@@ -9,7 +9,8 @@
       (function() {
         var VISITED_KEY = 'unfollow-radar-visited';
         var STORE_KEY = 'unfollow-radar-store';
-        var NON_EN_LANGS = ['es','ru','de','fr','pt','it','ja','ko','ar'];
+        // SYNC with src/config/languages.ts NON_ENGLISH_LANGUAGES
+        var NON_EN_LANGS = ['ar','de','es','fr','hi','id','ja','pt','ru','tr'];
 
         // Skip if path already has language prefix
         var path = location.pathname;
