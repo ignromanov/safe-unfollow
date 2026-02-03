@@ -56,30 +56,25 @@ const STORE_KEY = 'unfollow-radar-store';
  * @param lang - Language to persist
  */
 export function persistLanguageSync(lang: SupportedLanguage): void {
-  console.log('[persistLanguageSync] Called with:', lang);
   try {
     const stored = localStorage.getItem(STORE_KEY);
-    console.log('[persistLanguageSync] Current localStorage:', stored);
     if (stored) {
       const parsed = JSON.parse(stored);
       if (parsed.state) {
         parsed.state.language = lang;
-        const newValue = JSON.stringify(parsed);
-        console.log('[persistLanguageSync] Writing:', newValue);
-        localStorage.setItem(STORE_KEY, newValue);
-        console.log('[persistLanguageSync] After write:', localStorage.getItem(STORE_KEY));
+        localStorage.setItem(STORE_KEY, JSON.stringify(parsed));
       }
     } else {
       // No existing store - create minimal structure
-      const newValue = JSON.stringify({
-        state: { language: lang },
-        version: 5,
-      });
-      console.log('[persistLanguageSync] Creating new:', newValue);
-      localStorage.setItem(STORE_KEY, newValue);
+      localStorage.setItem(
+        STORE_KEY,
+        JSON.stringify({
+          state: { language: lang },
+          version: 5,
+        })
+      );
     }
-  } catch (e) {
-    console.log('[persistLanguageSync] Error:', e);
+  } catch {
     // localStorage unavailable (private mode, quota exceeded)
   }
 }
