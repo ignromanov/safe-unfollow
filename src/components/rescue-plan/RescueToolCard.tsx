@@ -26,10 +26,9 @@ interface RescueToolCardProps {
   tool: RescueTool;
   index: number;
   onToolClick: (tool: RescueTool, e: React.MouseEvent) => void;
-  onToolHover: (toolId: string, isEntering: boolean) => void;
 }
 
-export function RescueToolCard({ tool, index, onToolClick, onToolHover }: RescueToolCardProps) {
+export function RescueToolCard({ tool, index, onToolClick }: RescueToolCardProps) {
   const { t } = useTranslation('results');
   const isFirst = index === 0;
 
@@ -39,8 +38,6 @@ export function RescueToolCard({ tool, index, onToolClick, onToolHover }: Rescue
       target="_blank"
       rel="noopener noreferrer"
       onClick={e => onToolClick(tool, e)}
-      onMouseEnter={() => onToolHover(tool.id, true)}
-      onMouseLeave={() => onToolHover(tool.id, false)}
       className={`group relative p-4 bg-white dark:bg-zinc-900 rounded-2xl border-2 transition-all duration-200 hover:scale-[1.02] flex flex-col ${
         isFirst
           ? 'border-zinc-300 dark:border-zinc-700 hover:border-primary hover:ring-2 hover:ring-primary/20 hover:shadow-xl'

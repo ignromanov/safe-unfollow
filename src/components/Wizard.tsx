@@ -107,7 +107,6 @@ export function Wizard({ initialStep = 1, onComplete, onCancel }: WizardProps) {
     if (isLastStep) {
       onComplete();
     } else {
-      analytics.wizardNextClick(currentStep);
       goToStep(Math.min(currentStep + 1, WIZARD_STEPS.length));
     }
   };
@@ -124,10 +123,6 @@ export function Wizard({ initialStep = 1, onComplete, onCancel }: WizardProps) {
   const handleCancel = () => {
     analytics.wizardCancel();
     onCancel();
-  };
-
-  const handleExternalLinkClick = () => {
-    analytics.wizardExternalLinkClick(step.id);
   };
 
   const handleCalendarReminder = useCallback(() => {
@@ -233,7 +228,6 @@ export function Wizard({ initialStep = 1, onComplete, onCancel }: WizardProps) {
                     href={step.externalLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    onClick={handleExternalLinkClick}
                     className="cursor-pointer inline-flex items-center justify-center gap-3 px-8 py-4 bg-primary text-white rounded-2xl font-black shadow-xl hover:scale-105 active:scale-95 transition-all text-sm md:text-base w-full sm:w-auto"
                   >
                     {t('buttons.openInstagram')} <ExternalLink size={20} />

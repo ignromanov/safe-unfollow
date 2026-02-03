@@ -34,7 +34,6 @@ interface ExpandedBannerProps {
   tools: RescueTool[];
   onDismiss: () => void;
   onToolClick: (tool: RescueTool, e: React.MouseEvent) => void;
-  onToolHover: (toolId: string, isEntering: boolean) => void;
 }
 
 export function ExpandedBanner({
@@ -43,7 +42,6 @@ export function ExpandedBanner({
   tools,
   onDismiss,
   onToolClick,
-  onToolHover,
 }: ExpandedBannerProps) {
   const { t } = useTranslation('results');
   const SeverityIcon = SEVERITY_ICONS[style.iconType];
@@ -92,13 +90,7 @@ export function ExpandedBanner({
         {/* Tools grid */}
         <div className="grid md:grid-cols-[1.3fr_1fr_1fr] gap-4 max-w-4xl mx-auto">
           {tools.map((tool, index) => (
-            <RescueToolCard
-              key={tool.id}
-              tool={tool}
-              index={index}
-              onToolClick={onToolClick}
-              onToolHover={onToolHover}
-            />
+            <RescueToolCard key={tool.id} tool={tool} index={index} onToolClick={onToolClick} />
           ))}
         </div>
 

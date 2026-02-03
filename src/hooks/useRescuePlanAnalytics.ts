@@ -9,7 +9,6 @@ import type { UserSegment, RescueTool } from '@/lib/rescue-plan';
  * Consolidates all analytics logic:
  * - Impression tracking (once per session)
  * - Tool click tracking
- * - Tool hover tracking (500ms+ hovers)
  * - View time tracking (on unmount)
  * - Dismiss tracking
  */
@@ -27,7 +26,6 @@ export function useRescuePlanAnalytics({
 }: UseRescuePlanAnalyticsOptions) {
   const hasTrackedImpression = useRef(false);
   const visibilityStartRef = useRef<number>(0);
-  const hoverTimersRef = useRef<Map<string, number>>(new Map());
 
   // Track impression when visible (once per session)
   useEffect(() => {
@@ -48,27 +46,6 @@ export function useRescuePlanAnalytics({
     };
   }, [segment, isDevMode]);
 
-  // Handle tool hover for analytics
-  const handleToolHover = useCallback(
-    (toolId: string, isEntering: boolean) => {
-      if (isDevMode) return;
-
-      if (isEntering) {
-        hoverTimersRef.current.set(toolId, Date.now());
-      } else {
-        const startTime = hoverTimersRef.current.get(toolId);
-        if (startTime) {
-          const duration = Date.now() - startTime;
-          if (duration > 500) {
-            analytics.rescuePlanHover?.(toolId, duration);
-          }
-          hoverTimersRef.current.delete(toolId);
-        }
-      }
-    },
-    [isDevMode]
-  );
-
   // Handle tool click with analytics
   const handleToolClick = useCallback(
     (tool: RescueTool, e: React.MouseEvent) => {
@@ -88,7 +65,6 @@ export function useRescuePlanAnalytics({
   }, [segment, isDevMode]);
 
   return {
-    handleToolHover,
     handleToolClick,
     trackDismiss,
   };

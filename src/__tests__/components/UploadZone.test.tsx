@@ -5,14 +5,13 @@ import { createI18nMock } from '@/__tests__/utils/mockI18n';
 
 vi.mock('react-i18next', () => createI18nMock(uploadEN));
 
-// Mock analytics
+// Mock analytics (V8: uploadDragEnter/uploadDragLeave removed as low-value)
 vi.mock('@/lib/analytics', () => ({
   analytics: {
-    uploadDragEnter: vi.fn(),
-    uploadDragLeave: vi.fn(),
     uploadDrop: vi.fn(),
     uploadClick: vi.fn(),
     diagnosticErrorView: vi.fn(),
+    filePickerCancel: vi.fn(),
   },
 }));
 
@@ -176,23 +175,7 @@ describe('UploadZone', () => {
     expect(fileInput).toHaveAttribute('aria-label', uploadEN.zone.ariaLabel);
   });
 
-  it('should track drag enter analytics on dragOver', () => {
-    render(<UploadZone onUploadStart={mockOnUploadStart} />);
-
-    const dropZone = document.querySelector('[class*="border-dashed"]');
-    fireEvent.dragOver(dropZone!);
-
-    expect(analytics.uploadDragEnter).toHaveBeenCalled();
-  });
-
-  it('should track drag leave analytics on dragLeave', () => {
-    render(<UploadZone onUploadStart={mockOnUploadStart} />);
-
-    const dropZone = document.querySelector('[class*="border-dashed"]');
-    fireEvent.dragLeave(dropZone!);
-
-    expect(analytics.uploadDragLeave).toHaveBeenCalled();
-  });
+  // V8: drag enter/leave analytics tests removed - events no longer tracked
 
   it('should show screen reader announcement when processing', () => {
     render(<UploadZone onUploadStart={mockOnUploadStart} isProcessing={true} />);

@@ -83,19 +83,15 @@ export const AnalyticsEvents = {
   SAMPLE_DATA_LOAD: 'sample_data_load',
   LANGUAGE_CHANGE: 'language_change',
 
-  // V2: Wizard
+  // V2: Wizard (V8: removed WIZARD_NEXT_CLICK, WIZARD_EXTERNAL_LINK_CLICK as duplicates)
   WIZARD_STEP_VIEW: 'wizard_step_view',
-  WIZARD_NEXT_CLICK: 'wizard_next_click',
   WIZARD_BACK_CLICK: 'wizard_back_click',
   WIZARD_CANCEL: 'wizard_cancel',
-  WIZARD_EXTERNAL_LINK_CLICK: 'wizard_external_link_click',
 
   // V3: Funnel / Page Views
   PAGE_VIEW: 'page_view',
 
-  // V3: Upload Zone
-  UPLOAD_DRAG_ENTER: 'upload_drag_enter',
-  UPLOAD_DRAG_LEAVE: 'upload_drag_leave',
+  // V3: Upload Zone (V8: removed UPLOAD_DRAG_ENTER, UPLOAD_DRAG_LEAVE as low-value)
   UPLOAD_DROP: 'upload_drop',
   UPLOAD_CLICK: 'upload_click',
 
@@ -139,8 +135,7 @@ export const AnalyticsEvents = {
   SESSION_DURATION: 'session_duration',
   RETURN_UPLOAD: 'return_upload',
 
-  // V5: Mobile-specific
-  FILE_PICKER_OPEN: 'file_picker_open',
+  // V5: Mobile-specific (V8: removed FILE_PICKER_OPEN as duplicate of UPLOAD_CLICK)
   FILE_PICKER_CANCEL: 'file_picker_cancel',
 
   // V3: FAQ
@@ -149,11 +144,10 @@ export const AnalyticsEvents = {
   // V3: Results Engagement
   RESULTS_SCROLL_DEPTH: 'results_scroll_depth',
 
-  // V4: Rescue Plan Monetization
+  // V4: Rescue Plan Monetization (V8: removed RESCUE_PLAN_HOVER as micro-interaction)
   RESCUE_PLAN_IMPRESSION: 'rescue_plan_impression',
   RESCUE_PLAN_TOOL_CLICK: 'rescue_plan_tool_click',
   RESCUE_PLAN_DISMISS: 'rescue_plan_dismiss',
-  RESCUE_PLAN_HOVER: 'rescue_plan_hover',
   RESCUE_PLAN_VIEW_TIME: 'rescue_plan_view_time',
   RESCUE_PLAN_RE_ENGAGEMENT: 'rescue_plan_re_engagement',
 } as const;
@@ -234,8 +228,9 @@ export const analytics = {
     });
   },
 
-  // Filter events
+  // Filter events (V8: 25% sampling to reduce quota usage)
   filterToggle: (filterName: string, action: FilterAction, activeCount: number) => {
+    if (Math.random() > 0.25) return;
     trackEvent(AnalyticsEvents.FILTER_TOGGLE, {
       filter_name: filterName,
       filter_action: action,
@@ -337,16 +332,13 @@ export const analytics = {
     trackEvent(AnalyticsEvents.LANGUAGE_CHANGE, { language });
   },
 
-  // V2: Wizard events
+  // V2: Wizard events (V8: 50% sampling, removed wizardNextClick/wizardExternalLinkClick as duplicates)
   wizardStepView: (stepId: number, stepTitle: string) => {
+    if (Math.random() > 0.5) return;
     trackEvent(AnalyticsEvents.WIZARD_STEP_VIEW, {
       step_id: stepId,
       step_title: stepTitle,
     });
-  },
-
-  wizardNextClick: (fromStep: number) => {
-    trackEvent(AnalyticsEvents.WIZARD_NEXT_CLICK, { from_step: fromStep });
   },
 
   wizardBackClick: (fromStep: number) => {
@@ -357,10 +349,6 @@ export const analytics = {
     trackEvent(AnalyticsEvents.WIZARD_CANCEL);
   },
 
-  wizardExternalLinkClick: (stepId: number) => {
-    trackEvent(AnalyticsEvents.WIZARD_EXTERNAL_LINK_CLICK, { step_id: stepId });
-  },
-
   // V3: Funnel / Page Views
   pageView: (page: PageName, language?: string) => {
     trackEvent(AnalyticsEvents.PAGE_VIEW, {
@@ -369,15 +357,7 @@ export const analytics = {
     });
   },
 
-  // V3: Upload Zone
-  uploadDragEnter: () => {
-    trackEvent(AnalyticsEvents.UPLOAD_DRAG_ENTER);
-  },
-
-  uploadDragLeave: () => {
-    trackEvent(AnalyticsEvents.UPLOAD_DRAG_LEAVE);
-  },
-
+  // V3: Upload Zone (V8: removed uploadDragEnter/uploadDragLeave as low-value)
   uploadDrop: () => {
     trackEvent(AnalyticsEvents.UPLOAD_DROP);
   },
@@ -426,8 +406,9 @@ export const analytics = {
     });
   },
 
-  // V3: Results Engagement
+  // V3: Results Engagement (V8: 25% sampling to reduce quota usage)
   resultsScrollDepth: (depth: ScrollDepth, totalAccounts: number) => {
+    if (Math.random() > 0.25) return;
     trackEvent(AnalyticsEvents.RESULTS_SCROLL_DEPTH, {
       depth,
       total_accounts: totalAccounts,
@@ -467,12 +448,7 @@ export const analytics = {
     });
   },
 
-  rescuePlanHover: (toolId: string, durationMs: number) => {
-    trackEvent(AnalyticsEvents.RESCUE_PLAN_HOVER, {
-      tool_id: toolId,
-      duration_ms: Math.round(durationMs),
-    });
-  },
+  // V8: removed rescuePlanHover as micro-interaction with low value
 
   rescuePlanViewTime: (seconds: number, severity: string, size: string) => {
     trackEvent(AnalyticsEvents.RESCUE_PLAN_VIEW_TIME, {
@@ -580,12 +556,9 @@ export const analytics = {
     });
   },
 
-  // V5: Mobile-specific
-  filePickerOpen: (source: 'click' | 'drag') => {
-    trackEvent(AnalyticsEvents.FILE_PICKER_OPEN, { source });
-  },
-
+  // V5: Mobile-specific (V8: removed filePickerOpen, added 25% sampling to filePickerCancel)
   filePickerCancel: () => {
+    if (Math.random() > 0.25) return;
     trackEvent(AnalyticsEvents.FILE_PICKER_CANCEL);
   },
 };

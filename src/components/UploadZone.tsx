@@ -63,7 +63,6 @@ export function UploadZone({
 
   const handleFileInputClick = useCallback(() => {
     pickerOpenedRef.current = true;
-    analytics.filePickerOpen('click');
   }, []);
 
   // Check if we have a critical error that should show diagnostic screen
@@ -91,19 +90,12 @@ export function UploadZone({
   const effectiveWarnings = devParseWarnings ?? parseWarnings;
   const effectiveHasCriticalError = devParseWarnings ? true : hasCriticalError;
 
-  const handleDragOver = useCallback(
-    (e: React.DragEvent<HTMLDivElement>) => {
-      e.preventDefault();
-      if (!isDragOver) {
-        analytics.uploadDragEnter();
-      }
-      setIsDragOver(true);
-    },
-    [isDragOver]
-  );
+  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  }, []);
 
   const handleDragLeave = useCallback(() => {
-    analytics.uploadDragLeave();
     setIsDragOver(false);
   }, []);
 

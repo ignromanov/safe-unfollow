@@ -85,7 +85,7 @@ export function RescuePlanBanner({
   const hasNoData = !devOverride && (totalCount === 0 || unfollowedCount === 0);
 
   // Analytics tracking
-  const { handleToolHover, handleToolClick, trackDismiss } = useRescuePlanAnalytics({
+  const { handleToolClick, trackDismiss } = useRescuePlanAnalytics({
     segment,
     isVisible,
     isDevMode,
@@ -186,7 +186,6 @@ export function RescuePlanBanner({
           tools={tools}
           onDismiss={handleDismiss}
           onToolClick={handleToolClick}
-          onToolHover={handleToolHover}
         />
       ) : (
         <CollapsedBanner

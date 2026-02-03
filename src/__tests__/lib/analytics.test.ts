@@ -128,7 +128,11 @@ describe('Analytics', () => {
         expect(call[1].error_message.length).toBeLessThanOrEqual(200);
       });
 
-      it('should track filter toggle with action', () => {
+      it('should track filter toggle with action (25% sampling)', () => {
+        // Mock Math.random to ensure the sampling passes
+        const originalRandom = Math.random;
+        Math.random = () => 0.1; // 10% < 25% threshold, so event fires
+
         analytics.filterToggle('notFollowingBack', 'enable', 3);
 
         expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.FILTER_TOGGLE, {
@@ -136,6 +140,19 @@ describe('Analytics', () => {
           filter_action: 'enable',
           active_filter_count: 3,
         });
+
+        Math.random = originalRandom;
+      });
+
+      it('should skip filter toggle when sampling excludes', () => {
+        const originalRandom = Math.random;
+        Math.random = () => 0.5; // 50% > 25% threshold, so event is skipped
+
+        analytics.filterToggle('notFollowingBack', 'enable', 3);
+
+        expect(windowSpy.umami.track).not.toHaveBeenCalled();
+
+        Math.random = originalRandom;
       });
 
       it('should track filter clear all', () => {
@@ -248,17 +265,18 @@ describe('Analytics', () => {
         );
       });
 
-      it('should track wizard events', () => {
+      it('should track wizard events (50% sampling for step view)', () => {
+        // Mock Math.random to ensure the sampling passes
+        const originalRandom = Math.random;
+        Math.random = () => 0.3; // 30% < 50% threshold, so event fires
+
         analytics.wizardStepView(1, 'Opening Settings');
         expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.WIZARD_STEP_VIEW, {
           step_id: 1,
           step_title: 'Opening Settings',
         });
 
-        analytics.wizardNextClick(1);
-        expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.WIZARD_NEXT_CLICK, {
-          from_step: 1,
-        });
+        Math.random = originalRandom;
 
         analytics.wizardBackClick(2);
         expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.WIZARD_BACK_CLICK, {
@@ -270,12 +288,17 @@ describe('Analytics', () => {
           AnalyticsEvents.WIZARD_CANCEL,
           undefined
         );
+      });
 
-        analytics.wizardExternalLinkClick(3);
-        expect(windowSpy.umami.track).toHaveBeenCalledWith(
-          AnalyticsEvents.WIZARD_EXTERNAL_LINK_CLICK,
-          { step_id: 3 }
-        );
+      it('should skip wizard step view when sampling excludes', () => {
+        const originalRandom = Math.random;
+        Math.random = () => 0.7; // 70% > 50% threshold, so event is skipped
+
+        analytics.wizardStepView(1, 'Opening Settings');
+
+        expect(windowSpy.umami.track).not.toHaveBeenCalled();
+
+        Math.random = originalRandom;
       });
 
       it('should track results clicks summary (V7)', () => {
@@ -332,18 +355,7 @@ describe('Analytics', () => {
       });
 
       it('should track upload zone interactions', () => {
-        analytics.uploadDragEnter();
-        expect(windowSpy.umami.track).toHaveBeenCalledWith(
-          AnalyticsEvents.UPLOAD_DRAG_ENTER,
-          undefined
-        );
-
-        analytics.uploadDragLeave();
-        expect(windowSpy.umami.track).toHaveBeenCalledWith(
-          AnalyticsEvents.UPLOAD_DRAG_LEAVE,
-          undefined
-        );
-
+        // V8: uploadDragEnter and uploadDragLeave removed as low-value events
         analytics.uploadDrop();
         expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.UPLOAD_DROP, undefined);
 
@@ -390,13 +402,30 @@ describe('Analytics', () => {
         expect(call[1].question_text.length).toBeLessThanOrEqual(100);
       });
 
-      it('should track results scroll depth', () => {
+      it('should track results scroll depth (25% sampling)', () => {
+        // Mock Math.random to ensure the sampling passes
+        const originalRandom = Math.random;
+        Math.random = () => 0.1; // 10% < 25% threshold, so event fires
+
         analytics.resultsScrollDepth(50, 1500);
 
         expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.RESULTS_SCROLL_DEPTH, {
           depth: 50,
           total_accounts: 1500,
         });
+
+        Math.random = originalRandom;
+      });
+
+      it('should skip results scroll depth when sampling excludes', () => {
+        const originalRandom = Math.random;
+        Math.random = () => 0.5; // 50% > 25% threshold, so event is skipped
+
+        analytics.resultsScrollDepth(50, 1500);
+
+        expect(windowSpy.umami.track).not.toHaveBeenCalled();
+
+        Math.random = originalRandom;
       });
 
       it('should track sample data load', () => {
@@ -438,14 +467,7 @@ describe('Analytics', () => {
         });
       });
 
-      it('should track rescue plan hover', () => {
-        analytics.rescuePlanHover('tool-2', 1234.567);
-
-        expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.RESCUE_PLAN_HOVER, {
-          tool_id: 'tool-2',
-          duration_ms: 1235,
-        });
-      });
+      // V8: rescuePlanHover removed as micro-interaction with low value
 
       it('should track rescue plan view time', () => {
         analytics.rescuePlanViewTime(45.678, 'high', 'large');
@@ -550,10 +572,9 @@ describe('Analytics', () => {
       expect(AnalyticsEvents.CLEAR_DATA).toBe('clear_data');
       expect(AnalyticsEvents.SAMPLE_DATA_CLICK).toBe('sample_data_click');
       expect(AnalyticsEvents.WIZARD_STEP_VIEW).toBe('wizard_step_view');
-      expect(AnalyticsEvents.WIZARD_NEXT_CLICK).toBe('wizard_next_click');
+      // V8: WIZARD_NEXT_CLICK and WIZARD_EXTERNAL_LINK_CLICK removed as duplicates
       expect(AnalyticsEvents.WIZARD_BACK_CLICK).toBe('wizard_back_click');
       expect(AnalyticsEvents.WIZARD_CANCEL).toBe('wizard_cancel');
-      expect(AnalyticsEvents.WIZARD_EXTERNAL_LINK_CLICK).toBe('wizard_external_link_click');
     });
   });
 
