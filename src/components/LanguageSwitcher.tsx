@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Globe, ChevronDown } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
-import { useAppStore } from '@/lib/store';
+import { persistLanguageSync } from '@/lib/store';
 import { SUPPORTED_LANGUAGES, LANGUAGE_NAMES, type SupportedLanguage } from '@/locales';
 import { detectLanguageFromPathname } from '@/config/languages';
 import {
@@ -35,7 +35,6 @@ function getPathWithoutLang(pathname: string): string {
 
 export function LanguageSwitcher() {
   const { t } = useTranslation('common');
-  const { setLanguage } = useAppStore();
   const location = useLocation();
 
   // Prevent hydration mismatch - Radix generates different IDs on server vs client
@@ -48,11 +47,13 @@ export function LanguageSwitcher() {
   const handleLanguageChange = (lang: SupportedLanguage) => {
     analytics.languageChange(lang);
 
-    // Update store BEFORE redirect - this persists the preference to localStorage
-    // so that future visits to currentLanguage-less paths will redirect correctly
-    setLanguage(lang);
+    // Persist language SYNCHRONOUSLY before navigation.
+    // DO NOT call setLanguage() here — it triggers Zustand persist which
+    // asynchronously overwrites our sync write with the OLD value.
+    // The store will be synced by useLanguageRedirect after page reload.
+    persistLanguageSync(lang);
 
-    // Full page reload to get correct SSG HTML for new currentLanguage
+    // Full page reload to get correct SSG HTML for new language
     const basePath = getPathWithoutLang(location.pathname);
     const newPath = lang === 'en' ? basePath : `/${lang}${basePath === '/' ? '' : basePath}`;
 

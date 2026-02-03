@@ -7,7 +7,6 @@
     <!-- CRITICAL: Language redirect MUST be first script - before any other resources load -->
     <script>
       (function() {
-        var VISITED_KEY = 'unfollow-radar-visited';
         var STORE_KEY = 'unfollow-radar-store';
         // SYNC with src/config/languages.ts NON_ENGLISH_LANGUAGES
         var NON_EN_LANGS = ['ar','de','es','fr','hi','id','ja','pt','ru','tr'];
@@ -16,27 +15,41 @@
         var path = location.pathname;
         for (var i = 0; i < NON_EN_LANGS.length; i++) {
           var prefix = '/' + NON_EN_LANGS[i];
-          if (path === prefix || path.startsWith(prefix + '/')) return;
+          if (path === prefix || path.startsWith(prefix + '/')) {
+            console.log('[lang-redirect] Path has prefix, skipping:', path);
+            return;
+          }
         }
 
         try {
-          // Skip if already visited - use stored language preference
-          if (localStorage.getItem(VISITED_KEY)) {
-            var store = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
-            var storedLang = store.state && store.state.language;
-            if (storedLang && storedLang !== 'en' && NON_EN_LANGS.indexOf(storedLang) !== -1) {
+          // Check if user has explicit language preference (from store)
+          // This is set by LanguageSwitcher via persistLanguageSync()
+          var raw = localStorage.getItem(STORE_KEY);
+          console.log('[lang-redirect] Raw localStorage:', raw);
+          var store = JSON.parse(raw || '{}');
+          var storedLang = store.state && store.state.language;
+          console.log('[lang-redirect] Stored lang:', storedLang);
+
+          if (storedLang) {
+            // User has explicit preference - respect it
+            if (storedLang !== 'en' && NON_EN_LANGS.indexOf(storedLang) !== -1) {
+              console.log('[lang-redirect] Redirecting to stored lang:', storedLang);
               location.href = '/' + storedLang + path;
             }
+            // storedLang is 'en' - stay on English path
+            console.log('[lang-redirect] Staying on English (stored preference)');
             return;
           }
 
-          // First visit: detect browser language
+          // No stored preference - first visit, detect browser language
           var browserLang = (navigator.language || '').split('-')[0].toLowerCase();
+          console.log('[lang-redirect] No stored pref, browser lang:', browserLang);
           if (browserLang && browserLang !== 'en' && NON_EN_LANGS.indexOf(browserLang) !== -1) {
-            localStorage.setItem(VISITED_KEY, 'true');
+            console.log('[lang-redirect] Redirecting to browser lang:', browserLang);
             location.href = '/' + browserLang + path;
           }
         } catch (e) {
+          console.log('[lang-redirect] Error:', e);
           // localStorage unavailable (private mode) - continue with English
         }
       })();

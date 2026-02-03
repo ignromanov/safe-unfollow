@@ -1,5 +1,5 @@
 import type { BadgeKey } from '@/core/types';
-import { useAppStore } from '@/lib/store';
+import { useAppStore, persistLanguageSync } from '@/lib/store';
 import { act, renderHook } from '@testing-library/react';
 
 // Mock localStorage
@@ -524,6 +524,56 @@ describe('useAppStore', () => {
       expect(result).not.toHaveProperty('parseWarnings');
       expect(result).not.toHaveProperty('fileDiscovery');
       expect(result).not.toHaveProperty('_hasHydrated');
+    });
+  });
+
+  describe('persistLanguageSync', () => {
+    it('should update language in existing localStorage data', () => {
+      const existingData = {
+        state: { language: 'en', filters: [] },
+        version: 5,
+      };
+      localStorageMock.getItem.mockReturnValue(JSON.stringify(existingData));
+
+      persistLanguageSync('es');
+
+      expect(localStorageMock.setItem).toHaveBeenCalledWith(
+        'unfollow-radar-store',
+        JSON.stringify({
+          state: { language: 'es', filters: [] },
+          version: 5,
+        })
+      );
+    });
+
+    it('should create store structure when localStorage is empty', () => {
+      localStorageMock.getItem.mockReturnValue(null);
+
+      persistLanguageSync('ru');
+
+      expect(localStorageMock.setItem).toHaveBeenCalledWith(
+        'unfollow-radar-store',
+        JSON.stringify({
+          state: { language: 'ru' },
+          version: 5,
+        })
+      );
+    });
+
+    it('should handle localStorage errors gracefully', () => {
+      localStorageMock.getItem.mockImplementation(() => {
+        throw new Error('localStorage unavailable');
+      });
+
+      // Should not throw
+      expect(() => persistLanguageSync('de')).not.toThrow();
+    });
+
+    it('should handle invalid JSON in localStorage', () => {
+      localStorageMock.getItem.mockReturnValue('invalid json');
+
+      // Should not throw (catches parse error)
+      expect(() => persistLanguageSync('fr')).not.toThrow();
     });
   });
 });

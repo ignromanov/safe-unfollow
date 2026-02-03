@@ -43,6 +43,47 @@ function deserializeSet<T>(arr: T[] | undefined): Set<T> {
   return new Set(arr ?? []);
 }
 
+const STORE_KEY = 'unfollow-radar-store';
+
+/**
+ * Synchronously persist language to localStorage.
+ *
+ * IMPORTANT: Call this BEFORE navigation when changing language.
+ * Zustand persist writes asynchronously (microtask), so the page would reload
+ * before localStorage updates, causing the redirect script in index.html
+ * to read the OLD language value.
+ *
+ * @param lang - Language to persist
+ */
+export function persistLanguageSync(lang: SupportedLanguage): void {
+  console.log('[persistLanguageSync] Called with:', lang);
+  try {
+    const stored = localStorage.getItem(STORE_KEY);
+    console.log('[persistLanguageSync] Current localStorage:', stored);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (parsed.state) {
+        parsed.state.language = lang;
+        const newValue = JSON.stringify(parsed);
+        console.log('[persistLanguageSync] Writing:', newValue);
+        localStorage.setItem(STORE_KEY, newValue);
+        console.log('[persistLanguageSync] After write:', localStorage.getItem(STORE_KEY));
+      }
+    } else {
+      // No existing store - create minimal structure
+      const newValue = JSON.stringify({
+        state: { language: lang },
+        version: 5,
+      });
+      console.log('[persistLanguageSync] Creating new:', newValue);
+      localStorage.setItem(STORE_KEY, newValue);
+    }
+  } catch (e) {
+    console.log('[persistLanguageSync] Error:', e);
+    // localStorage unavailable (private mode, quota exceeded)
+  }
+}
+
 export const useAppStore = create<AppState>()(
   persist(
     set => ({
@@ -101,7 +142,7 @@ export const useAppStore = create<AppState>()(
       },
     }),
     {
-      name: 'unfollow-radar-store',
+      name: STORE_KEY,
       version: 5, // Version 5: Remove journey state
       migrate: (persistedState: unknown, version: number) => {
         // If version is 4 or older, migrate to v5 (remove journey)

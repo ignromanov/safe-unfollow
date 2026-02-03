@@ -24,6 +24,7 @@ vi.mock('@/lib/analytics', () => ({
 // Mock the store
 vi.mock('@/lib/store', () => ({
   useAppStore: vi.fn(),
+  persistLanguageSync: vi.fn(),
 }));
 
 // Mock locales exports - must match src/config/languages.ts
