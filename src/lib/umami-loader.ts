@@ -16,7 +16,7 @@ export function loadUmami(): void {
 
   const script = document.createElement('script');
   script.defer = true;
-  script.src = 'https://cloud.umami.is/script.js';
-  script.dataset.websiteId = '48136699-8e66-4397-bf85-89f46b28fc6d';
+  script.src = 'https://umami-coral-xi.vercel.app/script.js';
+  script.dataset.websiteId = '70c9e250-c415-4c56-92b0-2792dc6cccba';
   document.head.appendChild(script);
 }

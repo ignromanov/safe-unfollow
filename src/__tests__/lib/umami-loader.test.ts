@@ -62,8 +62,8 @@ describe('umami-loader', () => {
 
       expect(document.createElement).toHaveBeenCalledWith('script');
       expect(mockScript.defer).toBe(true);
-      expect(mockScript.src).toBe('https://cloud.umami.is/script.js');
-      expect(mockScript.dataset.websiteId).toBe('48136699-8e66-4397-bf85-89f46b28fc6d');
+      expect(mockScript.src).toBe('https://umami-coral-xi.vercel.app/script.js');
+      expect(mockScript.dataset.websiteId).toBe('70c9e250-c415-4c56-92b0-2792dc6cccba');
       expect(appendChildSpy).toHaveBeenCalledWith(mockScript);
     });
 
@@ -131,12 +131,12 @@ describe('umami-loader', () => {
       expect(mockScript.defer).toBe(true);
     });
 
-    it('should use correct Umami cloud URL', async () => {
+    it('should use correct self-hosted Umami URL', async () => {
       const { loadUmami } = await import('@/lib/umami-loader');
 
       loadUmami();
 
-      expect(mockScript.src).toBe('https://cloud.umami.is/script.js');
+      expect(mockScript.src).toBe('https://umami-coral-xi.vercel.app/script.js');
     });
 
     it('should use correct website ID', async () => {
@@ -144,7 +144,7 @@ describe('umami-loader', () => {
 
       loadUmami();
 
-      expect(mockScript.dataset.websiteId).toBe('48136699-8e66-4397-bf85-89f46b28fc6d');
+      expect(mockScript.dataset.websiteId).toBe('70c9e250-c415-4c56-92b0-2792dc6cccba');
     });
 
     it('should append script to document head', async () => {
