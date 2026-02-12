@@ -1,4 +1,4 @@
-import { analytics } from '@/lib/analytics';
+import { analytics, AnalyticsEvents, trackBeacon } from '@/lib/analytics';
 import { useCallback, useEffect, useRef } from 'react';
 
 /**
@@ -7,6 +7,9 @@ import { useCallback, useEffect, useRef } from 'react';
  *
  * V7: Extended to track profile clicks with badge aggregation.
  * Sends both timeOnResults and resultsClicksSummary events.
+ *
+ * V9: Uses sendBeacon for reliable delivery on mobile page unload.
+ * Also uses pagehide as additional listener for Safari.
  *
  * @param accountCount - Total number of accounts being viewed
  * @param isActive - Whether the results are currently being displayed
@@ -32,7 +35,7 @@ export function useTimeOnResults(accountCount: number, isActive: boolean) {
     });
   }, []);
 
-  // Fire the analytics events
+  // Fire the analytics events via sendBeacon for reliability
   const fireEvent = useCallback(() => {
     if (hasFiredRef.current || startTimeRef.current === null) {
       return;
@@ -42,9 +45,14 @@ export function useTimeOnResults(accountCount: number, isActive: boolean) {
 
     // Only fire if user spent meaningful time (>5 seconds)
     if (timeSpent >= 5) {
-      analytics.timeOnResults(timeSpent, accountCount, actionsCountRef.current);
+      // Use sendBeacon for timeOnResults (fires on page leave)
+      trackBeacon(AnalyticsEvents.TIME_ON_RESULTS, {
+        time_seconds: Math.round(timeSpent),
+        account_count: accountCount,
+        actions_count: actionsCountRef.current,
+      });
 
-      // V7: Send aggregated click summary (only if there were clicks)
+      // Send aggregated click summary (only if there were clicks)
       if (clicksCountRef.current > 0) {
         analytics.resultsClicksSummary({
           totalClicks: clicksCountRef.current,
@@ -69,18 +77,25 @@ export function useTimeOnResults(accountCount: number, isActive: boolean) {
     badgeClicksRef.current = {};
     hasFiredRef.current = false;
 
-    // Handle visibility change (user switches tab)
+    // Layer 1: visibilitychange (most reliable on mobile)
     const handleVisibilityChange = () => {
       if (document.hidden) {
         fireEvent();
       }
     };
 
+    // Layer 2: pagehide (Safari-specific)
+    const handlePageHide = () => {
+      fireEvent();
+    };
+
     document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('pagehide', handlePageHide);
 
     // Fire on unmount
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('pagehide', handlePageHide);
       fireEvent();
     };
   }, [isActive, fireEvent]);

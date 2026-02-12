@@ -120,15 +120,12 @@ export const AccountList = memo(function AccountList({
     );
   }
 
-  // V7: Track profile click with badge types (sampling + aggregation)
+  // V9: Track profile click via aggregation callback only (profileClick event removed)
   const trackAccountClick = (account: AccountBadges) => {
     const activeBadges = (Object.entries(account.badges) as [BadgeKey, boolean][])
       .filter(([, active]) => active)
       .map(([key]) => key);
 
-    // Sampled event (10% of clicks)
-    analytics.profileClick(activeBadges);
-    // Aggregation callback (all clicks)
     onAccountClick?.(activeBadges);
   };
 

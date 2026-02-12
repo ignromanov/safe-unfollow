@@ -35,6 +35,9 @@ export const createRoot = ViteReactSSG(
     if (isClient) {
       // Load analytics (respects user opt-out)
       loadUmami();
+
+      // Report Web Vitals (LCP, INP, CLS, FCP, TTFB) with 10% sampling
+      import('./lib/web-vitals').then(({ initWebVitals }) => initWebVitals());
     }
   }
 );

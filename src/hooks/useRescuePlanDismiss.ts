@@ -1,6 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
 
-import { analytics } from '@/lib/analytics';
 import type { UserSegment } from '@/lib/rescue-plan';
 
 /**
@@ -59,9 +58,8 @@ function getDismissState(currentSegment: UserSegment | null): {
     const currentSeverity = currentSegment.severity;
 
     if (SEVERITY_ORDER[currentSeverity] > SEVERITY_ORDER[storedSeverity]) {
-      // Severity worsened - show banner again and track re-engagement
+      // Severity worsened - show banner again (V9: re-engagement event removed)
       localStorage.removeItem(STORAGE_KEY);
-      analytics.rescuePlanReEngagement?.(storedSeverity, currentSeverity);
       return { isDismissed: false, storedState: state };
     }
 

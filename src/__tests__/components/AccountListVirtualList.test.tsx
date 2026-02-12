@@ -38,15 +38,12 @@ vi.mock('@/lib/store', () => ({
   }),
 }));
 
-// Mock analytics (V7: updated to use profileClick instead of accountClick/externalProfileClick)
+// Mock analytics (V9: profileClick removed, only aggregation via onAccountClick)
 vi.mock('@/lib/analytics', () => ({
   analytics: {
     resultsScrollDepth: vi.fn(),
-    profileClick: vi.fn(),
   },
 }));
-
-import { analytics } from '@/lib/analytics';
 
 // Mock useAccountDataSource
 const mockAccounts: AccountBadges[] = [
@@ -139,9 +136,8 @@ describe('AccountList Virtual List', () => {
     expect(firstUsernameLink).toBeDefined();
     expect(firstUsernameLink).toHaveAttribute('href', 'https://instagram.com/test_user_0');
 
-    // Click link to verify analytics (V7: uses profileClick with badge types)
+    // Click link to verify aggregation callback (V9: profileClick removed)
     fireEvent.click(firstUsernameLink!);
-    expect(analytics.profileClick).toHaveBeenCalledWith(['following']); // badge types array
     expect(mockOnAccountClick).toHaveBeenCalledWith(['following']); // aggregation callback
   });
 

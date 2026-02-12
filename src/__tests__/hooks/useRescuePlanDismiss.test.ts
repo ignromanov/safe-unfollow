@@ -1,15 +1,7 @@
 import { clearRescuePlanDismiss, useRescuePlanDismiss } from '@/hooks/useRescuePlanDismiss';
-import { analytics } from '@/lib/analytics';
 import type { UserSegment } from '@/lib/rescue-plan';
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
-// Mock analytics
-vi.mock('@/lib/analytics', () => ({
-  analytics: {
-    rescuePlanReEngagement: vi.fn(),
-  },
-}));
 
 const mockSegment: UserSegment = {
   severity: 'warning',
@@ -90,9 +82,8 @@ describe('useRescuePlanDismiss', () => {
     const criticalSegment: UserSegment = { ...mockSegment, severity: 'critical' };
     rerender(criticalSegment);
 
-    // Should be un-dismissed now
+    // Should be un-dismissed now (V9: re-engagement event removed, but behavior preserved)
     expect(result.current.isDismissed).toBe(false);
-    expect(analytics.rescuePlanReEngagement).toHaveBeenCalledWith('warning', 'critical');
   });
 
   it('should NOT re-engage user when severity improves', () => {
@@ -113,7 +104,6 @@ describe('useRescuePlanDismiss', () => {
 
     // Should still be dismissed
     expect(result.current.isDismissed).toBe(true);
-    expect(analytics.rescuePlanReEngagement).not.toHaveBeenCalled();
   });
 
   it('should handle null segment gracefully', () => {

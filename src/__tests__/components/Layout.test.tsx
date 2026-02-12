@@ -5,7 +5,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-// Mock analytics
+// Mock analytics (V9: added captureUTMParams for UTM tracking)
 vi.mock('@/lib/analytics', () => ({
   analytics: {
     pageView: vi.fn(),
@@ -13,6 +13,7 @@ vi.mock('@/lib/analytics', () => ({
     themeToggle: vi.fn(),
     clearData: vi.fn(),
   },
+  captureUTMParams: vi.fn(),
 }));
 
 // Mock ThemeProvider
@@ -111,6 +112,11 @@ vi.mock('@/hooks/useLanguagePrefix', () => ({
 
 vi.mock('@/hooks/useLanguageRedirect', () => ({
   useLanguageRedirect: vi.fn(),
+}));
+
+// Mock PWA install analytics (V9: new hook)
+vi.mock('@/hooks/usePWAInstallAnalytics', () => ({
+  usePWAInstallAnalytics: vi.fn(),
 }));
 
 // Mock i18next (used directly in Layout.tsx)

@@ -5,13 +5,11 @@ import { createI18nMock } from '@/__tests__/utils/mockI18n';
 
 vi.mock('react-i18next', () => createI18nMock(uploadEN));
 
-// Mock analytics (V8: uploadDragEnter/uploadDragLeave removed as low-value)
+// Mock analytics (V9: uploadDrop/filePickerCancel removed)
 vi.mock('@/lib/analytics', () => ({
   analytics: {
-    uploadDrop: vi.fn(),
     uploadClick: vi.fn(),
     diagnosticErrorView: vi.fn(),
-    filePickerCancel: vi.fn(),
   },
 }));
 
@@ -129,7 +127,7 @@ describe('UploadZone', () => {
     expect(analytics.uploadClick).toHaveBeenCalled();
   });
 
-  it('should call onUploadStart and track analytics when zip file is dropped', () => {
+  it('should call onUploadStart when zip file is dropped', () => {
     render(<UploadZone onUploadStart={mockOnUploadStart} />);
 
     const file = new File(['test'], 'data.zip', { type: 'application/zip' });
@@ -140,7 +138,6 @@ describe('UploadZone', () => {
     });
 
     expect(mockOnUploadStart).toHaveBeenCalledWith(file);
-    expect(analytics.uploadDrop).toHaveBeenCalled();
   });
 
   it('should not call onUploadStart when non-zip file is dropped', () => {

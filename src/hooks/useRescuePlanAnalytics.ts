@@ -36,15 +36,7 @@ export function useRescuePlanAnalytics({
     }
   }, [isVisible, segment, isDevMode]);
 
-  // Track view time on unmount
-  useEffect(() => {
-    return () => {
-      if (visibilityStartRef.current > 0 && !isDevMode) {
-        const viewTime = (Date.now() - visibilityStartRef.current) / 1000;
-        analytics.rescuePlanViewTime?.(viewTime, segment.severity, segment.size);
-      }
-    };
-  }, [segment, isDevMode]);
+  // V9: rescuePlanViewTime removed (micro-engagement, low value)
 
   // Handle tool click with analytics
   const handleToolClick = useCallback(
@@ -58,11 +50,10 @@ export function useRescuePlanAnalytics({
     [segment, isDevMode]
   );
 
-  // Track dismiss
+  // V9: rescuePlanDismiss event removed (low value). Dismiss still works via hook.
   const trackDismiss = useCallback(() => {
-    if (isDevMode) return;
-    analytics.rescuePlanDismiss(segment.severity, segment.size, segment.unfollowedPercent);
-  }, [segment, isDevMode]);
+    // No-op: dismiss tracking removed in V9
+  }, []);
 
   return {
     handleToolClick,

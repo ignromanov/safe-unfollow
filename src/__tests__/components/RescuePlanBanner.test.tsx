@@ -5,14 +5,11 @@ import { createI18nMock } from '@/__tests__/utils/mockI18n';
 // Note: RescuePlanBanner test uses simple key-only mock
 vi.mock('react-i18next', () => createI18nMock({}));
 
-// Mock analytics
+// Mock analytics (V9: removed dismiss/viewTime/hover)
 vi.mock('@/lib/analytics', () => ({
   analytics: {
     rescuePlanImpression: vi.fn(),
-    rescuePlanDismiss: vi.fn(),
     rescuePlanToolClick: vi.fn(),
-    rescuePlanViewTime: vi.fn(),
-    rescuePlanHover: vi.fn(),
   },
 }));
 
@@ -104,7 +101,7 @@ describe('RescuePlanBanner', () => {
     fireEvent.click(closeButton);
 
     expect(mockDismiss).toHaveBeenCalled();
-    expect(analytics.rescuePlanDismiss).toHaveBeenCalled();
+    // V9: rescuePlanDismiss event removed, but dismiss still works via hook
     // Banner collapses instead of hiding completely
     expect(screen.getByRole('complementary')).toBeInTheDocument();
     // Dismiss button should be gone (collapsed state)

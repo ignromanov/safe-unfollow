@@ -14,8 +14,9 @@ import { useInstagramData } from '@/hooks/useInstagramData';
 import { useLanguageFromPath } from '@/hooks/useLanguageFromPath';
 import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
 import { useLanguageRedirect } from '@/hooks/useLanguageRedirect';
+import { usePWAInstallAnalytics } from '@/hooks/usePWAInstallAnalytics';
 import { useSessionDuration } from '@/hooks/useSessionDuration';
-import { analytics } from '@/lib/analytics';
+import { analytics, captureUTMParams } from '@/lib/analytics';
 import { RTL_LANGUAGES, type SupportedLanguage } from '@/locales';
 
 interface LayoutProps {
@@ -86,6 +87,14 @@ export function Layout({ lang }: LayoutProps) {
 
   // Track session duration for engagement analytics
   useSessionDuration();
+
+  // Track PWA install events
+  usePWAInstallAnalytics();
+
+  // Capture UTM params from URL on first render
+  useEffect(() => {
+    captureUTMParams();
+  }, []);
 
   // Get language prefix for navigation
   const prefix = useLanguagePrefix();

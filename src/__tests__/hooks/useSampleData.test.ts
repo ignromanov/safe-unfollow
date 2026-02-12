@@ -18,11 +18,11 @@ vi.mock('@/lib/sample-data', () => ({
   clearSampleData: vi.fn(),
 }));
 
+// Mock analytics (V9: fileUploadError removed)
 vi.mock('@/lib/analytics', () => ({
   analytics: {
     fileUploadStart: vi.fn(),
     fileUploadSuccess: vi.fn(),
-    fileUploadError: vi.fn(),
     sampleDataLoad: vi.fn(),
   },
 }));

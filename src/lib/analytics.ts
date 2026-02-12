@@ -1,9 +1,17 @@
 /**
- * Umami Analytics Utility
+ * Umami Analytics Utility (V9)
  *
  * Privacy-first analytics with file content hash for session correlation.
  * Uses the same hash as IndexedDB cache for consistency.
  * No personal data (usernames, file names) is ever tracked.
+ *
+ * V9 changes:
+ * - Removed ~10 redundant/low-value events (storage optimization)
+ * - Tightened sampling: filterToggle 10%, wizardStepView 25%, scrollDepth 10%, searchPerform 25%
+ * - Reduced payloads: file_hash 12 chars, removed step_title/question_text
+ * - Added trackBeacon for reliable mobile delivery
+ * - Added UTM capture + conversion attribution
+ * - Added error_boundary/route_error to AnalyticsEvents const (type safety)
  */
 
 // Umami global interface
@@ -47,11 +55,15 @@ export function optIntoTracking(): void {
 }
 
 // Event name constants
+// V9: Removed FILE_UPLOAD_ERROR (legacy duplicate of uploadErrorByCode),
+//     PROFILE_CLICK (redundant with RESULTS_CLICKS_SUMMARY),
+//     HELP_OPEN (5 opens in 47 days), FILE_PICKER_CANCEL (low signal),
+//     RESCUE_PLAN_DISMISS/VIEW_TIME/RE_ENGAGEMENT (micro-engagement),
+//     UPLOAD_DROP (duplicate of UPLOAD_CLICK), SAMPLE_DATA_CLICK (keep only SAMPLE_DATA_LOAD)
 export const AnalyticsEvents = {
   // File Upload
   FILE_UPLOAD_START: 'file_upload_start',
   FILE_UPLOAD_SUCCESS: 'file_upload_success',
-  FILE_UPLOAD_ERROR: 'file_upload_error',
 
   // Filters
   FILTER_TOGGLE: 'filter_toggle',
@@ -60,49 +72,43 @@ export const AnalyticsEvents = {
   // Search
   SEARCH_PERFORM: 'search_perform',
 
-  // Account interactions (V7: optimized with sampling)
-  PROFILE_CLICK: 'profile_click',
+  // Account interactions (V9: only aggregated summary, removed per-click PROFILE_CLICK)
   RESULTS_CLICKS_SUMMARY: 'results_clicks_summary',
-
-  // Help
-  HELP_OPEN: 'help_open',
 
   // Links
   LINK_CLICK: 'link_click',
 
-  // V2: Hero CTAs
+  // Hero CTAs
   HERO_CTA_GUIDE: 'hero_cta_guide',
   HERO_CTA_SAMPLE: 'hero_cta_sample',
   HERO_CTA_UPLOAD_DIRECT: 'hero_cta_upload_direct',
   HERO_CTA_CONTINUE: 'hero_cta_continue',
 
-  // V2: Navigation
+  // Navigation
   THEME_TOGGLE: 'theme_toggle',
   CLEAR_DATA: 'clear_data',
-  SAMPLE_DATA_CLICK: 'sample_data_click',
   SAMPLE_DATA_LOAD: 'sample_data_load',
   LANGUAGE_CHANGE: 'language_change',
 
-  // V2: Wizard (V8: removed WIZARD_NEXT_CLICK, WIZARD_EXTERNAL_LINK_CLICK as duplicates)
+  // Wizard (V9: 25% sampling, removed step_title payload)
   WIZARD_STEP_VIEW: 'wizard_step_view',
   WIZARD_BACK_CLICK: 'wizard_back_click',
   WIZARD_CANCEL: 'wizard_cancel',
 
-  // V3: Funnel / Page Views
+  // Funnel / Page Views
   PAGE_VIEW: 'page_view',
 
-  // V3: Upload Zone (V8: removed UPLOAD_DRAG_ENTER, UPLOAD_DRAG_LEAVE as low-value)
-  UPLOAD_DROP: 'upload_drop',
+  // Upload Zone (V9: removed UPLOAD_DROP as duplicate of UPLOAD_CLICK)
   UPLOAD_CLICK: 'upload_click',
 
-  // V3: Diagnostic Errors
+  // Diagnostic Errors
   DIAGNOSTIC_ERROR_VIEW: 'diagnostic_error_view',
   DIAGNOSTIC_ERROR_RETRY: 'diagnostic_error_retry',
   DIAGNOSTIC_ERROR_HELP: 'diagnostic_error_help',
   DIAGNOSTIC_ERROR_REPORT_ISSUE: 'diagnostic_error_report_issue',
   DIAGNOSTIC_ERROR_COPY_DETAILS: 'diagnostic_error_copy_details',
 
-  // V5: Granular Upload Errors
+  // Granular Upload Errors
   UPLOAD_ERROR_NOT_ZIP: 'upload_error_not_zip',
   UPLOAD_ERROR_HTML_FORMAT: 'upload_error_html_format',
   UPLOAD_ERROR_NOT_INSTAGRAM: 'upload_error_not_instagram',
@@ -112,7 +118,7 @@ export const AnalyticsEvents = {
   UPLOAD_ERROR_MISSING_FOLLOWERS: 'upload_error_missing_followers',
   UPLOAD_ERROR_UNKNOWN: 'upload_error_unknown',
 
-  // V6: Extended Upload Errors
+  // Extended Upload Errors
   UPLOAD_ERROR_CORRUPTED_ZIP: 'upload_error_corrupted_zip',
   UPLOAD_ERROR_ZIP_ENCRYPTED: 'upload_error_zip_encrypted',
   UPLOAD_ERROR_EMPTY_FILE: 'upload_error_empty_file',
@@ -130,26 +136,31 @@ export const AnalyticsEvents = {
   UPLOAD_ERROR_CRYPTO: 'upload_error_crypto',
   UPLOAD_ERROR_NETWORK: 'upload_error_network',
 
-  // V5: Session & Engagement
+  // Session & Engagement
   TIME_ON_RESULTS: 'time_on_results',
   SESSION_DURATION: 'session_duration',
   RETURN_UPLOAD: 'return_upload',
 
-  // V5: Mobile-specific (V8: removed FILE_PICKER_OPEN as duplicate of UPLOAD_CLICK)
-  FILE_PICKER_CANCEL: 'file_picker_cancel',
-
-  // V3: FAQ
+  // FAQ
   FAQ_EXPAND: 'faq_expand',
 
-  // V3: Results Engagement
+  // Results Engagement
   RESULTS_SCROLL_DEPTH: 'results_scroll_depth',
 
-  // V4: Rescue Plan Monetization (V8: removed RESCUE_PLAN_HOVER as micro-interaction)
+  // Rescue Plan (V9: kept only impression + tool_click)
   RESCUE_PLAN_IMPRESSION: 'rescue_plan_impression',
   RESCUE_PLAN_TOOL_CLICK: 'rescue_plan_tool_click',
-  RESCUE_PLAN_DISMISS: 'rescue_plan_dismiss',
-  RESCUE_PLAN_VIEW_TIME: 'rescue_plan_view_time',
-  RESCUE_PLAN_RE_ENGAGEMENT: 'rescue_plan_re_engagement',
+
+  // Error tracking (V9: added to const for type safety, was previously cast)
+  ERROR_BOUNDARY: 'error_boundary',
+  ROUTE_ERROR: 'route_error',
+
+  // Web Vitals (V9: new, 10% sampling)
+  WEB_VITAL: 'web_vital',
+
+  // PWA (V9: new)
+  PWA_INSTALL_PROMPT: 'pwa_install_prompt',
+  PWA_INSTALLED: 'pwa_installed',
 } as const;
 
 export type AnalyticsEventName = (typeof AnalyticsEvents)[keyof typeof AnalyticsEvents];
@@ -164,13 +175,66 @@ type LinkType =
   | 'privacy-policy'
   | 'terms-of-service'
   | 'buy-me-coffee';
-type HelpSource = 'header' | 'upload_section';
 type FilterAction = 'enable' | 'disable';
 type PageName = 'hero' | 'wizard' | 'upload' | 'results' | 'sample' | 'privacy' | 'terms' | '404';
 type ScrollDepth = 25 | 50 | 75 | 100;
 
 // Re-export DiagnosticErrorCode from core/types to ensure consistency
 export type { DiagnosticErrorCode } from '@/core/types';
+
+// --- UTM Parameter Tracking ---
+
+const UTM_STORAGE_KEY = 'analytics_utm';
+const ENTRY_CTA_KEY = 'analytics_entry_cta';
+
+/**
+ * Capture UTM parameters from URL on page load.
+ * Store in sessionStorage for enriching events later.
+ */
+export function captureUTMParams(): void {
+  if (typeof window === 'undefined') return;
+
+  const params = new URLSearchParams(window.location.search);
+  const utm: Record<string, string> = {};
+
+  for (const key of ['utm_source', 'utm_medium', 'utm_campaign'] as const) {
+    const value = params.get(key);
+    if (value) utm[key] = value;
+  }
+
+  if (Object.keys(utm).length > 0) {
+    sessionStorage.setItem(UTM_STORAGE_KEY, JSON.stringify(utm));
+  }
+}
+
+function getStoredUTM(): Record<string, string> {
+  if (typeof window === 'undefined') return {};
+  try {
+    const stored = sessionStorage.getItem(UTM_STORAGE_KEY);
+    return stored ? JSON.parse(stored) : {};
+  } catch {
+    return {};
+  }
+}
+
+/**
+ * Store entry CTA for conversion attribution.
+ * Called from Hero CTA handlers.
+ */
+export function setEntryCTA(cta: string): void {
+  if (typeof window === 'undefined') return;
+  // Only store the first CTA per session
+  if (!sessionStorage.getItem(ENTRY_CTA_KEY)) {
+    sessionStorage.setItem(ENTRY_CTA_KEY, cta);
+  }
+}
+
+function getEntryCTA(): string | null {
+  if (typeof window === 'undefined') return null;
+  return sessionStorage.getItem(ENTRY_CTA_KEY);
+}
+
+// --- Core tracking ---
 
 /**
  * Track event with Umami
@@ -196,13 +260,63 @@ function trackEvent(
 }
 
 /**
+ * Track event via sendBeacon for reliable delivery on page unload.
+ * Falls back to regular trackEvent if sendBeacon is unavailable.
+ */
+export function trackBeacon(
+  eventName: AnalyticsEventName,
+  eventData?: Record<string, string | number | boolean>
+): void {
+  if (import.meta.env.DEV || isTrackingOptedOut()) return;
+  if (typeof window === 'undefined') return;
+
+  // Try sendBeacon first for reliability on mobile page unload
+  if (navigator.sendBeacon && window.umami) {
+    try {
+      // Umami's collect endpoint
+      const scriptEl = document.querySelector('script[data-website-id]');
+      const websiteId = scriptEl?.getAttribute('data-website-id');
+      const src = scriptEl?.getAttribute('src');
+      if (src && websiteId) {
+        const baseUrl = new URL(src).origin;
+        navigator.sendBeacon(
+          `${baseUrl}/api/send`,
+          new Blob(
+            [
+              JSON.stringify({
+                type: 'event',
+                payload: {
+                  website: websiteId,
+                  name: eventName,
+                  data: eventData,
+                  hostname: window.location.hostname,
+                  language: navigator.language,
+                  url: window.location.pathname,
+                },
+              }),
+            ],
+            { type: 'application/json' }
+          )
+        );
+        return;
+      }
+    } catch {
+      // Fall through to regular tracking
+    }
+  }
+
+  // Fallback: regular tracking
+  trackEvent(eventName, eventData);
+}
+
+/**
  * Analytics helper object with typed methods
  */
 export const analytics = {
-  // File Upload events
+  // File Upload events (V9: file_hash truncated to 12 chars)
   fileUploadStart: (fileHash: string, fileSizeMb: number) => {
     trackEvent(AnalyticsEvents.FILE_UPLOAD_START, {
-      file_hash: fileHash,
+      file_hash: fileHash.slice(0, 12),
       file_size_mb: Math.round(fileSizeMb * 100) / 100,
     });
   },
@@ -213,24 +327,25 @@ export const analytics = {
     processingTimeMs: number,
     fromCache: boolean
   ) => {
+    const utm = getStoredUTM();
+    const entryCta = getEntryCTA();
     trackEvent(AnalyticsEvents.FILE_UPLOAD_SUCCESS, {
-      file_hash: fileHash,
+      file_hash: fileHash.slice(0, 12),
       account_count: accountCount,
       processing_time_ms: Math.round(processingTimeMs),
       from_cache: fromCache,
+      ...(utm.utm_source && { utm_source: utm.utm_source }),
+      ...(utm.utm_medium && { utm_medium: utm.utm_medium }),
+      ...(utm.utm_campaign && { utm_campaign: utm.utm_campaign }),
+      ...(entryCta && { entry_cta: entryCta }),
     });
   },
 
-  fileUploadError: (fileHash: string, errorMessage: string) => {
-    trackEvent(AnalyticsEvents.FILE_UPLOAD_ERROR, {
-      file_hash: fileHash,
-      error_message: errorMessage.slice(0, 200), // Limit length
-    });
-  },
+  // V9: fileUploadError removed — uploadErrorByCode fires granular events
 
-  // Filter events (V8: 25% sampling to reduce quota usage)
+  // Filter events (V9: 10% sampling, was 25%)
   filterToggle: (filterName: string, action: FilterAction, activeCount: number) => {
-    if (Math.random() > 0.25) return;
+    if (Math.random() > 0.1) return;
     trackEvent(AnalyticsEvents.FILTER_TOGGLE, {
       filter_name: filterName,
       filter_action: action,
@@ -244,13 +359,14 @@ export const analytics = {
     });
   },
 
-  // Search events
+  // Search events (V9: 25% sampling, was 100%)
   searchPerform: (
     queryLength: number,
     resultCount: number,
     totalCount: number,
     hasFiltersActive: boolean
   ) => {
+    if (Math.random() > 0.25) return;
     trackEvent(AnalyticsEvents.SEARCH_PERFORM, {
       query_length: queryLength,
       result_count: resultCount,
@@ -259,35 +375,27 @@ export const analytics = {
     });
   },
 
-  // V7: Profile click with sampling (replaces accountClick + externalProfileClick)
-  // Only 10% of clicks are tracked to reduce Umami quota usage
-  profileClick: (badges: string[]) => {
-    // Sampling: track only 10% of clicks
-    if (Math.random() > 0.1) return;
+  // V9: profileClick removed — resultsClicksSummary captures same data in aggregate
 
-    trackEvent(AnalyticsEvents.PROFILE_CLICK, {
-      badge_types: badges.join(','),
-      badge_count: badges.length,
-    });
-  },
-
-  // V7: Aggregated click summary sent on page leave
+  // Aggregated click summary sent on page leave (V9: top 3 badges only)
   resultsClicksSummary: (stats: {
     totalClicks: number;
     badgeClicks: Record<string, number>;
     timeSpentSeconds: number;
   }) => {
+    // Keep only top 3 badges by click count to reduce payload
+    const top3 = Object.entries(stats.badgeClicks)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 3)
+      .reduce<Record<string, number>>((acc, [k, v]) => {
+        acc[k] = v;
+        return acc;
+      }, {});
+
     trackEvent(AnalyticsEvents.RESULTS_CLICKS_SUMMARY, {
       total_clicks: stats.totalClicks,
-      badge_clicks: JSON.stringify(stats.badgeClicks),
+      badge_clicks: JSON.stringify(top3),
       time_spent: Math.round(stats.timeSpentSeconds),
-    });
-  },
-
-  // Help modal
-  helpOpen: (source: HelpSource) => {
-    trackEvent(AnalyticsEvents.HELP_OPEN, {
-      source,
     });
   },
 
@@ -298,24 +406,28 @@ export const analytics = {
     });
   },
 
-  // V2: Hero CTAs
+  // Hero CTAs (V9: also sets entry CTA for conversion attribution)
   heroCTAGuide: () => {
+    setEntryCTA('guide');
     trackEvent(AnalyticsEvents.HERO_CTA_GUIDE);
   },
 
   heroCTASample: () => {
+    setEntryCTA('sample');
     trackEvent(AnalyticsEvents.HERO_CTA_SAMPLE);
   },
 
   heroCTAUploadDirect: () => {
+    setEntryCTA('upload_direct');
     trackEvent(AnalyticsEvents.HERO_CTA_UPLOAD_DIRECT);
   },
 
   heroCTAContinue: () => {
+    setEntryCTA('continue');
     trackEvent(AnalyticsEvents.HERO_CTA_CONTINUE);
   },
 
-  // V2: Navigation
+  // Navigation
   themeToggle: (mode: 'dark' | 'light' | 'system') => {
     trackEvent(AnalyticsEvents.THEME_TOGGLE, { mode });
   },
@@ -324,20 +436,17 @@ export const analytics = {
     trackEvent(AnalyticsEvents.CLEAR_DATA);
   },
 
-  sampleDataClick: () => {
-    trackEvent(AnalyticsEvents.SAMPLE_DATA_CLICK);
-  },
+  // V9: sampleDataClick removed — keep only sampleDataLoad (actual conversion)
 
   languageChange: (language: string) => {
     trackEvent(AnalyticsEvents.LANGUAGE_CHANGE, { language });
   },
 
-  // V2: Wizard events (V8: 50% sampling, removed wizardNextClick/wizardExternalLinkClick as duplicates)
-  wizardStepView: (stepId: number, stepTitle: string) => {
-    if (Math.random() > 0.5) return;
+  // Wizard events (V9: 25% sampling was 50%, removed step_title payload)
+  wizardStepView: (stepId: number, _stepTitle?: string) => {
+    if (Math.random() > 0.25) return;
     trackEvent(AnalyticsEvents.WIZARD_STEP_VIEW, {
       step_id: stepId,
-      step_title: stepTitle,
     });
   },
 
@@ -349,24 +458,38 @@ export const analytics = {
     trackEvent(AnalyticsEvents.WIZARD_CANCEL);
   },
 
-  // V3: Funnel / Page Views
+  // Page Views (V9: enriched with UTM + device context on first per session)
   pageView: (page: PageName, language?: string) => {
-    trackEvent(AnalyticsEvents.PAGE_VIEW, {
+    const utm = getStoredUTM();
+    const isFirstView =
+      typeof window !== 'undefined' && !sessionStorage.getItem('analytics_first_pv');
+
+    const data: Record<string, string | number | boolean> = {
       page,
       ...(language && { language }),
-    });
+      ...(utm.utm_source && { utm_source: utm.utm_source }),
+      ...(utm.utm_medium && { utm_medium: utm.utm_medium }),
+      ...(utm.utm_campaign && { utm_campaign: utm.utm_campaign }),
+    };
+
+    // B8: Add device context on first page_view only
+    if (isFirstView && typeof window !== 'undefined') {
+      sessionStorage.setItem('analytics_first_pv', '1');
+      const w = window.innerWidth;
+      const viewport = w < 640 ? 'mobile' : w < 1024 ? 'tablet' : 'desktop';
+      data.viewport = viewport;
+      data.is_pwa = window.matchMedia('(display-mode: standalone)').matches;
+    }
+
+    trackEvent(AnalyticsEvents.PAGE_VIEW, data);
   },
 
-  // V3: Upload Zone (V8: removed uploadDragEnter/uploadDragLeave as low-value)
-  uploadDrop: () => {
-    trackEvent(AnalyticsEvents.UPLOAD_DROP);
-  },
-
+  // Upload Zone (V9: removed uploadDrop as duplicate of uploadClick)
   uploadClick: () => {
     trackEvent(AnalyticsEvents.UPLOAD_CLICK);
   },
 
-  // V3: Diagnostic Errors
+  // Diagnostic Errors
   diagnosticErrorView: (code: string, source?: string) => {
     trackEvent(AnalyticsEvents.DIAGNOSTIC_ERROR_VIEW, {
       error_code: code,
@@ -398,24 +521,23 @@ export const analytics = {
     });
   },
 
-  // V3: FAQ
-  faqExpand: (questionId: number, questionText: string) => {
+  // FAQ (V9: removed question_text payload, question_id is sufficient)
+  faqExpand: (questionId: number, _questionText?: string) => {
     trackEvent(AnalyticsEvents.FAQ_EXPAND, {
       question_id: questionId,
-      question_text: questionText.slice(0, 100), // Limit length
     });
   },
 
-  // V3: Results Engagement (V8: 25% sampling to reduce quota usage)
+  // Results Engagement (V9: 10% sampling, was 25%)
   resultsScrollDepth: (depth: ScrollDepth, totalAccounts: number) => {
-    if (Math.random() > 0.25) return;
+    if (Math.random() > 0.1) return;
     trackEvent(AnalyticsEvents.RESULTS_SCROLL_DEPTH, {
       depth,
       total_accounts: totalAccounts,
     });
   },
 
-  // V3: Sample Data Load
+  // Sample Data Load
   sampleDataLoad: (accountCount: number, loadTimeMs: number) => {
     trackEvent(AnalyticsEvents.SAMPLE_DATA_LOAD, {
       account_count: accountCount,
@@ -423,7 +545,7 @@ export const analytics = {
     });
   },
 
-  // V4: Rescue Plan Monetization
+  // Rescue Plan (V9: kept only impression + tool_click, removed dismiss/viewTime/reEngagement)
   rescuePlanImpression: (severity: string, size: string, unfollowedPercent: number) => {
     trackEvent(AnalyticsEvents.RESCUE_PLAN_IMPRESSION, {
       severity,
@@ -440,50 +562,23 @@ export const analytics = {
     });
   },
 
-  rescuePlanDismiss: (severity: string, size: string, unfollowedPercent: number) => {
-    trackEvent(AnalyticsEvents.RESCUE_PLAN_DISMISS, {
-      severity,
-      size,
-      unfollowed_percent: Math.round(unfollowedPercent),
-    });
-  },
-
-  // V8: removed rescuePlanHover as micro-interaction with low value
-
-  rescuePlanViewTime: (seconds: number, severity: string, size: string) => {
-    trackEvent(AnalyticsEvents.RESCUE_PLAN_VIEW_TIME, {
-      view_time_seconds: Math.round(seconds),
-      severity,
-      size,
-    });
-  },
-
-  rescuePlanReEngagement: (oldSeverity: string, newSeverity: string) => {
-    trackEvent(AnalyticsEvents.RESCUE_PLAN_RE_ENGAGEMENT, {
-      old_severity: oldSeverity,
-      new_severity: newSeverity,
-    });
-  },
-
-  // Error Boundary (optional tracking)
+  // Error Boundary (V9: proper type, no more cast)
   errorBoundary: (errorMessage: string, componentStack: string) => {
-    // Note: Not in AnalyticsEvents const - optional tracking
-    trackEvent('error_boundary' as AnalyticsEventName, {
+    trackEvent(AnalyticsEvents.ERROR_BOUNDARY, {
       error_message: errorMessage.slice(0, 200),
       component_stack: componentStack.slice(0, 500),
     });
   },
 
-  // Route Error (optional tracking)
+  // Route Error (V9: proper type, no more cast)
   routeError: (status: number, message: string) => {
-    // Note: Not in AnalyticsEvents const - optional tracking
-    trackEvent('route_error' as AnalyticsEventName, {
+    trackEvent(AnalyticsEvents.ROUTE_ERROR, {
       status,
       message: message.slice(0, 200),
     });
   },
 
-  // V5: Granular Upload Errors
+  // Granular Upload Errors (V9: removed legacy fileUploadError call, shorter payloads)
   uploadErrorByCode: (
     fileHash: string,
     code: import('@/core/types').DiagnosticErrorCode,
@@ -493,7 +588,6 @@ export const analytics = {
       import('@/core/types').DiagnosticErrorCode,
       (typeof AnalyticsEvents)[keyof typeof AnalyticsEvents]
     > = {
-      // Existing
       NOT_ZIP: AnalyticsEvents.UPLOAD_ERROR_NOT_ZIP,
       HTML_FORMAT: AnalyticsEvents.UPLOAD_ERROR_HTML_FORMAT,
       NOT_INSTAGRAM_EXPORT: AnalyticsEvents.UPLOAD_ERROR_NOT_INSTAGRAM,
@@ -501,39 +595,31 @@ export const analytics = {
       NO_DATA_FILES: AnalyticsEvents.UPLOAD_ERROR_NO_DATA,
       MISSING_FOLLOWING: AnalyticsEvents.UPLOAD_ERROR_MISSING_FOLLOWING,
       MISSING_FOLLOWERS: AnalyticsEvents.UPLOAD_ERROR_MISSING_FOLLOWERS,
-      // New - ZIP/File
       CORRUPTED_ZIP: AnalyticsEvents.UPLOAD_ERROR_CORRUPTED_ZIP,
       ZIP_ENCRYPTED: AnalyticsEvents.UPLOAD_ERROR_ZIP_ENCRYPTED,
       EMPTY_FILE: AnalyticsEvents.UPLOAD_ERROR_EMPTY_FILE,
       FILE_TOO_LARGE: AnalyticsEvents.UPLOAD_ERROR_FILE_TOO_LARGE,
-      // New - Parsing
       JSON_PARSE_ERROR: AnalyticsEvents.UPLOAD_ERROR_JSON_PARSE,
       INVALID_DATA_STRUCTURE: AnalyticsEvents.UPLOAD_ERROR_INVALID_STRUCTURE,
-      // New - Worker
       WORKER_TIMEOUT: AnalyticsEvents.UPLOAD_ERROR_TIMEOUT,
       WORKER_INIT_ERROR: AnalyticsEvents.UPLOAD_ERROR_WORKER_INIT,
       WORKER_CRASHED: AnalyticsEvents.UPLOAD_ERROR_WORKER_CRASHED,
-      // New - Storage
       INDEXEDDB_ERROR: AnalyticsEvents.UPLOAD_ERROR_INDEXEDDB,
       QUOTA_EXCEEDED: AnalyticsEvents.UPLOAD_ERROR_QUOTA,
       IDB_NOT_SUPPORTED: AnalyticsEvents.UPLOAD_ERROR_IDB_NOT_SUPPORTED,
       IDB_PERMISSION_DENIED: AnalyticsEvents.UPLOAD_ERROR_IDB_PERMISSION,
-      // New - Other
       UPLOAD_CANCELLED: AnalyticsEvents.UPLOAD_ERROR_CANCELLED,
       CRYPTO_NOT_AVAILABLE: AnalyticsEvents.UPLOAD_ERROR_CRYPTO,
       NETWORK_ERROR: AnalyticsEvents.UPLOAD_ERROR_NETWORK,
-      // Fallback
       UNKNOWN: AnalyticsEvents.UPLOAD_ERROR_UNKNOWN,
     };
     trackEvent(eventMap[code], {
-      file_hash: fileHash,
-      error_message: errorMessage?.slice(0, 100) ?? '',
+      file_hash: fileHash.slice(0, 12),
+      error_message: errorMessage?.slice(0, 50) ?? '',
     });
-    // Keep legacy event for backward compatibility
-    analytics.fileUploadError(fileHash, `${code}: ${errorMessage ?? ''}`);
   },
 
-  // V5: Session & Engagement
+  // Session & Engagement
   timeOnResults: (seconds: number, accountCount: number, actionsCount: number) => {
     trackEvent(AnalyticsEvents.TIME_ON_RESULTS, {
       time_seconds: Math.round(seconds),
@@ -556,9 +642,22 @@ export const analytics = {
     });
   },
 
-  // V5: Mobile-specific (V8: removed filePickerOpen, added 25% sampling to filePickerCancel)
-  filePickerCancel: () => {
-    if (Math.random() > 0.25) return;
-    trackEvent(AnalyticsEvents.FILE_PICKER_CANCEL);
+  // Web Vitals (V9: new, 10% sampling)
+  webVital: (name: string, value: number, rating: string) => {
+    if (Math.random() > 0.1) return;
+    trackEvent(AnalyticsEvents.WEB_VITAL, {
+      metric_name: name,
+      metric_value: Math.round(value),
+      rating,
+    });
+  },
+
+  // PWA Install (V9: new)
+  pwaInstallPrompt: () => {
+    trackEvent(AnalyticsEvents.PWA_INSTALL_PROMPT);
+  },
+
+  pwaInstalled: () => {
+    trackEvent(AnalyticsEvents.PWA_INSTALLED);
   },
 };

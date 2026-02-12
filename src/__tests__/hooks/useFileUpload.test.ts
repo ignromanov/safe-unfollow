@@ -11,11 +11,11 @@ vi.mock('@/lib/indexeddb/indexeddb-cache');
 vi.mock('@/lib/indexeddb/indexeddb-service');
 vi.mock('@/core/parsers/instagram');
 vi.mock('@/core/badges');
+// Mock analytics (V9: fileUploadError removed)
 vi.mock('@/lib/analytics', () => ({
   analytics: {
     fileUploadStart: vi.fn(),
     fileUploadSuccess: vi.fn(),
-    fileUploadError: vi.fn(),
     uploadErrorByCode: vi.fn(),
     returnUpload: vi.fn(),
     linkClick: vi.fn(),
