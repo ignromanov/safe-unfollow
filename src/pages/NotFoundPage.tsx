@@ -16,7 +16,7 @@ export function Component() {
 
   // Track 404 page views
   useEffect(() => {
-    analytics.pageView('404', undefined);
+    analytics.pageView();
   }, []);
 
   return (

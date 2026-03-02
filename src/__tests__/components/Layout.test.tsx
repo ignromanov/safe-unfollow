@@ -440,52 +440,25 @@ describe('Layout', () => {
   });
 
   describe('analytics tracking', () => {
-    it('should track page view on mount', () => {
+    it('should call pageView once on mount with no arguments', () => {
       renderLayout('/');
 
-      expect(mockPageView).toHaveBeenCalledWith('hero', undefined);
+      expect(mockPageView).toHaveBeenCalledTimes(1);
+      expect(mockPageView).toHaveBeenCalledWith();
     });
 
-    it('should track page view with language', () => {
+    it('should call pageView regardless of language prop', () => {
       renderLayout('/', 'es');
 
-      expect(mockPageView).toHaveBeenCalledWith('hero', 'es');
+      expect(mockPageView).toHaveBeenCalledTimes(1);
+      expect(mockPageView).toHaveBeenCalledWith();
     });
 
-    it('should track wizard page view', () => {
+    it('should call pageView regardless of route', () => {
       renderLayout('/wizard');
 
-      expect(mockPageView).toHaveBeenCalledWith('wizard', undefined);
-    });
-
-    it('should track upload page view', () => {
-      renderLayout('/upload');
-
-      expect(mockPageView).toHaveBeenCalledWith('upload', undefined);
-    });
-
-    it('should track results page view', () => {
-      renderLayout('/results');
-
-      expect(mockPageView).toHaveBeenCalledWith('results', undefined);
-    });
-
-    it('should track sample page view', () => {
-      renderLayout('/sample');
-
-      expect(mockPageView).toHaveBeenCalledWith('sample', undefined);
-    });
-
-    it('should track privacy page view', () => {
-      renderLayout('/privacy');
-
-      expect(mockPageView).toHaveBeenCalledWith('privacy', undefined);
-    });
-
-    it('should track terms page view', () => {
-      renderLayout('/terms');
-
-      expect(mockPageView).toHaveBeenCalledWith('terms', undefined);
+      expect(mockPageView).toHaveBeenCalledTimes(1);
+      expect(mockPageView).toHaveBeenCalledWith();
     });
   });
 

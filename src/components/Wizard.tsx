@@ -115,13 +115,11 @@ export function Wizard({ initialStep = 1, onComplete, onCancel }: WizardProps) {
     if (isFirstStep) {
       onCancel();
     } else {
-      analytics.wizardBackClick(currentStep);
       goToStep(Math.max(currentStep - 1, 1));
     }
   };
 
   const handleCancel = () => {
-    analytics.wizardCancel();
     onCancel();
   };
 

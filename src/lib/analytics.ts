@@ -1,17 +1,19 @@
 /**
- * Umami Analytics Utility (V9)
+ * Umami Analytics Utility (V10)
  *
  * Privacy-first analytics with file content hash for session correlation.
  * Uses the same hash as IndexedDB cache for consistency.
  * No personal data (usernames, file names) is ever tracked.
  *
- * V9 changes:
- * - Removed ~10 redundant/low-value events (storage optimization)
- * - Tightened sampling: filterToggle 10%, wizardStepView 25%, scrollDepth 10%, searchPerform 25%
- * - Reduced payloads: file_hash 12 chars, removed step_title/question_text
- * - Added trackBeacon for reliable mobile delivery
- * - Added UTM capture + conversion attribution
- * - Added error_boundary/route_error to AnalyticsEvents const (type safety)
+ * V10 changes (storage optimization — Neon DB load reduction ~70%):
+ * - Removed page_view for non-UTM sessions (Umami built-in handles pageviews)
+ * - Removed session_duration (Umami tracks natively)
+ * - Removed rescue_plan_impression (kept only tool_click)
+ * - Removed results_scroll_depth (engagement inferred from time_on_results)
+ * - Removed wizard_back_click, wizard_cancel (low actionability)
+ * - Tightened sampling: wizardStepView 5%, filterToggle 3%, searchPerform 5%, webVital 3%
+ * - Added 25% sampling to resultsClicksSummary
+ * - Simplified payloads: removed file_hash from upload events, removed processing_time_ms
  */
 
 // Umami global interface
@@ -55,11 +57,9 @@ export function optIntoTracking(): void {
 }
 
 // Event name constants
-// V9: Removed FILE_UPLOAD_ERROR (legacy duplicate of uploadErrorByCode),
-//     PROFILE_CLICK (redundant with RESULTS_CLICKS_SUMMARY),
-//     HELP_OPEN (5 opens in 47 days), FILE_PICKER_CANCEL (low signal),
-//     RESCUE_PLAN_DISMISS/VIEW_TIME/RE_ENGAGEMENT (micro-engagement),
-//     UPLOAD_DROP (duplicate of UPLOAD_CLICK), SAMPLE_DATA_CLICK (keep only SAMPLE_DATA_LOAD)
+// V10: Removed SESSION_DURATION (Umami native), RESCUE_PLAN_IMPRESSION (low value),
+//      RESULTS_SCROLL_DEPTH (inferred from time_on_results),
+//      WIZARD_BACK_CLICK/CANCEL (low actionability)
 export const AnalyticsEvents = {
   // File Upload
   FILE_UPLOAD_START: 'file_upload_start',
@@ -72,7 +72,7 @@ export const AnalyticsEvents = {
   // Search
   SEARCH_PERFORM: 'search_perform',
 
-  // Account interactions (V9: only aggregated summary, removed per-click PROFILE_CLICK)
+  // Account interactions (aggregated summary only)
   RESULTS_CLICKS_SUMMARY: 'results_clicks_summary',
 
   // Links
@@ -90,15 +90,13 @@ export const AnalyticsEvents = {
   SAMPLE_DATA_LOAD: 'sample_data_load',
   LANGUAGE_CHANGE: 'language_change',
 
-  // Wizard (V9: 25% sampling, removed step_title payload)
+  // Wizard (V10: 5% sampling, removed back_click and cancel)
   WIZARD_STEP_VIEW: 'wizard_step_view',
-  WIZARD_BACK_CLICK: 'wizard_back_click',
-  WIZARD_CANCEL: 'wizard_cancel',
 
-  // Funnel / Page Views
+  // Funnel / Page Views (V10: first-in-session UTM attribution only)
   PAGE_VIEW: 'page_view',
 
-  // Upload Zone (V9: removed UPLOAD_DROP as duplicate of UPLOAD_CLICK)
+  // Upload Zone
   UPLOAD_CLICK: 'upload_click',
 
   // Diagnostic Errors
@@ -136,29 +134,24 @@ export const AnalyticsEvents = {
   UPLOAD_ERROR_CRYPTO: 'upload_error_crypto',
   UPLOAD_ERROR_NETWORK: 'upload_error_network',
 
-  // Session & Engagement
+  // Session & Engagement (V10: removed SESSION_DURATION)
   TIME_ON_RESULTS: 'time_on_results',
-  SESSION_DURATION: 'session_duration',
   RETURN_UPLOAD: 'return_upload',
 
   // FAQ
   FAQ_EXPAND: 'faq_expand',
 
-  // Results Engagement
-  RESULTS_SCROLL_DEPTH: 'results_scroll_depth',
-
-  // Rescue Plan (V9: kept only impression + tool_click)
-  RESCUE_PLAN_IMPRESSION: 'rescue_plan_impression',
+  // Rescue Plan (V10: removed impression, kept only tool_click)
   RESCUE_PLAN_TOOL_CLICK: 'rescue_plan_tool_click',
 
-  // Error tracking (V9: added to const for type safety, was previously cast)
+  // Error tracking
   ERROR_BOUNDARY: 'error_boundary',
   ROUTE_ERROR: 'route_error',
 
-  // Web Vitals (V9: new, 10% sampling)
+  // Web Vitals (V10: 3% sampling)
   WEB_VITAL: 'web_vital',
 
-  // PWA (V9: new)
+  // PWA
   PWA_INSTALL_PROMPT: 'pwa_install_prompt',
   PWA_INSTALLED: 'pwa_installed',
 } as const;
@@ -176,8 +169,6 @@ type LinkType =
   | 'terms-of-service'
   | 'buy-me-coffee';
 type FilterAction = 'enable' | 'disable';
-type PageName = 'hero' | 'wizard' | 'upload' | 'results' | 'sample' | 'privacy' | 'terms' | '404';
-type ScrollDepth = 25 | 50 | 75 | 100;
 
 // Re-export DiagnosticErrorCode from core/types to ensure consistency
 export type { DiagnosticErrorCode } from '@/core/types';
@@ -313,26 +304,19 @@ export function trackBeacon(
  * Analytics helper object with typed methods
  */
 export const analytics = {
-  // File Upload events (V9: file_hash truncated to 12 chars)
-  fileUploadStart: (fileHash: string, fileSizeMb: number) => {
+  // File Upload events (V10: removed file_hash — not actionable in dashboard)
+  fileUploadStart: (fileSizeMb: number) => {
     trackEvent(AnalyticsEvents.FILE_UPLOAD_START, {
-      file_hash: fileHash.slice(0, 12),
       file_size_mb: Math.round(fileSizeMb * 100) / 100,
     });
   },
 
-  fileUploadSuccess: (
-    fileHash: string,
-    accountCount: number,
-    processingTimeMs: number,
-    fromCache: boolean
-  ) => {
+  // V10: Simplified — removed file_hash, processing_time_ms. Kept UTM for conversion attribution.
+  fileUploadSuccess: (accountCount: number, fromCache: boolean) => {
     const utm = getStoredUTM();
     const entryCta = getEntryCTA();
     trackEvent(AnalyticsEvents.FILE_UPLOAD_SUCCESS, {
-      file_hash: fileHash.slice(0, 12),
       account_count: accountCount,
-      processing_time_ms: Math.round(processingTimeMs),
       from_cache: fromCache,
       ...(utm.utm_source && { utm_source: utm.utm_source }),
       ...(utm.utm_medium && { utm_medium: utm.utm_medium }),
@@ -341,11 +325,9 @@ export const analytics = {
     });
   },
 
-  // V9: fileUploadError removed — uploadErrorByCode fires granular events
-
-  // Filter events (V9: 10% sampling, was 25%)
+  // Filter events (V10: 3% sampling, was 10%)
   filterToggle: (filterName: string, action: FilterAction, activeCount: number) => {
-    if (Math.random() > 0.1) return;
+    if (Math.random() > 0.03) return;
     trackEvent(AnalyticsEvents.FILTER_TOGGLE, {
       filter_name: filterName,
       filter_action: action,
@@ -359,14 +341,14 @@ export const analytics = {
     });
   },
 
-  // Search events (V9: 25% sampling, was 100%)
+  // Search events (V10: 5% sampling, was 25%)
   searchPerform: (
     queryLength: number,
     resultCount: number,
     totalCount: number,
     hasFiltersActive: boolean
   ) => {
-    if (Math.random() > 0.25) return;
+    if (Math.random() > 0.05) return;
     trackEvent(AnalyticsEvents.SEARCH_PERFORM, {
       query_length: queryLength,
       result_count: resultCount,
@@ -375,14 +357,13 @@ export const analytics = {
     });
   },
 
-  // V9: profileClick removed — resultsClicksSummary captures same data in aggregate
-
-  // Aggregated click summary sent on page leave (V9: top 3 badges only)
+  // Aggregated click summary sent on page leave (V10: 25% sampling)
   resultsClicksSummary: (stats: {
     totalClicks: number;
     badgeClicks: Record<string, number>;
     timeSpentSeconds: number;
   }) => {
+    if (Math.random() > 0.25) return;
     // Keep only top 3 badges by click count to reduce payload
     const top3 = Object.entries(stats.badgeClicks)
       .sort(([, a], [, b]) => b - a)
@@ -406,7 +387,7 @@ export const analytics = {
     });
   },
 
-  // Hero CTAs (V9: also sets entry CTA for conversion attribution)
+  // Hero CTAs (sets entry CTA for conversion attribution)
   heroCTAGuide: () => {
     setEntryCTA('guide');
     trackEvent(AnalyticsEvents.HERO_CTA_GUIDE);
@@ -436,55 +417,35 @@ export const analytics = {
     trackEvent(AnalyticsEvents.CLEAR_DATA);
   },
 
-  // V9: sampleDataClick removed — keep only sampleDataLoad (actual conversion)
-
   languageChange: (language: string) => {
     trackEvent(AnalyticsEvents.LANGUAGE_CHANGE, { language });
   },
 
-  // Wizard events (V9: 25% sampling was 50%, removed step_title payload)
+  // Wizard events (V10: 5% sampling, was 25%)
   wizardStepView: (stepId: number, _stepTitle?: string) => {
-    if (Math.random() > 0.25) return;
+    if (Math.random() > 0.05) return;
     trackEvent(AnalyticsEvents.WIZARD_STEP_VIEW, {
       step_id: stepId,
     });
   },
 
-  wizardBackClick: (fromStep: number) => {
-    trackEvent(AnalyticsEvents.WIZARD_BACK_CLICK, { from_step: fromStep });
-  },
+  // Page Views (V10: first-in-session UTM attribution only, Umami built-in handles pageviews)
+  pageView: () => {
+    if (typeof window === 'undefined') return;
+    if (sessionStorage.getItem('analytics_first_pv')) return;
+    sessionStorage.setItem('analytics_first_pv', '1');
 
-  wizardCancel: () => {
-    trackEvent(AnalyticsEvents.WIZARD_CANCEL);
-  },
-
-  // Page Views (V9: enriched with UTM + device context on first per session)
-  pageView: (page: PageName, language?: string) => {
     const utm = getStoredUTM();
-    const isFirstView =
-      typeof window !== 'undefined' && !sessionStorage.getItem('analytics_first_pv');
+    if (!utm.utm_source) return;
 
-    const data: Record<string, string | number | boolean> = {
-      page,
-      ...(language && { language }),
-      ...(utm.utm_source && { utm_source: utm.utm_source }),
+    trackEvent(AnalyticsEvents.PAGE_VIEW, {
+      utm_source: utm.utm_source,
       ...(utm.utm_medium && { utm_medium: utm.utm_medium }),
       ...(utm.utm_campaign && { utm_campaign: utm.utm_campaign }),
-    };
-
-    // B8: Add device context on first page_view only
-    if (isFirstView && typeof window !== 'undefined') {
-      sessionStorage.setItem('analytics_first_pv', '1');
-      const w = window.innerWidth;
-      const viewport = w < 640 ? 'mobile' : w < 1024 ? 'tablet' : 'desktop';
-      data.viewport = viewport;
-      data.is_pwa = window.matchMedia('(display-mode: standalone)').matches;
-    }
-
-    trackEvent(AnalyticsEvents.PAGE_VIEW, data);
+    });
   },
 
-  // Upload Zone (V9: removed uploadDrop as duplicate of uploadClick)
+  // Upload Zone
   uploadClick: () => {
     trackEvent(AnalyticsEvents.UPLOAD_CLICK);
   },
@@ -521,19 +482,10 @@ export const analytics = {
     });
   },
 
-  // FAQ (V9: removed question_text payload, question_id is sufficient)
+  // FAQ
   faqExpand: (questionId: number, _questionText?: string) => {
     trackEvent(AnalyticsEvents.FAQ_EXPAND, {
       question_id: questionId,
-    });
-  },
-
-  // Results Engagement (V9: 10% sampling, was 25%)
-  resultsScrollDepth: (depth: ScrollDepth, totalAccounts: number) => {
-    if (Math.random() > 0.1) return;
-    trackEvent(AnalyticsEvents.RESULTS_SCROLL_DEPTH, {
-      depth,
-      total_accounts: totalAccounts,
     });
   },
 
@@ -545,15 +497,7 @@ export const analytics = {
     });
   },
 
-  // Rescue Plan (V9: kept only impression + tool_click, removed dismiss/viewTime/reEngagement)
-  rescuePlanImpression: (severity: string, size: string, unfollowedPercent: number) => {
-    trackEvent(AnalyticsEvents.RESCUE_PLAN_IMPRESSION, {
-      severity,
-      size,
-      unfollowed_percent: Math.round(unfollowedPercent),
-    });
-  },
-
+  // Rescue Plan (V10: removed impression, kept only tool_click)
   rescuePlanToolClick: (toolId: string, severity: string, size: string) => {
     trackEvent(AnalyticsEvents.RESCUE_PLAN_TOOL_CLICK, {
       tool_id: toolId,
@@ -562,7 +506,7 @@ export const analytics = {
     });
   },
 
-  // Error Boundary (V9: proper type, no more cast)
+  // Error Boundary
   errorBoundary: (errorMessage: string, componentStack: string) => {
     trackEvent(AnalyticsEvents.ERROR_BOUNDARY, {
       error_message: errorMessage.slice(0, 200),
@@ -570,7 +514,7 @@ export const analytics = {
     });
   },
 
-  // Route Error (V9: proper type, no more cast)
+  // Route Error
   routeError: (status: number, message: string) => {
     trackEvent(AnalyticsEvents.ROUTE_ERROR, {
       status,
@@ -578,7 +522,7 @@ export const analytics = {
     });
   },
 
-  // Granular Upload Errors (V9: removed legacy fileUploadError call, shorter payloads)
+  // Granular Upload Errors
   uploadErrorByCode: (
     fileHash: string,
     code: import('@/core/types').DiagnosticErrorCode,
@@ -628,13 +572,6 @@ export const analytics = {
     });
   },
 
-  sessionDuration: (seconds: number, pagesViewed: number) => {
-    trackEvent(AnalyticsEvents.SESSION_DURATION, {
-      duration_seconds: Math.round(seconds),
-      pages_viewed: pagesViewed,
-    });
-  },
-
   returnUpload: (fileHashPrefix: string, daysSinceLastUpload: number) => {
     trackEvent(AnalyticsEvents.RETURN_UPLOAD, {
       file_hash_prefix: fileHashPrefix.slice(0, 8),
@@ -642,9 +579,9 @@ export const analytics = {
     });
   },
 
-  // Web Vitals (V9: new, 10% sampling)
+  // Web Vitals (V10: 3% sampling, was 10%)
   webVital: (name: string, value: number, rating: string) => {
-    if (Math.random() > 0.1) return;
+    if (Math.random() > 0.03) return;
     trackEvent(AnalyticsEvents.WEB_VITAL, {
       metric_name: name,
       metric_value: Math.round(value),
@@ -652,7 +589,7 @@ export const analytics = {
     });
   },
 
-  // PWA Install (V9: new)
+  // PWA Install
   pwaInstallPrompt: () => {
     trackEvent(AnalyticsEvents.PWA_INSTALL_PROMPT);
   },

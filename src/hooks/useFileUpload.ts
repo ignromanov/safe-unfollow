@@ -118,7 +118,7 @@ export function useFileUpload() {
         fileHash = await generateFileHash(file);
 
         // Track upload start with file hash
-        analytics.fileUploadStart(fileHash, fileSizeMb);
+        analytics.fileUploadStart(fileSizeMb);
 
         // Check IndexedDB cache first
         const cachedData = await dbCache.get(fileHash);
@@ -138,12 +138,7 @@ export function useFileUpload() {
           });
 
           // Track success from cache
-          analytics.fileUploadSuccess(
-            fileHash,
-            cachedData.metadata.accountCount,
-            performance.now() - startTime,
-            true
-          );
+          analytics.fileUploadSuccess(cachedData.metadata.accountCount, true);
 
           return;
         }
@@ -221,12 +216,7 @@ export function useFileUpload() {
         });
 
         // Track successful processing
-        analytics.fileUploadSuccess(
-          resultFileHash,
-          accountCount,
-          performance.now() - startTime,
-          false
-        );
+        analytics.fileUploadSuccess(accountCount, false);
 
         // Track return upload (user uploading new data)
         trackReturnUploadIfApplicable(resultFileHash);

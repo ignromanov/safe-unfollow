@@ -5,10 +5,9 @@ import { createI18nMock } from '@/__tests__/utils/mockI18n';
 // Note: RescuePlanBanner test uses simple key-only mock
 vi.mock('react-i18next', () => createI18nMock({}));
 
-// Mock analytics (V9: removed dismiss/viewTime/hover)
+// Mock analytics (V10: removed rescuePlanImpression, kept only tool_click)
 vi.mock('@/lib/analytics', () => ({
   analytics: {
-    rescuePlanImpression: vi.fn(),
     rescuePlanToolClick: vi.fn(),
   },
 }));
@@ -60,16 +59,6 @@ describe('RescuePlanBanner', () => {
 
     // Now should have expanded content (dismiss button visible)
     expect(screen.getByLabelText('rescue.dismiss')).toBeInTheDocument();
-  });
-
-  it('should call analytics impression when visible', () => {
-    render(<RescuePlanBanner {...defaultProps} />);
-
-    act(() => {
-      vi.advanceTimersByTime(1000);
-    });
-
-    expect(analytics.rescuePlanImpression).toHaveBeenCalled();
   });
 
   it('should show collapsed view if already dismissed', () => {

@@ -15,27 +15,11 @@ import { useLanguageFromPath } from '@/hooks/useLanguageFromPath';
 import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
 import { useLanguageRedirect } from '@/hooks/useLanguageRedirect';
 import { usePWAInstallAnalytics } from '@/hooks/usePWAInstallAnalytics';
-import { useSessionDuration } from '@/hooks/useSessionDuration';
 import { analytics, captureUTMParams } from '@/lib/analytics';
 import { RTL_LANGUAGES, type SupportedLanguage } from '@/locales';
 
 interface LayoutProps {
   lang?: SupportedLanguage;
-}
-
-type PageName = 'hero' | 'wizard' | 'upload' | 'results' | 'sample' | 'privacy' | 'terms';
-
-/**
- * Map pathname to page name for analytics
- */
-function getPageNameFromPath(pathname: string): PageName {
-  if (pathname.endsWith('/results')) return 'results';
-  if (pathname.endsWith('/upload')) return 'upload';
-  if (pathname.endsWith('/wizard')) return 'wizard';
-  if (pathname.endsWith('/sample')) return 'sample';
-  if (pathname.endsWith('/privacy')) return 'privacy';
-  if (pathname.endsWith('/terms')) return 'terms';
-  return 'hero';
 }
 
 /**
@@ -85,9 +69,6 @@ export function Layout({ lang }: LayoutProps) {
   // Uses useLayoutEffect to redirect BEFORE paint
   useLanguageRedirect();
 
-  // Track session duration for engagement analytics
-  useSessionDuration();
-
   // Track PWA install events
   usePWAInstallAnalytics();
 
@@ -116,11 +97,10 @@ export function Layout({ lang }: LayoutProps) {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [location.pathname]);
 
-  // Track page views
+  // V10: UTM attribution on first page view only (Umami built-in handles pageviews)
   useEffect(() => {
-    const pageName = getPageNameFromPath(location.pathname);
-    analytics.pageView(pageName, lang);
-  }, [location.pathname, lang]);
+    analytics.pageView();
+  }, []);
 
   // Navigation handlers
   const handleViewResults = () => navigate(`${prefix}/results`);

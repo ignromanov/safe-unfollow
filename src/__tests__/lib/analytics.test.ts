@@ -1,8 +1,9 @@
 /**
- * Analytics Tests (V9)
+ * Analytics Tests (V10)
  *
  * Tests for privacy-first analytics utility with opt-out support.
- * V9: Updated for event removal, sampling changes, payload reductions.
+ * V10: Removed events (session_duration, rescue_plan_impression, results_scroll_depth,
+ *       wizard_back_click, wizard_cancel), simplified payloads, tightened sampling.
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
@@ -121,22 +122,19 @@ describe('Analytics', () => {
         vi.stubEnv('DEV', false);
       });
 
-      it('should track file upload start with truncated hash', () => {
-        analytics.fileUploadStart('abc123def456ghi789', 5.5);
+      it('should track file upload start with file size', () => {
+        analytics.fileUploadStart(5.5);
 
         expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.FILE_UPLOAD_START, {
-          file_hash: 'abc123def456',
           file_size_mb: 5.5,
         });
       });
 
-      it('should track file upload success with truncated hash', () => {
-        analytics.fileUploadSuccess('abc123def456ghi789', 1500, 2500, false);
+      it('should track file upload success without hash or processing time', () => {
+        analytics.fileUploadSuccess(1500, false);
 
         expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.FILE_UPLOAD_SUCCESS, {
-          file_hash: 'abc123def456',
           account_count: 1500,
-          processing_time_ms: 2500,
           from_cache: false,
         });
       });
@@ -148,7 +146,7 @@ describe('Analytics', () => {
         });
         sessionStorageMock['analytics_entry_cta'] = 'guide';
 
-        analytics.fileUploadSuccess('abc123def456', 1500, 2500, false);
+        analytics.fileUploadSuccess(1500, false);
 
         const call = windowSpy.umami.track.mock.calls[0];
         expect(call[1].utm_source).toBe('producthunt');
@@ -156,9 +154,9 @@ describe('Analytics', () => {
         expect(call[1].entry_cta).toBe('guide');
       });
 
-      it('should track filter toggle with 10% sampling', () => {
+      it('should track filter toggle with 3% sampling', () => {
         const originalRandom = Math.random;
-        Math.random = () => 0.05; // 5% < 10% threshold
+        Math.random = () => 0.02; // 2% < 3% threshold
 
         analytics.filterToggle('notFollowingBack', 'enable', 3);
 
@@ -173,7 +171,7 @@ describe('Analytics', () => {
 
       it('should skip filter toggle when sampling excludes', () => {
         const originalRandom = Math.random;
-        Math.random = () => 0.5; // 50% > 10% threshold
+        Math.random = () => 0.05; // 5% > 3% threshold
 
         analytics.filterToggle('notFollowingBack', 'enable', 3);
 
@@ -190,9 +188,9 @@ describe('Analytics', () => {
         });
       });
 
-      it('should track search with 25% sampling', () => {
+      it('should track search with 5% sampling', () => {
         const originalRandom = Math.random;
-        Math.random = () => 0.1; // 10% < 25% threshold
+        Math.random = () => 0.03; // 3% < 5% threshold
 
         analytics.searchPerform(10, 25, 1000, true);
 
@@ -208,7 +206,7 @@ describe('Analytics', () => {
 
       it('should skip search when sampling excludes', () => {
         const originalRandom = Math.random;
-        Math.random = () => 0.5; // 50% > 25% threshold
+        Math.random = () => 0.1; // 10% > 5% threshold
 
         analytics.searchPerform(10, 25, 1000, true);
 
@@ -218,6 +216,8 @@ describe('Analytics', () => {
       });
 
       it('should track results clicks summary with top 3 badges', () => {
+        const originalRandom = Math.random;
+        Math.random = () => 0.1;
         analytics.resultsClicksSummary({
           totalClicks: 20,
           badgeClicks: { unfollowed: 10, notFollowingBack: 5, following: 3, mutuals: 2 },
@@ -229,6 +229,7 @@ describe('Analytics', () => {
           badge_clicks: '{"unfollowed":10,"notFollowingBack":5,"following":3}',
           time_spent: 46,
         });
+        Math.random = originalRandom;
       });
 
       it('should track link clicks', () => {
@@ -270,9 +271,9 @@ describe('Analytics', () => {
         expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.CLEAR_DATA, undefined);
       });
 
-      it('should track wizard events with 25% sampling and no step_title', () => {
+      it('should track wizard step view with 5% sampling and no step_title', () => {
         const originalRandom = Math.random;
-        Math.random = () => 0.1; // 10% < 25% threshold
+        Math.random = () => 0.03; // 3% < 5% threshold
 
         analytics.wizardStepView(1, 'Opening Settings');
         expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.WIZARD_STEP_VIEW, {
@@ -280,22 +281,11 @@ describe('Analytics', () => {
         });
 
         Math.random = originalRandom;
-
-        analytics.wizardBackClick(2);
-        expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.WIZARD_BACK_CLICK, {
-          from_step: 2,
-        });
-
-        analytics.wizardCancel();
-        expect(windowSpy.umami.track).toHaveBeenCalledWith(
-          AnalyticsEvents.WIZARD_CANCEL,
-          undefined
-        );
       });
 
       it('should skip wizard step view when sampling excludes', () => {
         const originalRandom = Math.random;
-        Math.random = () => 0.5; // 50% > 25% threshold
+        Math.random = () => 0.1; // 10% > 5% threshold
 
         analytics.wizardStepView(1, 'Opening Settings');
 
@@ -305,17 +295,10 @@ describe('Analytics', () => {
       });
 
       it('should round file size in upload start', () => {
-        analytics.fileUploadStart('hash123456789', 5.123456);
+        analytics.fileUploadStart(5.123456);
 
         const call = windowSpy.umami.track.mock.calls[0];
         expect(call[1].file_size_mb).toBe(5.12);
-      });
-
-      it('should round processing time in upload success', () => {
-        analytics.fileUploadSuccess('hash123456789', 1000, 1234.567, false);
-
-        const call = windowSpy.umami.track.mock.calls[0];
-        expect(call[1].processing_time_ms).toBe(1235);
       });
 
       it('should track language change', () => {
@@ -326,45 +309,32 @@ describe('Analytics', () => {
         });
       });
 
-      it('should track page view with language', () => {
-        analytics.pageView('hero', 'en');
+      it('should track page view only once per session with UTM params', () => {
+        sessionStorageMock['analytics_utm'] = JSON.stringify({
+          utm_source: 'producthunt',
+          utm_medium: 'launch',
+        });
 
-        expect(windowSpy.umami.track).toHaveBeenCalledWith(
-          AnalyticsEvents.PAGE_VIEW,
-          expect.objectContaining({
-            page: 'hero',
-            language: 'en',
-          })
-        );
-      });
+        analytics.pageView();
 
-      it('should track page view without language', () => {
-        analytics.pageView('wizard');
-
-        expect(windowSpy.umami.track).toHaveBeenCalledWith(
-          AnalyticsEvents.PAGE_VIEW,
-          expect.objectContaining({
-            page: 'wizard',
-          })
-        );
-      });
-
-      it('should enrich first page view with viewport and is_pwa', () => {
-        windowSpy.innerWidth = 375;
-        windowSpy.matchMedia = () => ({ matches: false });
-
-        analytics.pageView('hero', 'en');
-
-        const call = windowSpy.umami.track.mock.calls[0];
-        expect(call[1].viewport).toBe('mobile');
-        expect(call[1].is_pwa).toBe(false);
+        expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.PAGE_VIEW, {
+          utm_source: 'producthunt',
+          utm_medium: 'launch',
+        });
         expect(sessionStorageMock['analytics_first_pv']).toBe('1');
 
-        // Second page view should not have viewport
+        // Second call should be skipped (already tracked this session)
         windowSpy.umami.track.mockClear();
-        analytics.pageView('wizard', 'en');
-        const call2 = windowSpy.umami.track.mock.calls[0];
-        expect(call2[1].viewport).toBeUndefined();
+        analytics.pageView();
+        expect(windowSpy.umami.track).not.toHaveBeenCalled();
+      });
+
+      it('should not track page view without UTM params', () => {
+        analytics.pageView();
+
+        expect(windowSpy.umami.track).not.toHaveBeenCalled();
+        // But session flag is still set
+        expect(sessionStorageMock['analytics_first_pv']).toBe('1');
       });
 
       it('should track upload click', () => {
@@ -406,47 +376,12 @@ describe('Analytics', () => {
         });
       });
 
-      it('should track results scroll depth with 10% sampling', () => {
-        const originalRandom = Math.random;
-        Math.random = () => 0.05; // 5% < 10% threshold
-
-        analytics.resultsScrollDepth(50, 1500);
-
-        expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.RESULTS_SCROLL_DEPTH, {
-          depth: 50,
-          total_accounts: 1500,
-        });
-
-        Math.random = originalRandom;
-      });
-
-      it('should skip results scroll depth when sampling excludes', () => {
-        const originalRandom = Math.random;
-        Math.random = () => 0.5; // 50% > 10% threshold
-
-        analytics.resultsScrollDepth(50, 1500);
-
-        expect(windowSpy.umami.track).not.toHaveBeenCalled();
-
-        Math.random = originalRandom;
-      });
-
       it('should track sample data load', () => {
         analytics.sampleDataLoad(500, 1234.567);
 
         expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.SAMPLE_DATA_LOAD, {
           account_count: 500,
           load_time_ms: 1235,
-        });
-      });
-
-      it('should track rescue plan impression', () => {
-        analytics.rescuePlanImpression('high', 'large', 45.678);
-
-        expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.RESCUE_PLAN_IMPRESSION, {
-          severity: 'high',
-          size: 'large',
-          unfollowed_percent: 46,
         });
       });
 
@@ -478,9 +413,9 @@ describe('Analytics', () => {
         });
       });
 
-      it('should track web vital with 10% sampling', () => {
+      it('should track web vital with 3% sampling', () => {
         const originalRandom = Math.random;
-        Math.random = () => 0.05;
+        Math.random = () => 0.02; // 2% < 3% threshold
 
         analytics.webVital('LCP', 1234.5, 'good');
 
@@ -514,7 +449,7 @@ describe('Analytics', () => {
       });
 
       it('should not track events', () => {
-        analytics.fileUploadStart('abc123', 5.5);
+        analytics.fileUploadStart(5.5);
         analytics.filterToggle('mutuals', 'enable', 1);
         analytics.searchPerform(5, 10, 100, false);
 
@@ -529,7 +464,7 @@ describe('Analytics', () => {
       });
 
       it('should not track events', () => {
-        analytics.fileUploadStart('abc123', 5.5);
+        analytics.fileUploadStart(5.5);
         analytics.filterToggle('mutuals', 'enable', 1);
         analytics.searchPerform(5, 10, 100, false);
 
@@ -546,7 +481,7 @@ describe('Analytics', () => {
 
       it('should not throw error', () => {
         expect(() => {
-          analytics.fileUploadStart('abc123', 5.5);
+          analytics.fileUploadStart(5.5);
           analytics.filterToggle('mutuals', 'enable', 1);
         }).not.toThrow();
       });
@@ -562,7 +497,7 @@ describe('Analytics', () => {
 
       it('should silently fail on tracking errors', () => {
         expect(() => {
-          analytics.fileUploadStart('abc123', 5.5);
+          analytics.fileUploadStart(5.5);
         }).not.toThrow();
       });
     });
@@ -616,8 +551,6 @@ describe('Analytics', () => {
       expect(AnalyticsEvents.THEME_TOGGLE).toBe('theme_toggle');
       expect(AnalyticsEvents.CLEAR_DATA).toBe('clear_data');
       expect(AnalyticsEvents.WIZARD_STEP_VIEW).toBe('wizard_step_view');
-      expect(AnalyticsEvents.WIZARD_BACK_CLICK).toBe('wizard_back_click');
-      expect(AnalyticsEvents.WIZARD_CANCEL).toBe('wizard_cancel');
       expect(AnalyticsEvents.ERROR_BOUNDARY).toBe('error_boundary');
       expect(AnalyticsEvents.ROUTE_ERROR).toBe('route_error');
       expect(AnalyticsEvents.WEB_VITAL).toBe('web_vital');
@@ -625,8 +558,9 @@ describe('Analytics', () => {
       expect(AnalyticsEvents.PWA_INSTALLED).toBe('pwa_installed');
     });
 
-    it('should NOT have removed V9 events', () => {
+    it('should NOT have removed V9/V10 events', () => {
       const events = AnalyticsEvents as Record<string, string>;
+      // V9 removals
       expect(events['FILE_UPLOAD_ERROR']).toBeUndefined();
       expect(events['PROFILE_CLICK']).toBeUndefined();
       expect(events['HELP_OPEN']).toBeUndefined();
@@ -636,6 +570,12 @@ describe('Analytics', () => {
       expect(events['RESCUE_PLAN_DISMISS']).toBeUndefined();
       expect(events['RESCUE_PLAN_VIEW_TIME']).toBeUndefined();
       expect(events['RESCUE_PLAN_RE_ENGAGEMENT']).toBeUndefined();
+      // V10 removals
+      expect(events['SESSION_DURATION']).toBeUndefined();
+      expect(events['RESCUE_PLAN_IMPRESSION']).toBeUndefined();
+      expect(events['RESULTS_SCROLL_DEPTH']).toBeUndefined();
+      expect(events['WIZARD_BACK_CLICK']).toBeUndefined();
+      expect(events['WIZARD_CANCEL']).toBeUndefined();
     });
   });
 

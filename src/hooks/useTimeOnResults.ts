@@ -43,8 +43,8 @@ export function useTimeOnResults(accountCount: number, isActive: boolean) {
 
     const timeSpent = (Date.now() - startTimeRef.current) / 1000;
 
-    // Only fire if user spent meaningful time (>5 seconds)
-    if (timeSpent >= 5) {
+    // Only fire if user spent meaningful time (>5 seconds), 25% sampling
+    if (timeSpent >= 5 && Math.random() <= 0.25) {
       // Use sendBeacon for timeOnResults (fires on page leave)
       trackBeacon(AnalyticsEvents.TIME_ON_RESULTS, {
         time_seconds: Math.round(timeSpent),

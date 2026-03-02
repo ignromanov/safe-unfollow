@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback } from 'react';
 
 import { analytics } from '@/lib/analytics';
 import type { UserSegment, RescueTool } from '@/lib/rescue-plan';
@@ -24,20 +24,6 @@ export function useRescuePlanAnalytics({
   isVisible,
   isDevMode,
 }: UseRescuePlanAnalyticsOptions) {
-  const hasTrackedImpression = useRef(false);
-  const visibilityStartRef = useRef<number>(0);
-
-  // Track impression when visible (once per session)
-  useEffect(() => {
-    if (isVisible && !hasTrackedImpression.current && !isDevMode) {
-      analytics.rescuePlanImpression(segment.severity, segment.size, segment.unfollowedPercent);
-      hasTrackedImpression.current = true;
-      visibilityStartRef.current = Date.now();
-    }
-  }, [isVisible, segment, isDevMode]);
-
-  // V9: rescuePlanViewTime removed (micro-engagement, low value)
-
   // Handle tool click with analytics
   const handleToolClick = useCallback(
     (tool: RescueTool, e: React.MouseEvent) => {
