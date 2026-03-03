@@ -57,7 +57,7 @@ export function Header({
   };
 
   return (
-    <header className="sticky top-0 z-[80] w-full border-b border-border bg-card/80 backdrop-blur-md">
+    <header className="sticky top-0 z-[80] w-full border-b border-border bg-card md:bg-card/80 md:backdrop-blur-md">
       <div className="container mx-auto px-4 h-16 md:h-20 flex items-center justify-between">
         {/* Logo */}
         <div
@@ -69,7 +69,7 @@ export function Header({
           onKeyDown={e => e.key === 'Enter' && onLogoClick?.()}
         >
           <div className="w-9 h-9 md:w-10 md:h-10 rounded-2xl bg-gradient-brand flex items-center justify-center text-white shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all">
-            <ShieldCheck size={22} strokeWidth={2.5} />
+            <ShieldCheck className="w-[22px] h-[22px]" strokeWidth={2.5} />
           </div>
           <span className="font-display font-extrabold text-xl md:text-2xl tracking-tight hidden sm:block">
             SafeUnfollow<span className="text-primary">.app</span>
@@ -82,24 +82,24 @@ export function Header({
             <div className="flex items-center gap-2">
               <button
                 onClick={onViewResults}
-                className={`cursor-pointer flex items-center gap-2 px-3 py-2.5 md:px-4 md:py-2 rounded-xl text-xs md:text-sm font-bold transition-all ${
+                className={`cursor-pointer flex items-center gap-2 px-3 py-3 md:px-4 md:py-2 rounded-xl text-xs md:text-sm font-bold transition-all ${
                   activeScreen === AppState.RESULTS
                     ? 'bg-primary text-white shadow-md'
                     : 'text-zinc-500 hover:bg-[oklch(0.5_0_0_/_0.05)]'
                 }`}
                 aria-label={t('buttons.viewResults')}
               >
-                <LayoutDashboard size={18} />
+                <LayoutDashboard className="w-[18px] h-[18px]" />
                 <span className="hidden md:inline">{t('buttons.viewResults')}</span>
               </button>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <button
-                    className="cursor-pointer flex items-center gap-2 px-3 py-2.5 md:px-4 md:py-2 rounded-xl text-xs md:text-sm font-bold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all"
+                    className="cursor-pointer flex items-center gap-2 px-3 py-3 md:px-4 md:py-2 rounded-xl text-xs md:text-sm font-bold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all"
                     title={t('header.deleteData')}
                     aria-label={t('header.deleteData')}
                   >
-                    <Trash2 size={18} />
+                    <Trash2 className="w-[18px] h-[18px]" />
                     <span className="hidden md:inline">{t('buttons.delete')}</span>
                   </button>
                 </AlertDialogTrigger>
@@ -128,14 +128,14 @@ export function Header({
           ) : (
             <button
               onClick={onUpload}
-              className={`cursor-pointer flex items-center gap-2 px-4 py-2.5 md:py-2 rounded-xl text-xs md:text-sm font-bold transition-all ${
+              className={`cursor-pointer flex items-center gap-2 px-4 py-3 md:py-2 rounded-xl text-xs md:text-sm font-bold transition-all ${
                 activeScreen === AppState.UPLOAD
                   ? 'bg-primary text-white shadow-md'
                   : 'text-zinc-500 hover:bg-[oklch(0.5_0_0_/_0.05)]'
               }`}
               aria-label={t('buttons.uploadFile')}
             >
-              <Upload size={18} />
+              <Upload className="w-[18px] h-[18px]" />
               <span className="hidden md:inline">{t('buttons.uploadFile')}</span>
             </button>
           )}
@@ -152,7 +152,7 @@ export function Header({
               This avoids structural mismatch (div vs svg). */}
           <button
             onClick={handleThemeToggle}
-            className="cursor-pointer p-2.5 rounded-2xl hover:bg-[oklch(0.5_0_0_/_0.05)] transition-colors text-zinc-500"
+            className="cursor-pointer p-3 rounded-2xl hover:bg-[oklch(0.5_0_0_/_0.05)] transition-colors text-zinc-500"
             title={
               mounted
                 ? theme === 'system'
@@ -172,14 +172,17 @@ export function Header({
                 : t('theme.system')
             }
           >
-            {/* Default to SunMoon icon for SSR, then switch after mount */}
-            {!mounted || theme === 'system' ? (
-              <SunMoon size={20} />
-            ) : theme === 'light' ? (
-              <Moon size={20} />
-            ) : (
-              <Sun size={20} />
-            )}
+            {/* Default to SunMoon icon for SSR, then switch after mount.
+                Fixed w/h prevents CLS during hydration. */}
+            <span className="inline-flex w-5 h-5">
+              {!mounted || theme === 'system' ? (
+                <SunMoon className="w-5 h-5" />
+              ) : theme === 'light' ? (
+                <Moon className="w-5 h-5" />
+              ) : (
+                <Sun className="w-5 h-5" />
+              )}
+            </span>
           </button>
         </div>
       </div>

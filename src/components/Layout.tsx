@@ -1,6 +1,6 @@
 import i18n from 'i18next';
-import { useEffect, useState } from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useLayoutEffect } from 'react';
+import { Outlet } from 'react-router-dom';
 
 import { BreadcrumbSchema } from '@/components/BreadcrumbSchema';
 import { BuyMeCoffeeWidget } from '@/components/BuyMeCoffeeWidget';
@@ -9,50 +9,50 @@ import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { OrganizationSchema } from '@/components/OrganizationSchema';
 import { ThemeProvider } from '@/components/theme-provider';
-import { AppState } from '@/core/types';
 import { useInstagramData } from '@/hooks/useInstagramData';
 import { useLanguageFromPath } from '@/hooks/useLanguageFromPath';
-import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
 import { useLanguageRedirect } from '@/hooks/useLanguageRedirect';
-import { usePWAInstallAnalytics } from '@/hooks/usePWAInstallAnalytics';
-import { analytics, captureUTMParams } from '@/lib/analytics';
+import { useLayoutAnalytics } from '@/hooks/useLayoutAnalytics';
+import { useLayoutNavigation } from '@/hooks/useLayoutNavigation';
+import { useLayoutState } from '@/hooks/useLayoutState';
 import { RTL_LANGUAGES, type SupportedLanguage } from '@/locales';
+
+// Use useLayoutEffect on client to sync language BEFORE paint,
+// preventing a flash of wrong language. Falls back to useEffect during SSG.
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 interface LayoutProps {
   lang?: SupportedLanguage;
 }
 
 /**
- * Map pathname to AppState for header highlighting
- */
-function getActiveScreen(pathname: string): AppState {
-  if (pathname.endsWith('/results')) return AppState.RESULTS;
-  if (pathname.endsWith('/upload')) return AppState.UPLOAD;
-  if (pathname.endsWith('/wizard')) return AppState.WIZARD;
-  if (pathname.endsWith('/sample')) return AppState.SAMPLE;
-  if (pathname.endsWith('/privacy')) return AppState.PRIVACY;
-  if (pathname.endsWith('/terms')) return AppState.TERMS;
-  return AppState.HERO;
-}
-
-/**
- * Root layout component for all pages
+ * Root layout component for all pages.
+ * Composes extracted hooks for navigation, analytics, and state management.
+ *
  * Handles:
  * - Theme provider wrapper
  * - Header and Footer
  * - Language sync from URL path
- * - Loading states
  * - BMC widget display
+ * - Structured data (SEO)
  */
 export function Layout({ lang }: LayoutProps) {
-  const location = useLocation();
-  const navigate = useNavigate();
   const { uploadState, handleClearData, fileMetadata } = useInstagramData();
 
-  // Client-mounted check (prevents hydration mismatch)
-  // Effects run AFTER hydration, so this is safe
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  // Extracted hooks
+  const {
+    pathname,
+    activeScreen,
+    isResultsPage,
+    handleViewResults,
+    handleUpload,
+    handleLogoClick,
+    handleClear,
+  } = useLayoutNavigation();
+  const { mounted } = useLayoutState(pathname);
+
+  // Analytics (UTM capture, page view, PWA install)
+  useLayoutAnalytics();
 
   // SSG: Switch language synchronously BEFORE rendering
   // This works because during SSG all language resources are preloaded
@@ -62,23 +62,18 @@ export function Layout({ lang }: LayoutProps) {
     i18n.changeLanguage(targetLang);
   }
 
+  // Client-side: ensure language is synced before paint on navigation
+  useIsomorphicLayoutEffect(() => {
+    if (i18n.language !== targetLang && i18n.hasResourceBundle(targetLang, 'common')) {
+      i18n.changeLanguage(targetLang);
+    }
+  }, [targetLang]);
+
   // Sync language from URL path (e.g., /es/wizard -> Spanish)
   useLanguageFromPath(lang);
 
   // Redirect from language-less paths to user's preferred language
-  // Uses useLayoutEffect to redirect BEFORE paint
   useLanguageRedirect();
-
-  // Track PWA install events
-  usePWAInstallAnalytics();
-
-  // Capture UTM params from URL on first render
-  useEffect(() => {
-    captureUTMParams();
-  }, []);
-
-  // Get language prefix for navigation
-  const prefix = useLanguagePrefix();
 
   // Determine text direction for RTL languages (Arabic, etc.)
   const isRTL = lang ? RTL_LANGUAGES.includes(lang) : false;
@@ -86,37 +81,13 @@ export function Layout({ lang }: LayoutProps) {
   // Guard with mounted to prevent hydration mismatch
   // SSG renders with hasResults=false, client updates after mount
   const hasResults = mounted && uploadState.status === 'success' && fileMetadata !== null;
-  const activeScreen = getActiveScreen(location.pathname);
-
-  // Determine current screen for BMC widget
-  const isResultsPage =
-    location.pathname.endsWith('/results') || location.pathname.endsWith('/sample');
-
-  // Scroll to top on route change
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
-  }, [location.pathname]);
-
-  // V10: UTM attribution on first page view only (Umami built-in handles pageviews)
-  useEffect(() => {
-    analytics.pageView();
-  }, []);
-
-  // Navigation handlers
-  const handleViewResults = () => navigate(`${prefix}/results`);
-  const handleUpload = () => navigate(`${prefix}/upload`);
-  const handleLogoClick = () => navigate(`${prefix}/`);
-  const handleClear = () => {
-    handleClearData();
-    navigate(`${prefix}/`);
-  };
 
   return (
     <ErrorBoundary>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
         <div
           dir={isRTL ? 'rtl' : 'ltr'}
-          className="min-h-screen bg-background flex flex-col transition-colors duration-300"
+          className="min-h-dvh bg-background flex flex-col transition-colors duration-300"
           suppressHydrationWarning
         >
           <a
@@ -132,7 +103,7 @@ export function Layout({ lang }: LayoutProps) {
             onViewResults={handleViewResults}
             onUpload={handleUpload}
             onLogoClick={handleLogoClick}
-            onClear={handleClear}
+            onClear={() => handleClear(handleClearData)}
           />
 
           <main id="main-content" className="flex-1 container mx-auto px-4">
@@ -146,7 +117,7 @@ export function Layout({ lang }: LayoutProps) {
             show={isResultsPage}
             expandDelay={999999999}
             autoCollapseAfter={10000}
-            skipStorageCheck={location.pathname.endsWith('/sample')}
+            skipStorageCheck={pathname.endsWith('/sample')}
           />
 
           {/* Structured data for SEO */}

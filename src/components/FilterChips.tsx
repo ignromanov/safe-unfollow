@@ -17,11 +17,11 @@ import type { BadgeKey } from '@/core/types';
 import type { FilterChipsProps } from '@/types/components';
 import { analytics } from '@/lib/analytics';
 import type { ReactNode } from 'react';
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-// Icon components for each badge type
-const BADGE_ICON_COMPONENTS: Record<BadgeKey, { icon: typeof Users; defaultClass: string }> = {
+// Module-level icon map (outside component, never re-created)
+const BADGE_ICON_MAP: Record<BadgeKey, { icon: typeof Users; defaultClass: string }> = {
   following: { icon: Users, defaultClass: 'text-blue-500' },
   followers: { icon: UserPlus, defaultClass: 'text-emerald-500' },
   mutuals: { icon: Heart, defaultClass: 'text-indigo-500' },
@@ -35,9 +35,12 @@ const BADGE_ICON_COMPONENTS: Record<BadgeKey, { icon: typeof Users; defaultClass
   dismissed: { icon: XCircle, defaultClass: 'text-zinc-400 opacity-50' },
 };
 
+// Module-level Intl.NumberFormat instance (created once, reused)
+const numberFormatter = new Intl.NumberFormat();
+
 // Get icon with correct color based on active state
 function getBadgeIcon(type: BadgeKey, isActive: boolean): ReactNode {
-  const config = BADGE_ICON_COMPONENTS[type];
+  const config = BADGE_ICON_MAP[type];
   const IconComponent = config.icon;
   return <IconComponent size={18} className={isActive ? 'text-white' : config.defaultClass} />;
 }
@@ -57,7 +60,7 @@ const FILTER_CONFIGS: Array<{ type: BadgeKey }> = [
   { type: 'dismissed' },
 ];
 
-export function FilterChips({
+export const FilterChips = memo(function FilterChips({
   selectedFilters,
   onFiltersChange,
   filterCounts,
@@ -107,8 +110,8 @@ export function FilterChips({
         )}
       </div>
 
-      {/* Available Filters */}
-      <div className="grid grid-cols-2 lg:grid-cols-1 gap-2.5">
+      {/* Available Filters — horizontal scroll on mobile */}
+      <div className="flex lg:grid lg:grid-cols-1 gap-2.5 overflow-x-auto flex-nowrap lg:flex-wrap lg:overflow-x-visible snap-x snap-mandatory scrollbar-hide pb-2 lg:pb-0 -mx-1 px-1 lg:mx-0 lg:px-0">
         {availableFilters.map(cfg => {
           const isActive = selectedFilters.has(cfg.type);
           const count = getBadgeCount(cfg.type);
@@ -117,7 +120,7 @@ export function FilterChips({
             <button
               key={cfg.type}
               onClick={() => handleFilterToggle(cfg.type)}
-              className={`cursor-pointer flex flex-col items-start justify-between p-4 rounded-2xl text-xs font-bold transition-all border min-h-[85px] relative ${
+              className={`snap-start shrink-0 lg:shrink cursor-pointer flex flex-col items-start justify-between p-4 rounded-2xl text-xs font-bold transition-all border min-h-[85px] min-w-[140px] lg:min-w-0 relative ${
                 isActive
                   ? 'bg-primary text-white border-primary shadow-md'
                   : 'text-zinc-600 dark:text-zinc-400 border-border bg-zinc-50/50 dark:bg-zinc-900/20 hover:border-primary/40'
@@ -138,7 +141,7 @@ export function FilterChips({
                       : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-500'
                   }`}
                 >
-                  {count.toLocaleString()}
+                  {numberFormatter.format(count)}
                 </span>
               </div>
               <span className="mt-3 block leading-snug text-left text-xs">{label}</span>
@@ -159,11 +162,11 @@ export function FilterChips({
           </button>
 
           {showEmptyFilters && (
-            <div className="grid grid-cols-2 lg:grid-cols-1 gap-2.5 mt-4 animate-in slide-in-from-top-2 duration-300">
+            <div className="flex lg:grid lg:grid-cols-1 gap-2.5 mt-4 animate-in slide-in-from-top-2 duration-300 overflow-x-auto flex-nowrap lg:flex-wrap lg:overflow-x-visible snap-x snap-mandatory scrollbar-hide pb-2 lg:pb-0 -mx-1 px-1 lg:mx-0 lg:px-0">
               {emptyFilters.map(cfg => (
                 <div
                   key={cfg.type}
-                  className="flex flex-col items-start justify-between p-4 rounded-2xl text-xs font-bold border border-border bg-zinc-50/20 dark:bg-zinc-900/10 opacity-60 min-h-[85px]"
+                  className="snap-start shrink-0 lg:shrink flex flex-col items-start justify-between p-4 rounded-2xl text-xs font-bold border border-border bg-zinc-50/20 dark:bg-zinc-900/10 opacity-60 min-h-[85px] min-w-[140px] lg:min-w-0"
                 >
                   <div className="flex items-center justify-between w-full">
                     <span>{getBadgeIcon(cfg.type, false)}</span>
@@ -182,4 +185,4 @@ export function FilterChips({
       )}
     </div>
   );
-}
+});

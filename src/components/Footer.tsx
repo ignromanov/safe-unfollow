@@ -31,7 +31,7 @@ export function Footer() {
   };
 
   return (
-    <footer className="mt-12 lg:mt-20 border-t border-border bg-surface py-10 lg:py-14">
+    <footer className="mt-12 lg:mt-20 border-t border-border bg-card py-10 lg:py-14">
       <div className="container mx-auto px-4">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-10 lg:gap-20">
           {/* Logo & Description */}

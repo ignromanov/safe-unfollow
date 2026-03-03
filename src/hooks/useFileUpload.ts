@@ -11,6 +11,9 @@ import { useParseWorker } from './useParseWorker';
 // Upload rate limiting (ms)
 const UPLOAD_DEBOUNCE_MS = 1000;
 
+// Maximum file size: 500MB
+const MAX_FILE_SIZE = 500 * 1024 * 1024;
+
 // localStorage key for tracking return uploads
 const LAST_UPLOAD_KEY = 'analytics_last_upload';
 
@@ -112,6 +115,27 @@ export function useFileUpload() {
 
           analytics.uploadErrorByCode('', 'NOT_ZIP', notZipWarning.message);
           throw new Error(notZipWarning.message);
+        }
+
+        // File size guard: reject files over 500MB
+        if (file.size > MAX_FILE_SIZE) {
+          const sizeMb = Math.round(file.size / (1024 * 1024));
+          const tooLargeWarning: ParseWarning = {
+            code: 'FILE_TOO_LARGE',
+            message: `File is ${sizeMb}MB, which exceeds the 500MB limit.`,
+            severity: 'error',
+            fix: 'Try requesting a smaller data export from Instagram, or use a desktop browser with more memory.',
+          };
+
+          setUploadInfo({
+            currentFileName: file.name,
+            uploadStatus: 'error',
+            uploadError: tooLargeWarning.message,
+            parseWarnings: [tooLargeWarning],
+          });
+
+          analytics.uploadErrorByCode('', 'FILE_TOO_LARGE', tooLargeWarning.message);
+          throw new Error(tooLargeWarning.message);
         }
 
         // Generate file hash for cache lookup and analytics correlation

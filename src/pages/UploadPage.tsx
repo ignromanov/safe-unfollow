@@ -15,7 +15,7 @@ import { useNavigate } from 'react-router-dom';
 export function Component() {
   const navigate = useNavigate();
   const prefix = useLanguagePrefix();
-  const { uploadState, handleZipUpload, parseWarnings } = useInstagramData();
+  const { uploadState, handleZipUpload, parseWarnings, uploadProgress } = useInstagramData();
 
   // Auto-navigate to results after successful upload
   useEffect(() => {
@@ -60,6 +60,7 @@ export function Component() {
         isProcessing={uploadState.status === 'loading'}
         error={uploadState.error}
         parseWarnings={parseWarnings}
+        uploadProgress={uploadProgress}
       />
       <div className="animate-in fade-in duration-1000">
         <HowToSection onStart={handleStartGuide} />

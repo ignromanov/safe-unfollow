@@ -247,7 +247,7 @@ export function DiagnosticErrorScreen({
           {diagnosticError.message}
         </p>
 
-        {/* Fix section */}
+        {/* Fix section — enhanced for HTML_FORMAT */}
         <div className="mb-8 rounded-2xl bg-white/60 p-6 dark:bg-black/20">
           <h3 className="mb-3 text-xs font-black uppercase tracking-widest text-zinc-900 dark:text-white">
             {t('diagnostic.howToFix')}
@@ -255,6 +255,28 @@ export function DiagnosticErrorScreen({
           <p className="text-sm font-medium leading-relaxed text-zinc-600 dark:text-zinc-400">
             {diagnosticError.fix}
           </p>
+
+          {/* Extra guidance for HTML format error */}
+          {diagnosticError.code === 'HTML_FORMAT' && (
+            <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800/50 dark:bg-amber-950/30">
+              <p className="text-sm font-bold text-amber-800 dark:text-amber-300">
+                {t('diagnostic.htmlFormatExplainer', {
+                  defaultValue:
+                    'You exported in HTML format. Go back to Instagram and select JSON format instead. The format selection is on the "Download your information" screen — look for the dropdown that says "HTML" and change it to "JSON".',
+                })}
+              </p>
+              {onOpenWizard && (
+                <button
+                  onClick={handleOpenWizard}
+                  className="mt-3 inline-flex items-center gap-2 rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-bold text-white transition-all hover:bg-amber-700 hover:shadow-md"
+                >
+                  {t('diagnostic.showFormatStep', {
+                    defaultValue: 'See where to select JSON format',
+                  })}
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Actions */}

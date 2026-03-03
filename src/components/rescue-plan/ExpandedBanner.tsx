@@ -120,19 +120,23 @@ export function ExpandedBanner({
           </div>
         </div>
 
-        {/* Dot indicators — mobile only */}
-        <div className="flex justify-center gap-2 mt-3 md:hidden">
+        {/* Dot indicators — mobile only, 44px touch targets (WCAG 2.1 AA) */}
+        <div className="flex justify-center mt-3 md:hidden">
           {tools.map((tool, index) => (
             <button
               key={tool.id}
               onClick={() => scrollToCard(index)}
               aria-label={tool.name}
-              className={`h-2 rounded-full transition-all duration-200 ${
-                activeIndex === index
-                  ? 'w-4 bg-zinc-700 dark:bg-zinc-200'
-                  : 'w-2 bg-zinc-300 dark:bg-zinc-600'
-              }`}
-            />
+              className="min-w-[44px] min-h-[44px] flex items-center justify-center"
+            >
+              <span
+                className={`block h-2 rounded-full transition-all duration-200 ${
+                  activeIndex === index
+                    ? 'w-4 bg-zinc-700 dark:bg-zinc-200'
+                    : 'w-2 bg-zinc-300 dark:bg-zinc-600'
+                }`}
+              />
+            </button>
           ))}
         </div>
 

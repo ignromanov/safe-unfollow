@@ -41,6 +41,9 @@ export function SearchBar({
             placeholder={t('search.placeholder')}
             value={value}
             onChange={e => onChange(e.target.value)}
+            autoCorrect="off"
+            autoCapitalize="none"
+            inputMode="search"
             className="pl-10 pr-12 sm:pr-10 text-base h-12 sm:h-10"
             aria-label={t('search.ariaLabel')}
           />

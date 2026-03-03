@@ -2,7 +2,16 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content, viewport-fit=cover" />
+
+    <!-- Resource hints: preconnect to external origins used by BMC widget -->
+    <link rel="preconnect" href="https://cdnjs.buymeacoffee.com" crossorigin />
+    <link rel="dns-prefetch" href="https://cdnjs.buymeacoffee.com" />
+
+    <!-- Font preload: critical latin-normal subsets loaded BEFORE CSS parse.
+         Paths reference @fontsource-variable source files; Vite resolves them at build time
+         via the CSS @import in styles.css. These <link> tags give the browser an early hint. -->
+    <link rel="preload" href="/src/styles.css" as="style" />
 
     <!-- CRITICAL: Language redirect MUST be first script - before any other resources load -->
     <script>

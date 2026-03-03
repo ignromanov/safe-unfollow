@@ -1,4 +1,5 @@
 import type { BadgeKey } from '@/core/types';
+import { memo } from 'react';
 import type { ReactNode } from 'react';
 
 export interface StatCardProps {
@@ -7,21 +8,19 @@ export interface StatCardProps {
   value: number;
   colorClass: string;
   badgeType?: BadgeKey;
-  activeFilters: Set<BadgeKey>;
+  isActive: boolean;
   onClick: (type: BadgeKey) => void;
 }
 
-export function StatCard({
+export const StatCard = memo(function StatCard({
   icon,
   label,
   value,
   colorClass,
   badgeType,
-  activeFilters,
+  isActive,
   onClick,
 }: StatCardProps) {
-  const isActive = badgeType && activeFilters.has(badgeType);
-
   return (
     <button
       onClick={() => badgeType && onClick(badgeType)}
@@ -59,4 +58,4 @@ export function StatCard({
       </div>
     </button>
   );
-}
+});

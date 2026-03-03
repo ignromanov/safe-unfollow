@@ -95,6 +95,14 @@ describe('AccountList Virtual List', () => {
     expect(screen.getByText('@test_user_0')).toBeInTheDocument();
   });
 
+  it('should handle null indices as show-all', () => {
+    render(<AccountList {...defaultProps} accountIndices={null} hasLoadedData={true} />);
+
+    // null = "show all", count comes from accountCount prop
+    expect(screen.getByText('Accounts (100)')).toBeInTheDocument();
+    expect(screen.getByText('@test_user_0')).toBeInTheDocument();
+  });
+
   it('should handle empty dataset', () => {
     render(<AccountList {...defaultProps} accountIndices={[]} hasLoadedData={true} />);
 
@@ -129,15 +137,16 @@ describe('AccountList Virtual List', () => {
       />
     );
 
-    // Find links to Instagram profiles
-    const profileLinks = screen.getAllByRole('link');
-    const firstUsernameLink = profileLinks.find(link => link.textContent?.includes('@test_user_0'));
+    // The entire row is now a single <a> link (AccountItem)
+    const links = screen.getAllByRole('article');
+    const firstArticle = links[0];
 
-    expect(firstUsernameLink).toBeDefined();
-    expect(firstUsernameLink).toHaveAttribute('href', 'https://instagram.com/test_user_0');
+    expect(firstArticle).toBeDefined();
+    expect(firstArticle).toHaveAttribute('href', 'https://instagram.com/test_user_0');
+    expect(firstArticle.textContent).toContain('@test_user_0');
 
     // Click link to verify aggregation callback (V9: profileClick removed)
-    fireEvent.click(firstUsernameLink!);
+    fireEvent.click(firstArticle);
     expect(mockOnAccountClick).toHaveBeenCalledWith(['following']); // aggregation callback
   });
 
@@ -161,11 +170,27 @@ describe('AccountList Virtual List', () => {
     const accountIndices = [0];
     render(<AccountList {...defaultProps} accountIndices={accountIndices} hasLoadedData={true} />);
 
-    // Check that Instagram link exists
-    const links = screen.getAllByRole('link');
-    const instagramLinks = links.filter(link =>
-      link.getAttribute('href')?.includes('instagram.com')
+    // The entire account row is an <a> link to Instagram
+    const articles = screen.getAllByRole('article');
+    const instagramLinks = articles.filter(el =>
+      el.getAttribute('href')?.includes('instagram.com')
     );
     expect(instagramLinks.length).toBeGreaterThan(0);
+  });
+
+  it('should have feed role on virtual list container', () => {
+    const accountIndices = [0, 1, 2];
+    render(<AccountList {...defaultProps} accountIndices={accountIndices} hasLoadedData={true} />);
+
+    expect(screen.getByRole('feed')).toBeInTheDocument();
+  });
+
+  it('should have article role with aria-posinset on account items', () => {
+    const accountIndices = [0, 1, 2];
+    render(<AccountList {...defaultProps} accountIndices={accountIndices} hasLoadedData={true} />);
+
+    const articles = screen.getAllByRole('article');
+    expect(articles[0]).toHaveAttribute('aria-posinset', '1');
+    expect(articles[0]).toHaveAttribute('aria-setsize', '3');
   });
 });

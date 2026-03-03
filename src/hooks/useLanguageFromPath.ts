@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAppStore } from '@/lib/store';
 import i18n, { SUPPORTED_LANGUAGES, loadLanguage, type SupportedLanguage } from '@/locales';
@@ -36,34 +36,46 @@ function getPathWithoutLang(pathname: string): string {
 }
 
 /**
- * Updates or creates hreflang link tags for SEO
+ * Updates or creates hreflang link tags for SEO.
+ * Uses a cached Map to update href in-place instead of removing/recreating DOM elements,
+ * reducing DOM mutations and potential layout recalculations.
  */
-function updateHreflangTags(currentPath: string): void {
-  // Remove existing hreflang tags
-  document.querySelectorAll('link[rel="alternate"][hreflang]').forEach(el => el.remove());
-
+function updateHreflangTags(currentPath: string, cache: Map<string, HTMLLinkElement>): void {
   const head = document.head;
-
-  // Get base path without language prefix (dynamically from SUPPORTED_LANGUAGES)
   const pathWithoutLang = getPathWithoutLang(currentPath);
 
-  // Add hreflang for each supported language
-  for (const lang of SUPPORTED_LANGUAGES) {
-    const link = document.createElement('link');
-    link.rel = 'alternate';
-    link.hreflang = lang;
-    // English uses root path, others use language prefix
-    link.href =
-      lang === 'en' ? `${BASE_URL}${pathWithoutLang}` : `${BASE_URL}/${lang}${pathWithoutLang}`;
-    head.appendChild(link);
+  // Remove any pre-existing hreflang tags not managed by this hook
+  // (e.g., from SSG output or other sources)
+  if (cache.size === 0) {
+    document.querySelectorAll('link[rel="alternate"][hreflang]').forEach(el => el.remove());
   }
 
-  // Add x-default (for users without language preference)
-  const xDefault = document.createElement('link');
-  xDefault.rel = 'alternate';
-  xDefault.hreflang = 'x-default';
-  xDefault.href = `${BASE_URL}${pathWithoutLang}`;
-  head.appendChild(xDefault);
+  // All hreflang keys: supported languages + x-default
+  const allKeys = [...SUPPORTED_LANGUAGES, 'x-default'] as const;
+
+  for (const key of allKeys) {
+    const isXDefault = key === 'x-default';
+    const href =
+      isXDefault || key === 'en'
+        ? `${BASE_URL}${pathWithoutLang}`
+        : `${BASE_URL}/${key}${pathWithoutLang}`;
+
+    const existing = cache.get(key);
+    if (existing) {
+      // Update href in-place (no DOM removal/creation)
+      if (existing.href !== href) {
+        existing.href = href;
+      }
+    } else {
+      // First time — create and cache the element
+      const link = document.createElement('link');
+      link.rel = 'alternate';
+      link.hreflang = key;
+      link.href = href;
+      head.appendChild(link);
+      cache.set(key, link);
+    }
+  }
 }
 
 /**
@@ -100,12 +112,18 @@ function updateCanonical(currentPath: string): void {
  * 3. Syncs i18next with URL language
  * 4. Updates HTML attributes and SEO meta tags
  *
+ * Hreflang link elements are cached in a Map and updated in-place
+ * to minimize DOM mutations.
+ *
  * IMPORTANT: i18n syncs with URL, NOT with store.
  * Store is only used for persisting preference for future redirects.
  */
 export function useLanguageFromPath(langFromRoute?: SupportedLanguage): void {
   const location = useLocation();
   const { setLanguage } = useAppStore();
+
+  // Cache for hreflang link elements to avoid DOM removal/creation
+  const linkCacheRef = useRef(new Map<string, HTMLLinkElement>());
 
   // Detect language from URL (single source of truth)
   const urlLang = langFromRoute ?? detectLanguageFromPathname(location.pathname);
@@ -123,8 +141,8 @@ export function useLanguageFromPath(langFromRoute?: SupportedLanguage): void {
       // Update HTML lang attribute
       updateHtmlLang(urlLang);
 
-      // Update hreflang tags for SEO
-      updateHreflangTags(location.pathname);
+      // Update hreflang tags for SEO (cached, in-place updates)
+      updateHreflangTags(location.pathname, linkCacheRef.current);
 
       // Update Open Graph locale
       updateOgLocale(urlLang);

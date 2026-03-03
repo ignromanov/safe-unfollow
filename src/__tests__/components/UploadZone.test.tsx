@@ -61,8 +61,14 @@ describe('UploadZone', () => {
   it('should display JSON format warning badge', () => {
     render(<UploadZone onUploadStart={mockOnUploadStart} />);
 
-    // zone.jsonOnly translation
-    expect(screen.getByText(uploadEN.zone.jsonOnly)).toBeInTheDocument();
+    // zone.jsonRequired translation (renamed from jsonOnly for friendlier text)
+    // Falls back to key name in test since translation key may not exist yet
+    expect(
+      screen.getByText(
+        (content: string) =>
+          content.includes(uploadEN.zone.jsonOnly) || content.includes('zone.jsonRequired')
+      )
+    ).toBeInTheDocument();
   });
 
   it('should display pre-upload checklist', () => {

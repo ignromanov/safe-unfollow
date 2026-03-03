@@ -145,9 +145,27 @@ function loadBMCScript(): void {
   script.setAttribute('data-y_margin', '18');
 
   script.onload = () => {
-    // Dispatch DOMContentLoaded to trigger BMC widget initialization
-    const evt = new Event('DOMContentLoaded', { bubbles: false, cancelable: false });
-    window.dispatchEvent(evt);
+    // BMC script self-initializes on DOMContentLoaded. In an SPA the document
+    // is already loaded so that event never fires again. Instead of dispatching
+    // a synthetic DOMContentLoaded (which can trigger unrelated listeners),
+    // use a MutationObserver to confirm the widget rendered.
+    const observer = new MutationObserver((_mutations, obs) => {
+      if (document.getElementById(BMC_WIDGET_ID)) {
+        obs.disconnect();
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    // BMC 1.0.0 checks readyState and calls init immediately if "complete"
+    // If that didn't work, nudge it with a DOMContentLoaded on document only
+    // (scoped — not window — to minimize side-effects)
+    if (!document.getElementById(BMC_WIDGET_ID)) {
+      const evt = new Event('DOMContentLoaded', { bubbles: false, cancelable: false });
+      document.dispatchEvent(evt);
+    }
+
+    // Safety: disconnect observer after 5s regardless
+    setTimeout(() => observer.disconnect(), 5000);
   };
 
   document.head.appendChild(script);

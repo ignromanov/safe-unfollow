@@ -102,6 +102,7 @@ export function FAQSection() {
                 {/* Semantic: h3 wraps button for proper hierarchy */}
                 <h3 className="text-lg md:text-2xl font-bold">
                   <button
+                    id={`faq-trigger-${item.key}`}
                     onClick={() => {
                       const isOpening = openIndex !== index;
                       if (isOpening) {
@@ -130,7 +131,7 @@ export function FAQSection() {
                 <div
                   id={`faq-answer-${item.key}`}
                   role="region"
-                  aria-labelledby={`faq-${item.key}`}
+                  aria-labelledby={`faq-trigger-${item.key}`}
                   hidden={openIndex !== index}
                   className={`transition-all duration-500 ease-in-out ${
                     openIndex === index ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0'

@@ -467,11 +467,11 @@ describe('Layout', () => {
   // consistent between SSG and client-side rendering.
 
   describe('layout structure', () => {
-    it('should have min-h-screen class on root container', () => {
+    it('should have min-h-dvh class on root container', () => {
       renderLayout();
 
       const container = screen.getByTestId('header').parentElement;
-      expect(container).toHaveClass('min-h-screen');
+      expect(container).toHaveClass('min-h-dvh');
     });
 
     it('should have flex-col layout', () => {

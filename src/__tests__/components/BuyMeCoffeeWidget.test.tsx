@@ -84,8 +84,8 @@ describe('BuyMeCoffeeWidget', () => {
       expect(scripts).toHaveLength(1);
     });
 
-    it('should dispatch DOMContentLoaded event on script load', () => {
-      const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
+    it('should dispatch DOMContentLoaded event on document when script loads', () => {
+      const dispatchSpy = vi.spyOn(document, 'dispatchEvent');
 
       render(<BuyMeCoffeeWidget show={true} />);
 
@@ -100,8 +100,10 @@ describe('BuyMeCoffeeWidget', () => {
       }
 
       expect(dispatchSpy).toHaveBeenCalled();
-      const event = dispatchSpy.mock.calls[0][0];
-      expect(event.type).toBe('DOMContentLoaded');
+      const dcl = dispatchSpy.mock.calls.find(
+        call => call[0] instanceof Event && (call[0] as Event).type === 'DOMContentLoaded'
+      );
+      expect(dcl).toBeDefined();
     });
   });
 

@@ -85,6 +85,25 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
   }
 
   const allFiles = Object.keys(zip.files ?? {});
+
+  // Zip bomb protection: limit entry count
+  const MAX_ZIP_ENTRIES = 10_000;
+  if (allFiles.length > MAX_ZIP_ENTRIES) {
+    return {
+      data: createEmptyParsedAll(),
+      warnings: [
+        {
+          code: 'CORRUPTED_ZIP',
+          message: `ZIP contains ${allFiles.length.toLocaleString()} entries (limit: ${MAX_ZIP_ENTRIES.toLocaleString()}). This does not look like a valid Instagram export.`,
+          severity: 'error',
+          fix: 'Make sure you are uploading the correct ZIP file from Instagram. A normal export typically contains fewer than 1,000 files.',
+        },
+      ],
+      discovery: { format: 'unknown', isInstagramExport: false, files: [] },
+      hasMinimalData: false,
+    };
+  }
+
   const analysis = analyzeZipStructure(allFiles);
 
   const warnings: ParseWarning[] = [];

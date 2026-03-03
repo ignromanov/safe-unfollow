@@ -20,7 +20,7 @@ export function Component() {
   }, []);
 
   return (
-    <div className="min-h-[calc(100vh-200px)] flex items-center justify-center p-4">
+    <div className="min-h-[calc(100dvh-200px)] flex items-center justify-center p-4">
       <div className="max-w-2xl w-full">
         <div className="animate-in slide-in-from-top-4 rounded-4xl border-2 border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/40 p-8 md:p-12 text-center">
           {/* Icon */}

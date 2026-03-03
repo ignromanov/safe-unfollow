@@ -106,7 +106,7 @@ export function useFilterWorker(options: UseFilterWorkerOptions): UseFilterWorke
       }
       setIsReady(false);
     };
-  }, [fileHash, totalAccounts]);
+  }, [fileHash]);
 
   // Filter method that delegates to worker
   const filterToIndices = useCallback(

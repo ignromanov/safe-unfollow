@@ -125,7 +125,7 @@ export function RescuePlanBanner({
     };
   }, []);
 
-  // Show banner immediately, then expand after delay
+  // Show banner immediately, then expand after delay (desktop only)
   useEffect(() => {
     setIsVisible(true);
 
@@ -138,7 +138,12 @@ export function RescuePlanBanner({
       return;
     }
 
-    // Auto-expand after delay
+    // Don't auto-expand on mobile — keep collapsed, let user tap to expand
+    const isMobile =
+      typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches;
+    if (isMobile) return;
+
+    // Auto-expand after delay (desktop only)
     showTimerRef.current = setTimeout(() => {
       setIsExpanded(true);
     }, effectiveDelay);

@@ -74,7 +74,7 @@ describe('Wizard', () => {
     render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
 
     expect(screen.getByText('Next Step')).toBeInTheDocument();
-    expect(screen.getByText('Back')).toBeInTheDocument();
+    expect(screen.getByText('buttons.cancel')).toBeInTheDocument();
   });
 
   it('should render external link button on step 1', () => {

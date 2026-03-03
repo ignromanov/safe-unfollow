@@ -60,7 +60,7 @@ const DefaultErrorFallback = ({ error }: { error: Error | null }) => {
   const isDev = import.meta.env.DEV;
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="min-h-dvh bg-background flex items-center justify-center p-4">
       <div className="max-w-2xl w-full">
         {/* Error card */}
         <div className="animate-in slide-in-from-top-4 rounded-4xl border-2 border-rose-200 dark:border-rose-900/50 bg-rose-50 dark:bg-rose-950/20 p-8 md:p-12">
