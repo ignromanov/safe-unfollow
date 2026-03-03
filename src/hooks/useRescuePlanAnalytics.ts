@@ -21,7 +21,7 @@ interface UseRescuePlanAnalyticsOptions {
 
 export function useRescuePlanAnalytics({
   segment,
-  isVisible,
+  isVisible: _isVisible,
   isDevMode,
 }: UseRescuePlanAnalyticsOptions) {
   // Handle tool click with analytics

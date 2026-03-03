@@ -3,6 +3,8 @@
 import { TrendingDown, AlertTriangle, TrendingUp, ChevronDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { useCarouselIndex } from '@/hooks/useCarouselIndex';
+
 import {
   getTitleKey,
   getSubtitleKey,
@@ -45,6 +47,7 @@ export function ExpandedBanner({
 }: ExpandedBannerProps) {
   const { t } = useTranslation('results');
   const SeverityIcon = SEVERITY_ICONS[style.iconType];
+  const { scrollRef, cardRefs, activeIndex, scrollToCard } = useCarouselIndex(tools.length);
 
   return (
     <>
@@ -87,10 +90,49 @@ export function ExpandedBanner({
           </div>
         )}
 
-        {/* Tools grid */}
-        <div className="grid md:grid-cols-[1.3fr_1fr_1fr] gap-4 max-w-4xl mx-auto">
+        {/* Tools: carousel on mobile, grid on desktop */}
+        <div className="relative -mx-6 md:mx-0">
+          {/* Mobile carousel */}
+          <div
+            ref={scrollRef}
+            className="flex gap-4 overflow-x-auto overscroll-x-contain scroll-smooth snap-x snap-mandatory pl-6 pt-3 pb-2 scroll-pl-6 md:hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {tools.map((tool, index) => (
+              <div
+                key={tool.id}
+                ref={el => {
+                  cardRefs.current[index] = el;
+                }}
+                className="shrink-0 snap-start w-[calc(100%-24px)]"
+              >
+                <RescueToolCard tool={tool} index={index} onToolClick={onToolClick} />
+              </div>
+            ))}
+            {/* Right padding spacer — iOS Safari ignores end padding in scroll containers */}
+            <div className="shrink-0 w-6" aria-hidden="true" />
+          </div>
+
+          {/* Desktop grid */}
+          <div className="hidden md:grid md:grid-cols-[1.3fr_1fr_1fr] gap-4 max-w-4xl mx-auto">
+            {tools.map((tool, index) => (
+              <RescueToolCard key={tool.id} tool={tool} index={index} onToolClick={onToolClick} />
+            ))}
+          </div>
+        </div>
+
+        {/* Dot indicators — mobile only */}
+        <div className="flex justify-center gap-2 mt-3 md:hidden">
           {tools.map((tool, index) => (
-            <RescueToolCard key={tool.id} tool={tool} index={index} onToolClick={onToolClick} />
+            <button
+              key={tool.id}
+              onClick={() => scrollToCard(index)}
+              aria-label={tool.name}
+              className={`h-2 rounded-full transition-all duration-200 ${
+                activeIndex === index
+                  ? 'w-4 bg-zinc-700 dark:bg-zinc-200'
+                  : 'w-2 bg-zinc-300 dark:bg-zinc-600'
+              }`}
+            />
           ))}
         </div>
 

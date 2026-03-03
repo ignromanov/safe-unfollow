@@ -38,7 +38,7 @@ export function RescueToolCard({ tool, index, onToolClick }: RescueToolCardProps
       target="_blank"
       rel="noopener noreferrer"
       onClick={e => onToolClick(tool, e)}
-      className={`group relative p-4 bg-white dark:bg-zinc-900 rounded-2xl border-2 transition-all duration-200 hover:scale-[1.02] flex flex-col ${
+      className={`group relative p-4 bg-white dark:bg-zinc-900 rounded-2xl border-2 transition-all duration-200 hover:scale-[1.02] active:scale-100 flex flex-col ${
         isFirst
           ? 'border-zinc-300 dark:border-zinc-700 hover:border-primary hover:ring-2 hover:ring-primary/20 hover:shadow-xl'
           : 'border-zinc-200 dark:border-zinc-800 hover:border-primary hover:shadow-lg'

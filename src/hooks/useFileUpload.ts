@@ -67,7 +67,7 @@ export function useFileUpload() {
       lastUploadRef.current = now;
 
       const uploadDate = new Date();
-      const startTime = performance.now();
+      const _startTime = performance.now();
       const fileSizeMb = file.size / (1024 * 1024);
 
       // Reset progress
