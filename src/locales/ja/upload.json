@@ -8,7 +8,10 @@
     "jsonOnly": "JSON形式のみ",
     "processing": "ローカルで分析中...",
     "processingHint": "大規模データセット（100万件以上）の処理には少し時間がかかることがあります。",
-    "ariaLabel": "InstagramデータのZIPファイルをアップロード"
+    "ariaLabel": "InstagramデータのZIPファイルをアップロード",
+    "jsonReminder": "データエクスポートをリクエストする際にJSON形式を選択したか確認してください。JSONとHTMLのZIPファイルは外見上同じに見えます。",
+    "seeGuide": "ステップバイステップガイドを見る",
+    "jsonRequired": "JSON形式のエクスポートが必要です"
   },
   "checklist": {
     "title": "アップロード前チェックリスト",

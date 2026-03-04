@@ -8,7 +8,10 @@
     "jsonOnly": "Sadece JSON Formatı",
     "processing": "Yerel olarak analiz ediliyor...",
     "processingHint": "Büyük veri setlerini (1M+'a kadar) işlemek biraz zaman alabilir.",
-    "ariaLabel": "Instagram veri ZIP dosyasını yükle"
+    "ariaLabel": "Instagram veri ZIP dosyasını yükle",
+    "jsonReminder": "Veri dışa aktarımını talep ederken JSON formatını seçtiğinden emin ol. JSON ve HTML ZIP dosyaları dışarıdan aynı görünür.",
+    "seeGuide": "Adım adım kılavuzu gör",
+    "jsonRequired": "JSON formatında dışa aktarım gerektirir"
   },
   "checklist": {
     "title": "Yükleme Öncesi Kontrol Listesi",

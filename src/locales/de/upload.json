@@ -8,7 +8,10 @@
     "jsonOnly": "Nur JSON-Format",
     "processing": "Lokal analysieren...",
     "processingHint": "Die Verarbeitung großer Datensätze (bis zu 1M+) kann einen Moment dauern.",
-    "ariaLabel": "Instagram-Daten-ZIP-Datei hochladen"
+    "ariaLabel": "Instagram-Daten-ZIP-Datei hochladen",
+    "jsonReminder": "Stelle sicher, dass du beim Anfordern deines Datenexports das JSON-Format ausgewählt hast. JSON- und HTML-ZIP-Dateien sehen von außen identisch aus.",
+    "seeGuide": "Schritt-für-Schritt-Anleitung ansehen",
+    "jsonRequired": "Erfordert Export im JSON-Format"
   },
   "checklist": {
     "title": "Checkliste vor dem Upload",

@@ -8,7 +8,10 @@
     "jsonOnly": "Format JSON uniquement",
     "processing": "Analyse locale en cours...",
     "processingHint": "Le traitement de grands ensembles de données (jusqu'à 1M+) peut prendre un moment.",
-    "ariaLabel": "Téléverser le fichier ZIP de données Instagram"
+    "ariaLabel": "Téléverser le fichier ZIP de données Instagram",
+    "jsonReminder": "Assurez-vous d'avoir sélectionné le format JSON lors de la demande de votre exportation de données. Les fichiers ZIP en JSON et HTML sont identiques vus de l'extérieur.",
+    "seeGuide": "Voir le guide étape par étape",
+    "jsonRequired": "Nécessite une exportation au format JSON"
   },
   "checklist": {
     "title": "Liste de vérification",

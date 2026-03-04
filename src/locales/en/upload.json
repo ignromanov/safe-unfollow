@@ -8,7 +8,10 @@
     "jsonOnly": "JSON Format Only",
     "processing": "Analyzing locally...",
     "processingHint": "Processing large datasets (up to 1M+) can take a moment.",
-    "ariaLabel": "Upload Instagram data ZIP file"
+    "ariaLabel": "Upload Instagram data ZIP file",
+    "jsonReminder": "Make sure you selected JSON format when requesting your data export. JSON and HTML ZIP files look identical from the outside.",
+    "seeGuide": "See the step-by-step guide",
+    "jsonRequired": "Requires JSON format export"
   },
   "checklist": {
     "title": "Pre-upload Checklist",
