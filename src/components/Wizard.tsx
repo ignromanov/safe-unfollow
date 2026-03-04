@@ -147,13 +147,13 @@ export function Wizard({ initialStep = 1, onComplete, onCancel }: WizardProps) {
       >
         {/* Header - Compact */}
         <div className="shrink-0 container mx-auto px-4 py-2 flex items-center justify-between border-b border-border bg-card">
-          <div className="flex items-center gap-4">
-            <span className="font-bold text-xs md:text-sm text-zinc-500 uppercase tracking-widest">
+          <div className="flex items-center gap-4 flex-1 min-w-0">
+            <span className="hidden md:block font-bold text-sm text-zinc-500 uppercase tracking-widest whitespace-nowrap">
               {t('header.stepOf', { current: currentStep, total: WIZARD_STEPS.length })}
             </span>
-            {/* Step indicator dots — clickable with 44px touch targets */}
+            {/* Step indicator dots — flex-1 to fill available space */}
             <div
-              className="flex"
+              className="flex flex-1"
               role="tablist"
               aria-label={t('header.stepNavigation', { defaultValue: 'Step navigation' })}
             >
@@ -164,10 +164,10 @@ export function Wizard({ initialStep = 1, onComplete, onCancel }: WizardProps) {
                   aria-selected={s.id === currentStep}
                   aria-label={t('header.stepLabel', { step: s.id, defaultValue: `Step ${s.id}` })}
                   onClick={() => goToStep(s.id)}
-                  className="min-w-[44px] min-h-[44px] flex items-center justify-center"
+                  className="flex-1 min-h-[44px] flex items-center justify-center"
                 >
                   <span
-                    className={`block h-1.5 w-6 md:w-8 rounded-full transition-all duration-300 ${
+                    className={`block h-1.5 w-full max-w-8 rounded-full transition-all duration-300 ${
                       s.id <= currentStep ? 'bg-primary' : 'bg-border'
                     }`}
                   />
