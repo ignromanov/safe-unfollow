@@ -1,6 +1,5 @@
 {
   "zone": {
-    "back": "Kembali",
     "title": "Unggah ZIP Instagram Anda",
     "description": "Data Anda tetap 100% privat. Kami menganalisis file ZIP Instagram Anda secara lokal di browser Anda.",
     "dropHere": "Letakkan file ZIP Instagram Anda di sini",
@@ -12,8 +11,11 @@
     "jsonReminder": "Pastikan Anda memilih format JSON saat meminta ekspor data. File ZIP JSON dan HTML terlihat identik dari luar.",
     "seeGuide": "Lihat panduan langkah demi langkah",
     "jsonRequired": "Memerlukan ekspor format JSON",
-    "privacyMicro": "Your file never leaves your device",
-    "notSureLink": "Not sure what to upload? See the guide"
+    "privacyMicro": "File Anda tidak pernah meninggalkan perangkat Anda",
+    "notSureLink": "Tidak yakin apa yang harus diunggah? Lihat panduan",
+    "processingAria": "Memproses file Anda, mohon tunggu...",
+    "tapToSelect": "Ketuk untuk memilih file ZIP Anda",
+    "notZipWarning": "Ini sepertinya bukan file .zip"
   },
   "checklist": {
     "title": "Checklist Sebelum Unggah",
@@ -28,7 +30,6 @@
     "learnFix": "Pelajari cara memperbaiki"
   },
   "diagnostic": {
-    "back": "Kembali",
     "howToFix": "Cara memperbaiki ini",
     "tryAgain": "Coba Lagi",
     "showMistakes": "Tunjukkan Kesalahan Saya",

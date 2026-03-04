@@ -2,7 +2,6 @@ import type { DiagnosticError, DiagnosticErrorCode, ParseWarning } from '@/core/
 import { createDiagnosticError, mapWarningToDiagnosticCode } from '@/core/types';
 import {
   AlertTriangle,
-  ArrowLeft,
   Check,
   Code2,
   Copy,
@@ -28,8 +27,6 @@ export interface DiagnosticErrorScreenProps {
   onTryAgain?: () => void;
   /** Callback to open wizard/guide */
   onOpenWizard?: () => void;
-  /** Callback to go back */
-  onBack?: () => void;
 }
 
 /**
@@ -145,7 +142,6 @@ export function DiagnosticErrorScreen({
   parseWarnings,
   onTryAgain,
   onOpenWizard,
-  onBack,
 }: DiagnosticErrorScreenProps) {
   const { t } = useTranslation('upload');
 
@@ -215,16 +211,6 @@ export function DiagnosticErrorScreen({
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10 md:py-16">
-      {/* Back button */}
-      {onBack && (
-        <button
-          onClick={onBack}
-          className="mb-8 flex cursor-pointer items-center gap-2 text-xs font-black uppercase tracking-widest text-zinc-500 transition-colors hover:text-primary"
-        >
-          <ArrowLeft size={18} /> {t('diagnostic.back')}
-        </button>
-      )}
-
       {/* Error card */}
       <div
         className={`animate-in slide-in-from-top-4 rounded-4xl border-2 ${colors.border} ${colors.bg} p-8 md:p-12`}

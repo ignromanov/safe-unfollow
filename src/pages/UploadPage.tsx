@@ -30,12 +30,6 @@ export function Component() {
     handleZipUpload(file);
   };
 
-  const handleBack = () => {
-    // Use browser history to go back to the actual previous page
-    // (could be / if user clicked "I have my file", or /wizard if from guide)
-    navigate(-1);
-  };
-
   const handleOpenWizard = () => {
     navigate(`${prefix}/wizard/step/6`);
   };
@@ -43,7 +37,6 @@ export function Component() {
   return (
     <UploadZone
       onUploadStart={handleUploadStart}
-      onBack={handleBack}
       onOpenWizard={handleOpenWizard}
       isProcessing={uploadState.status === 'loading'}
       error={uploadState.error}

@@ -1,6 +1,5 @@
 {
   "zone": {
-    "back": "戻る",
     "title": "Instagram ZIPをアップロード",
     "description": "データは100%プライベートです。Instagram ZIPファイルをブラウザ内でローカル分析します。",
     "dropHere": "Instagram ZIPファイルをここにドロップ",
@@ -12,8 +11,11 @@
     "jsonReminder": "データエクスポートをリクエストする際にJSON形式を選択したか確認してください。JSONとHTMLのZIPファイルは外見上同じに見えます。",
     "seeGuide": "ステップバイステップガイドを見る",
     "jsonRequired": "JSON形式のエクスポートが必要です",
-    "privacyMicro": "Your file never leaves your device",
-    "notSureLink": "Not sure what to upload? See the guide"
+    "privacyMicro": "ファイルはデバイスから外に出ません",
+    "notSureLink": "何をアップロードすればいいかわからない？ガイドを見る",
+    "processingAria": "ファイルを処理中です、お待ちください...",
+    "tapToSelect": "タップしてZIPファイルを選択",
+    "notZipWarning": "これは.zipファイルではないようです"
   },
   "checklist": {
     "title": "アップロード前チェックリスト",
@@ -28,7 +30,6 @@
     "learnFix": "修正方法を見る"
   },
   "diagnostic": {
-    "back": "戻る",
     "howToFix": "修正方法",
     "tryAgain": "もう一度試す",
     "showMistakes": "間違いを確認",

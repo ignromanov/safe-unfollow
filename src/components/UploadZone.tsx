@@ -32,7 +32,6 @@ export interface UploadError {
 
 export interface UploadZoneProps {
   onUploadStart: (file: File) => void;
-  onBack?: () => void;
   onOpenWizard?: () => void;
   isProcessing?: boolean;
   error?: UploadError | string | null;
@@ -41,7 +40,6 @@ export interface UploadZoneProps {
 
 export function UploadZone({
   onUploadStart,
-  onBack,
   onOpenWizard,
   isProcessing = false,
   error: _error,
@@ -145,7 +143,6 @@ export function UploadZone({
           parseWarnings={effectiveWarnings}
           onTryAgain={handleTryAgain}
           onOpenWizard={onOpenWizard}
-          onBack={onBack}
         />
 
         {/* Dev mode: Error selector overlay */}
@@ -175,16 +172,6 @@ export function UploadZone({
         {isProcessing &&
           t('zone.processingAria', { defaultValue: 'Processing your file, please wait...' })}
       </div>
-
-      {/* Back button */}
-      {onBack && (
-        <button
-          onClick={onBack}
-          className="mb-8 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-zinc-500 transition-colors hover:text-primary md:mb-12"
-        >
-          <ArrowLeft size={18} /> {t('zone.back')}
-        </button>
-      )}
 
       <div className="grid gap-12 lg:grid-cols-5">
         {/* Main upload area - 3 columns */}

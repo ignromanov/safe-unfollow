@@ -1,6 +1,5 @@
 {
   "zone": {
-    "back": "Zurück",
     "title": "Instagram ZIP hochladen",
     "description": "Deine Daten bleiben 100% privat. Wir analysieren deine Instagram ZIP-Datei lokal in deinem Browser.",
     "dropHere": "Instagram ZIP-Datei hier ablegen",
@@ -12,8 +11,11 @@
     "jsonReminder": "Stelle sicher, dass du beim Anfordern deines Datenexports das JSON-Format ausgewählt hast. JSON- und HTML-ZIP-Dateien sehen von außen identisch aus.",
     "seeGuide": "Schritt-für-Schritt-Anleitung ansehen",
     "jsonRequired": "Erfordert Export im JSON-Format",
-    "privacyMicro": "Your file never leaves your device",
-    "notSureLink": "Not sure what to upload? See the guide"
+    "privacyMicro": "Deine Datei verlässt nie dein Gerät",
+    "notSureLink": "Nicht sicher, was du hochladen sollst? Siehe Anleitung",
+    "processingAria": "Datei wird verarbeitet, bitte warten...",
+    "tapToSelect": "Tippe, um deine ZIP-Datei auszuwählen",
+    "notZipWarning": "Das scheint keine .zip-Datei zu sein"
   },
   "checklist": {
     "title": "Checkliste vor dem Upload",
@@ -28,7 +30,6 @@
     "learnFix": "So behebst du das"
   },
   "diagnostic": {
-    "back": "Zurück",
     "howToFix": "So behebst du das",
     "tryAgain": "Erneut versuchen",
     "showMistakes": "Zeig mir, was schiefging",

@@ -1,6 +1,5 @@
 {
   "zone": {
-    "back": "Retour",
     "title": "Téléversez votre ZIP Instagram",
     "description": "Vos données restent 100% privées. Nous analysons votre fichier ZIP Instagram localement dans votre navigateur.",
     "dropHere": "Déposez votre fichier ZIP Instagram ici",
@@ -12,8 +11,11 @@
     "jsonReminder": "Assurez-vous d'avoir sélectionné le format JSON lors de la demande de votre exportation de données. Les fichiers ZIP en JSON et HTML sont identiques vus de l'extérieur.",
     "seeGuide": "Voir le guide étape par étape",
     "jsonRequired": "Nécessite une exportation au format JSON",
-    "privacyMicro": "Your file never leaves your device",
-    "notSureLink": "Not sure what to upload? See the guide"
+    "privacyMicro": "Votre fichier ne quitte jamais votre appareil",
+    "notSureLink": "Pas sûr de quoi envoyer ? Consultez le guide",
+    "processingAria": "Traitement de votre fichier, veuillez patienter...",
+    "tapToSelect": "Appuyez pour sélectionner votre fichier ZIP",
+    "notZipWarning": "Ceci ne semble pas être un fichier .zip"
   },
   "checklist": {
     "title": "Liste de vérification",
@@ -28,7 +30,6 @@
     "learnFix": "Apprenez comment corriger cela"
   },
   "diagnostic": {
-    "back": "Retour",
     "howToFix": "Comment corriger cela",
     "tryAgain": "Réessayer",
     "showMistakes": "Montrer où je me suis trompé",

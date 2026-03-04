@@ -1,6 +1,5 @@
 {
   "zone": {
-    "back": "Back",
     "title": "Upload Your Instagram ZIP",
     "description": "Your data remains 100% private. We analyze your Instagram ZIP file locally in your browser.",
     "dropHere": "Drop your Instagram ZIP file here",
@@ -13,7 +12,10 @@
     "seeGuide": "See the step-by-step guide",
     "jsonRequired": "Requires JSON format export",
     "privacyMicro": "Your file never leaves your device",
-    "notSureLink": "Not sure what to upload? See the guide"
+    "notSureLink": "Not sure what to upload? See the guide",
+    "processingAria": "Processing your file, please wait...",
+    "tapToSelect": "Tap to select your ZIP file",
+    "notZipWarning": "This does not look like a .zip file"
   },
   "checklist": {
     "title": "Pre-upload Checklist",
@@ -28,7 +30,6 @@
     "learnFix": "Learn how to fix"
   },
   "diagnostic": {
-    "back": "Back",
     "howToFix": "How to fix this",
     "tryAgain": "Try Again",
     "showMistakes": "Show Where I Went Wrong",

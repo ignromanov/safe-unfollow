@@ -1,6 +1,5 @@
 {
   "zone": {
-    "back": "वापस",
     "title": "Instagram ZIP अपलोड करें",
     "description": "आपका डेटा 100% प्राइवेट रहता है। हम आपकी Instagram ZIP फाइल को आपके ब्राउज़र में लोकली एनालाइज़ करते हैं।",
     "dropHere": "अपनी Instagram ZIP फाइल यहां ड्रॉप करें",
@@ -12,8 +11,11 @@
     "jsonReminder": "डेटा एक्सपोर्ट रिक्वेस्ट करते समय JSON फॉर्मेट चुनना न भूलें। JSON और HTML ZIP फाइलें बाहर से एक जैसी दिखती हैं।",
     "seeGuide": "स्टेप-बाय-स्टेप गाइड देखें",
     "jsonRequired": "JSON फॉर्मेट एक्सपोर्ट ज़रूरी है",
-    "privacyMicro": "Your file never leaves your device",
-    "notSureLink": "Not sure what to upload? See the guide"
+    "privacyMicro": "आपकी फ़ाइल आपके डिवाइस से बाहर नहीं जाती",
+    "notSureLink": "क्या अपलोड करें समझ नहीं आ रहा? गाइड देखें",
+    "processingAria": "फ़ाइल प्रोसेस हो रही है, कृपया प्रतीक्षा करें...",
+    "tapToSelect": "अपनी ZIP फ़ाइल चुनने के लिए टैप करें",
+    "notZipWarning": "यह .zip फ़ाइल नहीं लगती"
   },
   "checklist": {
     "title": "अपलोड से पहले चेकलिस्ट",
@@ -28,7 +30,6 @@
     "learnFix": "ठीक करना सीखें"
   },
   "diagnostic": {
-    "back": "वापस",
     "howToFix": "इसे कैसे ठीक करें",
     "tryAgain": "फिर से कोशिश करें",
     "showMistakes": "मेरी गलती दिखाएं",

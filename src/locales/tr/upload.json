@@ -1,6 +1,5 @@
 {
   "zone": {
-    "back": "Geri",
     "title": "Instagram ZIP Yükle",
     "description": "Verilerin %100 gizli kalır. Instagram ZIP dosyanı tarayıcında yerel olarak analiz ediyoruz.",
     "dropHere": "Instagram ZIP dosyanı buraya bırak",
@@ -12,8 +11,11 @@
     "jsonReminder": "Veri dışa aktarımını talep ederken JSON formatını seçtiğinden emin ol. JSON ve HTML ZIP dosyaları dışarıdan aynı görünür.",
     "seeGuide": "Adım adım kılavuzu gör",
     "jsonRequired": "JSON formatında dışa aktarım gerektirir",
-    "privacyMicro": "Your file never leaves your device",
-    "notSureLink": "Not sure what to upload? See the guide"
+    "privacyMicro": "Dosyanız cihazınızdan asla ayrılmaz",
+    "notSureLink": "Ne yükleyeceğinizi bilmiyor musunuz? Kılavuza bakın",
+    "processingAria": "Dosyanız işleniyor, lütfen bekleyin...",
+    "tapToSelect": "ZIP dosyanızı seçmek için dokunun",
+    "notZipWarning": "Bu bir .zip dosyası gibi görünmüyor"
   },
   "checklist": {
     "title": "Yükleme Öncesi Kontrol Listesi",
@@ -28,7 +30,6 @@
     "learnFix": "Nasıl düzeltilir öğren"
   },
   "diagnostic": {
-    "back": "Geri",
     "howToFix": "Bunu nasıl düzeltirsin",
     "tryAgain": "Tekrar Dene",
     "showMistakes": "Nerede Yanlış Yaptığımı Göster",

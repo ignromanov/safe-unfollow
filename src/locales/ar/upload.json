@@ -1,6 +1,5 @@
 {
   "zone": {
-    "back": "رجوع",
     "title": "ارفع بياناتك",
     "description": "تبقى بياناتك خاصة 100%. نحلل كل شيء محلياً في متصفحك.",
     "dropHere": "أفلت ملف ZIP الخاص بانستغرام هنا",
@@ -12,8 +11,11 @@
     "jsonReminder": "تأكد من اختيار صيغة JSON عند طلب تصدير بياناتك. ملفات ZIP بصيغة JSON و HTML تبدو متطابقة من الخارج.",
     "seeGuide": "شاهد الدليل خطوة بخطوة",
     "jsonRequired": "يتطلب تصديراً بصيغة JSON",
-    "privacyMicro": "Your file never leaves your device",
-    "notSureLink": "Not sure what to upload? See the guide"
+    "privacyMicro": "ملفك لا يغادر جهازك أبداً",
+    "notSureLink": "غير متأكد ماذا ترفع؟ راجع الدليل",
+    "processingAria": "جارٍ معالجة ملفك، يرجى الانتظار...",
+    "tapToSelect": "انقر لاختيار ملف ZIP الخاص بك",
+    "notZipWarning": "هذا لا يبدو كملف .zip"
   },
   "checklist": {
     "title": "قائمة التحقق قبل الرفع",
@@ -28,7 +30,6 @@
     "learnFix": "تعلم كيفية الإصلاح"
   },
   "diagnostic": {
-    "back": "رجوع",
     "howToFix": "كيفية إصلاح هذا",
     "tryAgain": "حاول مجدداً",
     "showMistakes": "أرني أين أخطأت",
