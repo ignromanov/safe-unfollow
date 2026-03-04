@@ -58,17 +58,11 @@ describe('UploadZone', () => {
     expect(screen.getByText(uploadEN.zone.orBrowse)).toBeInTheDocument();
   });
 
-  it('should display JSON format warning badge', () => {
+  it('should display JSON format reminder inline text', () => {
     render(<UploadZone onUploadStart={mockOnUploadStart} />);
 
-    // zone.jsonRequired translation (renamed from jsonOnly for friendlier text)
-    // Falls back to key name in test since translation key may not exist yet
-    expect(
-      screen.getByText(
-        (content: string) =>
-          content.includes(uploadEN.zone.jsonOnly) || content.includes('zone.jsonRequired')
-      )
-    ).toBeInTheDocument();
+    // zone.jsonReminder is now shown as inline muted text (not a badge)
+    expect(screen.getByText(uploadEN.zone.jsonReminder)).toBeInTheDocument();
   });
 
   it('should display pre-upload checklist', () => {

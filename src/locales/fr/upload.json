@@ -11,7 +11,9 @@
     "ariaLabel": "Téléverser le fichier ZIP de données Instagram",
     "jsonReminder": "Assurez-vous d'avoir sélectionné le format JSON lors de la demande de votre exportation de données. Les fichiers ZIP en JSON et HTML sont identiques vus de l'extérieur.",
     "seeGuide": "Voir le guide étape par étape",
-    "jsonRequired": "Nécessite une exportation au format JSON"
+    "jsonRequired": "Nécessite une exportation au format JSON",
+    "privacyMicro": "Your file never leaves your device",
+    "notSureLink": "Not sure what to upload? See the guide"
   },
   "checklist": {
     "title": "Liste de vérification",
@@ -48,7 +50,131 @@
     "reportIssue": "Signaler ce problème sur GitHub",
     "copyDetails": "Copier les détails de l'erreur",
     "copied": "Copié !",
-    "errorCode": "Code d'erreur"
+    "errorCode": "Code d'erreur",
+    "htmlFormatExplainer": "Vous avez exporté vos données au format HTML. Retournez sur Instagram et sélectionnez le format JSON à la place. Le choix du format se fait sur l'écran « Télécharger vos informations » — repérez le menu déroulant indiquant « HTML » et changez-le en « JSON ».",
+    "showFormatStep": "Voir où sélectionner le format JSON",
+    "errors": {
+      "NOT_ZIP": {
+        "title": "Ce n'est pas un fichier ZIP",
+        "message": "Veuillez téléverser l'archive ZIP d'Instagram, pas un dossier ou un autre type de fichier.",
+        "fix": "Cherchez un fichier se terminant par .zip dans votre dossier Téléchargements. Il devrait s'appeler quelque chose comme « instagram-nomutilisateur-date.zip »."
+      },
+      "HTML_FORMAT": {
+        "title": "Mauvais format : HTML",
+        "message": "Vous avez téléchargé vos données au format HTML, mais cet outil nécessite le format JSON.",
+        "fix": "Retournez dans Paramètres Instagram → Télécharger vos données → Sélectionnez le format « JSON » (pas HTML) → Redemandez le téléchargement."
+      },
+      "NOT_INSTAGRAM_EXPORT": {
+        "title": "Pas une exportation Instagram",
+        "message": "Ce fichier ZIP ne semble pas être une exportation de données Instagram.",
+        "fix": "Assurez-vous de téléverser le fichier ZIP provenant de la fonction « Télécharger vos données » d'Instagram, et non un fichier ZIP quelconque."
+      },
+      "INCOMPLETE_EXPORT": {
+        "title": "Exportation incomplète",
+        "message": "L'exportation ne contient pas les données « Abonnés et abonnements ».",
+        "fix": "Redemandez votre exportation depuis Instagram et assurez-vous de sélectionner « Abonnés et abonnements » dans les types de données."
+      },
+      "NO_DATA_FILES": {
+        "title": "Aucune donnée d'abonnés trouvée",
+        "message": "Impossible de trouver les fichiers following.json ou followers à l'emplacement attendu.",
+        "fix": "Vérifiez que vous avez sélectionné « Abonnés et abonnements » lors de la demande de vos données, et que vous téléversez le bon fichier ZIP."
+      },
+      "MISSING_FOLLOWING": {
+        "title": "Données d'abonnements manquantes",
+        "message": "following.json introuvable — impossible de détecter vos abonnements.",
+        "fix": "Redemandez votre exportation et assurez-vous que « Abonnés et abonnements » est bien sélectionné."
+      },
+      "MISSING_FOLLOWERS": {
+        "title": "Données d'abonnés manquantes",
+        "message": "Fichiers followers_*.json introuvables — impossible de détecter vos abonnés.",
+        "fix": "Redemandez votre exportation et assurez-vous que « Abonnés et abonnements » est bien sélectionné."
+      },
+      "CORRUPTED_ZIP": {
+        "title": "Fichier ZIP corrompu",
+        "message": "Le fichier ZIP semble endommagé ou corrompu et ne peut pas être ouvert.",
+        "fix": "Essayez de retélécharger vos données Instagram. Assurez-vous que le téléchargement s'est terminé complètement avant de téléverser."
+      },
+      "ZIP_ENCRYPTED": {
+        "title": "ZIP protégé par mot de passe",
+        "message": "Le fichier ZIP est protégé par un mot de passe, mais les exportations Instagram ne sont pas chiffrées.",
+        "fix": "Il ne s'agit peut-être pas d'une exportation Instagram valide. Demandez une nouvelle exportation depuis les Paramètres Instagram."
+      },
+      "EMPTY_FILE": {
+        "title": "Fichier vide",
+        "message": "Le fichier téléversé est vide (0 octet).",
+        "fix": "Le téléchargement a peut-être été interrompu. Essayez de retélécharger vos données depuis Instagram."
+      },
+      "FILE_TOO_LARGE": {
+        "title": "Fichier trop volumineux",
+        "message": "Le fichier fait {{sizeMb}} Mo, ce qui dépasse la limite de 500 Mo.",
+        "fix": "Essayez de demander une exportation de données plus petite depuis Instagram, ou utilisez un navigateur sur ordinateur avec plus de mémoire."
+      },
+      "JSON_PARSE_ERROR": {
+        "title": "Format de données invalide",
+        "message": "Un ou plusieurs fichiers JSON dans l'exportation sont malformés ou corrompus.",
+        "fix": "Cela peut indiquer un téléchargement corrompu. Demandez une nouvelle exportation de données depuis Instagram."
+      },
+      "INVALID_DATA_STRUCTURE": {
+        "title": "Structure de données inattendue",
+        "message": "Les fichiers JSON existent mais ont une structure inattendue.",
+        "fix": "Instagram a peut-être modifié son format d'exportation. Veuillez signaler ce problème."
+      },
+      "WORKER_TIMEOUT": {
+        "title": "Délai de traitement dépassé",
+        "message": "Le traitement du fichier a pris trop de temps (plus de 60 secondes).",
+        "fix": "Essayez de fermer d'autres onglets du navigateur pour libérer des ressources, ou utilisez un fichier d'exportation plus petit."
+      },
+      "WORKER_INIT_ERROR": {
+        "title": "Échec du démarrage du traitement",
+        "message": "Impossible d'initialiser le processeur de fichiers.",
+        "fix": "Essayez de rafraîchir la page. Si le problème persiste, essayez un autre navigateur."
+      },
+      "WORKER_CRASHED": {
+        "title": "Plantage du traitement",
+        "message": "Le processeur de fichiers a planté de manière inattendue.",
+        "fix": "Cela peut être dû à une mémoire insuffisante. Essayez de fermer d'autres onglets ou d'utiliser un fichier plus petit."
+      },
+      "INDEXEDDB_ERROR": {
+        "title": "Erreur de stockage",
+        "message": "Impossible de sauvegarder les données dans le stockage du navigateur.",
+        "fix": "Essayez de vider le cache du navigateur ou d'utiliser un autre navigateur. Le mode privé/navigation privée peut avoir un stockage limité."
+      },
+      "QUOTA_EXCEEDED": {
+        "title": "Stockage plein",
+        "message": "Le quota de stockage du navigateur a été dépassé.",
+        "fix": "Libérez de l'espace dans les paramètres du navigateur, ou essayez un autre profil de navigateur."
+      },
+      "IDB_NOT_SUPPORTED": {
+        "title": "Stockage non disponible",
+        "message": "Le stockage IndexedDB n'est pas disponible dans ce navigateur.",
+        "fix": "Cette application nécessite IndexedDB. Désactivez le mode privé/navigation privée, ou essayez Chrome, Firefox ou Safari."
+      },
+      "IDB_PERMISSION_DENIED": {
+        "title": "Accès au stockage refusé",
+        "message": "Le navigateur a refusé l'accès au stockage.",
+        "fix": "Vérifiez les paramètres du navigateur pour autoriser le stockage sur ce site, ou désactivez le mode de confidentialité strict."
+      },
+      "UPLOAD_CANCELLED": {
+        "title": "Téléversement annulé",
+        "message": "Le téléversement a été annulé.",
+        "fix": "Cliquez sur « Réessayer » pour téléverser votre fichier."
+      },
+      "CRYPTO_NOT_AVAILABLE": {
+        "title": "Fonctionnalité de sécurité indisponible",
+        "message": "Votre navigateur ne prend pas en charge le hachage sécurisé (crypto.subtle).",
+        "fix": "Veuillez utiliser un navigateur moderne (Chrome 37+, Firefox 34+, Safari 11+) avec HTTPS."
+      },
+      "NETWORK_ERROR": {
+        "title": "Erreur réseau",
+        "message": "Une erreur réseau s'est produite lors du téléversement.",
+        "fix": "Vérifiez votre connexion internet et réessayez."
+      },
+      "UNKNOWN": {
+        "title": "Erreur de téléversement",
+        "message": "Une erreur inattendue s'est produite lors du traitement de votre fichier.",
+        "fix": "Essayez de téléverser le fichier à nouveau. Si le problème persiste, assurez-vous que le fichier ZIP n'est pas corrompu."
+      }
+    }
   },
   "waiting": {
     "title": "En attente d'Instagram...",

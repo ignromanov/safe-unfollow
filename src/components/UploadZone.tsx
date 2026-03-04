@@ -1,15 +1,7 @@
 import type { DiagnosticErrorCode, ParseWarning } from '@/core/types';
 import { ALL_DIAGNOSTIC_ERROR_CODES, createDiagnosticError } from '@/core/types';
 import { analytics } from '@/lib/analytics';
-import {
-  AlertCircle,
-  ArrowLeft,
-  CheckCircle2,
-  Info,
-  Loader2,
-  Smartphone,
-  Upload,
-} from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Info, Loader2, Smartphone, Upload } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
@@ -45,8 +37,6 @@ export interface UploadZoneProps {
   isProcessing?: boolean;
   error?: UploadError | string | null;
   parseWarnings?: ParseWarning[];
-  /** Upload/processing progress percentage (0-100) */
-  uploadProgress?: number;
 }
 
 export function UploadZone({
@@ -56,7 +46,6 @@ export function UploadZone({
   isProcessing = false,
   error: _error,
   parseWarnings,
-  uploadProgress = 0,
 }: UploadZoneProps) {
   const { t } = useTranslation('upload');
   const [isDragOver, setIsDragOver] = useState(false);
@@ -210,41 +199,37 @@ export function UploadZone({
             </p>
           </div>
 
-          {/* JSON format reminder — visible above drop zone */}
-          <div className="flex items-start gap-3 rounded-2xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-900/50 dark:bg-blue-950/20">
-            <Info size={18} className="mt-0.5 shrink-0 text-blue-500" aria-hidden="true" />
-            <p className="text-sm font-medium text-blue-700 dark:text-blue-300">
-              {t('zone.jsonReminder', {
-                defaultValue:
-                  'Make sure you selected JSON format when requesting your data export. JSON and HTML ZIP files look identical from the outside.',
-              })}
-              {onOpenWizard && (
-                <>
-                  {' '}
-                  <button
-                    onClick={onOpenWizard}
-                    className="inline font-bold text-blue-600 underline underline-offset-2 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200"
-                  >
-                    {t('zone.seeGuide', { defaultValue: 'See the step-by-step guide' })}
-                  </button>
-                </>
-              )}
-            </p>
-          </div>
+          {/* JSON format reminder — inline hint, no card chrome */}
+          <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 md:text-sm">
+            <Info size={14} className="me-1.5 inline shrink-0 text-zinc-400" aria-hidden="true" />
+            {t('zone.jsonReminder', {
+              defaultValue:
+                'Make sure you selected JSON format when requesting your data export. JSON and HTML ZIP files look identical from the outside.',
+            })}
+            {onOpenWizard && (
+              <>
+                {' '}
+                <button
+                  onClick={onOpenWizard}
+                  className="inline font-semibold text-primary underline underline-offset-2 hover:text-primary/80"
+                >
+                  {t('zone.seeGuide', { defaultValue: 'See the step-by-step guide' })}
+                </button>
+              </>
+            )}
+          </p>
 
           {/* Upload zone: touch-optimized vs desktop drag-and-drop */}
           {isTouchDevice ? (
             <TouchUploadZone
               fileInputRef={fileInputRef}
               isProcessing={isProcessing}
-              uploadProgress={uploadProgress}
               onFileInput={handleFileInput}
             />
           ) : (
             <DesktopDropZone
               fileInputRef={fileInputRef}
               isProcessing={isProcessing}
-              uploadProgress={uploadProgress}
               isDragOver={isDragOver}
               dragValidation={dragValidation}
               dragBorderClass={dragBorderClass}
@@ -254,10 +239,29 @@ export function UploadZone({
               onDragLeave={handleDragLeave}
             />
           )}
+
+          {/* Mobile-only: compact help section (replaces sidebar cards) */}
+          <div className="mt-4 space-y-2 text-center lg:hidden">
+            <p className="text-xs font-medium text-zinc-400 dark:text-zinc-500">
+              {t('zone.privacyMicro', {
+                defaultValue: 'Your file never leaves your device',
+              })}
+            </p>
+            {onOpenWizard && (
+              <button
+                onClick={onOpenWizard}
+                className="text-xs font-semibold text-primary underline underline-offset-2 hover:text-primary/80"
+              >
+                {t('zone.notSureLink', {
+                  defaultValue: 'Not sure what to upload? See the guide',
+                })}
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* Sidebar - 2 columns; on mobile shows ABOVE drop zone via order */}
-        <div className="order-first space-y-6 lg:order-last lg:col-span-2">
+        {/* Sidebar - desktop only; hidden on mobile to keep CTA visible without scroll */}
+        <div className="hidden space-y-6 lg:block lg:col-span-2">
           {/* Pre-upload Checklist */}
           <div className="rounded-4xl border border-border bg-card p-8 shadow-sm">
             <h4 className="mb-6 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-zinc-900 dark:text-white">
@@ -319,16 +323,14 @@ export function UploadZone({
   );
 }
 
-/** Mobile/touch: prominent tap-to-select button with compact progress */
+/** Mobile/touch: prominent tap-to-select button with spinner during processing */
 function TouchUploadZone({
   fileInputRef,
   isProcessing,
-  uploadProgress,
   onFileInput,
 }: {
   fileInputRef: React.RefObject<HTMLInputElement>;
   isProcessing: boolean;
-  uploadProgress: number;
   onFileInput: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
   const { t } = useTranslation('upload');
@@ -352,18 +354,14 @@ function TouchUploadZone({
         disabled={isProcessing}
         aria-label={t('zone.ariaLabel')}
       />
-      <p className="text-center text-xs font-medium text-zinc-500">
-        {t('zone.zipFilesOnly', { defaultValue: '.zip files only' })}
-      </p>
-
-      {/* JSON format badge (friendlier text) */}
-      <div className="inline-flex items-center gap-2 rounded-xl bg-amber-100 px-4 py-2 text-xs font-bold text-amber-700 shadow-sm dark:bg-amber-900/30 dark:text-amber-400">
-        <AlertCircle size={14} aria-hidden="true" />{' '}
-        {t('zone.jsonRequired', { defaultValue: 'Requires JSON format export' })}
-      </div>
-
-      {/* Progress bar (mobile) */}
-      {isProcessing && <UploadProgressBar uploadProgress={uploadProgress} variant="mobile" />}
+      {isProcessing && (
+        <div className="flex items-center justify-center gap-3">
+          <Loader2 className="h-5 w-5 animate-spin text-primary" aria-hidden="true" />
+          <span className="text-sm font-bold text-zinc-900 dark:text-white">
+            {t('zone.processing')}
+          </span>
+        </div>
+      )}
     </div>
   );
 }
@@ -372,7 +370,6 @@ function TouchUploadZone({
 function DesktopDropZone({
   fileInputRef,
   isProcessing,
-  uploadProgress,
   isDragOver,
   dragValidation,
   dragBorderClass,
@@ -383,7 +380,6 @@ function DesktopDropZone({
 }: {
   fileInputRef: React.RefObject<HTMLInputElement>;
   isProcessing: boolean;
-  uploadProgress: number;
   isDragOver: boolean;
   dragValidation: DragValidation;
   dragBorderClass: string;
@@ -427,10 +423,7 @@ function DesktopDropZone({
           <h3 className="text-2xl font-bold text-zinc-900 dark:text-white md:text-3xl">
             {t('zone.processing')}
           </h3>
-          <p className="mb-4 font-medium text-zinc-500">{t('zone.processingHint')}</p>
-
-          {/* Progress bar (desktop) */}
-          <UploadProgressBar uploadProgress={uploadProgress} variant="desktop" />
+          <p className="font-medium text-zinc-500">{t('zone.processingHint')}</p>
         </div>
       ) : (
         <div className="text-center">
@@ -465,70 +458,9 @@ function DesktopDropZone({
           <p className="mx-auto mb-8 max-w-sm text-sm font-medium text-zinc-500 md:text-lg">
             {t('zone.orBrowse')}
           </p>
-
-          {/* JSON Format badge — friendlier text */}
-          <div className="inline-flex items-center gap-2 rounded-xl bg-amber-100 px-4 py-2 text-xs font-bold text-amber-700 shadow-sm dark:bg-amber-900/30 dark:text-amber-400">
-            <AlertCircle size={14} aria-hidden="true" />{' '}
-            {t('zone.jsonRequired', { defaultValue: 'Requires JSON format export' })}
-          </div>
         </div>
       )}
     </label>
-  );
-}
-
-/** Shared progress bar used in both touch and desktop upload zones */
-function UploadProgressBar({
-  uploadProgress,
-  variant,
-}: {
-  uploadProgress: number;
-  variant: 'mobile' | 'desktop';
-}) {
-  const { t } = useTranslation('upload');
-
-  if (variant === 'mobile') {
-    return (
-      <div className="w-full space-y-2">
-        <div className="flex items-center justify-center gap-3">
-          <Loader2 className="h-5 w-5 animate-spin text-primary" aria-hidden="true" />
-          <span className="text-sm font-bold text-zinc-900 dark:text-white">
-            {t('zone.processing')}
-          </span>
-        </div>
-        <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700">
-          <div
-            className="h-full rounded-full bg-primary transition-all duration-300"
-            style={{ width: `${Math.max(uploadProgress, 2)}%` }}
-            role="progressbar"
-            aria-valuenow={uploadProgress}
-            aria-valuemin={0}
-            aria-valuemax={100}
-          />
-        </div>
-        <p className="text-center text-xs font-medium text-zinc-500">
-          {uploadProgress > 0 ? `${Math.round(uploadProgress)}%` : t('zone.processingHint')}
-        </p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="mx-auto max-w-xs">
-      <div className="h-2.5 w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700">
-        <div
-          className="h-full rounded-full bg-primary transition-all duration-300"
-          style={{ width: `${Math.max(uploadProgress, 2)}%` }}
-          role="progressbar"
-          aria-valuenow={uploadProgress}
-          aria-valuemin={0}
-          aria-valuemax={100}
-        />
-      </div>
-      {uploadProgress > 0 && (
-        <p className="mt-2 text-sm font-bold text-primary">{Math.round(uploadProgress)}%</p>
-      )}
-    </div>
   );
 }
 

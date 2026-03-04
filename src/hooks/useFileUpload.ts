@@ -6,6 +6,7 @@ import { dbCache, generateFileHash } from '@/lib/indexeddb/indexeddb-cache';
 import { parseOnMainThread, parseWithWorker } from '@/lib/parse-orchestration';
 import { useAppStore } from '@/lib/store';
 import { useCallback, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParseWorker } from './useParseWorker';
 
 // Upload rate limiting (ms)
@@ -55,6 +56,7 @@ export function useFileUpload() {
 
   // Store actions
   const setUploadInfo = useAppStore(s => s.setUploadInfo);
+  const { t } = useTranslation('upload');
 
   // Web Worker for file parsing
   const { workerRef, isWorkerReady } = useParseWorker();
@@ -101,9 +103,9 @@ export function useFileUpload() {
         if (!isZip) {
           const notZipWarning: ParseWarning = {
             code: 'NOT_ZIP',
-            message: 'Please upload a ZIP archive file, not a folder or other file type.',
+            message: t('diagnostic.errors.NOT_ZIP.message'),
             severity: 'error',
-            fix: 'Look for a file ending in .zip in your Downloads folder.',
+            fix: t('diagnostic.errors.NOT_ZIP.fix'),
           };
 
           setUploadInfo({
@@ -122,9 +124,9 @@ export function useFileUpload() {
           const sizeMb = Math.round(file.size / (1024 * 1024));
           const tooLargeWarning: ParseWarning = {
             code: 'FILE_TOO_LARGE',
-            message: `File is ${sizeMb}MB, which exceeds the 500MB limit.`,
+            message: t('diagnostic.errors.FILE_TOO_LARGE.message', { sizeMb }),
             severity: 'error',
-            fix: 'Try requesting a smaller data export from Instagram, or use a desktop browser with more memory.',
+            fix: t('diagnostic.errors.FILE_TOO_LARGE.fix'),
           };
 
           setUploadInfo({
@@ -272,7 +274,7 @@ export function useFileUpload() {
         throw err;
       }
     },
-    [setUploadInfo]
+    [setUploadInfo, t]
   );
 
   const abortUpload = useCallback(() => {

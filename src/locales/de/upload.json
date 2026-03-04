@@ -11,7 +11,9 @@
     "ariaLabel": "Instagram-Daten-ZIP-Datei hochladen",
     "jsonReminder": "Stelle sicher, dass du beim Anfordern deines Datenexports das JSON-Format ausgewählt hast. JSON- und HTML-ZIP-Dateien sehen von außen identisch aus.",
     "seeGuide": "Schritt-für-Schritt-Anleitung ansehen",
-    "jsonRequired": "Erfordert Export im JSON-Format"
+    "jsonRequired": "Erfordert Export im JSON-Format",
+    "privacyMicro": "Your file never leaves your device",
+    "notSureLink": "Not sure what to upload? See the guide"
   },
   "checklist": {
     "title": "Checkliste vor dem Upload",
@@ -48,7 +50,131 @@
     "reportIssue": "Problem auf GitHub melden",
     "copyDetails": "Fehlerdetails kopieren",
     "copied": "Kopiert!",
-    "errorCode": "Fehlercode"
+    "errorCode": "Fehlercode",
+    "htmlFormatExplainer": "Du hast deine Daten im HTML-Format exportiert. Gehe zurück zu Instagram und wähle stattdessen das JSON-Format aus. Die Formatauswahl befindet sich auf dem Bildschirm \"Deine Informationen herunterladen\" — suche das Dropdown-Menü mit \"HTML\" und ändere es auf \"JSON\".",
+    "showFormatStep": "Zeig mir, wo ich das JSON-Format auswähle",
+    "errors": {
+      "NOT_ZIP": {
+        "title": "Keine ZIP-Datei",
+        "message": "Bitte lade das ZIP-Archiv von Instagram hoch, keinen Ordner oder einen anderen Dateityp.",
+        "fix": "Suche in deinem Download-Ordner nach einer Datei mit der Endung .zip. Sie sollte etwa so heißen: \"instagram-benutzername-datum.zip\"."
+      },
+      "HTML_FORMAT": {
+        "title": "Falsches Format: HTML",
+        "message": "Du hast deine Daten im HTML-Format heruntergeladen, dieses Tool benötigt jedoch das JSON-Format.",
+        "fix": "Gehe zurück zu Instagram-Einstellungen → Deine Daten herunterladen → wähle \"JSON\"-Format (nicht HTML) → erneut anfordern."
+      },
+      "NOT_INSTAGRAM_EXPORT": {
+        "title": "Kein Instagram-Export",
+        "message": "Diese ZIP-Datei scheint kein Instagram-Datenexport zu sein.",
+        "fix": "Stelle sicher, dass du die ZIP-Datei aus Instagrams Funktion \"Deine Daten herunterladen\" hochlädst und keine beliebige ZIP-Datei."
+      },
+      "INCOMPLETE_EXPORT": {
+        "title": "Unvollständiger Export",
+        "message": "Im Export fehlen die Daten zu \"Follower und Gefolgte\".",
+        "fix": "Fordere deine Daten erneut bei Instagram an und stelle sicher, dass du \"Follower und Gefolgte\" unter den Datentypen auswählst."
+      },
+      "NO_DATA_FILES": {
+        "title": "Keine Follower-Daten gefunden",
+        "message": "Die Dateien following.json oder followers konnten nicht am erwarteten Speicherort gefunden werden.",
+        "fix": "Stelle sicher, dass du beim Anfordern deiner Daten \"Follower und Gefolgte\" ausgewählt hast und dass du die richtige ZIP-Datei hochlädst."
+      },
+      "MISSING_FOLLOWING": {
+        "title": "Fehlende Gefolgten-Daten",
+        "message": "following.json nicht gefunden — es kann nicht ermittelt werden, wem du folgst.",
+        "fix": "Fordere deine Daten erneut an und stelle sicher, dass \"Follower und Gefolgte\" ausgewählt ist."
+      },
+      "MISSING_FOLLOWERS": {
+        "title": "Fehlende Follower-Daten",
+        "message": "followers_*.json-Dateien nicht gefunden — es kann nicht ermittelt werden, wer dir folgt.",
+        "fix": "Fordere deine Daten erneut an und stelle sicher, dass \"Follower und Gefolgte\" ausgewählt ist."
+      },
+      "CORRUPTED_ZIP": {
+        "title": "Beschädigte ZIP-Datei",
+        "message": "Die ZIP-Datei scheint beschädigt zu sein und kann nicht geöffnet werden.",
+        "fix": "Versuche, deine Instagram-Daten erneut herunterzuladen. Stelle sicher, dass der Download vollständig abgeschlossen war, bevor du sie hochlädst."
+      },
+      "ZIP_ENCRYPTED": {
+        "title": "Passwortgeschützte ZIP-Datei",
+        "message": "Die ZIP-Datei ist passwortgeschützt, Instagram-Exporte sind jedoch nicht verschlüsselt.",
+        "fix": "Hierbei handelt es sich möglicherweise nicht um einen gültigen Instagram-Datenexport. Fordere einen neuen Export über die Instagram-Einstellungen an."
+      },
+      "EMPTY_FILE": {
+        "title": "Leere Datei",
+        "message": "Die hochgeladene Datei ist leer (0 Bytes).",
+        "fix": "Der Download wurde möglicherweise unterbrochen. Versuche, deine Daten erneut von Instagram herunterzuladen."
+      },
+      "FILE_TOO_LARGE": {
+        "title": "Datei zu groß",
+        "message": "Die Datei ist {{sizeMb}} MB groß und überschreitet das Limit von 500 MB.",
+        "fix": "Fordere bei Instagram einen kleineren Datenexport an oder verwende einen Desktop-Browser mit mehr Arbeitsspeicher."
+      },
+      "JSON_PARSE_ERROR": {
+        "title": "Ungültiges Datenformat",
+        "message": "Eine oder mehrere JSON-Dateien im Export sind fehlerhaft oder beschädigt.",
+        "fix": "Dies kann auf einen fehlerhaften Download hinweisen. Fordere einen neuen Datenexport bei Instagram an."
+      },
+      "INVALID_DATA_STRUCTURE": {
+        "title": "Unerwartete Datenstruktur",
+        "message": "Die JSON-Dateien sind vorhanden, haben jedoch eine unerwartete Struktur.",
+        "fix": "Instagram hat möglicherweise das Exportformat geändert. Bitte melde dieses Problem."
+      },
+      "WORKER_TIMEOUT": {
+        "title": "Verarbeitungs-Timeout",
+        "message": "Die Verarbeitung der Datei hat zu lange gedauert (über 60 Sekunden).",
+        "fix": "Versuche, andere Browser-Tabs zu schließen, um Ressourcen freizugeben, oder verwende eine kleinere Exportdatei."
+      },
+      "WORKER_INIT_ERROR": {
+        "title": "Verarbeitung konnte nicht gestartet werden",
+        "message": "Der Datei-Prozessor konnte nicht initialisiert werden.",
+        "fix": "Versuche, die Seite zu aktualisieren. Falls das Problem weiterhin besteht, probiere einen anderen Browser."
+      },
+      "WORKER_CRASHED": {
+        "title": "Verarbeitung abgestürzt",
+        "message": "Der Datei-Prozessor ist unerwartet abgestürzt.",
+        "fix": "Dies kann auf zu wenig Arbeitsspeicher zurückzuführen sein. Versuche, andere Tabs zu schließen oder eine kleinere Datei zu verwenden."
+      },
+      "INDEXEDDB_ERROR": {
+        "title": "Speicherfehler",
+        "message": "Die Daten konnten nicht im Browser-Speicher gespeichert werden.",
+        "fix": "Versuche, den Browser-Cache zu leeren oder einen anderen Browser zu verwenden. Im privaten/Inkognito-Modus ist der Speicher möglicherweise eingeschränkt."
+      },
+      "QUOTA_EXCEEDED": {
+        "title": "Speicher voll",
+        "message": "Das Browser-Speicherkontingent wurde überschritten.",
+        "fix": "Lösche einige Browser-Daten in den Einstellungen oder versuche es mit einem anderen Browser-Profil."
+      },
+      "IDB_NOT_SUPPORTED": {
+        "title": "Speicher nicht verfügbar",
+        "message": "IndexedDB-Speicher ist in diesem Browser nicht verfügbar.",
+        "fix": "Diese App benötigt IndexedDB. Deaktiviere den Inkognito-/privaten Modus oder verwende Chrome, Firefox oder Safari."
+      },
+      "IDB_PERMISSION_DENIED": {
+        "title": "Speicherzugriff verweigert",
+        "message": "Der Browser hat den Zugriff auf den Speicher verweigert.",
+        "fix": "Prüfe die Browser-Einstellungen, um den Speicher für diese Seite zu erlauben, oder deaktiviere den strikten Datenschutzmodus."
+      },
+      "UPLOAD_CANCELLED": {
+        "title": "Upload abgebrochen",
+        "message": "Der Upload wurde abgebrochen.",
+        "fix": "Klicke auf \"Erneut versuchen\", um deine Datei hochzuladen."
+      },
+      "CRYPTO_NOT_AVAILABLE": {
+        "title": "Sicherheitsfunktion nicht verfügbar",
+        "message": "Dein Browser unterstützt kein sicheres Hashing (crypto.subtle).",
+        "fix": "Bitte verwende einen modernen Browser (Chrome 37+, Firefox 34+, Safari 11+) mit HTTPS."
+      },
+      "NETWORK_ERROR": {
+        "title": "Netzwerkfehler",
+        "message": "Beim Upload ist ein Netzwerkfehler aufgetreten.",
+        "fix": "Prüfe deine Internetverbindung und versuche es erneut."
+      },
+      "UNKNOWN": {
+        "title": "Upload-Fehler",
+        "message": "Bei der Verarbeitung deiner Datei ist ein unerwarteter Fehler aufgetreten.",
+        "fix": "Versuche, die Datei erneut hochzuladen. Falls das Problem weiterhin besteht, stelle sicher, dass die ZIP-Datei nicht beschädigt ist."
+      }
+    }
   },
   "waiting": {
     "title": "Warten auf Instagram...",

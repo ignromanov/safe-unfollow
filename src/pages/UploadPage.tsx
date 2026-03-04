@@ -1,6 +1,3 @@
-import { FAQSection } from '@/components/FAQSection';
-import { FooterCTA } from '@/components/FooterCTA';
-import { HowToSection } from '@/components/HowToSection';
 import { PageLoader } from '@/components/PageLoader';
 import { UploadZone } from '@/components/UploadZone';
 import { useInstagramData } from '@/hooks/useInstagramData';
@@ -15,7 +12,7 @@ import { useNavigate } from 'react-router-dom';
 export function Component() {
   const navigate = useNavigate();
   const prefix = useLanguagePrefix();
-  const { uploadState, handleZipUpload, parseWarnings, uploadProgress } = useInstagramData();
+  const { uploadState, handleZipUpload, parseWarnings } = useInstagramData();
 
   // Auto-navigate to results after successful upload
   useEffect(() => {
@@ -43,31 +40,15 @@ export function Component() {
     navigate(`${prefix}/wizard/step/6`);
   };
 
-  const handleStartGuide = () => {
-    navigate(`${prefix}/wizard`);
-  };
-
-  const handleLoadSample = () => {
-    navigate(`${prefix}/sample`);
-  };
-
   return (
-    <>
-      <UploadZone
-        onUploadStart={handleUploadStart}
-        onBack={handleBack}
-        onOpenWizard={handleOpenWizard}
-        isProcessing={uploadState.status === 'loading'}
-        error={uploadState.error}
-        parseWarnings={parseWarnings}
-        uploadProgress={uploadProgress}
-      />
-      <div className="animate-in fade-in duration-1000">
-        <HowToSection onStart={handleStartGuide} />
-        <FAQSection />
-        <FooterCTA onStart={handleStartGuide} onSample={handleLoadSample} />
-      </div>
-    </>
+    <UploadZone
+      onUploadStart={handleUploadStart}
+      onBack={handleBack}
+      onOpenWizard={handleOpenWizard}
+      isProcessing={uploadState.status === 'loading'}
+      error={uploadState.error}
+      parseWarnings={parseWarnings}
+    />
   );
 }
 

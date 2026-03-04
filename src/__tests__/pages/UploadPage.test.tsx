@@ -35,27 +35,6 @@ vi.mock('@/components/UploadZone', () => ({
   ),
 }));
 
-vi.mock('@/components/HowToSection', () => ({
-  HowToSection: ({ onStart }: { onStart: () => void }) => (
-    <div data-testid="how-to-section">
-      <button onClick={onStart}>How To Start</button>
-    </div>
-  ),
-}));
-
-vi.mock('@/components/FAQSection', () => ({
-  FAQSection: () => <div data-testid="faq-section">FAQ</div>,
-}));
-
-vi.mock('@/components/FooterCTA', () => ({
-  FooterCTA: ({ onStart, onSample }: { onStart: () => void; onSample: () => void }) => (
-    <div data-testid="footer-cta">
-      <button onClick={onStart}>{commonEN.cta.getStarted}</button>
-      <button onClick={onSample}>{commonEN.cta.trySample}</button>
-    </div>
-  ),
-}));
-
 vi.mock('@/components/PageLoader', () => ({
   PageLoader: () => <div data-testid="page-loader">Loading...</div>,
 }));
@@ -100,13 +79,13 @@ describe('UploadPage', () => {
       expect(screen.getByTestId('upload-zone')).toBeInTheDocument();
     });
 
-    it('should render all sections', () => {
+    it('should render only UploadZone (no below-fold sections)', () => {
       render(<UploadPage />);
 
       expect(screen.getByTestId('upload-zone')).toBeInTheDocument();
-      expect(screen.getByTestId('how-to-section')).toBeInTheDocument();
-      expect(screen.getByTestId('faq-section')).toBeInTheDocument();
-      expect(screen.getByTestId('footer-cta')).toBeInTheDocument();
+      expect(screen.queryByTestId('how-to-section')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('faq-section')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('footer-cta')).not.toBeInTheDocument();
     });
 
     it('should not show loader in idle state', () => {
@@ -263,35 +242,6 @@ describe('UploadPage', () => {
     });
   });
 
-  describe('navigation - section handlers', () => {
-    it('should navigate to wizard from HowToSection', async () => {
-      const user = userEvent.setup();
-      render(<UploadPage />);
-
-      await user.click(screen.getByText('How To Start'));
-
-      expect(mockNavigate).toHaveBeenCalledWith('/wizard');
-    });
-
-    it('should navigate to wizard from FooterCTA', async () => {
-      const user = userEvent.setup();
-      render(<UploadPage />);
-
-      await user.click(screen.getByText(commonEN.cta.getStarted));
-
-      expect(mockNavigate).toHaveBeenCalledWith('/wizard');
-    });
-
-    it('should navigate to sample from FooterCTA', async () => {
-      const user = userEvent.setup();
-      render(<UploadPage />);
-
-      await user.click(screen.getByText(commonEN.cta.trySample));
-
-      expect(mockNavigate).toHaveBeenCalledWith('/sample');
-    });
-  });
-
   describe('language prefix support', () => {
     it('should use language prefix in navigation', async () => {
       mockUseLanguagePrefix.mockReturnValue('/es');
@@ -317,18 +267,6 @@ describe('UploadPage', () => {
       await waitFor(() => {
         expect(mockNavigate).toHaveBeenCalledWith('/ru/results', { replace: true });
       });
-    });
-  });
-
-  describe('sections animation', () => {
-    it('should wrap sections in animated container', () => {
-      const { container } = render(<UploadPage />);
-
-      const animatedDiv = container.querySelector('.animate-in.fade-in');
-      expect(animatedDiv).toBeInTheDocument();
-      expect(animatedDiv).toContainElement(screen.getByTestId('how-to-section'));
-      expect(animatedDiv).toContainElement(screen.getByTestId('faq-section'));
-      expect(animatedDiv).toContainElement(screen.getByTestId('footer-cta'));
     });
   });
 });

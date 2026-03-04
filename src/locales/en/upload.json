@@ -11,7 +11,9 @@
     "ariaLabel": "Upload Instagram data ZIP file",
     "jsonReminder": "Make sure you selected JSON format when requesting your data export. JSON and HTML ZIP files look identical from the outside.",
     "seeGuide": "See the step-by-step guide",
-    "jsonRequired": "Requires JSON format export"
+    "jsonRequired": "Requires JSON format export",
+    "privacyMicro": "Your file never leaves your device",
+    "notSureLink": "Not sure what to upload? See the guide"
   },
   "checklist": {
     "title": "Pre-upload Checklist",
@@ -48,7 +50,131 @@
     "reportIssue": "Report this issue on GitHub",
     "copyDetails": "Copy error details",
     "copied": "Copied!",
-    "errorCode": "Error code"
+    "errorCode": "Error code",
+    "htmlFormatExplainer": "You exported in HTML format. Go back to Instagram and select JSON format instead. The format selection is on the \"Download your information\" screen — look for the dropdown that says \"HTML\" and change it to \"JSON\".",
+    "showFormatStep": "See where to select JSON format",
+    "errors": {
+      "NOT_ZIP": {
+        "title": "Not a ZIP File",
+        "message": "Please upload the ZIP archive from Instagram, not a folder or other file type.",
+        "fix": "Look for a file ending in .zip in your Downloads folder. It should be named something like \"instagram-username-date.zip\"."
+      },
+      "HTML_FORMAT": {
+        "title": "Wrong Format: HTML",
+        "message": "You downloaded your data in HTML format, but this tool requires JSON format to work.",
+        "fix": "Go back to Instagram Settings → Download Your Data → Select \"JSON\" format (not HTML) → Request download again."
+      },
+      "NOT_INSTAGRAM_EXPORT": {
+        "title": "Not an Instagram Export",
+        "message": "This ZIP file doesn't appear to be an Instagram data export.",
+        "fix": "Make sure you're uploading the ZIP file from Instagram's \"Download Your Data\" feature, not a random ZIP file."
+      },
+      "INCOMPLETE_EXPORT": {
+        "title": "Incomplete Export",
+        "message": "The export is missing the \"Followers and following\" data.",
+        "fix": "Re-request your data from Instagram and make sure to select \"Followers and following\" in the data types."
+      },
+      "NO_DATA_FILES": {
+        "title": "No Follower Data Found",
+        "message": "Could not find following.json or followers files in the expected location.",
+        "fix": "Make sure you selected \"Followers and following\" when requesting your data, and that you're uploading the correct ZIP file."
+      },
+      "MISSING_FOLLOWING": {
+        "title": "Missing Following Data",
+        "message": "following.json not found — cannot detect who you follow.",
+        "fix": "Re-request your data and ensure \"Followers and following\" is selected."
+      },
+      "MISSING_FOLLOWERS": {
+        "title": "Missing Followers Data",
+        "message": "followers_*.json files not found — cannot detect who follows you.",
+        "fix": "Re-request your data and ensure \"Followers and following\" is selected."
+      },
+      "CORRUPTED_ZIP": {
+        "title": "Corrupted ZIP File",
+        "message": "The ZIP file appears to be damaged or corrupted and cannot be opened.",
+        "fix": "Try downloading your Instagram data again. Make sure the download completed fully before uploading."
+      },
+      "ZIP_ENCRYPTED": {
+        "title": "Password-Protected ZIP",
+        "message": "The ZIP file is password-protected, but Instagram exports are not encrypted.",
+        "fix": "This may not be a valid Instagram data export. Request a new export from Instagram Settings."
+      },
+      "EMPTY_FILE": {
+        "title": "Empty File",
+        "message": "The uploaded file is empty (0 bytes).",
+        "fix": "The download may have been interrupted. Try downloading your data again from Instagram."
+      },
+      "FILE_TOO_LARGE": {
+        "title": "File Too Large",
+        "message": "File is {{sizeMb}}MB, which exceeds the 500MB limit.",
+        "fix": "Try requesting a smaller data export from Instagram, or use a desktop browser with more memory."
+      },
+      "JSON_PARSE_ERROR": {
+        "title": "Invalid Data Format",
+        "message": "One or more JSON files in the export are malformed or corrupted.",
+        "fix": "This may indicate a corrupted download. Request a fresh data export from Instagram."
+      },
+      "INVALID_DATA_STRUCTURE": {
+        "title": "Unexpected Data Structure",
+        "message": "The JSON files exist but have an unexpected structure.",
+        "fix": "Instagram may have changed their export format. Please report this issue."
+      },
+      "WORKER_TIMEOUT": {
+        "title": "Processing Timeout",
+        "message": "The file took too long to process (over 60 seconds).",
+        "fix": "Try closing other browser tabs to free up resources, or use a smaller export file."
+      },
+      "WORKER_INIT_ERROR": {
+        "title": "Processing Failed to Start",
+        "message": "Could not initialize the file processor.",
+        "fix": "Try refreshing the page. If the problem persists, try a different browser."
+      },
+      "WORKER_CRASHED": {
+        "title": "Processing Crashed",
+        "message": "The file processor crashed unexpectedly.",
+        "fix": "This may be due to insufficient memory. Try closing other tabs or using a smaller file."
+      },
+      "INDEXEDDB_ERROR": {
+        "title": "Storage Error",
+        "message": "Could not save data to browser storage.",
+        "fix": "Try clearing browser cache or using a different browser. Private/incognito mode may have limited storage."
+      },
+      "QUOTA_EXCEEDED": {
+        "title": "Storage Full",
+        "message": "Browser storage quota has been exceeded.",
+        "fix": "Clear some browser data in Settings, or try a different browser profile."
+      },
+      "IDB_NOT_SUPPORTED": {
+        "title": "Storage Not Available",
+        "message": "IndexedDB storage is not available in this browser.",
+        "fix": "This app requires IndexedDB. Disable incognito/private mode, or try Chrome/Firefox/Safari."
+      },
+      "IDB_PERMISSION_DENIED": {
+        "title": "Storage Permission Denied",
+        "message": "The browser denied access to storage.",
+        "fix": "Check browser settings to allow storage for this site, or disable strict privacy mode."
+      },
+      "UPLOAD_CANCELLED": {
+        "title": "Upload Cancelled",
+        "message": "The upload was cancelled.",
+        "fix": "Click \"Try Again\" to upload your file."
+      },
+      "CRYPTO_NOT_AVAILABLE": {
+        "title": "Security Feature Unavailable",
+        "message": "Your browser does not support secure hashing (crypto.subtle).",
+        "fix": "Please use a modern browser (Chrome 37+, Firefox 34+, Safari 11+) with HTTPS."
+      },
+      "NETWORK_ERROR": {
+        "title": "Network Error",
+        "message": "A network error occurred during upload.",
+        "fix": "Check your internet connection and try again."
+      },
+      "UNKNOWN": {
+        "title": "Upload Error",
+        "message": "An unexpected error occurred while processing your file.",
+        "fix": "Try uploading the file again. If the problem persists, make sure the ZIP file is not corrupted."
+      }
+    }
   },
   "waiting": {
     "title": "Waiting for Instagram...",

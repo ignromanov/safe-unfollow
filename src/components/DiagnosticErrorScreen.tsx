@@ -236,13 +236,19 @@ export function DiagnosticErrorScreen({
         <div className="mb-2 flex items-center gap-3">
           <AlertTriangle size={20} className={colors.icon} aria-hidden="true" />
           <h2 className={`text-sm font-black uppercase tracking-widest ${colors.title}`}>
-            {diagnosticError.title}
+            {t(`diagnostic.errors.${diagnosticError.code}.title`, {
+              defaultValue: diagnosticError.title,
+            })}
           </h2>
         </div>
 
         {/* Message */}
         <p className={`mb-6 text-base font-medium leading-relaxed md:text-lg ${colors.text}`}>
-          {diagnosticError.message}
+          {diagnosticError.code === 'UNKNOWN'
+            ? diagnosticError.message
+            : t(`diagnostic.errors.${diagnosticError.code}.message`, {
+                defaultValue: diagnosticError.message,
+              })}
         </p>
 
         {/* Fix section — enhanced for HTML_FORMAT */}
@@ -251,26 +257,23 @@ export function DiagnosticErrorScreen({
             {t('diagnostic.howToFix')}
           </h3>
           <p className="text-sm font-medium leading-relaxed text-zinc-600 dark:text-zinc-400">
-            {diagnosticError.fix}
+            {t(`diagnostic.errors.${diagnosticError.code}.fix`, {
+              defaultValue: diagnosticError.fix,
+            })}
           </p>
 
           {/* Extra guidance for HTML format error */}
           {diagnosticError.code === 'HTML_FORMAT' && (
             <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800/50 dark:bg-amber-950/30">
               <p className="text-sm font-bold text-amber-800 dark:text-amber-300">
-                {t('diagnostic.htmlFormatExplainer', {
-                  defaultValue:
-                    'You exported in HTML format. Go back to Instagram and select JSON format instead. The format selection is on the "Download your information" screen — look for the dropdown that says "HTML" and change it to "JSON".',
-                })}
+                {t('diagnostic.htmlFormatExplainer')}
               </p>
               {onOpenWizard && (
                 <button
                   onClick={handleOpenWizard}
                   className="mt-3 inline-flex items-center gap-2 rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-bold text-white transition-all hover:bg-amber-700 hover:shadow-md"
                 >
-                  {t('diagnostic.showFormatStep', {
-                    defaultValue: 'See where to select JSON format',
-                  })}
+                  {t('diagnostic.showFormatStep')}
                 </button>
               )}
             </div>

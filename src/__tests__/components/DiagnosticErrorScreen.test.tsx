@@ -239,7 +239,8 @@ describe('DiagnosticErrorScreen', () => {
       render(<DiagnosticErrorScreen parseWarnings={parseWarnings} />);
 
       expect(screen.getByText('Wrong Format: HTML')).toBeInTheDocument();
-      expect(screen.getByText('Export is in HTML format')).toBeInTheDocument();
+      // Message is now translated via i18n, so the JSON translation is shown instead of raw parser message
+      expect(screen.getByText(uploadEN.diagnostic.errors.HTML_FORMAT.message)).toBeInTheDocument();
     });
 
     it('should prioritize errorCode over parseWarnings', () => {

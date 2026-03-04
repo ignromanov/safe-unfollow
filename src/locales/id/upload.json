@@ -11,7 +11,9 @@
     "ariaLabel": "Unggah file ZIP data Instagram",
     "jsonReminder": "Pastikan Anda memilih format JSON saat meminta ekspor data. File ZIP JSON dan HTML terlihat identik dari luar.",
     "seeGuide": "Lihat panduan langkah demi langkah",
-    "jsonRequired": "Memerlukan ekspor format JSON"
+    "jsonRequired": "Memerlukan ekspor format JSON",
+    "privacyMicro": "Your file never leaves your device",
+    "notSureLink": "Not sure what to upload? See the guide"
   },
   "checklist": {
     "title": "Checklist Sebelum Unggah",
@@ -48,7 +50,131 @@
     "reportIssue": "Laporkan masalah ini di GitHub",
     "copyDetails": "Salin detail error",
     "copied": "Tersalin!",
-    "errorCode": "Kode error"
+    "errorCode": "Kode error",
+    "htmlFormatExplainer": "Anda mengekspor dalam format HTML. Kembali ke Instagram dan pilih format JSON. Pilihan format ada di layar \"Unduh informasi Anda\" — cari dropdown yang bertuliskan \"HTML\" dan ubah menjadi \"JSON\".",
+    "showFormatStep": "Lihat cara memilih format JSON",
+    "errors": {
+      "NOT_ZIP": {
+        "title": "Bukan File ZIP",
+        "message": "Unggah arsip ZIP dari Instagram, bukan folder atau jenis file lain.",
+        "fix": "Cari file berakhiran .zip di folder Unduhan Anda. Biasanya bernama seperti \"instagram-username-tanggal.zip\"."
+      },
+      "HTML_FORMAT": {
+        "title": "Format Salah: HTML",
+        "message": "Anda mengunduh data dalam format HTML, namun alat ini memerlukan format JSON.",
+        "fix": "Buka Instagram Pengaturan → Unduh Data Anda → Pilih format \"JSON\" (bukan HTML) → Minta unduhan lagi."
+      },
+      "NOT_INSTAGRAM_EXPORT": {
+        "title": "Bukan Ekspor Instagram",
+        "message": "File ZIP ini tampaknya bukan ekspor data Instagram.",
+        "fix": "Pastikan Anda mengunggah file ZIP dari fitur \"Unduh Data Anda\" milik Instagram, bukan file ZIP sembarang."
+      },
+      "INCOMPLETE_EXPORT": {
+        "title": "Ekspor Tidak Lengkap",
+        "message": "Ekspor tidak menyertakan data \"Pengikut dan mengikuti\".",
+        "fix": "Minta ulang data dari Instagram dan pastikan memilih \"Pengikut dan mengikuti\" pada tipe data."
+      },
+      "NO_DATA_FILES": {
+        "title": "Data Pengikut Tidak Ditemukan",
+        "message": "Tidak dapat menemukan file following.json atau followers di lokasi yang diharapkan.",
+        "fix": "Pastikan Anda memilih \"Pengikut dan mengikuti\" saat meminta data, dan bahwa Anda mengunggah file ZIP yang benar."
+      },
+      "MISSING_FOLLOWING": {
+        "title": "Data Following Tidak Ada",
+        "message": "following.json tidak ditemukan — tidak dapat mendeteksi siapa yang Anda ikuti.",
+        "fix": "Minta ulang data Anda dan pastikan \"Pengikut dan mengikuti\" dipilih."
+      },
+      "MISSING_FOLLOWERS": {
+        "title": "Data Followers Tidak Ada",
+        "message": "File followers_*.json tidak ditemukan — tidak dapat mendeteksi siapa yang mengikuti Anda.",
+        "fix": "Minta ulang data Anda dan pastikan \"Pengikut dan mengikuti\" dipilih."
+      },
+      "CORRUPTED_ZIP": {
+        "title": "File ZIP Rusak",
+        "message": "File ZIP tampaknya rusak atau korup dan tidak dapat dibuka.",
+        "fix": "Coba unduh ulang data Instagram Anda. Pastikan unduhan selesai sepenuhnya sebelum mengunggah."
+      },
+      "ZIP_ENCRYPTED": {
+        "title": "ZIP Berpassword",
+        "message": "File ZIP ini dilindungi kata sandi, padahal ekspor Instagram tidak dienkripsi.",
+        "fix": "Ini mungkin bukan ekspor data Instagram yang valid. Minta ekspor baru dari Pengaturan Instagram."
+      },
+      "EMPTY_FILE": {
+        "title": "File Kosong",
+        "message": "File yang diunggah kosong (0 byte).",
+        "fix": "Unduhan mungkin terputus. Coba unduh ulang data Anda dari Instagram."
+      },
+      "FILE_TOO_LARGE": {
+        "title": "File Terlalu Besar",
+        "message": "Ukuran file {{sizeMb}}MB melebihi batas 500MB.",
+        "fix": "Coba minta ekspor data yang lebih kecil dari Instagram, atau gunakan browser desktop dengan memori lebih besar."
+      },
+      "JSON_PARSE_ERROR": {
+        "title": "Format Data Tidak Valid",
+        "message": "Satu atau lebih file JSON dalam ekspor rusak atau tidak terbaca.",
+        "fix": "Ini mungkin menandakan unduhan yang korup. Minta ekspor data baru dari Instagram."
+      },
+      "INVALID_DATA_STRUCTURE": {
+        "title": "Struktur Data Tidak Terduga",
+        "message": "File JSON ada tetapi memiliki struktur yang tidak terduga.",
+        "fix": "Instagram mungkin mengubah format ekspornya. Harap laporkan masalah ini."
+      },
+      "WORKER_TIMEOUT": {
+        "title": "Waktu Pemrosesan Habis",
+        "message": "File membutuhkan terlalu lama untuk diproses (lebih dari 60 detik).",
+        "fix": "Coba tutup tab browser lain untuk membebaskan sumber daya, atau gunakan file ekspor yang lebih kecil."
+      },
+      "WORKER_INIT_ERROR": {
+        "title": "Pemrosesan Gagal Dimulai",
+        "message": "Tidak dapat menginisialisasi pemroses file.",
+        "fix": "Coba muat ulang halaman. Jika masalah berlanjut, coba browser lain."
+      },
+      "WORKER_CRASHED": {
+        "title": "Pemrosesan Terhenti",
+        "message": "Pemroses file berhenti secara tidak terduga.",
+        "fix": "Ini mungkin disebabkan memori yang tidak cukup. Coba tutup tab lain atau gunakan file yang lebih kecil."
+      },
+      "INDEXEDDB_ERROR": {
+        "title": "Kesalahan Penyimpanan",
+        "message": "Tidak dapat menyimpan data ke penyimpanan browser.",
+        "fix": "Coba hapus cache browser atau gunakan browser lain. Mode privat/incognito mungkin memiliki penyimpanan terbatas."
+      },
+      "QUOTA_EXCEEDED": {
+        "title": "Penyimpanan Penuh",
+        "message": "Kuota penyimpanan browser telah terlampaui.",
+        "fix": "Hapus sebagian data browser di Pengaturan, atau coba profil browser yang berbeda."
+      },
+      "IDB_NOT_SUPPORTED": {
+        "title": "Penyimpanan Tidak Tersedia",
+        "message": "Penyimpanan IndexedDB tidak tersedia di browser ini.",
+        "fix": "Aplikasi ini memerlukan IndexedDB. Nonaktifkan mode incognito/privat, atau coba Chrome/Firefox/Safari."
+      },
+      "IDB_PERMISSION_DENIED": {
+        "title": "Izin Penyimpanan Ditolak",
+        "message": "Browser menolak akses ke penyimpanan.",
+        "fix": "Periksa pengaturan browser untuk mengizinkan penyimpanan bagi situs ini, atau nonaktifkan mode privasi ketat."
+      },
+      "UPLOAD_CANCELLED": {
+        "title": "Unggahan Dibatalkan",
+        "message": "Unggahan telah dibatalkan.",
+        "fix": "Klik \"Coba Lagi\" untuk mengunggah file Anda."
+      },
+      "CRYPTO_NOT_AVAILABLE": {
+        "title": "Fitur Keamanan Tidak Tersedia",
+        "message": "Browser Anda tidak mendukung hashing aman (crypto.subtle).",
+        "fix": "Gunakan browser modern (Chrome 37+, Firefox 34+, Safari 11+) dengan HTTPS."
+      },
+      "NETWORK_ERROR": {
+        "title": "Kesalahan Jaringan",
+        "message": "Terjadi kesalahan jaringan saat mengunggah.",
+        "fix": "Periksa koneksi internet Anda dan coba lagi."
+      },
+      "UNKNOWN": {
+        "title": "Kesalahan Unggahan",
+        "message": "Terjadi kesalahan tak terduga saat memproses file Anda.",
+        "fix": "Coba unggah file lagi. Jika masalah berlanjut, pastikan file ZIP tidak rusak."
+      }
+    }
   },
   "waiting": {
     "title": "Menunggu Instagram...",

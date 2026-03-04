@@ -11,7 +11,9 @@
     "ariaLabel": "Enviar arquivo ZIP de dados do Instagram",
     "jsonReminder": "Certifique-se de ter selecionado o formato JSON ao solicitar sua exportação de dados. Arquivos ZIP em JSON e HTML são idênticos por fora.",
     "seeGuide": "Ver o guia passo a passo",
-    "jsonRequired": "Requer exportação em formato JSON"
+    "jsonRequired": "Requer exportação em formato JSON",
+    "privacyMicro": "Your file never leaves your device",
+    "notSureLink": "Not sure what to upload? See the guide"
   },
   "checklist": {
     "title": "Checklist Pré-envio",
@@ -48,7 +50,131 @@
     "reportIssue": "Reportar problema no GitHub",
     "copyDetails": "Copiar detalhes do erro",
     "copied": "Copiado!",
-    "errorCode": "Código do erro"
+    "errorCode": "Código do erro",
+    "htmlFormatExplainer": "Você exportou no formato HTML. Volte ao Instagram e selecione o formato JSON. A seleção de formato está na tela \"Baixar suas informações\" — procure pelo menu suspenso que diz \"HTML\" e mude para \"JSON\".",
+    "showFormatStep": "Ver onde selecionar o formato JSON",
+    "errors": {
+      "NOT_ZIP": {
+        "title": "Não é um arquivo ZIP",
+        "message": "Envie o arquivo ZIP do Instagram, não uma pasta ou outro tipo de arquivo.",
+        "fix": "Procure um arquivo terminado em .zip na sua pasta de Downloads. O nome deve ser algo como \"instagram-usuario-data.zip\"."
+      },
+      "HTML_FORMAT": {
+        "title": "Formato incorreto: HTML",
+        "message": "Você baixou seus dados no formato HTML, mas esta ferramenta precisa do formato JSON para funcionar.",
+        "fix": "Volte para Configurações do Instagram → Baixar seus dados → Selecione o formato \"JSON\" (não HTML) → Solicite o download novamente."
+      },
+      "NOT_INSTAGRAM_EXPORT": {
+        "title": "Não é uma exportação do Instagram",
+        "message": "Este arquivo ZIP não parece ser uma exportação de dados do Instagram.",
+        "fix": "Verifique se está enviando o arquivo ZIP gerado pelo recurso \"Baixar seus dados\" do Instagram, e não outro arquivo ZIP qualquer."
+      },
+      "INCOMPLETE_EXPORT": {
+        "title": "Exportação incompleta",
+        "message": "A exportação não contém os dados de \"Seguidores e seguindo\".",
+        "fix": "Solicite seus dados novamente no Instagram e certifique-se de selecionar \"Seguidores e seguindo\" nos tipos de dados."
+      },
+      "NO_DATA_FILES": {
+        "title": "Nenhum dado de seguidores encontrado",
+        "message": "Não foi possível encontrar os arquivos following.json ou followers no local esperado.",
+        "fix": "Verifique se selecionou \"Seguidores e seguindo\" ao solicitar seus dados e se está enviando o arquivo ZIP correto."
+      },
+      "MISSING_FOLLOWING": {
+        "title": "Dados de \"seguindo\" ausentes",
+        "message": "following.json não encontrado — não é possível detectar quem você segue.",
+        "fix": "Solicite seus dados novamente e certifique-se de selecionar \"Seguidores e seguindo\"."
+      },
+      "MISSING_FOLLOWERS": {
+        "title": "Dados de seguidores ausentes",
+        "message": "Arquivos followers_*.json não encontrados — não é possível detectar quem te segue.",
+        "fix": "Solicite seus dados novamente e certifique-se de selecionar \"Seguidores e seguindo\"."
+      },
+      "CORRUPTED_ZIP": {
+        "title": "Arquivo ZIP corrompido",
+        "message": "O arquivo ZIP parece estar danificado ou corrompido e não pode ser aberto.",
+        "fix": "Tente baixar seus dados do Instagram novamente. Certifique-se de que o download foi concluído completamente antes de enviar."
+      },
+      "ZIP_ENCRYPTED": {
+        "title": "ZIP protegido por senha",
+        "message": "O arquivo ZIP está protegido por senha, mas exportações do Instagram não são criptografadas.",
+        "fix": "Este arquivo pode não ser uma exportação válida do Instagram. Solicite uma nova exportação nas Configurações do Instagram."
+      },
+      "EMPTY_FILE": {
+        "title": "Arquivo vazio",
+        "message": "O arquivo enviado está vazio (0 bytes).",
+        "fix": "O download pode ter sido interrompido. Tente baixar seus dados novamente pelo Instagram."
+      },
+      "FILE_TOO_LARGE": {
+        "title": "Arquivo muito grande",
+        "message": "O arquivo tem {{sizeMb}}MB, o que excede o limite de 500MB.",
+        "fix": "Tente solicitar uma exportação menor ao Instagram, ou use um navegador no computador com mais memória disponível."
+      },
+      "JSON_PARSE_ERROR": {
+        "title": "Formato de dados inválido",
+        "message": "Um ou mais arquivos JSON da exportação estão malformados ou corrompidos.",
+        "fix": "Isso pode indicar um download corrompido. Solicite uma nova exportação de dados ao Instagram."
+      },
+      "INVALID_DATA_STRUCTURE": {
+        "title": "Estrutura de dados inesperada",
+        "message": "Os arquivos JSON existem, mas têm uma estrutura inesperada.",
+        "fix": "O Instagram pode ter alterado o formato de exportação. Por favor, reporte este problema."
+      },
+      "WORKER_TIMEOUT": {
+        "title": "Tempo de processamento esgotado",
+        "message": "O arquivo demorou demais para ser processado (mais de 60 segundos).",
+        "fix": "Tente fechar outras abas do navegador para liberar recursos, ou use um arquivo de exportação menor."
+      },
+      "WORKER_INIT_ERROR": {
+        "title": "Falha ao iniciar o processamento",
+        "message": "Não foi possível inicializar o processador de arquivos.",
+        "fix": "Tente atualizar a página. Se o problema persistir, tente usar um navegador diferente."
+      },
+      "WORKER_CRASHED": {
+        "title": "Processamento interrompido",
+        "message": "O processador de arquivos parou inesperadamente.",
+        "fix": "Isso pode ser causado por memória insuficiente. Tente fechar outras abas ou usar um arquivo menor."
+      },
+      "INDEXEDDB_ERROR": {
+        "title": "Erro de armazenamento",
+        "message": "Não foi possível salvar os dados no armazenamento do navegador.",
+        "fix": "Tente limpar o cache do navegador ou usar um navegador diferente. O modo privado/anônimo pode ter armazenamento limitado."
+      },
+      "QUOTA_EXCEEDED": {
+        "title": "Armazenamento cheio",
+        "message": "A cota de armazenamento do navegador foi excedida.",
+        "fix": "Limpe alguns dados do navegador nas Configurações, ou tente usar um perfil de navegador diferente."
+      },
+      "IDB_NOT_SUPPORTED": {
+        "title": "Armazenamento indisponível",
+        "message": "O armazenamento IndexedDB não está disponível neste navegador.",
+        "fix": "Este aplicativo requer IndexedDB. Desative o modo anônimo/privado, ou tente Chrome, Firefox ou Safari."
+      },
+      "IDB_PERMISSION_DENIED": {
+        "title": "Permissão de armazenamento negada",
+        "message": "O navegador negou acesso ao armazenamento.",
+        "fix": "Verifique as configurações do navegador para permitir armazenamento neste site, ou desative o modo de privacidade restrito."
+      },
+      "UPLOAD_CANCELLED": {
+        "title": "Envio cancelado",
+        "message": "O envio foi cancelado.",
+        "fix": "Clique em \"Tentar Novamente\" para enviar seu arquivo."
+      },
+      "CRYPTO_NOT_AVAILABLE": {
+        "title": "Recurso de segurança indisponível",
+        "message": "Seu navegador não suporta hashing seguro (crypto.subtle).",
+        "fix": "Use um navegador moderno (Chrome 37+, Firefox 34+, Safari 11+) com HTTPS."
+      },
+      "NETWORK_ERROR": {
+        "title": "Erro de rede",
+        "message": "Ocorreu um erro de rede durante o envio.",
+        "fix": "Verifique sua conexão com a internet e tente novamente."
+      },
+      "UNKNOWN": {
+        "title": "Erro no envio",
+        "message": "Ocorreu um erro inesperado ao processar seu arquivo.",
+        "fix": "Tente enviar o arquivo novamente. Se o problema persistir, verifique se o arquivo ZIP não está corrompido."
+      }
+    }
   },
   "waiting": {
     "title": "Aguardando o Instagram...",
