@@ -24,7 +24,7 @@ export const StatCard = memo(function StatCard({
   return (
     <button
       onClick={() => badgeType && onClick(badgeType)}
-      className={`p-5 md:p-6 rounded-3xl border transition-all flex flex-col items-start gap-3 md:gap-4 text-left group w-full ${
+      className={`p-5 md:p-6 rounded-3xl border transition-all flex flex-col items-start gap-3 md:gap-4 text-start group w-full ${
         isActive
           ? 'bg-primary border-primary shadow-lg scale-[1.02]'
           : 'bg-card border-border hover:border-primary/50 shadow-sm'

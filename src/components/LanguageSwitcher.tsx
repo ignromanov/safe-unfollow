@@ -1,5 +1,3 @@
-'use client';
-
 import { useState, useEffect } from 'react';
 import { Globe, ChevronDown } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
@@ -88,7 +86,7 @@ export function LanguageSwitcher() {
               }`}
             >
               <span className="uppercase text-xs font-bold w-6">{lang}</span>
-              <span className="ml-2">{LANGUAGE_NAMES[lang]}</span>
+              <span className="ms-2">{LANGUAGE_NAMES[lang]}</span>
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>

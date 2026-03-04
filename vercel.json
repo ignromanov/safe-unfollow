@@ -56,7 +56,8 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://umami-coral-xi.vercel.app https://cdnjs.buymeacoffee.com https://vercel.live; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://umami-coral-xi.vercel.app https://vercel.live; frame-src 'self' https://buymeacoffee.com https://www.buymeacoffee.com https://vercel.live; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+          "_comment": "script-src hash covers the inline language-redirect script in index.html. Regenerate with: python3 -c \"import hashlib,base64;f=open('index.html').read();s=f[f.index('<script>')+8:f.index('</script>')];print('sha256-'+base64.b64encode(hashlib.sha256(s.encode()).digest()).decode())\"",
+          "value": "default-src 'self'; script-src 'self' 'sha256-sqF1LAH/ouvP3ila1ztpPEqjTFlSk5DRpKH+pqIW/RU=' https://umami-coral-xi.vercel.app https://cdnjs.buymeacoffee.com https://vercel.live; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://umami-coral-xi.vercel.app https://vercel.live; frame-src 'self' https://buymeacoffee.com https://www.buymeacoffee.com https://vercel.live; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
         }
       ]
     },

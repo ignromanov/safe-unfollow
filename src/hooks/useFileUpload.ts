@@ -278,8 +278,9 @@ export function useFileUpload() {
   const abortUpload = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
+      setUploadInfo({ uploadStatus: 'idle', uploadError: null });
     }
-  }, []);
+  }, [setUploadInfo]);
 
   return {
     handleZipUpload,

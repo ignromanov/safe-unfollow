@@ -1,5 +1,3 @@
-'use client';
-
 import type { DiagnosticErrorCode, ParseWarning } from '@/core/types';
 import { ALL_DIAGNOSTIC_ERROR_CODES, createDiagnosticError } from '@/core/types';
 import { analytics } from '@/lib/analytics';
@@ -203,7 +201,7 @@ export function UploadZone({
         {/* Main upload area - 3 columns */}
         <div className="flex flex-col gap-8 lg:col-span-3">
           {/* Title */}
-          <div className="text-center md:text-left">
+          <div className="text-center md:text-start">
             <h1 className="mb-4 text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-white md:text-6xl">
               {t('zone.title')}
             </h1>
@@ -308,7 +306,7 @@ export function UploadZone({
 
       {/* Dev mode: Show error preview button */}
       {import.meta.env.DEV && !devErrorCode && (
-        <div className="fixed bottom-4 left-4 z-50">
+        <div className="fixed bottom-4 start-4 z-50">
           <button
             onClick={() => setDevErrorCode('NOT_ZIP')}
             className="rounded-lg border border-zinc-700 bg-zinc-900/95 px-4 py-2 text-xs font-medium text-zinc-400 shadow-xl backdrop-blur transition-colors hover:bg-zinc-800 hover:text-zinc-200"
@@ -552,12 +550,12 @@ function DevErrorSelector({
   if (!import.meta.env.DEV) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 z-50 max-w-xs">
+    <div className="fixed bottom-4 start-4 z-50 max-w-xs">
       <div className="rounded-xl border border-zinc-700 bg-zinc-900/95 shadow-2xl backdrop-blur">
         {/* Header */}
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="flex w-full items-center justify-between px-4 py-3 text-left"
+          className="flex w-full items-center justify-between px-4 py-3 text-start"
         >
           <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">
             🔧 Dev: Error Preview
@@ -575,7 +573,7 @@ function DevErrorSelector({
                 <button
                   key={code}
                   onClick={() => onSelect(code)}
-                  className={`rounded px-2 py-1.5 text-left text-xs transition-colors ${
+                  className={`rounded px-2 py-1.5 text-start text-xs transition-colors ${
                     currentCode === code
                       ? 'bg-blue-600 font-medium text-white'
                       : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'

@@ -110,11 +110,11 @@ export function FAQSection() {
                       }
                       setOpenIndex(openIndex === index ? null : index);
                     }}
-                    className="cursor-pointer w-full px-6 py-6 md:px-10 md:py-10 flex items-center justify-between text-left hover:bg-[oklch(0.5_0_0_/_0.02)] transition-colors group"
+                    className="cursor-pointer w-full px-6 py-6 md:px-10 md:py-10 flex items-center justify-between text-start hover:bg-[oklch(0.5_0_0_/_0.02)] transition-colors group"
                     aria-expanded={openIndex === index}
                     aria-controls={`faq-answer-${item.key}`}
                   >
-                    <span className="pr-8 group-hover:text-primary transition-colors leading-tight">
+                    <span className="pe-8 group-hover:text-primary transition-colors leading-tight">
                       {item.question}
                     </span>
                     <div

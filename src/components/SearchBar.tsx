@@ -1,5 +1,3 @@
-'use client';
-
 import { Search, X, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -28,10 +26,10 @@ export function SearchBar({
       <form role="search" onSubmit={e => e.preventDefault()}>
         <div className="relative">
           {isFiltering ? (
-            <Loader2 className="absolute left-3 sm:left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground animate-spin" />
+            <Loader2 className="absolute start-3 sm:start-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground animate-spin" />
           ) : (
             <Search
-              className="absolute left-3 sm:left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground"
+              className="absolute start-3 sm:start-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground"
               aria-hidden="true"
             />
           )}
@@ -44,7 +42,7 @@ export function SearchBar({
             autoCorrect="off"
             autoCapitalize="none"
             inputMode="search"
-            className="pl-10 pr-12 sm:pr-10 text-base h-12 sm:h-10"
+            className="ps-10 pe-12 sm:pe-10 text-base h-12 sm:h-10"
             aria-label={t('search.ariaLabel')}
           />
           {value && (
@@ -52,7 +50,7 @@ export function SearchBar({
               variant="ghost"
               size="sm"
               onClick={() => onChange('')}
-              className="absolute right-1 top-1/2 h-11 w-11 sm:h-8 sm:w-8 -translate-y-1/2 p-0"
+              className="absolute end-1 top-1/2 h-11 w-11 sm:h-8 sm:w-8 -translate-y-1/2 p-0"
               aria-label={t('search.clearAriaLabel')}
             >
               <X className="h-4 w-4" />

@@ -1,5 +1,3 @@
-'use client';
-
 import type { DiagnosticError, DiagnosticErrorCode, ParseWarning } from '@/core/types';
 import { createDiagnosticError, mapWarningToDiagnosticCode } from '@/core/types';
 import {

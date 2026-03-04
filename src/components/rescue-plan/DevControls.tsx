@@ -1,5 +1,3 @@
-'use client';
-
 import { Bug } from 'lucide-react';
 
 import type { UserSegment } from '@/lib/rescue-plan';
@@ -22,7 +20,7 @@ export function DevControls({ segment, onCycle }: DevControlsProps) {
   return (
     <button
       onClick={onCycle}
-      className="absolute top-4 left-4 p-2 text-zinc-400 hover:text-primary transition-colors rounded-full hover:bg-black/5 dark:hover:bg-white/5 flex items-center gap-1 text-xs font-mono z-10"
+      className="absolute top-4 start-4 p-2 text-zinc-400 hover:text-primary transition-colors rounded-full hover:bg-black/5 dark:hover:bg-white/5 flex items-center gap-1 text-xs font-mono z-10"
       title="Cycle through severity/size combinations"
     >
       <Bug size={16} />

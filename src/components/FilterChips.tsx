@@ -1,5 +1,3 @@
-'use client';
-
 import {
   Users,
   UserPlus,
@@ -14,7 +12,12 @@ import {
   Ghost,
 } from 'lucide-react';
 import type { BadgeKey } from '@/core/types';
-import type { FilterChipsProps } from '@/types/components';
+interface FilterChipsProps {
+  selectedFilters: Set<BadgeKey>;
+  onFiltersChange: (filters: Set<BadgeKey>) => void;
+  filterCounts: Record<BadgeKey, number>;
+  isFiltering?: boolean;
+}
 import { analytics } from '@/lib/analytics';
 import type { ReactNode } from 'react';
 import { memo, useState } from 'react';
@@ -144,7 +147,7 @@ export const FilterChips = memo(function FilterChips({
                   {numberFormatter.format(count)}
                 </span>
               </div>
-              <span className="mt-3 block leading-snug text-left text-xs">{label}</span>
+              <span className="mt-3 block leading-snug text-start text-xs">{label}</span>
             </button>
           );
         })}
@@ -174,7 +177,7 @@ export const FilterChips = memo(function FilterChips({
                       0
                     </span>
                   </div>
-                  <span className="mt-3 block leading-snug text-left text-xs text-zinc-400">
+                  <span className="mt-3 block leading-snug text-start text-xs text-zinc-400">
                     {t(`badges.${cfg.type}`)}
                   </span>
                 </div>

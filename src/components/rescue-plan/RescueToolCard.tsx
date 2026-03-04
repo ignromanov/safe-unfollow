@@ -1,5 +1,3 @@
-'use client';
-
 import { ExternalLink } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -47,7 +45,7 @@ export function RescueToolCard({ tool, index, onToolClick }: RescueToolCardProps
       {/* Badge */}
       {tool.badge && (
         <span
-          className={`absolute -top-2 -right-2 px-2 py-0.5 text-xs font-bold rounded-full ${BADGE_STYLES[tool.badge]}`}
+          className={`absolute -top-2 -end-2 px-2 py-0.5 text-xs font-bold rounded-full ${BADGE_STYLES[tool.badge]}`}
         >
           {tool.badge === 'popular'
             ? `🔥 ${t('rescue.badges.popular')}`
@@ -59,7 +57,7 @@ export function RescueToolCard({ tool, index, onToolClick }: RescueToolCardProps
 
       {/* Recommended label for first item */}
       {isFirst && (
-        <span className="absolute -top-2 left-3 px-2 py-0.5 text-xs font-bold rounded-full bg-primary text-white">
+        <span className="absolute -top-2 start-3 px-2 py-0.5 text-xs font-bold rounded-full bg-primary text-white">
           ⭐ {t('rescue.recommended')}
         </span>
       )}

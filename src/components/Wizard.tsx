@@ -1,5 +1,3 @@
-'use client';
-
 import { useCallback, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, X, ExternalLink, AlertTriangle, Calendar } from 'lucide-react';
@@ -91,7 +89,7 @@ export function Wizard({ initialStep = 1, onComplete, onCancel }: WizardProps) {
   // Navigate to step via URL
   const goToStep = useCallback(
     (step: number) => {
-      navigate(`${prefix}/wizard/step/${step}`, { replace: true });
+      navigate(`${prefix}/wizard/step/${step}`);
     },
     [navigate, prefix]
   );
@@ -217,7 +215,7 @@ export function Wizard({ initialStep = 1, onComplete, onCancel }: WizardProps) {
                   />
                 )}
                 {step.isWarning && (
-                  <div className="absolute top-4 left-4 p-2.5 bg-amber-400 text-black rounded-xl shadow-lg flex items-center gap-2 font-black text-xs animate-bounce">
+                  <div className="absolute top-4 start-4 p-2.5 bg-amber-400 text-black rounded-xl shadow-lg flex items-center gap-2 font-black text-xs animate-bounce">
                     <AlertTriangle size={18} />
                     {t('format.warning')}
                   </div>

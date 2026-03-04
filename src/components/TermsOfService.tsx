@@ -1,5 +1,3 @@
-'use client';
-
 import { ScrollText, AlertTriangle, Scale, FileText, Mail, ArrowLeft } from 'lucide-react';
 
 interface TermsOfServiceProps {
@@ -88,7 +86,7 @@ export function TermsOfService({ onBack }: TermsOfServiceProps) {
             SafeUnfollow is a privacy-focused web application that allows you to analyze your
             Instagram follower data locally in your browser. The Service:
           </p>
-          <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
+          <ul className="list-disc list-inside space-y-2 text-muted-foreground ms-4">
             <li>Processes Instagram data export files (ZIP format) entirely in your browser</li>
             <li>Identifies followers, following, mutual connections, and unfollowers</li>
             <li>Stores all data locally in your browser's IndexedDB</li>
@@ -100,7 +98,7 @@ export function TermsOfService({ onBack }: TermsOfServiceProps) {
         <section>
           <h2 className="text-2xl font-bold mb-4">3. User Responsibilities</h2>
           <p className="text-muted-foreground mb-4">By using the Service, you agree to:</p>
-          <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
+          <ul className="list-disc list-inside space-y-2 text-muted-foreground ms-4">
             <li>
               Only upload Instagram data exports that belong to you or that you have permission to
               analyze
@@ -178,7 +176,7 @@ export function TermsOfService({ onBack }: TermsOfServiceProps) {
             THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND,
             EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO:
           </p>
-          <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
+          <ul className="list-disc list-inside space-y-2 text-muted-foreground ms-4">
             <li>Implied warranties of merchantability or fitness for a particular purpose</li>
             <li>Warranties that the Service will be uninterrupted, error-free, or secure</li>
             <li>Warranties regarding the accuracy or reliability of any results obtained</li>
@@ -197,7 +195,7 @@ export function TermsOfService({ onBack }: TermsOfServiceProps) {
             TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT SHALL SAFEUNFOLLOW, ITS CREATORS,
             CONTRIBUTORS, OR AFFILIATES BE LIABLE FOR:
           </p>
-          <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
+          <ul className="list-disc list-inside space-y-2 text-muted-foreground ms-4">
             <li>Any indirect, incidental, special, consequential, or punitive damages</li>
             <li>Loss of profits, data, use, or goodwill</li>
             <li>Any damages arising from your use or inability to use the Service</li>
@@ -275,7 +273,7 @@ export function TermsOfService({ onBack }: TermsOfServiceProps) {
         </section>
 
         {/* Acceptance Notice */}
-        <section className="not-prose mt-12 p-6 bg-surface border border-border rounded-2xl">
+        <section className="not-prose mt-12 p-6 bg-card border border-border rounded-2xl">
           <p className="text-muted-foreground text-center">
             By using SafeUnfollow, you acknowledge that you have read, understood, and agree to be
             bound by these Terms of Service.

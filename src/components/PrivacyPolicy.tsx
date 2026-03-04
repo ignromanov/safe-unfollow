@@ -1,5 +1,3 @@
-'use client';
-
 import { Shield, Database, Eye, Lock, Mail, ArrowLeft } from 'lucide-react';
 
 interface PrivacyPolicyProps {
@@ -80,7 +78,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             When you upload your Instagram data export (ZIP file), all processing happens entirely
             within your web browser:
           </p>
-          <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
+          <ul className="list-disc list-inside space-y-2 text-muted-foreground ms-4">
             <li>Your followers and following lists</li>
             <li>Account relationships (mutual, non-mutual, etc.)</li>
             <li>Timestamps from Instagram's export</li>
@@ -104,7 +102,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
           <p className="text-muted-foreground mb-4">
             We use privacy-friendly analytics services (Vercel Analytics, Umami) that collect:
           </p>
-          <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
+          <ul className="list-disc list-inside space-y-2 text-muted-foreground ms-4">
             <li>Page views and navigation patterns</li>
             <li>Device type and browser (anonymized)</li>
             <li>Geographic region (country-level, not precise location)</li>
@@ -120,7 +118,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
           <p className="text-muted-foreground">
             We store the following in your browser's local storage:
           </p>
-          <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4 mt-2">
+          <ul className="list-disc list-inside space-y-2 text-muted-foreground ms-4 mt-2">
             <li>Theme preference (dark/light mode)</li>
             <li>Analytics opt-out preference</li>
             <li>UI state (filter selections)</li>
@@ -133,7 +131,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
           <p className="text-muted-foreground mb-4">
             To be absolutely clear, we never collect or have access to:
           </p>
-          <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
+          <ul className="list-disc list-inside space-y-2 text-muted-foreground ms-4">
             <li>Your Instagram username or profile</li>
             <li>Your followers or following lists</li>
             <li>Any content from your Instagram export</li>
@@ -151,7 +149,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
           <p className="text-muted-foreground">
             All data processing occurs within your browser's security sandbox. IndexedDB storage is:
           </p>
-          <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4 mt-2">
+          <ul className="list-disc list-inside space-y-2 text-muted-foreground ms-4 mt-2">
             <li>Isolated to this website only</li>
             <li>Inaccessible to other websites or applications</li>
             <li>Encrypted at rest by modern browsers</li>
@@ -223,7 +221,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             Since we don't collect personal data, traditional data rights (access, deletion,
             portability) don't apply in the usual sense. However:
           </p>
-          <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
+          <ul className="list-disc list-inside space-y-2 text-muted-foreground ms-4">
             <li>
               <strong className="text-foreground">Delete your data:</strong> Clear your browser's
               IndexedDB storage or use the "Clear Data" button in the app
@@ -265,7 +263,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
         </section>
 
         {/* Trust Badge */}
-        <section className="not-prose mt-12 p-6 bg-surface border border-border rounded-2xl flex items-center gap-4">
+        <section className="not-prose mt-12 p-6 bg-card border border-border rounded-2xl flex items-center gap-4">
           <Eye className="w-10 h-10 text-primary flex-shrink-0" />
           <div>
             <p className="font-bold text-lg">Privacy by Design</p>

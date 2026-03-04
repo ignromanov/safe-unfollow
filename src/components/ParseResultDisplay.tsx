@@ -55,8 +55,8 @@ function FileDiscoveryTable({ discovery }: { discovery: FileDiscovery }) {
           <table className="w-full text-sm">
             <thead className="bg-muted/50">
               <tr>
-                <th className="text-left px-3 py-2 font-medium">File</th>
-                <th className="text-left px-3 py-2 font-medium">Description</th>
+                <th className="text-start px-3 py-2 font-medium">File</th>
+                <th className="text-start px-3 py-2 font-medium">Description</th>
                 <th className="text-center px-3 py-2 font-medium">Status</th>
                 <th className="text-right px-3 py-2 font-medium">Count</th>
               </tr>
@@ -91,8 +91,8 @@ function FileDiscoveryTable({ discovery }: { discovery: FileDiscovery }) {
             <table className="w-full text-sm">
               <thead className="bg-muted/50">
                 <tr>
-                  <th className="text-left px-3 py-2 font-medium">File</th>
-                  <th className="text-left px-3 py-2 font-medium">Description</th>
+                  <th className="text-start px-3 py-2 font-medium">File</th>
+                  <th className="text-start px-3 py-2 font-medium">Description</th>
                   <th className="text-center px-3 py-2 font-medium">Status</th>
                   <th className="text-right px-3 py-2 font-medium">Count</th>
                 </tr>

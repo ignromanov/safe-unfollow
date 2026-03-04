@@ -1,5 +1,3 @@
-'use client';
-
 import { TrendingDown, AlertTriangle, TrendingUp, ChevronDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -44,7 +42,7 @@ export function CollapsedBanner({
         <div className={`p-1.5 rounded-lg shrink-0 ${style.bgLightClass}`}>
           <SeverityIcon className={`w-4 h-4 ${style.iconColorClass}`} />
         </div>
-        <div className="text-left">
+        <div className="text-start">
           <p className="font-semibold text-xs text-zinc-900 dark:text-white">
             {t(getTitleKey(severity) as any, {
               unfollowedPercent: unfollowedPercent.toFixed(1),

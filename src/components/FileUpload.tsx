@@ -1,12 +1,16 @@
-'use client';
-
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { ParseResultDisplay } from '@/components/ParseResultDisplay';
-import type { FileUploadProps } from '@/types/components';
 import { AlertCircle, BookOpen, FileArchive, Info, Upload } from 'lucide-react';
 import type React from 'react';
 import { useCallback } from 'react';
+
+interface FileUploadProps {
+  onFileSelect: (file: File) => void;
+  isLoading: boolean;
+  error: string | null;
+  onHelpClick: () => void;
+}
 
 export function FileUpload({ onFileSelect, isLoading, error, onHelpClick }: FileUploadProps) {
   const handleDrop = useCallback(
@@ -84,7 +88,7 @@ export function FileUpload({ onFileSelect, isLoading, error, onHelpClick }: File
 
           {!isLoading && (
             <Button size="lg" className="mt-4">
-              <Upload className="mr-2 h-5 w-5" />
+              <Upload className="me-2 h-5 w-5" />
               Select ZIP File
             </Button>
           )}

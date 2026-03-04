@@ -114,14 +114,14 @@ export function HowToSection({ onStart }: HowToSectionProps) {
             {t('subtitle')}
           </p>
 
-          <ol className="space-y-16 md:space-y-24 relative before:absolute before:left-6 md:before:left-8 before:top-4 before:bottom-4 before:w-0.5 before:bg-border">
+          <ol className="space-y-16 md:space-y-24 relative before:absolute before:start-6 md:before:start-8 before:top-4 before:bottom-4 before:w-0.5 before:bg-border">
             {steps.map((step, idx) => (
               <li
                 key={step.id}
                 role="button"
                 tabIndex={0}
                 aria-label={t('openStepAria', { step: step.id, title: step.title })}
-                className="relative pl-16 md:pl-24 group cursor-pointer"
+                className="relative ps-16 md:ps-24 group cursor-pointer"
                 onClick={() => handleStepClick(idx)}
                 onKeyDown={e => {
                   if (e.key === 'Enter' || e.key === ' ') {
@@ -130,7 +130,7 @@ export function HowToSection({ onStart }: HowToSectionProps) {
                   }
                 }}
               >
-                <div className="absolute left-0 top-0 w-12 h-12 md:w-16 md:h-16 rounded-2xl md:rounded-3xl bg-card border-2 border-primary flex items-center justify-center font-black text-lg md:text-2xl text-primary z-10 group-hover:scale-110 group-hover:shadow-2xl transition-all duration-300">
+                <div className="absolute start-0 top-0 w-12 h-12 md:w-16 md:h-16 rounded-2xl md:rounded-3xl bg-card border-2 border-primary flex items-center justify-center font-black text-lg md:text-2xl text-primary z-10 group-hover:scale-110 group-hover:shadow-2xl transition-all duration-300">
                   {step.id}
                 </div>
                 <div className="space-y-4">
@@ -179,7 +179,7 @@ export function HowToSection({ onStart }: HowToSectionProps) {
           </ol>
 
           <div className="mt-24 md:mt-40 p-10 md:p-16 rounded-4xl bg-primary text-white flex flex-col md:flex-row items-center justify-between gap-10 shadow-2xl shadow-primary/30">
-            <div className="text-center md:text-left space-y-4">
+            <div className="text-center md:text-start space-y-4">
               <h4 className="text-3xl md:text-5xl font-display font-black tracking-tight leading-none">
                 {t('cta.title')}
               </h4>

@@ -146,6 +146,10 @@
   button, [role="button"], a[href], input[type="button"], input[type="submit"] {
     cursor: pointer;
   }
+  /* Remove tap highlight on mobile for interactive elements */
+  [role="button"], button, a {
+    -webkit-tap-highlight-color: transparent;
+  }
 }
 
 @layer utilities {
