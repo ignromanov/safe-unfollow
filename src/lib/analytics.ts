@@ -57,7 +57,7 @@ export function optIntoTracking(): void {
 }
 
 // Event name constants
-// V10: Removed SESSION_DURATION (Umami native), RESCUE_PLAN_IMPRESSION (low value),
+// V10: Removed SESSION_DURATION (Umami native),
 //      RESULTS_SCROLL_DEPTH (inferred from time_on_results),
 //      WIZARD_BACK_CLICK/CANCEL (low actionability)
 export const AnalyticsEvents = {
@@ -146,8 +146,10 @@ export const AnalyticsEvents = {
   DONATION_CARD_CLICK: 'donation_card_click',
   DONATION_CARD_DISMISS: 'donation_card_dismiss',
 
-  // Rescue Plan (V10: removed impression, kept only tool_click)
+  // Rescue Plan
+  RESCUE_PLAN_IMPRESSION: 'rescue_plan_impression',
   RESCUE_PLAN_TOOL_CLICK: 'rescue_plan_tool_click',
+  RESCUE_PLAN_DISMISS: 'rescue_plan_dismiss',
 
   // Error tracking
   ERROR_BOUNDARY: 'error_boundary',
@@ -521,10 +523,24 @@ export const analytics = {
     });
   },
 
-  // Rescue Plan (V10: removed impression, kept only tool_click)
+  // Rescue Plan (100% sampling — high-value conversion events)
+  rescuePlanImpression: (severity: string, size: string) => {
+    trackEvent(AnalyticsEvents.RESCUE_PLAN_IMPRESSION, {
+      severity,
+      size,
+    });
+  },
+
   rescuePlanToolClick: (toolId: string, severity: string, size: string) => {
     trackEvent(AnalyticsEvents.RESCUE_PLAN_TOOL_CLICK, {
       tool_id: toolId,
+      severity,
+      size,
+    });
+  },
+
+  rescuePlanDismiss: (severity: string, size: string) => {
+    trackEvent(AnalyticsEvents.RESCUE_PLAN_DISMISS, {
       severity,
       size,
     });

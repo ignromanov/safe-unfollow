@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 
 const STORAGE_KEY = 'donation_card_dismissed';
-const TTL_DAYS = 30;
+const TTL_DAYS = 14;
 const TTL_MS = TTL_DAYS * 24 * 60 * 60 * 1000;
 
 interface DismissState {

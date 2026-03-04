@@ -84,12 +84,14 @@ export function RescueToolCard({ tool, index, onToolClick }: RescueToolCardProps
         </div>
 
         {/* Description */}
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-3">{t(tool.descKey as any)}</p>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-3 line-clamp-1 md:line-clamp-none">
+          {t(tool.descKey as any)}
+        </p>
       </div>
 
       {/* CTA Button - always at bottom */}
       <div
-        className={`w-full py-2 px-3 rounded-xl text-center text-sm font-semibold transition-all mt-auto ${
+        className={`w-full py-1.5 md:py-2 px-3 rounded-xl text-center text-sm font-semibold transition-all mt-auto ${
           isFirst
             ? 'bg-primary text-white group-hover:bg-primary/90'
             : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 group-hover:bg-primary group-hover:text-white'

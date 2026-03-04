@@ -113,8 +113,8 @@ export const FilterChips = memo(function FilterChips({
         )}
       </div>
 
-      {/* Available Filters — horizontal scroll on mobile */}
-      <div className="flex lg:grid lg:grid-cols-1 gap-2.5 overflow-x-auto flex-nowrap lg:flex-wrap lg:overflow-x-visible snap-x snap-mandatory scrollbar-hide pb-2 lg:pb-0 -mx-1 px-1 lg:mx-0 lg:px-0">
+      {/* Available Filters — 2-col grid on mobile, 1-col on desktop sidebar */}
+      <div className="grid grid-cols-2 lg:grid-cols-1 gap-2.5">
         {availableFilters.map(cfg => {
           const isActive = selectedFilters.has(cfg.type);
           const count = getBadgeCount(cfg.type);
@@ -123,7 +123,7 @@ export const FilterChips = memo(function FilterChips({
             <button
               key={cfg.type}
               onClick={() => handleFilterToggle(cfg.type)}
-              className={`snap-start shrink-0 lg:shrink cursor-pointer flex flex-col items-start justify-between p-4 rounded-2xl text-xs font-bold transition-all border min-h-[85px] min-w-[140px] lg:min-w-0 relative ${
+              className={`cursor-pointer flex flex-col items-start justify-between p-4 rounded-2xl text-xs font-bold transition-all border min-h-[85px] relative ${
                 isActive
                   ? 'bg-primary text-white border-primary shadow-md'
                   : 'text-zinc-600 dark:text-zinc-400 border-border bg-zinc-50/50 dark:bg-zinc-900/20 hover:border-primary/40'
@@ -165,11 +165,11 @@ export const FilterChips = memo(function FilterChips({
           </button>
 
           {showEmptyFilters && (
-            <div className="flex lg:grid lg:grid-cols-1 gap-2.5 mt-4 animate-in slide-in-from-top-2 duration-300 overflow-x-auto flex-nowrap lg:flex-wrap lg:overflow-x-visible snap-x snap-mandatory scrollbar-hide pb-2 lg:pb-0 -mx-1 px-1 lg:mx-0 lg:px-0">
+            <div className="grid grid-cols-2 lg:grid-cols-1 gap-2.5 mt-4 animate-in slide-in-from-top-2 duration-300">
               {emptyFilters.map(cfg => (
                 <div
                   key={cfg.type}
-                  className="snap-start shrink-0 lg:shrink flex flex-col items-start justify-between p-4 rounded-2xl text-xs font-bold border border-border bg-zinc-50/20 dark:bg-zinc-900/10 opacity-60 min-h-[85px] min-w-[140px] lg:min-w-0"
+                  className="flex flex-col items-start justify-between p-4 rounded-2xl text-xs font-bold border border-border bg-zinc-50/20 dark:bg-zinc-900/10 opacity-60 min-h-[85px]"
                 >
                   <div className="flex items-center justify-between w-full">
                     <span>{getBadgeIcon(cfg.type, false)}</span>

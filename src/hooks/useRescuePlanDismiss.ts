@@ -6,14 +6,14 @@ import type { UserSegment } from '@/lib/rescue-plan';
  * Hook for managing rescue plan banner dismiss state with localStorage persistence.
  *
  * Features:
- * - 7-day TTL for dismiss state
+ * - 14-day TTL for dismiss state
  * - Segment change re-engagement (shows again if severity worsens)
  * - Stores segment info for analytics
  * - SSR-safe (checks window)
  */
 
 const STORAGE_KEY = 'rescue_plan_dismissed';
-const TTL_DAYS = 5;
+const TTL_DAYS = 14;
 const TTL_MS = TTL_DAYS * 24 * 60 * 60 * 1000;
 
 /** Severity order for comparison (higher = worse) */

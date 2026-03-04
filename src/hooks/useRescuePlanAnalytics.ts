@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 import { analytics } from '@/lib/analytics';
 import type { UserSegment, RescueTool } from '@/lib/rescue-plan';
@@ -9,7 +9,6 @@ import type { UserSegment, RescueTool } from '@/lib/rescue-plan';
  * Consolidates all analytics logic:
  * - Impression tracking (once per session)
  * - Tool click tracking
- * - View time tracking (on unmount)
  * - Dismiss tracking
  */
 
@@ -21,9 +20,19 @@ interface UseRescuePlanAnalyticsOptions {
 
 export function useRescuePlanAnalytics({
   segment,
-  isVisible: _isVisible,
+  isVisible,
   isDevMode,
 }: UseRescuePlanAnalyticsOptions) {
+  const impressionTrackedRef = useRef(false);
+
+  // Track impression once per session
+  useEffect(() => {
+    if (!isDevMode && isVisible && !impressionTrackedRef.current) {
+      impressionTrackedRef.current = true;
+      analytics.rescuePlanImpression(segment.severity, segment.size);
+    }
+  }, [isVisible, isDevMode, segment.severity, segment.size]);
+
   // Handle tool click with analytics
   const handleToolClick = useCallback(
     (tool: RescueTool, e: React.MouseEvent) => {
@@ -36,10 +45,10 @@ export function useRescuePlanAnalytics({
     [segment, isDevMode]
   );
 
-  // V9: rescuePlanDismiss event removed (low value). Dismiss still works via hook.
   const trackDismiss = useCallback(() => {
-    // No-op: dismiss tracking removed in V9
-  }, []);
+    if (isDevMode) return;
+    analytics.rescuePlanDismiss(segment.severity, segment.size);
+  }, [segment, isDevMode]);
 
   return {
     handleToolClick,
