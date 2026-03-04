@@ -56,6 +56,15 @@
     "header": "Accounts ({{count, number}})",
     "viewProfile": "View Profile"
   },
+  "donation": {
+    "headline": "You just analyzed {{count}} accounts — for free.",
+    "body": "No login. No server. No data sent anywhere. If this saved you time, a coffee keeps it going.",
+    "headlineMobile": "Free. Private. No login.",
+    "bodyMobile": "If it was useful, consider buying a coffee.",
+    "cta": "Buy a Coffee",
+    "ctaMobile": "Support",
+    "dismiss": "Not now"
+  },
   "rescue": {
     "critical": {
       "title": "You've lost {{unfollowedPercent}}% — recover in 7 days",
@@ -98,7 +107,8 @@
     "dismiss": "Maybe later",
     "disclaimer": "Hand-picked tools we recommend. Affiliate links fund free updates — no cost to you.",
     "urgency": {
-      "critical": "Act now — engagement drops 40% after 48 hours"
+      "critical": "Act now — engagement drops 40% after 48 hours",
+      "warning": "Early action prevents bigger losses — optimize now"
     },
     "ariaLabel": "Recommended tools to improve your Instagram presence",
     "badges": {

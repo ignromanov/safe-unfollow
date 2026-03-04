@@ -1,5 +1,3 @@
-'use client';
-
 import { TrendingDown, AlertTriangle, TrendingUp, ChevronDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -54,7 +52,7 @@ export function ExpandedBanner({
       {/* Collapse button */}
       <button
         onClick={onDismiss}
-        className="absolute top-4 right-4 p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors rounded-full hover:bg-black/5 dark:hover:bg-white/5"
+        className="absolute top-4 end-4 p-3 min-h-[44px] min-w-[44px] flex items-center justify-center text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors rounded-full hover:bg-black/5 dark:hover:bg-white/5"
         aria-label={t('rescue.dismiss')}
       >
         <ChevronDown size={20} className="rotate-180" />
@@ -66,7 +64,7 @@ export function ExpandedBanner({
           <div className={`p-4 rounded-2xl shrink-0 ${style.bgLightClass}`}>
             <SeverityIcon className={`w-8 h-8 ${style.iconColorClass}`} />
           </div>
-          <div className="pr-8">
+          <div className="pe-8">
             <h3 className="text-xl md:text-2xl font-display font-bold text-zinc-900 dark:text-white">
               {t(getTitleKey(segment.severity) as any, {
                 unfollowedPercent: segment.unfollowedPercent.toFixed(1),
@@ -80,12 +78,20 @@ export function ExpandedBanner({
           </div>
         </div>
 
-        {/* Urgency element for critical severity */}
+        {/* Urgency element for critical and warning severity */}
         {segment.severity === 'critical' && (
           <div className="flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 rounded-xl mb-4 border border-orange-200 dark:border-orange-800">
             <AlertTriangle className="w-4 h-4 text-orange-600 animate-pulse" />
             <span className="text-sm font-semibold text-orange-700 dark:text-orange-400">
               {t('rescue.urgency.critical')}
+            </span>
+          </div>
+        )}
+        {segment.severity === 'warning' && (
+          <div className="flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 rounded-xl mb-4 border border-amber-200 dark:border-amber-800">
+            <AlertTriangle className="w-4 h-4 text-amber-600 animate-pulse" />
+            <span className="text-sm font-semibold text-amber-700 dark:text-amber-400">
+              {t('rescue.urgency.warning')}
             </span>
           </div>
         )}
@@ -95,7 +101,7 @@ export function ExpandedBanner({
           {/* Mobile carousel */}
           <div
             ref={scrollRef}
-            className="flex gap-4 overflow-x-auto overscroll-x-contain scroll-smooth snap-x snap-mandatory pl-6 pt-3 pb-2 scroll-pl-6 md:hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="flex gap-4 overflow-x-auto overscroll-x-contain scroll-smooth snap-x snap-mandatory ps-6 pt-3 pb-2 scroll-ps-6 md:hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {tools.map((tool, index) => (
               <div

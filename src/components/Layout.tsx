@@ -87,7 +87,7 @@ export function Layout({ lang }: LayoutProps) {
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
         <div
           dir={isRTL ? 'rtl' : 'ltr'}
-          className="min-h-dvh bg-background flex flex-col transition-colors duration-300"
+          className="min-h-dvh bg-background flex flex-col"
           suppressHydrationWarning
         >
           <a
@@ -112,10 +112,10 @@ export function Layout({ lang }: LayoutProps) {
 
           <Footer />
 
-          {/* BMC Widget - shows only on results pages, auto-open disabled */}
+          {/* BMC Widget - shows only on results pages, auto-expand after 60s */}
           <BuyMeCoffeeWidget
             show={isResultsPage}
-            expandDelay={999999999}
+            expandDelay={60000}
             autoCollapseAfter={10000}
             skipStorageCheck={pathname.endsWith('/sample')}
           />

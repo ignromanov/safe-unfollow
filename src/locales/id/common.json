@@ -53,7 +53,10 @@
     "forTheCommunity": "untuk Komunitas",
     "copyright": "© 2026 SafeUnfollow.app",
     "license": "Lisensi MIT",
-    "viewSource": "Kode Sumber"
+    "viewSource": "Kode Sumber",
+    "analyzedCount": "Anda menganalisis {{count}} akun. Itu gratis.",
+    "noAdsNoInvestors": "Alat ini tidak memiliki iklan maupun investor.",
+    "buyACoffee": "Traktir Kopi"
   },
   "nav": {
     "privacy": "Kebijakan Privasi",

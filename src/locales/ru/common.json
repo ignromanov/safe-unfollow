@@ -53,7 +53,10 @@
     "forTheCommunity": "для сообщества",
     "copyright": "© 2026 SafeUnfollow.app",
     "license": "Лицензия MIT",
-    "viewSource": "Исходный код"
+    "viewSource": "Исходный код",
+    "analyzedCount": "Вы проанализировали {{count}} аккаунтов. Это было бесплатно.",
+    "noAdsNoInvestors": "В этом инструменте нет рекламы и инвесторов.",
+    "buyACoffee": "Купить кофе"
   },
   "nav": {
     "privacy": "Политика конфиденциальности",

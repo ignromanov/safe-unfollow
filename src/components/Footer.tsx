@@ -1,16 +1,16 @@
-'use client';
-
 import { useState, useEffect } from 'react';
-import { Heart, Shield, EyeOff, Eye, Github, BookOpen } from 'lucide-react';
+import { Heart, Coffee, EyeOff, Eye, Github, BookOpen } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { analytics, isTrackingOptedOut, optOutOfTracking, optIntoTracking } from '@/lib/analytics';
 import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
+import { useAppStore } from '@/lib/store';
 import { Logo } from './Logo';
 
 export function Footer() {
   const { t } = useTranslation('common');
   const prefix = useLanguagePrefix();
+  const fileMetadata = useAppStore(s => s.fileMetadata);
 
   // Prevent hydration mismatch - localStorage is unknown on server
   const [mounted, setMounted] = useState(false);
@@ -20,6 +20,8 @@ export function Footer() {
     setMounted(true);
     setIsOptedOut(isTrackingOptedOut());
   }, []);
+
+  const accountCount = mounted ? fileMetadata?.accountCount : undefined;
 
   const handleTrackingToggle = () => {
     if (isOptedOut) {
@@ -35,7 +37,7 @@ export function Footer() {
       <div className="container mx-auto px-4">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-10 lg:gap-20">
           {/* Logo & Description */}
-          <div className="text-center lg:text-left">
+          <div className="text-center lg:text-start">
             <div className="font-bold text-2xl mb-6 flex items-center justify-center lg:justify-start gap-4 group">
               <Logo
                 size={56}
@@ -75,8 +77,9 @@ export function Footer() {
                 className="hover:text-primary transition-colors py-2 px-1 flex items-center gap-1.5 cursor-pointer"
                 onClick={() => analytics.linkClick('docs')}
               >
-                <BookOpen size={14} />
+                <BookOpen size={14} aria-hidden="true" />
                 {t('footer.docs')}
+                <span className="sr-only"> (opens in new tab)</span>
               </a>
               <a
                 href="https://safeunfollow.app/docs/troubleshooting"
@@ -86,6 +89,7 @@ export function Footer() {
                 onClick={() => analytics.linkClick('docs-troubleshooting')}
               >
                 {t('footer.troubleshooting')}
+                <span className="sr-only"> (opens in new tab)</span>
               </a>
               <a
                 href="https://safeunfollow.app/docs/accessibility"
@@ -95,6 +99,7 @@ export function Footer() {
                 onClick={() => analytics.linkClick('docs-accessibility')}
               >
                 {t('footer.accessibility')}
+                <span className="sr-only"> (opens in new tab)</span>
               </a>
               <a
                 href="mailto:hello@safeunfollow.app"
@@ -127,15 +132,21 @@ export function Footer() {
                 className="hover:text-primary transition-colors py-2 px-1 flex items-center gap-1.5 cursor-pointer"
                 onClick={() => analytics.linkClick('github')}
               >
-                <Github size={14} />
+                <Github size={14} aria-hidden="true" />
                 {t('footer.viewSource')}
+                <span className="sr-only"> (opens in new tab)</span>
               </a>
             </div>
 
             {/* BuyMeaCoffee Section */}
             <div className="bg-[oklch(0.5_0_0_/_0.03)] p-6 lg:p-8 rounded-3xl border border-border flex flex-col items-center gap-5 shadow-sm w-full lg:w-auto">
-              <p className="text-xs lg:text-sm font-black text-zinc-500 uppercase tracking-widest leading-none">
-                {t('footer.keepItFree')}
+              <p
+                className="text-xs lg:text-sm font-black text-zinc-500 uppercase tracking-widest leading-none"
+                suppressHydrationWarning
+              >
+                {accountCount
+                  ? t('footer.analyzedCount', { count: accountCount })
+                  : t('footer.noAdsNoInvestors')}
               </p>
               <a
                 href="https://www.buymeacoffee.com/ignromanov"
@@ -144,8 +155,9 @@ export function Footer() {
                 className="group flex items-center gap-4 px-10 py-5 bg-primary text-primary-foreground rounded-2xl font-black text-sm lg:text-lg shadow-xl hover:scale-105 active:scale-95 transition-all w-full lg:w-auto justify-center cursor-pointer"
                 onClick={() => analytics.linkClick('buy-me-coffee')}
               >
-                <Shield size={22} className="fill-current" />
-                <span>{t('footer.supportPrivacy')}</span>
+                <Coffee size={22} aria-hidden="true" />
+                <span>{t('footer.buyACoffee')}</span>
+                <span className="sr-only"> (opens in new tab)</span>
               </a>
             </div>
           </div>

@@ -56,6 +56,15 @@
     "header": "Cuentas ({{count, number}})",
     "viewProfile": "Ver Perfil"
   },
+  "donation": {
+    "headline": "Acabas de analizar {{count}} cuentas — gratis.",
+    "body": "Sin login. Sin servidor. Sin datos enviados. Si te ahorró tiempo, un café lo mantiene vivo.",
+    "headlineMobile": "Gratis. Privado. Sin login.",
+    "bodyMobile": "Si fue útil, considera un café.",
+    "cta": "Invitar un Café",
+    "ctaMobile": "Apoyar",
+    "dismiss": "Ahora no"
+  },
   "rescue": {
     "critical": {
       "title": "Has perdido {{unfollowedPercent}}% — recupérate en 7 días",
@@ -98,7 +107,8 @@
     "dismiss": "Quizás después",
     "disclaimer": "Herramientas seleccionadas que recomendamos. Los enlaces de afiliados financian actualizaciones gratuitas — sin costo para ti.",
     "urgency": {
-      "critical": "Actúa ahora — el engagement cae 40% después de 48 horas"
+      "critical": "Actúa ahora — el engagement cae 40% después de 48 horas",
+      "warning": "Actuar temprano previene pérdidas mayores — optimiza ahora"
     },
     "ariaLabel": "Herramientas recomendadas para mejorar tu presencia en Instagram",
     "badges": {

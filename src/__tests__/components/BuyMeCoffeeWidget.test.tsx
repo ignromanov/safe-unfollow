@@ -64,8 +64,10 @@ describe('BuyMeCoffeeWidget', () => {
       const script = document.getElementById(BMC_SCRIPT_ID) as HTMLScriptElement;
       expect(script.getAttribute('data-name')).toBe('BMC-Widget');
       expect(script.getAttribute('data-id')).toBe('ignromanov');
-      expect(script.getAttribute('data-description')).toBe('Support privacy-first tools');
-      expect(script.getAttribute('data-message')).toBe('Thanks for using a private tool! 🛡️');
+      expect(script.getAttribute('data-description')).toBe(
+        'Free Instagram tracker. Your data stays local.'
+      );
+      expect(script.getAttribute('data-message')).toBe('If it helped, a coffee keeps it free.');
       expect(script.getAttribute('data-color')).toBe('#6366F1');
       expect(script.getAttribute('data-position')).toBe('left');
       expect(script.getAttribute('data-x_margin')).toBe('18');
@@ -109,7 +111,7 @@ describe('BuyMeCoffeeWidget', () => {
 
   describe('Widget Auto-Expansion', () => {
     it('should not auto-expand if localStorage flag is set', () => {
-      localStorage.setItem(BMC_STORAGE_KEY, 'true');
+      localStorage.setItem(BMC_STORAGE_KEY, String(Date.now()));
 
       render(<BuyMeCoffeeWidget show={true} expandDelay={100} />);
 
@@ -144,13 +146,15 @@ describe('BuyMeCoffeeWidget', () => {
       vi.advanceTimersByTime(150);
 
       expect(clickSpy).toHaveBeenCalledTimes(1);
-      expect(localStorage.getItem(BMC_STORAGE_KEY)).toBe('true');
+      const storedValue = localStorage.getItem(BMC_STORAGE_KEY);
+      expect(storedValue).not.toBeNull();
+      expect(Number(storedValue)).toBeGreaterThan(0);
 
       mockWidget.remove();
     });
 
     it('should skip localStorage check when skipStorageCheck=true', () => {
-      localStorage.setItem(BMC_STORAGE_KEY, 'true');
+      localStorage.setItem(BMC_STORAGE_KEY, String(Date.now()));
 
       render(
         <BuyMeCoffeeWidget
@@ -527,7 +531,9 @@ describe('BuyMeCoffeeWidget', () => {
         vi.advanceTimersByTime(150);
       }).not.toThrow();
 
-      expect(localStorage.getItem(BMC_STORAGE_KEY)).toBe('true');
+      const storedValue = localStorage.getItem(BMC_STORAGE_KEY);
+      expect(storedValue).not.toBeNull();
+      expect(Number(storedValue)).toBeGreaterThan(0);
     });
 
     it('should handle widget not present when collapse timer fires', () => {
@@ -599,7 +605,9 @@ describe('BuyMeCoffeeWidget', () => {
 
       vi.advanceTimersByTime(150);
 
-      expect(localStorage.getItem(BMC_STORAGE_KEY)).toBe('true');
+      const storedValue = localStorage.getItem(BMC_STORAGE_KEY);
+      expect(storedValue).not.toBeNull();
+      expect(Number(storedValue)).toBeGreaterThan(0);
 
       unmount();
       mockWidget.remove();

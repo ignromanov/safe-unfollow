@@ -397,7 +397,7 @@ describe('Layout', () => {
     it('should configure BMC widget with correct props', () => {
       renderLayout('/results');
 
-      expect(screen.getByText('expandDelay: 999999999')).toBeInTheDocument();
+      expect(screen.getByText('expandDelay: 60000')).toBeInTheDocument();
       expect(screen.getByText('autoCollapseAfter: 10000')).toBeInTheDocument();
     });
 

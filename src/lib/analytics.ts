@@ -141,6 +141,11 @@ export const AnalyticsEvents = {
   // FAQ
   FAQ_EXPAND: 'faq_expand',
 
+  // Donation Card
+  DONATION_CARD_IMPRESSION: 'donation_card_impression',
+  DONATION_CARD_CLICK: 'donation_card_click',
+  DONATION_CARD_DISMISS: 'donation_card_dismiss',
+
   // Rescue Plan (V10: removed impression, kept only tool_click)
   RESCUE_PLAN_TOOL_CLICK: 'rescue_plan_tool_click',
 
@@ -494,6 +499,25 @@ export const analytics = {
     trackEvent(AnalyticsEvents.SAMPLE_DATA_LOAD, {
       account_count: accountCount,
       load_time_ms: Math.round(loadTimeMs),
+    });
+  },
+
+  // Donation Card (100% sampling — high-value conversion events)
+  donationCardImpression: (accountCount: number) => {
+    trackEvent(AnalyticsEvents.DONATION_CARD_IMPRESSION, {
+      account_count: accountCount,
+    });
+  },
+
+  donationCardClick: (accountCount: number) => {
+    trackEvent(AnalyticsEvents.DONATION_CARD_CLICK, {
+      account_count: accountCount,
+    });
+  },
+
+  donationCardDismiss: (accountCount: number) => {
+    trackEvent(AnalyticsEvents.DONATION_CARD_DISMISS, {
+      account_count: accountCount,
     });
   },
 

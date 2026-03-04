@@ -56,6 +56,15 @@
     "header": "Akun ({{count, number}})",
     "viewProfile": "Lihat Profil"
   },
+  "donation": {
+    "headline": "Anda baru saja menganalisis {{count}} akun — gratis.",
+    "body": "Tanpa login. Tanpa server. Tidak ada data yang dikirim. Jika ini menghemat waktu Anda, secangkir kopi menjaga proyek tetap berjalan.",
+    "headlineMobile": "Gratis. Privat. Tanpa login.",
+    "bodyMobile": "Jika bermanfaat, pertimbangkan untuk mentraktir kopi.",
+    "cta": "Traktir Kopi",
+    "ctaMobile": "Dukung",
+    "dismiss": "Nanti saja"
+  },
   "rescue": {
     "critical": {
       "title": "Anda kehilangan {{unfollowedPercent}}% — pulih dalam 7 hari",
@@ -98,7 +107,8 @@
     "dismiss": "Mungkin nanti",
     "disclaimer": "Tools pilihan yang kami rekomendasikan. Tautan afiliasi mendanai pembaruan gratis — tanpa biaya tambahan untuk Anda.",
     "urgency": {
-      "critical": "Bertindak sekarang — engagement turun 40% setelah 48 jam"
+      "critical": "Bertindak sekarang — engagement turun 40% setelah 48 jam",
+      "warning": "Tindakan dini mencegah kerugian lebih besar — optimalkan sekarang"
     },
     "ariaLabel": "Tools yang direkomendasikan untuk meningkatkan kehadiran Instagram Anda",
     "badges": {

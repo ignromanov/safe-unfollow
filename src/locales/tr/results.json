@@ -56,6 +56,15 @@
     "header": "Hesaplar ({{count, number}})",
     "viewProfile": "Profili Görüntüle"
   },
+  "donation": {
+    "headline": "Az önce {{count}} hesabı analiz ettiniz — ücretsiz.",
+    "body": "Giriş yok. Sunucu yok. Hiçbir veri gönderilmedi. Zaman kazandırdıysa, bir kahve projeyi ayakta tutar.",
+    "headlineMobile": "Ücretsiz. Özel. Giriş yok.",
+    "bodyMobile": "Faydalı olduysa, bir kahve ısmarlayın.",
+    "cta": "Kahve Ismarla",
+    "ctaMobile": "Destekle",
+    "dismiss": "Şimdi değil"
+  },
   "rescue": {
     "critical": {
       "title": "%{{unfollowedPercent}} kaybettiniz — 7 günde kurtarın",
@@ -98,7 +107,8 @@
     "dismiss": "Belki sonra",
     "disclaimer": "Önerdiğimiz el yapımı seçilmiş araçlar. Ortaklık bağlantıları ücretsiz güncellemeleri finanse eder — size ekstra maliyet yok.",
     "urgency": {
-      "critical": "Şimdi harekete geçin — etkileşim 48 saat sonra %40 düşer"
+      "critical": "Şimdi harekete geçin — etkileşim 48 saat sonra %40 düşer",
+      "warning": "Erken harekete geçmek daha büyük kayıpları önler — şimdi optimize edin"
     },
     "ariaLabel": "Instagram varlığınızı geliştirmek için önerilen araçlar",
     "badges": {

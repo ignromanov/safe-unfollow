@@ -1,5 +1,3 @@
-'use client';
-
 import {
   Search,
   Users,
@@ -13,6 +11,7 @@ import {
 import { FilterChips } from './FilterChips';
 import { AccountList } from './AccountList';
 import { StatCard } from './StatCard';
+import { InlineDonationCard } from './InlineDonationCard';
 import { RescuePlanBanner } from './RescuePlanBanner';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import type { BadgeKey } from '@/core/types';
@@ -141,7 +140,7 @@ export function AccountListSection({
           <div className="flex items-center gap-2">
             <div className="relative flex-grow md:w-80">
               <Search
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400"
+                className="absolute start-4 top-1/2 -translate-y-1/2 text-zinc-400"
                 size={18}
               />
               <label htmlFor="account-search" className="sr-only">
@@ -156,7 +155,7 @@ export function AccountListSection({
                 autoCorrect="off"
                 autoCapitalize="none"
                 inputMode="search"
-                className="w-full pl-11 pr-4 py-3.5 rounded-2xl border border-border bg-card focus:ring-2 focus:ring-primary outline-none transition-all font-semibold text-base shadow-sm"
+                className="w-full ps-11 pe-4 py-3.5 rounded-2xl border border-border bg-card focus:ring-2 focus:ring-primary outline-none transition-all font-semibold text-base shadow-sm"
               />
             </div>
             <button
@@ -215,6 +214,9 @@ export function AccountListSection({
           onClick={handleStatCardClick}
         />
       </div>
+
+      {/* Inline Donation Card */}
+      <InlineDonationCard accountCount={accountCount} isSample={isSample} />
 
       {/* Main Content Layout - grid for flexible banner positioning */}
       <div className="grid grid-cols-1 lg:grid-cols-[20rem_1fr] gap-6 md:gap-12">

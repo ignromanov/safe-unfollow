@@ -53,7 +53,10 @@
     "forTheCommunity": "للمجتمع",
     "copyright": "© 2026 SafeUnfollow.app",
     "license": "رخصة MIT",
-    "viewSource": "الكود المصدري"
+    "viewSource": "الكود المصدري",
+    "analyzedCount": "لقد حللت {{count}} حساب. كان مجانياً.",
+    "noAdsNoInvestors": "هذه الأداة بدون إعلانات وبدون مستثمرين.",
+    "buyACoffee": "اشترِ قهوة"
   },
   "nav": {
     "privacy": "سياسة الخصوصية",

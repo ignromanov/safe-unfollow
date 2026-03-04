@@ -56,6 +56,15 @@
     "header": "Contas ({{count, number}})",
     "viewProfile": "Ver Perfil"
   },
+  "donation": {
+    "headline": "Você analisou {{count}} contas — de graça.",
+    "body": "Sem login. Sem servidor. Nenhum dado enviado. Se economizou seu tempo, um café mantém o projeto.",
+    "headlineMobile": "Grátis. Privado. Sem login.",
+    "bodyMobile": "Se foi útil, considere um café.",
+    "cta": "Pagar um Café",
+    "ctaMobile": "Apoiar",
+    "dismiss": "Agora não"
+  },
   "rescue": {
     "critical": {
       "title": "Você perdeu {{unfollowedPercent}}% — recupere em 7 dias",
@@ -98,7 +107,8 @@
     "dismiss": "Talvez depois",
     "disclaimer": "Ferramentas selecionadas que recomendamos. Links de afiliados financiam atualizações gratuitas — sem custo para você.",
     "urgency": {
-      "critical": "Aja agora — o engajamento cai 40% após 48 horas"
+      "critical": "Aja agora — o engajamento cai 40% após 48 horas",
+      "warning": "Agir cedo previne perdas maiores — otimize agora"
     },
     "ariaLabel": "Ferramentas recomendadas para melhorar sua presença no Instagram",
     "badges": {

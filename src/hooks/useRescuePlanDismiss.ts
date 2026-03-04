@@ -13,7 +13,7 @@ import type { UserSegment } from '@/lib/rescue-plan';
  */
 
 const STORAGE_KEY = 'rescue_plan_dismissed';
-const TTL_DAYS = 7;
+const TTL_DAYS = 5;
 const TTL_MS = TTL_DAYS * 24 * 60 * 60 * 1000;
 
 /** Severity order for comparison (higher = worse) */

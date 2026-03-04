@@ -53,7 +53,10 @@
     "forTheCommunity": "कम्युनिटी के लिए",
     "copyright": "© 2026 SafeUnfollow.app",
     "license": "MIT लाइसेंस",
-    "viewSource": "सोर्स कोड"
+    "viewSource": "सोर्स कोड",
+    "analyzedCount": "आपने {{count}} अकाउंट विश्लेषित किए। यह मुफ्त था।",
+    "noAdsNoInvestors": "इस टूल में कोई विज्ञापन या निवेशक नहीं हैं।",
+    "buyACoffee": "कॉफ़ी खरीदें"
   },
   "nav": {
     "privacy": "प्राइवेसी पॉलिसी",
