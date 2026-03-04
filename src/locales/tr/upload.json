@@ -33,27 +33,10 @@
     "howToFix": "Bunu nasıl düzeltirsin",
     "tryAgain": "Tekrar Dene",
     "showMistakes": "Nerede Yanlış Yaptığımı Göster",
-    "commonMistakes": "Yaygın Hatalar",
-    "mistakes": {
-      "html": {
-        "title": "JSON yerine HTML",
-        "description": "Verilerini talep ederken \"JSON\" formatını seçtiğinden emin ol"
-      },
-      "missingData": {
-        "title": "Eksik veri kategorisi",
-        "description": "Veri türlerinde \"Takipçiler ve takip edilenler\" seçmelisin"
-      },
-      "wrongFile": {
-        "title": "Yanlış dosya",
-        "description": ".zip dosyasını yükle, klasör veya çıkarılmış dosyaları değil"
-      }
-    },
     "reportIssue": "Bu sorunu GitHub'da bildir",
     "copyDetails": "Hata detaylarını kopyala",
     "copied": "Kopyalandı!",
     "errorCode": "Hata kodu",
-    "htmlFormatExplainer": "HTML formatında dışa aktarım yaptın. Instagram'a geri dön ve bunun yerine JSON formatını seç. Format seçimi \"Bilgilerini indir\" ekranında — \"HTML\" yazan açılır menüyü bulup \"JSON\" olarak değiştir.",
-    "showFormatStep": "JSON formatını nerede seçeceğini gör",
     "errors": {
       "NOT_ZIP": {
         "title": "ZIP Dosyası Değil",

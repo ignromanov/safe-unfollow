@@ -33,27 +33,10 @@
     "howToFix": "Comment corriger cela",
     "tryAgain": "Réessayer",
     "showMistakes": "Montrer où je me suis trompé",
-    "commonMistakes": "Erreurs courantes",
-    "mistakes": {
-      "html": {
-        "title": "HTML au lieu de JSON",
-        "description": "Assurez-vous de sélectionner le format « JSON » lors de la demande de vos données"
-      },
-      "missingData": {
-        "title": "Catégorie de données manquante",
-        "description": "Vous devez sélectionner « Abonnés et abonnements » dans les types de données"
-      },
-      "wrongFile": {
-        "title": "Mauvais fichier",
-        "description": "Téléversez le fichier .zip, pas un dossier ou des fichiers extraits"
-      }
-    },
     "reportIssue": "Signaler ce problème sur GitHub",
     "copyDetails": "Copier les détails de l'erreur",
     "copied": "Copié !",
     "errorCode": "Code d'erreur",
-    "htmlFormatExplainer": "Vous avez exporté vos données au format HTML. Retournez sur Instagram et sélectionnez le format JSON à la place. Le choix du format se fait sur l'écran « Télécharger vos informations » — repérez le menu déroulant indiquant « HTML » et changez-le en « JSON ».",
-    "showFormatStep": "Voir où sélectionner le format JSON",
     "errors": {
       "NOT_ZIP": {
         "title": "Ce n'est pas un fichier ZIP",

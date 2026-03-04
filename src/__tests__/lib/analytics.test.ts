@@ -567,12 +567,10 @@ describe('Analytics', () => {
       expect(events['FILE_PICKER_CANCEL']).toBeUndefined();
       expect(events['UPLOAD_DROP']).toBeUndefined();
       expect(events['SAMPLE_DATA_CLICK']).toBeUndefined();
-      expect(events['RESCUE_PLAN_DISMISS']).toBeUndefined();
       expect(events['RESCUE_PLAN_VIEW_TIME']).toBeUndefined();
       expect(events['RESCUE_PLAN_RE_ENGAGEMENT']).toBeUndefined();
       // V10 removals
       expect(events['SESSION_DURATION']).toBeUndefined();
-      expect(events['RESCUE_PLAN_IMPRESSION']).toBeUndefined();
       expect(events['RESULTS_SCROLL_DEPTH']).toBeUndefined();
       expect(events['WIZARD_BACK_CLICK']).toBeUndefined();
       expect(events['WIZARD_CANCEL']).toBeUndefined();

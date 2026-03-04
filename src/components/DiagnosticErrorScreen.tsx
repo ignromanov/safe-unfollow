@@ -247,23 +247,6 @@ export function DiagnosticErrorScreen({
               defaultValue: diagnosticError.fix,
             })}
           </p>
-
-          {/* Extra guidance for HTML format error */}
-          {diagnosticError.code === 'HTML_FORMAT' && (
-            <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800/50 dark:bg-amber-950/30">
-              <p className="text-sm font-bold text-amber-800 dark:text-amber-300">
-                {t('diagnostic.htmlFormatExplainer')}
-              </p>
-              {onOpenWizard && (
-                <button
-                  onClick={handleOpenWizard}
-                  className="mt-3 inline-flex items-center gap-2 rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-bold text-white transition-all hover:bg-amber-700 hover:shadow-md"
-                >
-                  {t('diagnostic.showFormatStep')}
-                </button>
-              )}
-            </div>
-          )}
         </div>
 
         {/* Actions */}
@@ -322,36 +305,6 @@ export function DiagnosticErrorScreen({
             </a>
           )}
         </div>
-      </div>
-
-      {/* Common mistakes hint */}
-      <div className="mt-8 rounded-3xl border border-zinc-200 bg-zinc-50 p-6 dark:border-zinc-800 dark:bg-zinc-900/40">
-        <h4 className="mb-4 text-xs font-black uppercase tracking-widest text-zinc-900 dark:text-white">
-          {t('diagnostic.commonMistakes')}
-        </h4>
-        <ul className="space-y-3 text-sm font-medium text-zinc-600 dark:text-zinc-400">
-          <li className="flex items-start gap-3">
-            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-rose-500" />
-            <span>
-              <strong>{t('diagnostic.mistakes.html.title')}</strong> —{' '}
-              {t('diagnostic.mistakes.html.description')}
-            </span>
-          </li>
-          <li className="flex items-start gap-3">
-            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
-            <span>
-              <strong>{t('diagnostic.mistakes.missingData.title')}</strong> —{' '}
-              {t('diagnostic.mistakes.missingData.description')}
-            </span>
-          </li>
-          <li className="flex items-start gap-3">
-            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500" />
-            <span>
-              <strong>{t('diagnostic.mistakes.wrongFile.title')}</strong> —{' '}
-              {t('diagnostic.mistakes.wrongFile.description')}
-            </span>
-          </li>
-        </ul>
       </div>
     </div>
   );

@@ -33,27 +33,10 @@
     "howToFix": "كيفية إصلاح هذا",
     "tryAgain": "حاول مجدداً",
     "showMistakes": "أرني أين أخطأت",
-    "commonMistakes": "الأخطاء الشائعة",
-    "mistakes": {
-      "html": {
-        "title": "HTML بدلاً من JSON",
-        "description": "تأكد من اختيار صيغة \"JSON\" عند طلب بياناتك"
-      },
-      "missingData": {
-        "title": "فئة بيانات مفقودة",
-        "description": "تحتاج لتحديد \"المتابعون والمتابَعون\" في أنواع البيانات"
-      },
-      "wrongFile": {
-        "title": "ملف خاطئ",
-        "description": "ارفع ملف .zip، وليس مجلداً أو ملفات مستخرجة"
-      }
-    },
     "reportIssue": "الإبلاغ عن هذه المشكلة على GitHub",
     "copyDetails": "نسخ تفاصيل الخطأ",
     "copied": "تم النسخ!",
     "errorCode": "رمز الخطأ",
-    "htmlFormatExplainer": "لقد صدّرت بياناتك بصيغة HTML. عُد إلى Instagram واختر صيغة JSON بدلاً من ذلك. خيار الصيغة موجود في شاشة \"تنزيل معلوماتك\" — ابحث عن القائمة المنسدلة التي تقول \"HTML\" وغيّرها إلى \"JSON\".",
-    "showFormatStep": "شاهد أين تختار صيغة JSON",
     "errors": {
       "NOT_ZIP": {
         "title": "الملف ليس بصيغة ZIP",

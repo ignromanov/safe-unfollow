@@ -82,23 +82,6 @@ describe('UploadZone', () => {
     expect(screen.getByText(uploadEN.errors.commonTitle)).toBeInTheDocument();
   });
 
-  it('should render back button when onBack is provided', () => {
-    render(<UploadZone onUploadStart={mockOnUploadStart} onBack={mockOnBack} />);
-
-    // zone.back translation
-    const backButton = screen.getByText(uploadEN.zone.back);
-    expect(backButton).toBeInTheDocument();
-
-    fireEvent.click(backButton);
-    expect(mockOnBack).toHaveBeenCalledTimes(1);
-  });
-
-  it('should not render back button when onBack is not provided', () => {
-    render(<UploadZone onUploadStart={mockOnUploadStart} />);
-
-    expect(screen.queryByText(uploadEN.zone.back)).not.toBeInTheDocument();
-  });
-
   it('should show processing state when isProcessing is true', () => {
     render(<UploadZone onUploadStart={mockOnUploadStart} isProcessing={true} />);
 

@@ -33,27 +33,10 @@
     "howToFix": "Cara memperbaiki ini",
     "tryAgain": "Coba Lagi",
     "showMistakes": "Tunjukkan Kesalahan Saya",
-    "commonMistakes": "Kesalahan Umum",
-    "mistakes": {
-      "html": {
-        "title": "HTML bukan JSON",
-        "description": "Pastikan memilih format \"JSON\" saat meminta data Anda"
-      },
-      "missingData": {
-        "title": "Kategori data tidak ada",
-        "description": "Anda perlu memilih \"Pengikut dan mengikuti\" di tipe data"
-      },
-      "wrongFile": {
-        "title": "File salah",
-        "description": "Unggah file .zip, bukan folder atau file yang sudah diekstrak"
-      }
-    },
     "reportIssue": "Laporkan masalah ini di GitHub",
     "copyDetails": "Salin detail error",
     "copied": "Tersalin!",
     "errorCode": "Kode error",
-    "htmlFormatExplainer": "Anda mengekspor dalam format HTML. Kembali ke Instagram dan pilih format JSON. Pilihan format ada di layar \"Unduh informasi Anda\" — cari dropdown yang bertuliskan \"HTML\" dan ubah menjadi \"JSON\".",
-    "showFormatStep": "Lihat cara memilih format JSON",
     "errors": {
       "NOT_ZIP": {
         "title": "Bukan File ZIP",

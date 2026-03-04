@@ -10,7 +10,7 @@ vi.mock('@/components/Wizard', () => ({
     <div data-testid="wizard">
       <h1>Instagram Export Wizard</h1>
       <button onClick={onComplete}>{uploadEN.waiting.uploadNow}</button>
-      <button onClick={onCancel}>{uploadEN.zone.back}</button>
+      <button onClick={onCancel}>Cancel</button>
     </div>
   ),
 }));
@@ -50,7 +50,7 @@ describe('WizardPage', () => {
       render(<WizardPage />);
 
       expect(screen.getByText(uploadEN.waiting.uploadNow)).toBeInTheDocument();
-      expect(screen.getByText(uploadEN.zone.back)).toBeInTheDocument();
+      expect(screen.getByText('Cancel')).toBeInTheDocument();
     });
   });
 
@@ -81,7 +81,7 @@ describe('WizardPage', () => {
       const user = userEvent.setup();
       render(<WizardPage />);
 
-      await user.click(screen.getByText(uploadEN.zone.back));
+      await user.click(screen.getByText('Cancel'));
 
       expect(mockNavigate).toHaveBeenCalledWith('/');
     });
@@ -92,7 +92,7 @@ describe('WizardPage', () => {
       const user = userEvent.setup();
       render(<WizardPage />);
 
-      await user.click(screen.getByText(uploadEN.zone.back));
+      await user.click(screen.getByText('Cancel'));
 
       expect(mockNavigate).toHaveBeenCalledWith('/de/');
     });
@@ -104,7 +104,7 @@ describe('WizardPage', () => {
 
       // Verify the props work by checking buttons exist and are functional
       expect(screen.getByText(uploadEN.waiting.uploadNow)).toBeInTheDocument();
-      expect(screen.getByText(uploadEN.zone.back)).toBeInTheDocument();
+      expect(screen.getByText('Cancel')).toBeInTheDocument();
     });
   });
 });

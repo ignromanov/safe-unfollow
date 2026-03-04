@@ -25,16 +25,10 @@ function useIsTouchDevice(): boolean {
 
 type DragValidation = 'none' | 'valid' | 'invalid';
 
-export interface UploadError {
-  title: string;
-  message: string;
-}
-
 export interface UploadZoneProps {
   onUploadStart: (file: File) => void;
   onOpenWizard?: () => void;
   isProcessing?: boolean;
-  error?: UploadError | string | null;
   parseWarnings?: ParseWarning[];
 }
 
@@ -42,7 +36,6 @@ export function UploadZone({
   onUploadStart,
   onOpenWizard,
   isProcessing = false,
-  error: _error,
   parseWarnings,
 }: UploadZoneProps) {
   const { t } = useTranslation('upload');

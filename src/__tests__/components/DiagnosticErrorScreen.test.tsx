@@ -169,61 +169,6 @@ describe('DiagnosticErrorScreen', () => {
 
       expect(screen.queryByText(uploadEN.diagnostic.showMistakes)).not.toBeInTheDocument();
     });
-
-    it('should render back button when onBack is provided', () => {
-      render(<DiagnosticErrorScreen errorCode="NOT_ZIP" onBack={mockOnBack} />);
-
-      // diagnostic.back translation
-      const backButton = screen.getByText(uploadEN.diagnostic.back);
-      expect(backButton).toBeInTheDocument();
-
-      fireEvent.click(backButton);
-      expect(mockOnBack).toHaveBeenCalledTimes(1);
-    });
-
-    it('should not render back button when onBack is not provided', () => {
-      render(<DiagnosticErrorScreen errorCode="NOT_ZIP" />);
-
-      expect(screen.queryByText(uploadEN.diagnostic.back)).not.toBeInTheDocument();
-    });
-  });
-
-  describe('common mistakes section', () => {
-    it('should display common mistakes hint section', () => {
-      render(<DiagnosticErrorScreen errorCode="NOT_ZIP" />);
-
-      // diagnostic.commonMistakes translation
-      expect(screen.getByText(uploadEN.diagnostic.commonMistakes)).toBeInTheDocument();
-
-      // diagnostic.mistakes.html.title translation
-      expect(screen.getByText(uploadEN.diagnostic.mistakes.html.title)).toBeInTheDocument();
-
-      // diagnostic.mistakes.missingData.title translation
-      expect(screen.getByText(uploadEN.diagnostic.mistakes.missingData.title)).toBeInTheDocument();
-
-      // diagnostic.mistakes.wrongFile.title translation
-      expect(screen.getByText(uploadEN.diagnostic.mistakes.wrongFile.title)).toBeInTheDocument();
-    });
-
-    it('should display mistake descriptions', () => {
-      render(<DiagnosticErrorScreen errorCode="NOT_ZIP" />);
-
-      // Descriptions are rendered inside spans with titles, so use regex to match partial text
-      // diagnostic.mistakes.html.description translation
-      expect(
-        screen.getByText(new RegExp(uploadEN.diagnostic.mistakes.html.description))
-      ).toBeInTheDocument();
-
-      // diagnostic.mistakes.missingData.description translation
-      expect(
-        screen.getByText(new RegExp(uploadEN.diagnostic.mistakes.missingData.description))
-      ).toBeInTheDocument();
-
-      // diagnostic.mistakes.wrongFile.description translation
-      expect(
-        screen.getByText(new RegExp(uploadEN.diagnostic.mistakes.wrongFile.description))
-      ).toBeInTheDocument();
-    });
   });
 
   describe('parseWarnings integration', () => {

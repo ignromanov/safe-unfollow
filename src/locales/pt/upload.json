@@ -33,27 +33,10 @@
     "howToFix": "Como corrigir isso",
     "tryAgain": "Tentar Novamente",
     "showMistakes": "Mostrar Onde Eu Errei",
-    "commonMistakes": "Erros Comuns",
-    "mistakes": {
-      "html": {
-        "title": "HTML em vez de JSON",
-        "description": "Certifique-se de selecionar o formato \"JSON\" ao solicitar seus dados"
-      },
-      "missingData": {
-        "title": "Categoria de dados faltando",
-        "description": "Você precisa selecionar \"Seguidores e seguindo\" nos tipos de dados"
-      },
-      "wrongFile": {
-        "title": "Arquivo errado",
-        "description": "Envie o arquivo .zip, não uma pasta ou arquivos extraídos"
-      }
-    },
     "reportIssue": "Reportar problema no GitHub",
     "copyDetails": "Copiar detalhes do erro",
     "copied": "Copiado!",
     "errorCode": "Código do erro",
-    "htmlFormatExplainer": "Você exportou no formato HTML. Volte ao Instagram e selecione o formato JSON. A seleção de formato está na tela \"Baixar suas informações\" — procure pelo menu suspenso que diz \"HTML\" e mude para \"JSON\".",
-    "showFormatStep": "Ver onde selecionar o formato JSON",
     "errors": {
       "NOT_ZIP": {
         "title": "Não é um arquivo ZIP",

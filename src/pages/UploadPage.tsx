@@ -39,7 +39,6 @@ export function Component() {
       onUploadStart={handleUploadStart}
       onOpenWizard={handleOpenWizard}
       isProcessing={uploadState.status === 'loading'}
-      error={uploadState.error}
       parseWarnings={parseWarnings}
     />
   );

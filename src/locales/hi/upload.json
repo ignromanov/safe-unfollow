@@ -33,27 +33,10 @@
     "howToFix": "इसे कैसे ठीक करें",
     "tryAgain": "फिर से कोशिश करें",
     "showMistakes": "मेरी गलती दिखाएं",
-    "commonMistakes": "आम गलतियां",
-    "mistakes": {
-      "html": {
-        "title": "JSON की जगह HTML",
-        "description": "डेटा रिक्वेस्ट करते समय \"JSON\" फॉर्मेट ज़रूर चुनें"
-      },
-      "missingData": {
-        "title": "डेटा कैटेगरी मिसिंग",
-        "description": "डेटा टाइप्स में \"Followers and following\" चुनना ज़रूरी है"
-      },
-      "wrongFile": {
-        "title": "गलत फाइल",
-        "description": ".zip फाइल अपलोड करें, फोल्डर या एक्सट्रैक्ट की गई फाइल्स नहीं"
-      }
-    },
     "reportIssue": "GitHub पर इस समस्या की रिपोर्ट करें",
     "copyDetails": "एरर डिटेल्स कॉपी करें",
     "copied": "कॉपी हो गया!",
     "errorCode": "एरर कोड",
-    "htmlFormatExplainer": "आपने HTML फॉर्मेट में डेटा एक्सपोर्ट किया है। Instagram पर वापस जाएं और इसकी जगह JSON फॉर्मेट चुनें। फॉर्मेट का विकल्प \"Download your information\" स्क्रीन पर मिलेगा — जहां \"HTML\" लिखा ड्रॉपडाउन है उसे \"JSON\" में बदलें।",
-    "showFormatStep": "JSON फॉर्मेट कहां चुनें, देखें",
     "errors": {
       "NOT_ZIP": {
         "title": "ZIP फाइल नहीं है",

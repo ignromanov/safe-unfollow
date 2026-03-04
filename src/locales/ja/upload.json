@@ -33,27 +33,10 @@
     "howToFix": "修正方法",
     "tryAgain": "もう一度試す",
     "showMistakes": "間違いを確認",
-    "commonMistakes": "よくある間違い",
-    "mistakes": {
-      "html": {
-        "title": "JSONではなくHTML",
-        "description": "データをリクエストする際に「JSON」形式を選択してください"
-      },
-      "missingData": {
-        "title": "データカテゴリの未選択",
-        "description": "データタイプで「フォロワーとフォロー中」を選択する必要があります"
-      },
-      "wrongFile": {
-        "title": "間違ったファイル",
-        "description": "フォルダや展開したファイルではなく、.zipファイルをアップロードしてください"
-      }
-    },
     "reportIssue": "GitHubでこの問題を報告",
     "copyDetails": "エラー詳細をコピー",
     "copied": "コピーしました！",
     "errorCode": "エラーコード",
-    "htmlFormatExplainer": "HTML形式でエクスポートされています。Instagramに戻り、代わりにJSON形式を選択してください。形式の選択は「情報をダウンロード」画面にあります。「HTML」と表示されているドロップダウンを「JSON」に変更してください。",
-    "showFormatStep": "JSON形式の選択箇所を確認する",
     "errors": {
       "NOT_ZIP": {
         "title": "ZIPファイルではありません",

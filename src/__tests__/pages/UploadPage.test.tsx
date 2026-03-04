@@ -2,34 +2,27 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { Component as UploadPage } from '@/pages/UploadPage';
-import uploadEN from '@/locales/en/upload.json';
 import commonEN from '@/locales/en/common.json';
 
 // Mock child components
 vi.mock('@/components/UploadZone', () => ({
   UploadZone: ({
     onUploadStart,
-    onBack,
     onOpenWizard,
     isProcessing,
-    error,
     parseWarnings,
   }: {
     onUploadStart: (file: File) => void;
-    onBack: () => void;
     onOpenWizard: () => void;
     isProcessing: boolean;
-    error: string | null;
     parseWarnings: string[];
   }) => (
     <div data-testid="upload-zone">
       <button onClick={() => onUploadStart(new File([], 'test.zip'))}>
         {commonEN.buttons.uploadFile}
       </button>
-      <button onClick={onBack}>{uploadEN.zone.back}</button>
       <button onClick={onOpenWizard}>Open Wizard</button>
       <div data-testid="is-processing">{String(isProcessing)}</div>
-      <div data-testid="error">{error || 'no-error'}</div>
       <div data-testid="warnings">{parseWarnings.join(', ') || 'no-warnings'}</div>
     </div>
   ),
@@ -128,18 +121,6 @@ describe('UploadPage', () => {
   });
 
   describe('rendering - error state', () => {
-    it('should pass error to UploadZone', () => {
-      mockUseInstagramData.mockReturnValue({
-        uploadState: { status: 'error', error: 'Invalid ZIP file', fileName: null },
-        handleZipUpload: mockHandleZipUpload,
-        parseWarnings: [],
-      });
-
-      render(<UploadPage />);
-
-      expect(screen.getByTestId('error')).toHaveTextContent('Invalid ZIP file');
-    });
-
     it('should pass parseWarnings to UploadZone', () => {
       mockUseInstagramData.mockReturnValue({
         uploadState: { status: 'idle', error: null, fileName: null },
@@ -222,16 +203,6 @@ describe('UploadPage', () => {
   });
 
   describe('navigation - UploadZone handlers', () => {
-    it('should navigate back in history when Back is clicked', async () => {
-      const user = userEvent.setup();
-      render(<UploadPage />);
-
-      await user.click(screen.getByText(uploadEN.zone.back));
-
-      // Uses browser history navigation to return to actual previous page
-      expect(mockNavigate).toHaveBeenCalledWith(-1);
-    });
-
     it('should navigate to wizard when Open Wizard is clicked', async () => {
       const user = userEvent.setup();
       render(<UploadPage />);
