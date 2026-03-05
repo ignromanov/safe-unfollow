@@ -6,7 +6,7 @@ import { createI18nMock } from '@/__tests__/utils/mockI18n';
 
 vi.mock('react-i18next', () => createI18nMock(uploadEN));
 
-vi.mock('@/lib/analytics/core', () => ({
+vi.mock('@/lib/stats/core', () => ({
   trackEvent: vi.fn(),
 }));
 
@@ -60,7 +60,7 @@ describe('FormatQuiz', () => {
     });
 
     it('should track analytics event', async () => {
-      const { trackEvent } = await import('@/lib/analytics/core');
+      const { trackEvent } = await import('@/lib/stats/core');
       const user = userEvent.setup();
       render(<FormatQuiz />);
 
