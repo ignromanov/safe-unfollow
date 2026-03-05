@@ -51,7 +51,7 @@ export default defineConfig({
       // Inline critical CSS and @font-face rules
       inlineFonts: true,     // Inline @font-face rules to resolve font URLs
       preloadFonts: false,   // DISABLED: Causes "preloaded but not used" warnings
-      preload: "swap",       // Font display strategy (font-display: swap)
+      preload: "body",       // Move full CSS to end of <body> (CSP-safe, no inline onload handler)
     },
 
     // Include dynamic routes (wizard steps 1-8, 404) for all languages
