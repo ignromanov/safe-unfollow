@@ -175,7 +175,8 @@
     "comparisonTitle": "अंतर कैसे पहचानें",
     "comparisonJson": "अगर डाउनलोड पेज पर \"Format: JSON\" दिखे, तो सही है।",
     "comparisonHtml": "अगर \"Format: HTML\" या .html फ़ाइलें दिखें, तो फिर से अनुरोध करें।",
-    "dismiss": "समझ गया"
+    "dismiss": "समझ गया",
+    "fixedIt": "मैंने JSON में फिर से अनुरोध किया है"
   },
   "formatWarning": "डेटा एक्सपोर्ट के लिए अनुरोध करते समय JSON (HTML नहीं) चुनना सुनिश्चित करें।",
   "waiting": {

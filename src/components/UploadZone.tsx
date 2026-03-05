@@ -150,7 +150,7 @@ export function UploadZone({
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 md:py-24">
       {/* Format quiz — non-blocking card above upload zone */}
-      <FormatQuiz onOpenWizard={onOpenWizard} />
+      <FormatQuiz onOpenWizard={onOpenWizard} isProcessing={isProcessing} />
 
       {/* Screen reader announcement for upload status */}
       <div role="status" aria-live="polite" className="sr-only">

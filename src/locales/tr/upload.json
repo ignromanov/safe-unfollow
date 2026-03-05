@@ -175,7 +175,8 @@
     "comparisonTitle": "Farkı nasıl anlarsınız",
     "comparisonJson": "İndirme sayfasında \"Format: JSON\" görüyorsanız doğru.",
     "comparisonHtml": "\"Format: HTML\" veya .html dosyaları görüyorsanız yeniden talep etmeniz gerekiyor.",
-    "dismiss": "Anladım"
+    "dismiss": "Anladım",
+    "fixedIt": "JSON olarak yeniden talep ettim"
   },
   "formatWarning": "Veri dışa aktarımı talep ederken JSON (HTML değil) seçtiğinizden emin olun.",
   "waiting": {

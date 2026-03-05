@@ -111,6 +111,7 @@ export const AnalyticsEvents = {
 
   // Format Quiz
   FORMAT_QUIZ_ANSWER: 'format_quiz_answer',
+  FORMAT_QUIZ_FIXED_IT: 'format_quiz_fixed_it',
 
   // Error tracking
   ERROR_BOUNDARY: 'error_boundary',

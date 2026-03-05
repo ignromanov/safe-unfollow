@@ -175,7 +175,8 @@
     "comparisonTitle": "Cara membedakannya",
     "comparisonJson": "Jika Anda melihat \"Format: JSON\" di halaman unduhan, berarti sudah benar.",
     "comparisonHtml": "Jika Anda melihat \"Format: HTML\" atau file .html di dalamnya, perlu minta ulang.",
-    "dismiss": "Mengerti"
+    "dismiss": "Mengerti",
+    "fixedIt": "Saya sudah meminta ulang dalam JSON"
   },
   "formatWarning": "Pastikan Anda memilih JSON (bukan HTML) saat meminta ekspor data.",
   "waiting": {

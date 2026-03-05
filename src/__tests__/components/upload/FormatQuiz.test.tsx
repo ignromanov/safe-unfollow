@@ -12,12 +12,14 @@ vi.mock('@/lib/stats/core', () => ({
 
 import { FormatQuiz } from '@/components/upload/FormatQuiz';
 
-const STORAGE_KEY = 'format-quiz-answer';
+const ANSWER_KEY = 'format-quiz-answer';
+const DISMISS_KEY = 'format-quiz-dismissed';
 
 describe('FormatQuiz', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(ANSWER_KEY);
+    localStorage.removeItem(DISMISS_KEY);
   });
 
   describe('rendering', () => {
@@ -34,9 +36,28 @@ describe('FormatQuiz', () => {
     });
 
     it('should not render when stored answer is json', () => {
-      localStorage.setItem(STORAGE_KEY, 'json');
+      localStorage.setItem(ANSWER_KEY, 'json');
       const { container } = render(<FormatQuiz />);
       expect(container.firstChild).toBeNull();
+    });
+
+    it('should not render when isProcessing is true', () => {
+      const { container } = render(<FormatQuiz isProcessing />);
+      expect(container.firstChild).toBeNull();
+    });
+
+    it('should have radiogroup role with aria-labelledby', () => {
+      render(<FormatQuiz />);
+      const radiogroup = screen.getByRole('radiogroup');
+      expect(radiogroup).toHaveAttribute('aria-labelledby', 'format-quiz-title');
+    });
+
+    it('should render buttons with min touch target height', () => {
+      render(<FormatQuiz />);
+      const radios = screen.getAllByRole('radio');
+      for (const radio of radios) {
+        expect(radio.className).toContain('min-h-[44px]');
+      }
     });
   });
 
@@ -56,7 +77,7 @@ describe('FormatQuiz', () => {
 
       await user.click(screen.getByText(uploadEN.quiz.json));
 
-      expect(localStorage.getItem(STORAGE_KEY)).toBe('json');
+      expect(localStorage.getItem(ANSWER_KEY)).toBe('json');
     });
 
     it('should track analytics event', async () => {
@@ -93,6 +114,53 @@ describe('FormatQuiz', () => {
       await user.click(cta);
       expect(onOpenWizard).toHaveBeenCalledTimes(1);
     });
+
+    it('should show "I\'ve fixed it" button', async () => {
+      const user = userEvent.setup();
+      render(<FormatQuiz />);
+
+      await user.click(screen.getByText(uploadEN.quiz.html));
+
+      expect(screen.getByText(uploadEN.quiz.fixedIt)).toBeInTheDocument();
+    });
+
+    it('should reset quiz when "I\'ve fixed it" is clicked', async () => {
+      const user = userEvent.setup();
+      render(<FormatQuiz />);
+
+      await user.click(screen.getByText(uploadEN.quiz.html));
+      expect(screen.getByText(uploadEN.quiz.htmlMessage)).toBeInTheDocument();
+
+      await user.click(screen.getByText(uploadEN.quiz.fixedIt));
+
+      // Should show quiz options again
+      expect(screen.getByText(uploadEN.quiz.title)).toBeInTheDocument();
+      expect(screen.getByText(uploadEN.quiz.json)).toBeInTheDocument();
+    });
+
+    it('should clear localStorage when "I\'ve fixed it" is clicked', async () => {
+      const user = userEvent.setup();
+      render(<FormatQuiz />);
+
+      await user.click(screen.getByText(uploadEN.quiz.html));
+      expect(localStorage.getItem(ANSWER_KEY)).toBe('html');
+
+      await user.click(screen.getByText(uploadEN.quiz.fixedIt));
+
+      expect(localStorage.getItem(ANSWER_KEY)).toBeNull();
+      expect(localStorage.getItem(DISMISS_KEY)).toBeNull();
+    });
+
+    it('should track analytics event for fixedIt', async () => {
+      const { trackEvent } = await import('@/lib/stats/core');
+      const user = userEvent.setup();
+      render(<FormatQuiz />);
+
+      await user.click(screen.getByText(uploadEN.quiz.html));
+      await user.click(screen.getByText(uploadEN.quiz.fixedIt));
+
+      expect(trackEvent).toHaveBeenCalledWith('format_quiz_fixed_it');
+    });
   });
 
   describe('Not sure answer', () => {
@@ -105,6 +173,25 @@ describe('FormatQuiz', () => {
       expect(screen.getByText(uploadEN.quiz.comparisonTitle)).toBeInTheDocument();
       expect(screen.getByText(uploadEN.quiz.comparisonJson)).toBeInTheDocument();
       expect(screen.getByText(uploadEN.quiz.comparisonHtml)).toBeInTheDocument();
+    });
+
+    it('should show "I\'ve fixed it" button in comparison view', async () => {
+      const user = userEvent.setup();
+      render(<FormatQuiz />);
+
+      await user.click(screen.getByText(uploadEN.quiz.notSure));
+
+      expect(screen.getByText(uploadEN.quiz.fixedIt)).toBeInTheDocument();
+    });
+
+    it('should reset quiz when "I\'ve fixed it" is clicked from comparison', async () => {
+      const user = userEvent.setup();
+      render(<FormatQuiz />);
+
+      await user.click(screen.getByText(uploadEN.quiz.notSure));
+      await user.click(screen.getByText(uploadEN.quiz.fixedIt));
+
+      expect(screen.getByText(uploadEN.quiz.title)).toBeInTheDocument();
     });
   });
 
@@ -129,6 +216,23 @@ describe('FormatQuiz', () => {
 
       await user.click(screen.getByRole('button', { name: uploadEN.quiz.dismiss }));
       expect(screen.queryByText(uploadEN.quiz.htmlMessage)).not.toBeInTheDocument();
+    });
+
+    it('should persist dismiss to localStorage', async () => {
+      const user = userEvent.setup();
+      render(<FormatQuiz />);
+
+      await user.click(screen.getByText(uploadEN.quiz.json));
+      await user.click(screen.getByRole('button', { name: uploadEN.quiz.dismiss }));
+
+      expect(localStorage.getItem(DISMISS_KEY)).toBe('1');
+    });
+
+    it('should not render when dismiss was persisted', () => {
+      localStorage.setItem(DISMISS_KEY, '1');
+      localStorage.setItem(ANSWER_KEY, 'html');
+      const { container } = render(<FormatQuiz />);
+      expect(container.firstChild).toBeNull();
     });
   });
 });

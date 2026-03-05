@@ -175,7 +175,8 @@
     "comparisonTitle": "كيف تفرق بينهما",
     "comparisonJson": "إذا رأيت \"التنسيق: JSON\" في صفحة التحميل، فأنت جاهز.",
     "comparisonHtml": "إذا رأيت \"التنسيق: HTML\" أو ملفات .html بالداخل، تحتاج إعادة الطلب.",
-    "dismiss": "فهمت"
+    "dismiss": "فهمت",
+    "fixedIt": "لقد أعدت الطلب بتنسيق JSON"
   },
   "formatWarning": "تأكد من اختيار JSON (وليس HTML) عند طلب تصدير بياناتك.",
   "waiting": {

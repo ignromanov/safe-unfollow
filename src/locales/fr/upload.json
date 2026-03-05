@@ -175,7 +175,8 @@
     "comparisonTitle": "Comment faire la différence",
     "comparisonJson": "Si vous voyez « Format : JSON » sur la page de téléchargement, c'est bon.",
     "comparisonHtml": "Si vous voyez « Format : HTML » ou des fichiers .html, il faut re-demander.",
-    "dismiss": "Compris"
+    "dismiss": "Compris",
+    "fixedIt": "J'ai redemandé en JSON"
   },
   "formatWarning": "Assurez-vous d'avoir sélectionné JSON (pas HTML) lors de la demande d'export.",
   "waiting": {

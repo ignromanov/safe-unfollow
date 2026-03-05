@@ -175,7 +175,8 @@
     "comparisonTitle": "Como diferenciar",
     "comparisonJson": "Se você vê \"Formato: JSON\" na página de download, está tudo certo.",
     "comparisonHtml": "Se você vê \"Formato: HTML\" ou arquivos .html dentro, precisa re-solicitar.",
-    "dismiss": "Entendi"
+    "dismiss": "Entendi",
+    "fixedIt": "Já solicitei em JSON"
   },
   "formatWarning": "Certifique-se de ter selecionado JSON (não HTML) ao solicitar sua exportação de dados.",
   "waiting": {

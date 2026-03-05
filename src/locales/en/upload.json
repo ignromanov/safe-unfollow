@@ -175,7 +175,8 @@
     "comparisonTitle": "How to tell the difference",
     "comparisonJson": "If you see \"Format: JSON\" on the download page, you're good.",
     "comparisonHtml": "If you see \"Format: HTML\" or files like .html inside, you need to re-request.",
-    "dismiss": "Got it"
+    "dismiss": "Got it",
+    "fixedIt": "I've re-requested in JSON"
   },
   "formatWarning": "Make sure you selected JSON (not HTML) when requesting your data export.",
   "waiting": {

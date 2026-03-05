@@ -175,7 +175,8 @@
     "comparisonTitle": "見分け方",
     "comparisonJson": "ダウンロードページで「フォーマット：JSON」と表示されていればOKです。",
     "comparisonHtml": "「フォーマット：HTML」や.htmlファイルが見える場合は再リクエストが必要です。",
-    "dismiss": "わかりました"
+    "dismiss": "わかりました",
+    "fixedIt": "JSONで再リクエストしました"
   },
   "formatWarning": "データエクスポートのリクエスト時にJSON（HTMLではなく）を選択してください。",
   "waiting": {
