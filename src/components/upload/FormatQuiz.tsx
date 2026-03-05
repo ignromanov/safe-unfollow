@@ -1,4 +1,4 @@
-import { trackEvent } from '@/lib/analytics/core';
+import { trackEvent } from '@/lib/stats/core';
 import { CheckCircle2, AlertTriangle, HelpCircle, X } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';

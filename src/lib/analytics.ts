@@ -1,1 +1,1 @@
-export * from './analytics/index';
+export * from './stats/index';
