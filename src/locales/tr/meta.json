@@ -3,7 +3,7 @@
   "description": "Instagram'da takipten çıkanları öğren, giriş yapmadan. ZIP yükle, hemen gör. %100 ücretsiz, gizli, 1M+ hesap. Çevrimdışı çalışır.",
   "ogTitle": "Instagram Takipten Çıkanlar — Ücretsiz Giriş Yok",
   "twitterDescription": "Instagram'da takipten çıkanları öğren, giriş yapmadan. ZIP yükle, hemen gör. %100 ücretsiz, 1M+ hesap. Çevrimdışı çalışır.",
-  "keywords": "instagram takipten çıkanlar, kim takibi bıraktı instagram, unfollow tracker türkçe, instagram zip analiz, giriş yapmadan takip kontrol",
+  "keywords": "instagram takipten çıkanlar, kim takibi bıraktı, takip analiz aracı, instagram zip analiz, giriş yapmadan takipçi kontrol, takipten çıkan izleyici",
   "routes": {
     "/upload": {
       "title": "Instagram ZIP Yükle — Ücretsiz Analiz | SafeUnfollow",
@@ -12,7 +12,7 @@
     },
     "/wizard": {
       "title": "Instagram Verilerini JSON Olarak İndirme — Rehber | SafeUnfollow",
-      "description": "Instagram verilerinizi JSON olarak indirmek için adım adım rehber.",
+      "description": "Instagram verilerinizi JSON formatında indirmek için adım adım rehber. Meta Hesap Merkezi'nden veri dışa aktarımını talep edin, güvenli analiz yapın.",
       "ogTitle": "Instagram Verilerini JSON Olarak İndirme — Rehber"
     },
     "/sample": {

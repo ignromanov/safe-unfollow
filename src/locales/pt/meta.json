@@ -1,13 +1,13 @@
 {
   "title": "Instagram Unfollowers — Gratis Sem Login | SafeUnfollow",
-  "description": "Descubra quem parou de te seguir no Instagram sem login. Envie seu ZIP, veja unfollowers instantaneamente. 100% gratis, privado, 1M+ contas. Funciona offline.",
+  "description": "Veja quem deixou de te seguir no Instagram sem login. Envie seu arquivo ZIP, analise instantaneamente. 100% grátis, privado, 1M+ contas. Funciona offline.",
   "ogTitle": "Instagram Unfollowers — Gratis Sem Login",
   "twitterDescription": "Descubra quem parou de te seguir no Instagram sem login. Envie ZIP, veja unfollowers. 100% gratis, 1M+ contas. Funciona offline.",
-  "keywords": "instagram unfollowers, quem deixou de me seguir instagram, rastreador de unfollow, ver unfollowers sem login, analisador zip instagram",
+  "keywords": "instagram quem deixou de seguir, rastreador de unfollowers, análise de seguidores, verificar quem parou de seguir, arquivo zip instagram, sem login",
   "routes": {
     "/upload": {
       "title": "Envie seu ZIP do Instagram — Análise Grátis | SafeUnfollow",
-      "description": "Envie sua exportação de dados do Instagram (ZIP) para análise grátis. Processamento 100% local, sem login, 1M+ contas.",
+      "description": "Envie sua exportação de dados do Instagram (ZIP) para análise grátis. Processamento 100% local, sem login.",
       "ogTitle": "Envie seu ZIP do Instagram — Análise Grátis"
     },
     "/wizard": {

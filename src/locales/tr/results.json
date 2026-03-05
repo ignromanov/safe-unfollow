@@ -67,7 +67,7 @@
   },
   "rescue": {
     "critical": {
-      "title": "%{{unfollowedPercent}} kaybettiniz — 7 günde kurtarın",
+      "title": "{{unfollowedPercent}}% kaybettiniz — 7 günde kurtarın",
       "subtitle": {
         "influencer": "{{count}}+ takipçiyle her kayıp erişiminizi etkiler. 7 günde kurtarın:",
         "power": "Üst seviyedesiniz — akıllı içerik üreticileri bunlarla hızla toparlanır:",
@@ -76,7 +76,7 @@
       }
     },
     "warning": {
-      "title": "%{{unfollowedPercent}} düşüş tespit edildi — optimize etme zamanı",
+      "title": "{{unfollowedPercent}}% düşüş tespit edildi — optimize etme zamanı",
       "subtitle": {
         "influencer": "Sizin ölçeğinizde erken optimizasyon daha büyük kayıpları önler:",
         "power": "Erken yakalayın — en iyi içerik üreticilerinin kullandıkları:",
@@ -85,7 +85,7 @@
       }
     },
     "growth": {
-      "title": "Sadece %{{unfollowedPercent}} kayıp — harika gidiyorsunuz!",
+      "title": "Sadece {{unfollowedPercent}}% kayıp — harika gidiyorsunuz!",
       "subtitle": {
         "influencer": "Profesyonel araçlarla erişiminizi ölçeklendirin:",
         "power": "Sonraki seviyeye hazır mısınız? İşte araç setiniz:",

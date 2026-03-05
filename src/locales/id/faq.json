@@ -91,7 +91,7 @@
     },
     "withoutPassword": {
       "question": "Bagaimana SafeUnfollow bekerja tanpa password Instagram saya?",
-      "answer": "SafeUnfollow menggunakan fitur ekspor data resmi Instagram (di Meta Accounts Center) alih-alih password Anda. Anda mengunduh data sebagai file ZIP langsung dari Instagram dan mengunggahnya di sini. Semuanya diproses di browser Anda.",
+      "answer": "SafeUnfollow menggunakan fitur ekspor data resmi Instagram (di Meta Accounts Center) alih-alih password Anda. Anda mengunduh data sebagai file ZIP langsung dari Instagram dan mengunggahnya di sini. Aplikasi membaca file JSON di dalam ZIP untuk membandingkan daftar pengikut dan yang diikuti — semua pemrosesan terjadi di browser Anda. Tanpa akses API, tanpa scraping, tanpa kredensial login diperlukan.",
       "relatedLink": {
         "text": "Lihat panduan ekspor",
         "href": "/wizard"
@@ -99,11 +99,11 @@
     },
     "betterThanPaid": {
       "question": "Apakah SafeUnfollow lebih baik dari aplikasi berbayar?",
-      "answer": "Untuk sebagian besar pengguna, ya. SafeUnfollow 100% gratis, tidak perlu login (tidak ada risiko banned), memproses data secara lokal (privasi maksimal), mendukung 1 juta+ akun, dan open source."
+      "answer": "Untuk sebagian besar pengguna, ya. SafeUnfollow 100% gratis, tidak perlu login (tidak ada risiko banned), memproses data secara lokal (privasi maksimal), mendukung 1 juta+ akun (kebanyakan aplikasi berbayar terbatas di 100K), dan open source. Aplikasi berbayar menawarkan pemantauan real-time yang memerlukan akses API — namun ini melanggar Ketentuan Layanan Instagram dan membahayakan akun Anda. SafeUnfollow menggunakan metode ekspor data resmi dan aman."
     },
     "mobileUse": {
       "question": "Bisakah saya menggunakan SafeUnfollow di iPhone atau Android?",
-      "answer": "Ya! SafeUnfollow berfungsi di browser mobile modern apa pun (Safari, Chrome, Firefox). Kunjungi safeunfollow.app, upload ZIP Anda, dan lihat hasilnya langsung. Bisa juga diinstal sebagai PWA."
+      "answer": "Ya! SafeUnfollow berfungsi di browser mobile modern apa pun (Safari, Chrome, Firefox). Kunjungi safeunfollow.app, upload ZIP Anda, dan lihat hasilnya langsung. Anda juga bisa menginstalnya sebagai PWA (Progressive Web App) untuk akses cepat dari layar utama. Aplikasi dioptimalkan untuk mobile — 81% pengguna kami menggunakan ponsel. Minta ekspor data dari aplikasi Instagram, unduh ZIP dari email Anda, lalu unggah di sini."
     }
   }
 }
