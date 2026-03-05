@@ -3,7 +3,7 @@ import { analytics } from '@/lib/analytics';
 import { IndexedDBFilterEngine } from '@/lib/filtering/IndexedDBFilterEngine';
 import { indexedDBService } from '@/lib/indexeddb/indexeddb-service';
 import { useAppStore } from '@/lib/store';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDebounce } from 'use-debounce';
 
 import { useFilterWorker } from './useFilterWorker';
@@ -22,7 +22,8 @@ export function useAccountFiltering(options: UseAccountFilteringOptions) {
   const { fileHash, accountCount: totalCount } = options;
 
   const [query, setQuery] = useState('');
-  const [filteredIndices, setFilteredIndices] = useState<number[]>([]);
+  // null = "show all" (no filters active, no search query) — avoids 8MB array for 1M accounts
+  const [filteredIndices, setFilteredIndices] = useState<number[] | null>(null);
   const [isFiltering, setIsFiltering] = useState(false);
   const [processingTime, setProcessingTime] = useState<number>(0);
 
@@ -99,12 +100,6 @@ export function useAccountFiltering(options: UseAccountFilteringOptions) {
     };
   }, [fileHash, totalCount, workerHasError]);
 
-  // Memoize allIndices array to prevent recreation
-  const allIndices = useMemo(() => {
-    if (totalCount === 0) return [];
-    return Array.from({ length: totalCount }, (_, i) => i);
-  }, [totalCount]);
-
   // Stable reference to filters string for dependency tracking
   const filtersKey = filtersArray.join(',');
 
@@ -112,7 +107,7 @@ export function useAccountFiltering(options: UseAccountFilteringOptions) {
   useEffect(() => {
     // Early exit if no data
     if (!fileHash || totalCount === 0) {
-      setFilteredIndices([]);
+      setFilteredIndices(null);
       setIsFiltering(false);
       isFilteringRef.current = false;
       return;
@@ -120,7 +115,7 @@ export function useAccountFiltering(options: UseAccountFilteringOptions) {
 
     const activeFilters = filtersArray as BadgeKey[];
 
-    // Fast path: no filters and no search - show all
+    // Fast path: no filters and no search — use null sentinel ("show all")
     if (activeFilters.length === 0 && !debouncedQuery.trim()) {
       // Cancel any pending requests
       if (abortControllerRef.current) {
@@ -128,8 +123,8 @@ export function useAccountFiltering(options: UseAccountFilteringOptions) {
         abortControllerRef.current = null;
       }
 
-      // Use memoized allIndices
-      setFilteredIndices(allIndices);
+      // null means "show all" — no 8MB array allocation
+      setFilteredIndices(null);
       setIsFiltering(false);
       isFilteringRef.current = false;
       return;
@@ -172,7 +167,10 @@ export function useAccountFiltering(options: UseAccountFilteringOptions) {
 
         // Only update state if component is still mounted and request not cancelled
         if (isMountedRef.current) {
-          setFilteredIndices(indices);
+          // Wrap in startTransition to keep UI responsive during large updates
+          startTransition(() => {
+            setFilteredIndices(indices);
+          });
           setProcessingTime(0);
           setIsFiltering(false);
           isFilteringRef.current = false;
@@ -201,7 +199,7 @@ export function useAccountFiltering(options: UseAccountFilteringOptions) {
 
         // Only update state if component is still mounted and request not cancelled
         if (isMountedRef.current && !abortController.signal.aborted) {
-          setFilteredIndices([]);
+          setFilteredIndices(null);
           setProcessingTime(0);
           setIsFiltering(false);
           isFilteringRef.current = false;
@@ -222,7 +220,6 @@ export function useAccountFiltering(options: UseAccountFilteringOptions) {
     totalCount,
     filtersKey,
     debouncedQuery,
-    allIndices,
     isWorkerReady,
     workerHasError,
     workerFilterToIndices,
@@ -249,7 +246,7 @@ export function useAccountFiltering(options: UseAccountFilteringOptions) {
 
     setQuery('');
     setStoreFilters(new Set());
-    setFilteredIndices([]);
+    setFilteredIndices(null);
     setIsFiltering(false);
     isFilteringRef.current = false;
   }, [setStoreFilters]);

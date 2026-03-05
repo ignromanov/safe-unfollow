@@ -1,7 +1,7 @@
 {
   "name": "safe-unfollow",
   "private": true,
-  "version": "1.5.0",
+  "version": "1.6.0",
   "type": "module",
   "description": "Find out who unfollowed you on Instagram — 100% local, free, open source unfollow tracker",
   "keywords": [
@@ -85,6 +85,7 @@
     "clsx": "^2.1.1",
     "comlink": "^4.4.2",
     "fastbitset": "^0.4.1",
+    "focus-trap-react": "^12.0.0",
     "i18next": "^25.7.4",
     "i18next-browser-languagedetector": "^8.2.0",
     "jszip": "^3.10.1",

@@ -117,10 +117,10 @@ describe('Footer', () => {
     expect(screen.getByText(commonEN.footer.license)).toBeInTheDocument();
   });
 
-  it('should render support privacy button', () => {
+  it('should render buy a coffee button', () => {
     renderWithRouter(<Footer />);
 
-    const supportButton = screen.getByText(commonEN.footer.supportPrivacy);
+    const supportButton = screen.getByText(commonEN.footer.buyACoffee);
     expect(supportButton).toBeInTheDocument();
 
     const link = supportButton.closest('a');
@@ -172,7 +172,7 @@ describe('Footer', () => {
   it('should call analytics on support button click', () => {
     renderWithRouter(<Footer />);
 
-    const supportButton = screen.getByText('Support privacy');
+    const supportButton = screen.getByText('Buy a Coffee');
     fireEvent.click(supportButton);
 
     expect(analytics.analytics.linkClick).toHaveBeenCalledWith('buy-me-coffee');

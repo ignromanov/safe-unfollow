@@ -15,6 +15,25 @@ import TermsPage from './pages/TermsPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 /**
+ * Factory for page children — each parent route needs its own object references
+ * to avoid React Router route ID collisions (IDs are derived from object identity).
+ */
+function createPageChildren(): RouteRecord[] {
+  return [
+    { index: true, element: <HomePage /> },
+    { path: 'wizard', element: <WizardPage /> },
+    { path: 'wizard/step/:stepId', element: <WizardPage /> },
+    { path: 'upload', element: <UploadPage /> },
+    { path: 'results', element: <ResultsPage /> },
+    { path: 'sample', element: <SamplePage /> },
+    { path: 'privacy', element: <PrivacyPage /> },
+    { path: 'terms', element: <TermsPage /> },
+    { path: '404', element: <NotFoundPage /> },
+    { path: '*', element: <NotFoundPage /> },
+  ];
+}
+
+/**
  * Route definitions for SSG prerendering
  *
  * Structure:
@@ -36,18 +55,7 @@ export const routes: RouteRecord[] = [
     element: <Layout />,
     errorElement: <RouteErrorPage />,
     entry: 'src/components/Layout.tsx',
-    children: [
-      { index: true, element: <HomePage /> },
-      { path: 'wizard', element: <WizardPage /> },
-      { path: 'wizard/step/:stepId', element: <WizardPage /> },
-      { path: 'upload', element: <UploadPage /> },
-      { path: 'results', element: <ResultsPage /> },
-      { path: 'sample', element: <SamplePage /> },
-      { path: 'privacy', element: <PrivacyPage /> },
-      { path: 'terms', element: <TermsPage /> },
-      { path: '404', element: <NotFoundPage /> },
-      { path: '*', element: <NotFoundPage /> },
-    ],
+    children: createPageChildren(),
   },
   // Language-prefixed routes (es, ru, de, etc.)
   ...SUPPORTED_LANGUAGES.filter(lang => lang !== 'en').map(
@@ -56,18 +64,7 @@ export const routes: RouteRecord[] = [
       element: <Layout lang={lang} />,
       errorElement: <RouteErrorPage />,
       entry: 'src/components/Layout.tsx',
-      children: [
-        { index: true, element: <HomePage /> },
-        { path: 'wizard', element: <WizardPage /> },
-        { path: 'wizard/step/:stepId', element: <WizardPage /> },
-        { path: 'upload', element: <UploadPage /> },
-        { path: 'results', element: <ResultsPage /> },
-        { path: 'sample', element: <SamplePage /> },
-        { path: 'privacy', element: <PrivacyPage /> },
-        { path: 'terms', element: <TermsPage /> },
-        { path: '404', element: <NotFoundPage /> },
-        { path: '*', element: <NotFoundPage /> },
-      ],
+      children: createPageChildren(),
     })
   ),
 ];

@@ -35,7 +35,7 @@ export function FooterCTA({ onStart, onSample }: FooterCTAProps) {
         </button>
         <button
           onClick={onSample}
-          className="w-full sm:w-auto px-10 py-5 rounded-2xl border-2 border-border bg-surface font-black text-base md:text-xl hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all flex items-center justify-center gap-3 cursor-pointer"
+          className="w-full sm:w-auto px-10 py-5 rounded-2xl border-2 border-border bg-card font-black text-base md:text-xl hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all flex items-center justify-center gap-3 cursor-pointer"
         >
           <Database size={22} />
           {t('cta.trySample')}

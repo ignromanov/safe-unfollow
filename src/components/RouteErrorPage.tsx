@@ -41,7 +41,7 @@ export function RouteErrorPage() {
   // HTTP Error Response (404, 500, etc.)
   if (isRouteErrorResponse(error)) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="min-h-dvh bg-background flex items-center justify-center p-4">
         <div className="max-w-2xl w-full">
           <div className="animate-in slide-in-from-top-4 rounded-4xl border-2 border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/20 p-8 md:p-12">
             {/* Icon */}
@@ -89,7 +89,7 @@ export function RouteErrorPage() {
   // Generic JavaScript Error
   if (error instanceof Error) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="min-h-dvh bg-background flex items-center justify-center p-4">
         <div className="max-w-2xl w-full">
           <div className="animate-in slide-in-from-top-4 rounded-4xl border-2 border-rose-200 dark:border-rose-900/50 bg-rose-50 dark:bg-rose-950/20 p-8 md:p-12">
             {/* Icon */}

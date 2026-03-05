@@ -3,5 +3,37 @@
   "description": "Finde heraus wer dir auf Instagram entfolgt hat, ohne Login. ZIP hochladen, Entfolger sofort sehen. 100% kostenlos, privat, DSGVO-konform, 1M+ Accounts.",
   "ogTitle": "Instagram Entfolger — Kostenlos Ohne Login",
   "twitterDescription": "Finde heraus wer dir auf Instagram entfolgt hat, ohne Login. ZIP hochladen, Entfolger sehen. 100% kostenlos, DSGVO-konform, 1M+ Accounts.",
-  "keywords": "instagram entfolger, wer hat mich entfolgt instagram, unfollow tracker ohne login, instagram zip analyzer, entfolger kostenlos prüfen"
+  "keywords": "instagram entfolger, wer hat mich entfolgt instagram, unfollow tracker ohne login, instagram zip analyzer, entfolger kostenlos prüfen",
+  "routes": {
+    "/upload": {
+      "title": "Instagram ZIP Hochladen — Kostenlose Analyse | SafeUnfollow",
+      "description": "Lade deinen Instagram-Datenexport (ZIP) hoch für kostenlose Analyse. 100% lokale Verarbeitung, ohne Login, 1M+ Accounts.",
+      "ogTitle": "Instagram ZIP Hochladen — Kostenlose Analyse"
+    },
+    "/wizard": {
+      "title": "Instagram Daten als JSON Herunterladen — Anleitung | SafeUnfollow",
+      "description": "Schritt-für-Schritt-Anleitung zum Herunterladen deiner Instagram-Daten als JSON. So forderst du deinen Datenexport von Meta an.",
+      "ogTitle": "Instagram Daten als JSON Herunterladen — Anleitung"
+    },
+    "/sample": {
+      "title": "Instagram Unfollow Tracker Testen — Kostenlose Demo | SafeUnfollow",
+      "description": "Teste Instagram Unfollow Tracker mit Beispieldaten. Sieh wie Badges, Filter und Suche funktionieren — ohne Upload.",
+      "ogTitle": "Instagram Unfollow Tracker Testen — Kostenlose Demo"
+    },
+    "/privacy": {
+      "title": "Datenschutz — Deine Daten Verlassen Dein Gerät Nicht | SafeUnfollow",
+      "description": "SafeUnfollow Datenschutzerklärung. 100% lokale Verarbeitung, keine Datensammlung, kein Tracking. DSGVO-konform.",
+      "ogTitle": "Datenschutz — Deine Daten Verlassen Dein Gerät Nicht"
+    },
+    "/results": {
+      "title": "Deine Instagram-Unfollow-Ergebnisse | SafeUnfollow",
+      "description": "Sieh dir deine Instagram-Unfollow-Analyseergebnisse an. Filtere nach Abzeichen und durchsuche Konten.",
+      "ogTitle": "Deine Instagram-Unfollow-Ergebnisse"
+    },
+    "/terms": {
+      "title": "Nutzungsbedingungen | SafeUnfollow",
+      "description": "Nutzungsbedingungen von SafeUnfollow. Kostenloser Open-Source Instagram-Unfollow-Tracker mit 100% lokaler Verarbeitung.",
+      "ogTitle": "Nutzungsbedingungen"
+    }
+  }
 }

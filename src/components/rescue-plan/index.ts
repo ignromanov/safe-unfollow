@@ -5,6 +5,5 @@
  */
 
 export { RescueToolCard } from './RescueToolCard';
-export { CollapsedBanner } from './CollapsedBanner';
 export { ExpandedBanner } from './ExpandedBanner';
 export { DevControls } from './DevControls';

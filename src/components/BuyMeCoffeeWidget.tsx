@@ -1,5 +1,3 @@
-'use client';
-
 import { useEffect, useRef, useCallback, useState } from 'react';
 
 const BMC_STORAGE_KEY = 'bmc_widget_shown_v1';
@@ -82,14 +80,26 @@ export function BuyMeCoffeeWidget({
     // Always load BMC script when show=true (displays the icon)
     loadBMCScript();
 
-    // Check localStorage (unless skipped for sample data) — only for auto-expand
+    // Check localStorage with 30-day TTL (unless skipped for sample data) — only for auto-expand
     if (!skipStorageCheck) {
       try {
-        const alreadyShown = localStorage.getItem(BMC_STORAGE_KEY);
-        if (alreadyShown) return; // Skip auto-expand, but icon is already loaded
+        const stored = localStorage.getItem(BMC_STORAGE_KEY);
+        if (stored) {
+          const shownAt = parseInt(stored, 10);
+          if (!isNaN(shownAt) && Date.now() - shownAt < 30 * 24 * 60 * 60 * 1000) {
+            return; // Skip auto-expand within 30-day TTL, but icon is already loaded
+          }
+        }
       } catch {
         // localStorage unavailable (private mode, quota exceeded)
       }
+    }
+
+    // Don't auto-expand if inline donation card was shown this session
+    try {
+      if (sessionStorage.getItem('donation_card_shown')) return;
+    } catch {
+      // sessionStorage unavailable
     }
 
     // Don't re-expand in same session
@@ -103,7 +113,7 @@ export function BuyMeCoffeeWidget({
       // Save to localStorage (only for non-sample)
       if (!skipStorageCheck) {
         try {
-          localStorage.setItem(BMC_STORAGE_KEY, 'true');
+          localStorage.setItem(BMC_STORAGE_KEY, String(Date.now()));
         } catch {
           // localStorage unavailable (private mode, quota exceeded)
         }
@@ -137,17 +147,35 @@ function loadBMCScript(): void {
   script.async = true;
   script.setAttribute('data-name', 'BMC-Widget');
   script.setAttribute('data-id', 'ignromanov');
-  script.setAttribute('data-description', 'Support privacy-first tools');
-  script.setAttribute('data-message', 'Thanks for using a private tool! 🛡️');
+  script.setAttribute('data-description', 'Free Instagram tracker. Your data stays local.');
+  script.setAttribute('data-message', 'If it helped, a coffee keeps it free.');
   script.setAttribute('data-color', '#6366F1');
   script.setAttribute('data-position', 'left');
   script.setAttribute('data-x_margin', '18');
   script.setAttribute('data-y_margin', '18');
 
   script.onload = () => {
-    // Dispatch DOMContentLoaded to trigger BMC widget initialization
-    const evt = new Event('DOMContentLoaded', { bubbles: false, cancelable: false });
-    window.dispatchEvent(evt);
+    // BMC script self-initializes on DOMContentLoaded. In an SPA the document
+    // is already loaded so that event never fires again. Instead of dispatching
+    // a synthetic DOMContentLoaded (which can trigger unrelated listeners),
+    // use a MutationObserver to confirm the widget rendered.
+    const observer = new MutationObserver((_mutations, obs) => {
+      if (document.getElementById(BMC_WIDGET_ID)) {
+        obs.disconnect();
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    // BMC 1.0.0 checks readyState and calls init immediately if "complete"
+    // If that didn't work, nudge it with a DOMContentLoaded on document only
+    // (scoped — not window — to minimize side-effects)
+    if (!document.getElementById(BMC_WIDGET_ID)) {
+      const evt = new Event('DOMContentLoaded', { bubbles: false, cancelable: false });
+      document.dispatchEvent(evt);
+    }
+
+    // Safety: disconnect observer after 5s regardless
+    setTimeout(() => observer.disconnect(), 5000);
   };
 
   document.head.appendChild(script);

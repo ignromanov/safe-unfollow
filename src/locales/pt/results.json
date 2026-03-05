@@ -39,9 +39,9 @@
     "followers": "Seguidores",
     "following": "Seguindo",
     "unfollowed": "Deixou de seguir recentemente",
-    "notFollowingBack": "Não segue de volta",
+    "notFollowingBack": "Não te seguem de volta",
     "mutuals": "Mútuos",
-    "notFollowedBack": "Não é seguido de volta",
+    "notFollowedBack": "Você não segue de volta",
     "pending": "Solicitação pendente",
     "permanent": "Pendente (permanente)",
     "restricted": "Restrito",
@@ -55,6 +55,15 @@
   "list": {
     "header": "Contas ({{count, number}})",
     "viewProfile": "Ver Perfil"
+  },
+  "donation": {
+    "headline": "Você analisou {{count}} contas — de graça.",
+    "body": "Sem login. Sem servidor. Nenhum dado enviado. Se economizou seu tempo, um café mantém o projeto.",
+    "headlineMobile": "Grátis. Privado. Sem login.",
+    "bodyMobile": "Se foi útil, considere um café.",
+    "cta": "Pagar um Café",
+    "ctaMobile": "Apoiar",
+    "dismiss": "Agora não"
   },
   "rescue": {
     "critical": {
@@ -88,7 +97,7 @@
       "cta": "Toque para ver recomendações"
     },
     "tools": {
-      "submagic": "Transforme clips em Reels virais → 3-5x mais alcance",
+      "publer": "Agende posts → mantenha a constância e cresça 2x mais rápido",
       "predis": "IA cria posts + designs → conteúdo 3x mais rápido",
       "manychat": "Respostas automáticas 24/7 → economize 10+ horas/semana",
       "metricool": "Encontre seus melhores horários → crescimento 40% mais rápido",
@@ -98,7 +107,8 @@
     "dismiss": "Talvez depois",
     "disclaimer": "Ferramentas selecionadas que recomendamos. Links de afiliados financiam atualizações gratuitas — sem custo para você.",
     "urgency": {
-      "critical": "Aja agora — o engajamento cai 40% após 48 horas"
+      "critical": "Aja agora — o engajamento cai 40% após 48 horas",
+      "warning": "Agir cedo previne perdas maiores — otimize agora"
     },
     "ariaLabel": "Ferramentas recomendadas para melhorar sua presença no Instagram",
     "badges": {
@@ -121,7 +131,8 @@
       "businesses1m": "1M+ negócios",
       "users200k": "200K+ usuários",
       "designs10m": "10M+ designs",
-      "users7m": "7M+ usuários"
+      "users7m": "7M+ usuários",
+      "users9m": "9M+ de usuários"
     }
   }
 }

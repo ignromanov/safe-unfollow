@@ -1,7 +1,7 @@
 ---
 layout: default
-title: FAQ
-description: Frequently asked questions about Instagram Unfollow Tracker
+title: Instagram Unfollow Tracker FAQ — No Login, Free, 100% Private
+description: Answers to common questions about Instagram Unfollow Tracker. Learn how it works without login, why it's free, and how your data stays private.
 permalink: /faq/
 last_updated: 2026-01-16
 ---

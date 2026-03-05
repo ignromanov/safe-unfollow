@@ -167,7 +167,7 @@ describe('useFilterWorker', () => {
       });
     });
 
-    it('should re-initialize when totalAccounts changes', async () => {
+    it('should NOT re-initialize when only totalAccounts changes', async () => {
       const { result, rerender } = renderHook(
         ({ fileHash, totalAccounts }) => useFilterWorker({ fileHash, totalAccounts }),
         { initialProps: { fileHash: mockFileHash, totalAccounts } }
@@ -179,12 +179,13 @@ describe('useFilterWorker', () => {
 
       mockApi.initialize.mockClear();
 
-      // Change totalAccounts
+      // Change totalAccounts only — should NOT trigger re-initialization
       rerender({ fileHash: mockFileHash, totalAccounts: 2000 });
 
-      await waitFor(() => {
-        expect(mockApi.initialize).toHaveBeenCalledWith(mockFileHash, 2000);
-      });
+      // Wait a tick to ensure no re-initialization happens
+      await new Promise(resolve => setTimeout(resolve, 50));
+
+      expect(mockApi.initialize).not.toHaveBeenCalled();
     });
 
     it('should become not ready when fileHash becomes null', async () => {

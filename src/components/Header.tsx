@@ -1,5 +1,3 @@
-'use client';
-
 import {
   AlertDialog,
   AlertDialogAction,
@@ -57,7 +55,7 @@ export function Header({
   };
 
   return (
-    <header className="sticky top-0 z-[80] w-full border-b border-border bg-card/80 backdrop-blur-md">
+    <header className="sticky top-0 z-[80] w-full border-b border-border bg-card md:bg-card/80 md:backdrop-blur-md">
       <div className="container mx-auto px-4 h-16 md:h-20 flex items-center justify-between">
         {/* Logo */}
         <div
@@ -82,7 +80,7 @@ export function Header({
             <div className="flex items-center gap-2">
               <button
                 onClick={onViewResults}
-                className={`cursor-pointer flex items-center gap-2 px-3 py-2.5 md:px-4 md:py-2 rounded-xl text-xs md:text-sm font-bold transition-all ${
+                className={`cursor-pointer flex items-center gap-2 px-3 py-3 md:px-4 md:py-2 rounded-xl text-xs md:text-sm font-bold transition-all ${
                   activeScreen === AppState.RESULTS
                     ? 'bg-primary text-white shadow-md'
                     : 'text-zinc-500 hover:bg-[oklch(0.5_0_0_/_0.05)]'
@@ -95,7 +93,7 @@ export function Header({
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <button
-                    className="cursor-pointer flex items-center gap-2 px-3 py-2.5 md:px-4 md:py-2 rounded-xl text-xs md:text-sm font-bold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all"
+                    className="cursor-pointer flex items-center gap-2 px-3 py-3 md:px-4 md:py-2 rounded-xl text-xs md:text-sm font-bold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all"
                     title={t('header.deleteData')}
                     aria-label={t('header.deleteData')}
                   >
@@ -128,7 +126,7 @@ export function Header({
           ) : (
             <button
               onClick={onUpload}
-              className={`cursor-pointer flex items-center gap-2 px-4 py-2.5 md:py-2 rounded-xl text-xs md:text-sm font-bold transition-all ${
+              className={`cursor-pointer flex items-center gap-2 px-3 py-3 md:px-4 md:py-2 rounded-xl text-xs md:text-sm font-bold transition-all ${
                 activeScreen === AppState.UPLOAD
                   ? 'bg-primary text-white shadow-md'
                   : 'text-zinc-500 hover:bg-[oklch(0.5_0_0_/_0.05)]'
@@ -152,7 +150,7 @@ export function Header({
               This avoids structural mismatch (div vs svg). */}
           <button
             onClick={handleThemeToggle}
-            className="cursor-pointer p-2.5 rounded-2xl hover:bg-[oklch(0.5_0_0_/_0.05)] transition-colors text-zinc-500"
+            className="cursor-pointer flex items-center justify-center p-3 md:px-3 md:py-2 rounded-2xl hover:bg-[oklch(0.5_0_0_/_0.05)] transition-colors text-zinc-500"
             title={
               mounted
                 ? theme === 'system'
@@ -172,7 +170,6 @@ export function Header({
                 : t('theme.system')
             }
           >
-            {/* Default to SunMoon icon for SSR, then switch after mount */}
             {!mounted || theme === 'system' ? (
               <SunMoon size={20} />
             ) : theme === 'light' ? (

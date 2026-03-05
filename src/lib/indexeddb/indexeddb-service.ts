@@ -6,19 +6,24 @@
  * - Bitset-based badge storage for fast filtering
  * - Lazy loading support for virtualization
  * - Search index caching with TTL
+ *
+ * Store-specific logic is extracted into:
+ * - stores/file-store.ts    (file metadata CRUD)
+ * - stores/column-store.ts  (columnar data append)
+ * - stores/bitset-store.ts  (badge bitset operations)
+ * - stores/search-store.ts  (search index persistence)
+ * - cache-manager.ts        (in-memory caching)
  */
 
 import type { AccountBadges, BadgeKey } from '@/core/types';
 import { BitSet, StringColumnBuilder, StringColumnReader } from './bitset';
+import { CacheManager } from './cache-manager';
 import {
-  CACHE_CONFIG,
   DB_CONFIG,
   STORES,
   STORE_CONFIGS,
-  type BitsetRecord,
   type ColumnRecord,
   type FileMetadataRecord,
-  type SearchIndexRecord,
   type SearchIndexType,
 } from './indexeddb-schema';
 import {
@@ -26,17 +31,17 @@ import {
   executeRead,
   executeWrite,
   getAllKeysFromIndex,
-  getAllRecords,
   waitForTransaction,
 } from './transaction-helpers';
+import * as fileStore from './stores/file-store';
+import * as columnStore from './stores/column-store';
+import * as bitsetStore from './stores/bitset-store';
+import * as searchStore from './stores/search-store';
 
 class IndexedDBService {
   private db: IDBDatabase | null = null;
   private initPromise: Promise<IDBDatabase> | null = null;
-
-  // In-memory caches
-  private bitsetCache = new Map<string, BitSet>(); // `${fileHash}:${badge}` → BitSet
-  private columnCache = new Map<string, StringColumnReader>(); // `${fileHash}:${column}` → Reader
+  private cache = new CacheManager();
 
   /**
    * Initialize database connection
@@ -83,9 +88,7 @@ class IndexedDBService {
    */
   async saveFileMetadata(metadata: FileMetadataRecord): Promise<void> {
     const db = await this.init();
-    const tx = db.transaction([STORES.FILES], 'readwrite');
-    const store = tx.objectStore(STORES.FILES);
-    await executeWrite(store, metadata);
+    await fileStore.saveFileMetadata(db, metadata);
   }
 
   /**
@@ -93,14 +96,7 @@ class IndexedDBService {
    */
   async getFileMetadata(fileHash: string): Promise<FileMetadataRecord | null> {
     const db = await this.init();
-    const tx = db.transaction([STORES.FILES], 'readonly');
-    const store = tx.objectStore(STORES.FILES);
-
-    const data = await executeRead<FileMetadataRecord>(store, fileHash);
-    if (data && data.uploadDate) {
-      data.uploadDate = new Date(data.uploadDate);
-    }
-    return data || null;
+    return fileStore.getFileMetadata(db, fileHash);
   }
 
   /**
@@ -229,8 +225,8 @@ class IndexedDBService {
 
     // Store columns first (sequential writes, no blocking)
     const columnsPromise = Promise.all([
-      this.appendColumn(tx, fileHash, 'usernames', usernameColumn, startIndex),
-      this.appendColumn(tx, fileHash, 'displayNames', displayNameColumn, startIndex),
+      columnStore.appendColumn(tx, fileHash, 'usernames', usernameColumn, startIndex),
+      columnStore.appendColumn(tx, fileHash, 'displayNames', displayNameColumn, startIndex),
     ]);
 
     // Update badge bitsets in parallel (read-modify-write operations)
@@ -249,7 +245,7 @@ class IndexedDBService {
     ];
 
     const bitsetsPromise = Promise.all(
-      badges.map(badge => this.updateBadgeBitset(tx, fileHash, badge, accounts, startIndex))
+      badges.map(badge => bitsetStore.updateBadgeBitset(tx, fileHash, badge, accounts, startIndex))
     );
 
     // Wait for both columns and bitsets to complete
@@ -259,106 +255,6 @@ class IndexedDBService {
     await waitForTransaction(tx);
   }
 
-  private async appendColumn(
-    tx: IDBTransaction,
-    fileHash: string,
-    column: 'usernames' | 'displayNames' | 'hrefs',
-    newData: { data: Uint8Array; offsets: Uint32Array; length: number },
-    startIndex: number
-  ): Promise<void> {
-    const store = tx.objectStore(STORES.COLUMNS);
-
-    // Get existing column or create new
-    const existing = await executeRead<ColumnRecord>(store, [fileHash, column]);
-
-    let finalData: Uint8Array;
-    let finalOffsets: Uint32Array;
-    let finalLength: number;
-
-    if (existing && startIndex > 0) {
-      // Append to existing column
-      const oldDataSize = existing.data.byteLength;
-      const newDataSize = newData.data.byteLength;
-
-      finalData = new Uint8Array(oldDataSize + newDataSize);
-      finalData.set(existing.data, 0);
-      finalData.set(newData.data, oldDataSize);
-
-      finalOffsets = new Uint32Array(existing.length + newData.length + 1);
-      finalOffsets.set(existing.offsets!, 0);
-
-      // Adjust new offsets
-      for (let i = 0; i < newData.offsets.length; i++) {
-        const offset = newData.offsets[i];
-        if (offset !== undefined) {
-          finalOffsets[existing.length + i] = oldDataSize + offset;
-        }
-      }
-
-      finalLength = existing.length + newData.length;
-    } else {
-      // First chunk
-      finalData = newData.data;
-      finalOffsets = newData.offsets;
-      finalLength = newData.length;
-    }
-
-    const record: ColumnRecord = {
-      fileHash,
-      column,
-      data: finalData,
-      offsets: finalOffsets,
-      length: finalLength,
-    };
-
-    await executeWrite(store, record);
-  }
-
-  private async updateBadgeBitset(
-    tx: IDBTransaction,
-    fileHash: string,
-    badge: BadgeKey,
-    accounts: AccountBadges[],
-    startIndex: number
-  ): Promise<void> {
-    const store = tx.objectStore(STORES.BITSETS);
-
-    // Get existing bitset or create new
-    const existing = await executeRead<BitsetRecord>(store, [fileHash, badge]);
-
-    let bitset: BitSet;
-    let count = existing?.accountCount || 0;
-
-    if (existing) {
-      bitset = BitSet.fromUint8Array(existing.data);
-    } else {
-      // Estimate total size (will grow as needed)
-      bitset = new BitSet(startIndex + accounts.length);
-    }
-
-    // Update bits for this chunk
-    for (let i = 0; i < accounts.length; i++) {
-      const account = accounts[i];
-      if (!account) continue;
-
-      const accountIndex = startIndex + i;
-
-      if (account.badges[badge]) {
-        bitset.set(accountIndex);
-        count++;
-      }
-    }
-
-    const record: BitsetRecord = {
-      fileHash,
-      badge,
-      data: bitset.toUint8Array(),
-      accountCount: count,
-    };
-
-    await executeWrite(store, record);
-  }
-
   /**
    * Get accounts by index range (for virtualization)
    * Loads both usernames and badges for the specified range
@@ -366,7 +262,7 @@ class IndexedDBService {
   async getAccountsByRange(fileHash: string, start: number, end: number): Promise<AccountBadges[]> {
     // Get username column
     const cacheKey = `${fileHash}:usernames`;
-    let reader = this.columnCache.get(cacheKey);
+    let reader = this.cache.columnCache.get(cacheKey);
 
     if (!reader) {
       const db = await this.init();
@@ -382,7 +278,7 @@ class IndexedDBService {
         throw new Error(`Column ${cacheKey} missing required offsets array`);
       }
       reader = new StringColumnReader(column.data, column.offsets);
-      this.columnCache.set(cacheKey, reader);
+      this.cache.columnCache.set(cacheKey, reader);
     }
 
     // Get usernames for range
@@ -442,27 +338,8 @@ class IndexedDBService {
    * Get badge bitset (with caching)
    */
   async getBadgeBitset(fileHash: string, badge: BadgeKey): Promise<BitSet | null> {
-    const cacheKey = `${fileHash}:${badge}`;
-    let bitset = this.bitsetCache.get(cacheKey);
-
-    if (bitset) {
-      return bitset;
-    }
-
     const db = await this.init();
-    const tx = db.transaction([STORES.BITSETS], 'readonly');
-    const store = tx.objectStore(STORES.BITSETS);
-
-    const record = await executeRead<BitsetRecord>(store, [fileHash, badge]);
-
-    if (!record) {
-      return null;
-    }
-
-    bitset = BitSet.fromUint8Array(record.data);
-    this.bitsetCache.set(cacheKey, bitset);
-
-    return bitset;
+    return bitsetStore.getBadgeBitset(db, fileHash, badge, this.cache.bitsetCache);
   }
 
   /**
@@ -470,28 +347,7 @@ class IndexedDBService {
    */
   async getBadgeStats(fileHash: string): Promise<Record<BadgeKey, number>> {
     const db = await this.init();
-    const tx = db.transaction([STORES.BITSETS], 'readonly');
-    const store = tx.objectStore(STORES.BITSETS);
-    const index = store.index('fileHash');
-
-    const stats: Partial<Record<BadgeKey, number>> = {};
-
-    return new Promise((resolve, reject) => {
-      const request = index.openCursor(IDBKeyRange.only(fileHash));
-
-      request.onsuccess = () => {
-        const cursor = request.result;
-        if (cursor) {
-          const record = cursor.value as BitsetRecord;
-          stats[record.badge] = record.accountCount;
-          cursor.continue();
-        } else {
-          resolve(stats as Record<BadgeKey, number>);
-        }
-      };
-
-      request.onerror = () => reject(request.error);
-    });
+    return bitsetStore.getBadgeStats(db, fileHash);
   }
 
   /**
@@ -504,22 +360,7 @@ class IndexedDBService {
     bitset: BitSet
   ): Promise<void> {
     const db = await this.init();
-    const tx = db.transaction([STORES.INDEXES], 'readwrite');
-    const store = tx.objectStore(STORES.INDEXES);
-
-    const now = Date.now();
-    const ttl = CACHE_CONFIG.INDEX_CACHE_DAYS * 24 * 60 * 60 * 1000;
-
-    const record: SearchIndexRecord = {
-      fileHash,
-      type,
-      key,
-      data: bitset.toUint8Array(),
-      createdAt: now,
-      expiresAt: now + ttl,
-    };
-
-    await executeWrite(store, record);
+    await searchStore.putSearchIndex(db, fileHash, type, key, bitset);
   }
 
   /**
@@ -531,22 +372,7 @@ class IndexedDBService {
     key: string
   ): Promise<BitSet | null> {
     const db = await this.init();
-    const tx = db.transaction([STORES.INDEXES], 'readonly');
-    const store = tx.objectStore(STORES.INDEXES);
-
-    const record = await executeRead<SearchIndexRecord>(store, [fileHash, type, key]);
-
-    if (!record) return null;
-
-    // Check expiration
-    if (Date.now() > record.expiresAt) {
-      // Delete expired index
-      const delTx = db.transaction([STORES.INDEXES], 'readwrite');
-      delTx.objectStore(STORES.INDEXES).delete([fileHash, type, key]);
-      return null;
-    }
-
-    return BitSet.fromUint8Array(record.data);
+    return searchStore.getSearchIndex(db, fileHash, type, key);
   }
 
   /**
@@ -584,24 +410,7 @@ class IndexedDBService {
    * Clear in-memory caches
    */
   clearCaches(fileHash?: string): void {
-    if (fileHash) {
-      // Clear caches for specific file
-      const prefix = `${fileHash}:`;
-      for (const key of this.bitsetCache.keys()) {
-        if (key.startsWith(prefix)) {
-          this.bitsetCache.delete(key);
-        }
-      }
-      for (const key of this.columnCache.keys()) {
-        if (key.startsWith(prefix)) {
-          this.columnCache.delete(key);
-        }
-      }
-    } else {
-      // Clear all caches
-      this.bitsetCache.clear();
-      this.columnCache.clear();
-    }
+    this.cache.clearCaches(fileHash);
   }
 
   /**
@@ -609,16 +418,7 @@ class IndexedDBService {
    */
   async getAllFiles(): Promise<FileMetadataRecord[]> {
     const db = await this.init();
-    const tx = db.transaction([STORES.FILES], 'readonly');
-    const store = tx.objectStore(STORES.FILES);
-
-    const files = await getAllRecords<FileMetadataRecord>(store);
-    return files.map(file => {
-      if (file.uploadDate) {
-        file.uploadDate = new Date(file.uploadDate);
-      }
-      return file;
-    });
+    return fileStore.getAllFiles(db);
   }
 }
 

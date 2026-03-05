@@ -2,56 +2,28 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { Component as UploadPage } from '@/pages/UploadPage';
-import uploadEN from '@/locales/en/upload.json';
 import commonEN from '@/locales/en/common.json';
 
 // Mock child components
 vi.mock('@/components/UploadZone', () => ({
   UploadZone: ({
     onUploadStart,
-    onBack,
     onOpenWizard,
     isProcessing,
-    error,
     parseWarnings,
   }: {
     onUploadStart: (file: File) => void;
-    onBack: () => void;
     onOpenWizard: () => void;
     isProcessing: boolean;
-    error: string | null;
     parseWarnings: string[];
   }) => (
     <div data-testid="upload-zone">
       <button onClick={() => onUploadStart(new File([], 'test.zip'))}>
         {commonEN.buttons.uploadFile}
       </button>
-      <button onClick={onBack}>{uploadEN.zone.back}</button>
       <button onClick={onOpenWizard}>Open Wizard</button>
       <div data-testid="is-processing">{String(isProcessing)}</div>
-      <div data-testid="error">{error || 'no-error'}</div>
       <div data-testid="warnings">{parseWarnings.join(', ') || 'no-warnings'}</div>
-    </div>
-  ),
-}));
-
-vi.mock('@/components/HowToSection', () => ({
-  HowToSection: ({ onStart }: { onStart: () => void }) => (
-    <div data-testid="how-to-section">
-      <button onClick={onStart}>How To Start</button>
-    </div>
-  ),
-}));
-
-vi.mock('@/components/FAQSection', () => ({
-  FAQSection: () => <div data-testid="faq-section">FAQ</div>,
-}));
-
-vi.mock('@/components/FooterCTA', () => ({
-  FooterCTA: ({ onStart, onSample }: { onStart: () => void; onSample: () => void }) => (
-    <div data-testid="footer-cta">
-      <button onClick={onStart}>{commonEN.cta.getStarted}</button>
-      <button onClick={onSample}>{commonEN.cta.trySample}</button>
     </div>
   ),
 }));
@@ -100,13 +72,13 @@ describe('UploadPage', () => {
       expect(screen.getByTestId('upload-zone')).toBeInTheDocument();
     });
 
-    it('should render all sections', () => {
+    it('should render only UploadZone (no below-fold sections)', () => {
       render(<UploadPage />);
 
       expect(screen.getByTestId('upload-zone')).toBeInTheDocument();
-      expect(screen.getByTestId('how-to-section')).toBeInTheDocument();
-      expect(screen.getByTestId('faq-section')).toBeInTheDocument();
-      expect(screen.getByTestId('footer-cta')).toBeInTheDocument();
+      expect(screen.queryByTestId('how-to-section')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('faq-section')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('footer-cta')).not.toBeInTheDocument();
     });
 
     it('should not show loader in idle state', () => {
@@ -149,18 +121,6 @@ describe('UploadPage', () => {
   });
 
   describe('rendering - error state', () => {
-    it('should pass error to UploadZone', () => {
-      mockUseInstagramData.mockReturnValue({
-        uploadState: { status: 'error', error: 'Invalid ZIP file', fileName: null },
-        handleZipUpload: mockHandleZipUpload,
-        parseWarnings: [],
-      });
-
-      render(<UploadPage />);
-
-      expect(screen.getByTestId('error')).toHaveTextContent('Invalid ZIP file');
-    });
-
     it('should pass parseWarnings to UploadZone', () => {
       mockUseInstagramData.mockReturnValue({
         uploadState: { status: 'idle', error: null, fileName: null },
@@ -243,16 +203,6 @@ describe('UploadPage', () => {
   });
 
   describe('navigation - UploadZone handlers', () => {
-    it('should navigate back in history when Back is clicked', async () => {
-      const user = userEvent.setup();
-      render(<UploadPage />);
-
-      await user.click(screen.getByText(uploadEN.zone.back));
-
-      // Uses browser history navigation to return to actual previous page
-      expect(mockNavigate).toHaveBeenCalledWith(-1);
-    });
-
     it('should navigate to wizard when Open Wizard is clicked', async () => {
       const user = userEvent.setup();
       render(<UploadPage />);
@@ -260,35 +210,6 @@ describe('UploadPage', () => {
       await user.click(screen.getByText('Open Wizard'));
 
       expect(mockNavigate).toHaveBeenCalledWith('/wizard/step/6');
-    });
-  });
-
-  describe('navigation - section handlers', () => {
-    it('should navigate to wizard from HowToSection', async () => {
-      const user = userEvent.setup();
-      render(<UploadPage />);
-
-      await user.click(screen.getByText('How To Start'));
-
-      expect(mockNavigate).toHaveBeenCalledWith('/wizard');
-    });
-
-    it('should navigate to wizard from FooterCTA', async () => {
-      const user = userEvent.setup();
-      render(<UploadPage />);
-
-      await user.click(screen.getByText(commonEN.cta.getStarted));
-
-      expect(mockNavigate).toHaveBeenCalledWith('/wizard');
-    });
-
-    it('should navigate to sample from FooterCTA', async () => {
-      const user = userEvent.setup();
-      render(<UploadPage />);
-
-      await user.click(screen.getByText(commonEN.cta.trySample));
-
-      expect(mockNavigate).toHaveBeenCalledWith('/sample');
     });
   });
 
@@ -317,18 +238,6 @@ describe('UploadPage', () => {
       await waitFor(() => {
         expect(mockNavigate).toHaveBeenCalledWith('/ru/results', { replace: true });
       });
-    });
-  });
-
-  describe('sections animation', () => {
-    it('should wrap sections in animated container', () => {
-      const { container } = render(<UploadPage />);
-
-      const animatedDiv = container.querySelector('.animate-in.fade-in');
-      expect(animatedDiv).toBeInTheDocument();
-      expect(animatedDiv).toContainElement(screen.getByTestId('how-to-section'));
-      expect(animatedDiv).toContainElement(screen.getByTestId('faq-section'));
-      expect(animatedDiv).toContainElement(screen.getByTestId('footer-cta'));
     });
   });
 });

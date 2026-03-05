@@ -146,6 +146,10 @@
   button, [role="button"], a[href], input[type="button"], input[type="submit"] {
     cursor: pointer;
   }
+  /* Remove tap highlight on mobile for interactive elements */
+  [role="button"], button, a {
+    -webkit-tap-highlight-color: transparent;
+  }
 }
 
 @layer utilities {
@@ -210,5 +214,43 @@
   }
   .no-scrollbar::-webkit-scrollbar {
     display: none;
+  }
+}
+
+/* P0.4: Accessibility — respect user motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* M-P1.3: Reset sticky hover effects on touch devices */
+@media (hover: none) {
+  .hover\:scale-105:hover,
+  .hover\:scale-\[1\.02\]:hover,
+  .hover\:scale-\[1\.05\]:hover {
+    transform: none !important;
+  }
+  .hover\:shadow-lg:hover,
+  .hover\:shadow-xl:hover,
+  .hover\:shadow-2xl:hover {
+    box-shadow: none !important;
+  }
+  .hover\:-translate-y-1:hover {
+    transform: none !important;
+  }
+  .group:hover .group-hover\:scale-110,
+  .group:hover .group-hover\:scale-\[1\.02\] {
+    transform: none !important;
+  }
+  .group:hover .group-hover\:-translate-x-1,
+  .group:hover .group-hover\:translate-x-1 {
+    transform: none !important;
+  }
+  .group:hover .group-hover\:shadow-2xl {
+    box-shadow: none !important;
   }
 }

@@ -1,5 +1,5 @@
 {
-  "version": "V1.5 1.000.000+ Hesap İçin Optimize Edildi",
+  "version": "V1.6 1.000.000+ Hesap İçin Optimize Edildi",
   "headline": {
     "prefix": "Gör",
     "highlight": "Instagram Takipten Çıkanları",
@@ -18,7 +18,7 @@
     "privacy": "Gizlilik Garantili"
   },
   "features": {
-    "heading": "Temel Ozellikler",
+    "heading": "Temel Özellikler",
     "local": {
       "title": "%100 Yerel",
       "description": "Verin asla cihazından çıkmaz"

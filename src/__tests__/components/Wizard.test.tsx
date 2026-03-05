@@ -74,7 +74,7 @@ describe('Wizard', () => {
     render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
 
     expect(screen.getByText('Next Step')).toBeInTheDocument();
-    expect(screen.getByText('Back')).toBeInTheDocument();
+    expect(screen.getByText('buttons.cancel')).toBeInTheDocument();
   });
 
   it('should render external link button on step 1', () => {
@@ -96,7 +96,7 @@ describe('Wizard', () => {
 
     fireEvent.click(screen.getByText(wizardEN.buttons.next));
 
-    expect(mockNavigate).toHaveBeenCalledWith('/wizard/step/2', { replace: true });
+    expect(mockNavigate).toHaveBeenCalledWith('/wizard/step/2');
   });
 
   it('should call navigate to previous step when Back is clicked', () => {
@@ -107,7 +107,7 @@ describe('Wizard', () => {
 
     fireEvent.click(screen.getByText('Back'));
 
-    expect(mockNavigate).toHaveBeenCalledWith('/wizard/step/1', { replace: true });
+    expect(mockNavigate).toHaveBeenCalledWith('/wizard/step/1');
   });
 
   it('should call onCancel when close button is clicked', () => {
@@ -155,7 +155,7 @@ describe('Wizard', () => {
     fireEvent.click(screen.getByText('Next Step'));
 
     // Navigation to step 2
-    expect(mockNavigate).toHaveBeenCalledWith('/wizard/step/2', { replace: true });
+    expect(mockNavigate).toHaveBeenCalledWith('/wizard/step/2');
   });
 
   it('should render correct step based on URL pathname', () => {
@@ -173,7 +173,7 @@ describe('Wizard', () => {
 
     fireEvent.click(screen.getByText(wizardEN.buttons.next));
 
-    expect(mockNavigate).toHaveBeenCalledWith('/wizard/step/4', { replace: true });
+    expect(mockNavigate).toHaveBeenCalledWith('/wizard/step/4');
   });
 
   it('should navigate to correct path when Back is clicked', () => {
@@ -182,7 +182,7 @@ describe('Wizard', () => {
 
     fireEvent.click(screen.getByText('Back'));
 
-    expect(mockNavigate).toHaveBeenCalledWith('/wizard/step/4', { replace: true });
+    expect(mockNavigate).toHaveBeenCalledWith('/wizard/step/4');
   });
 
   it('should render "I already have my ZIP file" button on step 1', () => {

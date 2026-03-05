@@ -35,12 +35,23 @@ vi.mock('@/components/FilterChips', () => ({
 }));
 
 vi.mock('@/components/AccountList', () => ({
-  AccountList: ({ accountIndices }: { accountIndices: number[] }) => (
-    <div data-testid="account-list">
-      <p>Accounts ({accountIndices.length})</p>
-      {accountIndices.length === 0 && <p>No accounts match your filters</p>}
-    </div>
-  ),
+  AccountList: ({
+    accountIndices,
+    accountCount,
+  }: {
+    accountIndices: number[] | null;
+    accountCount: number;
+  }) => {
+    const count = accountIndices === null ? accountCount : accountIndices.length;
+    return (
+      <div data-testid="account-list">
+        <p>Accounts ({count})</p>
+        {accountIndices !== null && accountIndices.length === 0 && (
+          <p>No accounts match your filters</p>
+        )}
+      </div>
+    );
+  },
 }));
 
 vi.mock('@/components/StatCard', () => ({
@@ -83,7 +94,7 @@ describe('AccountListSection', () => {
   const createMockReturnValue = (overrides = {}) => ({
     query: '',
     setQuery: mockSetQuery,
-    filteredIndices: Array.from({ length: 21 }, (_, i) => i), // 21 indices
+    filteredIndices: null as number[] | null, // null = "show all"
     filters: new Set<BadgeKey>(),
     setFilters: mockSetFilters,
     filterCounts: defaultFilterCounts,

@@ -53,7 +53,10 @@
     "forTheCommunity": "コミュニティのために",
     "copyright": "© 2026 SafeUnfollow.app",
     "license": "MITライセンス",
-    "viewSource": "ソースコード"
+    "viewSource": "ソースコード",
+    "analyzedCount": "{{count}}アカウントを分析しました。無料でした。",
+    "noAdsNoInvestors": "このツールには広告も投資家もいません。",
+    "buyACoffee": "コーヒーを贈る"
   },
   "nav": {
     "privacy": "プライバシーポリシー",

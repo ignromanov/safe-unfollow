@@ -5,14 +5,26 @@
 
 import type { InstagramExportEntry, RawItem } from '@/core/types';
 
+/** Instagram usernames: 1-30 chars, alphanumeric + dots + underscores */
+const INSTAGRAM_USERNAME_RE = /^[a-zA-Z0-9._]{1,30}$/;
+
+/**
+ * Check if a username matches Instagram's username format
+ */
+export function isValidUsername(username: string): boolean {
+  return INSTAGRAM_USERNAME_RE.test(username);
+}
+
 /**
  * Normalize username to lowercase and trim whitespace
- * Returns null for empty or invalid usernames
+ * Returns null for empty, malformed, or invalid usernames
  */
 export function normalize(username: string | undefined | null): string | null {
   if (!username) return null;
   const trimmed = username.trim().toLowerCase();
-  return trimmed.length ? trimmed : null;
+  if (!trimmed.length) return null;
+  if (!isValidUsername(trimmed)) return null;
+  return trimmed;
 }
 
 /**

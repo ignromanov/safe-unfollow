@@ -386,12 +386,15 @@ describe('Analytics', () => {
       });
 
       it('should track rescue plan tool click', () => {
-        analytics.rescuePlanToolClick('tool-1', 'medium', 'small');
+        analytics.rescuePlanToolClick('tool-1', 0, 'medium', 'small', 1500);
 
         expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.RESCUE_PLAN_TOOL_CLICK, {
           tool_id: 'tool-1',
+          position: 0,
           severity: 'medium',
           size: 'small',
+          segment: 'medium_small',
+          account_count: 1500,
         });
       });
 
@@ -567,12 +570,10 @@ describe('Analytics', () => {
       expect(events['FILE_PICKER_CANCEL']).toBeUndefined();
       expect(events['UPLOAD_DROP']).toBeUndefined();
       expect(events['SAMPLE_DATA_CLICK']).toBeUndefined();
-      expect(events['RESCUE_PLAN_DISMISS']).toBeUndefined();
       expect(events['RESCUE_PLAN_VIEW_TIME']).toBeUndefined();
       expect(events['RESCUE_PLAN_RE_ENGAGEMENT']).toBeUndefined();
       // V10 removals
       expect(events['SESSION_DURATION']).toBeUndefined();
-      expect(events['RESCUE_PLAN_IMPRESSION']).toBeUndefined();
       expect(events['RESULTS_SCROLL_DEPTH']).toBeUndefined();
       expect(events['WIZARD_BACK_CLICK']).toBeUndefined();
       expect(events['WIZARD_CANCEL']).toBeUndefined();

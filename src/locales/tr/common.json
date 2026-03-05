@@ -53,7 +53,10 @@
     "forTheCommunity": "Topluluk için",
     "copyright": "© 2026 SafeUnfollow.app",
     "license": "MIT Lisanslı",
-    "viewSource": "Kaynak Kodu"
+    "viewSource": "Kaynak Kodu",
+    "analyzedCount": "{{count}} hesabı analiz ettiniz. Ücretsizdi.",
+    "noAdsNoInvestors": "Bu araçta reklam veya yatırımcı yok.",
+    "buyACoffee": "Kahve Ismarla"
   },
   "nav": {
     "privacy": "Gizlilik Politikası",

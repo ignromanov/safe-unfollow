@@ -1,5 +1,3 @@
-'use client';
-
 import {
   Users,
   UserPlus,
@@ -14,14 +12,19 @@ import {
   Ghost,
 } from 'lucide-react';
 import type { BadgeKey } from '@/core/types';
-import type { FilterChipsProps } from '@/types/components';
+interface FilterChipsProps {
+  selectedFilters: Set<BadgeKey>;
+  onFiltersChange: (filters: Set<BadgeKey>) => void;
+  filterCounts: Record<BadgeKey, number>;
+  isFiltering?: boolean;
+}
 import { analytics } from '@/lib/analytics';
 import type { ReactNode } from 'react';
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-// Icon components for each badge type
-const BADGE_ICON_COMPONENTS: Record<BadgeKey, { icon: typeof Users; defaultClass: string }> = {
+// Module-level icon map (outside component, never re-created)
+const BADGE_ICON_MAP: Record<BadgeKey, { icon: typeof Users; defaultClass: string }> = {
   following: { icon: Users, defaultClass: 'text-blue-500' },
   followers: { icon: UserPlus, defaultClass: 'text-emerald-500' },
   mutuals: { icon: Heart, defaultClass: 'text-indigo-500' },
@@ -35,9 +38,12 @@ const BADGE_ICON_COMPONENTS: Record<BadgeKey, { icon: typeof Users; defaultClass
   dismissed: { icon: XCircle, defaultClass: 'text-zinc-400 opacity-50' },
 };
 
+// Module-level Intl.NumberFormat instance (created once, reused)
+const numberFormatter = new Intl.NumberFormat();
+
 // Get icon with correct color based on active state
 function getBadgeIcon(type: BadgeKey, isActive: boolean): ReactNode {
-  const config = BADGE_ICON_COMPONENTS[type];
+  const config = BADGE_ICON_MAP[type];
   const IconComponent = config.icon;
   return <IconComponent size={18} className={isActive ? 'text-white' : config.defaultClass} />;
 }
@@ -57,7 +63,7 @@ const FILTER_CONFIGS: Array<{ type: BadgeKey }> = [
   { type: 'dismissed' },
 ];
 
-export function FilterChips({
+export const FilterChips = memo(function FilterChips({
   selectedFilters,
   onFiltersChange,
   filterCounts,
@@ -107,7 +113,7 @@ export function FilterChips({
         )}
       </div>
 
-      {/* Available Filters */}
+      {/* Available Filters — 2-col grid on mobile, 1-col on desktop sidebar */}
       <div className="grid grid-cols-2 lg:grid-cols-1 gap-2.5">
         {availableFilters.map(cfg => {
           const isActive = selectedFilters.has(cfg.type);
@@ -138,10 +144,10 @@ export function FilterChips({
                       : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-500'
                   }`}
                 >
-                  {count.toLocaleString()}
+                  {numberFormatter.format(count)}
                 </span>
               </div>
-              <span className="mt-3 block leading-snug text-left text-xs">{label}</span>
+              <span className="mt-3 block leading-snug text-start text-xs">{label}</span>
             </button>
           );
         })}
@@ -171,7 +177,7 @@ export function FilterChips({
                       0
                     </span>
                   </div>
-                  <span className="mt-3 block leading-snug text-left text-xs text-zinc-400">
+                  <span className="mt-3 block leading-snug text-start text-xs text-zinc-400">
                     {t(`badges.${cfg.type}`)}
                   </span>
                 </div>
@@ -182,4 +188,4 @@ export function FilterChips({
       )}
     </div>
   );
-}
+});

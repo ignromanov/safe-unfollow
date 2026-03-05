@@ -1,6 +1,5 @@
 {
   "zone": {
-    "back": "Geri",
     "title": "Instagram ZIP Yükle",
     "description": "Verilerin %100 gizli kalır. Instagram ZIP dosyanı tarayıcında yerel olarak analiz ediyoruz.",
     "dropHere": "Instagram ZIP dosyanı buraya bırak",
@@ -8,7 +7,15 @@
     "jsonOnly": "Sadece JSON Formatı",
     "processing": "Yerel olarak analiz ediliyor...",
     "processingHint": "Büyük veri setlerini (1M+'a kadar) işlemek biraz zaman alabilir.",
-    "ariaLabel": "Instagram veri ZIP dosyasını yükle"
+    "ariaLabel": "Instagram veri ZIP dosyasını yükle",
+    "jsonReminder": "Veri dışa aktarımını talep ederken JSON formatını seçtiğinden emin ol. JSON ve HTML ZIP dosyaları dışarıdan aynı görünür.",
+    "seeGuide": "Adım adım kılavuzu gör",
+    "jsonRequired": "JSON formatında dışa aktarım gerektirir",
+    "privacyMicro": "Dosyanız cihazınızdan asla ayrılmaz",
+    "notSureLink": "Ne yükleyeceğinizi bilmiyor musunuz? Kılavuza bakın",
+    "processingAria": "Dosyanız işleniyor, lütfen bekleyin...",
+    "tapToSelect": "ZIP dosyanızı seçmek için dokunun",
+    "notZipWarning": "Bu bir .zip dosyası gibi görünmüyor"
   },
   "checklist": {
     "title": "Yükleme Öncesi Kontrol Listesi",
@@ -23,30 +30,155 @@
     "learnFix": "Nasıl düzeltilir öğren"
   },
   "diagnostic": {
-    "back": "Geri",
     "howToFix": "Bunu nasıl düzeltirsin",
     "tryAgain": "Tekrar Dene",
     "showMistakes": "Nerede Yanlış Yaptığımı Göster",
-    "commonMistakes": "Yaygın Hatalar",
-    "mistakes": {
-      "html": {
-        "title": "JSON yerine HTML",
-        "description": "Verilerini talep ederken \"JSON\" formatını seçtiğinden emin ol"
-      },
-      "missingData": {
-        "title": "Eksik veri kategorisi",
-        "description": "Veri türlerinde \"Takipçiler ve takip edilenler\" seçmelisin"
-      },
-      "wrongFile": {
-        "title": "Yanlış dosya",
-        "description": ".zip dosyasını yükle, klasör veya çıkarılmış dosyaları değil"
-      }
-    },
     "reportIssue": "Bu sorunu GitHub'da bildir",
     "copyDetails": "Hata detaylarını kopyala",
     "copied": "Kopyalandı!",
-    "errorCode": "Hata kodu"
+    "errorCode": "Hata kodu",
+    "errors": {
+      "NOT_ZIP": {
+        "title": "ZIP Dosyası Değil",
+        "message": "Lütfen klasör veya başka bir dosya türü değil, Instagram'dan gelen ZIP arşivini yükle.",
+        "fix": "İndirilenler klasöründe .zip uzantılı bir dosya ara. Genellikle \"instagram-kullaniciadi-tarih.zip\" gibi bir ismi olur."
+      },
+      "HTML_FORMAT": {
+        "title": "Yanlış Format: HTML",
+        "message": "Verilerini HTML formatında indirdin, ancak bu araç çalışmak için JSON formatı gerektiriyor.",
+        "fix": "Instagram Ayarlar → Verilerini İndir → \"JSON\" formatını seç (HTML değil) → Tekrar indirme talep et."
+      },
+      "NOT_INSTAGRAM_EXPORT": {
+        "title": "Instagram Dışa Aktarımı Değil",
+        "message": "Bu ZIP dosyası bir Instagram veri dışa aktarımı gibi görünmüyor.",
+        "fix": "Instagram'ın \"Verilerini İndir\" özelliğinden gelen ZIP dosyasını yüklediğinden emin ol, rastgele bir ZIP dosyası değil."
+      },
+      "INCOMPLETE_EXPORT": {
+        "title": "Eksik Dışa Aktarım",
+        "message": "Dışa aktarımda \"Takipçiler ve takip edilenler\" verisi eksik.",
+        "fix": "Instagram'dan verilerini tekrar talep et ve veri türlerinde \"Takipçiler ve takip edilenler\" seçtiğinden emin ol."
+      },
+      "NO_DATA_FILES": {
+        "title": "Takipçi Verisi Bulunamadı",
+        "message": "Beklenen konumda following.json veya followers dosyaları bulunamadı.",
+        "fix": "Verilerini talep ederken \"Takipçiler ve takip edilenler\" seçtiğinden ve doğru ZIP dosyasını yüklediğinden emin ol."
+      },
+      "MISSING_FOLLOWING": {
+        "title": "Takip Edilen Verisi Eksik",
+        "message": "following.json bulunamadı — kimi takip ettiğin tespit edilemiyor.",
+        "fix": "Verilerini tekrar talep et ve \"Takipçiler ve takip edilenler\" seçildiğinden emin ol."
+      },
+      "MISSING_FOLLOWERS": {
+        "title": "Takipçi Verisi Eksik",
+        "message": "followers_*.json dosyaları bulunamadı — seni kimin takip ettiği tespit edilemiyor.",
+        "fix": "Verilerini tekrar talep et ve \"Takipçiler ve takip edilenler\" seçildiğinden emin ol."
+      },
+      "CORRUPTED_ZIP": {
+        "title": "Bozuk ZIP Dosyası",
+        "message": "ZIP dosyası hasarlı veya bozuk görünüyor ve açılamıyor.",
+        "fix": "Instagram verilerini tekrar indirmeyi dene. Yüklemeden önce indirmenin tamamen tamamlandığından emin ol."
+      },
+      "ZIP_ENCRYPTED": {
+        "title": "Şifreli ZIP",
+        "message": "ZIP dosyası parola korumalı, ancak Instagram dışa aktarımları şifrelenmez.",
+        "fix": "Bu geçerli bir Instagram veri dışa aktarımı olmayabilir. Instagram Ayarlar'dan yeni bir dışa aktarım talep et."
+      },
+      "EMPTY_FILE": {
+        "title": "Boş Dosya",
+        "message": "Yüklenen dosya boş (0 bayt).",
+        "fix": "İndirme kesintiye uğramış olabilir. Instagram'dan verilerini tekrar indirmeyi dene."
+      },
+      "FILE_TOO_LARGE": {
+        "title": "Dosya Çok Büyük",
+        "message": "Dosya boyutu {{sizeMb}}MB, 500MB sınırını aşıyor.",
+        "fix": "Instagram'dan daha küçük bir veri dışa aktarımı talep etmeyi dene ya da daha fazla belleğe sahip bir masaüstü tarayıcı kullan."
+      },
+      "JSON_PARSE_ERROR": {
+        "title": "Geçersiz Veri Formatı",
+        "message": "Dışa aktarımdaki bir veya daha fazla JSON dosyası hatalı biçimlendirilmiş veya bozuk.",
+        "fix": "Bu bozuk bir indirmeye işaret edebilir. Instagram'dan yeni bir veri dışa aktarımı talep et."
+      },
+      "INVALID_DATA_STRUCTURE": {
+        "title": "Beklenmedik Veri Yapısı",
+        "message": "JSON dosyaları mevcut ancak beklenmedik bir yapıya sahip.",
+        "fix": "Instagram dışa aktarım formatını değiştirmiş olabilir. Lütfen bu sorunu bildirin."
+      },
+      "WORKER_TIMEOUT": {
+        "title": "İşlem Zaman Aşımı",
+        "message": "Dosyanın işlenmesi çok uzun sürdü (60 saniyeden fazla).",
+        "fix": "Kaynakları boşaltmak için diğer tarayıcı sekmelerini kapatmayı dene ya da daha küçük bir dışa aktarım dosyası kullan."
+      },
+      "WORKER_INIT_ERROR": {
+        "title": "İşlem Başlatılamadı",
+        "message": "Dosya işlemcisi başlatılamadı.",
+        "fix": "Sayfayı yenilemeyi dene. Sorun devam ederse farklı bir tarayıcı dene."
+      },
+      "WORKER_CRASHED": {
+        "title": "İşlem Çöktü",
+        "message": "Dosya işlemcisi beklenmedik şekilde çöktü.",
+        "fix": "Bu yetersiz bellekten kaynaklanıyor olabilir. Diğer sekmeleri kapatmayı veya daha küçük bir dosya kullanmayı dene."
+      },
+      "INDEXEDDB_ERROR": {
+        "title": "Depolama Hatası",
+        "message": "Veriler tarayıcı depolama alanına kaydedilemedi.",
+        "fix": "Tarayıcı önbelleğini temizlemeyi veya farklı bir tarayıcı kullanmayı dene. Gizli/incognito modda depolama alanı sınırlı olabilir."
+      },
+      "QUOTA_EXCEEDED": {
+        "title": "Depolama Dolu",
+        "message": "Tarayıcı depolama kotası aşıldı.",
+        "fix": "Ayarlar'dan bazı tarayıcı verilerini temizle veya farklı bir tarayıcı profili dene."
+      },
+      "IDB_NOT_SUPPORTED": {
+        "title": "Depolama Kullanılamıyor",
+        "message": "Bu tarayıcıda IndexedDB depolama mevcut değil.",
+        "fix": "Bu uygulama IndexedDB gerektiriyor. Gizli/incognito modu devre dışı bırak ya da Chrome/Firefox/Safari dene."
+      },
+      "IDB_PERMISSION_DENIED": {
+        "title": "Depolama İzni Reddedildi",
+        "message": "Tarayıcı depolama alanına erişimi reddetti.",
+        "fix": "Bu site için depolama iznine izin vermek üzere tarayıcı ayarlarını kontrol et veya katı gizlilik modunu devre dışı bırak."
+      },
+      "UPLOAD_CANCELLED": {
+        "title": "Yükleme İptal Edildi",
+        "message": "Yükleme iptal edildi.",
+        "fix": "Dosyanı yüklemek için \"Tekrar Dene\"ye tıkla."
+      },
+      "CRYPTO_NOT_AVAILABLE": {
+        "title": "Güvenlik Özelliği Kullanılamıyor",
+        "message": "Tarayıcın güvenli karma işlemini (crypto.subtle) desteklemiyor.",
+        "fix": "Lütfen HTTPS ile modern bir tarayıcı kullan (Chrome 37+, Firefox 34+, Safari 11+)."
+      },
+      "NETWORK_ERROR": {
+        "title": "Ağ Hatası",
+        "message": "Yükleme sırasında bir ağ hatası oluştu.",
+        "fix": "İnternet bağlantını kontrol et ve tekrar dene."
+      },
+      "UNKNOWN": {
+        "title": "Yükleme Hatası",
+        "message": "Dosyan işlenirken beklenmedik bir hata oluştu.",
+        "fix": "Dosyayı tekrar yüklemeyi dene. Sorun devam ederse ZIP dosyasının bozuk olmadığından emin ol."
+      }
+    }
   },
+  "quiz": {
+    "title": "Hangi formatı seçtiniz?",
+    "subtitle": "Instagram veri dışa aktarımını talep ederken hangi formatı seçtiniz?",
+    "json": "JSON",
+    "jsonHint": "Analiz için doğru format",
+    "html": "HTML",
+    "htmlHint": "Çalışmaz — JSON olarak yeniden indirin",
+    "notSure": "Emin değilim",
+    "notSureHint": "Kontrol edeyim",
+    "successMessage": "Hazır! ZIP dosyanızı aşağıya yükleyin.",
+    "htmlMessage": "HTML dışa aktarımları analiz edilemez. Lütfen verilerinizi JSON formatında yeniden talep edin.",
+    "htmlCta": "JSON formatını nasıl alacağınızı görün",
+    "comparisonTitle": "Farkı nasıl anlarsınız",
+    "comparisonJson": "İndirme sayfasında \"Format: JSON\" görüyorsanız doğru.",
+    "comparisonHtml": "\"Format: HTML\" veya .html dosyaları görüyorsanız yeniden talep etmeniz gerekiyor.",
+    "dismiss": "Anladım",
+    "fixedIt": "JSON olarak yeniden talep ettim"
+  },
+  "formatWarning": "Veri dışa aktarımı talep ederken JSON (HTML değil) seçtiğinizden emin olun.",
   "waiting": {
     "title": "Instagram bekleniyor...",
     "description": "Instagram veri dışa aktarımını hazırlıyor. 48 saat içinde bir e-posta alacaksın (genellikle çok daha hızlı!).",

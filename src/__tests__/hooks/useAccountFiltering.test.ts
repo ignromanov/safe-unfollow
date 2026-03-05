@@ -100,9 +100,9 @@ describe('useAccountFiltering', () => {
       expect(result.current.isFiltering).toBe(false);
       expect(result.current.processingTime).toBe(0);
 
-      // When no filters/query, should show all indices
+      // When no filters/query, null = "show all" (avoids 8MB array for 1M accounts)
       await waitFor(() => {
-        expect(result.current.filteredIndices).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+        expect(result.current.filteredIndices).toBeNull();
       });
 
       unmount();
@@ -159,7 +159,7 @@ describe('useAccountFiltering', () => {
       );
 
       expect(result.current.totalCount).toBe(0);
-      expect(result.current.filteredIndices).toEqual([]);
+      expect(result.current.filteredIndices).toBeNull();
 
       unmount();
     });
@@ -325,8 +325,9 @@ describe('useAccountFiltering', () => {
         })
       );
 
+      // null = "show all" sentinel (avoids 8MB array allocation for 1M accounts)
       await waitFor(() => {
-        expect(result.current.filteredIndices).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+        expect(result.current.filteredIndices).toBeNull();
       });
 
       unmount();
@@ -383,9 +384,9 @@ describe('useAccountFiltering', () => {
       expect(mockSetFilters).toHaveBeenCalledWith(new Set());
       expect(result.current.isFiltering).toBe(false);
 
-      // After clearing, should show all indices (no filters/query)
+      // After clearing, null = "show all" (no filters/query)
       await waitFor(() => {
-        expect(result.current.filteredIndices).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+        expect(result.current.filteredIndices).toBeNull();
       });
 
       unmount();
@@ -463,7 +464,7 @@ describe('useAccountFiltering', () => {
 
       await waitFor(() => {
         expect(result.current.isFiltering).toBe(false);
-        expect(result.current.filteredIndices).toEqual([]);
+        expect(result.current.filteredIndices).toBeNull();
       });
 
       consoleErrorSpy.mockRestore();
@@ -613,7 +614,7 @@ describe('useAccountFiltering', () => {
       );
 
       expect(result.current.totalCount).toBe(0);
-      expect(result.current.filteredIndices).toEqual([]);
+      expect(result.current.filteredIndices).toBeNull();
 
       unmount();
     });
@@ -637,7 +638,7 @@ describe('useAccountFiltering', () => {
         })
       );
 
-      expect(result.current.filteredIndices).toEqual([]);
+      expect(result.current.filteredIndices).toBeNull();
 
       unmount();
     });
@@ -654,9 +655,9 @@ describe('useAccountFiltering', () => {
         result.current.setQuery('   ');
       });
 
-      // Whitespace query should be treated as empty - show all
+      // Whitespace query should be treated as empty - null = "show all"
       await waitFor(() => {
-        expect(result.current.filteredIndices).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+        expect(result.current.filteredIndices).toBeNull();
       });
 
       unmount();
@@ -809,9 +810,9 @@ describe('useAccountFiltering', () => {
         }
       );
 
-      // Wait for initial state
+      // Wait for initial state — null = "show all"
       await waitFor(() => {
-        expect(result.current.filteredIndices).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+        expect(result.current.filteredIndices).toBeNull();
       });
 
       // Update store to have empty filters
@@ -828,9 +829,9 @@ describe('useAccountFiltering', () => {
       // Trigger rerender with null fileHash
       rerender({ fileHash: null, accountCount: 0 });
 
-      // Should handle null engine gracefully
+      // Should handle null engine gracefully — null = no data
       await waitFor(() => {
-        expect(result.current.filteredIndices).toEqual([]);
+        expect(result.current.filteredIndices).toBeNull();
         expect(result.current.isFiltering).toBe(false);
         expect(result.current.totalCount).toBe(0);
       });

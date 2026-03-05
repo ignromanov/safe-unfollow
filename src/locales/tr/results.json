@@ -56,9 +56,18 @@
     "header": "Hesaplar ({{count, number}})",
     "viewProfile": "Profili Görüntüle"
   },
+  "donation": {
+    "headline": "Az önce {{count}} hesabı analiz ettiniz — ücretsiz.",
+    "body": "Giriş yok. Sunucu yok. Hiçbir veri gönderilmedi. Zaman kazandırdıysa, bir kahve projeyi ayakta tutar.",
+    "headlineMobile": "Ücretsiz. Özel. Giriş yok.",
+    "bodyMobile": "Faydalı olduysa, bir kahve ısmarlayın.",
+    "cta": "Kahve Ismarla",
+    "ctaMobile": "Destekle",
+    "dismiss": "Şimdi değil"
+  },
   "rescue": {
     "critical": {
-      "title": "%{{unfollowedPercent}} kaybettiniz — 7 günde kurtarın",
+      "title": "{{unfollowedPercent}}% kaybettiniz — 7 günde kurtarın",
       "subtitle": {
         "influencer": "{{count}}+ takipçiyle her kayıp erişiminizi etkiler. 7 günde kurtarın:",
         "power": "Üst seviyedesiniz — akıllı içerik üreticileri bunlarla hızla toparlanır:",
@@ -67,7 +76,7 @@
       }
     },
     "warning": {
-      "title": "%{{unfollowedPercent}} düşüş tespit edildi — optimize etme zamanı",
+      "title": "{{unfollowedPercent}}% düşüş tespit edildi — optimize etme zamanı",
       "subtitle": {
         "influencer": "Sizin ölçeğinizde erken optimizasyon daha büyük kayıpları önler:",
         "power": "Erken yakalayın — en iyi içerik üreticilerinin kullandıkları:",
@@ -76,7 +85,7 @@
       }
     },
     "growth": {
-      "title": "Sadece %{{unfollowedPercent}} kayıp — harika gidiyorsunuz!",
+      "title": "Sadece {{unfollowedPercent}}% kayıp — harika gidiyorsunuz!",
       "subtitle": {
         "influencer": "Profesyonel araçlarla erişiminizi ölçeklendirin:",
         "power": "Sonraki seviyeye hazır mısınız? İşte araç setiniz:",
@@ -88,7 +97,7 @@
       "cta": "Önerileri görmek için dokunun"
     },
     "tools": {
-      "submagic": "Klipleri viral Reels'e dönüştürün → 3-5x daha fazla erişim",
+      "publer": "Gönderileri planla → tutarlı ol ve 2 kat daha hızlı büyü",
       "predis": "AI gönderi + tasarım oluşturur → 3x daha hızlı içerik",
       "manychat": "7/24 otomatik yanıt → haftada 10+ saat tasarruf",
       "metricool": "En iyi zamanlarınızı bulun → %40 daha hızlı büyüme",
@@ -98,7 +107,8 @@
     "dismiss": "Belki sonra",
     "disclaimer": "Önerdiğimiz el yapımı seçilmiş araçlar. Ortaklık bağlantıları ücretsiz güncellemeleri finanse eder — size ekstra maliyet yok.",
     "urgency": {
-      "critical": "Şimdi harekete geçin — etkileşim 48 saat sonra %40 düşer"
+      "critical": "Şimdi harekete geçin — etkileşim 48 saat sonra %40 düşer",
+      "warning": "Erken harekete geçmek daha büyük kayıpları önler — şimdi optimize edin"
     },
     "ariaLabel": "Instagram varlığınızı geliştirmek için önerilen araçlar",
     "badges": {
@@ -121,7 +131,8 @@
       "businesses1m": "1M+ işletme",
       "users200k": "200K+ kullanıcı",
       "designs10m": "10M+ tasarım",
-      "users7m": "7M+ kullanıcı"
+      "users7m": "7M+ kullanıcı",
+      "users9m": "9M+ kullanıcı"
     }
   }
 }

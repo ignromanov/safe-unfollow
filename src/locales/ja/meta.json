@@ -3,5 +3,37 @@
   "description": "Instagramでフォロー解除した人を確認、ログイン不要。ZIPをアップロード、即座に表示。100%無料、プライベート、100万件対応。オフライン利用可。",
   "ogTitle": "Instagram フォロー解除 — 無料・ログイン不要",
   "twitterDescription": "Instagramでフォロー解除した人を確認、ログイン不要。ZIPアップロード、即座に表示。100%無料、100万件対応。オフライン可。",
-  "keywords": "instagram フォロー解除, 誰がフォロー外した instagram, アンフォローチェッカー, instagram zip 分析, ログイン不要 フォロー確認"
+  "keywords": "instagram フォロー解除, 誰がフォロー外した instagram, アンフォローチェッカー, instagram zip 分析, ログイン不要 フォロー確認",
+  "routes": {
+    "/upload": {
+      "title": "Instagram ZIPアップロード — 無料分析 | SafeUnfollow",
+      "description": "Instagramデータエクスポート（ZIP）をアップロードして無料分析。100%ローカル処理、ログイン不要、100万件以上のアカウント対応。データは端末から出ません。",
+      "ogTitle": "Instagram ZIPアップロード — 無料分析"
+    },
+    "/wizard": {
+      "title": "Instagramデータのダウンロード方法 — ステップガイド | SafeUnfollow",
+      "description": "InstagramデータをJSON形式でダウンロードする手順ガイド。Metaからのデータエクスポートの方法。",
+      "ogTitle": "Instagramデータのダウンロード方法 — ステップガイド"
+    },
+    "/sample": {
+      "title": "Instagram Unfollow Trackerを試す — 無料デモ | SafeUnfollow",
+      "description": "サンプルデータでInstagram Unfollow Trackerを試す。バッジ、フィルター、検索の動作を確認。",
+      "ogTitle": "Instagram Unfollow Trackerを試す — 無料デモ"
+    },
+    "/privacy": {
+      "title": "プライバシーポリシー — データは端末から出ません | SafeUnfollow",
+      "description": "SafeUnfollowプライバシーポリシー。100%ローカル処理、データ収集なし、追跡なし。",
+      "ogTitle": "プライバシーポリシー — データは端末から出ません"
+    },
+    "/results": {
+      "title": "Instagramのアンフォロー分析結果 | SafeUnfollow",
+      "description": "Instagramのアンフォロー分析結果を表示。バッジでフィルタリング、アカウント検索、誰がフォロー解除したか確認できます。",
+      "ogTitle": "Instagramのアンフォロー分析結果"
+    },
+    "/terms": {
+      "title": "利用規約 | SafeUnfollow",
+      "description": "SafeUnfollowの利用規約。100%ローカル処理の無料オープンソースInstagramアンフォロートラッカー。",
+      "ogTitle": "利用規約"
+    }
+  }
 }

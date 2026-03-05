@@ -1,4 +1,4 @@
-import type { AccountBadges, BadgeKey, BadgeValue } from '@/core/types';
+import type { AccountBadges, BadgeKey } from '@/core/types';
 import { indexedDBService } from '@/lib/indexeddb/indexeddb-service';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -20,7 +20,7 @@ describe('IndexedDBService (Integration Tests)', () => {
   const mockFileSize = 1024;
 
   // Helper to create badge value (timestamp)
-  const badge = (): BadgeValue => Date.now();
+  const badge = (): number => Date.now();
 
   // Track all file hashes used in tests for cleanup
   const usedFileHashes = new Set<string>([

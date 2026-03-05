@@ -10,7 +10,6 @@ vi.mock('react-i18next', () => createI18nMockSingle(commonEN));
 
 describe('StatCard', () => {
   const mockOnClick = vi.fn();
-  const activeFilters = new Set<BadgeKey>(['following']);
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -24,7 +23,7 @@ describe('StatCard', () => {
         value={500}
         colorClass="bg-blue-500/10 text-blue-500"
         badgeType="following"
-        activeFilters={new Set()}
+        isActive={false}
         onClick={mockOnClick}
       />
     );
@@ -41,7 +40,7 @@ describe('StatCard', () => {
         value={500}
         colorClass="bg-blue-500/10 text-blue-500"
         badgeType="following"
-        activeFilters={new Set()}
+        isActive={false}
         onClick={mockOnClick}
       />
     );
@@ -57,7 +56,7 @@ describe('StatCard', () => {
         value={1234567}
         colorClass="bg-blue-500/10 text-blue-500"
         badgeType="following"
-        activeFilters={new Set()}
+        isActive={false}
         onClick={mockOnClick}
       />
     );
@@ -73,7 +72,7 @@ describe('StatCard', () => {
         value={500}
         colorClass="bg-blue-500/10 text-blue-500"
         badgeType="following"
-        activeFilters={new Set()}
+        isActive={false}
         onClick={mockOnClick}
       />
     );
@@ -92,7 +91,7 @@ describe('StatCard', () => {
         value={500}
         colorClass="bg-blue-500/10 text-blue-500"
         badgeType="following"
-        activeFilters={activeFilters}
+        isActive={true}
         onClick={mockOnClick}
       />
     );
@@ -110,7 +109,7 @@ describe('StatCard', () => {
         value={500}
         colorClass="bg-blue-500/10 text-blue-500"
         badgeType="following"
-        activeFilters={new Set()}
+        isActive={false}
         onClick={mockOnClick}
       />
     );
@@ -128,7 +127,7 @@ describe('StatCard', () => {
         value={500}
         colorClass="bg-blue-500/10 text-blue-500"
         badgeType="following"
-        activeFilters={activeFilters}
+        isActive={true}
         onClick={mockOnClick}
       />
     );
@@ -147,7 +146,7 @@ describe('StatCard', () => {
         value={500}
         colorClass="bg-blue-500/10 text-blue-500"
         badgeType="following"
-        activeFilters={new Set()}
+        isActive={false}
         onClick={mockOnClick}
       />
     );
@@ -165,7 +164,7 @@ describe('StatCard', () => {
         label="Total"
         value={500}
         colorClass="bg-gray-500/10 text-gray-500"
-        activeFilters={new Set()}
+        isActive={false}
         onClick={mockOnClick}
       />
     );
@@ -181,7 +180,7 @@ describe('StatCard', () => {
         label="Total"
         value={500}
         colorClass="bg-gray-500/10 text-gray-500"
-        activeFilters={new Set()}
+        isActive={false}
         onClick={mockOnClick}
       />
     );
@@ -200,7 +199,7 @@ describe('StatCard', () => {
         value={0}
         colorClass="bg-blue-500/10 text-blue-500"
         badgeType="following"
-        activeFilters={new Set()}
+        isActive={false}
         onClick={mockOnClick}
       />
     );
@@ -216,7 +215,7 @@ describe('StatCard', () => {
         value={500}
         colorClass="bg-blue-500/10 text-blue-500"
         badgeType="following"
-        activeFilters={new Set()}
+        isActive={false}
         onClick={mockOnClick}
       />
     );
@@ -233,7 +232,7 @@ describe('StatCard', () => {
         value={500}
         colorClass="bg-blue-500/10 text-blue-500"
         badgeType="following"
-        activeFilters={new Set()}
+        isActive={false}
         onClick={mockOnClick}
       />
     );
@@ -258,7 +257,7 @@ describe('StatCard', () => {
           value={100}
           colorClass="bg-blue-500/10 text-blue-500"
           badgeType={badge.type}
-          activeFilters={new Set()}
+          isActive={false}
           onClick={mockOnClick}
         />
       );
@@ -273,8 +272,6 @@ describe('StatCard', () => {
   });
 
   it('should maintain active state across multiple filters', () => {
-    const multipleFilters = new Set<BadgeKey>(['following', 'mutuals']);
-
     render(
       <StatCard
         icon={<Users />}
@@ -282,7 +279,7 @@ describe('StatCard', () => {
         value={500}
         colorClass="bg-blue-500/10 text-blue-500"
         badgeType="following"
-        activeFilters={multipleFilters}
+        isActive={true}
         onClick={mockOnClick}
       />
     );

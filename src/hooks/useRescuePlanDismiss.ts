@@ -6,14 +6,14 @@ import type { UserSegment } from '@/lib/rescue-plan';
  * Hook for managing rescue plan banner dismiss state with localStorage persistence.
  *
  * Features:
- * - 7-day TTL for dismiss state
+ * - 14-day TTL for dismiss state
  * - Segment change re-engagement (shows again if severity worsens)
  * - Stores segment info for analytics
  * - SSR-safe (checks window)
  */
 
 const STORAGE_KEY = 'rescue_plan_dismissed';
-const TTL_DAYS = 7;
+const TTL_DAYS = 14;
 const TTL_MS = TTL_DAYS * 24 * 60 * 60 * 1000;
 
 /** Severity order for comparison (higher = worse) */
@@ -77,12 +77,10 @@ function getDismissState(currentSegment: UserSegment | null): {
  * @returns isDismissed state and dismiss function
  */
 export function useRescuePlanDismiss(segment: UserSegment | null) {
-  const [isDismissed, setIsDismissed] = useState<boolean>(() => {
-    const { isDismissed } = getDismissState(segment);
-    return isDismissed;
-  });
+  // Initialize as false to avoid SSR hydration mismatch (localStorage not available during SSR)
+  const [isDismissed, setIsDismissed] = useState(false);
 
-  // Re-check dismiss state when segment changes (for re-engagement)
+  // Read localStorage client-side only, and re-check when segment changes (for re-engagement)
   useEffect(() => {
     if (!segment) return;
 

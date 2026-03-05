@@ -56,6 +56,15 @@
     "header": "Konten ({{count, number}})",
     "viewProfile": "Profil ansehen"
   },
+  "donation": {
+    "headline": "Du hast gerade {{count}} Konten analysiert — kostenlos.",
+    "body": "Kein Login. Kein Server. Keine Daten gesendet. Wenn es dir Zeit gespart hat, hält ein Kaffee das Projekt am Laufen.",
+    "headlineMobile": "Kostenlos. Privat. Kein Login.",
+    "bodyMobile": "Wenn es nützlich war, spendier einen Kaffee.",
+    "cta": "Kaffee spendieren",
+    "ctaMobile": "Unterstützen",
+    "dismiss": "Nicht jetzt"
+  },
   "rescue": {
     "critical": {
       "title": "Du hast {{unfollowedPercent}}% verloren — erhole dich in 7 Tagen",
@@ -88,7 +97,7 @@
       "cta": "Tippen für Empfehlungen"
     },
     "tools": {
-      "submagic": "Verwandle Clips in virale Reels → 3-5x mehr Reichweite",
+      "publer": "Plane Beiträge → bleib konsistent und wachse 2x schneller",
       "predis": "KI erstellt Posts + Designs → Content 3x schneller",
       "manychat": "Auto-Antworten 24/7 → spare 10+ Stunden/Woche",
       "metricool": "Finde deine besten Zeiten → 40% schnelleres Wachstum",
@@ -98,7 +107,8 @@
     "dismiss": "Vielleicht später",
     "disclaimer": "Handverlesene Tools, die wir empfehlen. Affiliate-Links finanzieren kostenlose Updates — keine Kosten für dich.",
     "urgency": {
-      "critical": "Jetzt handeln — Engagement sinkt 40% nach 48 Stunden"
+      "critical": "Jetzt handeln — Engagement sinkt 40% nach 48 Stunden",
+      "warning": "Frühes Handeln verhindert größere Verluste — jetzt optimieren"
     },
     "ariaLabel": "Empfohlene Tools zur Verbesserung deiner Instagram-Präsenz",
     "badges": {
@@ -121,7 +131,8 @@
       "businesses1m": "1M+ Firmen",
       "users200k": "200K+ Nutzer",
       "designs10m": "10M+ Designs",
-      "users7m": "7M+ Nutzer"
+      "users7m": "7M+ Nutzer",
+      "users9m": "9M+ Nutzer"
     }
   }
 }

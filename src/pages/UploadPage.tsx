@@ -1,6 +1,3 @@
-import { FAQSection } from '@/components/FAQSection';
-import { FooterCTA } from '@/components/FooterCTA';
-import { HowToSection } from '@/components/HowToSection';
 import { PageLoader } from '@/components/PageLoader';
 import { UploadZone } from '@/components/UploadZone';
 import { useInstagramData } from '@/hooks/useInstagramData';
@@ -33,40 +30,17 @@ export function Component() {
     handleZipUpload(file);
   };
 
-  const handleBack = () => {
-    // Use browser history to go back to the actual previous page
-    // (could be / if user clicked "I have my file", or /wizard if from guide)
-    navigate(-1);
-  };
-
   const handleOpenWizard = () => {
     navigate(`${prefix}/wizard/step/6`);
   };
 
-  const handleStartGuide = () => {
-    navigate(`${prefix}/wizard`);
-  };
-
-  const handleLoadSample = () => {
-    navigate(`${prefix}/sample`);
-  };
-
   return (
-    <>
-      <UploadZone
-        onUploadStart={handleUploadStart}
-        onBack={handleBack}
-        onOpenWizard={handleOpenWizard}
-        isProcessing={uploadState.status === 'loading'}
-        error={uploadState.error}
-        parseWarnings={parseWarnings}
-      />
-      <div className="animate-in fade-in duration-1000">
-        <HowToSection onStart={handleStartGuide} />
-        <FAQSection />
-        <FooterCTA onStart={handleStartGuide} onSample={handleLoadSample} />
-      </div>
-    </>
+    <UploadZone
+      onUploadStart={handleUploadStart}
+      onOpenWizard={handleOpenWizard}
+      isProcessing={uploadState.status === 'loading'}
+      parseWarnings={parseWarnings}
+    />
   );
 }
 

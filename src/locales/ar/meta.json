@@ -3,5 +3,37 @@
   "description": "اكتشف من ألغى متابعتك على Instagram بدون تسجيل الدخول. ارفع ZIP، شاهد النتائج فوراً. 100% مجاني، خاص، 1 مليون+ حساب. يعمل بدون إنترنت.",
   "ogTitle": "Instagram Unfollowers — مجاني بدون تسجيل",
   "twitterDescription": "اكتشف من ألغى متابعتك على Instagram. مجاني للأبد، بدون تسجيل دخول، ملايين الحسابات. مفتوح المصدر.",
-  "keywords": "instagram unfollowers عربي, من ألغى متابعتي انستغرام, تحليل المتابعين, أداة مجانية, بدون تسجيل, خصوصية, مفتوح المصدر"
+  "keywords": "instagram unfollowers عربي, من ألغى متابعتي انستغرام, تحليل المتابعين, أداة مجانية, بدون تسجيل, خصوصية, مفتوح المصدر",
+  "routes": {
+    "/upload": {
+      "title": "ارفع ZIP Instagram — تحليل مجاني | SafeUnfollow",
+      "description": "ارفع ملف تصدير بيانات Instagram (ZIP) لتحليل مجاني فوري. معالجة 100% محلية على جهازك، بدون تسجيل دخول، بدون كلمة مرور. يدعم ملايين الحسابات.",
+      "ogTitle": "ارفع ZIP Instagram — تحليل مجاني"
+    },
+    "/wizard": {
+      "title": "كيف تحمّل بياناتك من Instagram (JSON) — دليل | SafeUnfollow",
+      "description": "دليل خطوة بخطوة لتحميل بيانات Instagram بصيغة JSON. تعرف على كيفية طلب تصدير بياناتك من مركز حسابات Meta للتحليل المجاني والآمن.",
+      "ogTitle": "كيف تحمّل بياناتك من Instagram (JSON) — دليل"
+    },
+    "/sample": {
+      "title": "جرّب Instagram Unfollow Tracker — عرض مجاني | SafeUnfollow",
+      "description": "جرّب Instagram Unfollow Tracker ببيانات تجريبية. شاهد الشارات والفلاتر والبحث.",
+      "ogTitle": "جرّب Instagram Unfollow Tracker — عرض مجاني"
+    },
+    "/privacy": {
+      "title": "سياسة الخصوصية — بياناتك لا تغادر جهازك | SafeUnfollow",
+      "description": "سياسة خصوصية SafeUnfollow. معالجة 100% محلية، بدون جمع بيانات، بدون تتبع. بياناتك لا تغادر متصفحك أبداً. خصوصيتك أولويتنا.",
+      "ogTitle": "سياسة الخصوصية — بياناتك لا تغادر جهازك"
+    },
+    "/results": {
+      "title": "نتائج تحليل إنستغرام | SafeUnfollow",
+      "description": "اعرض نتائج تحليل إلغاء المتابعة على إنستغرام. صفِّ حسب الشارات وابحث في الحسابات.",
+      "ogTitle": "نتائج إلغاء متابعة إنستغرام"
+    },
+    "/terms": {
+      "title": "شروط الخدمة | SafeUnfollow",
+      "description": "شروط خدمة SafeUnfollow. أداة مجانية ومفتوحة المصدر لتتبع إلغاء المتابعة على إنستغرام بمعالجة محلية 100%.",
+      "ogTitle": "شروط الخدمة"
+    }
+  }
 }

@@ -6,10 +6,14 @@ import { dbCache, generateFileHash } from '@/lib/indexeddb/indexeddb-cache';
 import { parseOnMainThread, parseWithWorker } from '@/lib/parse-orchestration';
 import { useAppStore } from '@/lib/store';
 import { useCallback, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParseWorker } from './useParseWorker';
 
 // Upload rate limiting (ms)
 const UPLOAD_DEBOUNCE_MS = 1000;
+
+// Maximum file size: 500MB
+const MAX_FILE_SIZE = 500 * 1024 * 1024;
 
 // localStorage key for tracking return uploads
 const LAST_UPLOAD_KEY = 'analytics_last_upload';
@@ -52,6 +56,7 @@ export function useFileUpload() {
 
   // Store actions
   const setUploadInfo = useAppStore(s => s.setUploadInfo);
+  const { t } = useTranslation('upload');
 
   // Web Worker for file parsing
   const { workerRef, isWorkerReady } = useParseWorker();
@@ -67,7 +72,7 @@ export function useFileUpload() {
       lastUploadRef.current = now;
 
       const uploadDate = new Date();
-      const startTime = performance.now();
+      const _startTime = performance.now();
       const fileSizeMb = file.size / (1024 * 1024);
 
       // Reset progress
@@ -98,9 +103,9 @@ export function useFileUpload() {
         if (!isZip) {
           const notZipWarning: ParseWarning = {
             code: 'NOT_ZIP',
-            message: 'Please upload a ZIP archive file, not a folder or other file type.',
+            message: t('diagnostic.errors.NOT_ZIP.message'),
             severity: 'error',
-            fix: 'Look for a file ending in .zip in your Downloads folder.',
+            fix: t('diagnostic.errors.NOT_ZIP.fix'),
           };
 
           setUploadInfo({
@@ -112,6 +117,27 @@ export function useFileUpload() {
 
           analytics.uploadErrorByCode('', 'NOT_ZIP', notZipWarning.message);
           throw new Error(notZipWarning.message);
+        }
+
+        // File size guard: reject files over 500MB
+        if (file.size > MAX_FILE_SIZE) {
+          const sizeMb = Math.round(file.size / (1024 * 1024));
+          const tooLargeWarning: ParseWarning = {
+            code: 'FILE_TOO_LARGE',
+            message: t('diagnostic.errors.FILE_TOO_LARGE.message', { sizeMb }),
+            severity: 'error',
+            fix: t('diagnostic.errors.FILE_TOO_LARGE.fix'),
+          };
+
+          setUploadInfo({
+            currentFileName: file.name,
+            uploadStatus: 'error',
+            uploadError: tooLargeWarning.message,
+            parseWarnings: [tooLargeWarning],
+          });
+
+          analytics.uploadErrorByCode('', 'FILE_TOO_LARGE', tooLargeWarning.message);
+          throw new Error(tooLargeWarning.message);
         }
 
         // Generate file hash for cache lookup and analytics correlation
@@ -248,14 +274,15 @@ export function useFileUpload() {
         throw err;
       }
     },
-    [setUploadInfo]
+    [setUploadInfo, t]
   );
 
   const abortUpload = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
+      setUploadInfo({ uploadStatus: 'idle', uploadError: null });
     }
-  }, []);
+  }, [setUploadInfo]);
 
   return {
     handleZipUpload,

@@ -1,5 +1,3 @@
-'use client';
-
 import {
   Search,
   Users,
@@ -13,8 +11,10 @@ import {
 import { FilterChips } from './FilterChips';
 import { AccountList } from './AccountList';
 import { StatCard } from './StatCard';
+import { InlineDonationCard } from './InlineDonationCard';
 import { RescuePlanBanner } from './RescuePlanBanner';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import type { BadgeKey } from '@/core/types';
 import { useAccountFiltering } from '@/hooks/useAccountFiltering';
 import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
 import { useTimeOnResults } from '@/hooks/useTimeOnResults';
@@ -63,8 +63,16 @@ export function AccountListSection({
   // V7: trackClick collects badge click data for aggregated summary event
   const { trackAction, trackClick } = useTimeOnResults(accountCount, hasLoadedData);
 
-  // Apply sort order to filtered indices
-  const sortedIndices = sortOrder === 'desc' ? [...filteredIndices].reverse() : filteredIndices;
+  // Apply sort order to filtered indices (null = show all)
+  const sortedIndices =
+    filteredIndices === null
+      ? null
+      : sortOrder === 'desc'
+        ? [...filteredIndices].reverse()
+        : filteredIndices;
+
+  // Display count: null means "show all" so use totalCount
+  const displayCount = sortedIndices === null ? totalCount : sortedIndices.length;
 
   const handleClearFilters = () => {
     setFilters(new Set());
@@ -72,12 +80,12 @@ export function AccountListSection({
     trackAction();
   };
 
-  const handleStatCardClick = (badgeType: string) => {
+  const handleStatCardClick = (badgeType: BadgeKey) => {
     const newFilters = new Set(filters);
-    if (newFilters.has(badgeType as any)) {
-      newFilters.delete(badgeType as any);
+    if (newFilters.has(badgeType)) {
+      newFilters.delete(badgeType);
     } else {
-      newFilters.add(badgeType as any);
+      newFilters.add(badgeType);
     }
     setFilters(newFilters);
     trackAction();
@@ -94,7 +102,7 @@ export function AccountListSection({
       {/* Screen reader announcement for results count */}
       <span aria-live="polite" aria-atomic="true" className="sr-only">
         {t('results.liveCount', {
-          count: sortedIndices.length,
+          count: displayCount,
           total: totalCount,
           defaultValue: 'Showing {{count}} of {{total}} accounts',
         })}
@@ -119,37 +127,51 @@ export function AccountListSection({
       )}
 
       {/* Top Header & Search */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div>
-          <h1 className="text-3xl md:text-5xl font-display font-extrabold mb-2 tracking-tight">
-            {t('header.title')}
-          </h1>
-          <p className="text-zinc-500 text-xs md:text-sm font-bold uppercase tracking-widest">
-            {t('header.fileInfo', { filename, count: totalCount })}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="relative flex-grow md:w-80">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
-            <input
-              type="text"
-              placeholder={t('search.placeholder')}
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-              className="w-full pl-11 pr-4 py-3.5 rounded-2xl border border-border bg-card focus:ring-2 focus:ring-primary outline-none transition-all font-semibold text-sm shadow-sm"
-            />
+      <div className="sticky top-16 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 -mx-4 px-4 py-4 md:py-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div>
+            <h1 className="text-3xl md:text-5xl font-display font-extrabold mb-2 tracking-tight">
+              {t('header.title')}
+            </h1>
+            <p className="text-zinc-500 text-xs md:text-sm font-bold uppercase tracking-widest">
+              {t('header.fileInfo', { filename, count: totalCount })}
+            </p>
           </div>
-          <button
-            onClick={() => setSortOrder(prev => (prev === 'asc' ? 'desc' : 'asc'))}
-            className={`cursor-pointer p-3.5 rounded-2xl border transition-all shadow-sm shrink-0 ${
-              sortOrder === 'desc'
-                ? 'bg-primary text-white border-primary'
-                : 'bg-card border-border text-zinc-500 hover:text-primary'
-            }`}
-            title={sortOrder === 'asc' ? t('sort.desc') : t('sort.asc')}
-          >
-            <ArrowUpDown size={20} />
-          </button>
+          <div className="flex items-center gap-2">
+            <div className="relative flex-grow md:w-80">
+              <Search
+                className="absolute start-4 top-1/2 -translate-y-1/2 text-zinc-400"
+                size={18}
+              />
+              <label htmlFor="account-search" className="sr-only">
+                {t('search.placeholder')}
+              </label>
+              <input
+                id="account-search"
+                type="text"
+                placeholder={t('search.placeholder')}
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                autoCorrect="off"
+                autoCapitalize="none"
+                inputMode="search"
+                className="w-full ps-11 pe-4 py-3.5 rounded-2xl border border-border bg-card focus:ring-2 focus:ring-primary outline-none transition-all font-semibold text-base shadow-sm"
+              />
+            </div>
+            <button
+              onClick={() => setSortOrder(prev => (prev === 'asc' ? 'desc' : 'asc'))}
+              className={`cursor-pointer p-3.5 rounded-2xl border transition-all shadow-sm shrink-0 ${
+                sortOrder === 'desc'
+                  ? 'bg-primary text-white border-primary'
+                  : 'bg-card border-border text-zinc-500 hover:text-primary'
+              }`}
+              title={sortOrder === 'asc' ? t('sort.desc') : t('sort.asc')}
+              aria-label={t('sort.ariaLabel', { defaultValue: 'Sort accounts' })}
+              aria-pressed={sortOrder === 'desc'}
+            >
+              <ArrowUpDown size={20} />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -161,7 +183,7 @@ export function AccountListSection({
           value={followersCount}
           colorClass="bg-emerald-500/10 text-emerald-500"
           badgeType="followers"
-          activeFilters={filters}
+          isActive={filters.has('followers')}
           onClick={handleStatCardClick}
         />
         <StatCard
@@ -170,7 +192,7 @@ export function AccountListSection({
           value={followingCount}
           colorClass="bg-blue-500/10 text-blue-500"
           badgeType="following"
-          activeFilters={filters}
+          isActive={filters.has('following')}
           onClick={handleStatCardClick}
         />
         <StatCard
@@ -179,7 +201,7 @@ export function AccountListSection({
           value={unfollowedCount}
           colorClass="bg-rose-500/10 text-rose-500"
           badgeType="unfollowed"
-          activeFilters={filters}
+          isActive={filters.has('unfollowed')}
           onClick={handleStatCardClick}
         />
         <StatCard
@@ -188,10 +210,13 @@ export function AccountListSection({
           value={notFollowingBackCount}
           colorClass="bg-amber-500/10 text-amber-500"
           badgeType="notFollowingBack"
-          activeFilters={filters}
+          isActive={filters.has('notFollowingBack')}
           onClick={handleStatCardClick}
         />
       </div>
+
+      {/* Inline Donation Card */}
+      <InlineDonationCard accountCount={accountCount} isSample={isSample} />
 
       {/* Main Content Layout - grid for flexible banner positioning */}
       <div className="grid grid-cols-1 lg:grid-cols-[20rem_1fr] gap-6 md:gap-12">

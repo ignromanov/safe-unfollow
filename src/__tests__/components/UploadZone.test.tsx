@@ -58,11 +58,11 @@ describe('UploadZone', () => {
     expect(screen.getByText(uploadEN.zone.orBrowse)).toBeInTheDocument();
   });
 
-  it('should display JSON format warning badge', () => {
+  it('should display JSON format reminder inline text', () => {
     render(<UploadZone onUploadStart={mockOnUploadStart} />);
 
-    // zone.jsonOnly translation
-    expect(screen.getByText(uploadEN.zone.jsonOnly)).toBeInTheDocument();
+    // zone.jsonReminder is now shown as inline muted text (not a badge)
+    expect(screen.getByText(uploadEN.zone.jsonReminder)).toBeInTheDocument();
   });
 
   it('should display pre-upload checklist', () => {
@@ -80,23 +80,6 @@ describe('UploadZone', () => {
 
     // errors.commonTitle translation
     expect(screen.getByText(uploadEN.errors.commonTitle)).toBeInTheDocument();
-  });
-
-  it('should render back button when onBack is provided', () => {
-    render(<UploadZone onUploadStart={mockOnUploadStart} onBack={mockOnBack} />);
-
-    // zone.back translation
-    const backButton = screen.getByText(uploadEN.zone.back);
-    expect(backButton).toBeInTheDocument();
-
-    fireEvent.click(backButton);
-    expect(mockOnBack).toHaveBeenCalledTimes(1);
-  });
-
-  it('should not render back button when onBack is not provided', () => {
-    render(<UploadZone onUploadStart={mockOnUploadStart} />);
-
-    expect(screen.queryByText(uploadEN.zone.back)).not.toBeInTheDocument();
   });
 
   it('should show processing state when isProcessing is true', () => {

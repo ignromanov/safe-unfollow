@@ -56,6 +56,15 @@
     "header": "Akun ({{count, number}})",
     "viewProfile": "Lihat Profil"
   },
+  "donation": {
+    "headline": "Anda baru saja menganalisis {{count}} akun — gratis.",
+    "body": "Tanpa login. Tanpa server. Tidak ada data yang dikirim. Jika ini menghemat waktu Anda, secangkir kopi menjaga proyek tetap berjalan.",
+    "headlineMobile": "Gratis. Privat. Tanpa login.",
+    "bodyMobile": "Jika bermanfaat, pertimbangkan untuk mentraktir kopi.",
+    "cta": "Traktir Kopi",
+    "ctaMobile": "Dukung",
+    "dismiss": "Nanti saja"
+  },
   "rescue": {
     "critical": {
       "title": "Anda kehilangan {{unfollowedPercent}}% — pulih dalam 7 hari",
@@ -88,7 +97,7 @@
       "cta": "Ketuk untuk lihat rekomendasi"
     },
     "tools": {
-      "submagic": "Ubah klip jadi Reels viral → 3-5x lebih banyak jangkauan",
+      "publer": "Jadwalkan postingan → tetap konsisten & tumbuh 2x lebih cepat",
       "predis": "AI buat postingan + desain → konten 3x lebih cepat",
       "manychat": "Balasan otomatis 24/7 → hemat 10+ jam/minggu",
       "metricool": "Temukan waktu terbaik Anda → pertumbuhan 40% lebih cepat",
@@ -98,7 +107,8 @@
     "dismiss": "Mungkin nanti",
     "disclaimer": "Tools pilihan yang kami rekomendasikan. Tautan afiliasi mendanai pembaruan gratis — tanpa biaya tambahan untuk Anda.",
     "urgency": {
-      "critical": "Bertindak sekarang — engagement turun 40% setelah 48 jam"
+      "critical": "Bertindak sekarang — engagement turun 40% setelah 48 jam",
+      "warning": "Tindakan dini mencegah kerugian lebih besar — optimalkan sekarang"
     },
     "ariaLabel": "Tools yang direkomendasikan untuk meningkatkan kehadiran Instagram Anda",
     "badges": {
@@ -121,7 +131,8 @@
       "businesses1m": "1M+ bisnis",
       "users200k": "200K+ pengguna",
       "designs10m": "10M+ desain",
-      "users7m": "7M+ pengguna"
+      "users7m": "7M+ pengguna",
+      "users9m": "9 juta+ pengguna"
     }
   }
 }

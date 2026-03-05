@@ -107,14 +107,14 @@ describe('SearchBar Component', () => {
 
     const input = screen.getByPlaceholderText('Search usernames...');
     expect(input).toHaveAttribute('type', 'text');
-    expect(input).toHaveClass('pl-10', 'text-base');
+    expect(input).toHaveClass('ps-10', 'text-base');
   });
 
   it('should have correct clear button attributes', () => {
     render(<SearchBar {...defaultProps} value="test" />);
 
     const clearButton = screen.getByRole('button');
-    expect(clearButton).toHaveClass('absolute', 'right-1', 'top-1/2', '-translate-y-1/2', 'p-0');
+    expect(clearButton).toHaveClass('absolute', 'end-1', 'top-1/2', '-translate-y-1/2', 'p-0');
   });
 
   it('should handle very large numbers', () => {

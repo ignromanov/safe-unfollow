@@ -1,7 +1,39 @@
 {
   "title": "Désabonnements Instagram — Gratuit sans connexion | SafeUnfollow",
-  "description": "Découvrez qui s'est désabonné de vous sur Instagram sans connexion. Téléversez votre ZIP, voyez les désabonnements instantanément. 100% gratuit, privé, gère 1M+ de comptes. Fonctionne hors ligne.",
+  "description": "Découvrez qui s'est désabonné sur Instagram sans connexion. Téléversez votre ZIP, voyez les résultats instantanément. 100% gratuit, privé, 1M+ comptes.",
   "ogTitle": "Désabonnements Instagram — Gratuit sans connexion",
   "twitterDescription": "Découvrez qui s'est désabonné de vous sur Instagram sans connexion. Téléversez ZIP, voyez les désabonnements instantanément. 100% gratuit, 1M+ de comptes. Fonctionne hors ligne.",
-  "keywords": "désabonnements instagram, qui s'est désabonné instagram, suivi désabonnements, voir désabonnements sans connexion, analyseur zip instagram"
+  "keywords": "désabonnements instagram, qui s'est désabonné instagram, suivi désabonnements, voir désabonnements sans connexion, analyseur zip instagram",
+  "routes": {
+    "/upload": {
+      "title": "Téléverser ZIP Instagram — Analyse Gratuite | SafeUnfollow",
+      "description": "Téléversez votre export Instagram (ZIP) pour une analyse gratuite. Traitement 100% local, sans connexion, gère 1M+ comptes.",
+      "ogTitle": "Téléverser ZIP Instagram — Analyse Gratuite"
+    },
+    "/wizard": {
+      "title": "Télécharger vos Données Instagram (JSON) — Guide | SafeUnfollow",
+      "description": "Guide étape par étape pour télécharger vos données Instagram en JSON. Comment demander votre export de données à Meta.",
+      "ogTitle": "Comment Télécharger vos Données Instagram (JSON) — Guide"
+    },
+    "/sample": {
+      "title": "Essayer Instagram Unfollow Tracker — Démo Gratuite | SafeUnfollow",
+      "description": "Essayez Instagram Unfollow Tracker avec des données d'exemple. Voyez les badges, filtres et la recherche en action.",
+      "ogTitle": "Essayer Instagram Unfollow Tracker — Démo Gratuite"
+    },
+    "/privacy": {
+      "title": "Politique de Confidentialité — 100% Local | SafeUnfollow",
+      "description": "Politique de confidentialité SafeUnfollow. Traitement 100% local, aucune collecte de données, aucun pistage.",
+      "ogTitle": "Politique de Confidentialité — Données Jamais Transmises"
+    },
+    "/results": {
+      "title": "Vos résultats Instagram | SafeUnfollow",
+      "description": "Consultez les résultats de votre analyse Instagram. Filtrez par badges et recherchez des comptes.",
+      "ogTitle": "Vos résultats Instagram"
+    },
+    "/terms": {
+      "title": "Conditions d'utilisation | SafeUnfollow",
+      "description": "Conditions d'utilisation de SafeUnfollow. Outil gratuit et open-source avec traitement 100% local.",
+      "ogTitle": "Conditions d'utilisation"
+    }
+  }
 }

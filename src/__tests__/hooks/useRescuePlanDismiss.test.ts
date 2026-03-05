@@ -50,14 +50,14 @@ describe('useRescuePlanDismiss', () => {
     expect(secondResult.current.isDismissed).toBe(true);
   });
 
-  it('should expire dismissal after 7 days', () => {
+  it('should expire dismissal after 14 days', () => {
     const { result } = renderHook(() => useRescuePlanDismiss(mockSegment));
     act(() => {
       result.current.dismiss();
     });
 
-    // Advance time by 7 days + 1 ms
-    vi.advanceTimersByTime(7 * 24 * 60 * 60 * 1000 + 1);
+    // Advance time by 14 days + 1 ms (TTL is 14 days)
+    vi.advanceTimersByTime(14 * 24 * 60 * 60 * 1000 + 1);
 
     // Re-render to trigger check
     const { result: newResult } = renderHook(() => useRescuePlanDismiss(mockSegment));

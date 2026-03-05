@@ -88,6 +88,22 @@
         "text": "Lies unser Datenschutz-Versprechen",
         "href": "/privacy"
       }
+    },
+    "withoutPassword": {
+      "question": "Wie funktioniert SafeUnfollow ohne mein Instagram-Passwort?",
+      "answer": "SafeUnfollow nutzt die offizielle Datenexport-Funktion von Instagram (im Meta Accounts Center) statt deinem Passwort. Du lädst deine Daten als ZIP-Datei direkt von Instagram herunter und lädst sie hier hoch. Die App liest die JSON-Dateien im ZIP, um Follower zu vergleichen — alles wird in deinem Browser verarbeitet.",
+      "relatedLink": {
+        "text": "Exportanleitung ansehen",
+        "href": "/wizard"
+      }
+    },
+    "betterThanPaid": {
+      "question": "Ist SafeUnfollow besser als kostenpflichtige Apps?",
+      "answer": "Für die meisten Nutzer ja. SafeUnfollow ist 100% kostenlos, erfordert kein Login (kein Bann-Risiko), verarbeitet Daten lokal (maximale Privatsphäre), unterstützt 1M+ Accounts und ist Open Source. Bezahl-Apps bieten Echtzeit-Monitoring, was aber gegen Instagrams Nutzungsbedingungen verstößt."
+    },
+    "mobileUse": {
+      "question": "Kann ich SafeUnfollow auf iPhone oder Android nutzen?",
+      "answer": "Ja! SafeUnfollow funktioniert in jedem modernen mobilen Browser (Safari, Chrome, Firefox). Besuche safeunfollow.app, lade dein ZIP hoch und sieh die Ergebnisse sofort. Du kannst es auch als PWA installieren. 81% unserer Nutzer sind auf Mobilgeräten."
     }
   }
 }

@@ -1,5 +1,3 @@
-'use client';
-
 import { useState, useEffect } from 'react';
 import { Globe, ChevronDown } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
@@ -67,7 +65,7 @@ export function LanguageSwitcher() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
-          className="cursor-pointer flex items-center gap-1.5 p-2.5 md:px-3 md:py-2 rounded-2xl hover:bg-[oklch(0.5_0_0_/_0.05)] transition-colors text-zinc-500"
+          className="cursor-pointer flex items-center gap-1.5 p-3 md:px-3 md:py-2 rounded-2xl hover:bg-[oklch(0.5_0_0_/_0.05)] transition-colors text-zinc-500"
           aria-label={t('language.changeLanguage')}
           suppressHydrationWarning
         >
@@ -88,7 +86,7 @@ export function LanguageSwitcher() {
               }`}
             >
               <span className="uppercase text-xs font-bold w-6">{lang}</span>
-              <span className="ml-2">{LANGUAGE_NAMES[lang]}</span>
+              <span className="ms-2">{LANGUAGE_NAMES[lang]}</span>
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>

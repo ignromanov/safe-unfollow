@@ -1,7 +1,7 @@
 ---
 layout: default
-title: Technical Specs
-description: Technical architecture and implementation details
+title: How Instagram Unfollow Tracker Works — Privacy & Architecture
+description: Technical deep-dive into Instagram Unfollow Tracker. Learn about 100% local processing, IndexedDB columnar storage, BitSet filtering, and how we handle 1M+ accounts privately.
 permalink: /tech-spec/
 last_updated: 2026-01-16
 ---
@@ -334,7 +334,7 @@ connections/followers_and_following/
 ```json
 {
   "name": "Instagram Unfollow Tracker",
-  "short_name": "Unfollow Radar",
+  "short_name": "Instagram Unfollow Tracker",
   "start_url": "/",
   "display": "standalone",
   "theme_color": "#000000"

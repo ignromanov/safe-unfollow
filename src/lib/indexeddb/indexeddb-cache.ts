@@ -110,10 +110,17 @@ export async function generateFileHash(file: File): Promise<string> {
   }
 
   try {
-    const buffer = await file.arrayBuffer();
-    // Hash first 1MB for performance, or entire file if smaller
-    const hashSize = Math.min(buffer.byteLength, 1024 * 1024);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', buffer.slice(0, hashSize));
+    // Read only first 1MB for hashing — avoids loading entire file into memory
+    const hashSize = Math.min(file.size, 1024 * 1024);
+    let buffer: ArrayBuffer;
+    if (typeof file.slice === 'function') {
+      buffer = await file.slice(0, hashSize).arrayBuffer();
+    } else {
+      // Fallback for environments where slice is not available (e.g., test mocks)
+      const fullBuffer = await file.arrayBuffer();
+      buffer = fullBuffer.slice(0, hashSize);
+    }
+    const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   } catch (err) {

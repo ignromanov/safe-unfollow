@@ -1,5 +1,3 @@
-'use client';
-
 import {
   Shield,
   Ban,
@@ -122,7 +120,7 @@ export function Hero({
       {/* Feature Cards */}
       <h2 className="sr-only">{t('features.heading', 'Key Features')}</h2>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 w-full max-w-6xl px-4">
-        <div className="p-6 md:p-10 rounded-4xl border border-border bg-card text-left shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-default group flex flex-col items-start">
+        <div className="p-6 md:p-10 rounded-4xl border border-border bg-card text-start shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-default group flex flex-col items-start">
           <div className="mb-6 flex justify-center group-hover:scale-110 transition-transform">
             <Shield className="text-emerald-500" size={24} />
           </div>
@@ -134,7 +132,7 @@ export function Hero({
           </div>
         </div>
 
-        <div className="p-6 md:p-10 rounded-4xl border border-border bg-card text-left shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-default group flex flex-col items-start">
+        <div className="p-6 md:p-10 rounded-4xl border border-border bg-card text-start shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-default group flex flex-col items-start">
           <div className="mb-6 flex justify-center group-hover:scale-110 transition-transform">
             <Ban className="text-rose-500" size={24} />
           </div>
@@ -146,7 +144,7 @@ export function Hero({
           </div>
         </div>
 
-        <div className="p-6 md:p-10 rounded-4xl border border-border bg-card text-left shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-default group flex flex-col items-start">
+        <div className="p-6 md:p-10 rounded-4xl border border-border bg-card text-start shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-default group flex flex-col items-start">
           <div className="mb-6 flex justify-center group-hover:scale-110 transition-transform">
             <InfinityIcon className="text-indigo-500" size={24} />
           </div>
@@ -158,7 +156,7 @@ export function Hero({
           </div>
         </div>
 
-        <div className="p-6 md:p-10 rounded-4xl border border-border bg-card text-left shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-default group flex flex-col items-start">
+        <div className="p-6 md:p-10 rounded-4xl border border-border bg-card text-start shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-default group flex flex-col items-start">
           <div className="mb-6 flex justify-center group-hover:scale-110 transition-transform">
             <Code className="text-amber-500" size={24} />
           </div>

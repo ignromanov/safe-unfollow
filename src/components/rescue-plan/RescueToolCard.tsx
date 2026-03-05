@@ -1,5 +1,3 @@
-'use client';
-
 import { ExternalLink } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -25,7 +23,7 @@ const BADGE_STYLES: Record<ToolBadge, string> = {
 interface RescueToolCardProps {
   tool: RescueTool;
   index: number;
-  onToolClick: (tool: RescueTool, e: React.MouseEvent) => void;
+  onToolClick: (tool: RescueTool, e: React.MouseEvent, position: number) => void;
 }
 
 export function RescueToolCard({ tool, index, onToolClick }: RescueToolCardProps) {
@@ -37,8 +35,8 @@ export function RescueToolCard({ tool, index, onToolClick }: RescueToolCardProps
       href={tool.url}
       target="_blank"
       rel="noopener noreferrer"
-      onClick={e => onToolClick(tool, e)}
-      className={`group relative p-4 bg-white dark:bg-zinc-900 rounded-2xl border-2 transition-all duration-200 hover:scale-[1.02] flex flex-col ${
+      onClick={e => onToolClick(tool, e, index)}
+      className={`group relative p-4 bg-white dark:bg-zinc-900 rounded-2xl border-2 transition-all duration-200 hover:scale-[1.02] active:scale-100 flex flex-col ${
         isFirst
           ? 'border-zinc-300 dark:border-zinc-700 hover:border-primary hover:ring-2 hover:ring-primary/20 hover:shadow-xl'
           : 'border-zinc-200 dark:border-zinc-800 hover:border-primary hover:shadow-lg'
@@ -47,7 +45,7 @@ export function RescueToolCard({ tool, index, onToolClick }: RescueToolCardProps
       {/* Badge */}
       {tool.badge && (
         <span
-          className={`absolute -top-2 -right-2 px-2 py-0.5 text-xs font-bold rounded-full ${BADGE_STYLES[tool.badge]}`}
+          className={`absolute -top-2 -end-2 px-2 py-0.5 text-xs font-bold rounded-full ${BADGE_STYLES[tool.badge]}`}
         >
           {tool.badge === 'popular'
             ? `🔥 ${t('rescue.badges.popular')}`
@@ -59,7 +57,7 @@ export function RescueToolCard({ tool, index, onToolClick }: RescueToolCardProps
 
       {/* Recommended label for first item */}
       {isFirst && (
-        <span className="absolute -top-2 left-3 px-2 py-0.5 text-xs font-bold rounded-full bg-primary text-white">
+        <span className="absolute -top-2 start-3 px-2 py-0.5 text-xs font-bold rounded-full bg-primary text-white">
           ⭐ {t('rescue.recommended')}
         </span>
       )}
@@ -86,12 +84,14 @@ export function RescueToolCard({ tool, index, onToolClick }: RescueToolCardProps
         </div>
 
         {/* Description */}
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-3">{t(tool.descKey as any)}</p>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-3 line-clamp-2 md:line-clamp-none">
+          {t(tool.descKey as any)}
+        </p>
       </div>
 
       {/* CTA Button - always at bottom */}
       <div
-        className={`w-full py-2 px-3 rounded-xl text-center text-sm font-semibold transition-all mt-auto ${
+        className={`w-full py-1.5 md:py-2 px-3 rounded-xl text-center text-sm font-semibold transition-all mt-auto ${
           isFirst
             ? 'bg-primary text-white group-hover:bg-primary/90'
             : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 group-hover:bg-primary group-hover:text-white'

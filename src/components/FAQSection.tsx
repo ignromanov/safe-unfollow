@@ -30,6 +30,9 @@ const FAQ_KEYS = [
   'free', // "Is it free" - objection handling
   'analyzeData', // NEW: "How to analyze data" - tutorial
   'shareDataSafely', // NEW: "Is it safe to upload" - trust
+  'withoutPassword', // "How does it work without my password" - AI/LLM query target
+  'betterThanPaid', // "Is SafeUnfollow better than paid apps" - comparison query target
+  'mobileUse', // "Can I use this on iPhone/Android" - mobile query target
 ] as const;
 
 export function FAQSection() {
@@ -102,6 +105,7 @@ export function FAQSection() {
                 {/* Semantic: h3 wraps button for proper hierarchy */}
                 <h3 className="text-lg md:text-2xl font-bold">
                   <button
+                    id={`faq-trigger-${item.key}`}
                     onClick={() => {
                       const isOpening = openIndex !== index;
                       if (isOpening) {
@@ -109,11 +113,11 @@ export function FAQSection() {
                       }
                       setOpenIndex(openIndex === index ? null : index);
                     }}
-                    className="cursor-pointer w-full px-6 py-6 md:px-10 md:py-10 flex items-center justify-between text-left hover:bg-[oklch(0.5_0_0_/_0.02)] transition-colors group"
+                    className="cursor-pointer w-full px-6 py-6 md:px-10 md:py-10 flex items-center justify-between text-start hover:bg-[oklch(0.5_0_0_/_0.02)] transition-colors group"
                     aria-expanded={openIndex === index}
                     aria-controls={`faq-answer-${item.key}`}
                   >
-                    <span className="pr-8 group-hover:text-primary transition-colors leading-tight">
+                    <span className="pe-8 group-hover:text-primary transition-colors leading-tight">
                       {item.question}
                     </span>
                     <div
@@ -130,7 +134,7 @@ export function FAQSection() {
                 <div
                   id={`faq-answer-${item.key}`}
                   role="region"
-                  aria-labelledby={`faq-${item.key}`}
+                  aria-labelledby={`faq-trigger-${item.key}`}
                   hidden={openIndex !== index}
                   className={`transition-all duration-500 ease-in-out ${
                     openIndex === index ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0'

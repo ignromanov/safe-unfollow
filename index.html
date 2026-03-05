@@ -2,7 +2,16 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content, viewport-fit=cover" />
+
+    <!-- Resource hints: preconnect to external origins used by BMC widget -->
+    <link rel="preconnect" href="https://cdnjs.buymeacoffee.com" crossorigin />
+    <link rel="dns-prefetch" href="https://cdnjs.buymeacoffee.com" />
+
+    <!-- Font preload: critical latin-normal subsets loaded BEFORE CSS parse.
+         Paths reference @fontsource-variable source files; Vite resolves them at build time
+         via the CSS @import in styles.css. These <link> tags give the browser an early hint. -->
+    <link rel="preload" href="/src/styles.css" as="style" />
 
     <!-- CRITICAL: Language redirect MUST be first script - before any other resources load -->
     <script>
@@ -44,6 +53,10 @@
       })();
     </script>
 
+    <!-- Preload critical fonts to reduce LCP -->
+    <link rel="preload" href="/node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/node_modules/@fontsource-variable/plus-jakarta-sans/files/plus-jakarta-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+
     <!-- Meta tags below are replaced by vite.config.ts onPageRendered for each language -->
     <meta name="description" content="Check who unfollowed you on Instagram without login. Upload your ZIP file, see unfollowers instantly. 100% free, privacy-first, handles 1M+ accounts." />
     <meta name="keywords" content="instagram unfollow tracker, who unfollowed me instagram, instagram followers analysis, instagram unfollow app, instagram mutual followers" />
@@ -83,64 +96,7 @@
     <!-- canonical, hreflang injected by vite.config.ts onPageRendered -->
     <title>Instagram Unfollowers — Free ZIP Upload, No Login Required</title>
 
-    <!-- Schema.org structured data: SoftwareApplication -->
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Instagram Unfollow Tracker",
-        "alternateName": "Safe Unfollow",
-        "description": "Privacy-first Instagram data analyzer that helps you find who unfollowed you. 100% local processing, no login required, handles 1M+ accounts.",
-        "applicationCategory": "UtilitiesApplication",
-        "operatingSystem": "Web Browser",
-        "offers": {
-          "@type": "Offer",
-          "price": "0",
-          "priceCurrency": "USD"
-        },
-        "softwareVersion": "1.5.0",
-        "author": {
-          "@type": "Person",
-          "name": "Ignat Romanov",
-          "url": "https://github.com/ignromanov"
-        },
-        "provider": {
-          "@type": "Organization",
-          "name": "Safe Unfollow",
-          "url": "https://safeunfollow.app"
-        },
-        "url": "https://safeunfollow.app/",
-        "license": "https://opensource.org/licenses/MIT",
-        "softwareHelp": {
-          "@type": "CreativeWork",
-          "url": "https://safeunfollow.app/wizard"
-        },
-        "featureList": [
-          "Find Instagram unfollowers",
-          "Mutual follower analysis",
-          "100% local processing - no data upload",
-          "Handles 1M+ accounts",
-          "No Instagram login required",
-          "Free and open source",
-          "Works offline",
-          "Lightning-fast search and filtering"
-        ]
-      }
-    </script>
-
-    <!-- Schema.org structured data: Organization -->
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "Organization",
-        "name": "Safe Unfollow",
-        "url": "https://safeunfollow.app",
-        "logo": "https://safeunfollow.app/logo.svg",
-        "sameAs": [
-          "https://github.com/ignromanov/safe-unfollow"
-        ]
-      }
-    </script>
+    <!-- Schema.org structured data rendered dynamically by OrganizationSchema.tsx (homepage only) -->
   </head>
 
   <body class="font-sans antialiased">

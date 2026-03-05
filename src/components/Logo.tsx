@@ -1,6 +1,7 @@
-'use client';
-
-import type { LogoProps } from '@/types/components';
+interface LogoProps {
+  size?: number;
+  className?: string;
+}
 
 /**
  * Brand logo component - renders inline SVG for CSS animation support.

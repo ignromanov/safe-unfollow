@@ -142,7 +142,7 @@ describe('TermsOfService', () => {
     it('should render GitHub link', () => {
       render(<TermsOfService {...defaultProps} />);
 
-      const githubLink = screen.getByRole('link', { name: 'GitHub' });
+      const githubLink = screen.getByRole('link', { name: /GitHub/ });
       expect(githubLink).toBeInTheDocument();
       expect(githubLink).toHaveAttribute('href', 'https://github.com/ignromanov/safe-unfollow');
       expect(githubLink).toHaveAttribute('target', '_blank');
