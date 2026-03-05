@@ -29,25 +29,43 @@ export function useRescuePlanAnalytics({
   useEffect(() => {
     if (!isDevMode && isVisible && !impressionTrackedRef.current) {
       impressionTrackedRef.current = true;
-      analytics.rescuePlanImpression(segment.severity, segment.size);
+      analytics.rescuePlanImpression(
+        segment.severity,
+        segment.size,
+        segment.totalAccounts,
+        segment.unfollowedPercent
+      );
     }
-  }, [isVisible, isDevMode, segment.severity, segment.size]);
+  }, [
+    isVisible,
+    isDevMode,
+    segment.severity,
+    segment.size,
+    segment.totalAccounts,
+    segment.unfollowedPercent,
+  ]);
 
-  // Handle tool click with analytics
+  // Handle tool click with analytics (includes position for slot analysis)
   const handleToolClick = useCallback(
-    (tool: RescueTool, e: React.MouseEvent) => {
+    (tool: RescueTool, e: React.MouseEvent, position: number) => {
       if (isDevMode) {
         e.preventDefault();
         return;
       }
-      analytics.rescuePlanToolClick(tool.id, segment.severity, segment.size);
+      analytics.rescuePlanToolClick(
+        tool.id,
+        position,
+        segment.severity,
+        segment.size,
+        segment.totalAccounts
+      );
     },
     [segment, isDevMode]
   );
 
   const trackDismiss = useCallback(() => {
     if (isDevMode) return;
-    analytics.rescuePlanDismiss(segment.severity, segment.size);
+    analytics.rescuePlanDismiss(segment.severity, segment.size, segment.totalAccounts);
   }, [segment, isDevMode]);
 
   return {

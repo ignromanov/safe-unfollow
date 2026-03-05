@@ -224,25 +224,44 @@ export const analytics = {
   },
 
   // Rescue Plan (100% sampling — high-value conversion events)
-  rescuePlanImpression: (severity: string, size: string) => {
+  rescuePlanImpression: (
+    severity: string,
+    size: string,
+    accountCount: number,
+    unfollowedPercent: number
+  ) => {
     trackEvent(AnalyticsEvents.RESCUE_PLAN_IMPRESSION, {
       severity,
       size,
+      segment: `${severity}_${size}`,
+      account_count: accountCount,
+      unfollowed_percent: Math.round(unfollowedPercent * 10) / 10,
     });
   },
 
-  rescuePlanToolClick: (toolId: string, severity: string, size: string) => {
+  rescuePlanToolClick: (
+    toolId: string,
+    position: number,
+    severity: string,
+    size: string,
+    accountCount: number
+  ) => {
     trackEvent(AnalyticsEvents.RESCUE_PLAN_TOOL_CLICK, {
       tool_id: toolId,
+      position,
       severity,
       size,
+      segment: `${severity}_${size}`,
+      account_count: accountCount,
     });
   },
 
-  rescuePlanDismiss: (severity: string, size: string) => {
+  rescuePlanDismiss: (severity: string, size: string, accountCount: number) => {
     trackEvent(AnalyticsEvents.RESCUE_PLAN_DISMISS, {
       severity,
       size,
+      segment: `${severity}_${size}`,
+      account_count: accountCount,
     });
   },
 

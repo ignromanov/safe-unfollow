@@ -6,8 +6,8 @@
  */
 
 export const AFFILIATE_LINKS = {
-  /** Submagic - AI video editing for Reels */
-  submagic: 'https://submagic.co/?via=safeunfollow',
+  /** Publer - Social media scheduling */
+  publer: 'https://publer.com/safeunfollow',
 
   /** Metricool - Analytics and scheduling */
   metricool: 'https://f.mtr.cool/CHZTJD',

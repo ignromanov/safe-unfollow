@@ -1,4 +1,4 @@
-import { Video, BarChart3, Palette, Sparkles } from 'lucide-react';
+import { CalendarDays, BarChart3, Palette, Sparkles } from 'lucide-react';
 
 import { AFFILIATE_LINKS } from '@/config/affiliate-links';
 import type { RescueTool, UserSegment, SegmentKey } from './types';
@@ -12,18 +12,18 @@ import { getSegmentKey } from './segmentation';
 
 /** All available rescue tools */
 export const RESCUE_TOOLS: Record<string, RescueTool> = {
-  submagic: {
-    id: 'submagic',
-    name: 'Submagic',
-    descKey: 'rescue.tools.submagic',
-    icon: Video,
-    url: AFFILIATE_LINKS.submagic,
-    color: 'text-purple-500',
-    category: 'content',
-    pricing: 'trial',
-    priceKey: 'rescue.price.freeTrial7',
-    socialKey: 'rescue.social.creators50k',
-    badge: 'trial', // Matches pricing model
+  publer: {
+    id: 'publer',
+    name: 'Publer',
+    descKey: 'rescue.tools.publer',
+    icon: CalendarDays,
+    url: AFFILIATE_LINKS.publer,
+    color: 'text-indigo-500',
+    category: 'scheduling',
+    pricing: 'freemium',
+    priceKey: 'rescue.price.freePlan',
+    socialKey: 'rescue.social.users9m',
+    badge: 'new',
   },
   metricool: {
     id: 'metricool',
@@ -36,7 +36,6 @@ export const RESCUE_TOOLS: Record<string, RescueTool> = {
     pricing: 'freemium',
     priceKey: 'rescue.price.freePlan',
     socialKey: 'rescue.social.users200k',
-    // No badge - "Free Plan" already shown in trust signals
   },
   vistacreate: {
     id: 'vistacreate',
@@ -49,7 +48,6 @@ export const RESCUE_TOOLS: Record<string, RescueTool> = {
     pricing: 'freemium',
     priceKey: 'rescue.price.freeForever',
     socialKey: 'rescue.social.designs10m',
-    // No badge - "Free forever" in trust signals is sufficient
   },
   predis: {
     id: 'predis',
@@ -62,7 +60,7 @@ export const RESCUE_TOOLS: Record<string, RescueTool> = {
     pricing: 'freemium',
     priceKey: 'rescue.price.freePlan',
     socialKey: 'rescue.social.posts1m',
-    badge: 'popular', // AI content generation is trending
+    badge: 'popular',
   },
 };
 
@@ -70,37 +68,37 @@ export const RESCUE_TOOLS: Record<string, RescueTool> = {
  * Tool selection matrix: maps segment to recommended tools (ordered by priority)
  *
  * Logic:
- * - Critical: Focus on content recovery (predis/submagic for fast content)
- * - Warning: Focus on optimization (metricool for analytics)
- * - Growth: Focus on scaling (balanced approach)
+ * - Critical: AI content first (predis) + scheduling consistency (publer)
+ * - Warning: Analytics (metricool) + content balance
+ * - Growth: Scaling focus — consistency (publer) + AI content (predis)
  *
- * Predis.ai positioning:
- * - Best for users who need to create content quickly (AI-powered)
- * - Complements Submagic (video) with posts/carousels
- * - Strong for critical/warning where content velocity matters
+ * Data-driven (Feb 2026):
+ * - Predis.ai = 55.8% of clicks (AI content resonates with "fix it" impulse)
+ * - growth_regular = 32.6% of affiliate clicks (top segment)
+ * - Publer replaces Submagic (1 click/30d — dead)
  */
 const TOOL_MATRIX: Record<SegmentKey, string[]> = {
-  // Critical - content recovery focus (AI content first for fast recovery)
-  critical_influencer: ['predis', 'submagic', 'metricool'],
-  critical_power: ['predis', 'submagic', 'metricool'],
-  critical_regular: ['predis', 'vistacreate', 'metricool'],
-  critical_casual: ['vistacreate', 'predis', 'metricool'],
+  // Critical - content recovery focus (AI content + consistency)
+  critical_influencer: ['predis', 'publer', 'metricool'],
+  critical_power: ['predis', 'publer', 'metricool'],
+  critical_regular: ['predis', 'publer', 'metricool'],
+  critical_casual: ['publer', 'predis', 'metricool'],
 
   // Warning - optimization focus (analytics + content balance)
-  warning_influencer: ['metricool', 'predis', 'submagic'],
-  warning_power: ['metricool', 'predis', 'submagic'],
-  warning_regular: ['predis', 'metricool', 'vistacreate'],
-  warning_casual: ['vistacreate', 'predis', 'metricool'],
+  warning_influencer: ['metricool', 'predis', 'publer'],
+  warning_power: ['metricool', 'predis', 'publer'],
+  warning_regular: ['predis', 'metricool', 'publer'],
+  warning_casual: ['publer', 'predis', 'metricool'],
 
-  // Growth - scaling focus (AI content for consistent posting)
-  growth_influencer: ['metricool', 'predis', 'submagic'],
-  growth_power: ['predis', 'metricool', 'submagic'],
-  growth_regular: ['predis', 'vistacreate', 'metricool'],
-  growth_casual: ['vistacreate', 'predis', 'metricool'],
+  // Growth - scaling focus (consistency + AI content)
+  growth_influencer: ['metricool', 'predis', 'publer'],
+  growth_power: ['predis', 'metricool', 'publer'],
+  growth_regular: ['predis', 'publer', 'metricool'],
+  growth_casual: ['publer', 'predis', 'metricool'],
 };
 
 /** Default tools if segment not found */
-const DEFAULT_TOOLS = ['predis', 'metricool', 'vistacreate'];
+const DEFAULT_TOOLS = ['predis', 'publer', 'metricool'];
 
 /**
  * Get recommended tools for a user segment

@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useRescuePlanDismiss } from '@/hooks/useRescuePlanDismiss';
@@ -7,6 +7,7 @@ import {
   computeSegment,
   getToolsForSegment,
   SEVERITY_STYLES,
+  SHOW_DELAY_BY_SEVERITY,
   type LossSeverity,
   type AccountSize,
   type UserSegment,
@@ -64,6 +65,18 @@ export function RescuePlanBanner({ filterCounts, totalCount, className }: Rescue
   // Get styling for severity
   const style = SEVERITY_STYLES[segment.severity];
 
+  // Delay banner appearance based on severity (let users explore first)
+  const [isDelayComplete, setIsDelayComplete] = useState(false);
+  useEffect(() => {
+    if (devOverride) {
+      setIsDelayComplete(true);
+      return;
+    }
+    const delay = SHOW_DELAY_BY_SEVERITY[segment.severity];
+    const timer = setTimeout(() => setIsDelayComplete(true), delay);
+    return () => clearTimeout(timer);
+  }, [segment.severity, devOverride]);
+
   // Check if no data available
   const unfollowedCount = filterCounts.unfollowed ?? 0;
   const hasNoData = !devOverride && (totalCount === 0 || unfollowedCount === 0);
@@ -71,7 +84,7 @@ export function RescuePlanBanner({ filterCounts, totalCount, className }: Rescue
   // Analytics tracking
   const { handleToolClick, trackDismiss } = useRescuePlanAnalytics({
     segment,
-    isVisible: !isDismissed || isDevMode,
+    isVisible: isDelayComplete && (!isDismissed || isDevMode),
     isDevMode,
   });
 
@@ -111,9 +124,10 @@ export function RescuePlanBanner({ filterCounts, totalCount, className }: Rescue
     dismiss();
   }, [dismiss, devOverride, trackDismiss]);
 
-  // Don't render if no data or dismissed
+  // Don't render if no data, dismissed, or delay not complete
   if (hasNoData) return null;
   if (isDismissed && !devOverride) return null;
+  if (!isDelayComplete) return null;
 
   return (
     <div

@@ -33,7 +33,7 @@ interface ExpandedBannerProps {
   segment: UserSegment;
   tools: RescueTool[];
   onDismiss: () => void;
-  onToolClick: (tool: RescueTool, e: React.MouseEvent) => void;
+  onToolClick: (tool: RescueTool, e: React.MouseEvent, position: number) => void;
 }
 
 export function ExpandedBanner({

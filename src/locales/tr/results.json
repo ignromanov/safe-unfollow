@@ -97,7 +97,7 @@
       "cta": "Önerileri görmek için dokunun"
     },
     "tools": {
-      "submagic": "Klipleri viral Reels'e dönüştürün → 3-5x daha fazla erişim",
+      "publer": "Gönderileri planla → tutarlı ol ve 2 kat daha hızlı büyü",
       "predis": "AI gönderi + tasarım oluşturur → 3x daha hızlı içerik",
       "manychat": "7/24 otomatik yanıt → haftada 10+ saat tasarruf",
       "metricool": "En iyi zamanlarınızı bulun → %40 daha hızlı büyüme",
@@ -131,7 +131,8 @@
       "businesses1m": "1M+ işletme",
       "users200k": "200K+ kullanıcı",
       "designs10m": "10M+ tasarım",
-      "users7m": "7M+ kullanıcı"
+      "users7m": "7M+ kullanıcı",
+      "users9m": "9M+ kullanıcı"
     }
   }
 }

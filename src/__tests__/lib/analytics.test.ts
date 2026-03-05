@@ -386,12 +386,15 @@ describe('Analytics', () => {
       });
 
       it('should track rescue plan tool click', () => {
-        analytics.rescuePlanToolClick('tool-1', 'medium', 'small');
+        analytics.rescuePlanToolClick('tool-1', 0, 'medium', 'small', 1500);
 
         expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.RESCUE_PLAN_TOOL_CLICK, {
           tool_id: 'tool-1',
+          position: 0,
           severity: 'medium',
           size: 'small',
+          segment: 'medium_small',
+          account_count: 1500,
         });
       });
 

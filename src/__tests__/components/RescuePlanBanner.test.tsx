@@ -1,5 +1,5 @@
 import { vi, beforeEach, describe, expect, it, afterEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { createI18nMock } from '@/__tests__/utils/mockI18n';
 
 // Mock IntersectionObserver (used by useCarouselIndex in ExpandedBanner)
@@ -41,6 +41,7 @@ vi.spyOn(dismissHook, 'useRescuePlanDismiss').mockReturnValue({
 describe('RescuePlanBanner', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.useFakeTimers();
     // Default mock implementation
     vi.spyOn(dismissHook, 'useRescuePlanDismiss').mockReturnValue({
       isDismissed: false,
@@ -49,6 +50,7 @@ describe('RescuePlanBanner', () => {
   });
 
   afterEach(() => {
+    vi.useRealTimers();
     vi.restoreAllMocks();
   });
 
@@ -59,6 +61,9 @@ describe('RescuePlanBanner', () => {
 
   it('should render banner with complementary role', () => {
     render(<RescuePlanBanner {...defaultProps} />);
+    act(() => {
+      vi.advanceTimersByTime(30_000);
+    });
 
     expect(screen.getByRole('complementary')).toBeInTheDocument();
   });
@@ -70,12 +75,18 @@ describe('RescuePlanBanner', () => {
     });
 
     render(<RescuePlanBanner {...defaultProps} />);
+    act(() => {
+      vi.advanceTimersByTime(30_000);
+    });
 
     expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
   });
 
   it('should call dismiss when close button is clicked', () => {
     render(<RescuePlanBanner {...defaultProps} />);
+    act(() => {
+      vi.advanceTimersByTime(30_000);
+    });
 
     const closeButton = screen.getByLabelText('rescue.dismiss');
     fireEvent.click(closeButton);
@@ -85,6 +96,9 @@ describe('RescuePlanBanner', () => {
 
   it('should track tool clicks', () => {
     render(<RescuePlanBanner {...defaultProps} />);
+    act(() => {
+      vi.advanceTimersByTime(30_000);
+    });
 
     // Find the first tool link (assuming there is at least one)
     const links = screen.getAllByRole('link');
@@ -100,6 +114,9 @@ describe('RescuePlanBanner', () => {
       totalCount: 1000,
     };
     render(<RescuePlanBanner {...props} />);
+    act(() => {
+      vi.advanceTimersByTime(30_000);
+    });
 
     expect(screen.getByRole('complementary')).toBeInTheDocument();
   });

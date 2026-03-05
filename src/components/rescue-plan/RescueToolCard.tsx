@@ -23,7 +23,7 @@ const BADGE_STYLES: Record<ToolBadge, string> = {
 interface RescueToolCardProps {
   tool: RescueTool;
   index: number;
-  onToolClick: (tool: RescueTool, e: React.MouseEvent) => void;
+  onToolClick: (tool: RescueTool, e: React.MouseEvent, position: number) => void;
 }
 
 export function RescueToolCard({ tool, index, onToolClick }: RescueToolCardProps) {
@@ -35,7 +35,7 @@ export function RescueToolCard({ tool, index, onToolClick }: RescueToolCardProps
       href={tool.url}
       target="_blank"
       rel="noopener noreferrer"
-      onClick={e => onToolClick(tool, e)}
+      onClick={e => onToolClick(tool, e, index)}
       className={`group relative p-4 bg-white dark:bg-zinc-900 rounded-2xl border-2 transition-all duration-200 hover:scale-[1.02] active:scale-100 flex flex-col ${
         isFirst
           ? 'border-zinc-300 dark:border-zinc-700 hover:border-primary hover:ring-2 hover:ring-primary/20 hover:shadow-xl'
@@ -84,7 +84,7 @@ export function RescueToolCard({ tool, index, onToolClick }: RescueToolCardProps
         </div>
 
         {/* Description */}
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-3 line-clamp-1 md:line-clamp-none">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-3 line-clamp-2 md:line-clamp-none">
           {t(tool.descKey as any)}
         </p>
       </div>

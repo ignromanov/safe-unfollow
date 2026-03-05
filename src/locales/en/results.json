@@ -97,7 +97,7 @@
       "cta": "Tap to see recommendations"
     },
     "tools": {
-      "submagic": "Turn clips into viral Reels → 3-5x reach boost",
+      "publer": "Schedule posts → stay consistent & grow 2x faster",
       "predis": "AI creates posts + designs → ship content 3x faster",
       "manychat": "Auto-reply 24/7 → 10+ hours/week saved",
       "metricool": "Find your peak times → 40% faster growth",
@@ -131,7 +131,8 @@
       "businesses1m": "1M+ businesses",
       "users200k": "200K+ users",
       "designs10m": "10M+ designs created",
-      "users7m": "7M+ users"
+      "users7m": "7M+ users",
+      "users9m": "9M+ users"
     }
   }
 }
