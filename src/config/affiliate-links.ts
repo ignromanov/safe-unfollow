@@ -17,12 +17,6 @@ export const AFFILIATE_LINKS = {
 
   /** Predis.ai - AI content generation */
   predis: 'https://predis.ai?ref=safeunfollow',
-
-  // /** ManyChat - Instagram DM automation */
-  // manychat: 'https://manychat.com/?ref=safeunfollow',
-
-  // /** Later - Social media scheduling */
-  // later: 'https://later.com/?ref=safeunfollow',
 } as const;
 
 export type AffiliateToolId = keyof typeof AFFILIATE_LINKS;

@@ -64,44 +64,6 @@ export const RESCUE_TOOLS: Record<string, RescueTool> = {
     socialKey: 'rescue.social.posts1m',
     badge: 'popular', // AI content generation is trending
   },
-  // manychat: {
-  //   id: 'manychat',
-  //   name: 'ManyChat',
-  //   descKey: 'rescue.tools.manychat',
-  //   icon: MessageSquare,
-  //   url: AFFILIATE_LINKS.manychat,
-  //   color: 'text-green-500',
-  //   category: 'engagement',
-  //   pricing: 'freemium',
-  //   priceKey: 'rescue.price.freeContacts',
-  //   socialKey: 'rescue.social.businesses1m',
-  //   badge: 'popular',
-  // },
-  // vistacreate: {
-  //   id: 'vistacreate',
-  //   name: 'VistaCreate',
-  //   descKey: 'rescue.tools.vistacreate',
-  //   icon: Palette,
-  //   url: AFFILIATE_LINKS.vistacreate,
-  //   color: 'text-cyan-500',
-  //   category: 'design',
-  //   pricing: 'freemium',
-  //   priceKey: 'rescue.price.freeForever',
-  //   socialKey: 'rescue.social.designs10m',
-  // },
-  // later: {
-  //   id: 'later',
-  //   name: 'Later',
-  //   descKey: 'rescue.tools.later',
-  //   icon: Calendar,
-  //   url: AFFILIATE_LINKS.later,
-  //   color: 'text-pink-500',
-  //   category: 'scheduling',
-  //   pricing: 'trial',
-  //   priceKey: 'rescue.price.freeTrial14',
-  //   socialKey: 'rescue.social.users7m',
-  //   badge: 'trial',
-  // },
 };
 
 /**
@@ -149,11 +111,4 @@ export function getToolsForSegment(segment: UserSegment): RescueTool[] {
   return toolIds
     .map(id => RESCUE_TOOLS[id])
     .filter((tool): tool is RescueTool => tool !== undefined);
-}
-
-/**
- * Get all available tools (for testing/debugging)
- */
-export function getAllTools(): RescueTool[] {
-  return Object.values(RESCUE_TOOLS);
 }

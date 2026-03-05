@@ -1,17 +1,10 @@
-export function unixToISO(ts?: number): string | null {
-  if (!ts) return null;
-  try {
-    return new Date(ts * 1000).toISOString();
-  } catch {
-    return null;
-  }
-}
-
-export function formatUnixHuman(ts?: number): string | null {
-  if (!ts) return null;
-  try {
-    return new Date(ts * 1000).toLocaleString();
-  } catch {
-    return null;
-  }
+// V3 App state for path-based routing
+export enum AppState {
+  HERO = 'HERO',
+  WIZARD = 'WIZARD',
+  UPLOAD = 'UPLOAD',
+  RESULTS = 'RESULTS',
+  SAMPLE = 'SAMPLE',
+  PRIVACY = 'PRIVACY',
+  TERMS = 'TERMS',
 }

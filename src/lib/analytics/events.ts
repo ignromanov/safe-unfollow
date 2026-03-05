@@ -304,14 +304,6 @@ export const analytics = {
   },
 
   // Session & Engagement
-  timeOnResults: (seconds: number, accountCount: number, actionsCount: number) => {
-    trackEvent(AnalyticsEvents.TIME_ON_RESULTS, {
-      time_seconds: Math.round(seconds),
-      account_count: accountCount,
-      actions_count: actionsCount,
-    });
-  },
-
   returnUpload: (fileHashPrefix: string, daysSinceLastUpload: number) => {
     trackEvent(AnalyticsEvents.RETURN_UPLOAD, {
       file_hash_prefix: fileHashPrefix.slice(0, 8),

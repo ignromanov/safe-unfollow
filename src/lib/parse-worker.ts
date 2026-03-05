@@ -9,12 +9,6 @@ import { indexedDBService } from './indexeddb/indexeddb-service';
 import { buildAllSearchIndexes } from './search-index';
 import { logger } from './logger';
 
-// Configuration - optimized for balance between speed and memory
-// Smaller chunks = more frequent progress updates but more overhead
-// Larger chunks = faster processing but less frequent updates
-// Process 30k accounts per chunk (optimized for 1M+ datasets) - not currently used
-// const CHUNK_SIZE = 30000;
-
 // Search index build delay (ms) - allows UI to be responsive before background task
 const SEARCH_INDEX_BUILD_DELAY_MS = 100;
 

@@ -1,7 +1,5 @@
-import type { BadgeKey } from '@/core/types';
-
 // Single source of truth for badge styles - V3 OKLCH color palette
-const BADGE_STYLE_MAP: Record<BadgeKey, string> = {
+const BADGE_STYLE_MAP: Record<string, string> = {
   following:
     'bg-[oklch(0.6_0.15_250_/_0.12)] text-[oklch(0.6_0.15_250)] border-[oklch(0.6_0.15_250_/_0.2)]',
   followers:
@@ -26,8 +24,4 @@ const BADGE_STYLE_MAP: Record<BadgeKey, string> = {
     'bg-[oklch(0.5_0.05_250_/_0.12)] text-[oklch(0.5_0.05_250)] border-[oklch(0.5_0.05_250_/_0.2)]',
 };
 
-// Generated exports for different component needs
 export const BADGE_STYLES: Record<string, string> = BADGE_STYLE_MAP;
-export const BADGE_CONFIGS: Record<BadgeKey, { color: string }> = Object.fromEntries(
-  Object.entries(BADGE_STYLE_MAP).map(([key, value]) => [key, { color: value }])
-) as Record<BadgeKey, { color: string }>;

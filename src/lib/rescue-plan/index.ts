@@ -28,7 +28,7 @@ export {
 } from './segmentation';
 
 // Tools
-export { RESCUE_TOOLS, getToolsForSegment, getAllTools } from './tools';
+export { getToolsForSegment } from './tools';
 
 // i18n Keys
 export { getTitleKey, getSubtitleKey } from './i18n-keys';

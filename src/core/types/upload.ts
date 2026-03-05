@@ -16,14 +16,6 @@ export interface FileMetadata {
   processingTime?: number;
 }
 
-/**
- * Required fields for persisted file metadata.
- * Used for validation before saving to IndexedDB.
- */
-export type RequiredFileMetadata = Required<Omit<FileMetadata, 'processingTime'>> & {
-  processingTime?: number;
-};
-
 // === Parse Result Types ===
 
 /** Severity of a parse warning */
