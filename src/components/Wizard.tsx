@@ -1,58 +1,12 @@
 import { useCallback, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, X, ExternalLink, AlertTriangle, Calendar } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import FocusTrap from 'focus-trap-react';
 
 import { analytics } from '@/lib/analytics';
-import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
 import { ResponsiveGif } from '@/components/ResponsiveGif';
-
-interface WizardStep {
-  id: number;
-  externalLink?: string;
-  isWarning?: boolean;
-  visual?: string;
-}
-
-const WIZARD_STEPS: WizardStep[] = [
-  {
-    id: 1,
-    externalLink:
-      'https://accountscenter.instagram.com/info_and_permissions/dyi/?entry_point=app_settings',
-    visual: '/wizard/step-1',
-  },
-  {
-    id: 2,
-    visual: '/wizard/step-2',
-  },
-  {
-    id: 3,
-    visual: '/wizard/step-3',
-  },
-  {
-    id: 4,
-    isWarning: true,
-    visual: '/wizard/step-4',
-  },
-  {
-    id: 5,
-    visual: '/wizard/step-5',
-  },
-  {
-    id: 6,
-    isWarning: true,
-    visual: '/wizard/step-6',
-  },
-  {
-    id: 7,
-    visual: '/wizard/step-7',
-  },
-  {
-    id: 8,
-    visual: '/wizard/step-8',
-  },
-];
+import { WIZARD_STEPS } from '@/config/wizard-steps';
+import { useWizardNavigation } from '@/hooks/useWizardNavigation';
 
 interface WizardProps {
   initialStep?: number;
@@ -62,37 +16,13 @@ interface WizardProps {
 
 export function Wizard({ initialStep = 1, onComplete, onCancel }: WizardProps) {
   const { t } = useTranslation('wizard');
-  const location = useLocation();
-  const navigate = useNavigate();
-  const prefix = useLanguagePrefix();
-
-  // Derive step from URL (single source of truth)
-  const stepFromUrl = (() => {
-    const match = location.pathname.match(/\/wizard\/step\/(\d+)/);
-    if (match?.[1]) {
-      const step = parseInt(match[1], 10);
-      if (step >= 1 && step <= WIZARD_STEPS.length) {
-        return step;
-      }
-    }
-    return initialStep;
-  })();
-
-  const currentStep = stepFromUrl;
+  const { currentStep, goToStep, prefix, navigate } = useWizardNavigation(initialStep);
 
   // Track analytics on step view
   useEffect(() => {
     const stepTitle = t(`steps.${currentStep}.title` as any);
     analytics.wizardStepView(currentStep, String(stepTitle));
   }, [currentStep, t]);
-
-  // Navigate to step via URL
-  const goToStep = useCallback(
-    (step: number) => {
-      navigate(`${prefix}/wizard/step/${step}`);
-    },
-    [navigate, prefix]
-  );
 
   const step = WIZARD_STEPS.find(s => s.id === currentStep);
   if (!step) {
