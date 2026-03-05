@@ -35,26 +35,10 @@ const EXCLUDE_PATTERNS = [
   /^500\.html$/,
 ];
 
-// Dynamic routes that don't have physical HTML files but should be in sitemap
-// Wizard has 8 steps (see src/components/Wizard.tsx WIZARD_STEPS)
-const WIZARD_STEP_COUNT = 8;
-const DYNAMIC_ROUTES = Array.from(
-  { length: WIZARD_STEP_COUNT },
-  (_, i) => `/wizard/step/${i + 1}`
-);
-
 // Per-route SEO settings
 const ROUTE_CONFIG: Record<string, { priority: number; changefreq: string }> = {
   "/": { priority: 1.0, changefreq: "weekly" },
   "/wizard": { priority: 0.8, changefreq: "monthly" },
-  "/wizard/step/1": { priority: 0.7, changefreq: "monthly" },
-  "/wizard/step/2": { priority: 0.7, changefreq: "monthly" },
-  "/wizard/step/3": { priority: 0.7, changefreq: "monthly" },
-  "/wizard/step/4": { priority: 0.7, changefreq: "monthly" },
-  "/wizard/step/5": { priority: 0.7, changefreq: "monthly" },
-  "/wizard/step/6": { priority: 0.7, changefreq: "monthly" },
-  "/wizard/step/7": { priority: 0.7, changefreq: "monthly" },
-  "/wizard/step/8": { priority: 0.7, changefreq: "monthly" },
   "/upload": { priority: 0.8, changefreq: "monthly" },
   "/waiting": { priority: 0.6, changefreq: "monthly" },
   "/results": { priority: 0.6, changefreq: "monthly" },
@@ -71,6 +55,9 @@ const ROUTE_CONFIG: Record<string, { priority: number; changefreq: string }> = {
   "/docs/tech-spec": { priority: 0.5, changefreq: "monthly" },
   "/docs/roadmap": { priority: 0.5, changefreq: "monthly" },
   "/docs/accessibility": { priority: 0.5, changefreq: "yearly" },
+  "/docs/compare": { priority: 0.6, changefreq: "monthly" },
+  "/docs/compare/vs-unfollowgram": { priority: 0.6, changefreq: "monthly" },
+  "/docs/compare/vs-followers-app": { priority: 0.6, changefreq: "monthly" },
 };
 
 // Paths that are English-only (no i18n versions)
@@ -84,6 +71,9 @@ const ENGLISH_ONLY_PATHS = [
   "/docs/tech-spec",
   "/docs/roadmap",
   "/docs/accessibility",
+  "/docs/compare",
+  "/docs/compare/vs-unfollowgram",
+  "/docs/compare/vs-followers-app",
 ];
 
 const DEFAULT_CONFIG = { priority: 0.7, changefreq: "monthly" };
@@ -294,19 +284,6 @@ function main(): void {
     }
   }
 
-  // Add dynamic routes (wizard steps) for all languages
-  // These don't have physical HTML files but are valid client-side routes
-  for (const dynamicRoute of DYNAMIC_ROUTES) {
-    for (const lang of SUPPORTED_LANGUAGES) {
-      const url = buildUrl(dynamicRoute, lang);
-      const key = `${lang}:${dynamicRoute}`;
-      if (!basePathsSet.has(key)) {
-        basePathsSet.add(key);
-        urlEntries.push({ url, basePath: dynamicRoute, lang });
-      }
-    }
-  }
-
   // Add docs pages (English only, hosted via GitHub Pages/Jekyll)
   // These are built separately and served at /docs/*
   for (const docsPath of ENGLISH_ONLY_PATHS) {
@@ -346,12 +323,10 @@ ${entries.join("\n\n")}
 
   // Summary
   const basePaths = new Set(urlEntries.map((e) => e.basePath));
-  const dynamicCount = DYNAMIC_ROUTES.length * SUPPORTED_LANGUAGES.length;
   const docsCount = ENGLISH_ONLY_PATHS.length;
   console.log(`✅ Sitemap generated: dist/sitemap.xml`);
   console.log(`   Total URLs: ${urlEntries.length}`);
-  console.log(`   - Static pages: ${urlEntries.length - dynamicCount - docsCount}`);
-  console.log(`   - Dynamic routes (wizard steps): ${dynamicCount}`);
+  console.log(`   - Static pages: ${urlEntries.length - docsCount}`);
   console.log(`   - Docs pages (English only): ${docsCount}`);
   console.log(`   Base paths: ${Array.from(basePaths).join(", ")}`);
   console.log(`   Languages: ${SUPPORTED_LANGUAGES.join(", ")}`);

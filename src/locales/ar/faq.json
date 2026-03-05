@@ -88,6 +88,22 @@
         "text": "اقرأ التزامنا بالخصوصية",
         "href": "/privacy"
       }
+    },
+    "withoutPassword": {
+      "question": "كيف يعمل SafeUnfollow بدون كلمة مرور Instagram؟",
+      "answer": "يستخدم SafeUnfollow ميزة تصدير البيانات الرسمية في Instagram (في مركز حسابات Meta) بدلاً من كلمة المرور. تقوم بتنزيل بياناتك كملف ZIP مباشرة من Instagram وترفعها هنا. كل شيء يُعالج في متصفحك.",
+      "relatedLink": {
+        "text": "انظر دليل التصدير",
+        "href": "/wizard"
+      }
+    },
+    "betterThanPaid": {
+      "question": "هل SafeUnfollow أفضل من التطبيقات المدفوعة؟",
+      "answer": "لمعظم المستخدمين، نعم. SafeUnfollow مجاني 100%، لا يحتاج تسجيل دخول (بدون خطر الحظر)، يعالج البيانات محلياً (أقصى خصوصية)، يدعم 1 مليون+ حساب، ومفتوح المصدر."
+    },
+    "mobileUse": {
+      "question": "هل يمكنني استخدام SafeUnfollow على iPhone أو Android؟",
+      "answer": "نعم! SafeUnfollow يعمل في أي متصفح هاتف حديث (Safari، Chrome، Firefox). زر safeunfollow.app وارفع ملف ZIP وشاهد النتائج فوراً. يمكن تثبيته كتطبيق PWA أيضاً."
     }
   }
 }

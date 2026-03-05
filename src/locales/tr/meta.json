@@ -3,5 +3,37 @@
   "description": "Instagram'da takipten çıkanları öğren, giriş yapmadan. ZIP yükle, hemen gör. %100 ücretsiz, gizli, 1M+ hesap. Çevrimdışı çalışır.",
   "ogTitle": "Instagram Takipten Çıkanlar — Ücretsiz Giriş Yok",
   "twitterDescription": "Instagram'da takipten çıkanları öğren, giriş yapmadan. ZIP yükle, hemen gör. %100 ücretsiz, 1M+ hesap. Çevrimdışı çalışır.",
-  "keywords": "instagram takipten çıkanlar, kim takibi bıraktı instagram, unfollow tracker türkçe, instagram zip analiz, giriş yapmadan takip kontrol"
+  "keywords": "instagram takipten çıkanlar, kim takibi bıraktı instagram, unfollow tracker türkçe, instagram zip analiz, giriş yapmadan takip kontrol",
+  "routes": {
+    "/upload": {
+      "title": "Instagram ZIP Yükle — Ücretsiz Analiz | SafeUnfollow",
+      "description": "Instagram veri dışa aktarımını (ZIP) yükle, ücretsiz analiz. %100 yerel işlem, giriş yok, 1M+ hesap.",
+      "ogTitle": "Instagram ZIP Yükle — Ücretsiz Analiz"
+    },
+    "/wizard": {
+      "title": "Instagram Verilerini JSON Olarak İndirme — Rehber | SafeUnfollow",
+      "description": "Instagram verilerinizi JSON olarak indirmek için adım adım rehber.",
+      "ogTitle": "Instagram Verilerini JSON Olarak İndirme — Rehber"
+    },
+    "/sample": {
+      "title": "Instagram Unfollow Tracker'ı Dene — Ücretsiz Demo | SafeUnfollow",
+      "description": "Örnek verilerle Instagram Unfollow Tracker'ı dene. Rozetleri, filtreleri ve aramayı gör.",
+      "ogTitle": "Instagram Unfollow Tracker'ı Dene — Ücretsiz Demo"
+    },
+    "/privacy": {
+      "title": "Gizlilik Politikası — Verilerin Cihazından Çıkmaz | SafeUnfollow",
+      "description": "SafeUnfollow gizlilik politikası. %100 yerel işlem, veri toplama yok, izleme yok.",
+      "ogTitle": "Gizlilik Politikası — Verilerin Cihazından Çıkmaz"
+    },
+    "/results": {
+      "title": "Instagram Sonuçlarınız | SafeUnfollow",
+      "description": "Instagram takipten çıkma analiz sonuçlarınızı görüntüleyin. Rozetlere göre filtreleyin ve hesapları arayın.",
+      "ogTitle": "Instagram Takipten Çıkma Sonuçlarınız"
+    },
+    "/terms": {
+      "title": "Hizmet Şartları | SafeUnfollow",
+      "description": "SafeUnfollow hizmet şartları. %100 yerel işleme ile ücretsiz, açık kaynaklı Instagram takip bırakma izleyicisi.",
+      "ogTitle": "Hizmet Şartları"
+    }
+  }
 }

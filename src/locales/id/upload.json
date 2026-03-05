@@ -160,6 +160,24 @@
       }
     }
   },
+  "quiz": {
+    "title": "Format apa yang Anda pilih?",
+    "subtitle": "Saat meminta ekspor data Instagram, format apa yang Anda pilih?",
+    "json": "JSON",
+    "jsonHint": "Format yang benar untuk analisis",
+    "html": "HTML",
+    "htmlHint": "Tidak berfungsi — perlu unduh ulang sebagai JSON",
+    "notSure": "Tidak yakin",
+    "notSureHint": "Biarkan saya periksa",
+    "successMessage": "Siap! Upload ZIP Anda di bawah.",
+    "htmlMessage": "Ekspor HTML tidak bisa dianalisis. Silakan minta ulang data dalam format JSON.",
+    "htmlCta": "Lihat cara mendapatkan format JSON",
+    "comparisonTitle": "Cara membedakannya",
+    "comparisonJson": "Jika Anda melihat \"Format: JSON\" di halaman unduhan, berarti sudah benar.",
+    "comparisonHtml": "Jika Anda melihat \"Format: HTML\" atau file .html di dalamnya, perlu minta ulang.",
+    "dismiss": "Mengerti"
+  },
+  "formatWarning": "Pastikan Anda memilih JSON (bukan HTML) saat meminta ekspor data.",
   "waiting": {
     "title": "Menunggu Instagram...",
     "description": "Instagram sedang menyiapkan ekspor data Anda. Anda akan menerima email dalam 48 jam (biasanya lebih cepat!).",

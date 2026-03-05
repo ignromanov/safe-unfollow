@@ -1,7 +1,7 @@
 ---
 layout: default
-title: Privacy Policy
-description: Data handling principles and privacy commitment
+title: Privacy Policy — Your Data Never Leaves Your Device
+description: Instagram Unfollow Tracker privacy policy. 100% local processing, no data collection, no tracking cookies. Your Instagram data never leaves your browser.
 permalink: /privacy/
 last_updated: 2026-01-16
 ---
@@ -10,7 +10,7 @@ last_updated: 2026-01-16
 
 ## Our Privacy Commitment
 
-**Unfollow Radar is designed with privacy as the core principle.** This document explains in plain English how we handle your data (spoiler: we don't collect any).
+**Instagram Unfollow Tracker is designed with privacy as the core principle.** This document explains in plain English how we handle your data (spoiler: we don't collect any).
 
 ## What We Do NOT Do
 

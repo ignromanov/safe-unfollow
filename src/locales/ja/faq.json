@@ -88,6 +88,22 @@
         "text": "プライバシーへの取り組みを読む",
         "href": "/privacy"
       }
+    },
+    "withoutPassword": {
+      "question": "SafeUnfollowはInstagramのパスワードなしでどう動くの？",
+      "answer": "SafeUnfollowはパスワードの代わりにInstagramの公式データエクスポート機能（MetaアカウントセンターMeta）を使用します。InstagramからZIPファイルとしてデータを直接ダウンロードし、ここにアップロードします。すべてブラウザ内で処理されます。",
+      "relatedLink": {
+        "text": "エクスポートガイドを見る",
+        "href": "/wizard"
+      }
+    },
+    "betterThanPaid": {
+      "question": "SafeUnfollowは有料アプリより優れていますか？",
+      "answer": "ほとんどのユーザーにとって、はい。SafeUnfollowは100%無料、ログイン不要（アカウント凍結リスクなし）、ローカル処理（最大限のプライバシー）、100万件以上のアカウント対応、オープンソースです。"
+    },
+    "mobileUse": {
+      "question": "iPhoneやAndroidでSafeUnfollowを使えますか？",
+      "answer": "はい！SafeUnfollowは最新のモバイルブラウザ（Safari、Chrome、Firefox）で動作します。safeunfollow.appにアクセスし、ZIPをアップロードして即座に結果を確認できます。PWAとしてもインストールできます。"
     }
   }
 }

@@ -88,6 +88,22 @@
         "text": "हमारा प्राइवेसी कमिटमेंट पढ़ें",
         "href": "/privacy"
       }
+    },
+    "withoutPassword": {
+      "question": "SafeUnfollow मेरे Instagram पासवर्ड के बिना कैसे काम करता है?",
+      "answer": "SafeUnfollow आपके पासवर्ड की जगह Instagram की आधिकारिक डेटा एक्सपोर्ट सुविधा (Meta अकाउंट सेंटर में) का उपयोग करता है। आप अपना डेटा ZIP फ़ाइल के रूप में सीधे Instagram से डाउनलोड करते हैं और यहाँ अपलोड करते हैं। सब कुछ आपके ब्राउज़र में प्रोसेस होता है।",
+      "relatedLink": {
+        "text": "एक्सपोर्ट गाइड देखें",
+        "href": "/wizard"
+      }
+    },
+    "betterThanPaid": {
+      "question": "क्या SafeUnfollow पेड ऐप्स से बेहतर है?",
+      "answer": "अधिकांश उपयोगकर्ताओं के लिए, हाँ। SafeUnfollow 100% मुफ्त है, लॉगिन की जरूरत नहीं, डेटा लोकली प्रोसेस करता है, 1M+ अकाउंट्स सपोर्ट करता है और ओपन सोर्स है।"
+    },
+    "mobileUse": {
+      "question": "क्या मैं iPhone या Android पर SafeUnfollow का उपयोग कर सकता हूँ?",
+      "answer": "हाँ! SafeUnfollow किसी भी आधुनिक मोबाइल ब्राउज़र (Safari, Chrome, Firefox) में काम करता है। safeunfollow.app पर जाएं, ZIP अपलोड करें और तुरंत परिणाम देखें। PWA के रूप में भी इंस्टॉल कर सकते हैं।"
     }
   }
 }

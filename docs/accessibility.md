@@ -1,7 +1,7 @@
 ---
 layout: default
-title: Accessibility
-description: Accessibility features and support
+title: Accessibility Features — Screen Reader, Keyboard, RTL Support
+description: Instagram Unfollow Tracker accessibility features. Full keyboard navigation, screen reader support, RTL languages, WCAG 2.1 AA compliance, and high contrast mode.
 permalink: /accessibility/
 ---
 

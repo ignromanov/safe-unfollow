@@ -160,6 +160,24 @@
       }
     }
   },
+  "quiz": {
+    "title": "Hangi formatı seçtiniz?",
+    "subtitle": "Instagram veri dışa aktarımını talep ederken hangi formatı seçtiniz?",
+    "json": "JSON",
+    "jsonHint": "Analiz için doğru format",
+    "html": "HTML",
+    "htmlHint": "Çalışmaz — JSON olarak yeniden indirin",
+    "notSure": "Emin değilim",
+    "notSureHint": "Kontrol edeyim",
+    "successMessage": "Hazır! ZIP dosyanızı aşağıya yükleyin.",
+    "htmlMessage": "HTML dışa aktarımları analiz edilemez. Lütfen verilerinizi JSON formatında yeniden talep edin.",
+    "htmlCta": "JSON formatını nasıl alacağınızı görün",
+    "comparisonTitle": "Farkı nasıl anlarsınız",
+    "comparisonJson": "İndirme sayfasında \"Format: JSON\" görüyorsanız doğru.",
+    "comparisonHtml": "\"Format: HTML\" veya .html dosyaları görüyorsanız yeniden talep etmeniz gerekiyor.",
+    "dismiss": "Anladım"
+  },
+  "formatWarning": "Veri dışa aktarımı talep ederken JSON (HTML değil) seçtiğinizden emin olun.",
   "waiting": {
     "title": "Instagram bekleniyor...",
     "description": "Instagram veri dışa aktarımını hazırlıyor. 48 saat içinde bir e-posta alacaksın (genellikle çok daha hızlı!).",

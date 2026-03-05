@@ -3,5 +3,37 @@
   "description": "Instagram पर अनफॉलो करने वालों को देखें बिना लॉगिन के। ZIP अपलोड करें, तुरंत देखें। 100% फ्री, प्राइवेट, 1M+ अकाउंट्स। ऑफलाइन काम करता है।",
   "ogTitle": "Instagram Unfollow — मुफ्त बिना Login",
   "twitterDescription": "Instagram पर अनफॉलो करने वालों को देखें बिना लॉगिन। ZIP अपलोड करें, तुरंत देखें। 100% फ्री, 1M+ अकाउंट्स। ऑफलाइन।",
-  "keywords": "instagram unfollow, किसने अनफॉलो किया instagram, unfollow tracker हिंदी, instagram zip analyzer, बिना login unfollow चेक"
+  "keywords": "instagram unfollow, किसने अनफॉलो किया instagram, unfollow tracker हिंदी, instagram zip analyzer, बिना login unfollow चेक",
+  "routes": {
+    "/upload": {
+      "title": "Instagram ZIP अपलोड करें — मुफ्त विश्लेषण | SafeUnfollow",
+      "description": "अपना Instagram डेटा एक्सपोर्ट (ZIP) अपलोड करें मुफ्त विश्लेषण के लिए। 100% लोकल प्रोसेसिंग, बिना लॉगिन।",
+      "ogTitle": "Instagram ZIP अपलोड करें — मुफ्त विश्लेषण"
+    },
+    "/wizard": {
+      "title": "Instagram डेटा JSON में कैसे डाउनलोड करें — गाइड | SafeUnfollow",
+      "description": "Instagram डेटा को JSON फॉर्मेट में डाउनलोड करने की स्टेप-बाय-स्टेप गाइड।",
+      "ogTitle": "Instagram डेटा JSON में कैसे डाउनलोड करें — गाइड"
+    },
+    "/sample": {
+      "title": "Instagram Unfollow Tracker आज़माएं — फ्री डेमो | SafeUnfollow",
+      "description": "सैंपल डेटा से Instagram Unfollow Tracker आज़माएं। बैज, फ़िल्टर और सर्च देखें।",
+      "ogTitle": "Instagram Unfollow Tracker आज़माएं — फ्री डेमो"
+    },
+    "/privacy": {
+      "title": "गोपनीयता नीति — डेटा आपके डिवाइस से बाहर नहीं जाता | SafeUnfollow",
+      "description": "SafeUnfollow गोपनीयता नीति। 100% लोकल प्रोसेसिंग, कोई डेटा संग्रह नहीं।",
+      "ogTitle": "गोपनीयता नीति — डेटा आपके डिवाइस से बाहर नहीं जाता"
+    },
+    "/results": {
+      "title": "आपके Instagram परिणाम | SafeUnfollow",
+      "description": "अपने Instagram अनफ़ॉलो विश्लेषण परिणाम देखें। बैज से फ़िल्टर करें और खाते खोजें।",
+      "ogTitle": "आपके Instagram अनफ़ॉलो परिणाम"
+    },
+    "/terms": {
+      "title": "सेवा की शर्तें | SafeUnfollow",
+      "description": "SafeUnfollow की सेवा शर्तें। 100% स्थानीय प्रसंस्करण के साथ मुफ़्त, ओपन-सोर्स Instagram ट्रैकर।",
+      "ogTitle": "सेवा की शर्तें"
+    }
+  }
 }

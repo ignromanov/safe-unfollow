@@ -1,7 +1,7 @@
 ---
 layout: default
-title: Troubleshooting
-description: Problem-solving guide for common issues
+title: Fix Instagram Upload Errors — JSON vs HTML, Wrong File & More
+description: Solve common Instagram data upload errors. Fix JSON vs HTML format issues, wrong file structure, and "no data found" errors step by step.
 permalink: /troubleshooting/
 ---
 

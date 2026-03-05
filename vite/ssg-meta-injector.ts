@@ -66,16 +66,32 @@ function loadMetaJson(lang: string, rootDir: string, route: string): Record<stri
     return NOT_FOUND_META;
   }
 
+  let meta: Record<string, unknown>;
   try {
     const metaPath = path.join(rootDir, 'src', 'locales', lang, 'meta.json');
     const content = fs.readFileSync(metaPath, 'utf-8');
-    return JSON.parse(content);
+    meta = JSON.parse(content);
   } catch {
     // Fallback to English
     const enPath = path.join(rootDir, 'src', 'locales', 'en', 'meta.json');
     const content = fs.readFileSync(enPath, 'utf-8');
-    return JSON.parse(content);
+    meta = JSON.parse(content);
   }
+
+  // Extract base path (strip language prefix) for route-specific meta lookup
+  const langPrefixPattern = createLanguagePrefixRegex();
+  const basePath = route.replace(langPrefixPattern, '/') || '/';
+
+  // Merge route-specific overrides if available
+  const routes = meta.routes as Record<string, Record<string, string>> | undefined;
+  if (routes && routes[basePath]) {
+    const { routes: _unused, ...defaults } = meta;
+    return { ...defaults, ...routes[basePath] } as Record<string, string>;
+  }
+
+  // Return base meta (without routes key)
+  const { routes: _unused, ...defaults } = meta;
+  return defaults as Record<string, string>;
 }
 
 /**
@@ -90,8 +106,14 @@ export async function injectLocalizedMeta(
   // vite-react-ssg may pass routes without leading slash (e.g., "results" instead of "/results")
   const normalizedRoute = route.startsWith('/') ? route : `/${route}`;
 
+  // Canonicalize wizard steps to /wizard (they share the same page content)
+  const isWizardStep = normalizedRoute.match(/\/wizard\/step\/\d+/);
+  const canonicalBasePath = isWizardStep
+    ? normalizedRoute.replace(/\/wizard\/step\/\d+/, '/wizard')
+    : normalizedRoute;
+
   // Normalize route for canonical URL
-  const canonicalPath = normalizedRoute === '/' ? '' : normalizedRoute.replace(/\/$/, '');
+  const canonicalPath = canonicalBasePath === '/' ? '' : canonicalBasePath.replace(/\/$/, '');
   const canonicalUrl = `${BASE_URL}${canonicalPath || '/'}`;
 
   // Get base path without language prefix for hreflang

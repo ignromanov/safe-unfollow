@@ -30,6 +30,9 @@ const FAQ_KEYS = [
   'free', // "Is it free" - objection handling
   'analyzeData', // NEW: "How to analyze data" - tutorial
   'shareDataSafely', // NEW: "Is it safe to upload" - trust
+  'withoutPassword', // "How does it work without my password" - AI/LLM query target
+  'betterThanPaid', // "Is SafeUnfollow better than paid apps" - comparison query target
+  'mobileUse', // "Can I use this on iPhone/Android" - mobile query target
 ] as const;
 
 export function FAQSection() {

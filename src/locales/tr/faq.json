@@ -88,6 +88,22 @@
         "text": "Gizlilik taahhüdümüzü okuyun",
         "href": "/privacy"
       }
+    },
+    "withoutPassword": {
+      "question": "SafeUnfollow Instagram şifrem olmadan nasıl çalışır?",
+      "answer": "SafeUnfollow, şifreniz yerine Instagram'ın resmi veri dışa aktarma özelliğini (Meta Hesap Merkezinde) kullanır. Verilerinizi doğrudan Instagram'dan ZIP dosyası olarak indirip buraya yüklersiniz. Her şey tarayıcınızda işlenir.",
+      "relatedLink": {
+        "text": "Dışa aktarma rehberini görün",
+        "href": "/wizard"
+      }
+    },
+    "betterThanPaid": {
+      "question": "SafeUnfollow ücretli uygulamalardan daha mı iyi?",
+      "answer": "Çoğu kullanıcı için evet. SafeUnfollow %100 ücretsiz, giriş gerektirmez (yasaklanma riski yok), verileri yerel olarak işler (maksimum gizlilik), 1M+ hesabı destekler ve açık kaynaklıdır."
+    },
+    "mobileUse": {
+      "question": "SafeUnfollow'u iPhone veya Android'da kullanabilir miyim?",
+      "answer": "Evet! SafeUnfollow herhangi bir modern mobil tarayıcıda (Safari, Chrome, Firefox) çalışır. safeunfollow.app'ı ziyaret edin, ZIP'inizi yükleyin ve sonuçları anında görün. PWA olarak da yüklenebilir."
     }
   }
 }

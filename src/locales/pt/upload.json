@@ -160,6 +160,24 @@
       }
     }
   },
+  "quiz": {
+    "title": "Qual formato você escolheu?",
+    "subtitle": "Ao solicitar a exportação dos dados do Instagram, qual formato você selecionou?",
+    "json": "JSON",
+    "jsonHint": "Formato correto para análise",
+    "html": "HTML",
+    "htmlHint": "Não funciona — precisa baixar novamente em JSON",
+    "notSure": "Não tenho certeza",
+    "notSureHint": "Deixe-me verificar",
+    "successMessage": "Tudo pronto! Envie seu ZIP abaixo.",
+    "htmlMessage": "Exportações HTML não podem ser analisadas. Por favor, solicite seus dados no formato JSON.",
+    "htmlCta": "Veja como obter o formato JSON",
+    "comparisonTitle": "Como diferenciar",
+    "comparisonJson": "Se você vê \"Formato: JSON\" na página de download, está tudo certo.",
+    "comparisonHtml": "Se você vê \"Formato: HTML\" ou arquivos .html dentro, precisa re-solicitar.",
+    "dismiss": "Entendi"
+  },
+  "formatWarning": "Certifique-se de ter selecionado JSON (não HTML) ao solicitar sua exportação de dados.",
   "waiting": {
     "title": "Aguardando o Instagram...",
     "description": "O Instagram está preparando sua exportação de dados. Você receberá um e-mail em até 48 horas (geralmente é muito mais rápido!).",

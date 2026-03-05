@@ -3,5 +3,37 @@
   "description": "Descubra quem parou de te seguir no Instagram sem login. Envie seu ZIP, veja unfollowers instantaneamente. 100% gratis, privado, 1M+ contas. Funciona offline.",
   "ogTitle": "Instagram Unfollowers — Gratis Sem Login",
   "twitterDescription": "Descubra quem parou de te seguir no Instagram sem login. Envie ZIP, veja unfollowers. 100% gratis, 1M+ contas. Funciona offline.",
-  "keywords": "instagram unfollowers, quem deixou de me seguir instagram, rastreador de unfollow, ver unfollowers sem login, analisador zip instagram"
+  "keywords": "instagram unfollowers, quem deixou de me seguir instagram, rastreador de unfollow, ver unfollowers sem login, analisador zip instagram",
+  "routes": {
+    "/upload": {
+      "title": "Envie seu ZIP do Instagram — Análise Grátis | SafeUnfollow",
+      "description": "Envie sua exportação de dados do Instagram (ZIP) para análise grátis. Processamento 100% local, sem login, 1M+ contas.",
+      "ogTitle": "Envie seu ZIP do Instagram — Análise Grátis"
+    },
+    "/wizard": {
+      "title": "Como Baixar seus Dados do Instagram (JSON) — Guia | SafeUnfollow",
+      "description": "Guia passo a passo para baixar seus dados do Instagram como JSON. Aprenda a solicitar sua exportação de dados da Meta.",
+      "ogTitle": "Como Baixar seus Dados do Instagram (JSON) — Guia"
+    },
+    "/sample": {
+      "title": "Experimente Instagram Unfollow Tracker — Demo Grátis | SafeUnfollow",
+      "description": "Experimente Instagram Unfollow Tracker com dados de exemplo. Veja como funcionam os badges, filtros e busca.",
+      "ogTitle": "Experimente Instagram Unfollow Tracker — Demo Grátis"
+    },
+    "/privacy": {
+      "title": "Política de Privacidade — Dados Nunca Saem do Dispositivo | SafeUnfollow",
+      "description": "Política de privacidade SafeUnfollow. Processamento 100% local, sem coleta de dados, sem rastreamento.",
+      "ogTitle": "Política de Privacidade — Dados Nunca Saem do Dispositivo"
+    },
+    "/results": {
+      "title": "Seus resultados do Instagram | SafeUnfollow",
+      "description": "Veja os resultados da sua análise de unfollow no Instagram. Filtre por badges e pesquise contas.",
+      "ogTitle": "Seus resultados de unfollow no Instagram"
+    },
+    "/terms": {
+      "title": "Termos de Serviço | SafeUnfollow",
+      "description": "Termos de serviço do SafeUnfollow. Rastreador gratuito e open-source com processamento 100% local.",
+      "ogTitle": "Termos de Serviço"
+    }
+  }
 }

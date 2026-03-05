@@ -10,6 +10,7 @@ import { DiagnosticErrorScreen } from './DiagnosticErrorScreen';
 import { TouchUploadZone } from './upload/TouchUploadZone';
 import { DesktopDropZone } from './upload/DesktopDropZone';
 import { DevErrorSelector } from './upload/DevErrorSelector';
+import { FormatQuiz } from './upload/FormatQuiz';
 
 import type { DragValidation } from './upload/DesktopDropZone';
 
@@ -148,6 +149,9 @@ export function UploadZone({
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 md:py-24">
+      {/* Format quiz — non-blocking card above upload zone */}
+      <FormatQuiz onOpenWizard={onOpenWizard} />
+
       {/* Screen reader announcement for upload status */}
       <div role="status" aria-live="polite" className="sr-only">
         {isProcessing &&
