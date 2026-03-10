@@ -102,7 +102,8 @@
       "manychat": "Respuestas automáticas 24/7 → ahorra 10+ horas/semana",
       "metricool": "Encuentra tus mejores horarios → crece 40% más rápido",
       "vistacreate": "Diseños pro en 60 seg → nunca pierdas un post",
-      "later": "Planifica tu mes en 1 hora → mantén la consistencia"
+      "later": "Planifica tu mes en 1 hora → mantén la consistencia",
+      "buffer": "Programa publicaciones → crece con consistencia"
     },
     "dismiss": "Quizás después",
     "disclaimer": "Herramientas seleccionadas que recomendamos. Los enlaces de afiliados financian actualizaciones gratuitas — sin costo para ti.",
@@ -127,12 +128,13 @@
     },
     "social": {
       "creators50k": "50K+ creadores",
-      "posts1m": "1M+ posts",
       "businesses1m": "1M+ negocios",
-      "users200k": "200K+ usuarios",
       "designs10m": "10M+ diseños",
       "users7m": "7M+ usuarios",
-      "users9m": "9M+ de usuarios"
+      "usersBuffer": "190K+ negocios",
+      "adsPredis": "200M+ anuncios generados",
+      "usersMetricool": "3.5M+ profesionales",
+      "usersPubler": "1.8M+ descargas"
     }
   }
 }

@@ -17,6 +17,9 @@ export const AFFILIATE_LINKS = {
 
   /** Predis.ai - AI content generation */
   predis: 'https://predis.ai?ref=safeunfollow',
+
+  /** Buffer - Social media management */
+  buffer: 'https://join.buffer.com/safeunfollow',
 } as const;
 
 export type AffiliateToolId = keyof typeof AFFILIATE_LINKS;

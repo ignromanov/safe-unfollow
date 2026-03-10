@@ -1,4 +1,4 @@
-import { CalendarDays, BarChart3, Palette, Sparkles } from 'lucide-react';
+import { CalendarDays, BarChart3, Palette, Sparkles, Send } from 'lucide-react';
 
 import { AFFILIATE_LINKS } from '@/config/affiliate-links';
 import type { RescueTool, UserSegment, SegmentKey } from './types';
@@ -22,7 +22,7 @@ export const RESCUE_TOOLS: Record<string, RescueTool> = {
     category: 'scheduling',
     pricing: 'freemium',
     priceKey: 'rescue.price.freePlan',
-    socialKey: 'rescue.social.users9m',
+    socialKey: 'rescue.social.usersPubler',
     badge: 'new',
   },
   metricool: {
@@ -35,7 +35,7 @@ export const RESCUE_TOOLS: Record<string, RescueTool> = {
     category: 'analytics',
     pricing: 'freemium',
     priceKey: 'rescue.price.freePlan',
-    socialKey: 'rescue.social.users200k',
+    socialKey: 'rescue.social.usersMetricool',
   },
   vistacreate: {
     id: 'vistacreate',
@@ -59,39 +59,51 @@ export const RESCUE_TOOLS: Record<string, RescueTool> = {
     category: 'content',
     pricing: 'freemium',
     priceKey: 'rescue.price.freePlan',
-    socialKey: 'rescue.social.posts1m',
+    socialKey: 'rescue.social.adsPredis',
     badge: 'popular',
+  },
+  buffer: {
+    id: 'buffer',
+    name: 'Buffer',
+    descKey: 'rescue.tools.buffer',
+    icon: Send,
+    url: AFFILIATE_LINKS.buffer,
+    color: 'text-blue-600',
+    category: 'scheduling',
+    pricing: 'freemium',
+    priceKey: 'rescue.price.freePlan',
+    socialKey: 'rescue.social.usersBuffer',
+    badge: 'new',
   },
 };
 
 /**
  * Tool selection matrix: maps segment to recommended tools (ordered by priority)
  *
- * Logic:
- * - Critical: AI content first (predis) + scheduling consistency (publer)
- * - Warning: Analytics (metricool) + content balance
- * - Growth: Scaling focus — consistency (publer) + AI content (predis)
+ * Revenue-optimized (Mar 2026):
+ * - Predis.ai #1 most segments: highest CTR (55.8%) + highest LTV ($34-68)
+ * - Metricool #1 for warning: rational "analyze what works" matches mindset
+ * - Buffer for influencer only: brand trust matters for 10K+ accounts
+ * - Publer for casual/regular/power: best Trustpilot (4.8), high commission (50%+20%)
+ * - VistaCreate removed from matrix (weakest CTR + weakest LTV)
  *
- * Data-driven (Feb 2026):
- * - Predis.ai = 55.8% of clicks (AI content resonates with "fix it" impulse)
- * - growth_regular = 32.6% of affiliate clicks (top segment)
- * - Publer replaces Submagic (1 click/30d — dead)
+ * Revenue LTV: Predis $34-68 > Metricool $50 > Publer $15-30 > Buffer $18
  */
 const TOOL_MATRIX: Record<SegmentKey, string[]> = {
-  // Critical - content recovery focus (AI content + consistency)
-  critical_influencer: ['predis', 'publer', 'metricool'],
-  critical_power: ['predis', 'publer', 'metricool'],
+  // Critical - AI content first (emotional "fix it" impulse)
+  critical_influencer: ['predis', 'metricool', 'buffer'],
+  critical_power: ['predis', 'metricool', 'publer'],
   critical_regular: ['predis', 'publer', 'metricool'],
-  critical_casual: ['publer', 'predis', 'metricool'],
+  critical_casual: ['predis', 'publer', 'metricool'],
 
-  // Warning - optimization focus (analytics + content balance)
-  warning_influencer: ['metricool', 'predis', 'publer'],
+  // Warning - analytics first (rational "analyze what works")
+  warning_influencer: ['metricool', 'predis', 'buffer'],
   warning_power: ['metricool', 'predis', 'publer'],
   warning_regular: ['predis', 'metricool', 'publer'],
   warning_casual: ['publer', 'predis', 'metricool'],
 
   // Growth - scaling focus (consistency + AI content)
-  growth_influencer: ['metricool', 'predis', 'publer'],
+  growth_influencer: ['metricool', 'predis', 'buffer'],
   growth_power: ['predis', 'metricool', 'publer'],
   growth_regular: ['predis', 'publer', 'metricool'],
   growth_casual: ['publer', 'predis', 'metricool'],
