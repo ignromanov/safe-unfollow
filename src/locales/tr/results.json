@@ -103,7 +103,8 @@
       "metricool": "En iyi zamanlarınızı bulun → %40 daha hızlı büyüme",
       "vistacreate": "60 saniyede profesyonel tasarım → hiç gönderi kaçırmayın",
       "later": "1 saatte ayınızı planlayın → tutarlı kalın",
-      "buffer": "Gönderileri planla ve büyümeyi takip et → tutarlı kal"
+      "buffer": "Gönderileri planla ve büyümeyi takip et → tutarlı kal",
+      "socialpilot": "500+ gönderiyi toplu planla → içerik üretiminizi ölçeklendirin"
     },
     "dismiss": "Belki sonra",
     "disclaimer": "Önerdiğimiz el yapımı seçilmiş araçlar. Ortaklık bağlantıları ücretsiz güncellemeleri finanse eder — size ekstra maliyet yok.",
@@ -134,7 +135,8 @@
       "usersBuffer": "190K+ işletme",
       "adsPredis": "200M+ reklam oluşturuldu",
       "usersMetricool": "3.5M+ profesyonel",
-      "usersPubler": "1.8M+ indirme"
+      "usersPubler": "1.8M+ indirme",
+      "usersSocialpilot": "13K+ işletme"
     }
   }
 }

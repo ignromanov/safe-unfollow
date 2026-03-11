@@ -1,4 +1,4 @@
-import { CalendarDays, BarChart3, Palette, Sparkles, Send } from 'lucide-react';
+import { CalendarDays, BarChart3, Palette, Sparkles, Send, Rocket } from 'lucide-react';
 
 import { AFFILIATE_LINKS } from '@/config/affiliate-links';
 import type { RescueTool, UserSegment, SegmentKey } from './types';
@@ -73,6 +73,18 @@ export const RESCUE_TOOLS: Record<string, RescueTool> = {
     pricing: 'freemium',
     priceKey: 'rescue.price.freePlan',
     socialKey: 'rescue.social.usersBuffer',
+  },
+  socialpilot: {
+    id: 'socialpilot',
+    name: 'SocialPilot',
+    descKey: 'rescue.tools.socialpilot',
+    icon: Rocket,
+    url: AFFILIATE_LINKS.socialpilot,
+    color: 'text-violet-500',
+    category: 'scheduling',
+    pricing: 'trial',
+    priceKey: 'rescue.price.freeTrial14',
+    socialKey: 'rescue.social.usersSocialpilot',
     badge: 'new',
   },
 };
@@ -83,27 +95,27 @@ export const RESCUE_TOOLS: Record<string, RescueTool> = {
  * Revenue-optimized (Mar 2026):
  * - Predis.ai #1 most segments: highest CTR (55.8%) + highest LTV ($34-68)
  * - Metricool #1 for warning: rational "analyze what works" matches mindset
- * - Buffer for influencer only: brand trust matters for 10K+ accounts
+ * - SocialPilot for influencer only: bulk scheduling (500 CSV), 20% recurring, $72 LTV
  * - Publer for casual/regular/power: best Trustpilot (4.8), high commission (50%+20%)
- * - VistaCreate removed from matrix (weakest CTR + weakest LTV)
+ * - Buffer/VistaCreate removed from matrix (kept in RESCUE_TOOLS)
  *
- * Revenue LTV: Predis $34-68 > Metricool $50 > Publer $15-30 > Buffer $18
+ * Revenue LTV: SocialPilot $72 > Predis $34-68 > Metricool $50 > Publer $15-30
  */
 const TOOL_MATRIX: Record<SegmentKey, string[]> = {
   // Critical - AI content first (emotional "fix it" impulse)
-  critical_influencer: ['predis', 'metricool', 'buffer'],
+  critical_influencer: ['predis', 'metricool', 'socialpilot'],
   critical_power: ['predis', 'metricool', 'publer'],
   critical_regular: ['predis', 'publer', 'metricool'],
   critical_casual: ['predis', 'publer', 'metricool'],
 
   // Warning - analytics first (rational "analyze what works")
-  warning_influencer: ['metricool', 'predis', 'buffer'],
+  warning_influencer: ['metricool', 'predis', 'socialpilot'],
   warning_power: ['metricool', 'predis', 'publer'],
   warning_regular: ['predis', 'metricool', 'publer'],
   warning_casual: ['publer', 'predis', 'metricool'],
 
   // Growth - scaling focus (consistency + AI content)
-  growth_influencer: ['metricool', 'predis', 'buffer'],
+  growth_influencer: ['metricool', 'predis', 'socialpilot'],
   growth_power: ['predis', 'metricool', 'publer'],
   growth_regular: ['predis', 'publer', 'metricool'],
   growth_casual: ['publer', 'predis', 'metricool'],

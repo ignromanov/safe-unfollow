@@ -103,7 +103,8 @@
       "metricool": "Finde deine besten Zeiten → 40% schnelleres Wachstum",
       "vistacreate": "Pro-Designs in 60 Sek → verpasse keinen Post",
       "later": "Plane deinen Monat in 1 Stunde → bleib konsistent",
-      "buffer": "Plane Beiträge & verfolge Wachstum → bleib konsistent"
+      "buffer": "Plane Beiträge & verfolge Wachstum → bleib konsistent",
+      "socialpilot": "500+ Beiträge planen → skaliere deinen Content"
     },
     "dismiss": "Vielleicht später",
     "disclaimer": "Handverlesene Tools, die wir empfehlen. Affiliate-Links finanzieren kostenlose Updates — keine Kosten für dich.",
@@ -134,7 +135,8 @@
       "usersBuffer": "190K+ Unternehmen",
       "adsPredis": "200M+ Anzeigen erstellt",
       "usersMetricool": "3.5M+ Profis",
-      "usersPubler": "1.8M+ Downloads"
+      "usersPubler": "1.8M+ Downloads",
+      "usersSocialpilot": "13K+ Unternehmen"
     }
   }
 }

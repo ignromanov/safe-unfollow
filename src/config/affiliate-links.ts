@@ -20,6 +20,9 @@ export const AFFILIATE_LINKS = {
 
   /** Buffer - Social media management */
   buffer: 'https://join.buffer.com/safeunfollow',
+
+  /** SocialPilot - Social media scheduling & analytics */
+  socialpilot: 'https://www.socialpilot.co?fp_ref=safeunfollow',
 } as const;
 
 export type AffiliateToolId = keyof typeof AFFILIATE_LINKS;
