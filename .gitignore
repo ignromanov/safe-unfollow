@@ -121,3 +121,6 @@ scripts/
 
 # Serena cache
 .serena
+
+# AI artifacts (separate private repo)
+.ai/
