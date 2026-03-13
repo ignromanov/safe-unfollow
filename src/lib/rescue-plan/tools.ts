@@ -1,4 +1,14 @@
-import { CalendarDays, BarChart3, Palette, Sparkles, Send, Rocket } from 'lucide-react';
+import {
+  CalendarDays,
+  BarChart3,
+  Palette,
+  Sparkles,
+  Send,
+  Rocket,
+  PenLine,
+  Shield,
+  Heart,
+} from 'lucide-react';
 
 import { AFFILIATE_LINKS } from '@/config/affiliate-links';
 import type { RescueTool, UserSegment, SegmentKey } from './types';
@@ -87,6 +97,42 @@ export const RESCUE_TOOLS: Record<string, RescueTool> = {
     socialKey: 'rescue.social.usersSocialpilot',
     badge: 'new',
   },
+  grammarly: {
+    id: 'grammarly',
+    name: 'Grammarly',
+    descKey: 'rescue.tools.grammarly',
+    icon: PenLine,
+    url: AFFILIATE_LINKS.grammarly,
+    color: 'text-green-500',
+    category: 'productivity',
+    pricing: 'freemium',
+    priceKey: 'rescue.price.freeForever',
+    socialKey: 'rescue.social.usersGrammarly',
+  },
+  nordvpn: {
+    id: 'nordvpn',
+    name: 'NordVPN',
+    descKey: 'rescue.tools.nordvpn',
+    icon: Shield,
+    url: AFFILIATE_LINKS.nordvpn,
+    color: 'text-blue-700',
+    category: 'privacy',
+    pricing: 'trial',
+    priceKey: 'rescue.price.moneyBack30',
+    socialKey: 'rescue.social.usersNordvpn',
+  },
+  headspace: {
+    id: 'headspace',
+    name: 'Headspace',
+    descKey: 'rescue.tools.headspace',
+    icon: Heart,
+    url: AFFILIATE_LINKS.headspace,
+    color: 'text-orange-400',
+    category: 'wellness',
+    pricing: 'trial',
+    priceKey: 'rescue.price.freeTrial14',
+    socialKey: 'rescue.social.usersHeadspace',
+  },
 };
 
 /**
@@ -111,14 +157,14 @@ const TOOL_MATRIX: Record<SegmentKey, string[]> = {
   // Warning - analytics first (rational "analyze what works")
   warning_influencer: ['metricool', 'predis', 'socialpilot'],
   warning_power: ['metricool', 'predis', 'publer'],
-  warning_regular: ['predis', 'metricool', 'publer'],
-  warning_casual: ['publer', 'predis', 'metricool'],
+  warning_regular: ['predis', 'metricool', 'nordvpn'], // was: publer → nordvpn (Confirmation Bias: privacy-aware user)
+  warning_casual: ['publer', 'predis', 'grammarly'], // was: metricool → grammarly (Zero-Price Effect)
 
   // Growth - scaling focus (consistency + AI content)
   growth_influencer: ['metricool', 'predis', 'socialpilot'],
   growth_power: ['predis', 'metricool', 'publer'],
-  growth_regular: ['predis', 'publer', 'metricool'],
-  growth_casual: ['publer', 'predis', 'metricool'],
+  growth_regular: ['predis', 'publer', 'grammarly'], // was: metricool → grammarly (Zero-Price Effect)
+  growth_casual: ['publer', 'predis', 'grammarly'], // was: metricool → grammarly (Zero-Price Effect)
 };
 
 /** Default tools if segment not found */
