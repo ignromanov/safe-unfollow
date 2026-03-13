@@ -13,7 +13,7 @@ import {
   type UserSegment,
 } from '@/lib/rescue-plan';
 
-import { ExpandedBanner, DevControls } from './rescue-plan';
+import { ExpandedBanner, DevControls, EmpathyCard } from './rescue-plan';
 
 /**
  * Rescue Plan Banner — Monetization Component
@@ -130,21 +130,25 @@ export function RescuePlanBanner({ filterCounts, totalCount, className }: Rescue
   if (!isDelayComplete) return null;
 
   return (
-    <div
-      className={`relative bg-gradient-to-r ${style.gradientClass} border-2 ${style.borderClass} rounded-3xl shadow-xl animate-in fade-in slide-in-from-top-4 duration-300 transition-all ${className ?? ''}`}
-      role="complementary"
-      aria-label={t('rescue.ariaLabel')}
-    >
-      {/* DEV: Test controls */}
-      <DevControls segment={segment} onCycle={handleDevCycle} />
+    <>
+      <div
+        className={`relative bg-gradient-to-r ${style.gradientClass} border-2 ${style.borderClass} rounded-3xl shadow-xl animate-in fade-in slide-in-from-top-4 duration-300 transition-all ${className ?? ''}`}
+        role="complementary"
+        aria-label={t('rescue.ariaLabel')}
+      >
+        {/* DEV: Test controls */}
+        <DevControls segment={segment} onCycle={handleDevCycle} />
 
-      <ExpandedBanner
-        style={style}
-        segment={segment}
-        tools={tools}
-        onDismiss={handleDismiss}
-        onToolClick={handleToolClick}
-      />
-    </div>
+        <ExpandedBanner
+          style={style}
+          segment={segment}
+          tools={tools}
+          onDismiss={handleDismiss}
+          onToolClick={handleToolClick}
+        />
+      </div>
+
+      <EmpathyCard segment={segment} />
+    </>
   );
 }

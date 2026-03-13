@@ -7,3 +7,4 @@
 export { RescueToolCard } from './RescueToolCard';
 export { ExpandedBanner } from './ExpandedBanner';
 export { DevControls } from './DevControls';
+export { EmpathyCard } from './EmpathyCard';
