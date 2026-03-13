@@ -59,10 +59,10 @@ export function LoadingTips({ isProcessing }: LoadingTipsProps) {
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-xs font-semibold text-zinc-900 dark:text-white truncate">
-              {t(tip.titleKey)}
+              {t(tip.titleKey as any)}
             </p>
             <p className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate">
-              {t(tip.descKey)}
+              {t(tip.descKey as any)}
             </p>
           </div>
           <ExternalLink
