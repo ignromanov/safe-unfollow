@@ -104,7 +104,10 @@
       "vistacreate": "Pro designs in 60 sec → never miss a post",
       "later": "Plan your month in 1 hour → stay consistent",
       "buffer": "Schedule posts & track growth → stay consistent",
-      "socialpilot": "Bulk schedule 500+ posts → scale your content machine"
+      "socialpilot": "Bulk schedule 500+ posts → scale your content machine",
+      "grammarly": "Write better captions & DMs → get noticed by your audience",
+      "nordvpn": "Protect your Instagram sessions & personal data online",
+      "headspace": "Mindfulness & meditation — take care of yourself first"
     },
     "dismiss": "Maybe later",
     "disclaimer": "Hand-picked tools we recommend. Affiliate links fund free updates — no cost to you.",
@@ -125,7 +128,8 @@
       "freeTrial14": "14-day free trial",
       "freePlan": "Free plan available",
       "freeContacts": "Free up to 1K contacts",
-      "freeForever": "Free forever plan"
+      "freeForever": "Free forever plan",
+      "moneyBack30": "30-day money-back guarantee"
     },
     "social": {
       "creators50k": "50K+ creators",
@@ -136,7 +140,10 @@
       "adsPredis": "200M+ ads generated",
       "usersMetricool": "3.5M+ professionals",
       "usersPubler": "1.8M+ downloads",
-      "usersSocialpilot": "13K+ businesses"
+      "usersSocialpilot": "13K+ businesses",
+      "usersGrammarly": "30M+ daily users",
+      "usersNordvpn": "14M+ users worldwide",
+      "usersHeadspace": "70M+ downloads"
     }
   }
 }
