@@ -104,7 +104,10 @@
       "vistacreate": "60秒でプロデザイン → 投稿を逃さない",
       "later": "1時間で月間計画 → 一貫性を維持",
       "buffer": "投稿をスケジュール＆成長を追跡 → 一貫性を保つ",
-      "socialpilot": "500以上の投稿を一括スケジュール → コンテンツを拡大"
+      "socialpilot": "500以上の投稿を一括スケジュール → コンテンツを拡大",
+      "grammarly": "Write better captions & DMs → get noticed by your audience",
+      "nordvpn": "Protect your Instagram sessions & personal data online",
+      "headspace": "Mindfulness & meditation — take care of yourself first"
     },
     "dismiss": "後で",
     "disclaimer": "厳選したおすすめツール。アフィリエイトリンクは無料アップデートを支援 — あなたへの追加費用なし。",
@@ -125,7 +128,8 @@
       "freeTrial14": "14日間無料",
       "freePlan": "無料プラン",
       "freeContacts": "1Kまで無料",
-      "freeForever": "永久無料"
+      "freeForever": "永久無料",
+      "moneyBack30": "30-day money-back guarantee"
     },
     "social": {
       "creators50k": "5万+作成者",
@@ -136,7 +140,14 @@
       "adsPredis": "2億以上の広告を生成",
       "usersMetricool": "350万以上のプロ",
       "usersPubler": "180万以上ダウンロード",
-      "usersSocialpilot": "1.3万以上のビジネス"
+      "usersSocialpilot": "1.3万以上のビジネス",
+      "usersGrammarly": "30M+ daily users",
+      "usersNordvpn": "14M+ users worldwide",
+      "usersHeadspace": "70M+ downloads"
+    },
+    "empathy": {
+      "message": "Numbers don't define your worth. Losing followers can feel personal — but it's usually just the algorithm. Take care of yourself first.",
+      "headspaceLink": "Try Headspace free for 14 days"
     }
   }
 }

@@ -104,7 +104,10 @@
       "vistacreate": "Pro-Designs in 60 Sek → verpasse keinen Post",
       "later": "Plane deinen Monat in 1 Stunde → bleib konsistent",
       "buffer": "Plane Beiträge & verfolge Wachstum → bleib konsistent",
-      "socialpilot": "500+ Beiträge planen → skaliere deinen Content"
+      "socialpilot": "500+ Beiträge planen → skaliere deinen Content",
+      "grammarly": "Write better captions & DMs → get noticed by your audience",
+      "nordvpn": "Protect your Instagram sessions & personal data online",
+      "headspace": "Mindfulness & meditation — take care of yourself first"
     },
     "dismiss": "Vielleicht später",
     "disclaimer": "Handverlesene Tools, die wir empfehlen. Affiliate-Links finanzieren kostenlose Updates — keine Kosten für dich.",
@@ -125,7 +128,8 @@
       "freeTrial14": "14 Tage gratis",
       "freePlan": "Gratis-Plan",
       "freeContacts": "Bis 1K gratis",
-      "freeForever": "Immer gratis"
+      "freeForever": "Immer gratis",
+      "moneyBack30": "30-day money-back guarantee"
     },
     "social": {
       "creators50k": "50K+ Creator",
@@ -136,7 +140,14 @@
       "adsPredis": "200M+ Anzeigen erstellt",
       "usersMetricool": "3.5M+ Profis",
       "usersPubler": "1.8M+ Downloads",
-      "usersSocialpilot": "13K+ Unternehmen"
+      "usersSocialpilot": "13K+ Unternehmen",
+      "usersGrammarly": "30M+ daily users",
+      "usersNordvpn": "14M+ users worldwide",
+      "usersHeadspace": "70M+ downloads"
+    },
+    "empathy": {
+      "message": "Numbers don't define your worth. Losing followers can feel personal — but it's usually just the algorithm. Take care of yourself first.",
+      "headspaceLink": "Try Headspace free for 14 days"
     }
   }
 }

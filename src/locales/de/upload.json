@@ -192,5 +192,19 @@
     "proTip": "Profi-Tipp: Schau im Spam-Ordner",
     "proTipHint": "Instagram-E-Mails landen oft dort. Suche nach E-Mails von <b>Meta</b> oder <b>Instagram</b>. Der Download-Link läuft nach 4 Tagen ab.",
     "skip": "Erstmal überspringen"
+  },
+  "loadingTips": {
+    "surfshark": {
+      "title": "Protect your Instagram sessions",
+      "desc": "Bank-grade encryption for all devices"
+    },
+    "grammarly": {
+      "title": "Write better captions & DMs",
+      "desc": "AI writing assistant trusted by 30M+"
+    },
+    "nordpass": {
+      "title": "Never lose your login again",
+      "desc": "Secure password manager by NordVPN team"
+    }
   }
 }

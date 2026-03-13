@@ -104,7 +104,10 @@
       "vistacreate": "تصاميم احترافية في 60 ثانية ← لا تفوّت أي منشور",
       "later": "خطط شهرك في ساعة واحدة ← حافظ على الاستمرارية",
       "buffer": "جدولة المنشورات وتتبع النمو → كن متسقًا",
-      "socialpilot": "جدولة 500+ منشور دفعة واحدة → وسّع محتواك"
+      "socialpilot": "جدولة 500+ منشور دفعة واحدة → وسّع محتواك",
+      "grammarly": "Write better captions & DMs → get noticed by your audience",
+      "nordvpn": "Protect your Instagram sessions & personal data online",
+      "headspace": "Mindfulness & meditation — take care of yourself first"
     },
     "dismiss": "ربما لاحقاً",
     "disclaimer": "أدوات مختارة بعناية نوصي بها. روابط الإحالة تدعم التحديثات المجانية — بدون تكلفة إضافية عليك.",
@@ -125,7 +128,8 @@
       "freeTrial14": "تجربة مجانية 14 يوم",
       "freePlan": "خطة مجانية متاحة",
       "freeContacts": "مجاني حتى 1K جهة اتصال",
-      "freeForever": "خطة مجانية للأبد"
+      "freeForever": "خطة مجانية للأبد",
+      "moneyBack30": "30-day money-back guarantee"
     },
     "social": {
       "creators50k": "50K+ صانع محتوى",
@@ -136,7 +140,14 @@
       "adsPredis": "+200 مليون إعلان تم إنشاؤه",
       "usersMetricool": "+3.5 مليون محترف",
       "usersPubler": "+1.8 مليون تحميل",
-      "usersSocialpilot": "+13 ألف شركة"
+      "usersSocialpilot": "+13 ألف شركة",
+      "usersGrammarly": "30M+ daily users",
+      "usersNordvpn": "14M+ users worldwide",
+      "usersHeadspace": "70M+ downloads"
+    },
+    "empathy": {
+      "message": "Numbers don't define your worth. Losing followers can feel personal — but it's usually just the algorithm. Take care of yourself first.",
+      "headspaceLink": "Try Headspace free for 14 days"
     }
   }
 }

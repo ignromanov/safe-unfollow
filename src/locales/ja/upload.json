@@ -192,5 +192,19 @@
     "proTip": "ヒント: 迷惑メールフォルダを確認",
     "proTipHint": "Instagramのメールは迷惑メールに入ることがよくあります。<b>Meta</b>または<b>Instagram</b>からのメールを探してください。ダウンロードリンクは4日で期限切れになります。",
     "skip": "今はスキップ"
+  },
+  "loadingTips": {
+    "surfshark": {
+      "title": "Protect your Instagram sessions",
+      "desc": "Bank-grade encryption for all devices"
+    },
+    "grammarly": {
+      "title": "Write better captions & DMs",
+      "desc": "AI writing assistant trusted by 30M+"
+    },
+    "nordpass": {
+      "title": "Never lose your login again",
+      "desc": "Secure password manager by NordVPN team"
+    }
   }
 }

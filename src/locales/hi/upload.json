@@ -192,5 +192,19 @@
     "proTip": "प्रो टिप: स्पैम फोल्डर चेक करें",
     "proTipHint": "Instagram के ईमेल अक्सर वहां चले जाते हैं। <b>Meta</b> या <b>Instagram</b> से ईमेल देखें। डाउनलोड लिंक 4 दिन में एक्सपायर हो जाता है।",
     "skip": "अभी छोड़ें"
+  },
+  "loadingTips": {
+    "surfshark": {
+      "title": "Protect your Instagram sessions",
+      "desc": "Bank-grade encryption for all devices"
+    },
+    "grammarly": {
+      "title": "Write better captions & DMs",
+      "desc": "AI writing assistant trusted by 30M+"
+    },
+    "nordpass": {
+      "title": "Never lose your login again",
+      "desc": "Secure password manager by NordVPN team"
+    }
   }
 }

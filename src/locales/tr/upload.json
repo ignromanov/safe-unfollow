@@ -192,5 +192,19 @@
     "proTip": "İpucu: Spam Klasörünü Kontrol Et",
     "proTipHint": "Instagram e-postaları genellikle oraya düşer. <b>Meta</b> veya <b>Instagram</b>'dan gelen e-postaları ara. İndirme linki 4 gün içinde geçersiz olur.",
     "skip": "Şimdilik atla"
+  },
+  "loadingTips": {
+    "surfshark": {
+      "title": "Protect your Instagram sessions",
+      "desc": "Bank-grade encryption for all devices"
+    },
+    "grammarly": {
+      "title": "Write better captions & DMs",
+      "desc": "AI writing assistant trusted by 30M+"
+    },
+    "nordpass": {
+      "title": "Never lose your login again",
+      "desc": "Secure password manager by NordVPN team"
+    }
   }
 }

@@ -192,5 +192,19 @@
     "proTip": "نصيحة: تحقق من مجلد البريد المزعج",
     "proTipHint": "رسائل انستغرام غالباً تذهب هناك. ابحث عن رسائل من <b>Meta</b> أو <b>Instagram</b>. رابط التحميل ينتهي خلال 4 أيام.",
     "skip": "تخطَّ الآن"
+  },
+  "loadingTips": {
+    "surfshark": {
+      "title": "Protect your Instagram sessions",
+      "desc": "Bank-grade encryption for all devices"
+    },
+    "grammarly": {
+      "title": "Write better captions & DMs",
+      "desc": "AI writing assistant trusted by 30M+"
+    },
+    "nordpass": {
+      "title": "Never lose your login again",
+      "desc": "Secure password manager by NordVPN team"
+    }
   }
 }

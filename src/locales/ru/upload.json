@@ -192,5 +192,19 @@
     "proTip": "Совет: Проверь папку «Спам»",
     "proTipHint": "Письма от Instagram часто попадают туда. Ищи письма от <b>Meta</b> или <b>Instagram</b>. Ссылка на скачивание действует 4 дня.",
     "skip": "Пропустить пока"
+  },
+  "loadingTips": {
+    "surfshark": {
+      "title": "Protect your Instagram sessions",
+      "desc": "Bank-grade encryption for all devices"
+    },
+    "grammarly": {
+      "title": "Write better captions & DMs",
+      "desc": "AI writing assistant trusted by 30M+"
+    },
+    "nordpass": {
+      "title": "Never lose your login again",
+      "desc": "Secure password manager by NordVPN team"
+    }
   }
 }

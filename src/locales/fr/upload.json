@@ -192,5 +192,19 @@
     "proTip": "Astuce : Vérifiez votre dossier Spam",
     "proTipHint": "Les e-mails d'Instagram finissent souvent là. Recherchez les e-mails de <b>Meta</b> ou <b>Instagram</b>. Le lien de téléchargement expire dans 4 jours.",
     "skip": "Passer pour l'instant"
+  },
+  "loadingTips": {
+    "surfshark": {
+      "title": "Protect your Instagram sessions",
+      "desc": "Bank-grade encryption for all devices"
+    },
+    "grammarly": {
+      "title": "Write better captions & DMs",
+      "desc": "AI writing assistant trusted by 30M+"
+    },
+    "nordpass": {
+      "title": "Never lose your login again",
+      "desc": "Secure password manager by NordVPN team"
+    }
   }
 }
