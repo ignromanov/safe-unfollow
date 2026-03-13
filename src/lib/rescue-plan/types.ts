@@ -13,7 +13,15 @@ export type LossSeverity = 'critical' | 'warning' | 'growth';
 export type AccountSize = 'casual' | 'regular' | 'power' | 'influencer';
 
 /** Tool category for grouping */
-export type ToolCategory = 'content' | 'engagement' | 'analytics' | 'design' | 'scheduling';
+export type ToolCategory =
+  | 'content'
+  | 'engagement'
+  | 'analytics'
+  | 'design'
+  | 'scheduling'
+  | 'privacy'
+  | 'productivity'
+  | 'wellness';
 
 /** Combined user segment (12 combinations) */
 export interface UserSegment {
