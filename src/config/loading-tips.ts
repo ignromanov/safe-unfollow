@@ -26,12 +26,12 @@ export interface LoadingTip {
 
 export const LOADING_TIPS: LoadingTip[] = [
   {
-    id: 'surfshark',
+    id: 'nordprotect',
     delayMs: 1000,
-    titleKey: 'loadingTips.surfshark.title',
-    descKey: 'loadingTips.surfshark.desc',
+    titleKey: 'loadingTips.nordprotect.title',
+    descKey: 'loadingTips.nordprotect.desc',
     icon: Shield,
-    url: AFFILIATE_LINKS.surfshark,
+    url: AFFILIATE_LINKS.nordprotect,
     color: 'text-teal-500',
   },
   {

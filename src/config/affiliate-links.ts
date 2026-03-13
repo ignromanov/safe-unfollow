@@ -27,14 +27,14 @@ export const AFFILIATE_LINKS = {
   /** Grammarly - Writing assistant (non-SMM, productivity) */
   grammarly: 'https://grammarly.com?ref=safeunfollow',
 
-  /** NordVPN - Privacy & security (non-SMM, privacy) */
-  nordvpn: 'https://nordvpn.com?ref=safeunfollow',
+  /** NordVPN - Privacy & security (non-SMM, privacy) — 40% CPS */
+  nordvpn: 'https://go.nordvpn.net/SHAow',
+
+  /** NordProtect - Identity protection (non-SMM, privacy) — 40% CPS */
+  nordprotect: 'https://go.nordprotect.net/SHAox',
 
   /** Headspace - Meditation & wellness (non-SMM, wellness) */
   headspace: 'https://headspace.com?ref=safeunfollow',
-
-  /** Surfshark - VPN & privacy (non-SMM, privacy) */
-  surfshark: 'https://surfshark.com?ref=safeunfollow',
 
   /** NordPass - Password manager (non-SMM, privacy) */
   nordpass: 'https://nordpass.com?ref=safeunfollow',
