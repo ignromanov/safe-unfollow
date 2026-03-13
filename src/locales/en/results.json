@@ -123,6 +123,10 @@
     },
     "recommended": "Recommended",
     "tryTool": "Get My {{name}} Trial",
+    "empathy": {
+      "message": "Numbers don't define your worth. Losing followers can feel personal — but it's usually just the algorithm. Take care of yourself first.",
+      "headspaceLink": "Try Headspace free for 14 days"
+    },
     "price": {
       "freeTrial7": "7-day free trial",
       "freeTrial14": "14-day free trial",
