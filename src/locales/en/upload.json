@@ -192,5 +192,19 @@
     "proTip": "Pro Tip: Check your Spam Folder",
     "proTipHint": "Instagram emails often end up there. Look for emails from <b>Meta</b> or <b>Instagram</b>. The download link expires in 4 days.",
     "skip": "Skip for now"
+  },
+  "loadingTips": {
+    "surfshark": {
+      "title": "Protect your privacy online",
+      "desc": "VPN keeps your browsing private — like this tool keeps your data local"
+    },
+    "grammarly": {
+      "title": "Write captions that keep followers",
+      "desc": "Free writing assistant — better DMs & bios that stand out"
+    },
+    "nordpass": {
+      "title": "Secure your accounts",
+      "desc": "Password manager — protect your Instagram & everything else"
+    }
   }
 }
