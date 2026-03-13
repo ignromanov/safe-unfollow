@@ -23,6 +23,21 @@ export const AFFILIATE_LINKS = {
 
   /** SocialPilot - Social media scheduling & analytics */
   socialpilot: 'https://www.socialpilot.co?fp_ref=safeunfollow',
+
+  /** Grammarly - Writing assistant (non-SMM, productivity) */
+  grammarly: 'https://grammarly.com?ref=safeunfollow',
+
+  /** NordVPN - Privacy & security (non-SMM, privacy) */
+  nordvpn: 'https://nordvpn.com?ref=safeunfollow',
+
+  /** Headspace - Meditation & wellness (non-SMM, wellness) */
+  headspace: 'https://headspace.com?ref=safeunfollow',
+
+  /** Surfshark - VPN & privacy (non-SMM, privacy) */
+  surfshark: 'https://surfshark.com?ref=safeunfollow',
+
+  /** NordPass - Password manager (non-SMM, privacy) */
+  nordpass: 'https://nordpass.com?ref=safeunfollow',
 } as const;
 
 export type AffiliateToolId = keyof typeof AFFILIATE_LINKS;
