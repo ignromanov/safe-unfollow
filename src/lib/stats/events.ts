@@ -265,6 +265,23 @@ export const analytics = {
     });
   },
 
+  // Loading Tips (100% sampling — low volume, high-value)
+  loadingTipImpression: (tipId: string, position: number, elapsedMs: number) => {
+    trackEvent(AnalyticsEvents.LOADING_TIP_IMPRESSION, {
+      tip_id: tipId,
+      position,
+      elapsed_ms: Math.round(elapsedMs),
+    });
+  },
+
+  loadingTipClick: (tipId: string, position: number, elapsedMs: number) => {
+    trackEvent(AnalyticsEvents.LOADING_TIP_CLICK, {
+      tip_id: tipId,
+      position,
+      elapsed_ms: Math.round(elapsedMs),
+    });
+  },
+
   // Error Boundary
   errorBoundary: (errorMessage: string, componentStack: string) => {
     trackEvent(AnalyticsEvents.ERROR_BOUNDARY, {

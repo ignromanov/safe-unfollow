@@ -109,6 +109,10 @@ export const AnalyticsEvents = {
   RESCUE_PLAN_TOOL_CLICK: 'rescue_plan_tool_click',
   RESCUE_PLAN_DISMISS: 'rescue_plan_dismiss',
 
+  // Loading Tips (during file processing)
+  LOADING_TIP_IMPRESSION: 'loading_tip_impression',
+  LOADING_TIP_CLICK: 'loading_tip_click',
+
   // Format Quiz
   FORMAT_QUIZ_ANSWER: 'format_quiz_answer',
   FORMAT_QUIZ_FIXED_IT: 'format_quiz_fixed_it',
