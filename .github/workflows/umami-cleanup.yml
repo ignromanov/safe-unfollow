@@ -1,0 +1,18 @@
+name: Umami DB Cleanup
+
+on:
+  schedule:
+    - cron: '0 3 * * 0' # Every Sunday 03:00 UTC
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run 90-day retention
+        env:
+          UMAMI_DB_URL: ${{ secrets.UMAMI_DB_URL }}
+        run: psql "$UMAMI_DB_URL" -v ON_ERROR_STOP=1 -f scripts/umami-retention.sql
