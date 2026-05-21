@@ -116,11 +116,17 @@ raw/
 # Design folders (experimental designs)
 designs/
 
-# Scripts folders
-scripts/
+# Scripts folders (ignore contents, not the dir — so specific files can be un-ignored)
+scripts/*
 
 # Serena cache
 .serena
 
 # AI artifacts (separate private repo)
 .ai/
+
+# Local Umami DB backups (never commit — contains analytics data)
+umami-backup-*.sql.gz
+
+# Retention script must ship despite the scripts/ ignore above (CI runs it)
+!scripts/umami-retention.sql
