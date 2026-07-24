@@ -204,9 +204,9 @@
     },
     "revokeAccess": {
       "title": "Astuce confidentialité rapide",
-      "desc": "Révoquez l'accès aux données Instagram des applications tierces que vous n'utilisez plus."
+      "desc": "Révoquez l'accès à vos données Instagram pour les apps inutilisées."
     },
-    "affiliateDisclosure": "Lien d'affiliation — nous pouvons toucher une commission, sans frais supplémentaires pour vous.",
+    "affiliateDisclosure": "Lien d'affilié — nous pouvons toucher une commission, sans frais pour vous.",
     "opensInNewTab": "s'ouvre dans un nouvel onglet"
   }
 }

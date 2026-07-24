@@ -196,17 +196,17 @@
   "loadingTips": {
     "localProcessing": {
       "title": "Deine Datei verlässt dieses Gerät nie",
-      "desc": "Die Verarbeitung erfolgt vollständig in deinem Browser — nichts wird hochgeladen."
+      "desc": "Alles läuft in deinem Browser — nichts wird hochgeladen."
     },
     "nordvpn": {
       "title": "Unterwegs im öffentlichen WLAN?",
-      "desc": "Ein VPN hält deine Instagram-Sitzungen privat. Wir nutzen NordVPN — Angebot ansehen"
+      "desc": "Ein VPN hält deine Sitzungen privat. Wir nutzen NordVPN — Angebot ansehen"
     },
     "revokeAccess": {
       "title": "Schneller Datenschutz-Tipp",
-      "desc": "Entziehe Drittanbieter-Apps, die du nicht mehr nutzt, den Zugriff auf deine Instagram-Daten."
+      "desc": "Entziehe ungenutzten Apps den Zugriff auf deine Instagram-Daten."
     },
-    "affiliateDisclosure": "Affiliate-Link — wir erhalten ggf. eine Provision, ohne Mehrkosten für dich.",
+    "affiliateDisclosure": "Affiliate-Link — ggf. Provision, ohne Mehrkosten für dich.",
     "opensInNewTab": "wird in einem neuen Tab geöffnet"
   }
 }

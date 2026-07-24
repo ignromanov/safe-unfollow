@@ -9,8 +9,11 @@ interface LoadingTipsProps {
   isProcessing: boolean;
 }
 
+// items-start, not items-center: long locales (ru/de/fr) wrap the description
+// and disclosure to ~8 lines at 320px, which would leave the icon floating in
+// the middle of a ~150px card instead of next to the title it belongs to.
 const CARD_CLASS =
-  'flex items-center gap-3 rounded-xl border border-zinc-200 bg-white/80 p-3 text-start shadow-sm backdrop-blur transition-all duration-300 dark:border-zinc-700 dark:bg-zinc-800/80';
+  'flex items-start gap-3 rounded-xl border border-zinc-200 bg-white/80 p-3 text-start shadow-sm backdrop-blur transition-all duration-300 dark:border-zinc-700 dark:bg-zinc-800/80';
 
 /** Privacy tips (plus one NordVPN affiliate card) shown while a ZIP is parsing */
 export function LoadingTips({ isProcessing }: LoadingTipsProps) {
