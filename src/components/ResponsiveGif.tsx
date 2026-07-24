@@ -38,6 +38,9 @@ export function ResponsiveGif({
 
   return (
     <video
+      // Force a remount when the clip changes: browsers evaluate <source>
+      // children only once, when the element is inserted into the DOM.
+      key={basePath}
       autoPlay
       muted
       loop

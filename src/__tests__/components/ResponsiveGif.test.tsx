@@ -29,6 +29,23 @@ describe('ResponsiveGif', () => {
     expect(container.querySelector('img')).not.toBeInTheDocument();
   });
 
+  it('remounts the video element when basePath changes so the browser re-selects sources', () => {
+    mockMatchMedia(false);
+
+    const { container, rerender } = render(
+      <ResponsiveGif basePath="/wizard/step-1" alt="Step 1" />
+    );
+    const firstVideo = container.querySelector('video');
+
+    rerender(<ResponsiveGif basePath="/wizard/step-2" alt="Step 2" />);
+    const secondVideo = container.querySelector('video');
+
+    // Browsers only evaluate <source> children when the <video> is inserted;
+    // updating src on a live element is ignored, so a new node is required.
+    expect(secondVideo).not.toBe(firstVideo);
+    expect(secondVideo).toHaveAttribute('poster', '/wizard/step-2-600w-poster.jpg');
+  });
+
   it('renders a static poster image when prefers-reduced-motion matches', () => {
     mockMatchMedia(true);
 
