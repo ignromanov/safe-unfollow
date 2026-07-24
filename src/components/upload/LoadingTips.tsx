@@ -50,7 +50,10 @@ export function LoadingTips({ isProcessing }: LoadingTipsProps) {
   return (
     // Every card stays mounted and reserves its space from the start: revealing
     // one animates opacity/transform only, so it cannot contribute to CLS.
-    <ul className="mx-auto mt-6 w-full max-w-sm space-y-3">
+    // No top margin: the parent in UploadZone is a `flex flex-col gap-8`, so
+    // spacing above the list is already the parent's job. An mt-* here stacks
+    // on top of that gap and pushes the cards away from the spinner.
+    <ul className="mx-auto w-full max-w-sm space-y-3">
       {VISIBLE_LOADING_TIPS.map((tip, index) => {
         const Icon = tip.icon;
         const isVisible = index < visibleCount;
