@@ -134,5 +134,27 @@
       "usersMetricool": "3.5M+ professionals",
       "usersPubler": "1.8M+ downloads"
     }
+  },
+  "export": {
+    "downloadAriaLabel": "Export accounts",
+    "paywall": {
+      "headline": "Take your list with you",
+      "subtitle": "Download a file that works everywhere — Excel, Sheets, or your own tools.",
+      "bullet1": "Works in Excel and Google Sheets",
+      "bullet2": "Respects your active filters",
+      "bullet3": "One-time $3 — not a subscription",
+      "bullet4": "Still 100% private: the file is generated in your browser",
+      "teaserPdf": "PDF report",
+      "teaserCompare": "Compare two exports",
+      "comingSoon": "Coming soon",
+      "cta": "Unlock export — $3",
+      "instantNote": "Instant unlock after checkout"
+    },
+    "dialog": {
+      "title": "Export accounts",
+      "rowCount": "{{count}} accounts will be exported",
+      "csv": "Download CSV",
+      "json": "Download JSON"
+    }
   }
 }

@@ -134,5 +134,27 @@
       "usersMetricool": "3.5M+ profesional",
       "usersPubler": "1.8M+ unduhan"
     }
+  },
+  "export": {
+    "downloadAriaLabel": "Ekspor akun",
+    "paywall": {
+      "headline": "Bawa daftarmu ke mana pun",
+      "subtitle": "Unduh file yang bisa dibuka di mana saja — Excel, Sheets, atau alatmu sendiri.",
+      "bullet1": "Berfungsi di Excel dan Google Sheets",
+      "bullet2": "Mengikuti filter aktifmu",
+      "bullet3": "Sekali bayar $3 — bukan langganan",
+      "bullet4": "Tetap 100% privat: file dibuat langsung di browsermu",
+      "teaserPdf": "Laporan PDF",
+      "teaserCompare": "Bandingkan dua ekspor",
+      "comingSoon": "Segera hadir",
+      "cta": "Buka ekspor — $3",
+      "instantNote": "Langsung terbuka setelah pembayaran"
+    },
+    "dialog": {
+      "title": "Ekspor akun",
+      "rowCount": "{{count}} akun akan diekspor",
+      "csv": "Unduh CSV",
+      "json": "Unduh JSON"
+    }
   }
 }

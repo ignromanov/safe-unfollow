@@ -134,5 +134,27 @@
       "usersMetricool": "350万以上のプロ",
       "usersPubler": "180万以上ダウンロード"
     }
+  },
+  "export": {
+    "downloadAriaLabel": "アカウントをエクスポート",
+    "paywall": {
+      "headline": "リストを持ち出そう",
+      "subtitle": "Excel、Sheets、お好きなツールでそのまま使えるファイルをダウンロード。",
+      "bullet1": "ExcelやGoogleスプレッドシートで開ける",
+      "bullet2": "現在のフィルターを反映",
+      "bullet3": "買い切り$3 — サブスクなし",
+      "bullet4": "これまで通り100%プライベート：ファイルはブラウザ内で生成",
+      "teaserPdf": "PDFレポート",
+      "teaserCompare": "2つのエクスポートを比較",
+      "comingSoon": "近日公開",
+      "cta": "エクスポートを解除 — $3",
+      "instantNote": "決済後すぐに利用可能"
+    },
+    "dialog": {
+      "title": "アカウントをエクスポート",
+      "rowCount": "{{count}}件のアカウントをエクスポートします",
+      "csv": "CSVをダウンロード",
+      "json": "JSONをダウンロード"
+    }
   }
 }

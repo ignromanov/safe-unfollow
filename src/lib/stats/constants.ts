@@ -65,6 +65,13 @@ export const AnalyticsEvents = {
   // so /upload pageviews already are the impression count.
   AFFILIATE_BLOCK_CLICK: 'affiliate_block_click',
 
+  // Pro Export
+  EXPORT_CLICK: 'export_click',
+  PAYWALL_VIEW: 'paywall_view',
+  CHECKOUT_START: 'checkout_start',
+  PURCHASE_SUCCESS: 'purchase_success',
+  DOWNLOAD: 'download',
+
   // Diagnostic Errors
   DIAGNOSTIC_ERROR_VIEW: 'diagnostic_error_view',
   DIAGNOSTIC_ERROR_RETRY: 'diagnostic_error_retry',

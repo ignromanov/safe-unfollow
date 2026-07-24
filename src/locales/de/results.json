@@ -134,5 +134,27 @@
       "usersMetricool": "3.5M+ Profis",
       "usersPubler": "1.8M+ Downloads"
     }
+  },
+  "export": {
+    "downloadAriaLabel": "Konten exportieren",
+    "paywall": {
+      "headline": "Nimm deine Liste mit",
+      "subtitle": "Lade eine Datei herunter, die überall funktioniert — Excel, Sheets oder deine eigenen Tools.",
+      "bullet1": "Funktioniert in Excel und Google Sheets",
+      "bullet2": "Berücksichtigt deine aktiven Filter",
+      "bullet3": "Einmalig 3 $ — kein Abo",
+      "bullet4": "Weiterhin 100 % privat: die Datei wird in deinem Browser erstellt",
+      "teaserPdf": "PDF-Bericht",
+      "teaserCompare": "Zwei Exporte vergleichen",
+      "comingSoon": "Demnächst",
+      "cta": "Export freischalten — 3 $",
+      "instantNote": "Sofortige Freischaltung nach dem Kauf"
+    },
+    "dialog": {
+      "title": "Konten exportieren",
+      "rowCount": "{{count}} Konten werden exportiert",
+      "csv": "CSV herunterladen",
+      "json": "JSON herunterladen"
+    }
   }
 }

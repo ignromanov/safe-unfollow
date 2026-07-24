@@ -7,6 +7,7 @@ import {
   ArrowUpDown,
   Database,
   Upload,
+  Download,
 } from 'lucide-react';
 import { FilterChips } from './FilterChips';
 import { AccountList } from './AccountList';
@@ -15,11 +16,17 @@ import { InlineDonationCard } from './InlineDonationCard';
 import { AdSlot } from './ads/AdSlot';
 import { RescuePlanBanner } from './RescuePlanBanner';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import { Button } from './ui/button';
+import { ExportDialog } from './export/ExportDialog';
+import { PaywallModal } from './export/PaywallModal';
 import type { BadgeKey } from '@/core/types';
 import { RESCUE_PLAN_BANNER_ENABLED } from '@/config/feature-flags';
 import { useAccountFiltering } from '@/hooks/useAccountFiltering';
 import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
 import { useTimeOnResults } from '@/hooks/useTimeOnResults';
+import { useProExport } from '@/hooks/useProExport';
+import { getExportRowCount } from '@/lib/export/data';
+import { analytics } from '@/lib/stats';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -60,6 +67,13 @@ export function AccountListSection({
   } = useAccountFiltering({ fileHash, accountCount });
 
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [isPaywallOpen, setIsPaywallOpen] = useState(false);
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
+  const {
+    isEnabled: isExportEnabled,
+    isUnlocked: isExportUnlocked,
+    startCheckout,
+  } = useProExport();
 
   // Track time on results for engagement analytics
   // V7: trackClick collects badge click data for aggregated summary event
@@ -75,6 +89,16 @@ export function AccountListSection({
 
   // Display count: null means "show all" so use totalCount
   const displayCount = sortedIndices === null ? totalCount : sortedIndices.length;
+
+  const handleDownloadClick = () => {
+    analytics.exportClick(isExportUnlocked);
+    if (isExportUnlocked) {
+      setIsExportDialogOpen(true);
+    } else {
+      analytics.paywallView();
+      setIsPaywallOpen(true);
+    }
+  };
 
   const handleClearFilters = () => {
     setFilters(new Set());
@@ -173,6 +197,18 @@ export function AccountListSection({
           >
             <ArrowUpDown size={20} />
           </button>
+          {isExportEnabled && (
+            <Button
+              onClick={handleDownloadClick}
+              variant="outline"
+              size="icon"
+              className="p-3.5 h-auto w-auto rounded-2xl shrink-0"
+              aria-label={t('export.downloadAriaLabel', { defaultValue: 'Export accounts' })}
+              title={t('export.downloadAriaLabel', { defaultValue: 'Export accounts' })}
+            >
+              <Download size={20} />
+            </Button>
+          )}
         </div>
       </div>
 
@@ -290,6 +326,24 @@ export function AccountListSection({
           both are past the reciprocity threshold, and of the pair only the ad
           stops earning when it goes unseen. */}
       <InlineDonationCard accountCount={accountCount} isSample={isSample} />
+
+      {isExportEnabled && (
+        <>
+          <PaywallModal
+            open={isPaywallOpen}
+            onOpenChange={setIsPaywallOpen}
+            onCheckout={startCheckout}
+          />
+          <ExportDialog
+            open={isExportDialogOpen}
+            onOpenChange={setIsExportDialogOpen}
+            fileHash={fileHash}
+            indices={sortedIndices}
+            rowCount={getExportRowCount(sortedIndices, totalCount)}
+            filename={filename.replace(/\.[^/.]+$/, '') || 'safeunfollow-export'}
+          />
+        </>
+      )}
     </div>
   );
 }

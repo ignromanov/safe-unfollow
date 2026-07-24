@@ -395,4 +395,25 @@ export const analytics = {
       slot,
     });
   },
+
+  // Pro Export
+  exportClick: (isUnlocked: boolean) => {
+    trackEvent(AnalyticsEvents.EXPORT_CLICK, { is_unlocked: isUnlocked });
+  },
+
+  paywallView: () => {
+    trackEvent(AnalyticsEvents.PAYWALL_VIEW);
+  },
+
+  checkoutStart: () => {
+    trackEvent(AnalyticsEvents.CHECKOUT_START);
+  },
+
+  purchaseSuccess: () => {
+    trackEvent(AnalyticsEvents.PURCHASE_SUCCESS);
+  },
+
+  download: (format: 'csv' | 'json', rowCount: number) => {
+    trackEvent(AnalyticsEvents.DOWNLOAD, { format, row_count: rowCount });
+  },
 };
