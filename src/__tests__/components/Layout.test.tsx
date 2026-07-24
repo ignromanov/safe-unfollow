@@ -1,9 +1,10 @@
 import { Layout } from '@/components/Layout';
 import type { FileMetadata } from '@/core/types';
 import { AppState } from '@/core/types';
+import resultsEN from '@/locales/en/results.json';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock analytics (V9: added captureUTMParams for UTM tracking)
 vi.mock('@/lib/analytics', () => ({
@@ -85,6 +86,26 @@ vi.mock('@/components/OrganizationSchema', () => ({
 vi.mock('@/components/PageLoader', () => ({
   PageLoader: () => <div data-testid="page-loader">Loading...</div>,
 }));
+
+// The dialog's own activation behavior is covered by LicenseDialog.test.tsx;
+// here we only care about whether Layout mounts it and with what props.
+vi.mock('@/components/export/LicenseDialog', () => ({
+  LicenseDialog: ({ initialKey, source }: { initialKey: string | null; source: string }) => (
+    <div data-testid="license-dialog">
+      {resultsEN.export.license.title} / {initialKey} / {source}
+    </div>
+  ),
+}));
+
+// Wraps (not replaces) the real consumeLicenseParam so the URL-stripping
+// behavior stays real while call count stays observable.
+vi.mock('@/lib/export/unlock', async importOriginal => {
+  const actual = await importOriginal<typeof import('@/lib/export/unlock')>();
+  return {
+    ...actual,
+    consumeLicenseParam: vi.fn(actual.consumeLicenseParam),
+  };
+});
 
 // Mock hooks
 const mockHandleClearData = vi.fn();
@@ -571,6 +592,59 @@ describe('Layout', () => {
       await waitFor(() => {
         expect(screen.getByText(`activeScreen: ${AppState.HERO}`)).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('license capture', () => {
+    beforeEach(() => {
+      vi.stubEnv('VITE_LEMONSQUEEZY_URL', 'https://checkout.example/buy');
+    });
+
+    afterEach(() => {
+      vi.unstubAllEnvs();
+      window.history.replaceState({}, '', '/');
+    });
+
+    it('should strip the license param from the URL on mount', async () => {
+      window.history.replaceState({}, '', '/results?license=38b1460a-5104-4067-a91d-77b872934d51');
+
+      renderLayout();
+
+      expect(window.location.search).toBe('');
+
+      // Let the lazily-loaded dialog resolve inside act() — otherwise React
+      // warns about a suspended resource finishing loading after the test body
+      // already returned.
+      await screen.findByTestId('license-dialog');
+    });
+
+    it('should not render the license dialog without the param', () => {
+      window.history.replaceState({}, '', '/results');
+
+      renderLayout();
+
+      expect(screen.queryByText(resultsEN.export.license.title)).not.toBeInTheDocument();
+    });
+
+    it('should read the license param exactly once, even across re-renders', async () => {
+      const { consumeLicenseParam } = await import('@/lib/export/unlock');
+      const { userEvent } = await import('@testing-library/user-event');
+      const user = userEvent.setup();
+      window.history.replaceState({}, '', '/results?license=38b1460a-5104-4067-a91d-77b872934d51');
+
+      renderLayout('/results');
+
+      // Force Layout to re-render without unmounting (route stays nested under
+      // the same top-level <Layout>) — a second read here would spend one of
+      // the license's 3 device activations, so it must not happen.
+      const uploadButton = screen.getByRole('button', { name: 'Upload' });
+      await user.click(uploadButton);
+
+      await waitFor(() => {
+        expect(screen.getByText(`activeScreen: ${AppState.UPLOAD}`)).toBeInTheDocument();
+      });
+
+      expect(vi.mocked(consumeLicenseParam)).toHaveBeenCalledTimes(1);
     });
   });
 });
