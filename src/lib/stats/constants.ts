@@ -123,6 +123,9 @@ export const AnalyticsEvents = {
   // PWA
   PWA_INSTALL_PROMPT: 'pwa_install_prompt',
   PWA_INSTALLED: 'pwa_installed',
+
+  // Ads
+  AD_SLOT_RENDERED: 'ad_slot_rendered',
 } as const;
 
 export type AnalyticsEventName = (typeof AnalyticsEvents)[keyof typeof AnalyticsEvents];

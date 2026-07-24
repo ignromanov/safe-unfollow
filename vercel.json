@@ -56,7 +56,7 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://umami-coral-xi.vercel.app https://cdnjs.buymeacoffee.com https://vercel.live; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://umami-coral-xi.vercel.app https://vercel.live; frame-src 'self' https://buymeacoffee.com https://www.buymeacoffee.com https://vercel.live; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://umami-coral-xi.vercel.app https://cdnjs.buymeacoffee.com https://vercel.live https://pagead2.googlesyndication.com https://*.googlesyndication.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: https://*.doubleclick.net https://*.googlesyndication.com; font-src 'self' data:; connect-src 'self' https://umami-coral-xi.vercel.app https://vercel.live https://*.doubleclick.net https://*.googlesyndication.com https://*.adtrafficquality.google; frame-src 'self' https://buymeacoffee.com https://www.buymeacoffee.com https://vercel.live https://*.doubleclick.net https://*.googlesyndication.com https://*.adtrafficquality.google; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
         }
       ]
     },
