@@ -2,8 +2,6 @@ import type React from 'react';
 import { Loader2, Upload } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { LoadingTips } from './LoadingTips';
-
 export type DragValidation = 'none' | 'valid' | 'invalid';
 
 interface DesktopDropZoneProps {
@@ -66,7 +64,6 @@ export function DesktopDropZone({
             {t('zone.processing')}
           </h3>
           <p className="font-medium text-zinc-500">{t('zone.processingHint')}</p>
-          <LoadingTips isProcessing={isProcessing} />
         </div>
       ) : (
         <div className="text-center">

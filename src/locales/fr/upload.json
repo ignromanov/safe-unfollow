@@ -206,6 +206,7 @@
       "title": "Astuce confidentialité rapide",
       "desc": "Révoquez l'accès aux données Instagram des applications tierces que vous n'utilisez plus."
     },
-    "affiliateDisclosure": "Lien d'affiliation — nous pouvons toucher une commission, sans frais supplémentaires pour vous."
+    "affiliateDisclosure": "Lien d'affiliation — nous pouvons toucher une commission, sans frais supplémentaires pour vous.",
+    "opensInNewTab": "s'ouvre dans un nouvel onglet"
   }
 }

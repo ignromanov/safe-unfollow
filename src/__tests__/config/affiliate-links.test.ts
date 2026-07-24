@@ -1,21 +1,33 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
 
-import { AFFILIATE_LINKS } from '@/config/affiliate-links';
+/**
+ * `AFFILIATE_LINKS.nordvpn` is resolved from `import.meta.env` at module load,
+ * so each case stubs the env and re-imports the module rather than relying on
+ * whatever the ambient environment happens to define.
+ */
+describe('AFFILIATE_LINKS.nordvpn env resolution', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.resetModules();
+  });
 
-describe('AFFILIATE_LINKS.nordvpn env fallback', () => {
-  it('resolves to an empty string, not undefined, when VITE_NORDVPN_URL is unset', () => {
-    // No .env file defines VITE_NORDVPN_URL in this repo/test run, so the
-    // `?? ''` fallback in affiliate-links.ts must have already kicked in.
-    expect(import.meta.env.VITE_NORDVPN_URL).toBeUndefined();
+  it('falls back to an empty string when VITE_NORDVPN_URL is unset', async () => {
+    vi.stubEnv('VITE_NORDVPN_URL', undefined);
+    vi.resetModules();
+
+    const { AFFILIATE_LINKS } = await import('@/config/affiliate-links');
+
+    // Never undefined: downstream code treats '' as "hide the tip", while
+    // undefined means "a tip that carries no link at all".
     expect(AFFILIATE_LINKS.nordvpn).toBe('');
   });
 
-  it('produces a string type that downstream hide-on-empty checks can rely on', () => {
-    // LoadingTips/config/loading-tips.ts treats `url: ''` as "hide the tip" and
-    // `url: undefined` as "always show" (see LoadingTip.url comment) — the
-    // fallback must never leave nordvpn as undefined, or the affiliate tip
-    // would render unconditionally with no link.
-    expect(typeof AFFILIATE_LINKS.nordvpn).toBe('string');
-    expect(AFFILIATE_LINKS.nordvpn).not.toBeUndefined();
+  it('exposes the configured URL when VITE_NORDVPN_URL is set', async () => {
+    vi.stubEnv('VITE_NORDVPN_URL', 'https://go.nordvpn.example/TEST');
+    vi.resetModules();
+
+    const { AFFILIATE_LINKS } = await import('@/config/affiliate-links');
+
+    expect(AFFILIATE_LINKS.nordvpn).toBe('https://go.nordvpn.example/TEST');
   });
 });

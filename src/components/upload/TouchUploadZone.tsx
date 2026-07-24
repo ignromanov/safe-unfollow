@@ -2,8 +2,6 @@ import type React from 'react';
 import { Loader2, Smartphone } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { LoadingTips } from './LoadingTips';
-
 interface TouchUploadZoneProps {
   fileInputRef: React.RefObject<HTMLInputElement>;
   isProcessing: boolean;
@@ -41,7 +39,6 @@ export function TouchUploadZone({ fileInputRef, isProcessing, onFileInput }: Tou
           </span>
         </div>
       )}
-      <LoadingTips isProcessing={isProcessing} />
     </div>
   );
 }

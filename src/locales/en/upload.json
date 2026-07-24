@@ -206,6 +206,7 @@
       "title": "Quick privacy tip",
       "desc": "Revoke Instagram data access for third-party apps you no longer use."
     },
-    "affiliateDisclosure": "Affiliate link — we may earn a commission at no cost to you."
+    "affiliateDisclosure": "Affiliate link — we may earn a commission at no cost to you.",
+    "opensInNewTab": "opens in a new tab"
   }
 }
