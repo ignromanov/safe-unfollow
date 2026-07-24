@@ -141,11 +141,11 @@ describe('Wizard', () => {
     expect(mockOnComplete).toHaveBeenCalled();
   });
 
-  it('should render step image with alt text', () => {
+  it('should render step video with alt text as aria-label', () => {
     render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
 
-    const image = screen.getByAltText(wizardEN.steps['1'].alt);
-    expect(image).toBeInTheDocument();
+    const video = screen.getByLabelText(wizardEN.steps['1'].alt);
+    expect(video).toBeInTheDocument();
   });
 
   it('should navigate via goToStep when clicking Next', () => {

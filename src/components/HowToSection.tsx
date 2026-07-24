@@ -65,7 +65,7 @@ export function HowToSection({ onStart }: HowToSectionProps) {
       position: step.id,
       name: step.title,
       text: step.description,
-      image: step.visual ? `${step.visual}-600w.gif` : undefined,
+      image: step.visual ? `${step.visual}-600w-poster.jpg` : undefined,
     })),
   };
 

@@ -69,14 +69,14 @@ describe('HowToSection', () => {
       expect(criticalBadges.length).toBeGreaterThanOrEqual(1);
     });
 
-    it('should render step images with lazy loading', () => {
-      renderWithRouter(<HowToSection />);
+    it('should render step videos with poster images', () => {
+      const { container } = renderWithRouter(<HowToSection />);
 
-      const images = screen.getAllByRole('img');
-      expect(images.length).toBeGreaterThan(0);
+      const videos = container.querySelectorAll('video');
+      expect(videos.length).toBeGreaterThan(0);
 
-      images.forEach(img => {
-        expect(img).toHaveAttribute('loading', 'lazy');
+      videos.forEach(video => {
+        expect(video).toHaveAttribute('poster');
       });
     });
   });
