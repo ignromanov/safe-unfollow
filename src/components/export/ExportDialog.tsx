@@ -1,5 +1,5 @@
 import { FileJson, FileSpreadsheet, Loader2 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import {
@@ -12,7 +12,14 @@ import {
 } from '@/components/ui/dialog';
 import { useExportWorker } from '@/hooks/useExportWorker';
 import { downloadBlob } from '@/lib/export/download';
+import { validateLicense } from '@/lib/export/license';
 import type { ExportFormat, ExportProgress } from '@/lib/export/types';
+import {
+  clearLicense,
+  getStoredLicense,
+  markValidatedThisSession,
+  shouldValidateThisSession,
+} from '@/lib/export/unlock';
 import { analytics } from '@/lib/stats';
 
 export interface ExportDialogProps {
@@ -42,6 +49,38 @@ export function ExportDialog({
   const [pendingFormat, setPendingFormat] = useState<ExportFormat | null>(null);
   const [progress, setProgress] = useState<ExportProgress | null>(null);
   const [hasFailed, setHasFailed] = useState(false);
+  const [isRevoked, setIsRevoked] = useState(false);
+  const [isCheckingLicense, setIsCheckingLicense] = useState(() => shouldValidateThisSession());
+
+  useEffect(() => {
+    if (!shouldValidateThisSession()) return;
+
+    const license = getStoredLicense();
+    if (license === null) {
+      setIsCheckingLicense(false);
+      return;
+    }
+
+    let isCurrent = true;
+
+    void validateLicense(license.key, license.instanceId).then(result => {
+      markValidatedThisSession();
+      if (!isCurrent) return;
+
+      // Fail open: only an explicit negative revokes. A network problem must not
+      // take the export away from someone who paid for it.
+      if (!result.ok && (result.reason === 'disabled' || result.reason === 'not_found')) {
+        clearLicense();
+        analytics.licenseRevoked();
+        setIsRevoked(true);
+      }
+      setIsCheckingLicense(false);
+    });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, []);
 
   const handleExport = async (format: ExportFormat): Promise<void> => {
     setPendingFormat(format);
@@ -102,11 +141,17 @@ export function ExportDialog({
           </p>
         ) : null}
 
+        {isRevoked ? (
+          <p role="alert" className="text-sm text-destructive">
+            {t('export.license.revoked')}
+          </p>
+        ) : null}
+
         <DialogFooter className="flex-col gap-2 sm:flex-col sm:items-stretch">
           <Button
             variant="outline"
             size="lg"
-            disabled={isPending}
+            disabled={isPending || isCheckingLicense || isRevoked}
             aria-busy={pendingFormat === 'csv'}
             onClick={() => void handleExport('csv')}
           >
@@ -116,7 +161,7 @@ export function ExportDialog({
           <Button
             variant="outline"
             size="lg"
-            disabled={isPending}
+            disabled={isPending || isCheckingLicense || isRevoked}
             aria-busy={pendingFormat === 'json'}
             onClick={() => void handleExport('json')}
           >

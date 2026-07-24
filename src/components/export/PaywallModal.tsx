@@ -14,9 +14,10 @@ export interface PaywallModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onCheckout: () => void;
+  onManualEntry: () => void;
 }
 
-export function PaywallModal({ open, onOpenChange, onCheckout }: PaywallModalProps) {
+export function PaywallModal({ open, onOpenChange, onCheckout, onManualEntry }: PaywallModalProps) {
   const { t } = useTranslation('results');
 
   const bullets = [
@@ -67,6 +68,9 @@ export function PaywallModal({ open, onOpenChange, onCheckout }: PaywallModalPro
           <p className="text-center text-xs text-muted-foreground">
             {t('export.paywall.instantNote')}
           </p>
+          <Button variant="ghost" size="sm" onClick={onManualEntry}>
+            {t('export.license.havePurchase')}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

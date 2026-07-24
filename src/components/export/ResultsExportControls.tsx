@@ -15,6 +15,9 @@ const ExportDialog = lazy(() =>
 const PaywallModal = lazy(() =>
   import('./PaywallModal').then(module => ({ default: module.PaywallModal }))
 );
+const LicenseDialog = lazy(() =>
+  import('./LicenseDialog').then(module => ({ default: module.LicenseDialog }))
+);
 
 export interface ResultsExportControlsProps {
   /** IndexedDB file hash for data lookup */
@@ -44,6 +47,7 @@ export function ResultsExportControls({
   const { isEnabled, isUnlocked, startCheckout } = useProExport();
   const [isPaywallOpen, setIsPaywallOpen] = useState(false);
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
+  const [isLicenseDialogOpen, setIsLicenseDialogOpen] = useState(false);
 
   if (!isEnabled) return null;
 
@@ -86,6 +90,10 @@ export function ResultsExportControls({
             open={isPaywallOpen}
             onOpenChange={setIsPaywallOpen}
             onCheckout={startCheckout}
+            onManualEntry={() => {
+              setIsPaywallOpen(false);
+              setIsLicenseDialogOpen(true);
+            }}
           />
         ) : null}
         {isExportDialogOpen ? (
@@ -96,6 +104,14 @@ export function ResultsExportControls({
             indices={indices}
             rowCount={rowCount}
             filename={filename}
+          />
+        ) : null}
+        {isLicenseDialogOpen ? (
+          <LicenseDialog
+            open={isLicenseDialogOpen}
+            onOpenChange={setIsLicenseDialogOpen}
+            initialKey={null}
+            source="manual"
           />
         ) : null}
       </Suspense>

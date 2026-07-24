@@ -94,6 +94,24 @@ describe('ResultsExportControls', () => {
     expect(vi.mocked(analytics.exportClick)).toHaveBeenCalledWith(true);
   });
 
+  it('should open the manual license dialog from the paywall', async () => {
+    const user = userEvent.setup();
+    mockUseProExport.mockReturnValue({
+      isEnabled: true,
+      isUnlocked: false,
+      startCheckout: vi.fn(),
+    });
+
+    render(<ResultsExportControls {...defaultProps} />);
+
+    await user.click(screen.getByRole('button', { name: downloadLabel }));
+    await user.click(
+      await screen.findByRole('button', { name: resultsEN.export.license.havePurchase })
+    );
+
+    expect(await screen.findByRole('textbox')).toBeInTheDocument();
+  });
+
   it('should not mount any modal before the button is clicked', () => {
     mockUseProExport.mockReturnValue({
       isEnabled: true,

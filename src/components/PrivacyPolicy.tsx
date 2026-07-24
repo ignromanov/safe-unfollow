@@ -124,8 +124,9 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             <li>Analytics opt-out preference</li>
             <li>UI state (filter selections)</li>
             <li>
-              Pro Export unlock flag (<code>su-pro-export</code>) — set after a purchase so the
-              export stays available on this device
+              Pro Export license (<code>su-pro-export</code>) — the license key from your purchase
+              and the activation id returned by LemonSqueezy, stored so the export stays available
+              on this device
             </li>
           </ul>
           <p className="text-muted-foreground mt-4">
@@ -227,6 +228,13 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
               LemonSqueezy's Privacy Policy
             </a>
             .
+          </p>
+          <p className="text-muted-foreground mt-4">
+            Unlocking the export sends your license key — and nothing else — to LemonSqueezy's
+            license service (<code>api.lemonsqueezy.com</code>) to activate it on this device. We
+            check the key again at most once per browser session, when you open the export dialog.
+            The response is neither logged nor passed to analytics, and no part of your Instagram
+            data is included in either request.
           </p>
 
           <h3 className="text-lg font-semibold mt-6 mb-3">5.3 External Links</h3>

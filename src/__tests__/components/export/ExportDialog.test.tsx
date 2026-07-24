@@ -14,16 +14,30 @@ vi.mock('@/hooks/useExportWorker', () => ({
 
 vi.mock('@/lib/export/download', () => ({ downloadBlob: vi.fn() }));
 
+vi.mock('@/lib/export/license', () => ({ validateLicense: vi.fn() }));
+
 vi.mock('@/lib/stats', async importOriginal => {
   const actual = await importOriginal<typeof import('@/lib/stats')>();
   return {
     ...actual,
-    analytics: { ...actual.analytics, download: vi.fn(), exportError: vi.fn() },
+    analytics: {
+      ...actual.analytics,
+      download: vi.fn(),
+      exportError: vi.fn(),
+      licenseRevoked: vi.fn(),
+    },
   };
 });
 
 import { ExportDialog } from '@/components/export/ExportDialog';
 import { downloadBlob } from '@/lib/export/download';
+import { validateLicense } from '@/lib/export/license';
+import {
+  getStoredLicense,
+  resetUnlockCache,
+  resetValidationFlag,
+  storeLicense,
+} from '@/lib/export/unlock';
 import { analytics } from '@/lib/stats';
 
 const blob = new Blob(['csv'], { type: 'text/csv;charset=utf-8' });
@@ -154,5 +168,49 @@ describe('ExportDialog', () => {
 
     const status = await screen.findByRole('status');
     expect(status).toHaveAttribute('aria-live', 'polite');
+  });
+
+  describe('per-session validation', () => {
+    beforeEach(() => {
+      localStorage.clear();
+      resetUnlockCache();
+      resetValidationFlag();
+      storeLicense('38b1460a-5104-4067-a91d-77b872934d51', 'f90ec370-fd83-46a5-8bbd-44a241e78665');
+    });
+
+    it('should keep the export available when validation fails on the network', async () => {
+      vi.mocked(validateLicense).mockResolvedValue({ ok: false, reason: 'network' });
+
+      render(<ExportDialog {...defaultProps} />);
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: resultsEN.export.dialog.csv })).toBeEnabled();
+      });
+      expect(getStoredLicense()).not.toBeNull();
+    });
+
+    it('should revoke the unlock when the license is disabled', async () => {
+      vi.mocked(validateLicense).mockResolvedValue({ ok: false, reason: 'disabled' });
+
+      render(<ExportDialog {...defaultProps} />);
+
+      expect(await screen.findByRole('alert')).toHaveTextContent(resultsEN.export.license.revoked);
+      expect(getStoredLicense()).toBeNull();
+      expect(analytics.licenseRevoked).toHaveBeenCalled();
+    });
+
+    it('should validate only once per session', async () => {
+      vi.mocked(validateLicense).mockResolvedValue({ ok: true });
+
+      const first = render(<ExportDialog {...defaultProps} />);
+      await waitFor(() => expect(validateLicense).toHaveBeenCalledTimes(1));
+      first.unmount();
+
+      render(<ExportDialog {...defaultProps} />);
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: resultsEN.export.dialog.csv })).toBeEnabled();
+      });
+      expect(validateLicense).toHaveBeenCalledTimes(1);
+    });
   });
 });
