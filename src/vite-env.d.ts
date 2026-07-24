@@ -9,6 +9,8 @@ interface ImportMetaEnv {
   readonly VITE_ADSENSE_SLOT_RESULTS?: string;
   /** AdSense ad unit slot ID for the low-profile unit at the end of Results. */
   readonly VITE_ADSENSE_SLOT_RESULTS_END?: string;
+  /** LemonSqueezy hosted checkout URL for Pro Export. Empty disables the export UI. */
+  readonly VITE_LEMONSQUEEZY_URL?: string;
 }
 
 interface ImportMeta {
