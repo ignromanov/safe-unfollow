@@ -14,7 +14,7 @@ import {
 import { Input } from '@/components/ui/input';
 import type { LicenseFailureReason } from '@/lib/export/license';
 import { activateLicense, isLicenseKeyFormat } from '@/lib/export/license';
-import { storeLicense } from '@/lib/export/unlock';
+import { getStoredLicense, storeLicense } from '@/lib/export/unlock';
 import { analytics } from '@/lib/stats';
 
 export interface LicenseDialogProps {
@@ -106,8 +106,19 @@ export function LicenseDialog({ open, onOpenChange, initialKey, source }: Licens
     if (!hasActivationKey) return;
     if (activatedKeyRef.current === activationKey) return;
     activatedKeyRef.current = activationKey;
+
+    // activateLicense() is not idempotent — it mints a new device instance
+    // every call, capped at 3 per key. If this device already holds this
+    // exact key, re-clicking the receipt-email link must not spend another
+    // activation: it would eventually lock the buyer out of their own phone.
+    const stored = getStoredLicense();
+    if (stored?.key === activationKey) {
+      onOpenChange(false);
+      return;
+    }
+
     void runActivation(activationKey);
-  }, [activationKey, hasActivationKey, runActivation]);
+  }, [activationKey, hasActivationKey, onOpenChange, runActivation]);
 
   const handleSubmit = (): void => {
     if (!isLicenseKeyFormat(inputValue)) {

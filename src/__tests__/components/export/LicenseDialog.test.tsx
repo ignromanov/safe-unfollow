@@ -28,11 +28,13 @@ vi.mock('@/lib/stats', async importOriginal => {
 
 import { LicenseDialog } from '@/components/export/LicenseDialog';
 import { activateLicense } from '@/lib/export/license';
-import { getStoredLicense, resetUnlockCache } from '@/lib/export/unlock';
+import { getStoredLicense, resetUnlockCache, storeLicense } from '@/lib/export/unlock';
 import { analytics } from '@/lib/stats';
 
 const KEY = '38b1460a-5104-4067-a91d-77b872934d51';
 const INSTANCE = 'f90ec370-fd83-46a5-8bbd-44a241e78665';
+const OTHER_KEY = '9f6c5b2a-1234-4d5e-8f9a-0b1c2d3e4f5a';
+const OTHER_INSTANCE = 'a1b2c3d4-5e6f-4789-9abc-def012345678';
 
 describe('LicenseDialog', () => {
   beforeEach(() => {
@@ -167,6 +169,38 @@ describe('LicenseDialog', () => {
     rerender(<LicenseDialog open initialKey={KEY} source="redirect" onOpenChange={() => {}} />);
 
     expect(activateLicense).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not re-activate a key that is already stored on this device', async () => {
+    // Simulates clicking the receipt-email link a second time on a device
+    // that already activated this key. activateLicense() is not idempotent —
+    // it mints a new device instance every call — so re-clicking must be a
+    // no-op rather than spending another of the 3 allowed activations.
+    storeLicense(KEY, INSTANCE);
+    const onOpenChange = vi.fn();
+
+    render(<LicenseDialog open initialKey={KEY} source="redirect" onOpenChange={onOpenChange} />);
+
+    await waitFor(() => {
+      expect(onOpenChange).toHaveBeenCalledWith(false);
+    });
+    expect(activateLicense).not.toHaveBeenCalled();
+  });
+
+  it('should still activate a different key even when another license is already stored', async () => {
+    // A customer who buys a second key must be able to activate it — the
+    // guard above must compare keys, not merely check "is something stored".
+    storeLicense(KEY, INSTANCE);
+    vi.mocked(activateLicense).mockResolvedValue({ ok: true, instanceId: OTHER_INSTANCE });
+
+    render(<LicenseDialog open initialKey={OTHER_KEY} source="redirect" onOpenChange={vi.fn()} />);
+
+    await waitFor(() => {
+      expect(activateLicense).toHaveBeenCalledWith(OTHER_KEY);
+    });
+    await waitFor(() => {
+      expect(getStoredLicense()).toEqual({ v: 1, key: OTHER_KEY, instanceId: OTHER_INSTANCE });
+    });
   });
 
   it('should show the manual form for an empty initialKey instead of activating', () => {
