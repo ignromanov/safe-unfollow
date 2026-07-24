@@ -150,6 +150,20 @@
       "cta": "Buka ekspor — $3",
       "instantNote": "Langsung terbuka setelah pembayaran"
     },
+    "license": {
+      "title": "Aktifkan ekspormu",
+      "activating": "Mengaktifkan…",
+      "manualDescription": "Masukkan kunci lisensi dari email pembelianmu untuk membuka ekspor di perangkat ini.",
+      "placeholder": "38b1460a-5104-4067-a91d-77b872934d51",
+      "submit": "Aktifkan",
+      "retry": "Coba lagi",
+      "havePurchase": "Sudah membeli? Masukkan kuncimu",
+      "errorFormat": "Itu bukan kunci lisensi yang valid. Periksa kunci di email pembelianmu.",
+      "errorNotFound": "Kami tidak menemukan kunci lisensi ini. Periksa kunci di email pembelianmu.",
+      "errorLimit": "Kunci ini sudah dipakai di 3 perangkat yang diizinkan. Bebaskan salah satu atau hubungi dukungan.",
+      "errorGeneric": "Aktivasi gagal. Periksa koneksimu dan coba lagi.",
+      "revoked": "Lisensi ini sudah tidak aktif. Jika ini tidak terduga, hubungi dukungan."
+    },
     "dialog": {
       "title": "Ekspor akun",
       "rowCount": "{{count}} akun akan diekspor",

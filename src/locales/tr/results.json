@@ -150,6 +150,20 @@
       "cta": "Dışa aktarmayı aç — 3$",
       "instantNote": "Ödemeden hemen sonra anında açılır"
     },
+    "license": {
+      "title": "Dışa aktarımını etkinleştir",
+      "activating": "Etkinleştiriliyor…",
+      "manualDescription": "Bu cihazda dışa aktarımın kilidini açmak için satın alma e-postandaki lisans anahtarını gir.",
+      "placeholder": "38b1460a-5104-4067-a91d-77b872934d51",
+      "submit": "Etkinleştir",
+      "retry": "Tekrar dene",
+      "havePurchase": "Zaten satın aldın mı? Anahtarını gir",
+      "errorFormat": "Bu bir lisans anahtarına benzemiyor. Satın alma e-postandaki anahtarı kontrol et.",
+      "errorNotFound": "Bu lisans anahtarını bulamadık. Satın alma e-postandaki anahtarı kontrol et.",
+      "errorLimit": "Bu anahtar izin verilen 3 cihazın tümünde kullanıldı. Birini boşalt ya da destek ile iletişime geç.",
+      "errorGeneric": "Etkinleştirme başarısız oldu. Bağlantını kontrol et ve tekrar dene.",
+      "revoked": "Bu lisans artık aktif değil. Bu beklenmiyorsa destek ile iletişime geç."
+    },
     "dialog": {
       "title": "Hesapları dışa aktar",
       "rowCount": "{{count}} hesap dışa aktarılacak",

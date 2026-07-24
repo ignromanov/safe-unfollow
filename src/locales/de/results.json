@@ -150,6 +150,20 @@
       "cta": "Export freischalten — 3 $",
       "instantNote": "Sofortige Freischaltung nach dem Kauf"
     },
+    "license": {
+      "title": "Export aktivieren",
+      "activating": "Wird aktiviert…",
+      "manualDescription": "Gib den Lizenzschlüssel aus deiner Kauf-E-Mail ein, um den Export auf diesem Gerät freizuschalten.",
+      "placeholder": "38b1460a-5104-4067-a91d-77b872934d51",
+      "submit": "Aktivieren",
+      "retry": "Erneut versuchen",
+      "havePurchase": "Bereits gekauft? Gib deinen Schlüssel ein",
+      "errorFormat": "Das sieht nicht wie ein Lizenzschlüssel aus. Überprüfe den Schlüssel in deiner Kauf-E-Mail.",
+      "errorNotFound": "Wir konnten diesen Lizenzschlüssel nicht finden. Überprüfe den Schlüssel in deiner Kauf-E-Mail.",
+      "errorLimit": "Dieser Schlüssel wurde bereits auf allen 3 erlaubten Geräten verwendet. Gib eines frei oder kontaktiere den Support.",
+      "errorGeneric": "Aktivierung fehlgeschlagen. Überprüfe deine Verbindung und versuche es erneut.",
+      "revoked": "Diese Lizenz ist nicht mehr aktiv. Falls das unerwartet ist, kontaktiere den Support."
+    },
     "dialog": {
       "title": "Konten exportieren",
       "rowCount": "{{count}} Konten werden exportiert",

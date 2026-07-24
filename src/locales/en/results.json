@@ -150,6 +150,20 @@
       "cta": "Unlock export — $3",
       "instantNote": "Instant unlock after checkout"
     },
+    "license": {
+      "title": "Activate your export",
+      "activating": "Activating…",
+      "manualDescription": "Enter the license key from your purchase email to unlock the export on this device.",
+      "placeholder": "38b1460a-5104-4067-a91d-77b872934d51",
+      "submit": "Activate",
+      "retry": "Try again",
+      "havePurchase": "Already purchased? Enter your key",
+      "errorFormat": "That does not look like a license key. Check the key in your purchase email.",
+      "errorNotFound": "We could not find this license key. Check the key in your purchase email.",
+      "errorLimit": "This key has been used on all 3 allowed devices. Free one up or contact support.",
+      "errorGeneric": "Activation failed. Check your connection and try again.",
+      "revoked": "This license is no longer active. If this is unexpected, contact support."
+    },
     "dialog": {
       "title": "Export accounts",
       "rowCount": "{{count}} accounts will be exported",

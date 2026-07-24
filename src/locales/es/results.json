@@ -150,6 +150,20 @@
       "cta": "Desbloquear exportación — $3",
       "instantNote": "Desbloqueo instantáneo tras el pago"
     },
+    "license": {
+      "title": "Activa tu exportación",
+      "activating": "Activando…",
+      "manualDescription": "Introduce la clave de licencia de tu correo de compra para desbloquear la exportación en este dispositivo.",
+      "placeholder": "38b1460a-5104-4067-a91d-77b872934d51",
+      "submit": "Activar",
+      "retry": "Inténtalo de nuevo",
+      "havePurchase": "¿Ya compraste? Introduce tu clave",
+      "errorFormat": "Eso no parece una clave de licencia. Revisa la clave en tu correo de compra.",
+      "errorNotFound": "No pudimos encontrar esta clave de licencia. Revisa la clave en tu correo de compra.",
+      "errorLimit": "Esta clave ya se usó en los 3 dispositivos permitidos. Libera uno o contacta con soporte.",
+      "errorGeneric": "No se pudo activar. Revisa tu conexión e inténtalo de nuevo.",
+      "revoked": "Esta licencia ya no está activa. Si esto es inesperado, contacta con soporte."
+    },
     "dialog": {
       "title": "Exportar cuentas",
       "rowCount": "Se exportarán {{count}} cuentas",
