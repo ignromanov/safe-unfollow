@@ -151,7 +151,6 @@ export function HowToSection({ onStart }: HowToSectionProps) {
                         basePath={step.visual}
                         alt={step.title}
                         className="w-full h-auto grayscale-[0.2] group-hover:grayscale-0 transition-all duration-700"
-                        loading="lazy"
                       />
                     </div>
                   )}

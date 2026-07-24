@@ -3,7 +3,10 @@
  * Serves optimized looping video (webm/mp4) sized for device viewport
  * - 400w for mobile (≤640px) - 69% smaller
  * - 600w for desktop (>640px) - 40% smaller
+ * Respects prefers-reduced-motion by rendering a static poster instead of autoplaying.
  */
+
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 
 interface ResponsiveGifProps {
   /** Base path without size suffix (e.g., '/wizard/step-1') */
@@ -12,8 +15,6 @@ interface ResponsiveGifProps {
   alt: string;
   /** CSS class name */
   className?: string;
-  /** Loading strategy (kept for API compatibility; video always preloads metadata) */
-  loading?: 'lazy' | 'eager';
 }
 
 export function ResponsiveGif({
@@ -21,6 +22,20 @@ export function ResponsiveGif({
   alt,
   className = 'w-full h-auto block',
 }: ResponsiveGifProps) {
+  const prefersReducedMotion = useReducedMotion();
+
+  if (prefersReducedMotion) {
+    return (
+      <img
+        src={`${basePath}-600w-poster.jpg`}
+        alt={alt}
+        width={600}
+        height={450}
+        className={className}
+      />
+    );
+  }
+
   return (
     <video
       autoPlay
