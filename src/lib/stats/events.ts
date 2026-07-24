@@ -348,4 +348,11 @@ export const analytics = {
   pwaInstalled: () => {
     trackEvent(AnalyticsEvents.PWA_INSTALLED);
   },
+
+  // Ads — impression opportunity when an ad slot is mounted and eligible
+  adSlotRendered: (slot: string) => {
+    trackEvent(AnalyticsEvents.AD_SLOT_RENDERED, {
+      slot,
+    });
+  },
 };

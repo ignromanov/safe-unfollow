@@ -12,6 +12,7 @@ import { FilterChips } from './FilterChips';
 import { AccountList } from './AccountList';
 import { StatCard } from './StatCard';
 import { InlineDonationCard } from './InlineDonationCard';
+import { AdSlot } from './ads/AdSlot';
 import { RescuePlanBanner } from './RescuePlanBanner';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import type { BadgeKey } from '@/core/types';
@@ -217,6 +218,9 @@ export function AccountListSection({
 
       {/* Inline Donation Card */}
       <InlineDonationCard accountCount={accountCount} isSample={isSample} />
+
+      {/* Ad slot — outside the virtualized list to avoid layout thrashing */}
+      {!isSample && <AdSlot name="results" slot={import.meta.env.VITE_ADSENSE_SLOT_RESULTS} />}
 
       {/* Main Content Layout - grid for flexible banner positioning */}
       <div className="grid grid-cols-1 lg:grid-cols-[20rem_1fr] gap-6 md:gap-12">

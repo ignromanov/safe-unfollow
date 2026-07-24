@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { AdSlot } from '@/components/ads/AdSlot';
 import { FAQSection } from '@/components/FAQSection';
 import { FooterCTA } from '@/components/FooterCTA';
 import { Hero } from '@/components/Hero';
@@ -74,6 +75,7 @@ export function Component() {
       />
       <div className="animate-in fade-in duration-1000">
         <HowToSection onStart={handleStartGuide} />
+        <AdSlot name="home" slot={import.meta.env.VITE_ADSENSE_SLOT_HOME} className="my-8" />
         <FAQSection />
         <FooterCTA onStart={handleStartGuide} onSample={handleLoadSample} />
       </div>
