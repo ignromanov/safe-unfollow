@@ -10,6 +10,7 @@ import { DiagnosticErrorScreen } from './DiagnosticErrorScreen';
 import { TouchUploadZone } from './upload/TouchUploadZone';
 import { DesktopDropZone } from './upload/DesktopDropZone';
 import { DevErrorSelector } from './upload/DevErrorSelector';
+import { LoadingTips } from './upload/LoadingTips';
 import { FormatQuiz } from './upload/FormatQuiz';
 
 import type { DragValidation } from './upload/DesktopDropZone';
@@ -211,6 +212,11 @@ export function UploadZone({
               onDragLeave={handleDragLeave}
             />
           )}
+
+          {/* Sibling of the drop zone: the desktop zone is a <label>, which
+              cannot legally contain the affiliate link, and its fixed
+              aspect-ratio box has no room for the cards. */}
+          <LoadingTips isProcessing={isProcessing} />
 
           {/* Mobile-only: compact help section (replaces sidebar cards) */}
           <div className="mt-4 space-y-2 text-center lg:hidden">

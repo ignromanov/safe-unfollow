@@ -18,6 +18,6 @@
 
 export { isTrackingOptedOut, optOutOfTracking, optIntoTracking, trackBeacon } from './core';
 export { AnalyticsEvents } from './constants';
-export type { AnalyticsEventName, DiagnosticErrorCode } from './constants';
+export type { AnalyticsEventName, DiagnosticErrorCode, ParseOutcome } from './constants';
 export { captureUTMParams, setEntryCTA } from './utm';
 export { analytics } from './events';

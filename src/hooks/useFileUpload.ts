@@ -1,5 +1,6 @@
 import type { FileDiscovery, ParseWarning } from '@/core/types';
 import { analytics } from '@/lib/analytics';
+import type { ParseOutcome } from '@/lib/analytics';
 import { extractErrorCode } from '@/lib/error-classifier';
 import { isValidZipFile } from '@/lib/file-validation';
 import { dbCache, generateFileHash } from '@/lib/indexeddb/indexeddb-cache';
@@ -72,8 +73,12 @@ export function useFileUpload() {
       lastUploadRef.current = now;
 
       const uploadDate = new Date();
-      const _startTime = performance.now();
+      const startTime = performance.now();
       const fileSizeMb = file.size / (1024 * 1024);
+
+      // Reported in the `finally` below. Defaults to 'error' so an exit path
+      // added later is counted pessimistically rather than silently dropped.
+      let outcome: ParseOutcome = 'error';
 
       // Reset progress
       setUploadProgress(0);
@@ -166,6 +171,7 @@ export function useFileUpload() {
           // Track success from cache
           analytics.fileUploadSuccess(cachedData.metadata.accountCount, true);
 
+          outcome = 'cached';
           return;
         }
 
@@ -246,10 +252,13 @@ export function useFileUpload() {
 
         // Track return upload (user uploading new data)
         trackReturnUploadIfApplicable(resultFileHash);
+
+        outcome = 'success';
       } catch (err) {
         // Track cancelled uploads but don't show error
         if (abortControllerRef.current?.signal.aborted) {
           analytics.uploadErrorByCode(fileHash, 'UPLOAD_CANCELLED');
+          outcome = 'cancelled';
           return;
         }
 
@@ -272,6 +281,10 @@ export function useFileUpload() {
           fileDiscovery: discovery,
         });
         throw err;
+      } finally {
+        // Every terminal path lands here, including the early cache return, so
+        // the bucket distribution covers all uploads and not just slow ones.
+        analytics.uploadParseDuration(performance.now() - startTime, outcome);
       }
     },
     [setUploadInfo, t]

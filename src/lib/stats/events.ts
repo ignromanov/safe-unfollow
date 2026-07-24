@@ -2,8 +2,8 @@
  * Analytics helper object with typed methods for all tracked events.
  */
 
-import { AnalyticsEvents } from './constants';
-import type { FilterAction, LinkType } from './constants';
+import { AnalyticsEvents, parseDurationBucket } from './constants';
+import type { FilterAction, LinkType, ParseOutcome } from './constants';
 import { trackEvent } from './core';
 import { getStoredUTM, getEntryCTA, setEntryCTA } from './utm';
 
@@ -29,6 +29,20 @@ export const analytics = {
       ...(utm.utm_medium && { utm_medium: utm.utm_medium }),
       ...(utm.utm_campaign && { utm_campaign: utm.utm_campaign }),
       ...(entryCta && { entry_cta: entryCta }),
+    });
+  },
+
+  /**
+   * How long the user sat in the processing state, bucketed, plus how it ended.
+   *
+   * Not a performance metric — it is the denominator for anything shown during
+   * parsing (`config/loading-tips.ts`). Without it a dead placement and an
+   * unappealing one look identical in the dashboard.
+   */
+  uploadParseDuration: (durationMs: number, outcome: ParseOutcome) => {
+    trackEvent(AnalyticsEvents.UPLOAD_PARSE_DURATION, {
+      duration_bucket: parseDurationBucket(durationMs),
+      outcome,
     });
   },
 
@@ -91,6 +105,23 @@ export const analytics = {
   linkClick: (linkType: LinkType) => {
     trackEvent(AnalyticsEvents.LINK_CLICK, {
       link_type: linkType,
+    });
+  },
+
+  // Loading Tips (shown during ZIP parsing)
+  loadingTipImpression: (tipId: string, index: number, delayMs: number) => {
+    trackEvent(AnalyticsEvents.LOADING_TIP_IMPRESSION, {
+      tip_id: tipId,
+      tip_index: index,
+      delay_ms: delayMs,
+    });
+  },
+
+  loadingTipClick: (tipId: string, index: number, elapsedMs: number) => {
+    trackEvent(AnalyticsEvents.LOADING_TIP_CLICK, {
+      tip_id: tipId,
+      tip_index: index,
+      elapsed_ms: elapsedMs,
     });
   },
 

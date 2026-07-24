@@ -1,5 +1,6 @@
 import type { BadgeKey } from '@/core/types';
 import { useFileUpload } from '@/hooks/useFileUpload';
+import { analytics } from '@/lib/analytics';
 import { dbCache, generateFileHash } from '@/lib/indexeddb/indexeddb-cache';
 import { indexedDBService } from '@/lib/indexeddb/indexeddb-service';
 import { useAppStore } from '@/lib/store';
@@ -19,6 +20,7 @@ vi.mock('@/lib/analytics', () => ({
     uploadErrorByCode: vi.fn(),
     returnUpload: vi.fn(),
     linkClick: vi.fn(),
+    uploadParseDuration: vi.fn(),
   },
 }));
 
@@ -347,6 +349,57 @@ describe('useFileUpload', () => {
         uploadStatus: 'success',
       })
     );
+  });
+
+  describe('parse duration tracking', () => {
+    // Sizes the audience for anything rendered during processing (LoadingTips).
+    // Every terminal path has to report, or the denominator is wrong.
+    it('should report a success outcome once parsing finishes', async () => {
+      const { result } = renderHook(() => useFileUpload());
+
+      await act(async () => {
+        await result.current.handleZipUpload(mockFile);
+      });
+
+      expect(analytics.uploadParseDuration).toHaveBeenCalledTimes(1);
+      expect(analytics.uploadParseDuration).toHaveBeenCalledWith(expect.any(Number), 'success');
+    });
+
+    it('should separate cache hits, which never show the loading state for long', async () => {
+      mockDbCache.get.mockResolvedValue({
+        metadata: {
+          name: 'test.zip',
+          size: 1024,
+          uploadDate: new Date('2023-01-01'),
+          fileHash: mockFileHash,
+          accountCount: 100,
+        },
+      } as any);
+
+      const { result } = renderHook(() => useFileUpload());
+
+      await act(async () => {
+        await result.current.handleZipUpload(mockFile);
+      });
+
+      expect(analytics.uploadParseDuration).toHaveBeenCalledWith(expect.any(Number), 'cached');
+    });
+
+    it('should report failures, which is how fast errors are told from fast parses', async () => {
+      mockGenerateFileHash.mockRejectedValueOnce(new Error('Invalid ZIP file'));
+
+      const { result } = renderHook(() => useFileUpload());
+
+      await act(async () => {
+        try {
+          await result.current.handleZipUpload(mockFile);
+        } catch {
+          // Expected — the hook rethrows for the caller's error UI
+        }
+      });
+
+      expect(analytics.uploadParseDuration).toHaveBeenCalledWith(expect.any(Number), 'error');
+    });
   });
 
   describe('Worker initialization', () => {

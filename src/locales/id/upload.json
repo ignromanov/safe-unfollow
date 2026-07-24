@@ -192,5 +192,21 @@
     "proTip": "Tips Pro: Cek Folder Spam",
     "proTipHint": "Email Instagram sering masuk ke sana. Cari email dari <b>Meta</b> atau <b>Instagram</b>. Link unduhan kadaluarsa dalam 4 hari.",
     "skip": "Lewati untuk saat ini"
+  },
+  "loadingTips": {
+    "localProcessing": {
+      "title": "File Anda tidak pernah meninggalkan perangkat ini",
+      "desc": "Pemrosesan sepenuhnya terjadi di browser Anda — tidak ada yang diunggah."
+    },
+    "nordvpn": {
+      "title": "Anda baru saja mengambil kembali data Anda",
+      "desc": "Jaga sisanya tetap privat. NordVPN menyembunyikan lalu lintas internet Anda dari ISP — lihat penawaran."
+    },
+    "revokeAccess": {
+      "title": "Tips privasi singkat",
+      "desc": "Cabut akses data Instagram untuk aplikasi pihak ketiga yang sudah tidak Anda gunakan."
+    },
+    "affiliateDisclosure": "Tautan afiliasi — kami mungkin mendapat komisi tanpa biaya tambahan bagi Anda.",
+    "opensInNewTab": "terbuka di tab baru"
   }
 }
