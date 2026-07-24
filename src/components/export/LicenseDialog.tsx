@@ -1,5 +1,5 @@
 import { Loader2 } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
@@ -44,6 +44,15 @@ const ERROR_KEYS = {
   unknown: 'export.license.errorGeneric',
 } as const satisfies Record<LicenseFailureReason | 'format', string>;
 
+// not_found, limit_reached and disabled are permanent verdicts from
+// LemonSqueezy — the same key fails the same way forever, so offering
+// "Try again" for those reasons would just invite a click that cannot help.
+const RETRYABLE_REASONS = new Set<LicenseFailureReason | 'format'>([
+  'invalid_input',
+  'network',
+  'unknown',
+]);
+
 /**
  * Activation surface for both entry points: the post-checkout redirect (key in
  * hand, activate on mount) and manual entry on a second device.
@@ -54,10 +63,21 @@ const ERROR_KEYS = {
  */
 export function LicenseDialog({ open, onOpenChange, initialKey, source }: LicenseDialogProps) {
   const { t } = useTranslation('results');
+  // A redirect URL can carry `?license=` with nothing after it — treat that
+  // the same as "no key" (show the manual form) rather than activating an
+  // empty string and paying for a network round-trip to learn what a regex
+  // already knew.
+  const activationKey = initialKey?.trim() ?? '';
+  const hasActivationKey = activationKey.length > 0;
   const [state, setState] = useState<DialogState>(
-    initialKey === null ? { kind: 'form' } : { kind: 'activating' }
+    hasActivationKey ? { kind: 'activating' } : { kind: 'form' }
   );
   const [inputValue, setInputValue] = useState('');
+  // Guards the automatic mount activation independently of runActivation's
+  // identity: activateLicense() is not idempotent (LemonSqueezy mints a new
+  // device instance, capped at 3, on every call), so this must not re-fire
+  // just because a parent re-render gave onOpenChange a new closure.
+  const activatedKeyRef = useRef<string | null>(null);
 
   const runActivation = useCallback(
     async (key: string): Promise<void> => {
@@ -83,9 +103,11 @@ export function LicenseDialog({ open, onOpenChange, initialKey, source }: Licens
   );
 
   useEffect(() => {
-    if (initialKey === null) return;
-    void runActivation(initialKey);
-  }, [initialKey, runActivation]);
+    if (!hasActivationKey) return;
+    if (activatedKeyRef.current === activationKey) return;
+    activatedKeyRef.current = activationKey;
+    void runActivation(activationKey);
+  }, [activationKey, hasActivationKey, runActivation]);
 
   const handleSubmit = (): void => {
     if (!isLicenseKeyFormat(inputValue)) {
@@ -96,8 +118,8 @@ export function LicenseDialog({ open, onOpenChange, initialKey, source }: Licens
   };
 
   const handleRetry = (): void => {
-    if (initialKey !== null) {
-      void runActivation(initialKey);
+    if (hasActivationKey) {
+      void runActivation(activationKey);
       return;
     }
     setState({ kind: 'form' });
@@ -110,9 +132,11 @@ export function LicenseDialog({ open, onOpenChange, initialKey, source }: Licens
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t('export.license.title')}</DialogTitle>
-          {initialKey === null ? (
-            <DialogDescription>{t('export.license.manualDescription')}</DialogDescription>
-          ) : null}
+          <DialogDescription>
+            {hasActivationKey
+              ? t('export.license.activating')
+              : t('export.license.manualDescription')}
+          </DialogDescription>
         </DialogHeader>
 
         <div role="status" aria-live="polite" className="min-h-5 text-sm text-muted-foreground">
@@ -125,7 +149,7 @@ export function LicenseDialog({ open, onOpenChange, initialKey, source }: Licens
           </p>
         ) : null}
 
-        {initialKey === null && state.kind !== 'activating' ? (
+        {!hasActivationKey && state.kind !== 'activating' ? (
           <Input
             value={inputValue}
             onChange={event => setInputValue(event.target.value)}
@@ -146,13 +170,16 @@ export function LicenseDialog({ open, onOpenChange, initialKey, source }: Licens
             </Button>
           ) : null}
 
-          {!isActivating && initialKey === null ? (
+          {!isActivating && !hasActivationKey ? (
             <Button size="lg" onClick={handleSubmit}>
               {t('export.license.submit')}
             </Button>
           ) : null}
 
-          {!isActivating && initialKey !== null && state.kind === 'error' ? (
+          {!isActivating &&
+          hasActivationKey &&
+          state.kind === 'error' &&
+          RETRYABLE_REASONS.has(state.reason) ? (
             <Button size="lg" onClick={handleRetry}>
               {t('export.license.retry')}
             </Button>

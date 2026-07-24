@@ -148,4 +148,65 @@ describe('LicenseDialog', () => {
     });
     expect(analytics.purchaseSuccess).not.toHaveBeenCalled();
   });
+
+  it('should not re-activate when a re-render passes a new onOpenChange identity', async () => {
+    vi.mocked(activateLicense).mockResolvedValue({ ok: false, reason: 'network' });
+
+    const { rerender } = render(
+      <LicenseDialog open initialKey={KEY} source="redirect" onOpenChange={() => {}} />
+    );
+
+    await waitFor(() => {
+      expect(activateLicense).toHaveBeenCalledTimes(1);
+    });
+    expect(await screen.findByRole('alert')).toBeInTheDocument();
+
+    // Simulates the most common way a parent wires onOpenChange: a fresh
+    // inline closure on every render. The activation must not repeat —
+    // activateLicense() is not idempotent and each key gets only 3 devices.
+    rerender(<LicenseDialog open initialKey={KEY} source="redirect" onOpenChange={() => {}} />);
+
+    expect(activateLicense).toHaveBeenCalledTimes(1);
+  });
+
+  it('should show the manual form for an empty initialKey instead of activating', () => {
+    render(<LicenseDialog open initialKey="" source="redirect" onOpenChange={vi.fn()} />);
+
+    expect(screen.getByRole('textbox')).toBeInTheDocument();
+    expect(activateLicense).not.toHaveBeenCalled();
+  });
+
+  it('should not offer a retry for a permanently unrecoverable reason', async () => {
+    vi.mocked(activateLicense).mockResolvedValue({ ok: false, reason: 'limit_reached' });
+
+    render(<LicenseDialog open initialKey={KEY} source="redirect" onOpenChange={vi.fn()} />);
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(resultsEN.export.license.errorLimit);
+    expect(
+      screen.queryByRole('button', { name: resultsEN.export.license.retry })
+    ).not.toBeInTheDocument();
+  });
+
+  it('should render a description for the redirect flow without triggering the Radix a11y warning', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.mocked(activateLicense).mockResolvedValue({ ok: true, instanceId: INSTANCE });
+
+    render(<LicenseDialog open initialKey={KEY} source="redirect" onOpenChange={vi.fn()} />);
+
+    // Radix portals DialogContent into document.body, not the RTL container.
+    expect(document.body.querySelector('[data-slot="dialog-description"]')).toHaveTextContent(
+      resultsEN.export.license.activating
+    );
+
+    await waitFor(() => {
+      expect(activateLicense).toHaveBeenCalled();
+    });
+
+    const loggedMissingDescription = consoleSpy.mock.calls.some(args =>
+      args.some(arg => typeof arg === 'string' && /description/i.test(arg))
+    );
+    expect(loggedMissingDescription).toBe(false);
+
+    consoleSpy.mockRestore();
+  });
 });
