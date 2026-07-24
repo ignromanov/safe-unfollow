@@ -3,8 +3,9 @@
  *
  * The `adsbygoogle.js` script is injected lazily — only when an eligible ad
  * slot mounts (see AdSlot). This keeps Google's ad script off the page entirely
- * for geo-blocked (EEA/UK/CH) and sample-route visitors, so no third-party ad
- * tracker loads without ads. Ownership verification for Google's site review
+ * for sample-route visitors. For EEA/UK/CH visitors the script still loads, and
+ * Google's certified CMP gates ad serving on the user's consent choice.
+ * Ownership verification for Google's site review
  * uses the inert `<meta name="google-adsense-account">` tag in index.html,
  * which sets no cookies and makes no network calls.
  */
