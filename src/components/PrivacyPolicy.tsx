@@ -123,6 +123,10 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             <li>Theme preference (dark/light mode)</li>
             <li>Analytics opt-out preference</li>
             <li>UI state (filter selections)</li>
+            <li>
+              Pro Export unlock flag (<code>su-pro-export</code>) — set after a purchase so the
+              export stays available on this device
+            </li>
           </ul>
           <p className="text-muted-foreground mt-4">
             In the EEA, UK and Switzerland, Google's consent tool additionally stores your
@@ -208,7 +212,24 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             .
           </p>
 
-          <h3 className="text-lg font-semibold mt-6 mb-3">5.2 External Links</h3>
+          <h3 className="text-lg font-semibold mt-6 mb-3">5.2 Payments (LemonSqueezy)</h3>
+          <p className="text-muted-foreground">
+            If you choose to unlock Pro Export, clicking the purchase button redirects you to
+            LemonSqueezy, our payment provider, where any payment details you enter are handled
+            entirely by them — we never see or store them. Your Instagram data is not sent anywhere
+            during this: the export file is still generated inside your browser. See{' '}
+            <a
+              href="https://www.lemonsqueezy.com/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              LemonSqueezy's Privacy Policy
+            </a>
+            .
+          </p>
+
+          <h3 className="text-lg font-semibold mt-6 mb-3">5.3 External Links</h3>
           <p className="text-muted-foreground">
             When you click on an Instagram profile, you are redirected to Instagram.com. Instagram's
             privacy policy applies to any interaction on their platform.

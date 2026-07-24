@@ -10,6 +10,50 @@ const UNLOCK_STORAGE_KEY = 'su-pro-export';
 const UNLOCK_QUERY_PARAM = 'export';
 const UNLOCK_QUERY_VALUE = 'unlocked';
 
+const listeners = new Set<() => void>();
+let unlockedCache: boolean | null = null;
+let isStorageListenerAttached = false;
+
+function notifyUnlockChanged(): void {
+  for (const listener of listeners) {
+    listener();
+  }
+}
+
+/**
+ * Drops the memoized flag so the next read hits localStorage again.
+ * Called when another tab changes the flag, and by tests between cases.
+ */
+export function resetUnlockCache(): void {
+  unlockedCache = null;
+}
+
+function handleStorageEvent(event: StorageEvent): void {
+  // key === null means the whole storage was cleared
+  if (event.key !== null && event.key !== UNLOCK_STORAGE_KEY) return;
+  resetUnlockCache();
+  notifyUnlockChanged();
+}
+
+/**
+ * Subscribes to unlock-state changes, including purchases completed in another
+ * tab. A single shared `storage` listener serves all subscribers.
+ *
+ * Returns an unsubscribe function.
+ */
+export function subscribeUnlock(listener: () => void): () => void {
+  listeners.add(listener);
+
+  if (!isStorageListenerAttached && typeof window !== 'undefined') {
+    window.addEventListener('storage', handleStorageEvent);
+    isStorageListenerAttached = true;
+  }
+
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
 /**
  * Whether the Pro Export feature is enabled at all (checkout URL configured).
  * When false, no export UI should render.
@@ -28,18 +72,26 @@ export function getCheckoutUrl(): string | null {
 
 /**
  * Whether the user has already unlocked Pro Export.
+ *
+ * Memoized: this is read on every render through useSyncExternalStore, and
+ * localStorage access is synchronous.
  */
 export function isExportUnlocked(): boolean {
   if (typeof window === 'undefined') return false;
-  return localStorage.getItem(UNLOCK_STORAGE_KEY) === '1';
+  if (unlockedCache === null) {
+    unlockedCache = localStorage.getItem(UNLOCK_STORAGE_KEY) === '1';
+  }
+  return unlockedCache;
 }
 
 /**
- * Marks Pro Export as unlocked in localStorage.
+ * Marks Pro Export as unlocked in localStorage and notifies subscribers.
  */
 export function setExportUnlocked(): void {
   if (typeof window === 'undefined') return;
   localStorage.setItem(UNLOCK_STORAGE_KEY, '1');
+  unlockedCache = true;
+  notifyUnlockChanged();
 }
 
 /**

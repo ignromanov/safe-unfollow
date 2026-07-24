@@ -416,4 +416,8 @@ export const analytics = {
   download: (format: 'csv' | 'json', rowCount: number) => {
     trackEvent(AnalyticsEvents.DOWNLOAD, { format, row_count: rowCount });
   },
+
+  exportError: (format: 'csv' | 'json') => {
+    trackEvent(AnalyticsEvents.EXPORT_ERROR, { format });
+  },
 };

@@ -1,16 +1,20 @@
 /**
  * Pro Export state: feature gating, unlock status, and checkout kickoff.
- * Consumes the `?export=unlocked` redirect-back param on mount.
+ *
+ * The `?export=unlocked` redirect-back is consumed by useExportUnlockCapture in
+ * Layout, not here. Layout is a parent, so its effect runs after this hook's
+ * first render — hence useSyncExternalStore rather than a one-shot snapshot.
  */
 
-import { analytics } from '@/lib/stats';
+import { useSyncExternalStore } from 'react';
+
 import {
-  consumeUnlockParam,
   getCheckoutUrl,
   isExportFeatureEnabled,
   isExportUnlocked,
+  subscribeUnlock,
 } from '@/lib/export/unlock';
-import { useEffect, useState } from 'react';
+import { analytics } from '@/lib/stats';
 
 export interface UseProExportResult {
   isEnabled: boolean;
@@ -18,22 +22,17 @@ export interface UseProExportResult {
   startCheckout: () => void;
 }
 
+// Module-level so the store identity stays stable across renders.
+const getUnlockSnapshot = (): boolean => isExportFeatureEnabled() && isExportUnlocked();
+const getServerUnlockSnapshot = (): boolean => false;
+
 export function useProExport(): UseProExportResult {
   const isEnabled = isExportFeatureEnabled();
-  // Lazy initializer reads the current flag synchronously on first render —
-  // avoids a one-frame "locked" flash for users who are already unlocked.
-  const [isUnlocked, setIsUnlocked] = useState(
-    () => isExportFeatureEnabled() && isExportUnlocked()
+  const isUnlocked = useSyncExternalStore(
+    subscribeUnlock,
+    getUnlockSnapshot,
+    getServerUnlockSnapshot
   );
-
-  useEffect(() => {
-    if (!isEnabled) return;
-
-    if (consumeUnlockParam()) {
-      analytics.purchaseSuccess();
-    }
-    setIsUnlocked(isExportUnlocked());
-  }, [isEnabled]);
 
   const startCheckout = (): void => {
     const checkoutUrl = getCheckoutUrl();

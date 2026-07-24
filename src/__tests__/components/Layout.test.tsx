@@ -1,9 +1,10 @@
 import { Layout } from '@/components/Layout';
 import type { FileMetadata } from '@/core/types';
 import { AppState } from '@/core/types';
+import { isExportUnlocked, resetUnlockCache } from '@/lib/export/unlock';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock analytics (V9: added captureUTMParams for UTM tracking)
 vi.mock('@/lib/analytics', () => ({
@@ -571,6 +572,37 @@ describe('Layout', () => {
       await waitFor(() => {
         expect(screen.getByText(`activeScreen: ${AppState.HERO}`)).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('pro export unlock capture', () => {
+    beforeEach(() => {
+      localStorage.clear();
+      resetUnlockCache();
+      vi.stubEnv('VITE_LEMONSQUEEZY_URL', 'https://checkout.example/buy');
+    });
+
+    afterEach(() => {
+      vi.unstubAllEnvs();
+      window.history.replaceState({}, '', '/');
+    });
+
+    // Regression: the capture used to live in the results view, which renders
+    // only when data is loaded (fileMetadata is null here). Returning from
+    // checkout without data silently dropped the paid unlock.
+    it('should capture the checkout redirect-back when no results are loaded', () => {
+      window.history.replaceState({}, '', '/?export=unlocked');
+
+      renderLayout('/');
+
+      expect(isExportUnlocked()).toBe(true);
+      expect(window.location.search).toBe('');
+    });
+
+    it('should leave the unlock flag untouched without the param', () => {
+      renderLayout('/');
+
+      expect(isExportUnlocked()).toBe(false);
     });
   });
 });

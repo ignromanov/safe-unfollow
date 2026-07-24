@@ -1,5 +1,5 @@
 import { vi, beforeEach, describe, it, expect } from 'vitest';
-import { screen, fireEvent } from '@tests/utils/testUtils';
+import { screen } from '@tests/utils/testUtils';
 import { renderWithRouter } from '@/__tests__/test-utils';
 import resultsEN from '@/locales/en/results.json';
 import { createI18nMock } from '@/__tests__/utils/mockI18n';
@@ -9,18 +9,10 @@ vi.mock('react-i18next', () => createI18nMock(resultsEN));
 import { AccountListSection } from '@/components/AccountListSection';
 import { useAccountFiltering } from '@/hooks/useAccountFiltering';
 import { useProExport } from '@/hooks/useProExport';
-import { analytics } from '@/lib/stats';
 
 vi.mock('@/hooks/useAccountFiltering');
 vi.mock('@/hooks/useProExport');
 vi.mock('@/hooks/useLanguagePrefix', () => ({ useLanguagePrefix: () => '' }));
-vi.mock('@/lib/stats', async importOriginal => {
-  const actual = await importOriginal<typeof import('@/lib/stats')>();
-  return {
-    ...actual,
-    analytics: { ...actual.analytics, exportClick: vi.fn(), paywallView: vi.fn() },
-  };
-});
 
 vi.mock('@/components/FilterChips', () => ({
   FilterChips: () => <div data-testid="filter-chips" />,
@@ -79,7 +71,7 @@ describe('AccountListSection — Pro Export gating', () => {
     mockUseAccountFiltering.mockReturnValue(createFilteringMock());
   });
 
-  it('does not render the export button when the feature is disabled', () => {
+  it('should not render the export button when the feature is disabled', () => {
     mockUseProExport.mockReturnValue({
       isEnabled: false,
       isUnlocked: false,
@@ -91,7 +83,7 @@ describe('AccountListSection — Pro Export gating', () => {
     expect(screen.queryByLabelText(resultsEN.export.downloadAriaLabel)).not.toBeInTheDocument();
   });
 
-  it('renders the export button when the feature is enabled', () => {
+  it('should render the export button when the feature is enabled', () => {
     mockUseProExport.mockReturnValue({
       isEnabled: true,
       isUnlocked: false,
@@ -103,30 +95,17 @@ describe('AccountListSection — Pro Export gating', () => {
     expect(screen.getByLabelText(resultsEN.export.downloadAriaLabel)).toBeInTheDocument();
   });
 
-  it('opens the paywall when locked and clicked', () => {
+  // Sample data is 1,180 generated demo accounts — offering a paid export of it
+  // would take money for a file the user has no use for.
+  it('should not render the export button for sample data', () => {
     mockUseProExport.mockReturnValue({
       isEnabled: true,
       isUnlocked: false,
       startCheckout: vi.fn(),
     });
 
-    renderWithRouter(<AccountListSection {...defaultProps} />);
-    fireEvent.click(screen.getByLabelText(resultsEN.export.downloadAriaLabel));
+    renderWithRouter(<AccountListSection {...defaultProps} isSample />);
 
-    expect(screen.getByText(resultsEN.export.paywall.headline)).toBeInTheDocument();
-    expect(vi.mocked(analytics.paywallView)).toHaveBeenCalled();
-  });
-
-  it('opens the export dialog when unlocked and clicked', () => {
-    mockUseProExport.mockReturnValue({
-      isEnabled: true,
-      isUnlocked: true,
-      startCheckout: vi.fn(),
-    });
-
-    renderWithRouter(<AccountListSection {...defaultProps} />);
-    fireEvent.click(screen.getByLabelText(resultsEN.export.downloadAriaLabel));
-
-    expect(screen.getByText(resultsEN.export.dialog.title)).toBeInTheDocument();
+    expect(screen.queryByLabelText(resultsEN.export.downloadAriaLabel)).not.toBeInTheDocument();
   });
 });

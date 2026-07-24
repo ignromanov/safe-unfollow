@@ -71,6 +71,7 @@ export const AnalyticsEvents = {
   CHECKOUT_START: 'checkout_start',
   PURCHASE_SUCCESS: 'purchase_success',
   DOWNLOAD: 'download',
+  EXPORT_ERROR: 'export_error',
 
   // Diagnostic Errors
   DIAGNOSTIC_ERROR_VIEW: 'diagnostic_error_view',

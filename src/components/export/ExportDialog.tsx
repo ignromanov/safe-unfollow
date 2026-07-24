@@ -10,9 +10,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { buildExportCsv } from '@/lib/export/csv';
-import { buildExportJson } from '@/lib/export/json';
+import { useExportWorker } from '@/hooks/useExportWorker';
 import { downloadBlob } from '@/lib/export/download';
+import type { ExportFormat, ExportProgress } from '@/lib/export/types';
 import { analytics } from '@/lib/stats';
 
 export interface ExportDialogProps {
@@ -24,7 +24,10 @@ export interface ExportDialogProps {
   filename: string;
 }
 
-type ExportFormat = 'csv' | 'json';
+function toPercent(progress: ExportProgress | null): number {
+  if (!progress || progress.total === 0) return 0;
+  return Math.min(100, Math.round((progress.processed / progress.total) * 100));
+}
 
 export function ExportDialog({
   open,
@@ -35,22 +38,50 @@ export function ExportDialog({
   filename,
 }: ExportDialogProps) {
   const { t } = useTranslation('results');
+  const { buildExport } = useExportWorker();
   const [pendingFormat, setPendingFormat] = useState<ExportFormat | null>(null);
+  const [progress, setProgress] = useState<ExportProgress | null>(null);
+  const [hasFailed, setHasFailed] = useState(false);
 
   const handleExport = async (format: ExportFormat): Promise<void> => {
     setPendingFormat(format);
+    setHasFailed(false);
+    setProgress(null);
+
     try {
-      const blob =
-        format === 'csv'
-          ? await buildExportCsv(fileHash, indices, rowCount)
-          : await buildExportJson(fileHash, indices, rowCount);
+      const blob = await buildExport(format, fileHash, indices, rowCount, setProgress);
 
       downloadBlob(blob, `${filename}.${format}`);
       analytics.download(format, rowCount);
       onOpenChange(false);
+    } catch {
+      // A paid export failing silently is the worst outcome — surface it and
+      // leave the dialog open so the user can retry.
+      setHasFailed(true);
+      analytics.exportError(format);
     } finally {
       setPendingFormat(null);
+      setProgress(null);
     }
+  };
+
+  const isPending = pendingFormat !== null;
+
+  const renderIcon = (format: ExportFormat) => {
+    if (pendingFormat === format) {
+      // Wrapper div, not the svg: browsers hardware-accelerate transforms on
+      // regular elements but not reliably on SVG nodes.
+      return (
+        <div className="animate-spin">
+          <Loader2 className="h-4 w-4" />
+        </div>
+      );
+    }
+    return format === 'csv' ? (
+      <FileSpreadsheet className="h-4 w-4" />
+    ) : (
+      <FileJson className="h-4 w-4" />
+    );
   };
 
   return (
@@ -61,31 +92,35 @@ export function ExportDialog({
           <DialogDescription>{t('export.dialog.rowCount', { count: rowCount })}</DialogDescription>
         </DialogHeader>
 
+        <div role="status" aria-live="polite" className="min-h-5 text-sm text-muted-foreground">
+          {isPending ? t('export.dialog.generating', { percent: toPercent(progress) }) : ''}
+        </div>
+
+        {hasFailed ? (
+          <p role="alert" className="text-sm text-destructive">
+            {t('export.dialog.error')}
+          </p>
+        ) : null}
+
         <DialogFooter className="flex-col gap-2 sm:flex-col sm:items-stretch">
           <Button
             variant="outline"
             size="lg"
-            disabled={pendingFormat !== null}
+            disabled={isPending}
+            aria-busy={pendingFormat === 'csv'}
             onClick={() => void handleExport('csv')}
           >
-            {pendingFormat === 'csv' ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <FileSpreadsheet className="h-4 w-4" />
-            )}
+            {renderIcon('csv')}
             {t('export.dialog.csv')}
           </Button>
           <Button
             variant="outline"
             size="lg"
-            disabled={pendingFormat !== null}
+            disabled={isPending}
+            aria-busy={pendingFormat === 'json'}
             onClick={() => void handleExport('json')}
           >
-            {pendingFormat === 'json' ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <FileJson className="h-4 w-4" />
-            )}
+            {renderIcon('json')}
             {t('export.dialog.json')}
           </Button>
         </DialogFooter>

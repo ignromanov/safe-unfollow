@@ -154,7 +154,9 @@
       "title": "Hesapları dışa aktar",
       "rowCount": "{{count}} hesap dışa aktarılacak",
       "csv": "CSV indir",
-      "json": "JSON indir"
+      "json": "JSON indir",
+      "generating": "Oluşturuluyor… {{percent}}%",
+      "error": "Dışa aktarma başarısız oldu. Lütfen tekrar deneyin."
     }
   }
 }

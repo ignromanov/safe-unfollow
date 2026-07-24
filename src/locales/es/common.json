@@ -7,7 +7,8 @@
     "clearData": "Borrar datos",
     "viewResults": "Resultados",
     "uploadFile": "Subir archivo",
-    "delete": "Eliminar"
+    "delete": "Eliminar",
+    "close": "Cerrar"
   },
   "badges": {
     "followers": "Seguidores",

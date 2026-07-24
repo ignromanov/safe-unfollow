@@ -154,7 +154,9 @@
       "title": "Ekspor akun",
       "rowCount": "{{count}} akun akan diekspor",
       "csv": "Unduh CSV",
-      "json": "Unduh JSON"
+      "json": "Unduh JSON",
+      "generating": "Membuat… {{percent}}%",
+      "error": "Ekspor gagal. Silakan coba lagi."
     }
   }
 }

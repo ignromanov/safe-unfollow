@@ -1,10 +1,12 @@
 /**
- * CSV export builder — respects active filters/search and streams accounts
- * in chunks so a 1M-row export never holds the full account list in memory.
+ * CSV export builder — respects active filters/search and accumulates one
+ * string per chunk (not per row), so a 1M-row export never holds a second
+ * full copy of the output in memory.
  */
 
-import type { BadgeKey } from '@/core/types';
-import { iterateAccountsForExport } from './data';
+import type { BadgeKey, BadgeMap } from '@/core/types';
+import { getExportRowCount, iterateAccountsForExport } from './data';
+import type { ExportProgressCallback } from './types';
 
 export const CSV_BADGE_COLUMNS: BadgeKey[] = [
   'following',
@@ -35,10 +37,15 @@ export function escapeCsvField(value: string): string {
 // /^[a-zA-Z0-9._]{1,30}$/ at parse time (see core/parsers), so they can never
 // start with =, +, -, or @, and href is always a fixed https://instagram.com/
 // prefix around that validated username.
-function buildCsvRow(username: string, badges: Record<string, unknown>): string {
-  const href = `https://instagram.com/${username}`;
-  const flags = CSV_BADGE_COLUMNS.map(key => (badges[key] ? '1' : '0'));
-  return [escapeCsvField(username), escapeCsvField(href), ...flags].join(',');
+function buildCsvRow(username: string, badges: BadgeMap): string {
+  // Plain concatenation instead of map()+spread+join(): one row of a 1M-row
+  // export would otherwise allocate two throwaway arrays.
+  let row = escapeCsvField(username);
+  row += `,${escapeCsvField(`https://instagram.com/${username}`)}`;
+  for (const key of CSV_BADGE_COLUMNS) {
+    row += badges[key] ? ',1' : ',0';
+  }
+  return row;
 }
 
 /**
@@ -48,16 +55,26 @@ function buildCsvRow(username: string, badges: Record<string, unknown>): string 
 export async function buildExportCsv(
   fileHash: string,
   indices: number[] | null,
-  totalCount: number
+  totalCount: number,
+  onProgress?: ExportProgressCallback
 ): Promise<Blob> {
   const header = ['username', 'href', ...CSV_BADGE_COLUMNS].join(',');
-  const lines: string[] = [header];
+  // One Blob part per chunk. Blob accepts the parts array directly, so the
+  // output is never materialized as a single joined string.
+  const parts: string[] = [`${header}\n`];
+  const total = getExportRowCount(indices, totalCount);
+  let processed = 0;
 
   for await (const chunk of iterateAccountsForExport(fileHash, indices, totalCount)) {
+    let buffer = '';
     for (const { account } of chunk) {
-      lines.push(buildCsvRow(account.username, account.badges));
+      buffer += `${buildCsvRow(account.username, account.badges)}\n`;
     }
+    if (buffer) parts.push(buffer);
+
+    processed += chunk.length;
+    onProgress?.({ processed, total });
   }
 
-  return new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+  return new Blob(parts, { type: 'text/csv;charset=utf-8' });
 }

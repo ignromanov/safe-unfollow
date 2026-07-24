@@ -9,5 +9,7 @@ export function downloadBlob(blob: Blob, filename: string): void {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  URL.revokeObjectURL(url);
+  // Deferred: Safari aborts an in-flight download when the object URL is
+  // revoked in the same tick as the click.
+  setTimeout(() => URL.revokeObjectURL(url), 0);
 }

@@ -154,7 +154,9 @@
       "title": "Exportar contas",
       "rowCount": "{{count}} contas serão exportadas",
       "csv": "Baixar CSV",
-      "json": "Baixar JSON"
+      "json": "Baixar JSON",
+      "generating": "Gerando… {{percent}}%",
+      "error": "A exportação falhou. Tente novamente."
     }
   }
 }

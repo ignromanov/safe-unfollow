@@ -26,19 +26,19 @@ function readBlobText(blob: Blob): Promise<string> {
 }
 
 describe('escapeCsvField', () => {
-  it('leaves plain values untouched', () => {
+  it('should leave plain values untouched', () => {
     expect(escapeCsvField('plain_user')).toBe('plain_user');
   });
 
-  it('quotes values containing a comma', () => {
+  it('should quote values containing a comma', () => {
     expect(escapeCsvField('a,b')).toBe('"a,b"');
   });
 
-  it('doubles embedded quotes', () => {
+  it('should double embedded quotes', () => {
     expect(escapeCsvField('say "hi"')).toBe('"say ""hi"""');
   });
 
-  it('quotes values containing a newline', () => {
+  it('should quote values containing a newline', () => {
     expect(escapeCsvField('line1\nline2')).toBe('"line1\nline2"');
   });
 });
@@ -48,7 +48,7 @@ describe('buildExportCsv', () => {
     getAccountsByRange.mockReset();
   });
 
-  it('builds a header row plus one row per account with href and badge flags', async () => {
+  it('should build a header row plus one row per account with href and badge flags', async () => {
     getAccountsByRange.mockResolvedValueOnce([
       account('alice', { following: true, unfollowed: 1700000000 }),
       account('bob'),
@@ -65,7 +65,7 @@ describe('buildExportCsv', () => {
     expect(lines[2]).toBe('bob,https://instagram.com/bob,0,0,0,0,0,0,0,0,0,0,0');
   });
 
-  it('escapes usernames containing commas or quotes', async () => {
+  it('should escape usernames containing commas or quotes', async () => {
     getAccountsByRange.mockResolvedValueOnce([account('weird,"name')]);
 
     const blob = await buildExportCsv('hash1', null, 1);
@@ -75,7 +75,7 @@ describe('buildExportCsv', () => {
     expect(dataLine).toContain('"weird,""name"');
   });
 
-  it('respects filtered indices by fetching only the relevant range', async () => {
+  it('should respect filtered indices by fetching only the relevant range', async () => {
     getAccountsByRange.mockResolvedValueOnce([account('c'), account('d'), account('e')]);
 
     // Indices 2 and 4 out of a wider range — only c(2) and e(4) should appear
@@ -84,7 +84,7 @@ describe('buildExportCsv', () => {
     expect(getAccountsByRange).toHaveBeenCalledWith('hash1', 2, 5);
   });
 
-  it('fetches in chunks of 1000 for the full "export all" case', async () => {
+  it('should fetch in chunks of 1000 for the full "export all" case', async () => {
     getAccountsByRange.mockResolvedValue([]);
 
     await buildExportCsv('hash1', null, 2500);
@@ -95,7 +95,7 @@ describe('buildExportCsv', () => {
     expect(getAccountsByRange).toHaveBeenNthCalledWith(3, 'hash1', 2000, 2500);
   });
 
-  it('caps the fetched index span for sparse filtered selections', async () => {
+  it('should cap the fetched index span for sparse filtered selections', async () => {
     getAccountsByRange.mockResolvedValue([]);
 
     // 200 indices scattered evenly across a 1M-account file (5000-index gaps) —
@@ -108,5 +108,45 @@ describe('buildExportCsv', () => {
     for (const [, start, end] of getAccountsByRange.mock.calls) {
       expect(end - start).toBeLessThanOrEqual(2000);
     }
+  });
+
+  it('should terminate every row with a newline, including the last one', async () => {
+    getAccountsByRange.mockResolvedValueOnce([account('alice'), account('bob')]);
+
+    const blob = await buildExportCsv('hash1', null, 2);
+    const text = await readBlobText(blob);
+
+    expect(text.endsWith('\n')).toBe(true);
+    // header + 2 rows, each newline-terminated -> no empty line in between
+    expect(text.split('\n').filter(Boolean)).toHaveLength(3);
+  });
+
+  it('should report progress after each chunk', async () => {
+    getAccountsByRange
+      .mockResolvedValueOnce(Array.from({ length: 1000 }, (_, i) => account(`user${i}`)))
+      .mockResolvedValueOnce(Array.from({ length: 500 }, (_, i) => account(`user${1000 + i}`)));
+    const onProgress = vi.fn();
+
+    await buildExportCsv('hash1', null, 1500, onProgress);
+
+    expect(onProgress).toHaveBeenCalledTimes(2);
+    expect(onProgress).toHaveBeenNthCalledWith(1, { processed: 1000, total: 1500 });
+    expect(onProgress).toHaveBeenLastCalledWith({ processed: 1500, total: 1500 });
+  });
+
+  it('should keep rows intact across chunk boundaries', async () => {
+    getAccountsByRange
+      .mockResolvedValueOnce(Array.from({ length: 1000 }, (_, i) => account(`user${i}`)))
+      .mockResolvedValueOnce(Array.from({ length: 500 }, (_, i) => account(`user${1000 + i}`)));
+
+    const blob = await buildExportCsv('hash1', null, 1500);
+    const text = await readBlobText(blob);
+    const rows = text.split('\n').filter(Boolean);
+
+    expect(rows).toHaveLength(1501); // header + 1500 accounts
+    expect(rows[1]).toBe('user0,https://instagram.com/user0,0,0,0,0,0,0,0,0,0,0,0');
+    expect(rows[1000]).toBe('user999,https://instagram.com/user999,0,0,0,0,0,0,0,0,0,0,0');
+    expect(rows[1001]).toBe('user1000,https://instagram.com/user1000,0,0,0,0,0,0,0,0,0,0,0');
+    expect(rows[1500]).toBe('user1499,https://instagram.com/user1499,0,0,0,0,0,0,0,0,0,0,0');
   });
 });

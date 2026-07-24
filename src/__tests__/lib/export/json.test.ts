@@ -30,7 +30,7 @@ describe('buildExportJson', () => {
     getAccountsByRange.mockReset();
   });
 
-  it('builds a JSON array with username, href, and badges per account', async () => {
+  it('should build a JSON array with username, href, and badges per account', async () => {
     getAccountsByRange.mockResolvedValueOnce([
       account('alice', { following: true }),
       account('bob'),
@@ -46,14 +46,26 @@ describe('buildExportJson', () => {
     ]);
   });
 
-  it('produces a valid empty array when there are no rows', async () => {
+  it('should produce a valid empty array when there are no rows', async () => {
     const blob = await buildExportJson('hash1', [], 0);
     const text = await readBlobText(blob);
 
     expect(JSON.parse(text)).toEqual([]);
   });
 
-  it('produces valid JSON across multiple chunk boundaries', async () => {
+  it('should report progress after each chunk', async () => {
+    getAccountsByRange
+      .mockResolvedValueOnce(Array.from({ length: 1000 }, (_, i) => account(`user${i}`)))
+      .mockResolvedValueOnce(Array.from({ length: 500 }, (_, i) => account(`user${1000 + i}`)));
+    const onProgress = vi.fn();
+
+    await buildExportJson('hash1', null, 1500, onProgress);
+
+    expect(onProgress).toHaveBeenCalledTimes(2);
+    expect(onProgress).toHaveBeenLastCalledWith({ processed: 1500, total: 1500 });
+  });
+
+  it('should produce valid JSON across multiple chunk boundaries', async () => {
     getAccountsByRange
       .mockResolvedValueOnce(Array.from({ length: 1000 }, (_, i) => account(`user${i}`)))
       .mockResolvedValueOnce(Array.from({ length: 500 }, (_, i) => account(`user${1000 + i}`)));

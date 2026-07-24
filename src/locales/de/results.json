@@ -154,7 +154,9 @@
       "title": "Konten exportieren",
       "rowCount": "{{count}} Konten werden exportiert",
       "csv": "CSV herunterladen",
-      "json": "JSON herunterladen"
+      "json": "JSON herunterladen",
+      "generating": "Wird erstellt… {{percent}}%",
+      "error": "Export fehlgeschlagen. Bitte versuche es erneut."
     }
   }
 }

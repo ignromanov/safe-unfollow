@@ -154,7 +154,9 @@
       "title": "Export accounts",
       "rowCount": "{{count}} accounts will be exported",
       "csv": "Download CSV",
-      "json": "Download JSON"
+      "json": "Download JSON",
+      "generating": "Generating… {{percent}}%",
+      "error": "Export failed. Please try again."
     }
   }
 }
