@@ -9,8 +9,8 @@ import { AFFILIATE_LINKS } from './affiliate-links';
  *
  * Privacy-themed tips shown during ZIP parsing (Zeigarnik effect — the user
  * is in an active waiting state with elevated attention). Only the NordVPN
- * tip carries an affiliate link; it drops out of `VISIBLE_LOADING_TIPS` when
- * `VITE_NORDVPN_URL` is unset, leaving the other tips untouched.
+ * tip carries an affiliate link; blanking that link in `affiliate-links.ts`
+ * drops the tip from `VISIBLE_LOADING_TIPS` and leaves the others untouched.
  */
 
 export interface LoadingTip {

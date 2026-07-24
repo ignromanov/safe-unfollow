@@ -1,41 +1,31 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
 
-/**
- * Covers the real config wiring (env -> AFFILIATE_LINKS -> VISIBLE_LOADING_TIPS)
- * that `LoadingTips.test.tsx` mocks away.
- */
+import { LOADING_TIPS, VISIBLE_LOADING_TIPS } from '@/config/loading-tips';
+
 describe('VISIBLE_LOADING_TIPS', () => {
   afterEach(() => {
-    vi.unstubAllEnvs();
+    vi.doUnmock('@/config/affiliate-links');
     vi.resetModules();
   });
 
-  it('drops the affiliate tip when VITE_NORDVPN_URL is unset', async () => {
-    vi.stubEnv('VITE_NORDVPN_URL', undefined);
-    vi.resetModules();
-
-    const { LOADING_TIPS, VISIBLE_LOADING_TIPS } = await import('@/config/loading-tips');
-
-    expect(VISIBLE_LOADING_TIPS.some(tip => tip.id === 'nordvpn')).toBe(false);
-    // The privacy tips must not depend on affiliate configuration.
-    expect(VISIBLE_LOADING_TIPS).toHaveLength(LOADING_TIPS.length - 1);
-  });
-
-  it('keeps the affiliate tip with its link when VITE_NORDVPN_URL is set', async () => {
-    vi.stubEnv('VITE_NORDVPN_URL', 'https://go.nordvpn.example/TEST');
-    vi.resetModules();
-
-    const { LOADING_TIPS, VISIBLE_LOADING_TIPS } = await import('@/config/loading-tips');
-
+  it('renders every tip while the affiliate link is configured', () => {
     expect(VISIBLE_LOADING_TIPS).toHaveLength(LOADING_TIPS.length);
-    expect(VISIBLE_LOADING_TIPS.find(tip => tip.id === 'nordvpn')?.url).toBe(
-      'https://go.nordvpn.example/TEST'
-    );
+    expect(VISIBLE_LOADING_TIPS.find(tip => tip.id === 'nordvpn')?.url).toMatch(/^https:\/\//);
   });
 
-  it('keeps delays ascending, which is what makes reveal indices match analytics', async () => {
-    const { VISIBLE_LOADING_TIPS } = await import('@/config/loading-tips');
+  it('drops the affiliate tip when its link is blanked, keeping the privacy tips', async () => {
+    // The kill switch: blanking the URL in affiliate-links.ts must remove the
+    // paid card without touching the tips that carry no link.
+    vi.doMock('@/config/affiliate-links', () => ({ AFFILIATE_LINKS: { nordvpn: '' } }));
+    vi.resetModules();
 
+    const reloaded = await import('@/config/loading-tips');
+
+    expect(reloaded.VISIBLE_LOADING_TIPS.some(tip => tip.id === 'nordvpn')).toBe(false);
+    expect(reloaded.VISIBLE_LOADING_TIPS).toHaveLength(reloaded.LOADING_TIPS.length - 1);
+  });
+
+  it('keeps delays ascending, which is what makes reveal indices match analytics', () => {
     const delays = VISIBLE_LOADING_TIPS.map(tip => tip.delayMs);
     expect(delays).toEqual([...delays].sort((a, b) => a - b));
   });
