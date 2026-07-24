@@ -7,6 +7,7 @@ import type { FilterAction, LinkType, ParseOutcome } from './constants';
 import { trackEvent } from './core';
 import { enqueueEvent } from './queue';
 import { getStoredUTM, getEntryCTA, setEntryCTA } from './utm';
+import type { LicenseFailureReason } from '@/lib/export/license';
 
 /**
  * Analytics helper object with typed methods
@@ -419,5 +420,19 @@ export const analytics = {
 
   exportError: (format: 'csv' | 'json') => {
     trackEvent(AnalyticsEvents.EXPORT_ERROR, { format });
+  },
+
+  // A license activated by hand on a second device, rather than via checkout.
+  licenseRestored: () => {
+    trackEvent(AnalyticsEvents.LICENSE_RESTORED);
+  },
+
+  // Reason only — never the key, and never the customer PII the API returns.
+  licenseError: (reason: LicenseFailureReason) => {
+    trackEvent(AnalyticsEvents.LICENSE_ERROR, { reason });
+  },
+
+  licenseRevoked: () => {
+    trackEvent(AnalyticsEvents.LICENSE_REVOKED);
   },
 };

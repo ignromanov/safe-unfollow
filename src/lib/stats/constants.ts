@@ -72,6 +72,9 @@ export const AnalyticsEvents = {
   PURCHASE_SUCCESS: 'purchase_success',
   DOWNLOAD: 'download',
   EXPORT_ERROR: 'export_error',
+  LICENSE_RESTORED: 'license_restored',
+  LICENSE_ERROR: 'license_error',
+  LICENSE_REVOKED: 'license_revoked',
 
   // Diagnostic Errors
   DIAGNOSTIC_ERROR_VIEW: 'diagnostic_error_view',
