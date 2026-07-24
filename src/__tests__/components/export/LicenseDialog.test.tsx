@@ -221,15 +221,18 @@ describe('LicenseDialog', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('should render a description for the redirect flow without triggering the Radix a11y warning', async () => {
+  it('should render a stable description for the redirect flow without triggering the Radix a11y warning', async () => {
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     vi.mocked(activateLicense).mockResolvedValue({ ok: true, instanceId: INSTANCE });
 
     render(<LicenseDialog open initialKey={KEY} source="redirect" onOpenChange={vi.fn()} />);
 
     // Radix portals DialogContent into document.body, not the RTL container.
+    // The description stays fixed (not "Activating…") so the role="status"
+    // region is the only element announcing that state change — otherwise a
+    // screen reader would hear "Activating…" twice.
     expect(document.body.querySelector('[data-slot="dialog-description"]')).toHaveTextContent(
-      resultsEN.export.license.activating
+      resultsEN.export.paywall.instantNote
     );
 
     await waitFor(() => {

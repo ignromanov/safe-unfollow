@@ -50,31 +50,36 @@ export function ExportDialog({
   const [progress, setProgress] = useState<ExportProgress | null>(null);
   const [hasFailed, setHasFailed] = useState(false);
   const [isRevoked, setIsRevoked] = useState(false);
-  const [isCheckingLicense, setIsCheckingLicense] = useState(() => shouldValidateThisSession());
 
+  // The export stays usable while this runs: validate is bounded at 4s, and
+  // blocking both buttons on it would leave a paying user staring at two
+  // disabled buttons on a slow connection to defend against the narrow case
+  // of a license disabled within that same window. The design already fails
+  // open on every ambiguous answer, so nothing here can hand out the file to
+  // someone who did not pay — it can only ever revoke.
   useEffect(() => {
     if (!shouldValidateThisSession()) return;
 
     const license = getStoredLicense();
-    if (license === null) {
-      setIsCheckingLicense(false);
-      return;
-    }
+    if (license === null) return;
 
     let isCurrent = true;
 
     void validateLicense(license.key, license.instanceId).then(result => {
-      markValidatedThisSession();
-      if (!isCurrent) return;
-
       // Fail open: only an explicit negative revokes. A network problem must not
       // take the export away from someone who paid for it.
-      if (!result.ok && (result.reason === 'disabled' || result.reason === 'not_found')) {
+      const revoked = !result.ok && (result.reason === 'disabled' || result.reason === 'not_found');
+      if (revoked) {
         clearLicense();
         analytics.licenseRevoked();
-        setIsRevoked(true);
       }
-      setIsCheckingLicense(false);
+      // Act on the verdict even if the dialog was closed before this resolved —
+      // skipping it would let a revoked license keep working for the rest of
+      // the browser session, since shouldValidateThisSession() only allows one
+      // check per session. Only the React state update below is conditional.
+      markValidatedThisSession();
+      if (!isCurrent) return;
+      if (revoked) setIsRevoked(true);
     });
 
     return () => {
@@ -151,7 +156,7 @@ export function ExportDialog({
           <Button
             variant="outline"
             size="lg"
-            disabled={isPending || isCheckingLicense || isRevoked}
+            disabled={isPending || isRevoked}
             aria-busy={pendingFormat === 'csv'}
             onClick={() => void handleExport('csv')}
           >
@@ -161,7 +166,7 @@ export function ExportDialog({
           <Button
             variant="outline"
             size="lg"
-            disabled={isPending || isCheckingLicense || isRevoked}
+            disabled={isPending || isRevoked}
             aria-busy={pendingFormat === 'json'}
             onClick={() => void handleExport('json')}
           >

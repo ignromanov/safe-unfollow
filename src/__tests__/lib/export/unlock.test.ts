@@ -138,6 +138,16 @@ describe('export/unlock', () => {
 
       expect(isExportUnlocked()).toBe(false);
     });
+
+    it('should be idempotent: a second call finds nothing left to consume', () => {
+      // Guards the invariant Critical 2's stored-license check depends on —
+      // the param must not still be readable after Layout's first render
+      // consumes it, or a re-render could hand the key to activation again.
+      window.history.replaceState({}, '', `/results?license=${KEY}`);
+
+      expect(consumeLicenseParam()).toBe(KEY);
+      expect(consumeLicenseParam()).toBeNull();
+    });
   });
 
   describe('shouldValidateThisSession', () => {

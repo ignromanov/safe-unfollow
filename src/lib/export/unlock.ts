@@ -81,6 +81,9 @@ function readStoredLicense(): StoredLicense | null {
 
   try {
     const parsed: unknown = JSON.parse(raw);
+    // The `object` check below is what actually rejects the pre-license '1'
+    // flag (JSON.parse('1') succeeds and returns the number 1) — the flag
+    // was never a valid license shape, so it falls through to null.
     if (
       typeof parsed === 'object' &&
       parsed !== null &&
@@ -93,7 +96,7 @@ function readStoredLicense(): StoredLicense | null {
       return { v: 1, key, instanceId };
     }
   } catch {
-    // Anything unparseable — including the pre-license '1' flag — is not a license.
+    // Anything that isn't even valid JSON is not a license.
   }
 
   return null;

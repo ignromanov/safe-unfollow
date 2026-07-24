@@ -63,12 +63,12 @@ describe('useProExport', () => {
     expect(result.current.isUnlocked).toBe(true);
   });
 
-  it('should leave the redirect-back param for the Layout-level capture', () => {
-    window.history.replaceState({}, '', '/results?export=unlocked');
+  it('should leave the `license` param in the URL for the Layout-level capture', () => {
+    window.history.replaceState({}, '', '/results?license=38b1460a-5104-4067-a91d-77b872934d51');
 
     renderHook(() => useProExport());
 
-    expect(window.location.search).toBe('?export=unlocked');
+    expect(window.location.search).toBe('?license=38b1460a-5104-4067-a91d-77b872934d51');
   });
 
   it('should report checkout start before navigating', () => {

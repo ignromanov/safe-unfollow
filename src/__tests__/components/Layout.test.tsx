@@ -646,5 +646,19 @@ describe('Layout', () => {
 
       expect(vi.mocked(consumeLicenseParam)).toHaveBeenCalledTimes(1);
     });
+
+    it('should strip the license param even when the feature flag is off', () => {
+      // Stripping is unconditionally safe; leaving it would keep a key in the
+      // address bar and in Umami's auto-tracked pageview URL with no way to
+      // ever use it, since the dialog itself stays flag-gated below.
+      vi.unstubAllEnvs();
+      vi.stubEnv('VITE_LEMONSQUEEZY_URL', '');
+      window.history.replaceState({}, '', '/results?license=38b1460a-5104-4067-a91d-77b872934d51');
+
+      renderLayout();
+
+      expect(window.location.search).toBe('');
+      expect(screen.queryByTestId('license-dialog')).not.toBeInTheDocument();
+    });
   });
 });

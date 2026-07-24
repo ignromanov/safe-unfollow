@@ -199,6 +199,40 @@ describe('ExportDialog', () => {
       expect(analytics.licenseRevoked).toHaveBeenCalled();
     });
 
+    it('should not block the export buttons while validation is in flight', async () => {
+      // Never resolves within the test — proves the buttons don't wait for it.
+      vi.mocked(validateLicense).mockImplementationOnce(() => new Promise(() => {}));
+
+      render(<ExportDialog {...defaultProps} />);
+
+      expect(screen.getByRole('button', { name: resultsEN.export.dialog.csv })).toBeEnabled();
+      expect(screen.getByRole('button', { name: resultsEN.export.dialog.json })).toBeEnabled();
+    });
+
+    it('should clear a revoked license even if the dialog unmounts before validation resolves', async () => {
+      // Closing the dialog within the 4s validate window must not let a
+      // revoked license keep working for the rest of the session — only the
+      // React state update (which would touch an unmounted component) is
+      // allowed to be skipped, not the revocation itself.
+      let resolveValidate: (result: { ok: false; reason: 'disabled' }) => void = () => {};
+      vi.mocked(validateLicense).mockImplementationOnce(
+        () =>
+          new Promise(resolve => {
+            resolveValidate = resolve;
+          })
+      );
+
+      const { unmount } = render(<ExportDialog {...defaultProps} />);
+      unmount();
+
+      resolveValidate({ ok: false, reason: 'disabled' });
+
+      await waitFor(() => {
+        expect(getStoredLicense()).toBeNull();
+      });
+      expect(analytics.licenseRevoked).toHaveBeenCalled();
+    });
+
     it('should validate only once per session', async () => {
       vi.mocked(validateLicense).mockResolvedValue({ ok: true });
 

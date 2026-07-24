@@ -145,7 +145,10 @@ export function LicenseDialog({ open, onOpenChange, initialKey, source }: Licens
           <DialogTitle>{t('export.license.title')}</DialogTitle>
           <DialogDescription>
             {hasActivationKey
-              ? t('export.license.activating')
+              ? // Stable purpose text, not state text: the role="status" region
+                // below already announces "Activating…" on state change, so
+                // repeating it here would have a screen reader read it twice.
+                t('export.paywall.instantNote')
               : t('export.license.manualDescription')}
           </DialogDescription>
         </DialogHeader>

@@ -66,9 +66,18 @@ export function Layout({ lang }: LayoutProps) {
   // Read once, during the first render: the param must be stripped before any
   // navigation or analytics can observe the key. A second read would spend one
   // of the license's 3 device activations, so nothing may re-trigger this.
-  const [capturedLicenseKey] = useState<string | null>(() =>
-    isExportFeatureEnabled() ? consumeLicenseParam() : null
-  );
+  // NOTE: this initializer has a side effect (history.replaceState). The app
+  // does not use StrictMode today; under StrictMode React double-invokes this
+  // initializer and commits the second result, which would find the param
+  // already stripped and silently drop the paid redirect.
+  const [capturedLicenseKey] = useState<string | null>(() => {
+    // Stripping is always safe and must happen even when the feature flag is
+    // off — otherwise a key lingers in the address bar and in Umami's
+    // auto-tracked pageview URL. Only mounting the dialog below is gated on
+    // the flag.
+    const key = consumeLicenseParam();
+    return isExportFeatureEnabled() ? key : null;
+  });
   const [isLicenseDialogOpen, setIsLicenseDialogOpen] = useState(capturedLicenseKey !== null);
 
   // SSG: Switch language synchronously BEFORE rendering
