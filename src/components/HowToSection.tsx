@@ -65,7 +65,7 @@ export function HowToSection({ onStart }: HowToSectionProps) {
       position: step.id,
       name: step.title,
       text: step.description,
-      image: step.visual ? `${step.visual}-600w.gif` : undefined,
+      image: step.visual ? `${step.visual}-600w-poster.jpg` : undefined,
     })),
   };
 
@@ -151,7 +151,6 @@ export function HowToSection({ onStart }: HowToSectionProps) {
                         basePath={step.visual}
                         alt={step.title}
                         className="w-full h-auto grayscale-[0.2] group-hover:grayscale-0 transition-all duration-700"
-                        loading="lazy"
                       />
                     </div>
                   )}

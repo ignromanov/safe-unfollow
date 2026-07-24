@@ -131,7 +131,6 @@ export function Wizard({ initialStep = 1, onComplete, onCancel }: WizardProps) {
                     basePath={step.visual}
                     alt={t(`steps.${currentStep}.alt` as any)}
                     className="w-full h-auto block"
-                    loading="lazy"
                   />
                 ) : (
                   <img
