@@ -44,11 +44,14 @@ export function areAdsAllowed(): boolean {
   return false;
 }
 
+/** Matches `/sample` on any language-prefixed path (e.g. `/es/sample`). */
+const SAMPLE_ROUTE_REGEX = /(?:^|\/)sample\/?$/;
+
 /**
  * True when the current route is the `/sample` demo page (any language
  * prefix). Ads must never load on the sample route.
  */
 export function isSampleRoute(): boolean {
   if (typeof window === 'undefined') return false;
-  return /(?:^|\/)sample\/?$/.test(window.location.pathname);
+  return SAMPLE_ROUTE_REGEX.test(window.location.pathname);
 }

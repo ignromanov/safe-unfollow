@@ -51,7 +51,7 @@ export function AdSlot({
     if (!mounted || !eligible || pushedRef.current || !client) return;
     pushedRef.current = true;
     analytics.adSlotRendered(name);
-    pushAdSlot();
+    pushAdSlot(client);
   }, [mounted, eligible, client, name]);
 
   if (!mounted || !eligible || !client || !slot) {

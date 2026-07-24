@@ -98,11 +98,12 @@
 
     <!-- Schema.org structured data rendered dynamically by OrganizationSchema.tsx (homepage only) -->
 
-    <!-- Google AdSense site verification. Unconditional so Google's crawler
-         sees it on every prerendered page during the site review. Renders no
-         ads without configured slot IDs; slot rendering/geo-gate handled in
-         src/components/ads/AdSlot.tsx. -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5976295812261948" crossorigin="anonymous"></script>
+    <!-- Google AdSense ownership verification. Inert meta-tag method (no
+         cookies, no network calls), present on every prerendered page for
+         Google's site review. The adsbygoogle.js script is injected at runtime
+         only for eligible (geo-allowed, non-sample) visitors — see
+         src/lib/ads/loader.ts — so no ad tracker loads in the EEA/UK/CH. -->
+    <meta name="google-adsense-account" content="ca-pub-5976295812261948" />
   </head>
 
   <body class="font-sans antialiased">

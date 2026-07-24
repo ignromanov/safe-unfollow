@@ -5,11 +5,12 @@
  * geo header). Visitors in the EEA/UK/CH get `su_ads=0` so no ads load and
  * no cookie-consent banner is ever required; everyone else gets `su_ads=1`.
  *
- * The middleware only tags the request and continues to the static origin.
- * Continuation uses the `x-middleware-next` response header contract that
- * Vercel's Edge runtime honours (equivalent to `next()` from @vercel/edge),
- * which keeps this file dependency-free.
+ * The middleware only tags the request and continues to the static origin via
+ * `next()` from @vercel/edge — the officially supported continuation API — then
+ * appends the cookie to that response.
  */
+
+import { next } from '@vercel/edge';
 
 export const config = {
   // Run on page requests only; skip API routes and static assets (files with
@@ -62,11 +63,11 @@ export default function middleware(request: Request): Response {
   const country = request.headers.get('x-vercel-ip-country') ?? '';
   const allow = GEO_BLOCKED_COUNTRIES.has(country) ? '0' : '1';
 
-  const headers = new Headers({ 'x-middleware-next': '1' });
-  headers.append(
+  const response = next();
+  response.headers.append(
     'set-cookie',
     `su_ads=${allow}; Path=/; Max-Age=${COOKIE_MAX_AGE_SECONDS}; SameSite=Lax`
   );
 
-  return new Response(null, { headers });
+  return response;
 }

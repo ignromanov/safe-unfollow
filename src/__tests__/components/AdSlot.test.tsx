@@ -83,7 +83,7 @@ describe('AdSlot', () => {
     expect(ins.getAttribute('data-ad-slot')).toBe(SLOT);
   });
 
-  it('tracks the impression and pushes the slot once (script comes from the head tag)', () => {
+  it('tracks the impression and pushes the slot once (loader injects the script)', () => {
     allowAds();
     const { rerender } = render(<AdSlot name="results" slot={SLOT} />);
     rerender(<AdSlot name="results" slot={SLOT} />);
