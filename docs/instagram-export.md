@@ -1,12 +1,12 @@
 ---
 layout: default
-title: How to Download Instagram Data as JSON (Step-by-Step Guide)
-description: Step-by-step guide to download your Instagram data as JSON for follower analysis. Learn the correct format, avoid common mistakes, and analyze unfollowers privately.
+title: Instagram Data Export: ZIP/JSON Guide (No Login Needed)
+description: Free step-by-step guide to export your Instagram ZIP/JSON file safely — no login or password shared. Avoid the #1 upload mistake.
 permalink: /instagram-export/
-last_updated: 2026-03-05
+last_updated: 2026-07-24
 ---
 
-# How to Download Your Instagram Data as JSON
+# How to Download Your Instagram Data as a ZIP (JSON Format)
 
 This complete guide shows you how to get your Instagram data in the correct format for [Instagram Unfollow Tracker](https://safeunfollow.app). The most important step: **choose JSON format, not HTML**.
 
