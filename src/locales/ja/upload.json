@@ -192,5 +192,20 @@
     "proTip": "ヒント: 迷惑メールフォルダを確認",
     "proTipHint": "Instagramのメールは迷惑メールに入ることがよくあります。<b>Meta</b>または<b>Instagram</b>からのメールを探してください。ダウンロードリンクは4日で期限切れになります。",
     "skip": "今はスキップ"
+  },
+  "loadingTips": {
+    "localProcessing": {
+      "title": "ファイルはこの端末から外部に送信されません",
+      "desc": "処理はすべてブラウザ内で行われます — アップロードは一切ありません。"
+    },
+    "nordvpn": {
+      "title": "公共Wi-Fiを使っていますか?",
+      "desc": "VPNはInstagramのセッションを保護します。私たちはNordVPNを利用しています — 特典を見る"
+    },
+    "revokeAccess": {
+      "title": "簡単なプライバシーのヒント",
+      "desc": "使わなくなったサードパーティアプリのInstagramデータへのアクセスを取り消しましょう。"
+    },
+    "affiliateDisclosure": "アフィリエイトリンクです — ご負担なしで当方が報酬を得る場合があります。"
   }
 }

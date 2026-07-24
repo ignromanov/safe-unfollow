@@ -192,5 +192,20 @@
     "proTip": "Dica: Verifique a Pasta de Spam",
     "proTipHint": "E-mails do Instagram frequentemente vão parar lá. Procure por e-mails de <b>Meta</b> ou <b>Instagram</b>. O link de download expira em 4 dias.",
     "skip": "Pular por enquanto"
+  },
+  "loadingTips": {
+    "localProcessing": {
+      "title": "Seu arquivo nunca sai deste dispositivo",
+      "desc": "O processamento acontece totalmente no seu navegador — nada é enviado."
+    },
+    "nordvpn": {
+      "title": "Navegando em Wi-Fi público?",
+      "desc": "Uma VPN mantém suas sessões do Instagram privadas. Usamos a NordVPN — Ver oferta"
+    },
+    "revokeAccess": {
+      "title": "Dica rápida de privacidade",
+      "desc": "Revogue o acesso aos seus dados do Instagram de apps de terceiros que você não usa mais."
+    },
+    "affiliateDisclosure": "Link de afiliado — podemos receber uma comissão sem custo adicional para você."
   }
 }

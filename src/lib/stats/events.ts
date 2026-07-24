@@ -94,6 +94,23 @@ export const analytics = {
     });
   },
 
+  // Loading Tips (shown during ZIP parsing)
+  loadingTipImpression: (tipId: string, index: number, delayMs: number) => {
+    trackEvent(AnalyticsEvents.LOADING_TIP_IMPRESSION, {
+      tip_id: tipId,
+      tip_index: index,
+      delay_ms: delayMs,
+    });
+  },
+
+  loadingTipClick: (tipId: string, index: number, elapsedMs: number) => {
+    trackEvent(AnalyticsEvents.LOADING_TIP_CLICK, {
+      tip_id: tipId,
+      tip_index: index,
+      elapsed_ms: elapsedMs,
+    });
+  },
+
   // Hero CTAs (sets entry CTA for conversion attribution)
   heroCTAGuide: () => {
     setEntryCTA('guide');

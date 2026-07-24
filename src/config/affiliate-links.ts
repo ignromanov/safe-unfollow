@@ -17,6 +17,9 @@ export const AFFILIATE_LINKS = {
 
   /** Predis.ai - AI content generation */
   predis: 'https://predis.ai?ref=safeunfollow',
+
+  /** NordVPN - shown as a loading tip during ZIP parsing */
+  nordvpn: import.meta.env.VITE_NORDVPN_URL ?? '',
 } as const;
 
 export type AffiliateToolId = keyof typeof AFFILIATE_LINKS;

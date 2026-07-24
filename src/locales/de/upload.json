@@ -192,5 +192,20 @@
     "proTip": "Profi-Tipp: Schau im Spam-Ordner",
     "proTipHint": "Instagram-E-Mails landen oft dort. Suche nach E-Mails von <b>Meta</b> oder <b>Instagram</b>. Der Download-Link läuft nach 4 Tagen ab.",
     "skip": "Erstmal überspringen"
+  },
+  "loadingTips": {
+    "localProcessing": {
+      "title": "Deine Datei verlässt dieses Gerät nie",
+      "desc": "Die Verarbeitung erfolgt vollständig in deinem Browser — nichts wird hochgeladen."
+    },
+    "nordvpn": {
+      "title": "Unterwegs im öffentlichen WLAN?",
+      "desc": "Ein VPN hält deine Instagram-Sitzungen privat. Wir nutzen NordVPN — Angebot ansehen"
+    },
+    "revokeAccess": {
+      "title": "Schneller Datenschutz-Tipp",
+      "desc": "Entziehe Drittanbieter-Apps, die du nicht mehr nutzt, den Zugriff auf deine Instagram-Daten."
+    },
+    "affiliateDisclosure": "Affiliate-Link — wir erhalten ggf. eine Provision, ohne Mehrkosten für dich."
   }
 }

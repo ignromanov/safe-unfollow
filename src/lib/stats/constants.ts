@@ -57,6 +57,10 @@ export const AnalyticsEvents = {
   // Upload Zone
   UPLOAD_CLICK: 'upload_click',
 
+  // Loading Tips (shown during ZIP parsing)
+  LOADING_TIP_IMPRESSION: 'loading_tip_impression',
+  LOADING_TIP_CLICK: 'loading_tip_click',
+
   // Diagnostic Errors
   DIAGNOSTIC_ERROR_VIEW: 'diagnostic_error_view',
   DIAGNOSTIC_ERROR_RETRY: 'diagnostic_error_retry',
