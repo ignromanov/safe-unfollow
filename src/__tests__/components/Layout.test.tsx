@@ -623,7 +623,7 @@ describe('Layout', () => {
 
       renderLayout();
 
-      expect(screen.queryByText(resultsEN.export.license.title)).not.toBeInTheDocument();
+      expect(screen.queryByTestId('license-dialog')).not.toBeInTheDocument();
     });
 
     it('should read the license param exactly once, even across re-renders', async () => {
