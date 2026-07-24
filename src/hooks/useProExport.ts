@@ -14,7 +14,11 @@ import { useEffect, useState } from 'react';
 
 export function useProExport() {
   const isEnabled = isExportFeatureEnabled();
-  const [isUnlocked, setIsUnlocked] = useState(false);
+  // Lazy initializer reads the current flag synchronously on first render —
+  // avoids a one-frame "locked" flash for users who are already unlocked.
+  const [isUnlocked, setIsUnlocked] = useState(
+    () => isExportFeatureEnabled() && isExportUnlocked()
+  );
 
   useEffect(() => {
     if (!isEnabled) return;

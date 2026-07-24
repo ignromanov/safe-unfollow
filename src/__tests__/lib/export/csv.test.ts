@@ -94,4 +94,19 @@ describe('buildExportCsv', () => {
     expect(getAccountsByRange).toHaveBeenNthCalledWith(2, 'hash1', 1000, 2000);
     expect(getAccountsByRange).toHaveBeenNthCalledWith(3, 'hash1', 2000, 2500);
   });
+
+  it('caps the fetched index span for sparse filtered selections', async () => {
+    getAccountsByRange.mockResolvedValue([]);
+
+    // 200 indices scattered evenly across a 1M-account file (5000-index gaps) —
+    // a naive count-based batch of 1000 would request a span of ~5,000,000.
+    const sparseIndices = Array.from({ length: 200 }, (_, i) => i * 5000);
+
+    await buildExportCsv('hash1', sparseIndices, 1_000_000);
+
+    expect(getAccountsByRange.mock.calls.length).toBeGreaterThan(1);
+    for (const [, start, end] of getAccountsByRange.mock.calls) {
+      expect(end - start).toBeLessThanOrEqual(2000);
+    }
+  });
 });

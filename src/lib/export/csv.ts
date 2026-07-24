@@ -31,6 +31,10 @@ export function escapeCsvField(value: string): string {
   return value;
 }
 
+// No formula-injection guard needed: usernames are validated against
+// /^[a-zA-Z0-9._]{1,30}$/ at parse time (see core/parsers), so they can never
+// start with =, +, -, or @, and href is always a fixed https://instagram.com/
+// prefix around that validated username.
 function buildCsvRow(username: string, badges: Record<string, unknown>): string {
   const href = `https://instagram.com/${username}`;
   const flags = CSV_BADGE_COLUMNS.map(key => (badges[key] ? '1' : '0'));
