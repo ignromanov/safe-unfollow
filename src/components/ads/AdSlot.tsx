@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactElement } from 'react';
 
 import { areAdsAllowed, isSampleRoute } from '@/lib/ads/geo';
-import { loadAdsenseScript, pushAdSlot } from '@/lib/ads/loader';
+import { pushAdSlot } from '@/lib/ads/loader';
 import { analytics } from '@/lib/analytics';
 import { cn } from '@/lib/utils';
 
@@ -50,7 +50,6 @@ export function AdSlot({
   useEffect(() => {
     if (!mounted || !eligible || pushedRef.current || !client) return;
     pushedRef.current = true;
-    loadAdsenseScript(client);
     analytics.adSlotRendered(name);
     pushAdSlot();
   }, [mounted, eligible, client, name]);

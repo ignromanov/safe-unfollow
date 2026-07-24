@@ -3,12 +3,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AdSlot } from '@/components/ads/AdSlot';
 
-const loadAdsenseScript = vi.fn();
 const pushAdSlot = vi.fn();
 const adSlotRendered = vi.fn();
 
 vi.mock('@/lib/ads/loader', () => ({
-  loadAdsenseScript: (client: string) => loadAdsenseScript(client),
   pushAdSlot: () => pushAdSlot(),
 }));
 
@@ -85,13 +83,12 @@ describe('AdSlot', () => {
     expect(ins.getAttribute('data-ad-slot')).toBe(SLOT);
   });
 
-  it('loads the script, tracks the impression and pushes the slot once', () => {
+  it('tracks the impression and pushes the slot once (script comes from the head tag)', () => {
     allowAds();
     const { rerender } = render(<AdSlot name="results" slot={SLOT} />);
     rerender(<AdSlot name="results" slot={SLOT} />);
 
-    expect(loadAdsenseScript).toHaveBeenCalledTimes(1);
-    expect(loadAdsenseScript).toHaveBeenCalledWith(CLIENT);
+    expect(adSlotRendered).toHaveBeenCalledTimes(1);
     expect(adSlotRendered).toHaveBeenCalledWith('results');
     expect(pushAdSlot).toHaveBeenCalledTimes(1);
   });
