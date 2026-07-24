@@ -12,7 +12,13 @@ import {
 } from '@/lib/export/unlock';
 import { useEffect, useState } from 'react';
 
-export function useProExport() {
+export interface UseProExportResult {
+  isEnabled: boolean;
+  isUnlocked: boolean;
+  startCheckout: () => void;
+}
+
+export function useProExport(): UseProExportResult {
   const isEnabled = isExportFeatureEnabled();
   // Lazy initializer reads the current flag synchronously on first render —
   // avoids a one-frame "locked" flash for users who are already unlocked.
