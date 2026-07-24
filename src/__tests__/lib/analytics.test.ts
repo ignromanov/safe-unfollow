@@ -139,6 +139,24 @@ describe('Analytics', () => {
         });
       });
 
+      it('should bucket parse duration rather than report raw milliseconds', () => {
+        analytics.uploadParseDuration(2345, 'success');
+
+        expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.UPLOAD_PARSE_DURATION, {
+          duration_bucket: '1-3s',
+          outcome: 'success',
+        });
+      });
+
+      it('should keep the outcome so fast failures are separable from fast parses', () => {
+        analytics.uploadParseDuration(400, 'error');
+
+        expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.UPLOAD_PARSE_DURATION, {
+          duration_bucket: '<1s',
+          outcome: 'error',
+        });
+      });
+
       it('should enrich file upload success with UTM and entry CTA', () => {
         sessionStorageMock['analytics_utm'] = JSON.stringify({
           utm_source: 'producthunt',

@@ -22,6 +22,7 @@ export const AnalyticsEvents = {
   // File Upload
   FILE_UPLOAD_START: 'file_upload_start',
   FILE_UPLOAD_SUCCESS: 'file_upload_success',
+  UPLOAD_PARSE_DURATION: 'upload_parse_duration',
 
   // Filters
   FILTER_TOGGLE: 'filter_toggle',
@@ -143,6 +144,33 @@ export type LinkType =
   | 'buy-me-coffee';
 
 export type FilterAction = 'enable' | 'disable';
+
+/** How the processing state ended. Fast errors must not look like fast parses. */
+export type ParseOutcome = 'success' | 'cached' | 'error' | 'cancelled';
+
+/** Upper bound (exclusive, ms) → label. Ascending; last entry is the overflow. */
+const PARSE_DURATION_BUCKETS: readonly (readonly [number, string])[] = [
+  [1_000, '<1s'],
+  [3_000, '1-3s'],
+  [5_000, '3-5s'],
+  [10_000, '5-10s'],
+  [Infinity, '10s+'],
+];
+
+/**
+ * Bucket a processing duration for `upload_parse_duration`.
+ *
+ * Bucketed on purpose: V10 dropped the raw `processing_time_ms` because
+ * per-event millisecond values were not actionable in the dashboard. The
+ * question this answers is a distribution one — how many users are still
+ * watching the loading state at N seconds — which is what sizes the audience
+ * for anything rendered there (see `config/loading-tips.ts`).
+ */
+export function parseDurationBucket(durationMs: number): string {
+  const match = PARSE_DURATION_BUCKETS.find(([upperBound]) => durationMs < upperBound);
+  // The Infinity entry makes this exhaustive for any finite input.
+  return match ? match[1] : '10s+';
+}
 
 // Re-export DiagnosticErrorCode from core/types to ensure consistency
 export type { DiagnosticErrorCode } from '@/core/types';

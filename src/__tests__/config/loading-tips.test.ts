@@ -29,4 +29,19 @@ describe('VISIBLE_LOADING_TIPS', () => {
     const delays = VISIBLE_LOADING_TIPS.map(tip => tip.delayMs);
     expect(delays).toEqual([...delays].sort((a, b) => a - b));
   });
+
+  it('reveals every tip inside the window a typical parse survives', () => {
+    // The delays are choreography, not gating. Most exports (80% of users hold
+    // under 3k accounts) finish parsing in 1-3s, and the 42% of uploads that
+    // fail on format usually fail sooner than that — so a tip scheduled past
+    // this bound is a tip nobody sees. Watch upload_parse_duration before
+    // raising it.
+    const REVEAL_BUDGET_MS = 1200;
+
+    for (const tip of VISIBLE_LOADING_TIPS) {
+      expect(tip.delayMs, `${tip.id} is revealed too late to be seen`).toBeLessThanOrEqual(
+        REVEAL_BUDGET_MS
+      );
+    }
+  });
 });
