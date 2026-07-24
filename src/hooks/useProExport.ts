@@ -1,9 +1,9 @@
 /**
  * Pro Export state: feature gating, unlock status, and checkout kickoff.
  *
- * The `?export=unlocked` redirect-back is consumed by useExportUnlockCapture in
- * Layout, not here. Layout is a parent, so its effect runs after this hook's
- * first render — hence useSyncExternalStore rather than a one-shot snapshot.
+ * The license redirect-back is captured elsewhere (in Layout, a parent), so
+ * its effect runs after this hook's first render — hence useSyncExternalStore
+ * rather than a one-shot snapshot.
  */
 
 import { useSyncExternalStore } from 'react';

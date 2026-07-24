@@ -2,7 +2,7 @@ import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useProExport } from '@/hooks/useProExport';
-import { resetUnlockCache, setExportUnlocked } from '@/lib/export/unlock';
+import { resetUnlockCache, storeLicense } from '@/lib/export/unlock';
 import { analytics } from '@/lib/stats';
 
 vi.mock('@/lib/stats', async importOriginal => {
@@ -42,7 +42,7 @@ describe('useProExport', () => {
   });
 
   it('should start unlocked when the flag is already persisted', () => {
-    setExportUnlocked();
+    storeLicense('38b1460a-5104-4067-a91d-77b872934d51', 'f90ec370-fd83-46a5-8bbd-44a241e78665');
 
     const { result } = renderHook(() => useProExport());
 
@@ -57,7 +57,7 @@ describe('useProExport', () => {
     expect(result.current.isUnlocked).toBe(false);
 
     act(() => {
-      setExportUnlocked();
+      storeLicense('38b1460a-5104-4067-a91d-77b872934d51', 'f90ec370-fd83-46a5-8bbd-44a241e78665');
     });
 
     expect(result.current.isUnlocked).toBe(true);

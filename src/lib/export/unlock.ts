@@ -1,18 +1,26 @@
 /**
- * Pro Export unlock logic.
+ * Pro Export unlock state.
  *
- * Unlock state is a plain localStorage flag — intentionally spoofable.
- * We sell file convenience, not access to data that is already free to view
- * in the UI, so there is no server-side check.
+ * The unlock is a LemonSqueezy license: the key plus the instance id returned
+ * by activation. Both live in localStorage because there is no server to hold
+ * them. A forged entry is still possible, but it can no longer be handed to
+ * someone else as a URL, and a leaked key can be disabled in the dashboard —
+ * which the per-session validate call then acts on.
  */
 
 const UNLOCK_STORAGE_KEY = 'su-pro-export';
-const UNLOCK_QUERY_PARAM = 'export';
-const UNLOCK_QUERY_VALUE = 'unlocked';
+const LICENSE_QUERY_PARAM = 'license';
+
+export interface StoredLicense {
+  v: 1;
+  key: string;
+  instanceId: string;
+}
 
 const listeners = new Set<() => void>();
-let unlockedCache: boolean | null = null;
+let licenseCache: StoredLicense | null | undefined;
 let isStorageListenerAttached = false;
+let hasValidatedThisSession = false;
 
 function notifyUnlockChanged(): void {
   for (const listener of listeners) {
@@ -20,12 +28,14 @@ function notifyUnlockChanged(): void {
   }
 }
 
-/**
- * Drops the memoized flag so the next read hits localStorage again.
- * Called when another tab changes the flag, and by tests between cases.
- */
+/** Drops the memoized license so the next read hits localStorage again. */
 export function resetUnlockCache(): void {
-  unlockedCache = null;
+  licenseCache = undefined;
+}
+
+/** Test seam: the per-session validation flag is module state by design. */
+export function resetValidationFlag(): void {
+  hasValidatedThisSession = false;
 }
 
 function handleStorageEvent(event: StorageEvent): void {
@@ -38,8 +48,6 @@ function handleStorageEvent(event: StorageEvent): void {
 /**
  * Subscribes to unlock-state changes, including purchases completed in another
  * tab. A single shared `storage` listener serves all subscribers.
- *
- * Returns an unsubscribe function.
  */
 export function subscribeUnlock(listener: () => void): () => void {
   listeners.add(listener);
@@ -54,65 +62,99 @@ export function subscribeUnlock(listener: () => void): () => void {
   };
 }
 
-/**
- * Whether the Pro Export feature is enabled at all (checkout URL configured).
- * When false, no export UI should render.
- */
+/** Whether Pro Export is configured at all. When false, no export UI renders. */
 export function isExportFeatureEnabled(): boolean {
   return Boolean(import.meta.env.VITE_LEMONSQUEEZY_URL);
 }
 
-/**
- * The LemonSqueezy hosted checkout URL, or null if not configured.
- */
+/** The LemonSqueezy hosted checkout URL, or null if not configured. */
 export function getCheckoutUrl(): string | null {
   const url = import.meta.env.VITE_LEMONSQUEEZY_URL;
   return url ? url : null;
 }
 
-/**
- * Whether the user has already unlocked Pro Export.
- *
- * Memoized: this is read on every render through useSyncExternalStore, and
- * localStorage access is synchronous.
- */
-export function isExportUnlocked(): boolean {
-  if (typeof window === 'undefined') return false;
-  if (unlockedCache === null) {
-    unlockedCache = localStorage.getItem(UNLOCK_STORAGE_KEY) === '1';
+function readStoredLicense(): StoredLicense | null {
+  if (typeof window === 'undefined') return null;
+
+  const raw = localStorage.getItem(UNLOCK_STORAGE_KEY);
+  if (raw === null) return null;
+
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (
+      typeof parsed === 'object' &&
+      parsed !== null &&
+      'key' in parsed &&
+      'instanceId' in parsed &&
+      typeof (parsed as StoredLicense).key === 'string' &&
+      typeof (parsed as StoredLicense).instanceId === 'string'
+    ) {
+      const { key, instanceId } = parsed as StoredLicense;
+      return { v: 1, key, instanceId };
+    }
+  } catch {
+    // Anything unparseable — including the pre-license '1' flag — is not a license.
   }
-  return unlockedCache;
+
+  return null;
 }
 
-/**
- * Marks Pro Export as unlocked in localStorage and notifies subscribers.
- */
-export function setExportUnlocked(): void {
+/** The stored license, memoized: this is read on every render via useSyncExternalStore. */
+export function getStoredLicense(): StoredLicense | null {
+  if (licenseCache === undefined) {
+    licenseCache = readStoredLicense();
+  }
+  return licenseCache;
+}
+
+export function isExportUnlocked(): boolean {
+  return getStoredLicense() !== null;
+}
+
+/** Persists an activated license and notifies subscribers. */
+export function storeLicense(key: string, instanceId: string): void {
   if (typeof window === 'undefined') return;
-  localStorage.setItem(UNLOCK_STORAGE_KEY, '1');
-  unlockedCache = true;
+
+  const license: StoredLicense = { v: 1, key, instanceId };
+  localStorage.setItem(UNLOCK_STORAGE_KEY, JSON.stringify(license));
+  licenseCache = license;
+  notifyUnlockChanged();
+}
+
+/** Removes the license — used when validation returns an explicit negative. */
+export function clearLicense(): void {
+  if (typeof window === 'undefined') return;
+
+  localStorage.removeItem(UNLOCK_STORAGE_KEY);
+  licenseCache = null;
   notifyUnlockChanged();
 }
 
 /**
- * Checks the current URL for `?export=unlocked` (set by the LemonSqueezy
- * redirect-back). If present, persists the unlock flag and strips the param
- * from the URL via history.replaceState.
+ * Reads `?license=` from the current URL and strips it, leaving other params
+ * intact. Stripping immediately keeps the key out of history entries, the
+ * referrer, and any analytics that read location.search.
  *
- * Returns true if the param was found and consumed (i.e. a fresh purchase).
+ * Returns the raw key; activation is the caller's job.
  */
-export function consumeUnlockParam(): boolean {
-  if (typeof window === 'undefined') return false;
+export function consumeLicenseParam(): string | null {
+  if (typeof window === 'undefined') return null;
 
   const url = new URL(window.location.href);
-  if (url.searchParams.get(UNLOCK_QUERY_PARAM) !== UNLOCK_QUERY_VALUE) {
-    return false;
-  }
+  const key = url.searchParams.get(LICENSE_QUERY_PARAM);
+  if (key === null) return null;
 
-  setExportUnlocked();
-
-  url.searchParams.delete(UNLOCK_QUERY_PARAM);
+  url.searchParams.delete(LICENSE_QUERY_PARAM);
   window.history.replaceState({}, '', url.pathname + url.search + url.hash);
 
-  return true;
+  return key;
+}
+
+/** True until the first validation of this browser session. */
+export function shouldValidateThisSession(): boolean {
+  return !hasValidatedThisSession;
+}
+
+export function markValidatedThisSession(): void {
+  hasValidatedThisSession = true;
 }
