@@ -63,7 +63,7 @@ describe('umami-loader', () => {
       expect(document.createElement).toHaveBeenCalledWith('script');
       expect(mockScript.defer).toBe(true);
       expect(mockScript.src).toBe('https://umami-coral-xi.vercel.app/script.js');
-      expect(mockScript.dataset.websiteId).toBe('70c9e250-c415-4c56-92b0-2792dc6cccba');
+      expect(mockScript.dataset.websiteId).toBe('f204b58f-a5bb-4231-b02b-4cc05f472d02');
       expect(appendChildSpy).toHaveBeenCalledWith(mockScript);
     });
 
@@ -144,7 +144,7 @@ describe('umami-loader', () => {
 
       loadUmami();
 
-      expect(mockScript.dataset.websiteId).toBe('70c9e250-c415-4c56-92b0-2792dc6cccba');
+      expect(mockScript.dataset.websiteId).toBe('f204b58f-a5bb-4231-b02b-4cc05f472d02');
     });
 
     it('should append script to document head', async () => {
