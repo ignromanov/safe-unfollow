@@ -230,11 +230,12 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             .
           </p>
           <p className="text-muted-foreground mt-4">
-            Unlocking the export sends your license key — and nothing else — to LemonSqueezy's
-            license service (<code>api.lemonsqueezy.com</code>) to activate it on this device. We
-            check the key again at most once per browser session, when you open the export dialog.
-            The response is neither logged nor passed to analytics, and no part of your Instagram
-            data is included in either request.
+            Unlocking the export sends your license key to LemonSqueezy's license service (
+            <code>api.lemonsqueezy.com</code>) to activate it on this device. We check it again at
+            most once per browser session, when you open the export dialog; that check also sends
+            the activation id LemonSqueezy issued for this device. Nothing else is sent — the
+            response is neither logged nor passed to analytics, and no part of your Instagram data
+            is included in either request.
           </p>
 
           <h3 className="text-lg font-semibold mt-6 mb-3">5.3 External Links</h3>
