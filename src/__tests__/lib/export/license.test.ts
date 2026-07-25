@@ -134,6 +134,20 @@ describe('export/license', () => {
         reason: 'unknown',
       });
     });
+
+    it('should use a longer timeout budget than validate', async () => {
+      // A timed-out activate may already have minted a device instance
+      // server-side (activation is not idempotent, capped at 3/key), so
+      // retrying is more expensive than waiting. Validate is best-effort and
+      // fails open, so it keeps the tight bound. AbortSignal.timeout is the
+      // only externally observable trace of the budget each call used.
+      const timeoutSpy = vi.spyOn(AbortSignal, 'timeout');
+      mockJson({ activated: true, instance: { id: INSTANCE } });
+
+      await activateLicense(KEY);
+
+      expect(timeoutSpy).toHaveBeenCalledWith(15000);
+    });
   });
 
   describe('validateLicense', () => {
@@ -187,6 +201,15 @@ describe('export/license', () => {
         ok: false,
         reason: 'network',
       });
+    });
+
+    it('should use a shorter timeout budget than activate', async () => {
+      const timeoutSpy = vi.spyOn(AbortSignal, 'timeout');
+      mockJson({ valid: true });
+
+      await validateLicense(KEY, INSTANCE);
+
+      expect(timeoutSpy).toHaveBeenCalledWith(4000);
     });
   });
 });

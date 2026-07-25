@@ -22,8 +22,19 @@ const LICENSE_API = 'https://api.lemonsqueezy.com/v1/licenses';
  */
 const INSTANCE_NAME = 'safeunfollow-web';
 
-/** Bounded so a hanging request cannot block the export UI indefinitely. */
-const REQUEST_TIMEOUT_MS = 4000;
+/** Validation is best-effort and fails open on any error, so a stuck request must not linger. */
+const VALIDATE_TIMEOUT_MS = 4000;
+
+/**
+ * Activation is not idempotent — LemonSqueezy mints a new device instance
+ * (capped at 3 per key) on every call. If the instance is minted server-side
+ * but the response arrives after a short timeout, activateLicense() reports a
+ * retryable 'network' failure and the UI offers "Try again", which spends
+ * another one of the buyer's three devices on a request that may have already
+ * succeeded. A longer budget here narrows that window; waiting is cheaper
+ * than retrying.
+ */
+const ACTIVATE_TIMEOUT_MS = 15000;
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -58,7 +69,8 @@ export function isLicenseKeyFormat(value: string): boolean {
 
 async function post(
   action: 'activate' | 'validate',
-  params: Record<string, string>
+  params: Record<string, string>,
+  timeoutMs: number
 ): Promise<LicenseApiBody | null> {
   try {
     const response = await fetch(`${LICENSE_API}/${action}`, {
@@ -68,7 +80,7 @@ async function post(
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: new URLSearchParams(params).toString(),
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      signal: AbortSignal.timeout(timeoutMs),
     });
 
     return (await response.json()) as LicenseApiBody;
@@ -103,10 +115,14 @@ function classifyFailure(body: LicenseApiBody): LicenseFailureReason {
 
 /** Spends one of the key's activations and returns the instance id to cache. */
 export async function activateLicense(licenseKey: string): Promise<ActivateResult> {
-  const body = await post('activate', {
-    license_key: licenseKey.trim(),
-    instance_name: INSTANCE_NAME,
-  });
+  const body = await post(
+    'activate',
+    {
+      license_key: licenseKey.trim(),
+      instance_name: INSTANCE_NAME,
+    },
+    ACTIVATE_TIMEOUT_MS
+  );
 
   if (body === null) return { ok: false, reason: 'network' };
 
@@ -123,10 +139,14 @@ export async function validateLicense(
   licenseKey: string,
   instanceId: string
 ): Promise<ValidateResult> {
-  const body = await post('validate', {
-    license_key: licenseKey.trim(),
-    instance_id: instanceId,
-  });
+  const body = await post(
+    'validate',
+    {
+      license_key: licenseKey.trim(),
+      instance_id: instanceId,
+    },
+    VALIDATE_TIMEOUT_MS
+  );
 
   if (body === null) return { ok: false, reason: 'network' };
   if (body.valid === true) return { ok: true };
