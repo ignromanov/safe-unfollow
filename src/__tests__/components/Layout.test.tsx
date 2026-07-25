@@ -600,9 +600,15 @@ describe('Layout', () => {
       vi.stubEnv('VITE_LEMONSQUEEZY_URL', 'https://checkout.example/buy');
     });
 
-    afterEach(() => {
+    afterEach(async () => {
       vi.unstubAllEnvs();
       window.history.replaceState({}, '', '/');
+      // Tests below store a real license via the unwrapped unlock module
+      // (only consumeLicenseParam is mocked above); clear it so it can't leak
+      // into later tests in this file, which all assume "no stored license".
+      const { resetUnlockCache } = await import('@/lib/export/unlock');
+      localStorage.clear();
+      resetUnlockCache();
     });
 
     it('should strip the license param from the URL on mount', async () => {
@@ -651,13 +657,48 @@ describe('Layout', () => {
       // Stripping is unconditionally safe; leaving it would keep a key in the
       // address bar and in Umami's auto-tracked pageview URL with no way to
       // ever use it, since the dialog itself stays flag-gated below.
-      vi.unstubAllEnvs();
+      // (No need for vi.unstubAllEnvs() here — the afterEach already ran it
+      // after every previous test, and vi.stubEnv freely overwrites a stub.)
       vi.stubEnv('VITE_LEMONSQUEEZY_URL', '');
       window.history.replaceState({}, '', '/results?license=38b1460a-5104-4067-a91d-77b872934d51');
 
       renderLayout();
 
       expect(window.location.search).toBe('');
+      expect(screen.queryByTestId('license-dialog')).not.toBeInTheDocument();
+    });
+
+    it('should not open the dialog when the captured key already matches the stored license', async () => {
+      const KEY = '38b1460a-5104-4067-a91d-77b872934d51';
+      const { storeLicense } = await import('@/lib/export/unlock');
+      storeLicense(KEY, 'f90ec370-fd83-46a5-8bbd-44a241e78665');
+      window.history.replaceState({}, '', `/results?license=${KEY}`);
+
+      renderLayout();
+
+      // The param is still stripped from the URL even though the dialog
+      // never opens — leaving it would keep the key in the address bar.
+      expect(window.location.search).toBe('');
+      expect(screen.queryByTestId('license-dialog')).not.toBeInTheDocument();
+    });
+
+    it('should open the dialog when the captured key differs from the stored license', async () => {
+      const STORED_KEY = '38b1460a-5104-4067-a91d-77b872934d51';
+      const NEW_KEY = 'a1a2a3a4-b1b2-c1c2-d1d2-e1e2e3e4e5e6';
+      const { storeLicense } = await import('@/lib/export/unlock');
+      storeLicense(STORED_KEY, 'f90ec370-fd83-46a5-8bbd-44a241e78665');
+      window.history.replaceState({}, '', `/results?license=${NEW_KEY}`);
+
+      renderLayout();
+
+      await screen.findByTestId('license-dialog');
+    });
+
+    it('should not open the dialog for an empty license param', () => {
+      window.history.replaceState({}, '', '/results?license=');
+
+      renderLayout();
+
       expect(screen.queryByTestId('license-dialog')).not.toBeInTheDocument();
     });
   });

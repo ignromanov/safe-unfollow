@@ -16,7 +16,7 @@ import { useLanguageRedirect } from '@/hooks/useLanguageRedirect';
 import { useLayoutAnalytics } from '@/hooks/useLayoutAnalytics';
 import { useLayoutNavigation } from '@/hooks/useLayoutNavigation';
 import { useLayoutState } from '@/hooks/useLayoutState';
-import { consumeLicenseParam, isExportFeatureEnabled } from '@/lib/export/unlock';
+import { consumeLicenseParam, getStoredLicense, isExportFeatureEnabled } from '@/lib/export/unlock';
 import { RTL_LANGUAGES, type SupportedLanguage } from '@/locales';
 
 // Only ever needed on the one page load that carries a checkout redirect, so it
@@ -78,7 +78,21 @@ export function Layout({ lang }: LayoutProps) {
     const key = consumeLicenseParam();
     return isExportFeatureEnabled() ? key : null;
   });
-  const [isLicenseDialogOpen, setIsLicenseDialogOpen] = useState(capturedLicenseKey !== null);
+  const [isLicenseDialogOpen, setIsLicenseDialogOpen] = useState(() => {
+    // An empty or whitespace-only `?license=` (e.g. a truncated link) is not
+    // a key at all — opening the manual-entry form for it would show a
+    // license prompt to someone who never bought anything.
+    const trimmed = capturedLicenseKey?.trim() ?? '';
+    if (trimmed.length === 0) return false;
+
+    // If this device already holds this exact key, opening the dialog only
+    // for LicenseDialog's own guard to close it immediately flashes a modal
+    // with no confirmation (plausibly read as another failure) and loads the
+    // lazy chunk for nothing. Decide not to open at all instead — the guard
+    // inside LicenseDialog stays as the correct last line of defence for
+    // every other caller.
+    return getStoredLicense()?.key !== trimmed;
+  });
 
   // SSG: Switch language synchronously BEFORE rendering
   // This works because during SSG all language resources are preloaded

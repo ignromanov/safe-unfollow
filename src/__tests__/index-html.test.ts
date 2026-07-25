@@ -23,13 +23,22 @@ const redirectScript = (() => {
 describe('index.html language redirect', () => {
   it('carries the query string and hash through every redirect', () => {
     // A redirect built from location.pathname alone silently drops ?utm_*, ?gclid
-    // and the ?license= parameter the checkout return depends on. Losing them is
-    // invisible: the visitor lands on a working page, and the attribution is gone
-    // before any analytics code has run.
-    const assignments = redirectScript.match(/location\.href\s*=\s*[^;]+;/g) ?? [];
+    // and the ?license_key= parameter the checkout return depends on. Losing them
+    // is invisible: the visitor lands on a working page, and the attribution is
+    // gone before any analytics code has run.
+    //
+    // The pattern covers `location.href =`, `window.location =`, `location.assign(...)`
+    // and `location.replace(...)`. Matching only `location.href =` would let a refactor
+    // to one of the other forms slip a query-string-dropping redirect past this guard.
+    const assignments = redirectScript.match(
+      /\blocation(?:\.href\s*=|\s*=|\.(?:assign|replace)\()[^;]+;/g
+    );
 
-    expect(assignments.length).toBeGreaterThan(0);
-    for (const assignment of assignments) {
+    // String.match returns null, not undefined, when nothing matches — assert on
+    // non-null so a deleted redirect fails here instead of passing vacuously.
+    expect(assignments, 'no redirect statement found in the script').not.toBeNull();
+    expect(assignments?.length).toBeGreaterThan(0);
+    for (const assignment of assignments ?? []) {
       expect(assignment, 'redirect must preserve the query string').toContain('location.search');
       expect(assignment, 'redirect must preserve the hash').toContain('location.hash');
     }
