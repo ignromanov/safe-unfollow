@@ -125,6 +125,9 @@ scripts/*
 # AI artifacts (separate private repo)
 .ai/
 
+# Conclave advisor instance (symlink into the conclave repo)
+.conclave
+
 # Local Umami DB backups (never commit — contains analytics data)
 umami-backup-*.sql.gz
 
