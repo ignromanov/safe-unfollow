@@ -1,24 +1,40 @@
-<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="512" height="512"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="512" height="512"><svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SafeUnfollow.app favicon — tuned for small sizes, not for the header.
+
+  Differs from logo.svg on purpose:
+  - solid shield instead of a stroked outline (a 1px outline dies below 24px)
+  - shield spans 56% of the canvas (was 42%) so it survives Google's circle crop
+  - checkmark is knocked out of the shield, so it reads as shape, not as a hairline
+  - background fills the full canvas: any padding leaves a dark rim inside the circle
+
+  Brand gradient (135deg), unchanged from logo.svg:
+  - oklch(0.6 0.18 264) -> #5B6BE0 (purple-blue)
+  - oklch(0.65 0.22 285) -> #9B5DE5 (purple)
+  - oklch(0.65 0.2 340) -> #E05B9B (pink)
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
   <defs>
-    <!-- Brand gradient: 135deg diagonal -->
     <linearGradient id="brandGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#5B6BE0"></stop>
-      <stop offset="50%" stop-color="#9B5DE5"></stop>
-      <stop offset="100%" stop-color="#E05B9B"></stop>
+      <stop offset="0%" stop-color="#5B6BE0" />
+      <stop offset="50%" stop-color="#9B5DE5" />
+      <stop offset="100%" stop-color="#E05B9B" />
     </linearGradient>
+
+    <!-- Checkmark as a cutout: masks the shield so the gradient shows through -->
+    <mask id="checkCutout" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512">
+      <rect width="512" height="512" fill="white" />
+      <path d="m9 12 2 2 4-4" transform="translate(40, 37.9) scale(18)" fill="none" stroke="black"
+        stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" />
+    </mask>
   </defs>
 
-  <!-- Rounded rectangle background -->
-  <rect x="16" y="16" width="480" height="480" rx="96" ry="96" fill="url(#brandGradient)"></rect>
+  <!-- Background: edge to edge, so Google's circle crop yields a full gradient disc -->
+  <rect width="512" height="512" rx="96" ry="96" fill="url(#brandGradient)" />
 
-  <!-- ShieldCheck icon (Lucide) - centered and scaled -->
-  <!-- Original viewBox: 0 0 24 24, scaled to fit ~280px centered in 512px -->
-  <g transform="translate(116, 116) scale(11.67)" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-    <!-- Shield path -->
-    <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path>
-    <!-- Checkmark path -->
-    <path d="m9 12 2 2 4-4"></path>
+  <!-- Shield (Lucide shield-check), filled and centred: 288x355px of the 512px canvas -->
+  <g mask="url(#checkCutout)">
+    <path transform="translate(40, 37.9) scale(18)" fill="white"
+      d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
   </g>
-</svg></svg><style>@media (prefers-color-scheme: light) { :root { filter: none; } }
-@media (prefers-color-scheme: dark) { :root { filter: none; } }
-</style></svg>
+</svg>
