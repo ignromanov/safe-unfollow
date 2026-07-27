@@ -7,8 +7,6 @@ interface ImportMetaEnv {
   readonly VITE_ADSENSE_SLOT_HOME?: string;
   /** AdSense ad unit slot ID for the Results placement. */
   readonly VITE_ADSENSE_SLOT_RESULTS?: string;
-  /** Dev-only override to render ads locally without a geo cookie ('1' to enable). */
-  readonly VITE_ADSENSE_DEV?: string;
 }
 
 interface ImportMeta {

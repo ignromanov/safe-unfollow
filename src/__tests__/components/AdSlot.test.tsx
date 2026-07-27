@@ -17,25 +17,10 @@ vi.mock('@/lib/analytics', () => ({
 const CLIENT = 'ca-pub-5976295812261948';
 const SLOT = '1234567890';
 
-function allowAds(): void {
-  Object.defineProperty(document, 'cookie', {
-    configurable: true,
-    get: () => 'su_ads=1',
-  });
-}
-
-function blockAds(): void {
-  Object.defineProperty(document, 'cookie', {
-    configurable: true,
-    get: () => 'su_ads=0',
-  });
-}
-
 describe('AdSlot', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     window.history.pushState({}, '', '/');
-    blockAds();
     vi.stubEnv('VITE_ADSENSE_CLIENT', CLIENT);
   });
 
@@ -45,32 +30,22 @@ describe('AdSlot', () => {
 
   it('renders nothing when the client env is missing', () => {
     vi.stubEnv('VITE_ADSENSE_CLIENT', '');
-    allowAds();
     const { container } = render(<AdSlot name="home" slot={SLOT} />);
     expect(container.firstChild).toBeNull();
   });
 
   it('renders nothing when the slot id is missing', () => {
-    allowAds();
     const { container } = render(<AdSlot name="home" slot={undefined} />);
     expect(container.firstChild).toBeNull();
   });
 
-  it('renders nothing when ads are geo-blocked', () => {
-    blockAds();
-    const { container } = render(<AdSlot name="home" slot={SLOT} />);
-    expect(container.firstChild).toBeNull();
-  });
-
   it('renders nothing on the /sample route', () => {
-    allowAds();
     window.history.pushState({}, '', '/sample');
     const { container } = render(<AdSlot name="home" slot={SLOT} />);
     expect(container.firstChild).toBeNull();
   });
 
   it('renders a fixed-height container with the ins element when eligible', () => {
-    allowAds();
     const { container } = render(<AdSlot name="home" slot={SLOT} minHeight={250} />);
 
     const wrapper = container.firstChild as HTMLElement;
@@ -84,7 +59,6 @@ describe('AdSlot', () => {
   });
 
   it('tracks the impression and pushes the slot once (loader injects the script)', () => {
-    allowAds();
     const { rerender } = render(<AdSlot name="results" slot={SLOT} />);
     rerender(<AdSlot name="results" slot={SLOT} />);
 

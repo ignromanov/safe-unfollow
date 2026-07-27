@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactElement } from 'react';
 
-import { areAdsAllowed, isSampleRoute } from '@/lib/ads/geo';
+import { isSampleRoute } from '@/lib/ads/eligibility';
 import { pushAdSlot } from '@/lib/ads/loader';
 import { analytics } from '@/lib/analytics';
 import { cn } from '@/lib/utils';
@@ -23,8 +23,10 @@ export interface AdSlotProps {
  *
  * Renders nothing (null, no reserved space) unless ALL conditions hold:
  * - `VITE_ADSENSE_CLIENT` and the placement `slot` are configured
- * - the visitor is geo-allowed (see lib/ads/geo)
  * - the current route is not `/sample`
+ *
+ * Consent for EEA/UK/CH visitors is handled by Google's certified CMP on top
+ * of the ad script — there is no client-side geo-gate.
  *
  * When eligible it renders a fixed-height container with the `<ins>` element,
  * lazily loads the AdSense script, and requests a fill — keeping CLS at 0.
@@ -45,7 +47,7 @@ export function AdSlot({
     setMounted(true);
   }, []);
 
-  const eligible = Boolean(client) && Boolean(slot) && !isSampleRoute() && areAdsAllowed();
+  const eligible = Boolean(client) && Boolean(slot) && !isSampleRoute();
 
   useEffect(() => {
     if (!mounted || !eligible || pushedRef.current || !client) return;
