@@ -33,7 +33,7 @@ describe('PrivacyPolicy Component', () => {
     it('should render the last updated date', () => {
       render(<PrivacyPolicy onBack={mockOnBack} />);
 
-      expect(screen.getByText(/last updated: january 9, 2026/i)).toBeInTheDocument();
+      expect(screen.getByText(/last updated: july 27, 2026/i)).toBeInTheDocument();
     });
   });
 
@@ -45,7 +45,20 @@ describe('PrivacyPolicy Component', () => {
       expect(screen.getByText(/100% Local Processing/i)).toBeInTheDocument();
       expect(screen.getByText(/No Account Required/i)).toBeInTheDocument();
       expect(screen.getByText(/Optional Analytics/i)).toBeInTheDocument();
-      expect(screen.getByText(/No Cookies for Tracking/i)).toBeInTheDocument();
+      expect(screen.getByText(/Ads Keep This Free/i)).toBeInTheDocument();
+    });
+
+    // The app serves AdSense units (see components/ads/AdSlot). Shipping ads
+    // without this disclosure would make the policy false, so it is a test and
+    // not a convention.
+    it('should disclose advertising and that ads cannot use Instagram data', () => {
+      render(<PrivacyPolicy onBack={mockOnBack} />);
+
+      expect(screen.getByText(/5\.3 Advertising \(Google AdSense\)/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Ads are never targeted using your Instagram data/i)
+      ).toBeInTheDocument();
+      expect(screen.getByText(/consent management platform/i)).toBeInTheDocument();
     });
 
     it('should render all main sections', () => {

@@ -58,6 +58,39 @@ describe('AdSlot', () => {
     expect(ins.getAttribute('data-ad-slot')).toBe(SLOT);
   });
 
+  it('renders a responsive display unit by default', () => {
+    const { container } = render(<AdSlot name="home" slot={SLOT} minHeight={250} />);
+
+    const ins = container.querySelector('ins.adsbygoogle') as HTMLElement;
+    expect(ins.getAttribute('data-ad-format')).toBe('auto');
+    expect(ins.getAttribute('data-full-width-responsive')).toBe('true');
+    // Fixed height keeps a display unit at zero CLS.
+    expect(ins.style.height).toBe('250px');
+  });
+
+  it('renders a multiplex unit with the autorelaxed format', () => {
+    const { container } = render(<AdSlot name="home_footer" slot={SLOT} format="multiplex" />);
+
+    const ins = container.querySelector('ins.adsbygoogle') as HTMLElement;
+    expect(ins.getAttribute('data-ad-format')).toBe('autorelaxed');
+    // Multiplex sizes its own grid: a fixed height would clip the tiles, and
+    // full-width-responsive is not a valid attribute for this format.
+    expect(ins.style.height).toBe('');
+    expect(ins.getAttribute('data-full-width-responsive')).toBeNull();
+  });
+
+  it('reserves space for a multiplex unit without clipping its grid', () => {
+    const { container } = render(
+      <AdSlot name="home_footer" slot={SLOT} format="multiplex" minHeight={300} />
+    );
+
+    const wrapper = container.firstChild as HTMLElement;
+    // Space is still reserved up front...
+    expect(wrapper.style.minHeight).toBe('300px');
+    // ...but the grid may grow past it, so it must not be clipped.
+    expect(wrapper.className).not.toContain('overflow-hidden');
+  });
+
   it('tracks the impression and pushes the slot once (loader injects the script)', () => {
     const { rerender } = render(<AdSlot name="results" slot={SLOT} />);
     rerender(<AdSlot name="results" slot={SLOT} />);

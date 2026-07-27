@@ -78,6 +78,15 @@ export function Component() {
         <AdSlot name="home" slot={import.meta.env.VITE_ADSENSE_SLOT_HOME} className="my-8" />
         <FAQSection />
         <FooterCTA onStart={handleStartGuide} onSample={handleLoadSample} />
+        {/* End-of-page multiplex: placed after the CTA so the CTA gets first
+            claim on attention, and so its self-sizing grid pushes only the
+            footer when it grows. */}
+        <AdSlot
+          name="home_footer"
+          slot={import.meta.env.VITE_ADSENSE_SLOT_HOME_FOOTER}
+          format="multiplex"
+          className="my-8"
+        />
       </div>
     </>
   );

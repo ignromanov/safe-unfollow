@@ -24,7 +24,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
           </div>
           <h1 className="text-4xl md:text-5xl font-display font-bold">Privacy Policy</h1>
         </div>
-        <p className="text-muted-foreground text-lg">Last updated: January 9, 2026</p>
+        <p className="text-muted-foreground text-lg">Last updated: July 27, 2026</p>
       </header>
 
       {/* Content */}
@@ -61,8 +61,9 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             <li className="flex items-start gap-3">
               <span className="text-primary font-bold">4.</span>
               <span>
-                <strong className="text-foreground">No Cookies for Tracking</strong> — We only use
-                essential cookies for theme preferences.
+                <strong className="text-foreground">Ads Keep This Free</strong> — We show ads from
+                Google AdSense, which set their own cookies. They can never be targeted using your
+                Instagram data, because that data never reaches us or Google. See section 5.3.
               </span>
             </li>
           </ul>
@@ -123,6 +124,11 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             <li>Analytics opt-out preference</li>
             <li>UI state (filter selections)</li>
           </ul>
+          <p className="text-muted-foreground mt-4">
+            In the EEA, UK and Switzerland, Google's consent tool additionally stores your
+            advertising consent choice on your device so it does not have to ask again on every
+            visit (see section 5.3).
+          </p>
         </section>
 
         {/* Section 3 */}
@@ -139,6 +145,11 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             <li>Your IP address (analytics are anonymized)</li>
             <li>Any data that could identify you personally</li>
           </ul>
+          <p className="text-muted-foreground mt-4">
+            This describes what <strong className="text-foreground">we</strong> receive. Loading any
+            page also involves third parties that serve it — our host and our ad provider — which
+            necessarily see your IP address, as any website you visit does. Section 5 lists them.
+          </p>
         </section>
 
         {/* Section 4 */}
@@ -202,6 +213,48 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             When you click on an Instagram profile, you are redirected to Instagram.com. Instagram's
             privacy policy applies to any interaction on their platform.
           </p>
+
+          <h3 className="text-lg font-semibold mt-6 mb-3">5.3 Advertising (Google AdSense)</h3>
+          <p className="text-muted-foreground">
+            This service is free and has no paid tier. Ads from Google AdSense cover its running
+            costs. Google, as a third-party vendor, uses cookies and similar technologies to serve
+            and measure those ads, and receives the data any web request carries — your IP address,
+            browser and the page URL the ad appears on.
+          </p>
+          <div className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+            <p className="text-sm text-emerald-700 dark:text-emerald-400 font-medium">
+              Ads are never targeted using your Instagram data. Your export is parsed inside your
+              browser and stored only in IndexedDB — neither we nor Google can read it, so it cannot
+              feed ad targeting even in principle.
+            </p>
+          </div>
+          <p className="text-muted-foreground mt-4">
+            Ads are not shown on the sample-data page. We do not place ads on the upload screen.
+          </p>
+          <p className="text-muted-foreground mt-4">
+            If you are in the EEA, UK or Switzerland, a consent dialog from Google's certified
+            consent management platform appears before personalized ads are served, and your choice
+            is remembered on your device. You can reopen it at any time to change or withdraw
+            consent. Everywhere else, you can turn off ad personalization at{' '}
+            <a
+              href="https://myadcenter.google.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              My Ad Center
+            </a>
+            . Details of Google's own processing are in{' '}
+            <a
+              href="https://policies.google.com/technologies/partner-sites"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              How Google uses information from sites that use its services
+            </a>
+            .
+          </p>
         </section>
 
         {/* Section 6 */}
@@ -229,6 +282,10 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             <li>
               <strong className="text-foreground">Opt out of analytics:</strong> Click "Don't Track
               Me" in the footer
+            </li>
+            <li>
+              <strong className="text-foreground">Change your ad consent:</strong> Reopen the
+              consent dialog (EEA, UK, Switzerland) or use Google's My Ad Center — see section 5.3
             </li>
             <li>
               <strong className="text-foreground">Audit the code:</strong> Review our open-source
