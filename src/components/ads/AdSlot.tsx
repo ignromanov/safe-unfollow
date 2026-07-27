@@ -5,15 +5,25 @@ import { pushAdSlot } from '@/lib/ads/loader';
 import { analytics } from '@/lib/analytics';
 import { cn } from '@/lib/utils';
 
+/**
+ * AdSense ad unit format.
+ *
+ * - `display` — responsive banner. Pinned to `minHeight` in both directions,
+ *   so it contributes zero CLS whether or not an ad fills it.
+ * - `multiplex` — native grid of related-content tiles. It sizes its own rows,
+ *   so `minHeight` only reserves space up front and the unit may grow past it.
+ *   Use it at the end of a page, where growth pushes nothing but the footer.
+ */
+export type AdSlotFormat = 'display' | 'multiplex';
+
 export interface AdSlotProps {
   /** Analytics/debug name for this placement (e.g. "home", "results"). */
   name: string;
   /** AdSense ad unit slot ID (from env). When empty, the slot renders nothing. */
   slot: string | undefined;
-  /**
-   * Reserved height in px for the ad container. Kept fixed so the slot
-   * contributes zero CLS whether or not an ad fills it.
-   */
+  /** Ad unit format. Defaults to a responsive display banner. */
+  format?: AdSlotFormat;
+  /** Reserved height in px for the ad container. */
   minHeight?: number;
   className?: string;
 }
@@ -28,12 +38,14 @@ export interface AdSlotProps {
  * Consent for EEA/UK/CH visitors is handled by Google's certified CMP on top
  * of the ad script — there is no client-side geo-gate.
  *
- * When eligible it renders a fixed-height container with the `<ins>` element,
- * lazily loads the AdSense script, and requests a fill — keeping CLS at 0.
+ * When eligible it renders a space-reserving container with the `<ins>`
+ * element, lazily loads the AdSense script, and requests a fill. See
+ * {@link AdSlotFormat} for how each format handles that reserved space.
  */
 export function AdSlot({
   name,
   slot,
+  format = 'display',
   minHeight = 280,
   className,
 }: AdSlotProps): ReactElement | null {
@@ -60,19 +72,21 @@ export function AdSlot({
     return null;
   }
 
+  const isMultiplex = format === 'multiplex';
+
   return (
     <div
-      className={cn('w-full flex justify-center overflow-hidden', className)}
+      className={cn('w-full flex justify-center', !isMultiplex && 'overflow-hidden', className)}
       style={{ minHeight }}
       data-ad-name={name}
     >
       <ins
         className="adsbygoogle"
-        style={{ display: 'block', width: '100%', height: minHeight }}
+        style={{ display: 'block', width: '100%', ...(isMultiplex ? {} : { height: minHeight }) }}
         data-ad-client={client}
         data-ad-slot={slot}
-        data-ad-format="auto"
-        data-full-width-responsive="true"
+        data-ad-format={isMultiplex ? 'autorelaxed' : 'auto'}
+        {...(isMultiplex ? {} : { 'data-full-width-responsive': 'true' })}
       />
     </div>
   );

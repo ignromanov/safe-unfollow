@@ -208,6 +208,55 @@ describe('HomePage', () => {
     });
   });
 
+  describe('ad placements', () => {
+    const withAdEnv = (fn: () => void) => {
+      vi.stubEnv('VITE_ADSENSE_CLIENT', 'ca-pub-test');
+      vi.stubEnv('VITE_ADSENSE_SLOT_HOME', '111');
+      vi.stubEnv('VITE_ADSENSE_SLOT_HOME_FOOTER', '222');
+      try {
+        fn();
+      } finally {
+        vi.unstubAllEnvs();
+      }
+    };
+
+    it('should render no ads when the slot env vars are unset', () => {
+      const { container } = render(<HomePage />);
+
+      expect(container.querySelectorAll('[data-ad-name]')).toHaveLength(0);
+    });
+
+    it('should place the in-content ad between HowTo and FAQ', () => {
+      withAdEnv(() => {
+        render(<HomePage />);
+
+        const ad = document.querySelector('[data-ad-name="home"]') as HTMLElement;
+        expect(ad).not.toBeNull();
+        expect(
+          screen.getByTestId('how-to-section').compareDocumentPosition(ad) &
+            Node.DOCUMENT_POSITION_FOLLOWING
+        ).toBeTruthy();
+        expect(
+          screen.getByTestId('faq-section').compareDocumentPosition(ad) &
+            Node.DOCUMENT_POSITION_PRECEDING
+        ).toBeTruthy();
+      });
+    });
+
+    it('should place the multiplex ad after the footer CTA, so the CTA is seen first', () => {
+      withAdEnv(() => {
+        render(<HomePage />);
+
+        const ad = document.querySelector('[data-ad-name="home_footer"]') as HTMLElement;
+        expect(ad).not.toBeNull();
+        expect(
+          screen.getByTestId('footer-cta').compareDocumentPosition(ad) &
+            Node.DOCUMENT_POSITION_FOLLOWING
+        ).toBeTruthy();
+      });
+    });
+  });
+
   describe('sections animation', () => {
     it('should wrap sections in animated container', () => {
       const { container } = render(<HomePage />);
