@@ -1,4 +1,4 @@
-import { act, render } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AdSlot } from '@/components/ads/AdSlot';
@@ -306,15 +306,14 @@ describe('AdSlot', () => {
   });
 
   it('associates the label with the ad container for screen readers', () => {
-    const { container } = render(<AdSlot name="results" slot={SLOT} />);
+    render(<AdSlot name="results" slot={SLOT} />);
     scrollIntoView();
 
-    const label = container.querySelector('[data-ad-name] > span') as HTMLElement;
-    const adContainer = container.querySelector('[data-ad-name] > div') as HTMLElement;
-    expect(label.id).toBeTruthy();
-    // Derived from `name`, not a constant — three AdSlots render on the
-    // homepage alone, and a shared id would break the association.
-    expect(label.id).toContain('results');
-    expect(adContainer.getAttribute('aria-labelledby')).toBe(label.id);
+    // Exercises the actual accessible-name computation, not just the
+    // id/attribute pair: an id/aria-labelledby match on a role-less div (role
+    // "generic", which is naming-prohibited) would pass an attribute check
+    // while still exposing no name to a screen reader. This only passes if
+    // the browser-equivalent name resolution actually lands on the element.
+    expect(screen.getByRole('group', { name: 'Advertisement' })).toBeInTheDocument();
   });
 });

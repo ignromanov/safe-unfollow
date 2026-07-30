@@ -149,8 +149,15 @@ export function AdSlot({
       >
         {t('ads.label')}
       </span>
+      {/* A bare div computes to role="generic", which is naming-prohibited —
+          aria-labelledby on it would be silently inert. `group` opts it into
+          naming without making it a landmark: `region`/`complementary` would
+          also work, but as landmarks they'd enter the page's navigation
+          structure, putting three ad units alongside the real sections for
+          screen-reader users. */}
       <div
         ref={containerRef}
+        role="group"
         aria-labelledby={labelId}
         className={cn('flex w-full justify-center', !isMultiplex && 'overflow-hidden')}
         style={{ minHeight }}
