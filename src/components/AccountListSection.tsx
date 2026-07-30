@@ -16,6 +16,7 @@ import { AdSlot } from './ads/AdSlot';
 import { RescuePlanBanner } from './RescuePlanBanner';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import type { BadgeKey } from '@/core/types';
+import { RESCUE_PLAN_BANNER_ENABLED } from '@/config/feature-flags';
 import { useAccountFiltering } from '@/hooks/useAccountFiltering';
 import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
 import { useTimeOnResults } from '@/hooks/useTimeOnResults';
@@ -225,7 +226,7 @@ export function AccountListSection({
       {/* Main Content Layout - grid for flexible banner positioning */}
       <div className="grid grid-cols-1 lg:grid-cols-[20rem_1fr] gap-6 md:gap-12">
         {/* Rescue Plan Banner - full width on desktop (top), between filters and list on mobile */}
-        {!isSample && (
+        {RESCUE_PLAN_BANNER_ENABLED && !isSample && (
           <RescuePlanBanner
             filterCounts={filterCounts}
             totalCount={totalCount}

@@ -62,6 +62,13 @@ vi.mock('@/components/StatCard', () => ({
   ),
 }));
 
+// RescuePlanBanner renders behind a severity-based setTimeout (5-15s) and pulls in
+// IntersectionObserver/analytics internals that are out of scope here — mock it like
+// the other children above so this file only asserts whether it's called at all.
+vi.mock('@/components/RescuePlanBanner', () => ({
+  RescuePlanBanner: () => <div data-testid="rescue-plan-banner" />,
+}));
+
 const mockUseAccountFiltering = vi.mocked(useAccountFiltering);
 
 describe('AccountListSection', () => {
@@ -261,6 +268,12 @@ describe('AccountListSection', () => {
       fileHash: 'test-hash-123',
       accountCount: 21,
     });
+  });
+
+  it('does not render the rescue plan banner while the flag is off', () => {
+    renderWithRouter(<AccountListSection {...defaultProps} />);
+
+    expect(screen.queryByTestId('rescue-plan-banner')).not.toBeInTheDocument();
   });
 
   it('should handle zero filter counts', () => {
