@@ -1,4 +1,4 @@
-import { render, screen, act, fireEvent } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { Shield } from 'lucide-react';
 
@@ -17,11 +17,8 @@ vi.mock('@/lib/stats', () => ({
   },
 }));
 
-// Already-filtered list, mirroring what the config exports at runtime: one
-// plain privacy tip plus one funded affiliate tip. The filtering itself is
-// covered in __tests__/config/affiliate-links.test.ts.
 vi.mock('@/config/loading-tips', () => ({
-  VISIBLE_LOADING_TIPS: [
+  LOADING_TIPS: [
     {
       id: 'privacy-tip',
       delayMs: 1000,
@@ -31,13 +28,12 @@ vi.mock('@/config/loading-tips', () => ({
       color: 'text-emerald-500',
     },
     {
-      id: 'nordvpn',
-      delayMs: 5000,
-      titleKey: 'loadingTips.nordvpn.title',
-      descKey: 'loadingTips.nordvpn.desc',
+      id: 'revoke-access',
+      delayMs: 1100,
+      titleKey: 'loadingTips.revokeAccess.title',
+      descKey: 'loadingTips.revokeAccess.desc',
       icon: Shield,
-      color: 'text-teal-500',
-      url: 'https://nordvpn.example/deal',
+      color: 'text-blue-600',
     },
   ],
 }));
@@ -70,13 +66,6 @@ describe('LoadingTips', () => {
       expect(analytics.loadingTipImpression).not.toHaveBeenCalled();
     });
 
-    it('keeps the not-yet-revealed affiliate link out of the tab order', () => {
-      const { container } = render(<LoadingTips isProcessing={true} />);
-
-      expect(container.querySelector('a')).toHaveAttribute('tabindex', '-1');
-      expect(screen.queryByRole('link')).toBeNull();
-    });
-
     it('reveals the first tip after its delay', () => {
       render(<LoadingTips isProcessing={true} />);
 
@@ -89,35 +78,16 @@ describe('LoadingTips', () => {
       expect(analytics.loadingTipImpression).toHaveBeenCalledWith('privacy-tip', 0, 1000);
     });
 
-    it('reveals the affiliate tip as an outbound link with a disclosure', () => {
+    it('reveals the second tip after its delay', () => {
       render(<LoadingTips isProcessing={true} />);
 
       act(() => {
-        vi.advanceTimersByTime(5000);
+        vi.advanceTimersByTime(1100);
       });
 
       expect(screen.getAllByRole('listitem')).toHaveLength(2);
-
-      const link = screen.getByRole('link');
-      expect(link).toHaveAttribute('href', 'https://nordvpn.example/deal');
-      expect(link).toHaveAttribute('target', '_blank');
-      expect(link).toHaveAttribute('rel', 'noopener noreferrer');
-      expect(link).not.toHaveAttribute('tabindex');
-      expect(screen.getByText('loadingTips.affiliateDisclosure')).toBeInTheDocument();
-      expect(screen.getByText('loadingTips.opensInNewTab')).toBeInTheDocument();
-    });
-
-    it('reports the click with the same index used for its impression', () => {
-      render(<LoadingTips isProcessing={true} />);
-
-      act(() => {
-        vi.advanceTimersByTime(5000);
-      });
-
-      fireEvent.click(screen.getByRole('link'));
-
-      expect(analytics.loadingTipImpression).toHaveBeenCalledWith('nordvpn', 1, 5000);
-      expect(analytics.loadingTipClick).toHaveBeenCalledWith('nordvpn', 1, expect.any(Number));
+      expect(screen.getByText('loadingTips.revokeAccess.title')).toBeInTheDocument();
+      expect(analytics.loadingTipImpression).toHaveBeenCalledWith('revoke-access', 1, 1100);
     });
   });
 
