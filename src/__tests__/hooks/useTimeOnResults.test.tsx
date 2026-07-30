@@ -1,4 +1,5 @@
 import { render } from '@testing-library/react';
+import type { MutableRefObject } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/lib/analytics', () => ({
@@ -7,11 +8,26 @@ vi.mock('@/lib/analytics', () => ({
   trackBeacon: vi.fn(),
 }));
 
-import { trackBeacon } from '@/lib/analytics';
+import { analytics, AnalyticsEvents, trackBeacon } from '@/lib/analytics';
 import { useTimeOnResults } from '@/hooks/useTimeOnResults';
 
-function Harness({ accountCount, isActive }: { accountCount: number; isActive: boolean }) {
-  useTimeOnResults(accountCount, isActive);
+type TimeOnResultsApi = ReturnType<typeof useTimeOnResults>;
+
+function Harness({
+  accountCount,
+  isActive,
+  apiRef,
+}: {
+  accountCount: number;
+  isActive: boolean;
+  apiRef?: MutableRefObject<TimeOnResultsApi | null>;
+}) {
+  const api = useTimeOnResults(accountCount, isActive);
+  if (apiRef) {
+    // Plain ref write during render — no state, no re-render triggered — so the
+    // test can reach `trackClick` without switching this suite to renderHook.
+    apiRef.current = api;
+  }
   return null;
 }
 
@@ -51,5 +67,41 @@ describe('useTimeOnResults', () => {
     unmount();
 
     expect(trackBeacon).not.toHaveBeenCalled();
+  });
+
+  it('sends the event with the right payload when the visit clears the floor and wins the roll', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.1); // passes the 0.25 roll
+    vi.spyOn(Date, 'now').mockReturnValue(0);
+
+    const apiRef: MutableRefObject<TimeOnResultsApi | null> = { current: null };
+    const { unmount } = render(<Harness accountCount={100} isActive apiRef={apiRef} />);
+
+    apiRef.current?.trackClick(['mutual']);
+
+    // 7.4s elapsed: picked so Math.round is actually exercised, not just a
+    // whole number that would pass even if the rounding were dropped.
+    vi.spyOn(Date, 'now').mockReturnValue(7_400);
+    unmount();
+
+    expect(trackBeacon).toHaveBeenCalledTimes(1);
+    expect(trackBeacon).toHaveBeenCalledWith(AnalyticsEvents.TIME_ON_RESULTS, {
+      time_seconds: 7,
+      account_count: 100,
+      actions_count: 1,
+    });
+    expect(analytics.resultsClicksSummary).toHaveBeenCalledTimes(1);
+  });
+
+  it('skips the click summary when the visit had no clicks', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.1); // passes the 0.25 roll
+    vi.spyOn(Date, 'now').mockReturnValue(0);
+
+    const { unmount } = render(<Harness accountCount={100} isActive />);
+
+    vi.spyOn(Date, 'now').mockReturnValue(7_400);
+    unmount();
+
+    expect(trackBeacon).toHaveBeenCalledTimes(1);
+    expect(analytics.resultsClicksSummary).not.toHaveBeenCalled();
   });
 });

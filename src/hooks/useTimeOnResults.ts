@@ -19,7 +19,7 @@ export function useTimeOnResults(accountCount: number, isActive: boolean) {
   const actionsCountRef = useRef(0);
   const clicksCountRef = useRef(0);
   const badgeClicksRef = useRef<Record<string, number>>({});
-  const hasFiredRef = useRef(false);
+  const hasDecidedRef = useRef(false);
 
   // Track user actions (filter, search, etc.)
   const trackAction = useCallback(() => {
@@ -37,7 +37,7 @@ export function useTimeOnResults(accountCount: number, isActive: boolean) {
 
   // Fire the analytics events via sendBeacon for reliability
   const fireEvent = useCallback(() => {
-    if (hasFiredRef.current || startTimeRef.current === null) {
+    if (hasDecidedRef.current || startTimeRef.current === null) {
       return;
     }
 
@@ -49,10 +49,11 @@ export function useTimeOnResults(accountCount: number, isActive: boolean) {
       return;
     }
 
-    // The guard goes up before the dice are rolled. Setting it inside the
+    // The guard goes up once the sampling decision is made — whether or not
+    // the roll passes — before the dice are rolled. Setting it inside the
     // sampling branch let a failed roll re-roll on each of three triggers,
     // making a documented 25% behave like 1 - 0.75^n.
-    hasFiredRef.current = true;
+    hasDecidedRef.current = true;
 
     if (Math.random() > 0.25) {
       return;
@@ -84,7 +85,7 @@ export function useTimeOnResults(accountCount: number, isActive: boolean) {
     actionsCountRef.current = 0;
     clicksCountRef.current = 0;
     badgeClicksRef.current = {};
-    hasFiredRef.current = false;
+    hasDecidedRef.current = false;
 
     // Layer 1: visibilitychange (most reliable on mobile)
     const handleVisibilityChange = () => {
