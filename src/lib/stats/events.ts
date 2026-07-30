@@ -5,6 +5,7 @@
 import { AnalyticsEvents, parseDurationBucket } from './constants';
 import type { FilterAction, LinkType, ParseOutcome } from './constants';
 import { trackEvent } from './core';
+import { enqueueEvent } from './queue';
 import { getStoredUTM, getEntryCTA, setEntryCTA } from './utm';
 
 /**
@@ -109,8 +110,10 @@ export const analytics = {
   },
 
   // Loading Tips (shown during ZIP parsing)
+  // Impressions are batched: three of these land inside the first second of a
+  // parse, and one invocation for the set is as good as three.
   loadingTipImpression: (tipId: string, index: number, delayMs: number) => {
-    trackEvent(AnalyticsEvents.LOADING_TIP_IMPRESSION, {
+    enqueueEvent(AnalyticsEvents.LOADING_TIP_IMPRESSION, {
       tip_id: tipId,
       tip_index: index,
       delay_ms: delayMs,
@@ -237,7 +240,7 @@ export const analytics = {
 
   // Donation Card (100% sampling — high-value conversion events)
   donationCardImpression: (accountCount: number) => {
-    trackEvent(AnalyticsEvents.DONATION_CARD_IMPRESSION, {
+    enqueueEvent(AnalyticsEvents.DONATION_CARD_IMPRESSION, {
       account_count: accountCount,
     });
   },
@@ -261,7 +264,7 @@ export const analytics = {
     accountCount: number,
     unfollowedPercent: number
   ) => {
-    trackEvent(AnalyticsEvents.RESCUE_PLAN_IMPRESSION, {
+    enqueueEvent(AnalyticsEvents.RESCUE_PLAN_IMPRESSION, {
       severity,
       size,
       segment: `${severity}_${size}`,
@@ -383,6 +386,14 @@ export const analytics = {
   // Ads — impression opportunity when an ad slot is mounted and eligible
   adSlotRendered: (slot: string) => {
     trackEvent(AnalyticsEvents.AD_SLOT_RENDERED, {
+      slot,
+    });
+  },
+
+  // Ads — one viewable impression opportunity, by the MRC display standard.
+  // Fires from the dwell gate in AdSlot, never on mount.
+  adSlotViewable: (slot: string) => {
+    enqueueEvent(AnalyticsEvents.AD_SLOT_VIEWABLE, {
       slot,
     });
   },
