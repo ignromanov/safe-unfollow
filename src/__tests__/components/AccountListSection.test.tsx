@@ -342,5 +342,56 @@ describe('AccountListSection', () => {
         ).toBeTruthy();
       });
     });
+
+    it('places the low-profile unit at the very tail, after the donation card', () => {
+      vi.stubEnv('VITE_ADSENSE_CLIENT', 'ca-pub-test');
+      vi.stubEnv('VITE_ADSENSE_SLOT_RESULTS_END', '333');
+      try {
+        const { container } = render(
+          <AccountListSection fileHash="abc" accountCount={100} filename="d.zip" />
+        );
+
+        const tail = container.querySelector('[data-ad-name="results_end"]') as HTMLElement;
+        const donation = container.querySelector(
+          '[data-testid="inline-donation-card"]'
+        ) as HTMLElement;
+        expect(tail).not.toBeNull();
+        expect(
+          donation.compareDocumentPosition(tail) & Node.DOCUMENT_POSITION_FOLLOWING
+        ).toBeTruthy();
+      } finally {
+        vi.unstubAllEnvs();
+      }
+    });
+
+    it('renders nothing for the tail unit without its env var', () => {
+      vi.stubEnv('VITE_ADSENSE_CLIENT', 'ca-pub-test');
+      try {
+        const { container } = render(
+          <AccountListSection fileHash="abc" accountCount={100} filename="d.zip" />
+        );
+
+        expect(container.querySelector('[data-ad-name="results_end"]')).toBeNull();
+      } finally {
+        vi.unstubAllEnvs();
+      }
+    });
+
+    it('keeps the tail unit low profile — the density ceiling leaves no slack', () => {
+      vi.stubEnv('VITE_ADSENSE_CLIENT', 'ca-pub-test');
+      vi.stubEnv('VITE_ADSENSE_SLOT_RESULTS_END', '333');
+      try {
+        const { container } = render(
+          <AccountListSection fileHash="abc" accountCount={100} filename="d.zip" />
+        );
+
+        const reserved = container.querySelector(
+          '[data-ad-name="results_end"] [style*="min-height"]'
+        ) as HTMLElement;
+        expect(reserved.style.minHeight).toBe('100px');
+      } finally {
+        vi.unstubAllEnvs();
+      }
+    });
   });
 });

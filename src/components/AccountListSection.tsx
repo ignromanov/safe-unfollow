@@ -268,6 +268,19 @@ export function AccountListSection({
           covers the after-the-fact ask, and this card above the list was its
           badly-timed duplicate. */}
       <InlineDonationCard accountCount={accountCount} isSample={isSample} />
+
+      {/* Tail unit. Better Ads measures density over the main content and
+          excludes ads below it, so the position keeps this one out of the
+          worst-case reading. `display` at 100px rather than multiplex: the fixed
+          height preserves the zero-CLS path, and at 26.4% worst-case mobile
+          density there is no slack for a unit that sizes itself. */}
+      {!isSample && (
+        <AdSlot
+          name="results_end"
+          slot={import.meta.env.VITE_ADSENSE_SLOT_RESULTS_END}
+          minHeight={100}
+        />
+      )}
     </div>
   );
 }
