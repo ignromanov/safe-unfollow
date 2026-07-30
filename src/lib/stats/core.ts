@@ -4,15 +4,10 @@
 
 import { TRACKING_OPT_OUT_KEY } from './constants';
 import type { AnalyticsEventName } from './constants';
+import { isTrackingOptedOut } from './consent';
 import { resolveUmamiTarget } from './endpoint';
 
-/**
- * Check if user has opted out of tracking
- */
-export function isTrackingOptedOut(): boolean {
-  if (typeof window === 'undefined') return false;
-  return localStorage.getItem(TRACKING_OPT_OUT_KEY) === 'true';
-}
+export { isTrackingOptedOut };
 
 /**
  * Opt out of tracking - Umami script will not load

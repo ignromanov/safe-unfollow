@@ -8,7 +8,7 @@
  * the opt-out path never injects the tag at all.
  */
 export interface UmamiTarget {
-  /** Origin of the Umami instance, e.g. `https://umami-coral-xi.vercel.app`. */
+  /** Origin of the Umami instance the script tag was served from. */
   origin: string;
   websiteId: string;
 }

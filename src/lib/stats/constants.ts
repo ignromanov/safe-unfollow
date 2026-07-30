@@ -131,6 +131,12 @@ export const AnalyticsEvents = {
 
   // Ads
   AD_SLOT_RENDERED: 'ad_slot_rendered',
+  // A viewable impression opportunity by the MRC display standard (50% of
+  // pixels for 1 continuous second). Deliberately NOT a redefinition of
+  // `ad_slot_rendered`: that one fires on mount and counts slots nobody
+  // scrolled to, so merging the two under one name would corrupt every trend
+  // line drawn across the change.
+  AD_SLOT_VIEWABLE: 'ad_slot_viewable',
 } as const;
 
 export type AnalyticsEventName = (typeof AnalyticsEvents)[keyof typeof AnalyticsEvents];
