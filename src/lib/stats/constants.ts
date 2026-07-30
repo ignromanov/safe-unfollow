@@ -129,13 +129,8 @@ export const AnalyticsEvents = {
   PWA_INSTALL_PROMPT: 'pwa_install_prompt',
   PWA_INSTALLED: 'pwa_installed',
 
-  // Ads
-  AD_SLOT_RENDERED: 'ad_slot_rendered',
-  // A viewable impression opportunity by the MRC display standard (50% of
-  // pixels for 1 continuous second). Deliberately NOT a redefinition of
-  // `ad_slot_rendered`: that one fires on mount and counts slots nobody
-  // scrolled to, so merging the two under one name would corrupt every trend
-  // line drawn across the change.
+  // Ads — a viewable impression opportunity by the MRC display standard (50%
+  // of pixels for 1 continuous second).
   AD_SLOT_VIEWABLE: 'ad_slot_viewable',
 } as const;
 

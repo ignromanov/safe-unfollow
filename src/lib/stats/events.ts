@@ -383,13 +383,6 @@ export const analytics = {
     trackEvent(AnalyticsEvents.PWA_INSTALLED);
   },
 
-  // Ads — impression opportunity when an ad slot is mounted and eligible
-  adSlotRendered: (slot: string) => {
-    trackEvent(AnalyticsEvents.AD_SLOT_RENDERED, {
-      slot,
-    });
-  },
-
   // Ads — one viewable impression opportunity, by the MRC display standard.
   // Fires from the dwell gate in AdSlot, never on mount.
   adSlotViewable: (slot: string) => {
