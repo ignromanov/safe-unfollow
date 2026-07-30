@@ -38,6 +38,19 @@ describe('promo impression batching', () => {
     expect(enqueueEvent).toHaveBeenCalledWith('donation_card_impression', { account_count: 42 });
   });
 
+  it('queues the rescue plan impression', () => {
+    analytics.rescuePlanImpression('critical', 'large', 4200, 37.5);
+
+    expect(enqueueEvent).toHaveBeenCalledWith('rescue_plan_impression', {
+      severity: 'critical',
+      size: 'large',
+      segment: 'critical_large',
+      account_count: 4200,
+      unfollowed_percent: 37.5,
+    });
+    expect(trackEvent).not.toHaveBeenCalled();
+  });
+
   it('keeps clicks on the immediate path — a click navigates away', () => {
     analytics.loadingTipClick('nordvpn', 1, 1200);
 
