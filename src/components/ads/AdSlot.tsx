@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState, type ReactElement } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
 
+import { useAdViewability } from '@/hooks/useAdViewability';
 import { isSampleRoute } from '@/lib/ads/eligibility';
 import { pushAdSlot } from '@/lib/ads/loader';
 import { analytics } from '@/lib/analytics';
@@ -101,14 +102,18 @@ export function AdSlot({
   useEffect(() => {
     if (!approaching || !eligible || pushedRef.current || !client) return;
     pushedRef.current = true;
-    // Fires when the ad is requested, not when the page merely contains a slot
-    // — the two diverge now that requests wait for the reader to scroll.
-    // Temporary home for this call: a follow-up moves it onto the MRC dwell
-    // gate, so it fires on an actual viewable impression rather than a fill
-    // request.
-    analytics.adSlotViewable(name);
     pushAdSlot(client);
   }, [approaching, eligible, client, name]);
+
+  const reportViewable = useCallback(() => {
+    analytics.adSlotViewable(name);
+  }, [name]);
+
+  // Counts a viewable slot opportunity, not a filled ad: the container keeps
+  // its reserved height whether or not a fill arrives. AdSense's own impression
+  // count divided by this one is the fill rate, which is the number worth
+  // knowing — so matching Google's count exactly buys no extra decision.
+  useAdViewability(containerRef, approaching, reportViewable);
 
   if (!mounted || !eligible || !client || !slot) {
     return null;

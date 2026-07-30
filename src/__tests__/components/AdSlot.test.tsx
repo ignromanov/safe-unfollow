@@ -34,8 +34,34 @@ function scrollIntoView(): void {
   });
 }
 
+/** Hold the slot half-visible long enough to satisfy the MRC dwell. */
+function dwell(): void {
+  act(() => {
+    for (const { element, callback } of observed) {
+      callback(
+        [
+          {
+            isIntersecting: true,
+            intersectionRatio: 1,
+            // `isViewable` measures real geometry: it divides rootHeight by
+            // elementHeight and returns false for a zero-height element, so an
+            // entry without a boundingClientRect can never count as viewable.
+            boundingClientRect: { height: 280 } as DOMRectReadOnly,
+            target: element,
+          } as IntersectionObserverEntry,
+        ],
+        {} as IntersectionObserver
+      );
+    }
+  });
+  act(() => {
+    vi.advanceTimersByTime(1000);
+  });
+}
+
 describe('AdSlot', () => {
   beforeEach(() => {
+    vi.useFakeTimers();
     vi.clearAllMocks();
     window.history.pushState({}, '', '/');
     vi.stubEnv('VITE_ADSENSE_CLIENT', CLIENT);
@@ -59,6 +85,13 @@ describe('AdSlot', () => {
         unobserve(): void {}
         disconnect(): void {
           disconnects += 1;
+          // A disconnected observer delivers nothing further, including
+          // already-queued records. Without this, `dwell()` keeps invoking a
+          // callback the hook has already shut down — and `useAdViewability`
+          // deliberately has no callback-level `firedRef` guard, precisely so a
+          // test can prove that `disconnect()` is what stops the re-fire.
+          // Filter, not splice: cleanup disconnects a second time on unmount.
+          observed = observed.filter(entry => entry.callback !== this.callback);
         }
       }
     );
@@ -67,6 +100,7 @@ describe('AdSlot', () => {
   afterEach(() => {
     vi.unstubAllEnvs();
     vi.unstubAllGlobals();
+    vi.useRealTimers();
   });
 
   it('renders nothing when the client env is missing', () => {
@@ -135,14 +169,36 @@ describe('AdSlot', () => {
     expect(wrapper.className).not.toContain('overflow-hidden');
   });
 
-  it('tracks the impression and pushes the slot once (loader injects the script)', () => {
-    const { rerender } = render(<AdSlot name="results" slot={SLOT} />);
-    scrollIntoView();
-    rerender(<AdSlot name="results" slot={SLOT} />);
+  describe('impression accounting', () => {
+    it('requests the fill without claiming an impression', () => {
+      render(<AdSlot name="results" slot={SLOT} />);
+      scrollIntoView();
 
-    expect(adSlotViewable).toHaveBeenCalledTimes(1);
-    expect(adSlotViewable).toHaveBeenCalledWith('results');
-    expect(pushAdSlot).toHaveBeenCalledTimes(1);
+      expect(pushAdSlot).toHaveBeenCalledTimes(1);
+      // Approaching is 400px of lead time — the reader has not seen anything yet.
+      expect(adSlotViewable).not.toHaveBeenCalled();
+    });
+
+    it('claims the impression only after the MRC dwell', () => {
+      render(<AdSlot name="results" slot={SLOT} />);
+      scrollIntoView();
+
+      dwell();
+
+      expect(adSlotViewable).toHaveBeenCalledTimes(1);
+      expect(adSlotViewable).toHaveBeenCalledWith('results');
+    });
+
+    it('claims it once even if the reader scrolls back and forth', () => {
+      const { rerender } = render(<AdSlot name="results" slot={SLOT} />);
+      scrollIntoView();
+      dwell();
+      rerender(<AdSlot name="results" slot={SLOT} />);
+      dwell();
+
+      expect(adSlotViewable).toHaveBeenCalledTimes(1);
+      expect(pushAdSlot).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('lazy loading', () => {
@@ -165,7 +221,9 @@ describe('AdSlot', () => {
       expect(observerOptions?.rootMargin).toBe('400px 0px');
 
       scrollIntoView();
-      expect(disconnects).toBeGreaterThan(0);
+      dwell();
+      dwell();
+      expect(adSlotViewable).toHaveBeenCalledTimes(1);
     });
 
     it('mounts the ins element only once the slot is approaching', () => {
