@@ -1,15 +1,10 @@
-import { Blob as NodeBlob } from 'node:buffer';
 import { vi } from 'vitest';
 
 /**
  * Setup browser API mocks for jsdom environment
- * Includes: matchMedia, ResizeObserver, IntersectionObserver, scrollTo, attachEvent, Blob
+ * Includes: matchMedia, ResizeObserver, IntersectionObserver, scrollTo, attachEvent
  */
 export function setupBrowserMocks() {
-  // jsdom's own Blob only implements slice/size/type — no text()/arrayBuffer(),
-  // which breaks any test reading back a Blob body (e.g. sendBeacon payloads).
-  // Node's Blob is spec-compatible and fully featured, so swap it in globally.
-  global.Blob = NodeBlob as unknown as typeof Blob;
   // Mock window.matchMedia
   Object.defineProperty(window, 'matchMedia', {
     writable: true,

@@ -1,3 +1,5 @@
+import { Blob as NodeBlob } from 'node:buffer';
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AnalyticsEvents } from '@/lib/stats/constants';
@@ -37,6 +39,12 @@ describe('event queue', () => {
     vi.stubGlobal('navigator', { ...navigator, sendBeacon, language: 'en-US' });
     fetchMock = vi.fn(() => Promise.resolve(new Response(null, { status: 200 })));
     vi.stubGlobal('fetch', fetchMock);
+
+    // jsdom's own Blob implements only slice/size/type — no text()/arrayBuffer() —
+    // and lastBeaconBody() below needs to read the payload back. Stubbed here,
+    // file-local, rather than in shared test setup, so every other test keeps
+    // jsdom's Blob (restored by vi.unstubAllGlobals() in afterEach).
+    vi.stubGlobal('Blob', NodeBlob);
   });
 
   afterEach(() => {
