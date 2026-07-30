@@ -277,8 +277,44 @@ describe('AdSlot', () => {
     scrollIntoView();
 
     // Matching our card chrome would make the ad indistinguishable from
-    // content, which AdSense forbids outright.
-    const className = (container.firstChild as HTMLElement).className;
-    expect(className).not.toMatch(/bg-gradient|rounded-4xl|bg-card/);
+    // content, which AdSense forbids outright. Checking only the outer
+    // wrapper's className can never catch this — those classes are hardcoded
+    // ('w-full' plus whatever the caller passes), so nothing the component
+    // itself renders could ever fail that check. Walk the whole subtree
+    // instead, since the chrome could land on any element inside it.
+    const adRoot = container.querySelector('[data-ad-name]') as HTMLElement;
+    const offendingClasses = /bg-gradient|rounded-4xl|bg-card/;
+    for (const el of [adRoot, ...adRoot.querySelectorAll('*')]) {
+      expect(el.className).not.toMatch(offendingClasses);
+    }
+  });
+
+  it('pins the label color at the measured AA-passing shades (text-zinc-600 light / text-zinc-400 dark)', () => {
+    // Guards against a later "tidy-up" quietly reverting to a shade that
+    // fails contrast. Measured against this app's actual --background token
+    // (not a card — every placement sits on the page background): zinc-600
+    // on light ≈7.51:1, zinc-400 on dark ≈7.92:1. Both clear the 4.5:1 floor
+    // small text needs (10px does not qualify for the 3:1 large-text
+    // exemption). The prior zinc-400/zinc-500 pair measured ≈2.6:1 / ≈3.7:1
+    // and failed AA on both themes.
+    const { container } = render(<AdSlot name="results" slot={SLOT} />);
+    scrollIntoView();
+
+    const label = container.querySelector('[data-ad-name] > span') as HTMLElement;
+    expect(label.className).toContain('text-zinc-600');
+    expect(label.className).toContain('dark:text-zinc-400');
+  });
+
+  it('associates the label with the ad container for screen readers', () => {
+    const { container } = render(<AdSlot name="results" slot={SLOT} />);
+    scrollIntoView();
+
+    const label = container.querySelector('[data-ad-name] > span') as HTMLElement;
+    const adContainer = container.querySelector('[data-ad-name] > div') as HTMLElement;
+    expect(label.id).toBeTruthy();
+    // Derived from `name`, not a constant — three AdSlots render on the
+    // homepage alone, and a shared id would break the association.
+    expect(label.id).toContain('results');
+    expect(adContainer.getAttribute('aria-labelledby')).toBe(label.id);
   });
 });

@@ -128,16 +128,30 @@ export function AdSlot({
   }
 
   const isMultiplex = format === 'multiplex';
+  // Unique per instance: three AdSlots render on the homepage alone, and a
+  // duplicated id would break the aria-labelledby association below.
+  const labelId = `ad-label-${name}`;
 
   return (
     <div className={cn('w-full', className)} data-ad-name={name}>
       {/* Required by the distinguishability policy. Small and muted, but it
-          must be legible and must not read as our own section heading. */}
-      <span className="mb-1 block text-center text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+          must be legible and must not read as our own section heading.
+          Colors are measured against this app's page background (--background,
+          OKLCH), not a card — every placement sits directly on it. 10px is
+          small text, so the exemption for large text (3:1) does not apply;
+          it needs the full 4.5:1. Measured: text-zinc-600 on light
+          --background ≈7.51:1, text-zinc-400 on dark --background ≈7.92:1.
+          The prior zinc-400/zinc-500 pair measured ≈2.6:1 / ≈3.7:1 and failed
+          AA on both themes. */}
+      <span
+        id={labelId}
+        className="mb-1 block text-center text-[10px] font-semibold uppercase tracking-widest text-zinc-600 dark:text-zinc-400"
+      >
         {t('ads.label')}
       </span>
       <div
         ref={containerRef}
+        aria-labelledby={labelId}
         className={cn('flex w-full justify-center', !isMultiplex && 'overflow-hidden')}
         style={{ minHeight }}
       >
