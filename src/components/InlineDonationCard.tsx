@@ -38,7 +38,10 @@ export function InlineDonationCard({ accountCount, isSample = false }: InlineDon
   };
 
   return (
-    <div className="relative rounded-3xl border-2 border-indigo-200 dark:border-indigo-800 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30 p-5 md:p-8 animate-in fade-in duration-500">
+    <div
+      data-testid="inline-donation-card"
+      className="relative rounded-3xl border-2 border-indigo-200 dark:border-indigo-800 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30 p-5 md:p-8 animate-in fade-in duration-500"
+    >
       <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-8">
         {/* Icon */}
         <div className="hidden md:flex shrink-0 p-4 rounded-2xl bg-indigo-100 dark:bg-indigo-900/40">

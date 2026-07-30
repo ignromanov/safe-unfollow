@@ -1,5 +1,5 @@
 import { vi, beforeEach } from 'vitest';
-import { screen, fireEvent } from '@tests/utils/testUtils';
+import { render, screen, fireEvent } from '@tests/utils/testUtils';
 import { renderWithRouter } from '@/__tests__/test-utils';
 import resultsEN from '@/locales/en/results.json';
 import { createI18nMock } from '@/__tests__/utils/mockI18n';
@@ -307,5 +307,40 @@ describe('AccountListSection', () => {
     expect(screen.getByTestId('stat-card-following')).toHaveTextContent(
       `${resultsEN.stats.following}: 0`
     );
+  });
+
+  describe('promo order', () => {
+    const withAdEnv = (fn: () => void) => {
+      vi.stubEnv('VITE_ADSENSE_CLIENT', 'ca-pub-test');
+      vi.stubEnv('VITE_ADSENSE_SLOT_RESULTS', '111');
+      try {
+        fn();
+      } finally {
+        vi.unstubAllEnvs();
+      }
+    };
+
+    it('puts the ad above the list and the donation ask below it', () => {
+      withAdEnv(() => {
+        const { container } = render(
+          <AccountListSection fileHash="abc" accountCount={100} filename="d.zip" />
+        );
+
+        const ad = container.querySelector('[data-ad-name="results"]') as HTMLElement;
+        const donation = container.querySelector(
+          '[data-testid="inline-donation-card"]'
+        ) as HTMLElement;
+        const list = container.querySelector('[data-testid="account-list"]') as HTMLElement;
+        expect(ad).not.toBeNull();
+        expect(donation).not.toBeNull();
+
+        // Ad before the list...
+        expect(ad.compareDocumentPosition(list) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+        // ...and the ask only after the visitor has their data.
+        expect(
+          list.compareDocumentPosition(donation) & Node.DOCUMENT_POSITION_FOLLOWING
+        ).toBeTruthy();
+      });
+    });
   });
 });

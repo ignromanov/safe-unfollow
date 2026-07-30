@@ -217,15 +217,20 @@ export function AccountListSection({
         />
       </div>
 
-      {/* Inline Donation Card */}
-      <InlineDonationCard accountCount={accountCount} isSample={isSample} />
-
-      {/* Ad slot — outside the virtualized list to avoid layout thrashing */}
-      {!isSample && <AdSlot name="results" slot={import.meta.env.VITE_ADSENSE_SLOT_RESULTS} />}
-
       {/* Main Content Layout - grid for flexible banner positioning */}
       <div className="grid grid-cols-1 lg:grid-cols-[20rem_1fr] gap-6 md:gap-12">
-        {/* Rescue Plan Banner - full width on desktop (top), between filters and list on mobile */}
+        {/* The only promo above the list. Takes the grid slot the rescue plan
+            banner used to hold — the position, never its styling. The wide gap
+            below is policy, not taste: FilterChips are tappable and an ad butted
+            against them invites accidental clicks. */}
+        {!isSample && (
+          <AdSlot
+            name="results"
+            slot={import.meta.env.VITE_ADSENSE_SLOT_RESULTS}
+            className="order-1 mb-4 lg:order-first lg:col-span-2"
+          />
+        )}
+
         {RESCUE_PLAN_BANNER_ENABLED && !isSample && (
           <RescuePlanBanner
             filterCounts={filterCounts}
@@ -235,7 +240,7 @@ export function AccountListSection({
         )}
 
         {/* Filters Sidebar */}
-        <div className="order-1 lg:order-none space-y-6">
+        <div className="order-2 lg:order-none space-y-6">
           <FilterChips
             selectedFilters={filters}
             onFiltersChange={setFilters}
@@ -257,6 +262,12 @@ export function AccountListSection({
           />
         </div>
       </div>
+
+      {/* Moved below the list: an ask placed before the value is delivered
+          inverts the reciprocity that makes it work. BuyMeCoffeeWidget already
+          covers the after-the-fact ask, and this card above the list was its
+          badly-timed duplicate. */}
+      <InlineDonationCard accountCount={accountCount} isSample={isSample} />
     </div>
   );
 }
