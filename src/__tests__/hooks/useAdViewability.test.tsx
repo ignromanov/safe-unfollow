@@ -4,19 +4,42 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { MRC_DWELL_MS, useAdViewability } from '@/hooks/useAdViewability';
 
-let observed: Array<{ element: Element; callback: IntersectionObserverCallback }>;
+let observed: Array<{
+  element: Element;
+  callback: IntersectionObserverCallback;
+  isActive: () => boolean;
+}>;
 let observerOptions: IntersectionObserverInit | undefined;
 let disconnects: number;
 
-function emit(ratio: number, isIntersecting = ratio > 0): void {
+/**
+ * Simulate one observer callback.
+ *
+ * `elementHeight` is a parameter because the hook decides viewability from the
+ * entry's own geometry — so "the unit grew after we subscribed" is expressed by
+ * emitting a taller box, which is exactly the case that must not silently stop
+ * counting.
+ */
+function emit(
+  ratio: number,
+  {
+    isIntersecting = ratio > 0,
+    elementHeight = 280,
+    rootHeight = 780,
+  }: { isIntersecting?: boolean; elementHeight?: number; rootHeight?: number } = {}
+): void {
   act(() => {
-    for (const { element, callback } of observed) {
+    for (const { element, callback, isActive } of observed) {
+      // A disconnected observer delivers nothing, so the double must not either.
+      if (!isActive()) continue;
       callback(
         [
           {
             isIntersecting,
             intersectionRatio: ratio,
             target: element,
+            boundingClientRect: { height: elementHeight } as DOMRectReadOnly,
+            rootBounds: { height: rootHeight } as DOMRectReadOnly,
           } as IntersectionObserverEntry,
         ],
         {} as IntersectionObserver
@@ -48,6 +71,7 @@ describe('useAdViewability', () => {
     vi.stubGlobal(
       'IntersectionObserver',
       class {
+        private connected = true;
         constructor(
           private callback: IntersectionObserverCallback,
           options?: IntersectionObserverInit
@@ -55,10 +79,16 @@ describe('useAdViewability', () => {
           observerOptions = options;
         }
         observe(element: Element): void {
-          observed.push({ element, callback: this.callback });
+          // `isActive` is what makes this double honest: the real disconnect()
+          // is synchronous and stops all further notifications, so a double that
+          // keeps delivering would let a missing disconnect() pass unnoticed.
+          observed.push({ element, callback: this.callback, isActive: () => this.connected });
         }
-        unobserve(): void {}
+        unobserve(): void {
+          this.connected = false;
+        }
         disconnect(): void {
+          this.connected = false;
           disconnects += 1;
         }
       }
@@ -103,7 +133,7 @@ describe('useAdViewability', () => {
 
     emit(0.6);
     act(() => vi.advanceTimersByTime(600));
-    emit(0.1, false);
+    emit(0.1, { isIntersecting: false });
     act(() => vi.advanceTimersByTime(MRC_DWELL_MS));
 
     expect(onViewable).not.toHaveBeenCalled();
@@ -138,18 +168,56 @@ describe('useAdViewability', () => {
     expect(observed).toHaveLength(0);
   });
 
-  it('lowers the threshold for a unit taller than the viewport', () => {
-    // A multiplex grid can exceed the viewport, and its ratio then can never
-    // reach 0.5 — the impression would never be counted at all.
-    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
-      height: 1560,
-      width: 320,
-    } as DOMRect);
+  it('subscribes with a dense threshold list, because the comparison target is not constant', () => {
+    // `threshold` is fixed at construction. Since the ratio we compare against
+    // depends on the element's current height, a single baked value cannot work
+    // — we need callbacks along the range and decide viewability ourselves.
+    render(<Harness onViewable={vi.fn()} />);
 
-    render(<Harness onViewable={vi.fn()} height={1560} />);
+    expect(Array.isArray(observerOptions?.threshold)).toBe(true);
+    expect((observerOptions?.threshold as number[]).length).toBe(101);
+  });
 
-    // Half the 780px viewport over a 1560px element.
-    expect(observerOptions?.threshold).toEqual([0.25]);
+  it('counts a unit that grew taller than the viewport after subscribing', () => {
+    // The regression guard for the real multiplex lifecycle: reserved height at
+    // subscribe time, tall once the tile grid fills. A target measured once at
+    // subscribe would stay at 0.5 and this impression would never be counted —
+    // a silent undercount, which is the more dangerous direction.
+    const onViewable = vi.fn();
+    render(<Harness onViewable={onViewable} />);
+
+    // Half the 780px viewport over a 1560px element is 0.25 — viewable.
+    emit(0.25, { elementHeight: 1560 });
+    act(() => vi.advanceTimersByTime(MRC_DWELL_MS));
+
+    expect(onViewable).toHaveBeenCalledTimes(1);
+  });
+
+  it('still demands half the element when the element fits the viewport', () => {
+    const onViewable = vi.fn();
+    render(<Harness onViewable={onViewable} />);
+
+    // 0.25 is enough only for an oversized element; at 280px the bar is 0.5.
+    emit(0.25, { elementHeight: 280 });
+    act(() => vi.advanceTimersByTime(MRC_DWELL_MS));
+
+    expect(onViewable).not.toHaveBeenCalled();
+  });
+
+  it('stops firing because the observer was disconnected, not because of a flag', () => {
+    // With the double honouring disconnect(), this fails if disconnect() is
+    // removed from the fire path — which a `firedRef` guard would have masked.
+    const onViewable = vi.fn();
+    render(<Harness onViewable={onViewable} />);
+
+    emit(0.6);
+    act(() => vi.advanceTimersByTime(MRC_DWELL_MS));
+    expect(disconnects).toBeGreaterThan(0);
+
+    emit(0.9);
+    act(() => vi.advanceTimersByTime(MRC_DWELL_MS));
+
+    expect(onViewable).toHaveBeenCalledTimes(1);
   });
 
   it('emits nothing when IntersectionObserver is unavailable', () => {
