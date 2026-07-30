@@ -43,25 +43,34 @@ export function useTimeOnResults(accountCount: number, isActive: boolean) {
 
     const timeSpent = (Date.now() - startTimeRef.current) / 1000;
 
-    // Only fire if user spent meaningful time (>5 seconds), 25% sampling
-    if (timeSpent >= 5 && Math.random() <= 0.25) {
-      // Use sendBeacon for timeOnResults (fires on page leave)
-      trackBeacon(AnalyticsEvents.TIME_ON_RESULTS, {
-        time_seconds: Math.round(timeSpent),
-        account_count: accountCount,
-        actions_count: actionsCountRef.current,
+    // Below the engagement floor this visit has nothing to say yet, and a later
+    // trigger may still clear the bar — so do not spend the guard on it.
+    if (timeSpent < 5) {
+      return;
+    }
+
+    // The guard goes up before the dice are rolled. Setting it inside the
+    // sampling branch let a failed roll re-roll on each of three triggers,
+    // making a documented 25% behave like 1 - 0.75^n.
+    hasFiredRef.current = true;
+
+    if (Math.random() > 0.25) {
+      return;
+    }
+
+    trackBeacon(AnalyticsEvents.TIME_ON_RESULTS, {
+      time_seconds: Math.round(timeSpent),
+      account_count: accountCount,
+      actions_count: actionsCountRef.current,
+    });
+
+    // Send aggregated click summary (only if there were clicks)
+    if (clicksCountRef.current > 0) {
+      analytics.resultsClicksSummary({
+        totalClicks: clicksCountRef.current,
+        badgeClicks: badgeClicksRef.current,
+        timeSpentSeconds: timeSpent,
       });
-
-      // Send aggregated click summary (only if there were clicks)
-      if (clicksCountRef.current > 0) {
-        analytics.resultsClicksSummary({
-          totalClicks: clicksCountRef.current,
-          badgeClicks: badgeClicksRef.current,
-          timeSpentSeconds: timeSpent,
-        });
-      }
-
-      hasFiredRef.current = true;
     }
   }, [accountCount]);
 
