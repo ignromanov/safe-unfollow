@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { useAdViewability } from '@/hooks/useAdViewability';
 import { isSampleRoute } from '@/lib/ads/eligibility';
@@ -60,6 +61,7 @@ export function AdSlot({
   minHeight = 280,
   className,
 }: AdSlotProps): ReactElement | null {
+  const { t } = useTranslation('common');
   const client = import.meta.env.VITE_ADSENSE_CLIENT;
   // Client-only: avoid SSG/hydration mismatch since eligibility depends on
   // the runtime route.
@@ -128,25 +130,35 @@ export function AdSlot({
   const isMultiplex = format === 'multiplex';
 
   return (
-    <div
-      ref={containerRef}
-      className={cn('w-full flex justify-center', !isMultiplex && 'overflow-hidden', className)}
-      style={{ minHeight }}
-      data-ad-name={name}
-    >
-      {/* Mounted late on purpose: `adsbygoogle.push({})` fills unprocessed
-          `<ins>` elements in document order, so an early-rendered slot further
-          up the page would swallow the fill meant for this one. */}
-      {approaching && (
-        <ins
-          className="adsbygoogle"
-          style={{ display: 'block', width: '100%', ...(isMultiplex ? {} : { height: minHeight }) }}
-          data-ad-client={client}
-          data-ad-slot={slot}
-          data-ad-format={isMultiplex ? 'autorelaxed' : 'auto'}
-          {...(isMultiplex ? {} : { 'data-full-width-responsive': 'true' })}
-        />
-      )}
+    <div className={cn('w-full', className)} data-ad-name={name}>
+      {/* Required by the distinguishability policy. Small and muted, but it
+          must be legible and must not read as our own section heading. */}
+      <span className="mb-1 block text-center text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+        {t('ads.label')}
+      </span>
+      <div
+        ref={containerRef}
+        className={cn('flex w-full justify-center', !isMultiplex && 'overflow-hidden')}
+        style={{ minHeight }}
+      >
+        {/* Mounted late on purpose: `adsbygoogle.push({})` fills unprocessed
+            `<ins>` elements in document order, so an early-rendered slot
+            further up the page would swallow the fill meant for this one. */}
+        {approaching && (
+          <ins
+            className="adsbygoogle"
+            style={{
+              display: 'block',
+              width: '100%',
+              ...(isMultiplex ? {} : { height: minHeight }),
+            }}
+            data-ad-client={client}
+            data-ad-slot={slot}
+            data-ad-format={isMultiplex ? 'autorelaxed' : 'auto'}
+            {...(isMultiplex ? {} : { 'data-full-width-responsive': 'true' })}
+          />
+        )}
+      </div>
     </div>
   );
 }

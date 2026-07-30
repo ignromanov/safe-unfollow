@@ -71,5 +71,8 @@
     "getStarted": "Loslegen",
     "trySample": "Demo testen",
     "tagline": "100% Kostenlos • Kein Login • Datenschutz garantiert"
+  },
+  "ads": {
+    "label": "Werbung"
   }
 }

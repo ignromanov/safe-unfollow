@@ -124,7 +124,9 @@ describe('AdSlot', () => {
     const { container } = render(<AdSlot name="home" slot={SLOT} minHeight={250} />);
     scrollIntoView();
 
-    const wrapper = container.firstChild as HTMLElement;
+    // The label sits in the outer `[data-ad-name]` wrapper; the reserved
+    // height lives on its inner div, which the viewability gate measures.
+    const wrapper = container.querySelector('[data-ad-name] > div') as HTMLElement;
     expect(wrapper).not.toBeNull();
     expect(wrapper.style.minHeight).toBe('250px');
 
@@ -162,7 +164,7 @@ describe('AdSlot', () => {
       <AdSlot name="home_footer" slot={SLOT} format="multiplex" minHeight={300} />
     );
 
-    const wrapper = container.firstChild as HTMLElement;
+    const wrapper = container.querySelector('[data-ad-name] > div') as HTMLElement;
     // Space is still reserved up front...
     expect(wrapper.style.minHeight).toBe('300px');
     // ...but the grid may grow past it, so it must not be clipped.
@@ -206,7 +208,7 @@ describe('AdSlot', () => {
       const { container } = render(<AdSlot name="home" slot={SLOT} minHeight={250} />);
 
       // Space is reserved from the first paint, so the later fill costs no CLS.
-      const wrapper = container.firstChild as HTMLElement;
+      const wrapper = container.querySelector('[data-ad-name] > div') as HTMLElement;
       expect(wrapper.style.minHeight).toBe('250px');
       // ...but no ad markup, no script, no request.
       expect(wrapper.querySelector('ins.adsbygoogle')).toBeNull();
@@ -260,5 +262,23 @@ describe('AdSlot', () => {
       expect(container.querySelector('ins.adsbygoogle')).not.toBeNull();
       expect(pushAdSlot).toHaveBeenCalledTimes(1);
     });
+  });
+
+  it('labels the unit, which the distinguishability policy requires', () => {
+    const { container } = render(<AdSlot name="results" slot={SLOT} />);
+    scrollIntoView();
+
+    const wrapper = container.firstChild as HTMLElement;
+    expect(wrapper.textContent).toContain('Advertisement');
+  });
+
+  it('does not dress the unit up as one of our own cards', () => {
+    const { container } = render(<AdSlot name="results" slot={SLOT} />);
+    scrollIntoView();
+
+    // Matching our card chrome would make the ad indistinguishable from
+    // content, which AdSense forbids outright.
+    const className = (container.firstChild as HTMLElement).className;
+    expect(className).not.toMatch(/bg-gradient|rounded-4xl|bg-card/);
   });
 });

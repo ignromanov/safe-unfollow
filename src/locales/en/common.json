@@ -71,5 +71,8 @@
     "getStarted": "Get Started",
     "trySample": "Try Sample",
     "tagline": "100% Free • No Login • Privacy First"
+  },
+  "ads": {
+    "label": "Advertisement"
   }
 }
