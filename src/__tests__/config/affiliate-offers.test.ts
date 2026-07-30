@@ -58,4 +58,21 @@ describe('resolveAffiliateOffer', () => {
     expect(resolveAffiliateOffer('ru')?.creative).toBeUndefined();
     expect(resolveAffiliateOffer('ar')?.creative).toBeUndefined();
   });
+
+  it('turns the placement off when an operator blanks a live offer url', () => {
+    // The kill switch is operational: someone empties `url` on the module's
+    // own offer constant during an incident. Exercise that exact object via
+    // the real resolution path rather than a parallel test-only one.
+    const offer = resolveAffiliateOffer('en');
+    if (!offer) {
+      throw new Error('expected the main offer to be active before exercising the kill switch');
+    }
+    const originalUrl = offer.url;
+    offer.url = '';
+    try {
+      expect(resolveAffiliateOffer('en')).toBeNull();
+    } finally {
+      offer.url = originalUrl;
+    }
+  });
 });
