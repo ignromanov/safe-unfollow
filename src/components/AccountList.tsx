@@ -75,7 +75,11 @@ export const AccountList = memo(function AccountList({
   if (displayCount === 0) {
     return (
       <div className="flex-grow bg-card rounded-4xl border border-border shadow-sm overflow-hidden flex flex-col max-h-[65dvh] md:max-h-[90vh]">
-        <div className="flex flex-col items-center justify-center h-full py-24 text-center px-12">
+        {/* No h-full here: the card above is capped, not sized, so its height is
+            auto and a percentage height has nothing to resolve against. It used
+            to resolve against h-[85dvh] and stretch this box to centre the
+            message in a tall panel; the cap left the class inert. */}
+        <div className="flex flex-col items-center justify-center py-24 text-center px-12">
           <Ghost size={64} className="mb-8 opacity-10" />
           <p className="text-xl md:text-2xl font-display font-bold text-zinc-300">
             {t('empty.noUsers')}
