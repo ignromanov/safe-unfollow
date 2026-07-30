@@ -4,6 +4,7 @@
 
 import { TRACKING_OPT_OUT_KEY } from './constants';
 import type { AnalyticsEventName } from './constants';
+import { resolveUmamiTarget } from './endpoint';
 
 /**
  * Check if user has opted out of tracking
@@ -69,21 +70,17 @@ export function trackBeacon(
 
   // Try sendBeacon first for reliability on mobile page unload
   if (navigator.sendBeacon && window.umami) {
-    try {
-      // Umami's collect endpoint
-      const scriptEl = document.querySelector('script[data-website-id]');
-      const websiteId = scriptEl?.getAttribute('data-website-id');
-      const src = scriptEl?.getAttribute('src');
-      if (src && websiteId) {
-        const baseUrl = new URL(src).origin;
+    const target = resolveUmamiTarget();
+    if (target) {
+      try {
         navigator.sendBeacon(
-          `${baseUrl}/api/send`,
+          `${target.origin}/api/send`,
           new Blob(
             [
               JSON.stringify({
                 type: 'event',
                 payload: {
-                  website: websiteId,
+                  website: target.websiteId,
                   name: eventName,
                   data: eventData,
                   hostname: window.location.hostname,
@@ -96,9 +93,9 @@ export function trackBeacon(
           )
         );
         return;
+      } catch {
+        // Fall through to regular tracking.
       }
-    } catch {
-      // Fall through to regular tracking
     }
   }
 
