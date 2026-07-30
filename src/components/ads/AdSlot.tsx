@@ -79,7 +79,13 @@ export function AdSlot({
 
     const container = containerRef.current;
     // Without IntersectionObserver there is no way to tell when the slot is
-    // near, so fall back to loading right away rather than never.
+    // near, so fall back to loading right away rather than never. Note this
+    // skews the fill-rate math: `useAdViewability` stays silent under the same
+    // condition (see its doc comment), so this path requests a fill — and
+    // AdSense counts an impression — while `ad_slot_viewable` never fires for
+    // it. The affected population is tiny (browsers without
+    // IntersectionObserver), but it inflates the fill rate with no signal to
+    // detect it.
     if (!container || typeof IntersectionObserver === 'undefined') {
       setApproaching(true);
       return;
@@ -103,7 +109,7 @@ export function AdSlot({
     if (!approaching || !eligible || pushedRef.current || !client) return;
     pushedRef.current = true;
     pushAdSlot(client);
-  }, [approaching, eligible, client, name]);
+  }, [approaching, eligible, client]);
 
   const reportViewable = useCallback(() => {
     analytics.adSlotViewable(name);

@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 import type { RefObject } from 'react';
 
 /** MRC display standard: half the pixels... */
-export const MRC_VISIBLE_RATIO = 0.5;
+const MRC_VISIBLE_RATIO = 0.5;
 /** ...for one continuous second. */
 export const MRC_DWELL_MS = 1000;
 

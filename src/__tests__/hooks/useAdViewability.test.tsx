@@ -220,6 +220,22 @@ describe('useAdViewability', () => {
     expect(onViewable).toHaveBeenCalledTimes(1);
   });
 
+  it('does not fire when unmounted partway through the dwell', () => {
+    // observer.disconnect() is synchronous but does not cancel a pending
+    // setTimeout — cancel() in the cleanup is the only thing standing between
+    // an unmount 900ms into the dwell and a viewable impression firing 100ms
+    // later for a page the reader already left.
+    const onViewable = vi.fn();
+    const { unmount } = render(<Harness onViewable={onViewable} />);
+
+    emit(0.6);
+    act(() => vi.advanceTimersByTime(MRC_DWELL_MS - 100));
+    unmount();
+    act(() => vi.advanceTimersByTime(MRC_DWELL_MS));
+
+    expect(onViewable).not.toHaveBeenCalled();
+  });
+
   it('emits nothing when IntersectionObserver is unavailable', () => {
     // Without a gate there is no honest dwell measurement, and firing anyway
     // would reintroduce exactly the mount-time count this replaces.

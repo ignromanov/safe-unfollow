@@ -78,8 +78,10 @@ describe('useEventQueueFlush', () => {
 
     unmount();
     window.dispatchEvent(new Event('pagehide'));
+    vi.spyOn(document, 'hidden', 'get').mockReturnValue(true);
+    document.dispatchEvent(new Event('visibilitychange'));
 
-    // The unmount flush is the only call; the listener no longer fires.
+    // The unmount flush is the only call; neither listener fires afterward.
     expect(flushEvents).toHaveBeenCalledTimes(1);
   });
 });

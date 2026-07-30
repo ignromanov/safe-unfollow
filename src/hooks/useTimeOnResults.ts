@@ -1,6 +1,11 @@
 import { analytics, AnalyticsEvents, trackBeacon } from '@/lib/analytics';
 import { useCallback, useEffect, useRef } from 'react';
 
+interface UseTimeOnResultsReturn {
+  trackAction: () => void;
+  trackClick: (badges: string[]) => void;
+}
+
 /**
  * Track time spent on results page and user engagement.
  * Fires analytics events on unmount or when page becomes hidden.
@@ -14,7 +19,7 @@ import { useCallback, useEffect, useRef } from 'react';
  * @param accountCount - Total number of accounts being viewed
  * @param isActive - Whether the results are currently being displayed
  */
-export function useTimeOnResults(accountCount: number, isActive: boolean) {
+export function useTimeOnResults(accountCount: number, isActive: boolean): UseTimeOnResultsReturn {
   const startTimeRef = useRef<number | null>(null);
   const actionsCountRef = useRef(0);
   const clicksCountRef = useRef(0);
