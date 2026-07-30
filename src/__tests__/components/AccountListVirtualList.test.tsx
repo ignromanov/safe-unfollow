@@ -193,4 +193,25 @@ describe('AccountList Virtual List', () => {
     expect(articles[0]).toHaveAttribute('aria-posinset', '1');
     expect(articles[0]).toHaveAttribute('aria-setsize', '3');
   });
+
+  it('caps its height rather than pinning it, so the page below the list is reachable', () => {
+    const { container } = render(
+      <AccountList fileHash="abc" accountCount={5000} accountIndices={null} hasLoadedData />
+    );
+
+    const card = container.firstChild as HTMLElement;
+    // A pinned height leaves only the sticky header to start a page scroll from,
+    // which nobody discovers. See D9.
+    expect(card.className).not.toMatch(/\bh-\[85dvh\]/);
+    expect(card.className).toMatch(/max-h-\[65dvh\]/);
+    expect(card.className).toMatch(/md:max-h-\[90vh\]/);
+  });
+
+  it('keeps overscroll-contain, which guards Android pull-to-refresh at the list top', () => {
+    const { container } = render(
+      <AccountList fileHash="abc" accountCount={5000} accountIndices={null} hasLoadedData />
+    );
+
+    expect(container.querySelector('.overscroll-contain')).not.toBeNull();
+  });
 });
