@@ -394,4 +394,31 @@ describe('AccountListSection', () => {
       }
     });
   });
+
+  describe('sticky header', () => {
+    it('keeps the heading out of the sticky container, and keeps exactly one h1', () => {
+      const { container } = render(
+        <AccountListSection fileHash="abc" accountCount={100} filename="d.zip" />
+      );
+
+      const headings = container.querySelectorAll('h1');
+      // Relocated, not duplicated: two h1s would be an a11y and SEO regression,
+      // which a `md:hidden` / `hidden md:block` pair would quietly introduce.
+      expect(headings).toHaveLength(1);
+
+      const sticky = container.querySelector('.sticky') as HTMLElement;
+      expect(sticky).not.toBeNull();
+      expect(sticky.contains(headings[0]!)).toBe(false);
+    });
+
+    it('keeps search and sort inside the sticky container', () => {
+      const { container } = render(
+        <AccountListSection fileHash="abc" accountCount={100} filename="d.zip" />
+      );
+
+      const sticky = container.querySelector('.sticky') as HTMLElement;
+      expect(sticky.querySelector('#account-search')).not.toBeNull();
+      expect(sticky.querySelector('button[aria-pressed]')).not.toBeNull();
+    });
+  });
 });

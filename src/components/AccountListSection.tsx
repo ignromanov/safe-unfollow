@@ -128,52 +128,51 @@ export function AccountListSection({
         </Alert>
       )}
 
-      {/* Top Header & Search */}
-      <div className="sticky top-16 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 -mx-4 px-4 py-4 md:py-6">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div>
-            <h1 className="text-3xl md:text-5xl font-display font-extrabold mb-2 tracking-tight">
-              {t('header.title')}
-            </h1>
-            <p className="text-zinc-500 text-xs md:text-sm font-bold uppercase tracking-widest">
-              {t('header.fileInfo', { filename, count: totalCount })}
-            </p>
+      {/* Heading in normal flow. It used to live in the sticky container, where
+          on mobile it stacked into a column and pinned ~176px under the 64px app
+          header — about a third of the viewport, permanently. */}
+      <div>
+        <h1 className="text-3xl md:text-5xl font-display font-extrabold mb-2 tracking-tight">
+          {t('header.title')}
+        </h1>
+        <p className="text-zinc-500 text-xs md:text-sm font-bold uppercase tracking-widest">
+          {t('header.fileInfo', { filename, count: totalCount })}
+        </p>
+      </div>
+
+      {/* Sticky: search and sort only. */}
+      <div className="sticky top-16 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 -mx-4 px-4 py-3">
+        <div className="flex items-center gap-2">
+          <div className="relative flex-grow md:w-80">
+            <Search className="absolute start-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
+            <label htmlFor="account-search" className="sr-only">
+              {t('search.placeholder')}
+            </label>
+            <input
+              id="account-search"
+              type="text"
+              placeholder={t('search.placeholder')}
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              autoCorrect="off"
+              autoCapitalize="none"
+              inputMode="search"
+              className="w-full ps-11 pe-4 py-3.5 rounded-2xl border border-border bg-card focus:ring-2 focus:ring-primary outline-none transition-all font-semibold text-base shadow-sm"
+            />
           </div>
-          <div className="flex items-center gap-2">
-            <div className="relative flex-grow md:w-80">
-              <Search
-                className="absolute start-4 top-1/2 -translate-y-1/2 text-zinc-400"
-                size={18}
-              />
-              <label htmlFor="account-search" className="sr-only">
-                {t('search.placeholder')}
-              </label>
-              <input
-                id="account-search"
-                type="text"
-                placeholder={t('search.placeholder')}
-                value={query}
-                onChange={e => setQuery(e.target.value)}
-                autoCorrect="off"
-                autoCapitalize="none"
-                inputMode="search"
-                className="w-full ps-11 pe-4 py-3.5 rounded-2xl border border-border bg-card focus:ring-2 focus:ring-primary outline-none transition-all font-semibold text-base shadow-sm"
-              />
-            </div>
-            <button
-              onClick={() => setSortOrder(prev => (prev === 'asc' ? 'desc' : 'asc'))}
-              className={`cursor-pointer p-3.5 rounded-2xl border transition-all shadow-sm shrink-0 ${
-                sortOrder === 'desc'
-                  ? 'bg-primary text-white border-primary'
-                  : 'bg-card border-border text-zinc-500 hover:text-primary'
-              }`}
-              title={sortOrder === 'asc' ? t('sort.desc') : t('sort.asc')}
-              aria-label={t('sort.ariaLabel', { defaultValue: 'Sort accounts' })}
-              aria-pressed={sortOrder === 'desc'}
-            >
-              <ArrowUpDown size={20} />
-            </button>
-          </div>
+          <button
+            onClick={() => setSortOrder(prev => (prev === 'asc' ? 'desc' : 'asc'))}
+            className={`cursor-pointer p-3.5 rounded-2xl border transition-all shadow-sm shrink-0 ${
+              sortOrder === 'desc'
+                ? 'bg-primary text-white border-primary'
+                : 'bg-card border-border text-zinc-500 hover:text-primary'
+            }`}
+            title={sortOrder === 'asc' ? t('sort.desc') : t('sort.asc')}
+            aria-label={t('sort.ariaLabel', { defaultValue: 'Sort accounts' })}
+            aria-pressed={sortOrder === 'desc'}
+          >
+            <ArrowUpDown size={20} />
+          </button>
         </div>
       </div>
 
