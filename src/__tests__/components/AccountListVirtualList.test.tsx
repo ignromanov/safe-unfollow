@@ -194,7 +194,7 @@ describe('AccountList Virtual List', () => {
     expect(articles[0]).toHaveAttribute('aria-setsize', '3');
   });
 
-  it('caps its height rather than pinning it, so the page below the list is reachable', () => {
+  it('caps its height rather than pinning it, so the page below the list is reachable (populated list)', () => {
     const { container } = render(
       <AccountList fileHash="abc" accountCount={5000} accountIndices={null} hasLoadedData />
     );
@@ -202,6 +202,19 @@ describe('AccountList Virtual List', () => {
     const card = container.firstChild as HTMLElement;
     // A pinned height leaves only the sticky header to start a page scroll from,
     // which nobody discovers. See D9.
+    expect(card.className).not.toMatch(/\bh-\[85dvh\]/);
+    expect(card.className).toMatch(/max-h-\[65dvh\]/);
+    expect(card.className).toMatch(/md:max-h-\[90vh\]/);
+  });
+
+  it('caps its height rather than pinning it, so the page below the list is reachable (empty state)', () => {
+    // displayCount === 0 branch: a filtered-to-nothing search is the worst case for
+    // a pinned height — a full-viewport card with nothing in it. See D9.
+    const { container } = render(
+      <AccountList fileHash="abc" accountCount={5000} accountIndices={[]} hasLoadedData />
+    );
+
+    const card = container.firstChild as HTMLElement;
     expect(card.className).not.toMatch(/\bh-\[85dvh\]/);
     expect(card.className).toMatch(/max-h-\[65dvh\]/);
     expect(card.className).toMatch(/md:max-h-\[90vh\]/);
