@@ -6,6 +6,7 @@ import { TRACKING_OPT_OUT_KEY } from './constants';
 import type { AnalyticsEventName } from './constants';
 import { isTrackingOptedOut } from './consent';
 import { resolveUmamiTarget } from './endpoint';
+import { clearEventQueue } from './queue';
 
 export { isTrackingOptedOut };
 
@@ -15,6 +16,9 @@ export { isTrackingOptedOut };
 export function optOutOfTracking(): void {
   if (typeof window === 'undefined') return;
   localStorage.setItem(TRACKING_OPT_OUT_KEY, 'true');
+  // Cleared, not flushed: consent withdrawn now also covers what is already
+  // pending from before the visitor changed their mind.
+  clearEventQueue();
   // Remove existing umami instance if present
   delete window.umami;
 }

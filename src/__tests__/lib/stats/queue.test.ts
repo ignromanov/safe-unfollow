@@ -154,4 +154,41 @@ describe('event queue', () => {
 
     expect(sendBeacon).not.toHaveBeenCalled();
   });
+
+  it('drops pending events when consent is withdrawn, rather than delivering them', async () => {
+    const { optOutOfTracking } = await import('@/lib/stats/core');
+    enqueueEvent(AnalyticsEvents.AD_SLOT_VIEWABLE, { slot: 'results' });
+    expect(getQueuedCount()).toBe(1);
+
+    optOutOfTracking();
+
+    expect(getQueuedCount()).toBe(0);
+    expect(sendBeacon).not.toHaveBeenCalled();
+  });
+
+  it('falls back to fetch when sendBeacon throws instead of returning false', () => {
+    // Some browsers (and extensions that patch the API) throw rather than
+    // returning false on failure — the try/catch must still route to fetch.
+    sendBeacon.mockImplementation(() => {
+      throw new Error('sendBeacon blocked');
+    });
+    enqueueEvent(AnalyticsEvents.AD_SLOT_VIEWABLE, { slot: 'results' });
+
+    flushEvents();
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(getQueuedCount()).toBe(0);
+  });
+
+  it('falls back to fetch when navigator.sendBeacon does not exist at all', () => {
+    // Older/embedded WebViews lack sendBeacon entirely — the optional chaining
+    // must skip straight to the fetch fallback without throwing.
+    vi.stubGlobal('navigator', { ...navigator, sendBeacon: undefined });
+    enqueueEvent(AnalyticsEvents.AD_SLOT_VIEWABLE, { slot: 'results' });
+
+    flushEvents();
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(getQueuedCount()).toBe(0);
+  });
 });
