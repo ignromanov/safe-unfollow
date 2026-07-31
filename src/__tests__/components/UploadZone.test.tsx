@@ -205,6 +205,9 @@ describe('UploadZone', () => {
       />
     );
 
+    // Positive proof the error screen actually rendered — without this, the
+    // assertion below would also pass if UploadZone rendered nothing at all.
+    expect(analytics.diagnosticErrorView).toHaveBeenCalled();
     expect(container.querySelector('aside')).toBeNull();
   });
 });
