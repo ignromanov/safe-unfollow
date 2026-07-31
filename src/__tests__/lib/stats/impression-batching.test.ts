@@ -52,12 +52,10 @@ describe('promo impression batching', () => {
   });
 
   it('keeps clicks on the immediate path — a click navigates away', () => {
-    analytics.loadingTipClick('nordvpn', 1, 1200);
+    analytics.affiliateBlockClick('nordvpn_global');
 
-    expect(trackEvent).toHaveBeenCalledWith('loading_tip_click', {
-      tip_id: 'nordvpn',
-      tip_index: 1,
-      elapsed_ms: 1200,
+    expect(trackEvent).toHaveBeenCalledWith('affiliate_block_click', {
+      offer_id: 'nordvpn_global',
     });
     expect(enqueueEvent).not.toHaveBeenCalled();
   });

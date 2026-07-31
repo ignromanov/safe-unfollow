@@ -13,7 +13,6 @@ vi.mock('react-i18next', () => ({
 vi.mock('@/lib/stats', () => ({
   analytics: {
     loadingTipImpression: vi.fn(),
-    loadingTipClick: vi.fn(),
   },
 }));
 

@@ -120,11 +120,10 @@ export const analytics = {
     });
   },
 
-  loadingTipClick: (tipId: string, index: number, elapsedMs: number) => {
-    trackEvent(AnalyticsEvents.LOADING_TIP_CLICK, {
-      tip_id: tipId,
-      tip_index: index,
-      elapsed_ms: elapsedMs,
+  // Affiliate block on /upload
+  affiliateBlockClick: (offerId: string) => {
+    trackEvent(AnalyticsEvents.AFFILIATE_BLOCK_CLICK, {
+      offer_id: offerId,
     });
   },
 
