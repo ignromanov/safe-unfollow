@@ -12,6 +12,7 @@ import { DesktopDropZone } from './upload/DesktopDropZone';
 import { DevErrorSelector } from './upload/DevErrorSelector';
 import { LoadingTips } from './upload/LoadingTips';
 import { FormatQuiz } from './upload/FormatQuiz';
+import { UploadAffiliateBlock } from './upload/UploadAffiliateBlock';
 
 import type { DragValidation } from './upload/DesktopDropZone';
 
@@ -236,6 +237,11 @@ export function UploadZone({
               </button>
             )}
           </div>
+
+          {/* Last in the column on purpose: the drop zone above is an
+              interaction target, and the help block plus the parent's gap-8
+              keep real distance from it. */}
+          <UploadAffiliateBlock />
         </div>
 
         {/* Sidebar - desktop only; hidden on mobile to keep CTA visible without scroll */}
