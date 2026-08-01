@@ -61,6 +61,19 @@ describe('PrivacyPolicy Component', () => {
       expect(screen.getByText(/consent management platform/i)).toBeInTheDocument();
     });
 
+    // The upload screen carries a persistent affiliate block (see
+    // components/upload/UploadAffiliateBlock). The claim that matters is the
+    // timing one — nothing reaches the partner until a click — because it is
+    // what makes a paid placement compatible with this product's promise. Same
+    // reasoning as the AdSense disclosure above: a test, not a convention.
+    it('should disclose affiliate links and that partners are not contacted before a click', () => {
+      render(<PrivacyPolicy onBack={mockOnBack} />);
+
+      expect(screen.getByText(/5\.4 Affiliate Links/i)).toBeInTheDocument();
+      expect(screen.getByText(/Nothing is sent to a partner until you click/i)).toBeInTheDocument();
+      expect(screen.getByText(/served from our own\s+domain/i)).toBeInTheDocument();
+    });
+
     it('should render all main sections', () => {
       render(<PrivacyPolicy onBack={mockOnBack} />);
 
