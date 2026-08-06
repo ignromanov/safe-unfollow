@@ -9,6 +9,7 @@ import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { OrganizationSchema } from '@/components/OrganizationSchema';
 import { ThemeProvider } from '@/components/theme-provider';
+import { useEventQueueFlush } from '@/hooks/useEventQueueFlush';
 import { useInstagramData } from '@/hooks/useInstagramData';
 import { useLanguageFromPath } from '@/hooks/useLanguageFromPath';
 import { useLanguageRedirect } from '@/hooks/useLanguageRedirect';
@@ -53,6 +54,7 @@ export function Layout({ lang }: LayoutProps) {
 
   // Analytics (UTM capture, page view, PWA install)
   useLayoutAnalytics();
+  useEventQueueFlush();
 
   // SSG: Switch language synchronously BEFORE rendering
   // This works because during SSG all language resources are preloaded

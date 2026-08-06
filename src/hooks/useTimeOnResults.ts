@@ -1,6 +1,11 @@
 import { analytics, AnalyticsEvents, trackBeacon } from '@/lib/analytics';
 import { useCallback, useEffect, useRef } from 'react';
 
+interface UseTimeOnResultsReturn {
+  trackAction: () => void;
+  trackClick: (badges: string[]) => void;
+}
+
 /**
  * Track time spent on results page and user engagement.
  * Fires analytics events on unmount or when page becomes hidden.
@@ -14,12 +19,12 @@ import { useCallback, useEffect, useRef } from 'react';
  * @param accountCount - Total number of accounts being viewed
  * @param isActive - Whether the results are currently being displayed
  */
-export function useTimeOnResults(accountCount: number, isActive: boolean) {
+export function useTimeOnResults(accountCount: number, isActive: boolean): UseTimeOnResultsReturn {
   const startTimeRef = useRef<number | null>(null);
   const actionsCountRef = useRef(0);
   const clicksCountRef = useRef(0);
   const badgeClicksRef = useRef<Record<string, number>>({});
-  const hasFiredRef = useRef(false);
+  const hasDecidedRef = useRef(false);
 
   // Track user actions (filter, search, etc.)
   const trackAction = useCallback(() => {
@@ -37,31 +42,41 @@ export function useTimeOnResults(accountCount: number, isActive: boolean) {
 
   // Fire the analytics events via sendBeacon for reliability
   const fireEvent = useCallback(() => {
-    if (hasFiredRef.current || startTimeRef.current === null) {
+    if (hasDecidedRef.current || startTimeRef.current === null) {
       return;
     }
 
     const timeSpent = (Date.now() - startTimeRef.current) / 1000;
 
-    // Only fire if user spent meaningful time (>5 seconds), 25% sampling
-    if (timeSpent >= 5 && Math.random() <= 0.25) {
-      // Use sendBeacon for timeOnResults (fires on page leave)
-      trackBeacon(AnalyticsEvents.TIME_ON_RESULTS, {
-        time_seconds: Math.round(timeSpent),
-        account_count: accountCount,
-        actions_count: actionsCountRef.current,
+    // Below the engagement floor this visit has nothing to say yet, and a later
+    // trigger may still clear the bar — so do not spend the guard on it.
+    if (timeSpent < 5) {
+      return;
+    }
+
+    // The guard goes up once the sampling decision is made — whether or not
+    // the roll passes — before the dice are rolled. Setting it inside the
+    // sampling branch let a failed roll re-roll on each of three triggers,
+    // making a documented 25% behave like 1 - 0.75^n.
+    hasDecidedRef.current = true;
+
+    if (Math.random() > 0.25) {
+      return;
+    }
+
+    trackBeacon(AnalyticsEvents.TIME_ON_RESULTS, {
+      time_seconds: Math.round(timeSpent),
+      account_count: accountCount,
+      actions_count: actionsCountRef.current,
+    });
+
+    // Send aggregated click summary (only if there were clicks)
+    if (clicksCountRef.current > 0) {
+      analytics.resultsClicksSummary({
+        totalClicks: clicksCountRef.current,
+        badgeClicks: badgeClicksRef.current,
+        timeSpentSeconds: timeSpent,
       });
-
-      // Send aggregated click summary (only if there were clicks)
-      if (clicksCountRef.current > 0) {
-        analytics.resultsClicksSummary({
-          totalClicks: clicksCountRef.current,
-          badgeClicks: badgeClicksRef.current,
-          timeSpentSeconds: timeSpent,
-        });
-      }
-
-      hasFiredRef.current = true;
     }
   }, [accountCount]);
 
@@ -75,7 +90,7 @@ export function useTimeOnResults(accountCount: number, isActive: boolean) {
     actionsCountRef.current = 0;
     clicksCountRef.current = 0;
     badgeClicksRef.current = {};
-    hasFiredRef.current = false;
+    hasDecidedRef.current = false;
 
     // Layer 1: visibilitychange (most reliable on mobile)
     const handleVisibilityChange = () => {

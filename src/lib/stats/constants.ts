@@ -129,8 +129,9 @@ export const AnalyticsEvents = {
   PWA_INSTALL_PROMPT: 'pwa_install_prompt',
   PWA_INSTALLED: 'pwa_installed',
 
-  // Ads
-  AD_SLOT_RENDERED: 'ad_slot_rendered',
+  // Ads — a viewable impression opportunity by the MRC display standard (50%
+  // of pixels for 1 continuous second).
+  AD_SLOT_VIEWABLE: 'ad_slot_viewable',
 } as const;
 
 export type AnalyticsEventName = (typeof AnalyticsEvents)[keyof typeof AnalyticsEvents];

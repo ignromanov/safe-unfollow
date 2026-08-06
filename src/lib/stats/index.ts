@@ -8,7 +8,8 @@
  * V10 changes (storage optimization — Neon DB load reduction ~70%):
  * - Removed page_view for non-UTM sessions (Umami built-in handles pageviews)
  * - Removed session_duration (Umami tracks natively)
- * - Removed rescue_plan_impression (kept only tool_click)
+ * - Removed rescue_plan_impression (kept only tool_click) — reinstated since;
+ *   see events.ts for its current delivery path
  * - Removed results_scroll_depth (engagement inferred from time_on_results)
  * - Removed wizard_back_click, wizard_cancel (low actionability)
  * - Tightened sampling: wizardStepView 5%, filterToggle 3%, searchPerform 5%, webVital 3%

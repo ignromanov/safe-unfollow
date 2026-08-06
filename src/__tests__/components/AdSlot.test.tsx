@@ -1,31 +1,106 @@
-import { render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AdSlot } from '@/components/ads/AdSlot';
 
 const pushAdSlot = vi.fn();
-const adSlotRendered = vi.fn();
+const adSlotViewable = vi.fn();
 
 vi.mock('@/lib/ads/loader', () => ({
   pushAdSlot: () => pushAdSlot(),
 }));
 
 vi.mock('@/lib/analytics', () => ({
-  analytics: { adSlotRendered: (slot: string) => adSlotRendered(slot) },
+  analytics: { adSlotViewable: (slot: string) => adSlotViewable(slot) },
 }));
 
 const CLIENT = 'ca-pub-5976295812261948';
 const SLOT = '1234567890';
 
+/** Observed elements, in observe() order, with their observer callbacks. */
+let observed: Array<{ element: Element; callback: IntersectionObserverCallback }>;
+let observerOptions: IntersectionObserverInit | undefined;
+let disconnects: number;
+
+/** Simulate the observed slot entering the (margin-expanded) viewport. */
+function scrollIntoView(): void {
+  act(() => {
+    for (const { element, callback } of observed) {
+      callback(
+        [{ isIntersecting: true, target: element } as IntersectionObserverEntry],
+        {} as IntersectionObserver
+      );
+    }
+  });
+}
+
+/** Hold the slot half-visible long enough to satisfy the MRC dwell. */
+function dwell(): void {
+  act(() => {
+    for (const { element, callback } of observed) {
+      callback(
+        [
+          {
+            isIntersecting: true,
+            intersectionRatio: 1,
+            // `isViewable` measures real geometry: it divides rootHeight by
+            // elementHeight and returns false for a zero-height element, so an
+            // entry without a boundingClientRect can never count as viewable.
+            boundingClientRect: { height: 280 } as DOMRectReadOnly,
+            target: element,
+          } as IntersectionObserverEntry,
+        ],
+        {} as IntersectionObserver
+      );
+    }
+  });
+  act(() => {
+    vi.advanceTimersByTime(1000);
+  });
+}
+
 describe('AdSlot', () => {
   beforeEach(() => {
+    vi.useFakeTimers();
     vi.clearAllMocks();
     window.history.pushState({}, '', '/');
     vi.stubEnv('VITE_ADSENSE_CLIENT', CLIENT);
+
+    observed = [];
+    observerOptions = undefined;
+    disconnects = 0;
+    // The shared browser mock is a no-op stub; this one is controllable.
+    vi.stubGlobal(
+      'IntersectionObserver',
+      class {
+        constructor(
+          private callback: IntersectionObserverCallback,
+          options?: IntersectionObserverInit
+        ) {
+          observerOptions = options;
+        }
+        observe(element: Element): void {
+          observed.push({ element, callback: this.callback });
+        }
+        unobserve(): void {}
+        disconnect(): void {
+          disconnects += 1;
+          // A disconnected observer delivers nothing further, including
+          // already-queued records. Without this, `dwell()` keeps invoking a
+          // callback the hook has already shut down — and `useAdViewability`
+          // deliberately has no callback-level `firedRef` guard, precisely so a
+          // test can prove that `disconnect()` is what stops the re-fire.
+          // Filter, not splice: cleanup disconnects a second time on unmount.
+          observed = observed.filter(entry => entry.callback !== this.callback);
+        }
+      }
+    );
   });
 
   afterEach(() => {
     vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
   });
 
   it('renders nothing when the client env is missing', () => {
@@ -47,6 +122,7 @@ describe('AdSlot', () => {
 
   it('renders a fixed-height container with the ins element when eligible', () => {
     const { container } = render(<AdSlot name="home" slot={SLOT} minHeight={250} />);
+    scrollIntoView();
 
     const wrapper = container.firstChild as HTMLElement;
     expect(wrapper).not.toBeNull();
@@ -60,6 +136,7 @@ describe('AdSlot', () => {
 
   it('renders a responsive display unit by default', () => {
     const { container } = render(<AdSlot name="home" slot={SLOT} minHeight={250} />);
+    scrollIntoView();
 
     const ins = container.querySelector('ins.adsbygoogle') as HTMLElement;
     expect(ins.getAttribute('data-ad-format')).toBe('auto');
@@ -70,6 +147,7 @@ describe('AdSlot', () => {
 
   it('renders a multiplex unit with the autorelaxed format', () => {
     const { container } = render(<AdSlot name="home_footer" slot={SLOT} format="multiplex" />);
+    scrollIntoView();
 
     const ins = container.querySelector('ins.adsbygoogle') as HTMLElement;
     expect(ins.getAttribute('data-ad-format')).toBe('autorelaxed');
@@ -91,12 +169,96 @@ describe('AdSlot', () => {
     expect(wrapper.className).not.toContain('overflow-hidden');
   });
 
-  it('tracks the impression and pushes the slot once (loader injects the script)', () => {
-    const { rerender } = render(<AdSlot name="results" slot={SLOT} />);
-    rerender(<AdSlot name="results" slot={SLOT} />);
+  describe('impression accounting', () => {
+    it('requests the fill without claiming an impression', () => {
+      render(<AdSlot name="results" slot={SLOT} />);
+      scrollIntoView();
 
-    expect(adSlotRendered).toHaveBeenCalledTimes(1);
-    expect(adSlotRendered).toHaveBeenCalledWith('results');
-    expect(pushAdSlot).toHaveBeenCalledTimes(1);
+      expect(pushAdSlot).toHaveBeenCalledTimes(1);
+      // Approaching is 400px of lead time — the reader has not seen anything yet.
+      expect(adSlotViewable).not.toHaveBeenCalled();
+    });
+
+    it('claims the impression only after the MRC dwell', () => {
+      render(<AdSlot name="results" slot={SLOT} />);
+      scrollIntoView();
+
+      dwell();
+
+      expect(adSlotViewable).toHaveBeenCalledTimes(1);
+      expect(adSlotViewable).toHaveBeenCalledWith('results');
+    });
+
+    it('claims it once even if the reader scrolls back and forth', () => {
+      const { rerender } = render(<AdSlot name="results" slot={SLOT} />);
+      scrollIntoView();
+      dwell();
+      rerender(<AdSlot name="results" slot={SLOT} />);
+      dwell();
+
+      expect(adSlotViewable).toHaveBeenCalledTimes(1);
+      expect(pushAdSlot).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('lazy loading', () => {
+    it('reserves space but requests nothing until the slot nears the viewport', () => {
+      const { container } = render(<AdSlot name="home" slot={SLOT} minHeight={250} />);
+
+      // Space is reserved from the first paint, so the later fill costs no CLS.
+      const wrapper = container.firstChild as HTMLElement;
+      expect(wrapper.style.minHeight).toBe('250px');
+      // ...but no ad markup, no script, no request.
+      expect(wrapper.querySelector('ins.adsbygoogle')).toBeNull();
+      expect(pushAdSlot).not.toHaveBeenCalled();
+      expect(adSlotViewable).not.toHaveBeenCalled();
+    });
+
+    it('observes the container with a lead margin, then stops observing', () => {
+      render(<AdSlot name="home" slot={SLOT} />);
+
+      expect(observed).toHaveLength(1);
+      expect(observerOptions?.rootMargin).toBe('400px 0px');
+
+      scrollIntoView();
+      dwell();
+      dwell();
+      expect(adSlotViewable).toHaveBeenCalledTimes(1);
+    });
+
+    it('mounts the ins element only once the slot is approaching', () => {
+      const { container } = render(<AdSlot name="home" slot={SLOT} />);
+      expect(container.querySelector('ins.adsbygoogle')).toBeNull();
+
+      scrollIntoView();
+
+      expect(container.querySelector('ins.adsbygoogle')).not.toBeNull();
+      expect(pushAdSlot).toHaveBeenCalledTimes(1);
+    });
+
+    it('ignores non-intersecting callbacks', () => {
+      const { container } = render(<AdSlot name="home" slot={SLOT} />);
+
+      act(() => {
+        for (const { element, callback } of observed) {
+          callback(
+            [{ isIntersecting: false, target: element } as IntersectionObserverEntry],
+            {} as IntersectionObserver
+          );
+        }
+      });
+
+      expect(container.querySelector('ins.adsbygoogle')).toBeNull();
+      expect(pushAdSlot).not.toHaveBeenCalled();
+    });
+
+    it('loads immediately when IntersectionObserver is unavailable', () => {
+      vi.stubGlobal('IntersectionObserver', undefined);
+
+      const { container } = render(<AdSlot name="home" slot={SLOT} />);
+
+      expect(container.querySelector('ins.adsbygoogle')).not.toBeNull();
+      expect(pushAdSlot).toHaveBeenCalledTimes(1);
+    });
   });
 });

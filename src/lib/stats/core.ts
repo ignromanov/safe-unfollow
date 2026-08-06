@@ -4,14 +4,11 @@
 
 import { TRACKING_OPT_OUT_KEY } from './constants';
 import type { AnalyticsEventName } from './constants';
+import { isTrackingOptedOut } from './consent';
+import { resolveUmamiTarget } from './endpoint';
+import { clearEventQueue } from './queue';
 
-/**
- * Check if user has opted out of tracking
- */
-export function isTrackingOptedOut(): boolean {
-  if (typeof window === 'undefined') return false;
-  return localStorage.getItem(TRACKING_OPT_OUT_KEY) === 'true';
-}
+export { isTrackingOptedOut };
 
 /**
  * Opt out of tracking - Umami script will not load
@@ -19,6 +16,9 @@ export function isTrackingOptedOut(): boolean {
 export function optOutOfTracking(): void {
   if (typeof window === 'undefined') return;
   localStorage.setItem(TRACKING_OPT_OUT_KEY, 'true');
+  // Cleared, not flushed: consent withdrawn now also covers what is already
+  // pending from before the visitor changed their mind.
+  clearEventQueue();
   // Remove existing umami instance if present
   delete window.umami;
 }
@@ -69,21 +69,17 @@ export function trackBeacon(
 
   // Try sendBeacon first for reliability on mobile page unload
   if (navigator.sendBeacon && window.umami) {
-    try {
-      // Umami's collect endpoint
-      const scriptEl = document.querySelector('script[data-website-id]');
-      const websiteId = scriptEl?.getAttribute('data-website-id');
-      const src = scriptEl?.getAttribute('src');
-      if (src && websiteId) {
-        const baseUrl = new URL(src).origin;
+    const target = resolveUmamiTarget();
+    if (target) {
+      try {
         navigator.sendBeacon(
-          `${baseUrl}/api/send`,
+          `${target.origin}/api/send`,
           new Blob(
             [
               JSON.stringify({
                 type: 'event',
                 payload: {
-                  website: websiteId,
+                  website: target.websiteId,
                   name: eventName,
                   data: eventData,
                   hostname: window.location.hostname,
@@ -96,9 +92,9 @@ export function trackBeacon(
           )
         );
         return;
+      } catch {
+        // Fall through to regular tracking.
       }
-    } catch {
-      // Fall through to regular tracking
     }
   }
 
