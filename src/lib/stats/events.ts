@@ -79,13 +79,19 @@ export const analytics = {
     });
   },
 
-  // Aggregated click summary sent on page leave (V10: 25% sampling)
+  /**
+   * Aggregated click summary sent on page leave.
+   *
+   * Unsampled here on purpose. `useTimeOnResults` is the only caller and it
+   * already rolls once per visit, before any of its three triggers fire. A
+   * second roll compounded to 6.25%, far too thin to segment `badge_clicks` by
+   * badge — which is the only reason that field is in the payload at all.
+   */
   resultsClicksSummary: (stats: {
     totalClicks: number;
     badgeClicks: Record<string, number>;
     timeSpentSeconds: number;
   }) => {
-    if (Math.random() > 0.25) return;
     // Keep only top 3 badges by click count to reduce payload
     const top3 = Object.entries(stats.badgeClicks)
       .sort(([, a], [, b]) => b - a)
