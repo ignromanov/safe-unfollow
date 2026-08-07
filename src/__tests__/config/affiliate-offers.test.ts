@@ -44,6 +44,17 @@ describe('resolveAffiliateOffer', () => {
     expect(new Set(ids).size).toBe(1);
   });
 
+  it('pins each tracking link exactly — short codes cannot be proofread', () => {
+    // These are opaque five-character codes that differ from each other by two
+    // characters. A typo sends real revenue to the wrong offer, or nowhere, and
+    // no reviewer will catch it by reading. Pinning them makes any change to a
+    // paid link a deliberate, visible edit rather than a silent character swap.
+    // Same reasoning as checking a creative's magic bytes instead of its name.
+    expect(resolveAffiliateOffer('en')?.url).toBe('https://go.nordvpn.net/SHAow');
+    expect(resolveAffiliateOffer('tr')?.url).toBe('https://go.getnord.net/SHBsa');
+    expect(resolveAffiliateOffer('ru')?.url).toBe('https://get.affiliatescn.net/SHBvA');
+  });
+
   it('serves every tracking link over https', () => {
     // Offer 153 is listed as plain http in the dashboard; a cleartext referrer
     // is a poor look on this product specifically.

@@ -26,8 +26,13 @@ describe('UploadAffiliateBlock', () => {
   it('links out to the resolved offer in a new tab, safely', () => {
     render(<UploadAffiliateBlock />);
 
+    // Matched on the whole URL, not a fragment. The links are short codes now
+    // (`/SHAow`), so there is no `offer_id=` left in them to key on and no
+    // substring short enough to be safe — `SHAow` and `SHBsa` differ by two
+    // characters, and a `stringContaining` on either would be one typo away
+    // from passing for the wrong offer.
     const link = screen.getByRole('link');
-    expect(link).toHaveAttribute('href', expect.stringContaining('offer_id=15'));
+    expect(link).toHaveAttribute('href', 'https://go.nordvpn.net/SHAow');
     expect(link).toHaveAttribute('target', '_blank');
     expect(link).toHaveAttribute('rel', expect.stringContaining('noopener'));
   });
@@ -37,10 +42,10 @@ describe('UploadAffiliateBlock', () => {
 
     render(<UploadAffiliateBlock />);
 
-    expect(screen.getByRole('link')).toHaveAttribute(
-      'href',
-      expect.stringContaining('offer_id=153')
-    );
+    // Offer 153 — Belarus, China, Russia. Served over https even though the
+    // network lists it as http: a cleartext hop would undercut the one claim
+    // this placement makes.
+    expect(screen.getByRole('link')).toHaveAttribute('href', 'https://get.affiliatescn.net/SHBvA');
   });
 
   it('shows the affiliate disclosure next to the link, not buried', () => {

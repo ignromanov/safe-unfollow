@@ -76,7 +76,7 @@ export interface AffiliateOffer {
 const NORDVPN_GLOBAL: AffiliateOffer = {
   id: 'nordvpn_global',
   copyKey: 'nordvpn',
-  url: 'https://go.nordvpn.net/aff_c?offer_id=15&aff_id=143131',
+  url: 'https://go.nordvpn.net/SHAow',
   creative: NORDVPN_CREATIVE,
 };
 
@@ -84,7 +84,7 @@ const NORDVPN_GLOBAL: AffiliateOffer = {
 const NORDVPN_ARABIA: AffiliateOffer = {
   id: 'nordvpn_arabia',
   copyKey: 'nordvpn',
-  url: 'https://go.getnord.net/aff_c?offer_id=226&aff_id=143131',
+  url: 'https://go.getnord.net/SHBsa',
   creative: NORDVPN_CREATIVE,
 };
 
@@ -92,7 +92,11 @@ const NORDVPN_ARABIA: AffiliateOffer = {
 const NORDVPN_CIS: AffiliateOffer = {
   id: 'nordvpn_cis',
   copyKey: 'nordvpn',
-  url: 'https://get.affiliatescn.net/aff_c?offer_id=153&aff_id=143131',
+  // The network lists this one as plain `http`. Upgraded to `https` here: the
+  // host serves a valid certificate (verified 2026-08-07), and a cleartext hop
+  // would contradict the very line this placement sells — that the ISP sees
+  // every site you open.
+  url: 'https://get.affiliatescn.net/SHBvA',
   creative: NORDVPN_CREATIVE,
 };
 
