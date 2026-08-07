@@ -250,6 +250,27 @@ describe('Analytics', () => {
         Math.random = originalRandom;
       });
 
+      it('should track results clicks summary regardless of its own roll', () => {
+        // The caller (useTimeOnResults) already decides sampling, once per visit
+        // and unbiased. A second roll here compounded to 6.25% and starved the
+        // badge segmentation the payload exists for. 0.9 fails the old 25% gate.
+        const originalRandom = Math.random;
+        Math.random = () => 0.9;
+
+        analytics.resultsClicksSummary({
+          totalClicks: 3,
+          badgeClicks: { unfollowed: 3 },
+          timeSpentSeconds: 12,
+        });
+
+        expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.RESULTS_CLICKS_SUMMARY, {
+          total_clicks: 3,
+          badge_clicks: '{"unfollowed":3}',
+          time_spent: 12,
+        });
+        Math.random = originalRandom;
+      });
+
       it('should track link clicks', () => {
         analytics.linkClick('github');
 
