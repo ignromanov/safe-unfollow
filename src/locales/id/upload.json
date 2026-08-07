@@ -198,15 +198,17 @@
       "title": "File Anda tidak pernah meninggalkan perangkat ini",
       "desc": "Pemrosesan sepenuhnya terjadi di browser Anda — tidak ada yang diunggah."
     },
-    "nordvpn": {
-      "title": "Anda baru saja mengambil kembali data Anda",
-      "desc": "Jaga sisanya tetap privat. NordVPN menyembunyikan lalu lintas internet Anda dari ISP — lihat penawaran."
-    },
     "revokeAccess": {
       "title": "Tips privasi singkat",
       "desc": "Cabut akses data Instagram untuk aplikasi pihak ketiga yang sudah tidak Anda gunakan."
-    },
-    "affiliateDisclosure": "Tautan afiliasi — kami mungkin mendapat komisi tanpa biaya tambahan bagi Anda.",
-    "opensInNewTab": "terbuka di tab baru"
+    }
+  },
+  "affiliate": {
+    "disclosure": "Tautan afiliasi — kami mungkin mendapat komisi tanpa biaya tambahan bagi Anda.",
+    "opensInNewTab": "terbuka di tab baru",
+    "nordvpn": {
+      "title": "Jaga privasi sisa aktivitas browsing Anda",
+      "desc": "Arsip Anda tidak pernah keluar dari tab ini, tetapi penyedia internet Anda masih melihat setiap situs yang Anda buka. VPN menutup celah itu."
+    }
   }
 }

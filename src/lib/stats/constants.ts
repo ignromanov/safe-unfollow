@@ -60,7 +60,10 @@ export const AnalyticsEvents = {
 
   // Loading Tips (shown during ZIP parsing)
   LOADING_TIP_IMPRESSION: 'loading_tip_impression',
-  LOADING_TIP_CLICK: 'loading_tip_click',
+
+  // Affiliate block on /upload. Click only: the block renders unconditionally,
+  // so /upload pageviews already are the impression count.
+  AFFILIATE_BLOCK_CLICK: 'affiliate_block_click',
 
   // Diagnostic Errors
   DIAGNOSTIC_ERROR_VIEW: 'diagnostic_error_view',

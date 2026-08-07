@@ -229,7 +229,8 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             </p>
           </div>
           <p className="text-muted-foreground mt-4">
-            Ads are not shown on the sample-data page. We do not place ads on the upload screen.
+            AdSense units are not shown on the sample-data page, and there are none on the upload
+            screen. The upload screen does carry one partner link, described in 5.4.
           </p>
           <p className="text-muted-foreground mt-4">
             If you are in the EEA, UK or Switzerland, a consent dialog from Google's certified
@@ -254,6 +255,33 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
               How Google uses information from sites that use its services
             </a>
             .
+          </p>
+
+          <h3 className="text-lg font-semibold mt-6 mb-3">5.4 Affiliate Links</h3>
+          <p className="text-muted-foreground">
+            Some outbound links on this site are affiliate links, including a partner block on the
+            upload screen and the tool suggestions on the results screen. If you buy something after
+            following one, we may earn a commission at no extra cost to you. Every such link is
+            labelled where it appears.
+          </p>
+          <div className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+            <p className="text-sm text-emerald-700 dark:text-emerald-400 font-medium">
+              Nothing is sent to a partner until you click. The banner image is served from our own
+              domain rather than the partner's, so loading the page does not contact them at all.
+            </p>
+          </div>
+          <p className="text-muted-foreground mt-4">
+            When you do click, you leave for the partner's site, and from that point their privacy
+            policy applies: like any site you visit, they can see your IP address, your browser, and
+            that you arrived from us, and they may set their own cookies to attribute the referral.
+            On our side we record only that a click happened and which offer it was — no identifier
+            of you, and nothing derived from your Instagram export, which never leaves your browser
+            in the first place.
+          </p>
+          <p className="text-muted-foreground mt-4">
+            Which partner offer you see depends on the language you are viewing the site in, because
+            these programmes are not available in every country. We do not claim to use these
+            products ourselves.
           </p>
         </section>
 

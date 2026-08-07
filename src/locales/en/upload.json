@@ -198,15 +198,17 @@
       "title": "Your file never leaves this device",
       "desc": "Parsing happens entirely in your browser — nothing is uploaded."
     },
-    "nordvpn": {
-      "title": "You just took your data back",
-      "desc": "Keep the rest of it private. NordVPN hides your traffic from your ISP — see the deal."
-    },
     "revokeAccess": {
       "title": "Quick privacy tip",
       "desc": "Revoke Instagram data access for third-party apps you no longer use."
-    },
-    "affiliateDisclosure": "Affiliate link — we may earn a commission at no cost to you.",
-    "opensInNewTab": "opens in a new tab"
+    }
+  },
+  "affiliate": {
+    "disclosure": "Affiliate link — we may earn a commission at no cost to you.",
+    "opensInNewTab": "opens in a new tab",
+    "nordvpn": {
+      "title": "Keep the rest of your browsing private",
+      "desc": "Your export never leaves this tab, but your provider still sees every site you visit. A VPN closes that gap."
+    }
   }
 }

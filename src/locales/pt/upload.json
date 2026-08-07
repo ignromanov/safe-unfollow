@@ -198,15 +198,17 @@
       "title": "Seu arquivo nunca sai deste dispositivo",
       "desc": "O processamento acontece totalmente no seu navegador — nada é enviado."
     },
-    "nordvpn": {
-      "title": "Você acabou de recuperar seus dados",
-      "desc": "Mantenha o resto privado. A NordVPN esconde seu tráfego do seu provedor — ver a oferta."
-    },
     "revokeAccess": {
       "title": "Dica rápida de privacidade",
       "desc": "Revogue o acesso aos seus dados do Instagram de apps de terceiros que você não usa mais."
-    },
-    "affiliateDisclosure": "Link de afiliado — podemos receber uma comissão sem custo adicional para você.",
-    "opensInNewTab": "abre em uma nova aba"
+    }
+  },
+  "affiliate": {
+    "disclosure": "Link de afiliado — podemos receber uma comissão sem custo adicional para você.",
+    "opensInNewTab": "abre em uma nova aba",
+    "nordvpn": {
+      "title": "Mantenha o resto da sua navegação privada",
+      "desc": "Seu arquivo nunca sai desta aba, mas seu provedor continua vendo cada site que você visita. Uma VPN fecha essa brecha."
+    }
   }
 }

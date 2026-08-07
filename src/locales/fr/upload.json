@@ -198,15 +198,17 @@
       "title": "Votre fichier ne quitte jamais cet appareil",
       "desc": "L'analyse se fait entièrement dans votre navigateur — rien n'est envoyé."
     },
-    "nordvpn": {
-      "title": "Vous venez de récupérer vos données",
-      "desc": "Gardez le reste privé aussi. NordVPN masque votre trafic à votre FAI — voir l'offre."
-    },
     "revokeAccess": {
       "title": "Astuce confidentialité rapide",
       "desc": "Révoquez l'accès à vos données Instagram pour les apps inutilisées."
-    },
-    "affiliateDisclosure": "Lien d'affilié — nous pouvons toucher une commission, sans frais pour vous.",
-    "opensInNewTab": "s'ouvre dans un nouvel onglet"
+    }
+  },
+  "affiliate": {
+    "disclosure": "Lien d'affilié — nous pouvons toucher une commission, sans frais pour vous.",
+    "opensInNewTab": "s'ouvre dans un nouvel onglet",
+    "nordvpn": {
+      "title": "Gardez le reste de votre navigation privée",
+      "desc": "Votre export ne quitte jamais cet onglet, mais votre fournisseur voit toujours chaque site que vous visitez. Un VPN comble cet écart."
+    }
   }
 }

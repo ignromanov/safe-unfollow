@@ -185,4 +185,29 @@ describe('UploadZone', () => {
     // Analytics should track the diagnostic error view
     expect(analytics.diagnosticErrorView).toHaveBeenCalled();
   });
+
+  it('places the affiliate block after the drop zone, not against it', () => {
+    const { container } = render(<UploadZone onUploadStart={vi.fn()} />);
+
+    const block = container.querySelector('aside') as HTMLElement;
+    const input = container.querySelector('input[type="file"]') as HTMLElement;
+    expect(block).not.toBeNull();
+    // The drop zone is an interaction target; an offer butted against it invites
+    // accidental clicks.
+    expect(input.compareDocumentPosition(block) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('shows no affiliate block on the diagnostic error screen', () => {
+    const { container } = render(
+      <UploadZone
+        onUploadStart={vi.fn()}
+        parseWarnings={[{ code: 'NOT_ZIP', message: 'nope', severity: 'error', fix: 'x' }]}
+      />
+    );
+
+    // Positive proof the error screen actually rendered — without this, the
+    // assertion below would also pass if UploadZone rendered nothing at all.
+    expect(analytics.diagnosticErrorView).toHaveBeenCalled();
+    expect(container.querySelector('aside')).toBeNull();
+  });
 });
