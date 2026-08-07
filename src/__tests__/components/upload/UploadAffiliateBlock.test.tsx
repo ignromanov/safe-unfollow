@@ -57,12 +57,38 @@ describe('UploadAffiliateBlock', () => {
     const img = container.querySelector('img') as HTMLImageElement;
     const lead = screen.getByText('affiliate.nordvpn.title');
     expect(img).not.toBeNull();
-    expect(img.getAttribute('src')).toBe('/affiliate/nordvpn-300x250.webp');
+    expect(img.getAttribute('src')).toBe('/affiliate/nordvpn-v2-300x250.webp');
     // Intrinsic size present so the banner cannot shift layout as it decodes.
     expect(img.getAttribute('width')).toBe('300');
     expect(img.getAttribute('height')).toBe('250');
     // Our line above their ad, never beside it.
     expect(lead.compareDocumentPosition(img) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('offers the wide cut from lg up, carrying its own intrinsic size', () => {
+    // The upload column is roughly 700px from `lg`; the 300px base cut fills
+    // under half of it. The size attributes matter as much as the source: they
+    // are what reserves an 8:1 box instead of the base 6:5 one, and jsdom will
+    // never catch a wrong pair by rendering it.
+    const { container } = render(<UploadAffiliateBlock />);
+
+    const source = container.querySelector('picture > source') as HTMLSourceElement;
+    expect(source).not.toBeNull();
+    expect(source.getAttribute('media')).toBe('(min-width: 1024px)');
+    expect(source.getAttribute('srcset')).toBe('/affiliate/nordvpn-v2-728x90.webp');
+    expect(source.getAttribute('width')).toBe('728');
+    expect(source.getAttribute('height')).toBe('90');
+  });
+
+  it('keeps the wide cut ahead of the fallback img, or the browser never sees it', () => {
+    // `<picture>` takes the first matching child. An `<img>` placed above the
+    // `<source>` wins unconditionally and the desktop cut becomes dead weight
+    // in the repo — downloaded by nobody, noticed by nobody.
+    const { container } = render(<UploadAffiliateBlock />);
+
+    const source = container.querySelector('picture > source') as HTMLSourceElement;
+    const img = container.querySelector('picture > img') as HTMLImageElement;
+    expect(source.compareDocumentPosition(img) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
   it('drops our body copy when the banner is present, so there is one pitch not two', () => {
@@ -83,17 +109,35 @@ describe('UploadAffiliateBlock', () => {
     expect(img.className).not.toMatch(/\bhidden\b/);
   });
 
-  it('falls back to the text-only card for an offer with no creative', () => {
-    // Offer 226 has none attached, and a required banner would couple the block
-    // to a single offer.
-    mockLanguage.mockReturnValue('ar');
+  it('falls back to the text-only card for an offer with no creative', async () => {
+    // No live offer takes this branch any more — all three borrow the one
+    // creative we hold. The branch stays because `creative` is optional and
+    // that borrowing is unconfirmed with the network: if it has to be undone,
+    // this path carries the placement, and an untested path would carry it
+    // badly. Stub an offer rather than pick a language, so the test keeps
+    // testing the branch instead of quietly testing nothing the day a locale
+    // gains a banner.
+    vi.doMock('@/config/affiliate-offers', () => ({
+      resolveAffiliateOffer: () => ({
+        id: 'stub_no_creative',
+        copyKey: 'nordvpn',
+        url: 'https://example.test/aff_c?offer_id=999',
+      }),
+    }));
+    vi.resetModules();
 
-    const { container } = render(<UploadAffiliateBlock />);
+    const { UploadAffiliateBlock: Reloaded } =
+      await import('@/components/upload/UploadAffiliateBlock');
+    const { container } = render(<Reloaded />);
 
     expect(container.querySelector('img')).toBeNull();
+    expect(container.querySelector('picture')).toBeNull();
     expect(screen.getByText('affiliate.nordvpn.title')).toBeInTheDocument();
     // Without a banner our own copy has to carry the pitch.
     expect(screen.getByText('affiliate.nordvpn.desc')).toBeInTheDocument();
+
+    vi.doUnmock('@/config/affiliate-offers');
+    vi.resetModules();
   });
 
   it('reports the click with the offer id, so the network row can be matched', async () => {

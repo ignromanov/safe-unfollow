@@ -17,13 +17,43 @@
  * message-match question, not a revenue one.
  */
 
-export interface AffiliateCreative {
+export interface AffiliateCreativeVariant {
   /** Self-hosted path under `public/`. Never a third-party URL: hot-linking
-   *  would send every visitor's IP to the network before any click. */
+   *  would send every visitor's IP to the network before any click.
+   *
+   *  Versioned filename (`-v2-`) because `vercel.json` caches `/affiliate/*`
+   *  immutably for a year: reusing a path would leave returning visitors on the
+   *  old creative until the cache expired. The name is the version. */
   src: string;
+  /** Intrinsic pixels, verified against the file itself by
+   *  `__tests__/assets/affiliate-creative.test.ts` — a wrong value here is a
+   *  wrong aspect-ratio reservation, which is a layout shift no test that only
+   *  looks at markup can see. */
   width: number;
   height: number;
 }
+
+export interface AffiliateCreative {
+  /** Below `lg`, and the fallback wherever no `<source>` matches. */
+  base: AffiliateCreativeVariant;
+  /** From `lg` up, where the upload column measures roughly 700px and a 300px
+   *  box fills under half of it. Optional: an offer may ship one cut only. */
+  wide?: AffiliateCreativeVariant;
+}
+
+/**
+ * The one creative set we hold, cut by the network for offer 15.
+ *
+ * Offers 226 and 153 have no creatives of their own and borrow it. That is a
+ * deliberate call taken 2026-08-07 and **not confirmed with the network**: if
+ * creatives are bound to an offer id rather than to the account, showing this
+ * one beside a 153/226 tracking link is outside the terms. Reverting is one
+ * property per offer — do not let this comment rot into an established fact.
+ */
+const NORDVPN_CREATIVE: AffiliateCreative = {
+  base: { src: '/affiliate/nordvpn-v2-300x250.webp', width: 300, height: 250 },
+  wide: { src: '/affiliate/nordvpn-v2-728x90.webp', width: 728, height: 90 },
+};
 
 export interface AffiliateOffer {
   /** Stable id; also the analytics dimension. */
@@ -36,26 +66,28 @@ export interface AffiliateOffer {
   creative?: AffiliateCreative;
 }
 
-/** Offer 15 — 232 locations, the near-global default. Has 42 creatives attached. */
+/** Offer 15 — 232 locations, the near-global default. Owns the creative above. */
 const NORDVPN_GLOBAL: AffiliateOffer = {
   id: 'nordvpn_global',
   copyKey: 'nordvpn',
   url: 'https://go.nordvpn.net/aff_c?offer_id=15&aff_id=143131',
-  creative: { src: '/affiliate/nordvpn-300x250.webp', width: 300, height: 250 },
+  creative: NORDVPN_CREATIVE,
 };
 
-/** Offer 226 — Turkey, the Gulf, North Africa, Iran, Afghanistan. No creatives confirmed. */
+/** Offer 226 — Turkey, the Gulf, North Africa, Iran, Afghanistan. Borrows the creative. */
 const NORDVPN_ARABIA: AffiliateOffer = {
   id: 'nordvpn_arabia',
   copyKey: 'nordvpn',
   url: 'https://go.getnord.net/aff_c?offer_id=226&aff_id=143131',
+  creative: NORDVPN_CREATIVE,
 };
 
-/** Offer 153 — Belarus, China, Russian Federation, and nothing else. No creatives confirmed. */
+/** Offer 153 — Belarus, China, Russian Federation, and nothing else. Borrows the creative. */
 const NORDVPN_CIS: AffiliateOffer = {
   id: 'nordvpn_cis',
   copyKey: 'nordvpn',
   url: 'https://get.affiliatescn.net/aff_c?offer_id=153&aff_id=143131',
+  creative: NORDVPN_CREATIVE,
 };
 
 /** Only the locales whose dominant country the main offer excludes. */

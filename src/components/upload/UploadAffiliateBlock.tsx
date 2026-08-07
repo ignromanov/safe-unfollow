@@ -7,6 +7,14 @@ import { analytics } from '@/lib/stats';
 import type { ReactElement } from 'react';
 
 /**
+ * Tailwind's default `lg`. Hard-coded because a `<source media>` query is a
+ * string the CSS engine never sees — it cannot inherit the framework's value.
+ * `tailwind.config.js` overrides `screens` only inside `container`, so the
+ * global scale is untouched; if that ever changes, this must change with it.
+ */
+const LG_BREAKPOINT_PX = 1024;
+
+/**
  * Persistent affiliate placement in the `/upload` body.
  *
  * It lives here rather than in the parsing spinner because a typical parse
@@ -52,15 +60,30 @@ export function UploadAffiliateBlock(): ReactElement | null {
             <p className="mb-2 text-sm font-semibold text-zinc-900 dark:text-white">
               {t(`affiliate.${offer.copyKey}.title` as any)}
             </p>
-            <img
-              src={creative.src}
-              width={creative.width}
-              height={creative.height}
-              alt=""
-              loading="lazy"
-              decoding="async"
-              className="mx-auto block h-auto w-full max-w-[300px] rounded-lg"
-            />
+            <picture>
+              {creative.wide ? (
+                <source
+                  media={`(min-width: ${LG_BREAKPOINT_PX}px)`}
+                  srcSet={creative.wide.src}
+                  width={creative.wide.width}
+                  height={creative.wide.height}
+                />
+              ) : null}
+              {/* `max-w-full` without `w-full`: the image settles at its own
+                  intrinsic width and shrinks only when the column is narrower.
+                  That keeps the cap out of the className — a hard-coded
+                  `max-w-[300px]` would be a second copy of a number the
+                  registry already owns, free to drift away from the file. */}
+              <img
+                src={creative.base.src}
+                width={creative.base.width}
+                height={creative.base.height}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                className="mx-auto block h-auto max-w-full rounded-lg"
+              />
+            </picture>
           </>
         ) : (
           <div className="flex items-start gap-3">

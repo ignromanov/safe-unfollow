@@ -52,11 +52,24 @@ describe('resolveAffiliateOffer', () => {
     }
   });
 
-  it('attaches a creative only where the network actually has one', () => {
-    expect(resolveAffiliateOffer('en')?.creative).toBeDefined();
-    // Nothing is confirmed attached for 153 or 226, so those stay text-only.
-    expect(resolveAffiliateOffer('ru')?.creative).toBeUndefined();
-    expect(resolveAffiliateOffer('ar')?.creative).toBeUndefined();
+  it('shows a banner in every language — the geo offers borrow the one creative we hold', () => {
+    // Only offer 15 was cut a creative. Lending it to 153 and 226 is a call
+    // taken 2026-08-07 and NOT confirmed with the network: if creatives are
+    // bound to an offer id rather than to the account, this is outside the
+    // terms and the three assertions below are what to revert.
+    for (const language of SUPPORTED_LANGUAGES) {
+      expect(resolveAffiliateOffer(language)?.creative, language).toBeDefined();
+    }
+  });
+
+  it('lends the same creative object rather than a copy per offer', () => {
+    // One object, deliberately: a swap edits one constant and all three offers
+    // follow. Were these separate literals, updating the creative would mean
+    // remembering three places, and forgetting one would ship a stale banner
+    // to exactly the locales nobody on the team reads.
+    const shared = resolveAffiliateOffer('en')?.creative;
+    expect(resolveAffiliateOffer('ru')?.creative).toBe(shared);
+    expect(resolveAffiliateOffer('ar')?.creative).toBe(shared);
   });
 
   it('turns the placement off when an operator blanks a live offer url', () => {
