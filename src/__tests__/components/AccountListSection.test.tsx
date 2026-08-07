@@ -343,7 +343,35 @@ describe('AccountListSection', () => {
       });
     });
 
-    it('places the low-profile unit at the very tail, after the donation card', () => {
+    // The single-column order is carried by the DOM, not by `order-*` utilities:
+    // it is the order a screen reader announces, and the only one jsdom can see.
+    // The desktop hoist above both columns is the exception, and it is spelled
+    // out as such — one `lg:` class rather than a mobile/desktop pair.
+    it('sits between the filters and the list on mobile, hoisted above both only on desktop', () => {
+      withAdEnv(() => {
+        const { container } = render(
+          <AccountListSection fileHash="abc" accountCount={100} filename="d.zip" />
+        );
+
+        const filters = container.querySelector('[data-testid="filter-chips"]') as HTMLElement;
+        const ad = container.querySelector('[data-ad-name="results"]') as HTMLElement;
+        const list = container.querySelector('[data-testid="account-list"]') as HTMLElement;
+
+        expect(filters.compareDocumentPosition(ad) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+        expect(ad.compareDocumentPosition(list) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+
+        expect(ad.className).toContain('lg:order-first');
+        // No mobile-order override may survive, or it would silently reinstate
+        // the old position while the DOM assertions above stayed green.
+        expect(ad.className).not.toMatch(/(^|\s)order-\d/);
+      });
+    });
+
+    // Both sit below the list, so both keep the reciprocity the move down bought.
+    // Between them the order is the paid one first: the donation card is the last
+    // thing on the page, where an unmet ask costs nothing, while the unit still
+    // needs to be reached.
+    it('places the low-profile unit below the list but ahead of the donation card', () => {
       vi.stubEnv('VITE_ADSENSE_CLIENT', 'ca-pub-test');
       vi.stubEnv('VITE_ADSENSE_SLOT_RESULTS_END', '333');
       try {
@@ -351,13 +379,15 @@ describe('AccountListSection', () => {
           <AccountListSection fileHash="abc" accountCount={100} filename="d.zip" />
         );
 
+        const list = container.querySelector('[data-testid="account-list"]') as HTMLElement;
         const tail = container.querySelector('[data-ad-name="results_end"]') as HTMLElement;
         const donation = container.querySelector(
           '[data-testid="inline-donation-card"]'
         ) as HTMLElement;
         expect(tail).not.toBeNull();
+        expect(list.compareDocumentPosition(tail) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
         expect(
-          donation.compareDocumentPosition(tail) & Node.DOCUMENT_POSITION_FOLLOWING
+          tail.compareDocumentPosition(donation) & Node.DOCUMENT_POSITION_FOLLOWING
         ).toBeTruthy();
       } finally {
         vi.unstubAllEnvs();

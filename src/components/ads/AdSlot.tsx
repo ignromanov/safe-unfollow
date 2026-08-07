@@ -39,6 +39,19 @@ export interface AdSlotProps {
 const LAZY_ROOT_MARGIN = '400px 0px';
 
 /**
+ * Ceiling for the ad box, in px.
+ *
+ * A slot spanning the full content column offers AdSense ~1250px on a desktop
+ * viewport, and the fill comes back around 1200 — left-aligned inside the box,
+ * leaving a band on the right that nothing will ever occupy. Read as a layout
+ * bug, and correctly so: we promised width we cannot fill. Capping the box to
+ * what Google actually serves removes the band without shrinking the creative,
+ * which is the fix AdSense's own responsive guidance points at. Inert wherever
+ * the column is already narrower — every mobile viewport, most of the homepage.
+ */
+const MAX_AD_WIDTH = 1200;
+
+/**
  * AdSense ad slot.
  *
  * Renders nothing (null, no reserved space) unless ALL conditions hold:
@@ -133,7 +146,11 @@ export function AdSlot({
   const labelId = `ad-label-${name}`;
 
   return (
-    <div className={cn('w-full', className)} data-ad-name={name}>
+    <div
+      className={cn('mx-auto w-full', className)}
+      style={{ maxWidth: MAX_AD_WIDTH }}
+      data-ad-name={name}
+    >
       {/* Required by the distinguishability policy. Small and muted, but it
           must be legible and must not read as our own section heading.
           Colors are measured against this app's page background (--background,
@@ -171,6 +188,11 @@ export function AdSlot({
             style={{
               display: 'block',
               width: '100%',
+              // The cap above makes the common mismatch disappear, but a
+              // creative can still come back narrower than whatever box it is
+              // offered. AdSense's iframe is inline, so this centres it instead
+              // of letting it hug the start edge.
+              textAlign: 'center',
               ...(isMultiplex ? {} : { height: minHeight }),
             }}
             data-ad-client={client}

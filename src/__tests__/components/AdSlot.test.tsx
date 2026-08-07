@@ -171,6 +171,29 @@ describe('AdSlot', () => {
     expect(wrapper.className).not.toContain('overflow-hidden');
   });
 
+  describe('width', () => {
+    it('caps the box at the widest creative served, so no unfillable band is promised', () => {
+      const { container } = render(<AdSlot name="results" slot={SLOT} />);
+
+      const box = container.querySelector('[data-ad-name]') as HTMLElement;
+      expect(box.style.maxWidth).toBe('1200px');
+      // A capped box narrower than its column has to be centred, or it reads as
+      // a layout bug rather than as an ad that happens not to be full-bleed.
+      expect(box.className).toContain('mx-auto');
+    });
+
+    it('centres a creative that comes back narrower than the box', () => {
+      const { container } = render(<AdSlot name="results" slot={SLOT} />);
+      scrollIntoView();
+
+      // AdSense injects its own iframe inside the `ins`, sized to whatever
+      // creative it picked. Left-aligned by default — which is exactly what a
+      // full-width column made visible.
+      const ins = container.querySelector('ins.adsbygoogle') as HTMLElement;
+      expect(ins.style.textAlign).toBe('center');
+    });
+  });
+
   describe('impression accounting', () => {
     it('requests the fill without claiming an impression', () => {
       render(<AdSlot name="results" slot={SLOT} />);

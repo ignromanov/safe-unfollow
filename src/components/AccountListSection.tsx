@@ -218,28 +218,16 @@ export function AccountListSection({
 
       {/* Main Content Layout - grid for flexible banner positioning */}
       <div className="grid grid-cols-1 lg:grid-cols-[20rem_1fr] gap-6 md:gap-12">
-        {/* The only promo above the list. Takes the grid slot the rescue plan
-            banner used to hold — the position, never its styling. The wide gap
-            below is policy, not taste: FilterChips are tappable and an ad butted
-            against them invites accidental clicks. */}
-        {!isSample && (
-          <AdSlot
-            name="results"
-            slot={import.meta.env.VITE_ADSENSE_SLOT_RESULTS}
-            className="order-1 mb-4 lg:order-first lg:col-span-2"
-          />
-        )}
-
         {RESCUE_PLAN_BANNER_ENABLED && !isSample && (
           <RescuePlanBanner
             filterCounts={filterCounts}
             totalCount={totalCount}
-            className="order-2 lg:order-first lg:col-span-2"
+            className="lg:order-first lg:col-span-2"
           />
         )}
 
         {/* Filters Sidebar */}
-        <div className="order-2 lg:order-none space-y-6">
+        <div className="space-y-6">
           <FilterChips
             selectedFilters={filters}
             onFiltersChange={setFilters}
@@ -248,8 +236,28 @@ export function AccountListSection({
           />
         </div>
 
+        {/* The only promo above the list. On desktop it takes the full-width
+            row the rescue plan banner used to hold — the position, never its
+            styling. In the single column it stays where it sits in the DOM,
+            between the filters and the list: the reader has just narrowed their
+            results and is about to look at them, which is the one moment on this
+            page they are neither typing nor scanning rows.
+
+            Order comes from the DOM, not from `order-*` utilities, so it is also
+            the order a screen reader announces; `lg:order-first` is the single
+            documented exception. The margins are policy, not taste: FilterChips
+            are tappable on one side and account rows on the other, and an ad
+            butted against either invites accidental clicks. */}
+        {!isSample && (
+          <AdSlot
+            name="results"
+            slot={import.meta.env.VITE_ADSENSE_SLOT_RESULTS}
+            className="my-4 lg:order-first lg:col-span-2 lg:mt-0"
+          />
+        )}
+
         {/* Account List */}
-        <div className="order-3 lg:order-none min-w-0">
+        <div className="min-w-0">
           <AccountList
             fileHash={fileHash}
             accountCount={accountCount}
@@ -261,12 +269,6 @@ export function AccountListSection({
           />
         </div>
       </div>
-
-      {/* Moved below the list: an ask placed before the value is delivered
-          inverts the reciprocity that makes it work. BuyMeCoffeeWidget already
-          covers the after-the-fact ask, and this card above the list was its
-          badly-timed duplicate. */}
-      <InlineDonationCard accountCount={accountCount} isSample={isSample} />
 
       {/* Tail unit. Better Ads measures density over the main content and
           excludes ads below it, so the position keeps this one out of the
@@ -280,6 +282,14 @@ export function AccountListSection({
           minHeight={100}
         />
       )}
+
+      {/* Below the list: an ask placed before the value is delivered inverts the
+          reciprocity that makes it work. BuyMeCoffeeWidget already covers the
+          after-the-fact ask, and this card above the list was its badly-timed
+          duplicate. Last of the two below-the-list blocks, behind the paid one:
+          both are past the reciprocity threshold, and of the pair only the ad
+          stops earning when it goes unseen. */}
+      <InlineDonationCard accountCount={accountCount} isSample={isSample} />
     </div>
   );
 }
