@@ -1,5 +1,5 @@
 import { vi, beforeEach } from 'vitest';
-import { screen, fireEvent } from '@tests/utils/testUtils';
+import { render, screen, fireEvent } from '@tests/utils/testUtils';
 import { renderWithRouter } from '@/__tests__/test-utils';
 import resultsEN from '@/locales/en/results.json';
 import { createI18nMock } from '@/__tests__/utils/mockI18n';
@@ -60,6 +60,13 @@ vi.mock('@/components/StatCard', () => ({
       {label}: {value}
     </div>
   ),
+}));
+
+// RescuePlanBanner renders behind a severity-based setTimeout (5-15s) and pulls in
+// IntersectionObserver/analytics internals that are out of scope here — mock it like
+// the other children above so this file only asserts whether it's called at all.
+vi.mock('@/components/RescuePlanBanner', () => ({
+  RescuePlanBanner: () => <div data-testid="rescue-plan-banner" />,
 }));
 
 const mockUseAccountFiltering = vi.mocked(useAccountFiltering);
@@ -263,6 +270,12 @@ describe('AccountListSection', () => {
     });
   });
 
+  it('does not render the rescue plan banner while the flag is off', () => {
+    renderWithRouter(<AccountListSection {...defaultProps} />);
+
+    expect(screen.queryByTestId('rescue-plan-banner')).not.toBeInTheDocument();
+  });
+
   it('should handle zero filter counts', () => {
     const emptyFilterCounts = {
       following: 0,
@@ -294,5 +307,148 @@ describe('AccountListSection', () => {
     expect(screen.getByTestId('stat-card-following')).toHaveTextContent(
       `${resultsEN.stats.following}: 0`
     );
+  });
+
+  describe('promo order', () => {
+    const withAdEnv = (fn: () => void) => {
+      vi.stubEnv('VITE_ADSENSE_CLIENT', 'ca-pub-test');
+      vi.stubEnv('VITE_ADSENSE_SLOT_RESULTS', '111');
+      try {
+        fn();
+      } finally {
+        vi.unstubAllEnvs();
+      }
+    };
+
+    it('puts the ad above the list and the donation ask below it', () => {
+      withAdEnv(() => {
+        const { container } = render(
+          <AccountListSection fileHash="abc" accountCount={100} filename="d.zip" />
+        );
+
+        const ad = container.querySelector('[data-ad-name="results"]') as HTMLElement;
+        const donation = container.querySelector(
+          '[data-testid="inline-donation-card"]'
+        ) as HTMLElement;
+        const list = container.querySelector('[data-testid="account-list"]') as HTMLElement;
+        expect(ad).not.toBeNull();
+        expect(donation).not.toBeNull();
+
+        // Ad before the list...
+        expect(ad.compareDocumentPosition(list) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+        // ...and the ask only after the visitor has their data.
+        expect(
+          list.compareDocumentPosition(donation) & Node.DOCUMENT_POSITION_FOLLOWING
+        ).toBeTruthy();
+      });
+    });
+
+    // The single-column order is carried by the DOM, not by `order-*` utilities:
+    // it is the order a screen reader announces, and the only one jsdom can see.
+    // The desktop hoist above both columns is the exception, and it is spelled
+    // out as such — one `lg:` class rather than a mobile/desktop pair.
+    it('sits between the filters and the list on mobile, hoisted above both only on desktop', () => {
+      withAdEnv(() => {
+        const { container } = render(
+          <AccountListSection fileHash="abc" accountCount={100} filename="d.zip" />
+        );
+
+        const filters = container.querySelector('[data-testid="filter-chips"]') as HTMLElement;
+        const ad = container.querySelector('[data-ad-name="results"]') as HTMLElement;
+        const list = container.querySelector('[data-testid="account-list"]') as HTMLElement;
+
+        expect(filters.compareDocumentPosition(ad) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+        expect(ad.compareDocumentPosition(list) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+
+        expect(ad.className).toContain('lg:order-first');
+        // No mobile-order override may survive, or it would silently reinstate
+        // the old position while the DOM assertions above stayed green.
+        expect(ad.className).not.toMatch(/(^|\s)order-\d/);
+      });
+    });
+
+    // Both sit below the list, so both keep the reciprocity the move down bought.
+    // Between them the order is the paid one first: the donation card is the last
+    // thing on the page, where an unmet ask costs nothing, while the unit still
+    // needs to be reached.
+    it('places the low-profile unit below the list but ahead of the donation card', () => {
+      vi.stubEnv('VITE_ADSENSE_CLIENT', 'ca-pub-test');
+      vi.stubEnv('VITE_ADSENSE_SLOT_RESULTS_END', '333');
+      try {
+        const { container } = render(
+          <AccountListSection fileHash="abc" accountCount={100} filename="d.zip" />
+        );
+
+        const list = container.querySelector('[data-testid="account-list"]') as HTMLElement;
+        const tail = container.querySelector('[data-ad-name="results_end"]') as HTMLElement;
+        const donation = container.querySelector(
+          '[data-testid="inline-donation-card"]'
+        ) as HTMLElement;
+        expect(tail).not.toBeNull();
+        expect(list.compareDocumentPosition(tail) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+        expect(
+          tail.compareDocumentPosition(donation) & Node.DOCUMENT_POSITION_FOLLOWING
+        ).toBeTruthy();
+      } finally {
+        vi.unstubAllEnvs();
+      }
+    });
+
+    it('renders nothing for the tail unit without its env var', () => {
+      vi.stubEnv('VITE_ADSENSE_CLIENT', 'ca-pub-test');
+      try {
+        const { container } = render(
+          <AccountListSection fileHash="abc" accountCount={100} filename="d.zip" />
+        );
+
+        expect(container.querySelector('[data-ad-name="results_end"]')).toBeNull();
+      } finally {
+        vi.unstubAllEnvs();
+      }
+    });
+
+    it('keeps the tail unit low profile — the density ceiling leaves no slack', () => {
+      vi.stubEnv('VITE_ADSENSE_CLIENT', 'ca-pub-test');
+      vi.stubEnv('VITE_ADSENSE_SLOT_RESULTS_END', '333');
+      try {
+        const { container } = render(
+          <AccountListSection fileHash="abc" accountCount={100} filename="d.zip" />
+        );
+
+        const reserved = container.querySelector(
+          '[data-ad-name="results_end"] [style*="min-height"]'
+        ) as HTMLElement;
+        expect(reserved.style.minHeight).toBe('100px');
+      } finally {
+        vi.unstubAllEnvs();
+      }
+    });
+  });
+
+  describe('sticky header', () => {
+    it('keeps the heading out of the sticky container, and keeps exactly one h1', () => {
+      const { container } = render(
+        <AccountListSection fileHash="abc" accountCount={100} filename="d.zip" />
+      );
+
+      const headings = container.querySelectorAll('h1');
+      // Relocated, not duplicated: two h1s would be an a11y and SEO regression,
+      // which a `md:hidden` / `hidden md:block` pair would quietly introduce.
+      expect(headings).toHaveLength(1);
+
+      const sticky = container.querySelector('.sticky') as HTMLElement;
+      expect(sticky).not.toBeNull();
+      expect(sticky.contains(headings[0]!)).toBe(false);
+    });
+
+    it('keeps search and sort inside the sticky container', () => {
+      const { container } = render(
+        <AccountListSection fileHash="abc" accountCount={100} filename="d.zip" />
+      );
+
+      const sticky = container.querySelector('.sticky') as HTMLElement;
+      expect(sticky.querySelector('#account-search')).not.toBeNull();
+      expect(sticky.querySelector('button[aria-pressed]')).not.toBeNull();
+    });
   });
 });

@@ -71,5 +71,8 @@
     "getStarted": "Başla",
     "trySample": "Demo Dene",
     "tagline": "100% Ücretsiz • Giriş Yok • Gizlilik Garantili"
+  },
+  "ads": {
+    "label": "Reklam"
   }
 }

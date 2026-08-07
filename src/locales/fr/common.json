@@ -71,5 +71,8 @@
     "getStarted": "Commencer",
     "trySample": "Essayer la démo",
     "tagline": "100% Gratuit • Sans connexion • Confidentialité garantie"
+  },
+  "ads": {
+    "label": "Publicité"
   }
 }

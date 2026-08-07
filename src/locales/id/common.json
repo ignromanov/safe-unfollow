@@ -71,5 +71,8 @@
     "getStarted": "Mulai",
     "trySample": "Coba Demo",
     "tagline": "100% Gratis • Tanpa Login • Privasi Terjamin"
+  },
+  "ads": {
+    "label": "Iklan"
   }
 }

@@ -1,4 +1,4 @@
-import { act, render } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AdSlot } from '@/components/ads/AdSlot';
@@ -124,7 +124,9 @@ describe('AdSlot', () => {
     const { container } = render(<AdSlot name="home" slot={SLOT} minHeight={250} />);
     scrollIntoView();
 
-    const wrapper = container.firstChild as HTMLElement;
+    // The label sits in the outer `[data-ad-name]` wrapper; the reserved
+    // height lives on its inner div, which the viewability gate measures.
+    const wrapper = container.querySelector('[data-ad-name] > div') as HTMLElement;
     expect(wrapper).not.toBeNull();
     expect(wrapper.style.minHeight).toBe('250px');
 
@@ -134,15 +136,21 @@ describe('AdSlot', () => {
     expect(ins.getAttribute('data-ad-slot')).toBe(SLOT);
   });
 
-  it('renders a responsive display unit by default', () => {
+  // Fluid width, pinned height — AdSense's documented recipe for a responsive
+  // unit whose size we control. `data-ad-format="auto"` treats an inline height
+  // as a starting value and rewrites it to fit the creative it picks, which is
+  // how a slot reserving 280px came back 413px tall on a phone. The attributes
+  // have to be absent, not merely contradicted by CSS.
+  it('pins the display unit to the reserved height instead of letting the format resize it', () => {
     const { container } = render(<AdSlot name="home" slot={SLOT} minHeight={250} />);
     scrollIntoView();
 
     const ins = container.querySelector('ins.adsbygoogle') as HTMLElement;
-    expect(ins.getAttribute('data-ad-format')).toBe('auto');
-    expect(ins.getAttribute('data-full-width-responsive')).toBe('true');
-    // Fixed height keeps a display unit at zero CLS.
+    expect(ins.getAttribute('data-ad-format')).toBeNull();
+    expect(ins.getAttribute('data-full-width-responsive')).toBeNull();
     expect(ins.style.height).toBe('250px');
+    expect(ins.style.width).toBe('100%');
+    expect(ins.style.maxWidth).toBe('1200px');
   });
 
   it('renders a multiplex unit with the autorelaxed format', () => {
@@ -162,11 +170,34 @@ describe('AdSlot', () => {
       <AdSlot name="home_footer" slot={SLOT} format="multiplex" minHeight={300} />
     );
 
-    const wrapper = container.firstChild as HTMLElement;
+    const wrapper = container.querySelector('[data-ad-name] > div') as HTMLElement;
     // Space is still reserved up front...
     expect(wrapper.style.minHeight).toBe('300px');
     // ...but the grid may grow past it, so it must not be clipped.
     expect(wrapper.className).not.toContain('overflow-hidden');
+  });
+
+  describe('width', () => {
+    it('caps the box at the widest creative served, so no unfillable band is promised', () => {
+      const { container } = render(<AdSlot name="results" slot={SLOT} />);
+
+      const box = container.querySelector('[data-ad-name]') as HTMLElement;
+      expect(box.style.maxWidth).toBe('1200px');
+      // A capped box narrower than its column has to be centred, or it reads as
+      // a layout bug rather than as an ad that happens not to be full-bleed.
+      expect(box.className).toContain('mx-auto');
+    });
+
+    it('centres a creative that comes back narrower than the box', () => {
+      const { container } = render(<AdSlot name="results" slot={SLOT} />);
+      scrollIntoView();
+
+      // AdSense injects its own iframe inside the `ins`, sized to whatever
+      // creative it picked. Left-aligned by default — which is exactly what a
+      // full-width column made visible.
+      const ins = container.querySelector('ins.adsbygoogle') as HTMLElement;
+      expect(ins.style.textAlign).toBe('center');
+    });
   });
 
   describe('impression accounting', () => {
@@ -206,7 +237,7 @@ describe('AdSlot', () => {
       const { container } = render(<AdSlot name="home" slot={SLOT} minHeight={250} />);
 
       // Space is reserved from the first paint, so the later fill costs no CLS.
-      const wrapper = container.firstChild as HTMLElement;
+      const wrapper = container.querySelector('[data-ad-name] > div') as HTMLElement;
       expect(wrapper.style.minHeight).toBe('250px');
       // ...but no ad markup, no script, no request.
       expect(wrapper.querySelector('ins.adsbygoogle')).toBeNull();
@@ -260,5 +291,58 @@ describe('AdSlot', () => {
       expect(container.querySelector('ins.adsbygoogle')).not.toBeNull();
       expect(pushAdSlot).toHaveBeenCalledTimes(1);
     });
+  });
+
+  it('labels the unit, which the distinguishability policy requires', () => {
+    const { container } = render(<AdSlot name="results" slot={SLOT} />);
+    scrollIntoView();
+
+    const wrapper = container.firstChild as HTMLElement;
+    expect(wrapper.textContent).toContain('Advertisement');
+  });
+
+  it('does not dress the unit up as one of our own cards', () => {
+    const { container } = render(<AdSlot name="results" slot={SLOT} />);
+    scrollIntoView();
+
+    // Matching our card chrome would make the ad indistinguishable from
+    // content, which AdSense forbids outright. Checking only the outer
+    // wrapper's className can never catch this — those classes are hardcoded
+    // ('w-full' plus whatever the caller passes), so nothing the component
+    // itself renders could ever fail that check. Walk the whole subtree
+    // instead, since the chrome could land on any element inside it.
+    const adRoot = container.querySelector('[data-ad-name]') as HTMLElement;
+    const offendingClasses = /bg-gradient|rounded-4xl|bg-card/;
+    for (const el of [adRoot, ...adRoot.querySelectorAll('*')]) {
+      expect(el.className).not.toMatch(offendingClasses);
+    }
+  });
+
+  it('pins the label color at the measured AA-passing shades (text-zinc-600 light / text-zinc-400 dark)', () => {
+    // Guards against a later "tidy-up" quietly reverting to a shade that
+    // fails contrast. Measured against this app's actual --background token
+    // (not a card — every placement sits on the page background): zinc-600
+    // on light ≈7.51:1, zinc-400 on dark ≈7.92:1. Both clear the 4.5:1 floor
+    // small text needs (10px does not qualify for the 3:1 large-text
+    // exemption). The prior zinc-400/zinc-500 pair measured ≈2.6:1 / ≈3.7:1
+    // and failed AA on both themes.
+    const { container } = render(<AdSlot name="results" slot={SLOT} />);
+    scrollIntoView();
+
+    const label = container.querySelector('[data-ad-name] > span') as HTMLElement;
+    expect(label.className).toContain('text-zinc-600');
+    expect(label.className).toContain('dark:text-zinc-400');
+  });
+
+  it('associates the label with the ad container for screen readers', () => {
+    render(<AdSlot name="results" slot={SLOT} />);
+    scrollIntoView();
+
+    // Exercises the actual accessible-name computation, not just the
+    // id/attribute pair: an id/aria-labelledby match on a role-less div (role
+    // "generic", which is naming-prohibited) would pass an attribute check
+    // while still exposing no name to a screen reader. This only passes if
+    // the browser-equivalent name resolution actually lands on the element.
+    expect(screen.getByRole('group', { name: 'Advertisement' })).toBeInTheDocument();
   });
 });

@@ -74,8 +74,12 @@ export const AccountList = memo(function AccountList({
 
   if (displayCount === 0) {
     return (
-      <div className="flex-grow bg-card rounded-4xl border border-border shadow-sm overflow-hidden flex flex-col h-[85dvh] md:h-[90vh]">
-        <div className="flex flex-col items-center justify-center h-full py-24 text-center px-12">
+      <div className="flex-grow bg-card rounded-4xl border border-border shadow-sm overflow-hidden flex flex-col max-h-[65dvh] md:max-h-[90vh]">
+        {/* No h-full here: the card above is capped, not sized, so its height is
+            auto and a percentage height has nothing to resolve against. It used
+            to resolve against h-[85dvh] and stretch this box to centre the
+            message in a tall panel; the cap left the class inert. */}
+        <div className="flex flex-col items-center justify-center py-24 text-center px-12">
           <Ghost size={64} className="mb-8 opacity-10" />
           <p className="text-xl md:text-2xl font-display font-bold text-zinc-300">
             {t('empty.noUsers')}
@@ -94,7 +98,7 @@ export const AccountList = memo(function AccountList({
   }
 
   return (
-    <div className="flex-grow bg-card rounded-4xl border border-border shadow-sm overflow-hidden flex flex-col h-[85dvh] md:h-[90vh]">
+    <div className="flex-grow bg-card rounded-4xl border border-border shadow-sm overflow-hidden flex flex-col max-h-[65dvh] md:max-h-[90vh]">
       {/* List Header */}
       <div className="px-5 md:px-8 py-4 md:py-5 border-b border-border bg-zinc-50/50 dark:bg-zinc-900/30">
         <h3 className="text-xs font-black text-zinc-500 uppercase tracking-widest">

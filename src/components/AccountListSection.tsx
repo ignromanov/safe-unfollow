@@ -16,6 +16,7 @@ import { AdSlot } from './ads/AdSlot';
 import { RescuePlanBanner } from './RescuePlanBanner';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import type { BadgeKey } from '@/core/types';
+import { RESCUE_PLAN_BANNER_ENABLED } from '@/config/feature-flags';
 import { useAccountFiltering } from '@/hooks/useAccountFiltering';
 import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
 import { useTimeOnResults } from '@/hooks/useTimeOnResults';
@@ -127,52 +128,51 @@ export function AccountListSection({
         </Alert>
       )}
 
-      {/* Top Header & Search */}
-      <div className="sticky top-16 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 -mx-4 px-4 py-4 md:py-6">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div>
-            <h1 className="text-3xl md:text-5xl font-display font-extrabold mb-2 tracking-tight">
-              {t('header.title')}
-            </h1>
-            <p className="text-zinc-500 text-xs md:text-sm font-bold uppercase tracking-widest">
-              {t('header.fileInfo', { filename, count: totalCount })}
-            </p>
+      {/* Heading in normal flow. It used to live in the sticky container, where
+          on mobile it stacked into a column and pinned ~176px under the 64px app
+          header — about a third of the viewport, permanently. */}
+      <div>
+        <h1 className="text-3xl md:text-5xl font-display font-extrabold mb-2 tracking-tight">
+          {t('header.title')}
+        </h1>
+        <p className="text-zinc-500 text-xs md:text-sm font-bold uppercase tracking-widest">
+          {t('header.fileInfo', { filename, count: totalCount })}
+        </p>
+      </div>
+
+      {/* Sticky: search and sort only. */}
+      <div className="sticky top-16 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 -mx-4 px-4 py-3">
+        <div className="flex items-center gap-2">
+          <div className="relative flex-grow md:w-80">
+            <Search className="absolute start-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
+            <label htmlFor="account-search" className="sr-only">
+              {t('search.placeholder')}
+            </label>
+            <input
+              id="account-search"
+              type="text"
+              placeholder={t('search.placeholder')}
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              autoCorrect="off"
+              autoCapitalize="none"
+              inputMode="search"
+              className="w-full ps-11 pe-4 py-3.5 rounded-2xl border border-border bg-card focus:ring-2 focus:ring-primary outline-none transition-all font-semibold text-base shadow-sm"
+            />
           </div>
-          <div className="flex items-center gap-2">
-            <div className="relative flex-grow md:w-80">
-              <Search
-                className="absolute start-4 top-1/2 -translate-y-1/2 text-zinc-400"
-                size={18}
-              />
-              <label htmlFor="account-search" className="sr-only">
-                {t('search.placeholder')}
-              </label>
-              <input
-                id="account-search"
-                type="text"
-                placeholder={t('search.placeholder')}
-                value={query}
-                onChange={e => setQuery(e.target.value)}
-                autoCorrect="off"
-                autoCapitalize="none"
-                inputMode="search"
-                className="w-full ps-11 pe-4 py-3.5 rounded-2xl border border-border bg-card focus:ring-2 focus:ring-primary outline-none transition-all font-semibold text-base shadow-sm"
-              />
-            </div>
-            <button
-              onClick={() => setSortOrder(prev => (prev === 'asc' ? 'desc' : 'asc'))}
-              className={`cursor-pointer p-3.5 rounded-2xl border transition-all shadow-sm shrink-0 ${
-                sortOrder === 'desc'
-                  ? 'bg-primary text-white border-primary'
-                  : 'bg-card border-border text-zinc-500 hover:text-primary'
-              }`}
-              title={sortOrder === 'asc' ? t('sort.desc') : t('sort.asc')}
-              aria-label={t('sort.ariaLabel', { defaultValue: 'Sort accounts' })}
-              aria-pressed={sortOrder === 'desc'}
-            >
-              <ArrowUpDown size={20} />
-            </button>
-          </div>
+          <button
+            onClick={() => setSortOrder(prev => (prev === 'asc' ? 'desc' : 'asc'))}
+            className={`cursor-pointer p-3.5 rounded-2xl border transition-all shadow-sm shrink-0 ${
+              sortOrder === 'desc'
+                ? 'bg-primary text-white border-primary'
+                : 'bg-card border-border text-zinc-500 hover:text-primary'
+            }`}
+            title={sortOrder === 'asc' ? t('sort.desc') : t('sort.asc')}
+            aria-label={t('sort.ariaLabel', { defaultValue: 'Sort accounts' })}
+            aria-pressed={sortOrder === 'desc'}
+          >
+            <ArrowUpDown size={20} />
+          </button>
         </div>
       </div>
 
@@ -216,25 +216,18 @@ export function AccountListSection({
         />
       </div>
 
-      {/* Inline Donation Card */}
-      <InlineDonationCard accountCount={accountCount} isSample={isSample} />
-
-      {/* Ad slot — outside the virtualized list to avoid layout thrashing */}
-      {!isSample && <AdSlot name="results" slot={import.meta.env.VITE_ADSENSE_SLOT_RESULTS} />}
-
       {/* Main Content Layout - grid for flexible banner positioning */}
       <div className="grid grid-cols-1 lg:grid-cols-[20rem_1fr] gap-6 md:gap-12">
-        {/* Rescue Plan Banner - full width on desktop (top), between filters and list on mobile */}
-        {!isSample && (
+        {RESCUE_PLAN_BANNER_ENABLED && !isSample && (
           <RescuePlanBanner
             filterCounts={filterCounts}
             totalCount={totalCount}
-            className="order-2 lg:order-first lg:col-span-2"
+            className="lg:order-first lg:col-span-2"
           />
         )}
 
         {/* Filters Sidebar */}
-        <div className="order-1 lg:order-none space-y-6">
+        <div className="space-y-6">
           <FilterChips
             selectedFilters={filters}
             onFiltersChange={setFilters}
@@ -243,8 +236,28 @@ export function AccountListSection({
           />
         </div>
 
+        {/* The only promo above the list. On desktop it takes the full-width
+            row the rescue plan banner used to hold — the position, never its
+            styling. In the single column it stays where it sits in the DOM,
+            between the filters and the list: the reader has just narrowed their
+            results and is about to look at them, which is the one moment on this
+            page they are neither typing nor scanning rows.
+
+            Order comes from the DOM, not from `order-*` utilities, so it is also
+            the order a screen reader announces; `lg:order-first` is the single
+            documented exception. The margins are policy, not taste: FilterChips
+            are tappable on one side and account rows on the other, and an ad
+            butted against either invites accidental clicks. */}
+        {!isSample && (
+          <AdSlot
+            name="results"
+            slot={import.meta.env.VITE_ADSENSE_SLOT_RESULTS}
+            className="my-4 lg:order-first lg:col-span-2 lg:mt-0"
+          />
+        )}
+
         {/* Account List */}
-        <div className="order-3 lg:order-none min-w-0">
+        <div className="min-w-0">
           <AccountList
             fileHash={fileHash}
             accountCount={accountCount}
@@ -256,6 +269,27 @@ export function AccountListSection({
           />
         </div>
       </div>
+
+      {/* Tail unit. Better Ads measures density over the main content and
+          excludes ads below it, so the position keeps this one out of the
+          worst-case reading. `display` at 100px rather than multiplex: the fixed
+          height preserves the zero-CLS path, and at 26.4% worst-case mobile
+          density there is no slack for a unit that sizes itself. */}
+      {!isSample && (
+        <AdSlot
+          name="results_end"
+          slot={import.meta.env.VITE_ADSENSE_SLOT_RESULTS_END}
+          minHeight={100}
+        />
+      )}
+
+      {/* Below the list: an ask placed before the value is delivered inverts the
+          reciprocity that makes it work. BuyMeCoffeeWidget already covers the
+          after-the-fact ask, and this card above the list was its badly-timed
+          duplicate. Last of the two below-the-list blocks, behind the paid one:
+          both are past the reciprocity threshold, and of the pair only the ad
+          stops earning when it goes unseen. */}
+      <InlineDonationCard accountCount={accountCount} isSample={isSample} />
     </div>
   );
 }
