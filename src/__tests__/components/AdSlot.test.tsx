@@ -136,15 +136,21 @@ describe('AdSlot', () => {
     expect(ins.getAttribute('data-ad-slot')).toBe(SLOT);
   });
 
-  it('renders a responsive display unit by default', () => {
+  // Fluid width, pinned height — AdSense's documented recipe for a responsive
+  // unit whose size we control. `data-ad-format="auto"` treats an inline height
+  // as a starting value and rewrites it to fit the creative it picks, which is
+  // how a slot reserving 280px came back 413px tall on a phone. The attributes
+  // have to be absent, not merely contradicted by CSS.
+  it('pins the display unit to the reserved height instead of letting the format resize it', () => {
     const { container } = render(<AdSlot name="home" slot={SLOT} minHeight={250} />);
     scrollIntoView();
 
     const ins = container.querySelector('ins.adsbygoogle') as HTMLElement;
-    expect(ins.getAttribute('data-ad-format')).toBe('auto');
-    expect(ins.getAttribute('data-full-width-responsive')).toBe('true');
-    // Fixed height keeps a display unit at zero CLS.
+    expect(ins.getAttribute('data-ad-format')).toBeNull();
+    expect(ins.getAttribute('data-full-width-responsive')).toBeNull();
     expect(ins.style.height).toBe('250px');
+    expect(ins.style.width).toBe('100%');
+    expect(ins.style.maxWidth).toBe('1200px');
   });
 
   it('renders a multiplex unit with the autorelaxed format', () => {

@@ -188,6 +188,7 @@ export function AdSlot({
             style={{
               display: 'block',
               width: '100%',
+              maxWidth: MAX_AD_WIDTH,
               // The cap above makes the common mismatch disappear, but a
               // creative can still come back narrower than whatever box it is
               // offered. AdSense's iframe is inline, so this centres it instead
@@ -197,8 +198,16 @@ export function AdSlot({
             }}
             data-ad-client={client}
             data-ad-slot={slot}
-            data-ad-format={isMultiplex ? 'autorelaxed' : 'auto'}
-            {...(isMultiplex ? {} : { 'data-full-width-responsive': 'true' })}
+            // A display unit carries no format attributes at all. Under
+            // `data-ad-format="auto"` the inline height is only a starting
+            // value — AdSense rewrites it to fit whichever creative it picks,
+            // which is how a slot reserving 280px rendered 413px tall on a
+            // phone and quietly broke the zero-CLS claim this component makes.
+            // Width fluid, height pinned, no format attributes is Google's own
+            // recipe for a responsive unit whose size the page controls.
+            // Multiplex is a different product: it has to declare its format,
+            // and it sizes its own grid by design.
+            {...(isMultiplex ? { 'data-ad-format': 'autorelaxed' } : {})}
           />
         )}
       </div>
