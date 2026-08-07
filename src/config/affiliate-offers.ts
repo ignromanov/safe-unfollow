@@ -36,8 +36,14 @@ export interface AffiliateCreativeVariant {
 export interface AffiliateCreative {
   /** Below `lg`, and the fallback wherever no `<source>` matches. */
   base: AffiliateCreativeVariant;
-  /** From `lg` up, where the upload column measures roughly 700px and a 300px
-   *  box fills under half of it. Optional: an offer may ship one cut only. */
+  /** From `lg` up, where the upload column measures roughly 750px and a 300px
+   *  box fills under half of it. Optional: an offer may ship one cut only.
+   *
+   *  Pick this by AREA, not by width. A 728×90 leaderboard closed 96% of the
+   *  column and still read as smaller than the box it replaced — 65 520 px²
+   *  against the base cut's 75 000. The 970×250 billboard lands at roughly
+   *  750×193 in this column: 2.2× the leaderboard's area, and a 0.77 downscale
+   *  keeps its headline legible where the square cut's sub-text turned to mush. */
   wide?: AffiliateCreativeVariant;
 }
 
@@ -52,7 +58,7 @@ export interface AffiliateCreative {
  */
 const NORDVPN_CREATIVE: AffiliateCreative = {
   base: { src: '/affiliate/nordvpn-v2-300x250.webp', width: 300, height: 250 },
-  wide: { src: '/affiliate/nordvpn-v2-728x90.webp', width: 728, height: 90 },
+  wide: { src: '/affiliate/nordvpn-v2-970x250.webp', width: 970, height: 250 },
 };
 
 export interface AffiliateOffer {

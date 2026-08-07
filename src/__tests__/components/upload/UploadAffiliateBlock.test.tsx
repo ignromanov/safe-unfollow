@@ -66,18 +66,18 @@ describe('UploadAffiliateBlock', () => {
   });
 
   it('offers the wide cut from lg up, carrying its own intrinsic size', () => {
-    // The upload column is roughly 700px from `lg`; the 300px base cut fills
+    // The upload column is roughly 750px from `lg`; the 300px base cut fills
     // under half of it. The size attributes matter as much as the source: they
-    // are what reserves an 8:1 box instead of the base 6:5 one, and jsdom will
-    // never catch a wrong pair by rendering it.
+    // are what reserves the wide box instead of the base 6:5 one, and jsdom
+    // will never catch a wrong pair by rendering it.
     const { container } = render(<UploadAffiliateBlock />);
 
     const source = container.querySelector('picture > source') as HTMLSourceElement;
     expect(source).not.toBeNull();
     expect(source.getAttribute('media')).toBe('(min-width: 1024px)');
-    expect(source.getAttribute('srcset')).toBe('/affiliate/nordvpn-v2-728x90.webp');
-    expect(source.getAttribute('width')).toBe('728');
-    expect(source.getAttribute('height')).toBe('90');
+    expect(source.getAttribute('srcset')).toBe('/affiliate/nordvpn-v2-970x250.webp');
+    expect(source.getAttribute('width')).toBe('970');
+    expect(source.getAttribute('height')).toBe('250');
   });
 
   it('keeps the wide cut ahead of the fallback img, or the browser never sees it', () => {
