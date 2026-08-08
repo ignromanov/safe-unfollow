@@ -112,6 +112,31 @@ describe('TermsOfService', () => {
     });
   });
 
+  // The paywall promises a refund at the moment of purchase (see
+  // export.paywall.refund). A promise made in the checkout UI and absent from
+  // the Terms is one a buyer can hold against us, and the Terms are where the
+  // binding version belongs. Same reasoning as the AdSense (§5.3) and affiliate
+  // (§5.4) disclosures pinned in PrivacyPolicy.test: a promise that can be
+  // silently deleted is not a promise. The window and the address are pinned
+  // separately because either can drift out of step with the paywall copy on
+  // its own.
+  describe('refund promise', () => {
+    it('should state the refund window in the Terms, not only in the paywall', () => {
+      render(<TermsOfService {...defaultProps} />);
+
+      expect(screen.getByText(/2\.1 Paid Export and Refunds/i)).toBeInTheDocument();
+      expect(screen.getByText(/within 30 days of your purchase/i)).toBeInTheDocument();
+      expect(screen.getByText(/refund it in full/i)).toBeInTheDocument();
+    });
+
+    it('should route refunds to the address the paywall gives the buyer', () => {
+      render(<TermsOfService {...defaultProps} />);
+
+      const refundLink = screen.getByRole('link', { name: 'refunds@safeunfollow.app' });
+      expect(refundLink).toHaveAttribute('href', 'mailto:refunds@safeunfollow.app');
+    });
+  });
+
   describe('content details', () => {
     it('should mention that service processes data locally', () => {
       render(<TermsOfService {...defaultProps} />);

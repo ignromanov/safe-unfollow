@@ -142,8 +142,8 @@
       "full": "{{filename}} salvo — todas as {{total}} linhas"
     },
     "paywall": {
-      "headline": "As primeiras {{rows}} já foram baixadas — agora a lista completa",
-      "subtitle": "A amostra termina em {{rows}} linhas. A exportação completa inclui todas as contas da visualização atual — CSV ou JSON, gerada no navegador.",
+      "headline": "As primeiras {{rows}} já foram baixadas — agora todas as {{total}}",
+      "subtitle": "Rastreadores parecidos cobram $5–10 por mês enquanto você quiser continuar acompanhando seus seguidores. Aqui são $7 uma única vez, pelo arquivo.",
       "bullet1": "Funciona no Excel e no Google Sheets",
       "bullet2": "Respeita seus filtros ativos",
       "bullet3": "Pagamento único de $7 — não é uma assinatura. Ativa em até 3 dispositivos.",
@@ -152,7 +152,8 @@
       "teaserCompare": "Comparar duas exportações",
       "comingSoon": "Em breve",
       "cta": "Desbloquear exportação — $7",
-      "instantNote": "Desbloqueio instantâneo após o pagamento"
+      "instantNote": "Desbloqueio instantâneo após o pagamento",
+      "refund": "Não é o que você esperava? Escreva para {{email}} em até 30 dias e devolvemos o dinheiro."
     },
     "license": {
       "title": "Ative sua exportação",

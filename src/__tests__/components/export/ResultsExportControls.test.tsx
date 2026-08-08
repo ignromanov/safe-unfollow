@@ -152,11 +152,14 @@ describe('ResultsExportControls', () => {
     expect(trigger).toHaveAccessibleName(trigger.textContent?.trim() ?? '');
   });
 
-  // The paywall headline interpolates the row cap, so the rendered text is not
-  // the raw string. Matching on the stable half keeps the assertion honest
-  // without duplicating i18next's interpolation in the test.
+  // The paywall headline interpolates the row cap and the reader's own total,
+  // so the rendered text is not the raw string. Matching on the stable half
+  // keeps the assertion honest without duplicating i18next's interpolation in
+  // the test.
   const paywallHeadline = new RegExp(
-    resultsEN.export.paywall.headline.replace('{{rows}}', String(FREE_EXPORT_ROWS))
+    resultsEN.export.paywall.headline
+      .replace('{{rows}}', String(FREE_EXPORT_ROWS))
+      .replace('{{total}}', String(defaultProps.totalCount))
   );
 
   describe('the free sample', () => {
@@ -223,10 +226,10 @@ describe('ResultsExportControls', () => {
       expect(vi.mocked(analytics.paywallView)).not.toHaveBeenCalled();
     });
 
-    // The paywall asserts "the sample you just downloaded stops at 10 rows"
-    // about a file the reader may never have seen land — 85% of traffic is
-    // mobile, and an iOS Safari blob download can be silent or blocked. The
-    // receipt is what makes that assertion checkable.
+    // The paywall's headline offers "all 42" of a file the reader may never
+    // have seen land — 85% of traffic is mobile, and an iOS Safari blob
+    // download can be silent or blocked. The receipt is what makes the offer
+    // checkable rather than an assertion about something unseen.
     it('should name the downloaded file in the paywall, matching what was written', async () => {
       unlocked(false);
       const user = userEvent.setup();
@@ -406,6 +409,24 @@ describe('ResultsExportControls', () => {
 
       expect(await screen.findByRole('button', { name: keyEntryLabel })).toBeInTheDocument();
     });
+  });
+
+  // The refund line is built by splitting the translated sentence on the
+  // address, because languages that put a postposition after it cannot take an
+  // appended link. That split is silent when it goes wrong: a change leaving
+  // the address as plain text still renders a plausible sentence, and only the
+  // buyer who wanted to complain finds out it is not clickable. The window is
+  // asserted too, so it cannot drift out of step with Terms §2.1.
+  it('should offer a clickable refund address in the paywall', async () => {
+    unlocked(false);
+    const user = userEvent.setup();
+
+    render(<ResultsExportControls {...defaultProps} />);
+    await user.click(screen.getByRole('button', { name: triggerLabel }));
+
+    const refundLink = await screen.findByRole('link', { name: 'refunds@safeunfollow.app' });
+    expect(refundLink).toHaveAttribute('href', 'mailto:refunds@safeunfollow.app');
+    expect(refundLink.closest('p')).toHaveTextContent(/30 days/);
   });
 
   it('should open the manual license dialog from the paywall', async () => {

@@ -142,8 +142,8 @@
       "full": "{{filename}} tersimpan — semua {{total}} baris"
     },
     "paywall": {
-      "headline": "{{rows}} baris pertama sudah diunduh — sekarang seluruh daftarnya",
-      "subtitle": "Contohnya berhenti di {{rows}} baris. Ekspor lengkap mencakup semua akun pada tampilan saat ini — CSV atau JSON, dibuat di browser.",
+      "headline": "{{rows}} baris pertama sudah diunduh — sekarang semua {{total}}",
+      "subtitle": "Pelacak sejenis menagih $5–10 per bulan selama kamu ingin terus memantau pengikutmu. Yang ini $7 sekali bayar, untuk filenya.",
       "bullet1": "Berfungsi di Excel dan Google Sheets",
       "bullet2": "Mengikuti filter aktifmu",
       "bullet3": "Sekali bayar $7 — bukan langganan. Berlaku di maksimal 3 perangkat.",
@@ -152,7 +152,8 @@
       "teaserCompare": "Bandingkan dua ekspor",
       "comingSoon": "Segera hadir",
       "cta": "Buka ekspor — $7",
-      "instantNote": "Langsung terbuka setelah pembayaran"
+      "instantNote": "Langsung terbuka setelah pembayaran",
+      "refund": "Tidak sesuai harapan? Kirim email ke {{email}} dalam 30 hari dan kami kembalikan uangmu."
     },
     "license": {
       "title": "Aktifkan ekspormu",

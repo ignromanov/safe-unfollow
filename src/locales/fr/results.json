@@ -142,8 +142,8 @@
       "full": "{{filename}} enregistré — toutes les {{total}} lignes"
     },
     "paywall": {
-      "headline": "Les {{rows}} premières sont téléchargées — passez à la liste entière",
-      "subtitle": "L’échantillon s’arrête à {{rows}} lignes. L’export complet contient tous les comptes de la vue actuelle — CSV ou JSON, généré dans le navigateur.",
+      "headline": "Les {{rows}} premières sont téléchargées — passez aux {{total}}",
+      "subtitle": "Des outils de suivi comparables coûtent 5–10 $ par mois tant que vous voulez surveiller vos abonnés. Ici, c’est 7 $ une seule fois, pour le fichier.",
       "bullet1": "Fonctionne dans Excel et Google Sheets",
       "bullet2": "Respecte vos filtres actifs",
       "bullet3": "Paiement unique de 7 $ — pas d’abonnement. Valable sur 3 appareils maximum.",
@@ -152,7 +152,8 @@
       "teaserCompare": "Comparer deux exports",
       "comingSoon": "Bientôt disponible",
       "cta": "Débloquer l’export — 7 $",
-      "instantNote": "Déblocage instantané après paiement"
+      "instantNote": "Déblocage instantané après paiement",
+      "refund": "Ce n’est pas ce que vous attendiez ? Écrivez à {{email}} sous 30 jours et nous vous remboursons."
     },
     "license": {
       "title": "Activez votre export",

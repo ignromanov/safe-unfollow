@@ -11,6 +11,16 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
+/**
+ * Where a refund request lands. A dedicated address rather than the general
+ * `hello@` one: an unstated refund policy is a named driver of friendly-fraud
+ * chargebacks, because the buyer can honestly say they did not know the terms —
+ * and a Dodo dispute costs $30 against a $7 sale, so the refund is the cheap
+ * outcome by a factor of four. Mirrored in the Terms of Service (§2.1); the two
+ * must not drift apart.
+ */
+const REFUND_EMAIL = 'refunds@safeunfollow.app';
+
 export interface PaywallModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -31,6 +41,14 @@ export function PaywallModal({
   totalRows,
 }: PaywallModalProps) {
   const { t, i18n } = useTranslation('results');
+
+  // Split on the address rather than reaching for <Trans>: the address has to
+  // sit mid-sentence in languages that put a postposition after it (Turkish
+  // "{{email}} adresine yaz"), so appending a link to a finished sentence would
+  // mistranslate. A locale that drops {{email}} is caught by the locale guard.
+  const [refundBefore, refundAfter] = t('export.paywall.refund', {
+    email: REFUND_EMAIL,
+  }).split(REFUND_EMAIL);
 
   const bullets = [
     t('export.paywall.bullet1'),
@@ -59,10 +77,20 @@ export function PaywallModal({
         </p>
 
         <DialogHeader>
-          <DialogTitle>{t('export.paywall.headline', { rows: FREE_EXPORT_ROWS })}</DialogTitle>
-          <DialogDescription>
-            {t('export.paywall.subtitle', { rows: FREE_EXPORT_ROWS })}
-          </DialogDescription>
+          <DialogTitle>
+            {t('export.paywall.headline', {
+              rows: FREE_EXPORT_ROWS,
+              total: totalRows.toLocaleString(i18n.language),
+            })}
+          </DialogTitle>
+          {/* The anchor, not a restatement of the cap — the receipt strip above
+              already names the file and the row count. Category pricing measured
+              on the App Store 2026-08-08: modal Pro tiers $4.99/mo, advanced
+              tiers $9.99/mo. That is a dated observation, not a standing fact.
+              It compares the pricing *model* only: none of those trackers sells
+              a data export, so claiming to undercut them on this feature would
+              be false. */}
+          <DialogDescription>{t('export.paywall.subtitle')}</DialogDescription>
         </DialogHeader>
 
         <ul className="space-y-2 text-sm">
@@ -97,6 +125,20 @@ export function PaywallModal({
           </Button>
           <p className="text-center text-xs text-muted-foreground">
             {t('export.paywall.instantNote')}
+          </p>
+          {/* Risk reversal belongs next to the action it de-risks, not among the
+              feature bullets. `dir="ltr"` on the address keeps its dot-separated
+              run intact inside the Arabic sentence that surrounds it. */}
+          <p className="text-center text-xs text-muted-foreground">
+            {refundBefore}
+            <a
+              dir="ltr"
+              href={`mailto:${REFUND_EMAIL}`}
+              className="text-primary underline underline-offset-2 hover:no-underline"
+            >
+              {REFUND_EMAIL}
+            </a>
+            {refundAfter}
           </p>
           {/* A recovery path, not a second offer. As a full-width ghost button
               it read as a rival primary action next to the CTA above it; as a

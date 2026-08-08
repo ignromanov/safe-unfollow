@@ -142,8 +142,8 @@
       "full": "Saved {{filename}} — all {{total}} rows"
     },
     "paywall": {
-      "headline": "You have the first {{rows}}. Get the rest.",
-      "subtitle": "The sample you just downloaded stops at {{rows}} rows. The full export covers every account in your current view — CSV or JSON, generated in your browser.",
+      "headline": "You have the first {{rows}}. Get all {{total}}.",
+      "subtitle": "Similar trackers charge $5–10 a month to keep watching your followers. This is $7, once, for the file itself.",
       "bullet1": "Works in Excel and Google Sheets",
       "bullet2": "Respects your active filters",
       "bullet3": "One-time $7 — not a subscription. Unlocks on up to 3 devices.",
@@ -152,7 +152,8 @@
       "teaserCompare": "Compare two exports",
       "comingSoon": "Coming soon",
       "cta": "Unlock export — $7",
-      "instantNote": "Instant unlock after checkout"
+      "instantNote": "Instant unlock after checkout",
+      "refund": "Not what you expected? Email {{email}} within 30 days and we'll refund it."
     },
     "license": {
       "title": "Activate your export",

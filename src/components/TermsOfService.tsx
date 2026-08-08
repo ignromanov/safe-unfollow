@@ -39,8 +39,11 @@ export function TermsOfService({ onBack }: TermsOfServiceProps) {
             <li className="flex items-start gap-3">
               <span className="text-amber-600 dark:text-amber-400 font-bold">1.</span>
               <span>
+                {/* Naming the paid export here is what keeps the summary from
+                    contradicting §2.1 one screen below it. */}
                 <strong className="text-foreground">Free to Use</strong> — SafeUnfollow is free and
-                open-source under the MIT license.
+                open-source under the MIT license. Exporting your results as a file is an optional
+                $7 one-time purchase.
               </span>
             </li>
             <li className="flex items-start gap-3">
@@ -92,6 +95,21 @@ export function TermsOfService({ onBack }: TermsOfServiceProps) {
             <li>Stores all data locally in your browser's IndexedDB</li>
             <li>Never transmits your Instagram data to any server</li>
           </ul>
+
+          {/* The purchase UI promises a refund. A promise made at checkout and
+              nowhere in the Terms is one a buyer can hold against us, so the
+              binding version lives here and is pinned by a test. Keep the
+              address and the window in step with export.paywall.refund. */}
+          <h3 className="text-lg font-semibold mt-6 mb-3">2.1 Paid Export and Refunds</h3>
+          <p className="text-muted-foreground">
+            The analysis is free. Downloading your results as a complete CSV or JSON file is an
+            optional one-time purchase of $7 — not a subscription — which unlocks the export on up
+            to 3 devices. If it is not what you expected, email{' '}
+            <a href="mailto:refunds@safeunfollow.app" className="text-primary hover:underline">
+              refunds@safeunfollow.app
+            </a>{' '}
+            within 30 days of your purchase and we will refund it in full.
+          </p>
         </section>
 
         {/* Section 3 */}
