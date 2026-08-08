@@ -134,5 +134,48 @@
       "usersMetricool": "3.5M+ profesional",
       "usersPubler": "1.8M+ unduhan"
     }
+  },
+  "export": {
+    "trigger": "Ekspor",
+    "saved": {
+      "capped": "{{filename}} tersimpan — {{rows}} baris pertama dari {{total}}",
+      "full": "{{filename}} tersimpan — semua {{total}} baris"
+    },
+    "paywall": {
+      "headline": "{{rows}} baris pertama sudah diunduh — sekarang semua {{total}}",
+      "subtitle": "Pelacak sejenis menagih $5–10 per bulan selama kamu ingin terus memantau pengikutmu. Yang ini $7 sekali bayar, untuk filenya.",
+      "bullet1": "Berfungsi di Excel dan Google Sheets",
+      "bullet2": "Mengikuti filter aktifmu",
+      "bullet3": "Sekali bayar $7 — bukan langganan. Berlaku di maksimal 3 perangkat.",
+      "bullet4": "Tetap 100% privat: file dibuat langsung di browsermu",
+      "teaserPdf": "Laporan PDF",
+      "teaserCompare": "Bandingkan dua ekspor",
+      "comingSoon": "Segera hadir",
+      "cta": "Buka ekspor — $7",
+      "instantNote": "Langsung terbuka setelah pembayaran",
+      "refund": "Tidak sesuai harapan? Kirim email ke {{email}} dalam 30 hari dan kami kembalikan uangmu."
+    },
+    "license": {
+      "title": "Aktifkan ekspormu",
+      "activating": "Mengaktifkan…",
+      "manualDescription": "Masukkan kunci lisensi dari email pembelianmu untuk membuka ekspor di perangkat ini.",
+      "placeholder": "38b1460a-5104-4067-a91d-77b872934d51",
+      "submit": "Aktifkan",
+      "retry": "Coba lagi",
+      "havePurchase": "Sudah membeli? Masukkan kuncimu",
+      "errorFormat": "Itu bukan kunci lisensi yang valid. Periksa kunci di email pembelianmu.",
+      "errorNotFound": "Kami tidak menemukan kunci lisensi ini. Periksa kunci di email pembelianmu.",
+      "errorLimit": "Kunci ini sudah dipakai di 3 perangkat yang diizinkan. Bebaskan salah satu atau hubungi dukungan.",
+      "errorGeneric": "Aktivasi gagal. Periksa koneksimu dan coba lagi.",
+      "revoked": "Lisensi ini sudah tidak aktif. Jika ini tidak terduga, hubungi dukungan."
+    },
+    "dialog": {
+      "title": "Ekspor akun",
+      "rowCount": "{{count}} akun akan diekspor",
+      "csv": "Unduh CSV",
+      "json": "Unduh JSON",
+      "generating": "Membuat… {{percent}}%",
+      "error": "Ekspor gagal. Silakan coba lagi."
+    }
   }
 }

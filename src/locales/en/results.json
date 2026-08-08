@@ -134,5 +134,48 @@
       "usersMetricool": "3.5M+ professionals",
       "usersPubler": "1.8M+ downloads"
     }
+  },
+  "export": {
+    "trigger": "Export",
+    "saved": {
+      "capped": "Saved {{filename}} — the first {{rows}} of {{total}} rows",
+      "full": "Saved {{filename}} — all {{total}} rows"
+    },
+    "paywall": {
+      "headline": "You have the first {{rows}}. Get all {{total}}.",
+      "subtitle": "Similar trackers charge $5–10 a month to keep watching your followers. This is $7, once, for the file itself.",
+      "bullet1": "Works in Excel and Google Sheets",
+      "bullet2": "Respects your active filters",
+      "bullet3": "One-time $7 — not a subscription. Unlocks on up to 3 devices.",
+      "bullet4": "Still 100% private: the file is generated in your browser",
+      "teaserPdf": "PDF report",
+      "teaserCompare": "Compare two exports",
+      "comingSoon": "Coming soon",
+      "cta": "Unlock export — $7",
+      "instantNote": "Instant unlock after checkout",
+      "refund": "Not what you expected? Email {{email}} within 30 days and we'll refund it."
+    },
+    "license": {
+      "title": "Activate your export",
+      "activating": "Activating…",
+      "manualDescription": "Enter the license key from your purchase email to unlock the export on this device.",
+      "placeholder": "38b1460a-5104-4067-a91d-77b872934d51",
+      "submit": "Activate",
+      "retry": "Try again",
+      "havePurchase": "Already purchased? Enter your key",
+      "errorFormat": "That does not look like a license key. Check the key in your purchase email.",
+      "errorNotFound": "We could not find this license key. Check the key in your purchase email.",
+      "errorLimit": "This key has been used on all 3 allowed devices. Free one up or contact support.",
+      "errorGeneric": "Activation failed. Check your connection and try again.",
+      "revoked": "This license is no longer active. If this is unexpected, contact support."
+    },
+    "dialog": {
+      "title": "Export accounts",
+      "rowCount": "{{count}} accounts will be exported",
+      "csv": "Download CSV",
+      "json": "Download JSON",
+      "generating": "Generating… {{percent}}%",
+      "error": "Export failed. Please try again."
+    }
   }
 }

@@ -7,7 +7,8 @@
     "clearData": "Hapus Data",
     "viewResults": "Hasil",
     "uploadFile": "Unggah File",
-    "delete": "Hapus"
+    "delete": "Hapus",
+    "close": "Tutup"
   },
   "badges": {
     "followers": "Pengikut",

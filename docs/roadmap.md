@@ -117,9 +117,14 @@ last_updated: 2026-01-16
 - ❌ **Third-party data sharing** — No data sharing with external services
 
 ### Commercial Features
-- ❌ **Premium subscriptions** — App remains completely free
-- ❌ **Advertising** — No ads or sponsored content
-- ❌ **Data monetization** — No selling or monetizing user data
+- ❌ **Subscriptions** — Finding your unfollowers is free in full, forever. The only paid item is a one-time $7 unlock for downloading the list as a file, and the download gives you a free sample first
+- ❌ **Paywalling the analysis** — Every badge, filter and account stays free however large your export is
+- ❌ **Data monetization** — No selling or monetizing user data, and no advertiser ever receives it
+
+The site does carry advertising and affiliate links, which is how the free analysis is paid
+for. Ads are served by Google AdSense and cannot target your Instagram data, because that data
+never leaves your browser. See the [Privacy Policy](https://safeunfollow.app/privacy) for what
+each third party does and does not receive.
 
 ---
 

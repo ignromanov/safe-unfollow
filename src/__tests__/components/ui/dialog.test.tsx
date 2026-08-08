@@ -10,6 +10,15 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 
+// Prefixed translations prove the label goes through i18n rather than being
+// hardcoded (the English string would be indistinguishable from a literal).
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => `translated:${key}`,
+    i18n: { language: 'en' },
+  }),
+}));
+
 // Mock Radix UI Dialog
 vi.mock('@radix-ui/react-dialog', () => ({
   Root: ({ children, ...props }: any) => (
@@ -104,6 +113,20 @@ describe('Dialog Components', () => {
 
       const content = screen.getByTestId('dialog-content');
       expect(content).toBeInTheDocument();
+    });
+
+    // 11 locales, including RTL Arabic — an English-only screen-reader label
+    // would be the only untranslated string in the dialog.
+    it('should label the built-in close button from translations', () => {
+      render(
+        <Dialog open={true}>
+          <DialogContent>
+            <div>Content</div>
+          </DialogContent>
+        </Dialog>
+      );
+
+      expect(screen.getByText('translated:buttons.close')).toBeInTheDocument();
     });
   });
 

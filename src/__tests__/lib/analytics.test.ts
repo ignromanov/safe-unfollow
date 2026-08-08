@@ -483,6 +483,34 @@ describe('Analytics', () => {
           undefined
         );
       });
+
+      describe('license events', () => {
+        it('should track a restored license', () => {
+          analytics.licenseRestored();
+
+          expect(windowSpy.umami.track).toHaveBeenCalledWith(
+            AnalyticsEvents.LICENSE_RESTORED,
+            undefined
+          );
+        });
+
+        it('should track a license error with its reason', () => {
+          analytics.licenseError('limit_reached');
+
+          expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.LICENSE_ERROR, {
+            reason: 'limit_reached',
+          });
+        });
+
+        it('should track a revoked license', () => {
+          analytics.licenseRevoked();
+
+          expect(windowSpy.umami.track).toHaveBeenCalledWith(
+            AnalyticsEvents.LICENSE_REVOKED,
+            undefined
+          );
+        });
+      });
     });
 
     describe('in development mode', () => {

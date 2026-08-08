@@ -134,5 +134,48 @@
       "usersMetricool": "3.5M+ professionnels",
       "usersPubler": "1.8M+ téléchargements"
     }
+  },
+  "export": {
+    "trigger": "Exporter",
+    "saved": {
+      "capped": "{{filename}} enregistré — les {{rows}} premières lignes sur {{total}}",
+      "full": "{{filename}} enregistré — toutes les {{total}} lignes"
+    },
+    "paywall": {
+      "headline": "Les {{rows}} premières sont téléchargées — passez aux {{total}}",
+      "subtitle": "Des outils de suivi comparables coûtent 5–10 $ par mois tant que vous voulez surveiller vos abonnés. Ici, c’est 7 $ une seule fois, pour le fichier.",
+      "bullet1": "Fonctionne dans Excel et Google Sheets",
+      "bullet2": "Respecte vos filtres actifs",
+      "bullet3": "Paiement unique de 7 $ — pas d’abonnement. Valable sur 3 appareils maximum.",
+      "bullet4": "Toujours 100 % privé : le fichier est généré dans votre navigateur",
+      "teaserPdf": "Rapport PDF",
+      "teaserCompare": "Comparer deux exports",
+      "comingSoon": "Bientôt disponible",
+      "cta": "Débloquer l’export — 7 $",
+      "instantNote": "Déblocage instantané après paiement",
+      "refund": "Ce n’est pas ce que vous attendiez ? Écrivez à {{email}} sous 30 jours et nous vous remboursons."
+    },
+    "license": {
+      "title": "Activez votre export",
+      "activating": "Activation…",
+      "manualDescription": "Saisissez la clé de licence reçue dans votre e-mail d’achat pour débloquer l’export sur cet appareil.",
+      "placeholder": "38b1460a-5104-4067-a91d-77b872934d51",
+      "submit": "Activer",
+      "retry": "Réessayer",
+      "havePurchase": "Déjà acheté ? Saisissez votre clé",
+      "errorFormat": "Cela ne ressemble pas à une clé de licence. Vérifiez la clé dans votre e-mail d’achat.",
+      "errorNotFound": "Nous n’avons pas trouvé cette clé de licence. Vérifiez la clé dans votre e-mail d’achat.",
+      "errorLimit": "Cette clé a été utilisée sur les 3 appareils autorisés. Libérez-en un ou contactez le support.",
+      "errorGeneric": "Échec de l’activation. Vérifiez votre connexion et réessayez.",
+      "revoked": "Cette licence n’est plus active. Si c’est inattendu, contactez le support."
+    },
+    "dialog": {
+      "title": "Exporter les comptes",
+      "rowCount": "{{count}} comptes seront exportés",
+      "csv": "Télécharger le CSV",
+      "json": "Télécharger le JSON",
+      "generating": "Génération… {{percent}}%",
+      "error": "L’export a échoué. Veuillez réessayer."
+    }
   }
 }

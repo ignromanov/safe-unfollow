@@ -13,7 +13,7 @@ Followers App is one of the most popular Instagram analytics apps on iOS and And
 
 | Feature | **SafeUnfollow** | **Followers App** |
 |---------|-----------------|-------------------|
-| **Price** | Free forever | $5.99/month (free tier limited) |
+| **Price** | Free — optional $7 one-time export | $5.99/month (free tier limited) |
 | **Login required** | No | Yes (Instagram password) |
 | **Data method** | Official Instagram ZIP export | API scraping |
 | **Privacy** | 100% local browser processing | Data on their servers |

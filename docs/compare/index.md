@@ -13,7 +13,7 @@ Looking for the best way to check who unfollowed you on Instagram? Here's how Sa
 
 | Feature | **SafeUnfollow** | Unfollowgram | Followers App | FollowMeter |
 |---------|-----------------|--------------|---------------|-------------|
-| **Price** | Free forever | $4.99/month | $5.99/month | $3.99/month |
+| **Price** | Free — optional $7 one-time export | $4.99/month | $5.99/month | $3.99/month |
 | **Login required** | No | Yes | Yes | Yes |
 | **Privacy** | 100% local | Cloud-based | Cloud-based | Cloud-based |
 | **Account limit** | 1,000,000+ | 50,000 | 100,000 | 25,000 |
@@ -34,7 +34,7 @@ Your data never leaves your device. Unlike cloud-based alternatives that upload 
 Most paid apps cap at 25K-100K accounts. SafeUnfollow uses columnar storage and bitset filtering to handle over 1,000,000 accounts with sub-5ms response times.
 
 ### Free and Open Source
-No subscriptions, no paywalls, no "premium" features. The entire codebase is [open source on GitHub](https://github.com/ignromanov/safe-unfollow) under the MIT license.
+No subscriptions, and no login — ever. Finding your unfollowers is free in full: every badge, every filter, the complete list, however many accounts you have. The one paid extra is a one-time $7 unlock for downloading that list as a file, and the download hands you a free sample first, so you see exactly what you would be paying for. The entire codebase is [open source on GitHub](https://github.com/ignromanov/safe-unfollow) under the MIT license.
 
 ## Detailed Comparisons
 

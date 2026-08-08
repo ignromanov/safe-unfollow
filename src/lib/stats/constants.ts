@@ -65,6 +65,30 @@ export const AnalyticsEvents = {
   // so /upload pageviews already are the impression count.
   AFFILIATE_BLOCK_CLICK: 'affiliate_block_click',
 
+  // Pro Export
+  //
+  // The trigger sits below the fold, so /results pageviews are not its
+  // denominator — this event is. Emitted from the same MRC dwell gate the ad
+  // slots use, never on mount.
+  EXPORT_TRIGGER_VIEWABLE: 'export_trigger_viewable',
+  EXPORT_CLICK: 'export_click',
+  // The capped file the locked click hands over. Separate from DOWNLOAD, which
+  // stays the paid artefact: mixing them would destroy the purchase count.
+  FREE_EXPORT_DOWNLOAD: 'free_export_download',
+  PAYWALL_VIEW: 'paywall_view',
+  // Closed via the X button, Escape, or an overlay click — the reader saw the
+  // offer and chose to keep using the tool instead of buying. Distinguishes
+  // "offer is wrong" (this) from "moment is wrong" (leaving the page with the
+  // paywall still open, which this does not capture).
+  PAYWALL_DISMISS: 'paywall_dismiss',
+  CHECKOUT_START: 'checkout_start',
+  PURCHASE_SUCCESS: 'purchase_success',
+  DOWNLOAD: 'download',
+  EXPORT_ERROR: 'export_error',
+  LICENSE_RESTORED: 'license_restored',
+  LICENSE_ERROR: 'license_error',
+  LICENSE_REVOKED: 'license_revoked',
+
   // Diagnostic Errors
   DIAGNOSTIC_ERROR_VIEW: 'diagnostic_error_view',
   DIAGNOSTIC_ERROR_RETRY: 'diagnostic_error_retry',

@@ -134,5 +134,48 @@
       "usersMetricool": "3.5M+ profissionais",
       "usersPubler": "1.8M+ downloads"
     }
+  },
+  "export": {
+    "trigger": "Exportar",
+    "saved": {
+      "capped": "{{filename}} salvo — as primeiras {{rows}} de {{total}} linhas",
+      "full": "{{filename}} salvo — todas as {{total}} linhas"
+    },
+    "paywall": {
+      "headline": "As primeiras {{rows}} já foram baixadas — agora todas as {{total}}",
+      "subtitle": "Rastreadores parecidos cobram $5–10 por mês enquanto você quiser continuar acompanhando seus seguidores. Aqui são $7 uma única vez, pelo arquivo.",
+      "bullet1": "Funciona no Excel e no Google Sheets",
+      "bullet2": "Respeita seus filtros ativos",
+      "bullet3": "Pagamento único de $7 — não é uma assinatura. Ativa em até 3 dispositivos.",
+      "bullet4": "Continua 100% privado: o arquivo é gerado no seu navegador",
+      "teaserPdf": "Relatório em PDF",
+      "teaserCompare": "Comparar duas exportações",
+      "comingSoon": "Em breve",
+      "cta": "Desbloquear exportação — $7",
+      "instantNote": "Desbloqueio instantâneo após o pagamento",
+      "refund": "Não é o que você esperava? Escreva para {{email}} em até 30 dias e devolvemos o dinheiro."
+    },
+    "license": {
+      "title": "Ative sua exportação",
+      "activating": "Ativando…",
+      "manualDescription": "Digite a chave de licença do seu e-mail de compra para desbloquear a exportação neste dispositivo.",
+      "placeholder": "38b1460a-5104-4067-a91d-77b872934d51",
+      "submit": "Ativar",
+      "retry": "Tentar novamente",
+      "havePurchase": "Já comprou? Digite sua chave",
+      "errorFormat": "Isso não parece uma chave de licença. Verifique a chave no seu e-mail de compra.",
+      "errorNotFound": "Não encontramos essa chave de licença. Verifique a chave no seu e-mail de compra.",
+      "errorLimit": "Essa chave já foi usada nos 3 dispositivos permitidos. Libere um ou entre em contato com o suporte.",
+      "errorGeneric": "Falha na ativação. Verifique sua conexão e tente novamente.",
+      "revoked": "Essa licença não está mais ativa. Se isso for inesperado, entre em contato com o suporte."
+    },
+    "dialog": {
+      "title": "Exportar contas",
+      "rowCount": "{{count}} contas serão exportadas",
+      "csv": "Baixar CSV",
+      "json": "Baixar JSON",
+      "generating": "Gerando… {{percent}}%",
+      "error": "A exportação falhou. Tente novamente."
+    }
   }
 }

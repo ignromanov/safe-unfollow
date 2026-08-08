@@ -7,7 +7,8 @@
     "clearData": "データを削除",
     "viewResults": "結果を見る",
     "uploadFile": "ファイルをアップロード",
-    "delete": "削除"
+    "delete": "削除",
+    "close": "閉じる"
   },
   "badges": {
     "followers": "フォロワー",

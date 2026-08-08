@@ -1,9 +1,10 @@
 import { Layout } from '@/components/Layout';
 import type { FileMetadata } from '@/core/types';
 import { AppState } from '@/core/types';
+import resultsEN from '@/locales/en/results.json';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock analytics (V9: added captureUTMParams for UTM tracking)
 vi.mock('@/lib/analytics', () => ({
@@ -85,6 +86,26 @@ vi.mock('@/components/OrganizationSchema', () => ({
 vi.mock('@/components/PageLoader', () => ({
   PageLoader: () => <div data-testid="page-loader">Loading...</div>,
 }));
+
+// The dialog's own activation behavior is covered by LicenseDialog.test.tsx;
+// here we only care about whether Layout mounts it and with what props.
+vi.mock('@/components/export/LicenseDialog', () => ({
+  LicenseDialog: ({ initialKey, source }: { initialKey: string | null; source: string }) => (
+    <div data-testid="license-dialog">
+      {resultsEN.export.license.title} / {initialKey} / {source}
+    </div>
+  ),
+}));
+
+// Wraps (not replaces) the real consumeLicenseParam so the URL-stripping
+// behavior stays real while call count stays observable.
+vi.mock('@/lib/export/unlock', async importOriginal => {
+  const actual = await importOriginal<typeof import('@/lib/export/unlock')>();
+  return {
+    ...actual,
+    consumeLicenseParam: vi.fn(actual.consumeLicenseParam),
+  };
+});
 
 // Mock hooks
 const mockHandleClearData = vi.fn();
@@ -571,6 +592,126 @@ describe('Layout', () => {
       await waitFor(() => {
         expect(screen.getByText(`activeScreen: ${AppState.HERO}`)).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('license capture', () => {
+    beforeEach(() => {
+      vi.stubEnv('VITE_DODO_CHECKOUT_URL', 'https://checkout.dodopayments.com/buy/pdt_x');
+    });
+
+    afterEach(async () => {
+      vi.unstubAllEnvs();
+      window.history.replaceState({}, '', '/');
+      // Tests below store a real license via the unwrapped unlock module
+      // (only consumeLicenseParam is mocked above); clear it so it can't leak
+      // into later tests in this file, which all assume "no stored license".
+      const { resetUnlockCache } = await import('@/lib/export/unlock');
+      localStorage.clear();
+      resetUnlockCache();
+    });
+
+    it('should strip the license param from the URL on mount', async () => {
+      window.history.replaceState(
+        {},
+        '',
+        '/results?license_key=38b1460a-5104-4067-a91d-77b872934d51'
+      );
+
+      renderLayout();
+
+      expect(window.location.search).toBe('');
+
+      // Let the lazily-loaded dialog resolve inside act() — otherwise React
+      // warns about a suspended resource finishing loading after the test body
+      // already returned.
+      await screen.findByTestId('license-dialog');
+    });
+
+    it('should not render the license dialog without the param', () => {
+      window.history.replaceState({}, '', '/results');
+
+      renderLayout();
+
+      expect(screen.queryByTestId('license-dialog')).not.toBeInTheDocument();
+    });
+
+    it('should read the license param exactly once, even across re-renders', async () => {
+      const { consumeLicenseParam } = await import('@/lib/export/unlock');
+      const { userEvent } = await import('@testing-library/user-event');
+      const user = userEvent.setup();
+      window.history.replaceState(
+        {},
+        '',
+        '/results?license_key=38b1460a-5104-4067-a91d-77b872934d51'
+      );
+
+      renderLayout('/results');
+
+      // Force Layout to re-render without unmounting (route stays nested under
+      // the same top-level <Layout>) — a second read here would spend one of
+      // the license's 3 device activations, so it must not happen.
+      const uploadButton = screen.getByRole('button', { name: 'Upload' });
+      await user.click(uploadButton);
+
+      await waitFor(() => {
+        expect(screen.getByText(`activeScreen: ${AppState.UPLOAD}`)).toBeInTheDocument();
+      });
+
+      expect(vi.mocked(consumeLicenseParam)).toHaveBeenCalledTimes(1);
+    });
+
+    it('should strip the license param even when the feature flag is off', () => {
+      // Stripping is unconditionally safe; leaving it would keep a key in the
+      // address bar and in Umami's auto-tracked pageview URL with no way to
+      // ever use it, since the dialog itself stays flag-gated below.
+      // (No need for vi.unstubAllEnvs() here — the afterEach already ran it
+      // after every previous test, and vi.stubEnv freely overwrites a stub.)
+      vi.stubEnv('VITE_DODO_CHECKOUT_URL', '');
+      window.history.replaceState(
+        {},
+        '',
+        '/results?license_key=38b1460a-5104-4067-a91d-77b872934d51'
+      );
+
+      renderLayout();
+
+      expect(window.location.search).toBe('');
+      expect(screen.queryByTestId('license-dialog')).not.toBeInTheDocument();
+    });
+
+    it('should not open the dialog when the captured key already matches the stored license', async () => {
+      const KEY = '38b1460a-5104-4067-a91d-77b872934d51';
+      const { storeLicense } = await import('@/lib/export/unlock');
+      storeLicense(KEY, 'f90ec370-fd83-46a5-8bbd-44a241e78665');
+      window.history.replaceState({}, '', `/results?license_key=${KEY}`);
+
+      renderLayout();
+
+      // The param is still stripped from the URL even though the dialog
+      // never opens — leaving it would keep the key in the address bar.
+      expect(window.location.search).toBe('');
+      expect(screen.queryByTestId('license-dialog')).not.toBeInTheDocument();
+    });
+
+    it('should open the dialog when the captured key differs from the stored license', async () => {
+      const STORED_KEY = '38b1460a-5104-4067-a91d-77b872934d51';
+      const NEW_KEY = 'a1a2a3a4-b1b2-c1c2-d1d2-e1e2e3e4e5e6';
+      const { storeLicense } = await import('@/lib/export/unlock');
+      storeLicense(STORED_KEY, 'f90ec370-fd83-46a5-8bbd-44a241e78665');
+      window.history.replaceState({}, '', `/results?license_key=${NEW_KEY}`);
+
+      renderLayout();
+
+      await screen.findByTestId('license-dialog');
+    });
+
+    it('should not open the dialog for an empty license param', () => {
+      window.history.replaceState({}, '', '/results?license_key=');
+
+      renderLayout();
+
+      expect(screen.queryByTestId('license-dialog')).not.toBeInTheDocument();
     });
   });
 });

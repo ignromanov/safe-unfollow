@@ -134,5 +134,48 @@
       "usersMetricool": "3.5M+ Profis",
       "usersPubler": "1.8M+ Downloads"
     }
+  },
+  "export": {
+    "trigger": "Exportieren",
+    "saved": {
+      "capped": "{{filename}} gespeichert — die ersten {{rows}} von {{total}} Zeilen",
+      "full": "{{filename}} gespeichert — alle {{total}} Zeilen"
+    },
+    "paywall": {
+      "headline": "Die ersten {{rows}} sind heruntergeladen — jetzt alle {{total}}",
+      "subtitle": "Vergleichbare Tracker kosten 5–10 $ im Monat, solange du deine Follower im Blick behalten willst. Hier sind es 7 $, einmalig, für die Datei selbst.",
+      "bullet1": "Funktioniert in Excel und Google Sheets",
+      "bullet2": "Berücksichtigt deine aktiven Filter",
+      "bullet3": "Einmalig 7 $ — kein Abo. Für bis zu 3 Geräte.",
+      "bullet4": "Weiterhin 100 % privat: die Datei wird in deinem Browser erstellt",
+      "teaserPdf": "PDF-Bericht",
+      "teaserCompare": "Zwei Exporte vergleichen",
+      "comingSoon": "Demnächst",
+      "cta": "Export freischalten — 7 $",
+      "instantNote": "Sofortige Freischaltung nach dem Kauf",
+      "refund": "Nicht das, was du erwartet hast? Schreib innerhalb von 30 Tagen an {{email}}, und wir erstatten dir den Betrag."
+    },
+    "license": {
+      "title": "Export aktivieren",
+      "activating": "Wird aktiviert…",
+      "manualDescription": "Gib den Lizenzschlüssel aus deiner Kauf-E-Mail ein, um den Export auf diesem Gerät freizuschalten.",
+      "placeholder": "38b1460a-5104-4067-a91d-77b872934d51",
+      "submit": "Aktivieren",
+      "retry": "Erneut versuchen",
+      "havePurchase": "Bereits gekauft? Gib deinen Schlüssel ein",
+      "errorFormat": "Das sieht nicht wie ein Lizenzschlüssel aus. Überprüfe den Schlüssel in deiner Kauf-E-Mail.",
+      "errorNotFound": "Wir konnten diesen Lizenzschlüssel nicht finden. Überprüfe den Schlüssel in deiner Kauf-E-Mail.",
+      "errorLimit": "Dieser Schlüssel wurde bereits auf allen 3 erlaubten Geräten verwendet. Gib eines frei oder kontaktiere den Support.",
+      "errorGeneric": "Aktivierung fehlgeschlagen. Überprüfe deine Verbindung und versuche es erneut.",
+      "revoked": "Diese Lizenz ist nicht mehr aktiv. Falls das unerwartet ist, kontaktiere den Support."
+    },
+    "dialog": {
+      "title": "Konten exportieren",
+      "rowCount": "{{count}} Konten werden exportiert",
+      "csv": "CSV herunterladen",
+      "json": "JSON herunterladen",
+      "generating": "Wird erstellt… {{percent}}%",
+      "error": "Export fehlgeschlagen. Bitte versuche es erneut."
+    }
   }
 }

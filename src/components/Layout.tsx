@@ -1,5 +1,5 @@
 import i18n from 'i18next';
-import { useEffect, useLayoutEffect } from 'react';
+import { Suspense, lazy, useEffect, useLayoutEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 
 import { BreadcrumbSchema } from '@/components/BreadcrumbSchema';
@@ -16,7 +16,14 @@ import { useLanguageRedirect } from '@/hooks/useLanguageRedirect';
 import { useLayoutAnalytics } from '@/hooks/useLayoutAnalytics';
 import { useLayoutNavigation } from '@/hooks/useLayoutNavigation';
 import { useLayoutState } from '@/hooks/useLayoutState';
+import { consumeLicenseParam, getStoredLicense, isExportFeatureEnabled } from '@/lib/export/unlock';
 import { RTL_LANGUAGES, type SupportedLanguage } from '@/locales';
+
+// Only ever needed on the one page load that carries a checkout redirect, so it
+// stays out of the bundle that all 88 prerendered pages ship.
+const LicenseDialog = lazy(() =>
+  import('@/components/export/LicenseDialog').then(module => ({ default: module.LicenseDialog }))
+);
 
 // Use useLayoutEffect on client to sync language BEFORE paint,
 // preventing a flash of wrong language. Falls back to useEffect during SSG.
@@ -55,6 +62,37 @@ export function Layout({ lang }: LayoutProps) {
   // Analytics (UTM capture, page view, PWA install)
   useLayoutAnalytics();
   useEventQueueFlush();
+
+  // Read once, during the first render: the param must be stripped before any
+  // navigation or analytics can observe the key. A second read would spend one
+  // of the license's 3 device activations, so nothing may re-trigger this.
+  // NOTE: this initializer has a side effect (history.replaceState). The app
+  // does not use StrictMode today; under StrictMode React double-invokes this
+  // initializer and commits the second result, which would find the param
+  // already stripped and silently drop the paid redirect.
+  const [capturedLicenseKey] = useState<string | null>(() => {
+    // Stripping is always safe and must happen even when the feature flag is
+    // off — otherwise a key lingers in the address bar and in Umami's
+    // auto-tracked pageview URL. Only mounting the dialog below is gated on
+    // the flag.
+    const key = consumeLicenseParam();
+    return isExportFeatureEnabled() ? key : null;
+  });
+  const [isLicenseDialogOpen, setIsLicenseDialogOpen] = useState(() => {
+    // An empty or whitespace-only `?license_key=` (e.g. a truncated link) is not
+    // a key at all — opening the manual-entry form for it would show a
+    // license prompt to someone who never bought anything.
+    const trimmed = capturedLicenseKey?.trim() ?? '';
+    if (trimmed.length === 0) return false;
+
+    // If this device already holds this exact key, opening the dialog only
+    // for LicenseDialog's own guard to close it immediately flashes a modal
+    // with no confirmation (plausibly read as another failure) and loads the
+    // lazy chunk for nothing. Decide not to open at all instead — the guard
+    // inside LicenseDialog stays as the correct last line of defence for
+    // every other caller.
+    return getStoredLicense()?.key !== trimmed;
+  });
 
   // SSG: Switch language synchronously BEFORE rendering
   // This works because during SSG all language resources are preloaded
@@ -125,6 +163,17 @@ export function Layout({ lang }: LayoutProps) {
           {/* Structured data for SEO */}
           <BreadcrumbSchema />
           <OrganizationSchema />
+
+          <Suspense fallback={null}>
+            {capturedLicenseKey !== null && isLicenseDialogOpen ? (
+              <LicenseDialog
+                open={isLicenseDialogOpen}
+                onOpenChange={setIsLicenseDialogOpen}
+                initialKey={capturedLicenseKey}
+                source="redirect"
+              />
+            ) : null}
+          </Suspense>
         </div>
       </ThemeProvider>
     </ErrorBoundary>

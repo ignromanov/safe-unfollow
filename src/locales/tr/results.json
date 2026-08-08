@@ -134,5 +134,48 @@
       "usersMetricool": "3.5M+ profesyonel",
       "usersPubler": "1.8M+ indirme"
     }
+  },
+  "export": {
+    "trigger": "Dışa aktar",
+    "saved": {
+      "capped": "{{filename}} kaydedildi — {{total}} satırın ilk {{rows}} satırı",
+      "full": "{{filename}} kaydedildi — {{total}} satırın tamamı"
+    },
+    "paywall": {
+      "headline": "İlk {{rows}} satır indirildi — sıra {{total}} satırın tamamında",
+      "subtitle": "Benzer takip araçları, takipçilerini izlemeye devam etmen için ayda 5–10$ alır. Buradaysa dosyanın kendisi için tek seferlik 7$.",
+      "bullet1": "Excel ve Google Sheets’te çalışır",
+      "bullet2": "Aktif filtrelerine uyar",
+      "bullet3": "Tek seferlik 7$ — abonelik değil. En fazla 3 cihazda açılır.",
+      "bullet4": "Yine %100 gizli: dosya tarayıcında oluşturulur",
+      "teaserPdf": "PDF raporu",
+      "teaserCompare": "İki dışa aktarımı karşılaştır",
+      "comingSoon": "Yakında",
+      "cta": "Dışa aktarmayı aç — 7$",
+      "instantNote": "Ödemeden hemen sonra anında açılır",
+      "refund": "Beklediğin gibi değil mi? 30 gün içinde {{email}} adresine yaz, paranı iade edelim."
+    },
+    "license": {
+      "title": "Dışa aktarımını etkinleştir",
+      "activating": "Etkinleştiriliyor…",
+      "manualDescription": "Bu cihazda dışa aktarımın kilidini açmak için satın alma e-postandaki lisans anahtarını gir.",
+      "placeholder": "38b1460a-5104-4067-a91d-77b872934d51",
+      "submit": "Etkinleştir",
+      "retry": "Tekrar dene",
+      "havePurchase": "Zaten satın aldın mı? Anahtarını gir",
+      "errorFormat": "Bu bir lisans anahtarına benzemiyor. Satın alma e-postandaki anahtarı kontrol et.",
+      "errorNotFound": "Bu lisans anahtarını bulamadık. Satın alma e-postandaki anahtarı kontrol et.",
+      "errorLimit": "Bu anahtar izin verilen 3 cihazın tümünde kullanıldı. Birini boşalt ya da destek ile iletişime geç.",
+      "errorGeneric": "Etkinleştirme başarısız oldu. Bağlantını kontrol et ve tekrar dene.",
+      "revoked": "Bu lisans artık aktif değil. Bu beklenmiyorsa destek ile iletişime geç."
+    },
+    "dialog": {
+      "title": "Hesapları dışa aktar",
+      "rowCount": "{{count}} hesap dışa aktarılacak",
+      "csv": "CSV indir",
+      "json": "JSON indir",
+      "generating": "Oluşturuluyor… {{percent}}%",
+      "error": "Dışa aktarma başarısız oldu. Lütfen tekrar deneyin."
+    }
   }
 }

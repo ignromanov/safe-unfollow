@@ -7,6 +7,7 @@ import type { FilterAction, LinkType, ParseOutcome } from './constants';
 import { trackEvent } from './core';
 import { enqueueEvent } from './queue';
 import { getStoredUTM, getEntryCTA, setEntryCTA } from './utm';
+import type { LicenseFailureReason } from '@/lib/export/license';
 
 /**
  * Analytics helper object with typed methods
@@ -394,5 +395,70 @@ export const analytics = {
     enqueueEvent(AnalyticsEvents.AD_SLOT_VIEWABLE, {
       slot,
     });
+  },
+
+  // Pro Export
+  //
+  // Batched like the ad impressions it shares a gate with: an impression is
+  // worth counting, not worth a serverless call each. Carries the unlock state
+  // because a returning purchaser sees this trigger every visit and will never
+  // buy again — leaving them in the denominator understates the real CTR.
+  exportTriggerViewable: (isUnlocked: boolean) => {
+    enqueueEvent(AnalyticsEvents.EXPORT_TRIGGER_VIEWABLE, { is_unlocked: isUnlocked });
+  },
+
+  exportClick: (isUnlocked: boolean) => {
+    trackEvent(AnalyticsEvents.EXPORT_CLICK, { is_unlocked: isUnlocked });
+  },
+
+  // `capped` is the number that says whether the free tier is doing its job or
+  // eating it: false means the reader's whole view fitted inside the allowance
+  // and no paywall was shown, because there was nothing left to sell.
+  freeExportDownload: (capped: boolean) => {
+    trackEvent(AnalyticsEvents.FREE_EXPORT_DOWNLOAD, { capped });
+  },
+
+  paywallView: () => {
+    trackEvent(AnalyticsEvents.PAYWALL_VIEW);
+  },
+
+  // Fires only for the three Radix-driven closes (X, Escape, overlay click) —
+  // not for checkout (navigates away without touching the dialog's open
+  // state) or manual key entry (closes the paywall by calling setState
+  // directly, bypassing this handler). Both of those already have their own
+  // event, and double-counting them here would corrupt the one ratio this
+  // event exists to produce.
+  paywallDismiss: () => {
+    trackEvent(AnalyticsEvents.PAYWALL_DISMISS);
+  },
+
+  checkoutStart: () => {
+    trackEvent(AnalyticsEvents.CHECKOUT_START);
+  },
+
+  purchaseSuccess: () => {
+    trackEvent(AnalyticsEvents.PURCHASE_SUCCESS);
+  },
+
+  download: (format: 'csv' | 'json', rowCount: number) => {
+    trackEvent(AnalyticsEvents.DOWNLOAD, { format, row_count: rowCount });
+  },
+
+  exportError: (format: 'csv' | 'json') => {
+    trackEvent(AnalyticsEvents.EXPORT_ERROR, { format });
+  },
+
+  // A license activated by hand on a second device, rather than via checkout.
+  licenseRestored: () => {
+    trackEvent(AnalyticsEvents.LICENSE_RESTORED);
+  },
+
+  // Reason only — never the key, and never the customer PII the API returns.
+  licenseError: (reason: LicenseFailureReason) => {
+    trackEvent(AnalyticsEvents.LICENSE_ERROR, { reason });
+  },
+
+  licenseRevoked: () => {
+    trackEvent(AnalyticsEvents.LICENSE_REVOKED);
   },
 };
