@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -18,12 +18,20 @@ vi.mock('@/lib/stats', async importOriginal => {
       exportClick: vi.fn(),
       paywallView: vi.fn(),
       exportTriggerViewable: vi.fn(),
+      freeExportDownload: vi.fn(),
+      exportError: vi.fn(),
     },
   };
 });
 
+vi.mock('@/lib/export/csv', () => ({ buildExportCsv: vi.fn() }));
+vi.mock('@/lib/export/download', () => ({ downloadBlob: vi.fn() }));
+
 import { ResultsExportControls } from '@/components/export/ResultsExportControls';
 import { useProExport } from '@/hooks/useProExport';
+import { buildExportCsv } from '@/lib/export/csv';
+import { downloadBlob } from '@/lib/export/download';
+import { FREE_EXPORT_ROWS } from '@/lib/export/free-tier';
 import { analytics } from '@/lib/stats';
 
 const mockUseProExport = vi.mocked(useProExport);
@@ -76,6 +84,7 @@ function unlocked(isUnlocked: boolean) {
 describe('ResultsExportControls', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(buildExportCsv).mockResolvedValue(new Blob(['username\n']));
     observed = [];
     realObserver = globalThis.IntersectionObserver;
     globalThis.IntersectionObserver = class {
@@ -118,16 +127,14 @@ describe('ResultsExportControls', () => {
     expect(screen.getByRole('button', { name: triggerLabel })).toBeInTheDocument();
   });
 
-  // The trigger opens a paywall rather than downloading a file, so the price
-  // belongs on the trigger: a bare download glyph promises a file and delivers
-  // an invoice. This asserts the visible text, not an aria-label.
-  it('should show the price in the visible trigger text', () => {
+  // The click now downloads a real file, so the trigger must not look like a
+  // purchase. It carried the price only while the click delivered nothing.
+  it('should not price the trigger', () => {
     unlocked(false);
 
     render(<ResultsExportControls {...defaultProps} />);
 
-    const trigger = screen.getByRole('button', { name: triggerLabel });
-    expect(trigger).toHaveTextContent('$7');
+    expect(screen.getByRole('button', { name: triggerLabel })).not.toHaveTextContent('$7');
   });
 
   // WCAG 2.5.3 Label in Name: the old icon button carried an aria-label of
@@ -144,16 +151,137 @@ describe('ResultsExportControls', () => {
     expect(trigger).toHaveAccessibleName(trigger.textContent?.trim() ?? '');
   });
 
-  it('should open the paywall when locked', async () => {
-    unlocked(false);
-    const user = userEvent.setup();
+  // The paywall headline interpolates the row cap, so the rendered text is not
+  // the raw string. Matching on the stable half keeps the assertion honest
+  // without duplicating i18next's interpolation in the test.
+  const paywallHeadline = new RegExp(
+    resultsEN.export.paywall.headline.replace('{{rows}}', String(FREE_EXPORT_ROWS))
+  );
 
-    render(<ResultsExportControls {...defaultProps} />);
-    await user.click(screen.getByRole('button', { name: triggerLabel }));
+  describe('the free sample', () => {
+    it('should download a capped file and only then ask for money', async () => {
+      unlocked(false);
+      const user = userEvent.setup();
 
-    expect(await screen.findByText(resultsEN.export.paywall.headline)).toBeInTheDocument();
-    expect(vi.mocked(analytics.paywallView)).toHaveBeenCalled();
-    expect(vi.mocked(analytics.exportClick)).toHaveBeenCalledWith(false);
+      render(<ResultsExportControls {...defaultProps} />);
+      await user.click(screen.getByRole('button', { name: triggerLabel }));
+
+      await waitFor(() => expect(vi.mocked(downloadBlob)).toHaveBeenCalled());
+
+      // The first ten of what the reader is looking at, built by the same
+      // builder the paid export uses — the sample has to be a smaller version
+      // of the thing being sold, not a second code path.
+      expect(vi.mocked(buildExportCsv)).toHaveBeenCalledWith(
+        defaultProps.fileHash,
+        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        defaultProps.totalCount
+      );
+      expect(vi.mocked(analytics.freeExportDownload)).toHaveBeenCalledWith(true);
+      expect(await screen.findByText(paywallHeadline)).toBeInTheDocument();
+      expect(vi.mocked(analytics.paywallView)).toHaveBeenCalled();
+      expect(vi.mocked(analytics.exportClick)).toHaveBeenCalledWith(false);
+    });
+
+    // A file that stops short must say so somewhere durable. The modal is gone
+    // the moment it is dismissed; the filename is still there next week.
+    it('should mark the capped file in its name', async () => {
+      unlocked(false);
+      const user = userEvent.setup();
+
+      render(<ResultsExportControls {...defaultProps} />);
+      await user.click(screen.getByRole('button', { name: triggerLabel }));
+
+      await waitFor(() =>
+        expect(vi.mocked(downloadBlob)).toHaveBeenCalledWith(
+          expect.any(Blob),
+          'my-export-sample.csv'
+        )
+      );
+    });
+
+    // Nothing is being withheld from a view that already fits, so there is
+    // nothing to sell and the file is not a sample. Pitching one anyway would
+    // claim there is more, about a file the reader can open and count.
+    it('should hand over the whole view untouched when it fits, and skip the pitch', async () => {
+      unlocked(false);
+      const user = userEvent.setup();
+
+      render(<ResultsExportControls {...defaultProps} indices={[4, 8, 15]} />);
+      await user.click(screen.getByRole('button', { name: triggerLabel }));
+
+      await waitFor(() =>
+        expect(vi.mocked(downloadBlob)).toHaveBeenCalledWith(expect.any(Blob), 'my-export.csv')
+      );
+      expect(vi.mocked(buildExportCsv)).toHaveBeenCalledWith(
+        defaultProps.fileHash,
+        [4, 8, 15],
+        defaultProps.totalCount
+      );
+      expect(vi.mocked(analytics.freeExportDownload)).toHaveBeenCalledWith(false);
+      expect(screen.queryByText(paywallHeadline)).not.toBeInTheDocument();
+      expect(vi.mocked(analytics.paywallView)).not.toHaveBeenCalled();
+    });
+
+    // A dead click is the worst outcome here: it is the step the whole funnel
+    // narrows to, and IndexedDB on this codebase has a known no-timeout hang.
+    it('should surface a failure instead of silently doing nothing', async () => {
+      unlocked(false);
+      vi.mocked(buildExportCsv).mockRejectedValueOnce(new Error('idb gone'));
+      const user = userEvent.setup();
+
+      render(<ResultsExportControls {...defaultProps} />);
+      await user.click(screen.getByRole('button', { name: triggerLabel }));
+
+      expect(await screen.findByRole('alert')).toHaveTextContent(resultsEN.export.dialog.error);
+      expect(vi.mocked(analytics.exportError)).toHaveBeenCalledWith('csv');
+      expect(vi.mocked(downloadBlob)).not.toHaveBeenCalled();
+      expect(screen.queryByText(paywallHeadline)).not.toBeInTheDocument();
+    });
+
+    // Clicking again *after* a finished export is legitimate and must keep
+    // working; what must not happen is a second build starting while the first
+    // is still in flight, which on a slow IndexedDB read is a wide window.
+    it('should not start a second build while one is in flight', async () => {
+      unlocked(false);
+      let release: (blob: Blob) => void = () => {};
+      vi.mocked(buildExportCsv).mockReturnValueOnce(
+        new Promise<Blob>(resolve => {
+          release = resolve;
+        })
+      );
+      const user = userEvent.setup();
+
+      // A view that fits under the cap, so no paywall opens: Radix marks the
+      // page `pointer-events: none` behind an open dialog, which would mask
+      // whether the control itself had been released.
+      render(<ResultsExportControls {...defaultProps} indices={[4, 8, 15]} />);
+      const trigger = screen.getByRole('button', { name: triggerLabel });
+
+      await user.click(trigger);
+
+      // First layer: the button is out of reach while the build runs.
+      expect(trigger).toBeDisabled();
+      expect(trigger).toHaveAttribute('aria-busy', 'true');
+
+      // Second layer: even reaching past that — a keyboard or a programmatic
+      // dispatch, neither of which respects `pointer-events: none` — starts
+      // nothing, because the guard is a ref rather than the render state.
+      await userEvent.setup({ pointerEventsCheck: 0 }).click(trigger);
+
+      expect(vi.mocked(buildExportCsv)).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(analytics.exportClick)).toHaveBeenCalledTimes(1);
+
+      release(new Blob(['username\n']));
+
+      // Waiting on the button rather than on the download: the file lands one
+      // render before the control releases, and a second export is legitimate
+      // only once it has.
+      await waitFor(() => expect(trigger).toBeEnabled());
+      expect(vi.mocked(downloadBlob)).toHaveBeenCalledTimes(1);
+
+      await user.click(trigger);
+      await waitFor(() => expect(vi.mocked(buildExportCsv)).toHaveBeenCalledTimes(2));
+    });
   });
 
   it('should open the export dialog when unlocked', async () => {

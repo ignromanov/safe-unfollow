@@ -411,6 +411,13 @@ export const analytics = {
     trackEvent(AnalyticsEvents.EXPORT_CLICK, { is_unlocked: isUnlocked });
   },
 
+  // `capped` is the number that says whether the free tier is doing its job or
+  // eating it: false means the reader's whole view fitted inside the allowance
+  // and no paywall was shown, because there was nothing left to sell.
+  freeExportDownload: (capped: boolean) => {
+    trackEvent(AnalyticsEvents.FREE_EXPORT_DOWNLOAD, { capped });
+  },
+
   paywallView: () => {
     trackEvent(AnalyticsEvents.PAYWALL_VIEW);
   },

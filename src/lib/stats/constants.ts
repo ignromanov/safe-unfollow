@@ -72,6 +72,9 @@ export const AnalyticsEvents = {
   // slots use, never on mount.
   EXPORT_TRIGGER_VIEWABLE: 'export_trigger_viewable',
   EXPORT_CLICK: 'export_click',
+  // The capped file the locked click hands over. Separate from DOWNLOAD, which
+  // stays the paid artefact: mixing them would destroy the purchase count.
+  FREE_EXPORT_DOWNLOAD: 'free_export_download',
   PAYWALL_VIEW: 'paywall_view',
   CHECKOUT_START: 'checkout_start',
   PURCHASE_SUCCESS: 'purchase_success',

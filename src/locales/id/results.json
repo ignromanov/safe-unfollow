@@ -136,10 +136,10 @@
     }
   },
   "export": {
-    "trigger": "Ekspor · $7",
+    "trigger": "Ekspor",
     "paywall": {
-      "headline": "Bawa daftarmu ke mana pun",
-      "subtitle": "Unduh file yang bisa dibuka di mana saja — Excel, Sheets, atau alatmu sendiri.",
+      "headline": "{{rows}} baris pertama sudah diunduh — sekarang seluruh daftarnya",
+      "subtitle": "Contohnya berhenti di {{rows}} baris. Ekspor lengkap mencakup semua akun pada tampilan saat ini — CSV atau JSON, dibuat di browser.",
       "bullet1": "Berfungsi di Excel dan Google Sheets",
       "bullet2": "Mengikuti filter aktifmu",
       "bullet3": "Sekali bayar $7 — bukan langganan. Berlaku di maksimal 3 perangkat.",

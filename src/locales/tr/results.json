@@ -136,10 +136,10 @@
     }
   },
   "export": {
-    "trigger": "Dışa aktar · 7$",
+    "trigger": "Dışa aktar",
     "paywall": {
-      "headline": "Listeni yanında götür",
-      "subtitle": "Excel, Sheets veya kendi araçlarınla her yerde çalışan bir dosya indir.",
+      "headline": "İlk {{rows}} satır indirildi — sıra tüm listede",
+      "subtitle": "Örnek {{rows}} satırda bitiyor. Tam dışa aktarma geçerli görünümdeki tüm hesapları içerir — CSV veya JSON, tarayıcıda oluşturulur.",
       "bullet1": "Excel ve Google Sheets’te çalışır",
       "bullet2": "Aktif filtrelerine uyar",
       "bullet3": "Tek seferlik 7$ — abonelik değil. En fazla 3 cihazda açılır.",

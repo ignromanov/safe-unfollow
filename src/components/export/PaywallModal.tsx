@@ -1,6 +1,7 @@
 import { Check, FileText, GitCompare } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
+import { FREE_EXPORT_ROWS } from '@/lib/export/free-tier';
 import {
   Dialog,
   DialogContent,
@@ -31,8 +32,10 @@ export function PaywallModal({ open, onOpenChange, onCheckout, onManualEntry }: 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t('export.paywall.headline')}</DialogTitle>
-          <DialogDescription>{t('export.paywall.subtitle')}</DialogDescription>
+          <DialogTitle>{t('export.paywall.headline', { rows: FREE_EXPORT_ROWS })}</DialogTitle>
+          <DialogDescription>
+            {t('export.paywall.subtitle', { rows: FREE_EXPORT_ROWS })}
+          </DialogDescription>
         </DialogHeader>
 
         <ul className="space-y-2 text-sm">

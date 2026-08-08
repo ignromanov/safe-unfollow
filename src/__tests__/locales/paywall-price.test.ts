@@ -35,14 +35,12 @@ describe('paywall price copy', () => {
 
   it('quotes the same amount in every supported language', () => {
     for (const language of SUPPORTED_LANGUAGES) {
-      const bundle = bundleFor(language).export;
-      const paywall = bundle?.paywall;
+      const paywall = bundleFor(language).export?.paywall;
 
       expect(paywall?.bullet3, `${language} bullet3`).toBeTruthy();
       expect(paywall?.cta, `${language} cta`).toBeTruthy();
-      expect(bundle?.trigger, `${language} trigger`).toBeTruthy();
 
-      for (const text of [paywall.bullet3, paywall.cta, bundle.trigger]) {
+      for (const text of [paywall.bullet3, paywall.cta]) {
         const amounts = amountsIn(String(text));
         expect(amounts, `${language} states a price in "${text}"`).not.toHaveLength(0);
         for (const amount of amounts) {
@@ -52,18 +50,33 @@ describe('paywall price copy', () => {
     }
   });
 
-  // The trigger and the paywall are one click apart, so a locale that writes
-  // `$7` on the button and `7 $` in the modal shows one price two ways inside a
-  // single flow. Amount-only agreement (above) cannot catch that: both spell 7.
-  it('spells the price the same way on the trigger as in the paywall', () => {
+  // The trigger carried "· $7" for exactly as long as its click opened a
+  // paywall instead of downloading anything: a bare download glyph that bills
+  // you is a trick, and the price was the honest fix. Now the click hands over
+  // a real file, so a price on the button would be the lie in the other
+  // direction — charging nothing and appearing to charge $7.
+  it('never prices the trigger, because the click delivers a file', () => {
     for (const language of SUPPORTED_LANGUAGES) {
-      const bundle = bundleFor(language).export;
+      const trigger = String(bundleFor(language).export.trigger);
 
-      const paywallToken = priceTokenIn(String(bundle.paywall.bullet3));
-      const triggerToken = priceTokenIn(String(bundle.trigger));
+      expect(trigger, `${language} trigger`).toBeTruthy();
+      expect(priceTokenIn(trigger), `${language} trigger must not quote a price`).toBeUndefined();
+    }
+  });
+});
 
-      expect(paywallToken, `${language} bullet3 price token`).toBeTruthy();
-      expect(triggerToken, `${language} trigger price token`).toBe(paywallToken);
+// The cap is a product decision that lives in one constant. A locale that
+// spells the number out instead of interpolating it keeps advertising ten rows
+// after the constant moves, and no type or test would notice — the string is
+// still a valid string.
+describe('paywall sample-size copy', () => {
+  it('interpolates the row cap rather than hardcoding it', () => {
+    for (const language of SUPPORTED_LANGUAGES) {
+      const paywall = bundleFor(language).export.paywall;
+
+      for (const field of ['headline', 'subtitle'] as const) {
+        expect(String(paywall[field]), `${language} ${field}`).toContain('{{rows}}');
+      }
     }
   });
 });

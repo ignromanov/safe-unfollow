@@ -136,10 +136,10 @@
     }
   },
   "export": {
-    "trigger": "Export · $7",
+    "trigger": "Export",
     "paywall": {
-      "headline": "Take your list with you",
-      "subtitle": "Download a file that works everywhere — Excel, Sheets, or your own tools.",
+      "headline": "You have the first {{rows}}. Get the rest.",
+      "subtitle": "The sample you just downloaded stops at {{rows}} rows. The full export covers every account in your current view — CSV or JSON, generated in your browser.",
       "bullet1": "Works in Excel and Google Sheets",
       "bullet2": "Respects your active filters",
       "bullet3": "One-time $7 — not a subscription. Unlocks on up to 3 devices.",
