@@ -141,6 +141,13 @@ export function ResultsExportControls({
     }
   };
 
+  // Reached from the paywall only. A standing "Already purchased?" link beside
+  // the trigger was shown to every reader, of whom none had purchased, and it
+  // disclosed that the product is paid from under a button that says "Export".
+  // The cost of moving it: a buyer setting up a second device now takes one
+  // unwanted ten-row sample on the way here. Acceptable, because the purchase
+  // email's ?license_key= link activates on its own — manual entry only serves
+  // the device that does not have that email open.
   const openLicenseDialog = (): void => {
     setIsPaywallOpen(false);
     setIsLicenseDialogOpen(true);
@@ -201,28 +208,6 @@ export function ResultsExportControls({
               total: saved.total.toLocaleString(i18n.language),
             })}
           </p>
-        )}
-
-        {/* Restoring a purchase must not go through the sample. Someone setting
-            up a second device has already paid, and the paywall — the only
-            other place this link lives — now opens *after* a download, so
-            without this they would be handed a ten-row file they did not ask
-            for before being allowed to unlock the one they own.
-
-            Kept in the paywall as well rather than moved: that dialog is a
-            focus trap, and a dead end inside one is worse than a duplicate
-            outside it. Quiet on purpose — this is a recovery path, not an
-            offer, and it must not compete with the trigger above it. */}
-        {!isUnlocked && (
-          <button
-            type="button"
-            onClick={openLicenseDialog}
-            onMouseEnter={() => void import('./LicenseDialog')}
-            onFocus={() => void import('./LicenseDialog')}
-            className="cursor-pointer px-1 py-2 text-xs text-zinc-500 underline underline-offset-2 transition-colors hover:text-primary focus-visible:text-primary"
-          >
-            {t('export.license.havePurchase')}
-          </button>
         )}
       </div>
 

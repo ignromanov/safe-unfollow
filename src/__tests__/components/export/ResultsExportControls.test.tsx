@@ -368,47 +368,42 @@ describe('ResultsExportControls', () => {
     expect(vi.mocked(analytics.exportClick)).toHaveBeenCalledWith(true);
   });
 
-  // A buyer setting up a second device has already paid. Leaving the only way
-  // to prove it behind the free sample means handing them a ten-row file they
-  // did not ask for before letting them unlock the one they own.
+  // Key entry belongs to the paywall and nowhere else. Beside the trigger it
+  // was shown to 100% of readers, of whom zero had purchased, and it disclosed
+  // that the product is paid from under a button that says only "Export".
   describe('restoring a purchase', () => {
-    it('should offer the key entry without making a buyer take the sample first', async () => {
+    const keyEntryLabel = resultsEN.export.license.havePurchase;
+
+    it('should not offer key entry beside the trigger', () => {
       unlocked(false);
-      const user = userEvent.setup();
 
       render(<ResultsExportControls {...defaultProps} />);
-      await user.click(screen.getByRole('button', { name: resultsEN.export.license.havePurchase }));
 
-      expect(await screen.findByRole('textbox')).toBeInTheDocument();
-      expect(vi.mocked(buildExportCsv)).not.toHaveBeenCalled();
-      expect(vi.mocked(downloadBlob)).not.toHaveBeenCalled();
-      expect(vi.mocked(analytics.paywallView)).not.toHaveBeenCalled();
+      // Anchored on the trigger being there: a component that rendered nothing
+      // at all would satisfy the negative assertion on its own.
+      expect(screen.getByRole('button', { name: triggerLabel })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: keyEntryLabel })).not.toBeInTheDocument();
     });
 
-    // Someone who has already activated has nothing to restore, and the link
-    // would be pure noise above their list.
-    it('should not offer it to someone already unlocked', () => {
+    it('should not offer it beside the trigger to someone already unlocked', () => {
       unlocked(true);
 
       render(<ResultsExportControls {...defaultProps} />);
 
-      expect(
-        screen.queryByRole('button', { name: resultsEN.export.license.havePurchase })
-      ).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: keyEntryLabel })).not.toBeInTheDocument();
     });
 
-    it('should not offer it when the feature is off', () => {
-      mockUseProExport.mockReturnValue({
-        isEnabled: false,
-        isUnlocked: false,
-        startCheckout: vi.fn(),
-      });
+    // The other half of the constraint: removing the link from the header is
+    // only defensible while the paywall still carries it. A buyer whose second
+    // device lacks the purchase email has no other way in.
+    it('should offer it in the paywall', async () => {
+      unlocked(false);
+      const user = userEvent.setup();
 
       render(<ResultsExportControls {...defaultProps} />);
+      await user.click(screen.getByRole('button', { name: triggerLabel }));
 
-      expect(
-        screen.queryByRole('button', { name: resultsEN.export.license.havePurchase })
-      ).not.toBeInTheDocument();
+      expect(await screen.findByRole('button', { name: keyEntryLabel })).toBeInTheDocument();
     });
   });
 

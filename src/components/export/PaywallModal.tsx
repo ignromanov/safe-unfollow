@@ -98,9 +98,19 @@ export function PaywallModal({
           <p className="text-center text-xs text-muted-foreground">
             {t('export.paywall.instantNote')}
           </p>
-          <Button variant="ghost" size="sm" onClick={onManualEntry}>
+          {/* A recovery path, not a second offer. As a full-width ghost button
+              it read as a rival primary action next to the CTA above it; as a
+              quiet centred link it reads as what it is. Still a real button, so
+              it stays keyboard-reachable inside the focus trap. `py-2` keeps the
+              hit area past WCAG 2.5.8 AA without giving a third-order link more
+              room than the action it sits under. */}
+          <button
+            type="button"
+            onClick={onManualEntry}
+            className="mx-auto cursor-pointer px-1 py-2 text-xs text-muted-foreground underline underline-offset-2 transition-colors hover:text-primary focus-visible:text-primary"
+          >
             {t('export.license.havePurchase')}
-          </Button>
+          </button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
