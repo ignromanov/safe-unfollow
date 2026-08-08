@@ -222,6 +222,78 @@ describe('ResultsExportControls', () => {
       expect(vi.mocked(analytics.paywallView)).not.toHaveBeenCalled();
     });
 
+    // The paywall asserts "the sample you just downloaded stops at 10 rows"
+    // about a file the reader may never have seen land — 85% of traffic is
+    // mobile, and an iOS Safari blob download can be silent or blocked. The
+    // receipt is what makes that assertion checkable.
+    it('should name the downloaded file in the paywall, matching what was written', async () => {
+      unlocked(false);
+      const user = userEvent.setup();
+
+      render(<ResultsExportControls {...defaultProps} />);
+      await user.click(screen.getByRole('button', { name: triggerLabel }));
+
+      await waitFor(() => expect(vi.mocked(downloadBlob)).toHaveBeenCalled());
+
+      // Read the name off the download call rather than restating it: a
+      // receipt naming a different file than the one on disk is worse than no
+      // receipt, and only this coupling can catch the two drifting apart.
+      const [, writtenName] = vi.mocked(downloadBlob).mock.calls[0];
+      const receipt = resultsEN.export.saved.capped
+        .replace('{{filename}}', String(writtenName))
+        .replace('{{rows}}', String(FREE_EXPORT_ROWS))
+        .replace('{{total}}', String(defaultProps.totalCount));
+
+      expect(await screen.findByText(receipt)).toBeInTheDocument();
+    });
+
+    // Without this the uncapped path gives no feedback whatsoever: no paywall
+    // opens, and the only evidence of the click is a file the browser may have
+    // saved without saying so.
+    it('should announce the saved file when the whole view fits', async () => {
+      unlocked(false);
+      const user = userEvent.setup();
+
+      render(<ResultsExportControls {...defaultProps} indices={[4, 8, 15]} />);
+      await user.click(screen.getByRole('button', { name: triggerLabel }));
+
+      const status = await screen.findByRole('status');
+
+      expect(status).toHaveTextContent(
+        resultsEN.export.saved.full
+          .replace('{{filename}}', 'my-export.csv')
+          .replace('{{total}}', '3')
+      );
+    });
+
+    // A receipt left over from the previous run describes a file that is no
+    // longer the newest one in the Downloads folder — the reader reconciles it
+    // against the wrong file, which is exactly the confusion it exists to end.
+    it('should drop the previous receipt when another export starts', async () => {
+      unlocked(false);
+      const user = userEvent.setup();
+
+      render(<ResultsExportControls {...defaultProps} indices={[4, 8, 15]} />);
+      const trigger = screen.getByRole('button', { name: triggerLabel });
+
+      await user.click(trigger);
+      await screen.findByRole('status');
+
+      let release: (blob: Blob) => void = () => {};
+      vi.mocked(buildExportCsv).mockReturnValueOnce(
+        new Promise<Blob>(resolve => {
+          release = resolve;
+        })
+      );
+
+      await user.click(trigger);
+
+      expect(screen.queryByRole('status')).not.toBeInTheDocument();
+
+      release(new Blob(['username\n']));
+      await waitFor(() => expect(screen.getByRole('status')).toBeInTheDocument());
+    });
+
     // A dead click is the worst outcome here: it is the step the whole funnel
     // narrows to, and IndexedDB on this codebase has a known no-timeout hang.
     it('should surface a failure instead of silently doing nothing', async () => {

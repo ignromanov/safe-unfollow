@@ -137,6 +137,10 @@
   },
   "export": {
     "trigger": "Export",
+    "saved": {
+      "capped": "Saved {{filename}} — the first {{rows}} of {{total}} rows",
+      "full": "Saved {{filename}} — all {{total}} rows"
+    },
     "paywall": {
       "headline": "You have the first {{rows}}. Get the rest.",
       "subtitle": "The sample you just downloaded stops at {{rows}} rows. The full export covers every account in your current view — CSV or JSON, generated in your browser.",

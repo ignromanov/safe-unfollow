@@ -137,6 +137,10 @@
   },
   "export": {
     "trigger": "エクスポート",
+    "saved": {
+      "capped": "{{filename}} を保存しました — {{total}}行のうち最初の{{rows}}行",
+      "full": "{{filename}} を保存しました — 全{{total}}行"
+    },
     "paywall": {
       "headline": "最初の{{rows}}件を取得しました — 続きはリスト全体で",
       "subtitle": "サンプルは{{rows}}行で終わります。完全なエクスポートには現在の表示にあるすべてのアカウントが含まれます — CSVまたはJSON、ブラウザ内で生成されます。",

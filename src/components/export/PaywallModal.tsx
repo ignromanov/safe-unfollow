@@ -16,10 +16,21 @@ export interface PaywallModalProps {
   onOpenChange: (open: boolean) => void;
   onCheckout: () => void;
   onManualEntry: () => void;
+  /** Name of the file just written to disk, extension included */
+  savedFilename: string;
+  /** Rows in the view the sample was cut from */
+  totalRows: number;
 }
 
-export function PaywallModal({ open, onOpenChange, onCheckout, onManualEntry }: PaywallModalProps) {
-  const { t } = useTranslation('results');
+export function PaywallModal({
+  open,
+  onOpenChange,
+  onCheckout,
+  onManualEntry,
+  savedFilename,
+  totalRows,
+}: PaywallModalProps) {
+  const { t, i18n } = useTranslation('results');
 
   const bullets = [
     t('export.paywall.bullet1'),
@@ -31,6 +42,22 @@ export function PaywallModal({ open, onOpenChange, onCheckout, onManualEntry }: 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
+        {/* The dialog arrives together with a file the reader never asked for,
+            and on iOS Safari a blob download can be silent or blocked outright.
+            Naming the file is what turns the headline below from an assertion
+            about something unseen into a claim the reader can go and check.
+            Muted and small on purpose: a receipt, not a second headline. */}
+        <p className="flex items-start gap-2 text-xs text-muted-foreground">
+          <Check className="h-3.5 w-3.5 shrink-0 text-emerald-500 mt-0.5" />
+          <span className="min-w-0 break-words">
+            {t('export.saved.capped', {
+              filename: savedFilename,
+              rows: FREE_EXPORT_ROWS,
+              total: totalRows.toLocaleString(i18n.language),
+            })}
+          </span>
+        </p>
+
         <DialogHeader>
           <DialogTitle>{t('export.paywall.headline', { rows: FREE_EXPORT_ROWS })}</DialogTitle>
           <DialogDescription>

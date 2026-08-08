@@ -137,6 +137,10 @@
   },
   "export": {
     "trigger": "Exportieren",
+    "saved": {
+      "capped": "{{filename}} gespeichert — die ersten {{rows}} von {{total}} Zeilen",
+      "full": "{{filename}} gespeichert — alle {{total}} Zeilen"
+    },
     "paywall": {
       "headline": "Die ersten {{rows}} sind heruntergeladen — jetzt die ganze Liste",
       "subtitle": "Die Stichprobe endet nach {{rows}} Zeilen. Der vollständige Export enthält alle Konten der aktuellen Ansicht — als CSV oder JSON, erzeugt im Browser.",

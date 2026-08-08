@@ -137,6 +137,10 @@
   },
   "export": {
     "trigger": "Ekspor",
+    "saved": {
+      "capped": "{{filename}} tersimpan — {{rows}} baris pertama dari {{total}}",
+      "full": "{{filename}} tersimpan — semua {{total}} baris"
+    },
     "paywall": {
       "headline": "{{rows}} baris pertama sudah diunduh — sekarang seluruh daftarnya",
       "subtitle": "Contohnya berhenti di {{rows}} baris. Ekspor lengkap mencakup semua akun pada tampilan saat ini — CSV atau JSON, dibuat di browser.",

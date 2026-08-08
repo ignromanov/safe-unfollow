@@ -53,13 +53,19 @@ export function ResultsExportControls({
   totalCount,
   filename,
 }: ResultsExportControlsProps) {
-  const { t } = useTranslation('results');
+  const { t, i18n } = useTranslation('results');
   const { isEnabled, isUnlocked, startCheckout } = useProExport();
   const [isPaywallOpen, setIsPaywallOpen] = useState(false);
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [isLicenseDialogOpen, setIsLicenseDialogOpen] = useState(false);
   const [isBusy, setIsBusy] = useState(false);
   const [hasError, setHasError] = useState(false);
+  // What the last free export actually put on disk. Snapshotted rather than
+  // recomputed at render: the reader can change the filters right after the
+  // download, and a receipt is only worth anything if it describes the file.
+  const [saved, setSaved] = useState<{ filename: string; total: number; capped: boolean } | null>(
+    null
+  );
   const triggerRef = useRef<HTMLButtonElement>(null);
   // A ref, not `isBusy`: two clicks in the same tick both read the state from
   // before the re-render and both start a build. Same reason LicenseDialog
@@ -73,6 +79,8 @@ export function ResultsExportControls({
   useAdViewability(triggerRef, isEnabled, () => analytics.exportTriggerViewable(isUnlocked));
 
   if (!isEnabled) return null;
+
+  const rowCount = indices === null ? totalCount : indices.length;
 
   // Warm the chunks on intent. A locked click now does real work before it
   // shows anything, so the CSV builder is on that path too, not just the modal.
@@ -98,6 +106,7 @@ export function ResultsExportControls({
     isRunningRef.current = true;
     setIsBusy(true);
     setHasError(false);
+    setSaved(null);
     try {
       // Dynamic: the builder reaches into IndexedDB, and a static import would
       // put that in the main bundle for every visitor who never exports.
@@ -112,7 +121,11 @@ export function ResultsExportControls({
 
       // The modal is gone once dismissed; the filename is still in the
       // Downloads folder next week saying the file stops short.
-      downloadBlob(blob, `${filename}${capped ? '-sample' : ''}.csv`);
+      const savedFilename = `${filename}${capped ? '-sample' : ''}.csv`;
+      downloadBlob(blob, savedFilename);
+      // One name, used for the file and for whatever names it back. A receipt
+      // pointing at a different file than the one on disk is worse than none.
+      setSaved({ filename: savedFilename, total: rowCount, capped });
       analytics.freeExportDownload(capped);
 
       if (capped) {
@@ -142,8 +155,6 @@ export function ResultsExportControls({
     }
     void runFreeExport();
   };
-
-  const rowCount = indices === null ? totalCount : indices.length;
 
   return (
     <>
@@ -176,6 +187,22 @@ export function ResultsExportControls({
           </p>
         )}
 
+        {/* The uncapped path opens no paywall, so without this a click produces
+            a file and nothing else — and on iOS Safari, where the download can
+            be silent, possibly nothing at all as far as the reader can tell.
+            The capped path says the same thing inside the paywall instead. */}
+        {saved && !saved.capped && (
+          <p
+            role="status"
+            className="max-w-[16rem] text-end text-xs break-words text-muted-foreground"
+          >
+            {t('export.saved.full', {
+              filename: saved.filename,
+              total: saved.total.toLocaleString(i18n.language),
+            })}
+          </p>
+        )}
+
         {/* Restoring a purchase must not go through the sample. Someone setting
             up a second device has already paid, and the paywall — the only
             other place this link lives — now opens *after* a download, so
@@ -200,12 +227,14 @@ export function ResultsExportControls({
       </div>
 
       <Suspense fallback={null}>
-        {isPaywallOpen ? (
+        {isPaywallOpen && saved ? (
           <PaywallModal
             open={isPaywallOpen}
             onOpenChange={setIsPaywallOpen}
             onCheckout={startCheckout}
             onManualEntry={openLicenseDialog}
+            savedFilename={saved.filename}
+            totalRows={saved.total}
           />
         ) : null}
         {isExportDialogOpen ? (

@@ -137,6 +137,10 @@
   },
   "export": {
     "trigger": "Dışa aktar",
+    "saved": {
+      "capped": "{{filename}} kaydedildi — {{total}} satırın ilk {{rows}} satırı",
+      "full": "{{filename}} kaydedildi — {{total}} satırın tamamı"
+    },
     "paywall": {
       "headline": "İlk {{rows}} satır indirildi — sıra tüm listede",
       "subtitle": "Örnek {{rows}} satırda bitiyor. Tam dışa aktarma geçerli görünümdeki tüm hesapları içerir — CSV veya JSON, tarayıcıda oluşturulur.",

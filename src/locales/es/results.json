@@ -137,6 +137,10 @@
   },
   "export": {
     "trigger": "Exportar",
+    "saved": {
+      "capped": "Guardado {{filename}} — las primeras {{rows}} de {{total}} filas",
+      "full": "Guardado {{filename}} — todas las {{total}} filas"
+    },
     "paywall": {
       "headline": "Las primeras {{rows}} ya están descargadas — ahora la lista completa",
       "subtitle": "La muestra termina en {{rows}} filas. La exportación completa incluye todas las cuentas de la vista actual: CSV o JSON, generado en el navegador.",
