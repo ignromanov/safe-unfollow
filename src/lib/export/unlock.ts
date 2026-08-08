@@ -8,6 +8,8 @@
  * which the per-session validate call then acts on.
  */
 
+import { getApiBase } from './license';
+
 const UNLOCK_STORAGE_KEY = 'su-pro-export';
 const LICENSE_QUERY_PARAM = 'license_key';
 
@@ -70,9 +72,16 @@ export function subscribeUnlock(listener: () => void): () => void {
   };
 }
 
-/** Whether Pro Export is configured at all. When false, no export UI renders. */
+/**
+ * Whether Pro Export is configured *usably*. When false, no export UI renders.
+ *
+ * A checkout URL alone is not enough: the License API host is read off that
+ * same URL, so a value we cannot map to a mode (a dodo.pe short link, a custom
+ * domain) would let us take money and then reject the resulting key against the
+ * wrong host. Not selling is the only safe answer to "which mode is this?".
+ */
 export function isExportFeatureEnabled(): boolean {
-  return Boolean(import.meta.env.VITE_DODO_CHECKOUT_URL);
+  return getApiBase() !== null;
 }
 
 /** The Dodo Payments hosted checkout URL, or null if not configured. */

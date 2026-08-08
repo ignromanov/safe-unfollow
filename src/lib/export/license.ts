@@ -11,13 +11,26 @@
  * a body missing `name` yields 422 `{"code":"INVALID_REQUEST_BODY"}`.
  */
 
-const LIVE_API = 'https://live.dodopayments.com';
-const TEST_API = 'https://test.dodopayments.com';
+/**
+ * Checkout host → License API host. Both pairings were confirmed by response
+ * headers, not inferred: checkout.dodopayments.com answers with
+ * `set-cookie: mode=live`, test.checkout.dodopayments.com with `mode=test`.
+ */
+const API_BASE_BY_CHECKOUT_HOST: Record<string, string> = {
+  'checkout.dodopayments.com': 'https://live.dodopayments.com',
+  'test.checkout.dodopayments.com': 'https://test.dodopayments.com',
+};
 
 /**
- * Cosmetic: shown as the instance name in the seller dashboard. Note that
- * /licenses/activate mints a NEW instance on every call even for an identical
- * name, so callers must cache the returned id rather than re-activating.
+ * Cosmetic: shown as the instance name in the seller dashboard.
+ *
+ * Callers must cache the returned id rather than re-activating, on the
+ * assumption that /licenses/activate mints a NEW instance per call even for an
+ * identical name. Dodo's docs do not state this either way — the inference is
+ * from a 201 "License key instance created" that returns a fresh instance id
+ * alongside a per-key `activations_limit`. Treated as non-idempotent because
+ * the two ways of being wrong are not symmetric: a needless cache costs
+ * nothing, a needless activation is one the buyer cannot get back.
  */
 const INSTANCE_NAME = 'safeunfollow-web';
 
@@ -25,12 +38,12 @@ const INSTANCE_NAME = 'safeunfollow-web';
 const VALIDATE_TIMEOUT_MS = 4000;
 
 /**
- * Activation is not idempotent — Dodo mints a new device instance (capped per
- * key) on every call. If the instance is minted server-side but the response
- * arrives after a short timeout, activateLicense() reports a retryable
- * 'network' failure and the UI offers "Try again", which spends another one of
- * the buyer's activations on a request that may have already succeeded. A
- * longer budget here narrows that window; waiting is cheaper than retrying.
+ * Assumed non-idempotent (see INSTANCE_NAME). If an instance is minted
+ * server-side but the response arrives after a short timeout, activateLicense()
+ * reports a retryable 'network' failure and the UI offers "Try again", which
+ * spends another one of the buyer's activations on a request that may have
+ * already succeeded. A longer budget here narrows that window; waiting is
+ * cheaper than retrying.
  */
 const ACTIVATE_TIMEOUT_MS = 15000;
 
@@ -73,20 +86,25 @@ interface LicenseApiResponse {
 }
 
 /**
- * Test mode is derived from the single configured checkout URL rather than a
- * second env var: a test checkout paired with live validation is a silent
- * failure, and one source of truth makes that pairing unrepresentable.
+ * The API host is read off the single configured checkout URL rather than a
+ * second env var, so a test checkout can never be paired with live validation.
+ *
+ * It returns null rather than guessing, because a wrong guess is the most
+ * expensive failure this module has: the buyer pays in one mode, receives a key
+ * minted in that mode, and we reject it against the other host with a 404 they
+ * can do nothing about. A dodo.pe short link is exactly this case — it 301s to
+ * either mode and its own hostname says nothing about which.
+ *
+ * Null means "we cannot tell", and every caller treats that as "do not sell".
  */
-function getApiBase(): string {
+export function getApiBase(): string | null {
   const checkoutUrl = import.meta.env.VITE_DODO_CHECKOUT_URL;
-  if (!checkoutUrl) return LIVE_API;
+  if (!checkoutUrl) return null;
 
   try {
-    return new URL(checkoutUrl).hostname.startsWith('test.') ? TEST_API : LIVE_API;
+    return API_BASE_BY_CHECKOUT_HOST[new URL(checkoutUrl).hostname] ?? null;
   } catch {
-    // A malformed URL disables checkout anyway; defaulting to live keeps an
-    // already-activated license working.
-    return LIVE_API;
+    return null;
   }
 }
 
@@ -99,9 +117,12 @@ async function post(
   action: 'activate' | 'validate',
   payload: Record<string, string>,
   timeoutMs: number
-): Promise<LicenseApiResponse | null> {
+): Promise<LicenseApiResponse | null | 'unconfigured'> {
+  const apiBase = getApiBase();
+  if (apiBase === null) return 'unconfigured';
+
   try {
-    const response = await fetch(`${getApiBase()}/licenses/${action}`, {
+    const response = await fetch(`${apiBase}/licenses/${action}`, {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -153,6 +174,11 @@ export async function activateLicense(licenseKey: string): Promise<ActivateResul
     ACTIVATE_TIMEOUT_MS
   );
 
+  // Unreachable through the UI — isExportFeatureEnabled() hides every export
+  // control when the mode cannot be resolved. Kept because the two guards
+  // defend different things: that one stops us selling, this one stops us
+  // sending a paid key to a host that was picked by a coin flip.
+  if (response === 'unconfigured') return { ok: false, reason: 'unknown' };
   if (response === null) return { ok: false, reason: 'network' };
 
   const instanceId = response.body.id;
@@ -177,6 +203,7 @@ export async function validateLicense(
     VALIDATE_TIMEOUT_MS
   );
 
+  if (response === 'unconfigured') return { ok: false, reason: 'unknown' };
   if (response === null) return { ok: false, reason: 'network' };
 
   // Anything other than a delivered verdict is not a statement about the

@@ -37,9 +37,28 @@ describe('export/unlock', () => {
       expect(isExportFeatureEnabled()).toBe(false);
     });
 
-    it('should be true when VITE_DODO_CHECKOUT_URL is set', () => {
-      vi.stubEnv('VITE_DODO_CHECKOUT_URL', 'https://checkout.example/buy');
+    it('should be true for a recognised live checkout URL', () => {
+      vi.stubEnv('VITE_DODO_CHECKOUT_URL', 'https://checkout.dodopayments.com/buy/pdt_x');
       expect(isExportFeatureEnabled()).toBe(true);
+    });
+
+    it('should be true for a recognised test checkout URL', () => {
+      vi.stubEnv('VITE_DODO_CHECKOUT_URL', 'https://test.checkout.dodopayments.com/buy/pdt_x');
+      expect(isExportFeatureEnabled()).toBe(true);
+    });
+
+    it('should be false for a short link, whose mode cannot be known', () => {
+      // dodo.pe short links 301 to either mode and their hostname says which
+      // one only after a redirect we are not going to follow at runtime. If we
+      // cannot tell which mode the buyer will pay in, we must not take the
+      // money: the key they get back would be rejected by the other host.
+      vi.stubEnv('VITE_DODO_CHECKOUT_URL', 'https://dodo.pe/vb124ghir3');
+      expect(isExportFeatureEnabled()).toBe(false);
+    });
+
+    it('should be false for a checkout URL on some other host', () => {
+      vi.stubEnv('VITE_DODO_CHECKOUT_URL', 'https://checkout.example/buy');
+      expect(isExportFeatureEnabled()).toBe(false);
     });
   });
 

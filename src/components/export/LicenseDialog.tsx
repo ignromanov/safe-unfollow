@@ -79,9 +79,10 @@ export function LicenseDialog({ open, onOpenChange, initialKey, source }: Licens
   );
   const [inputValue, setInputValue] = useState('');
   // Guards the automatic mount activation independently of runActivation's
-  // identity: activateLicense() is not idempotent (Dodo mints a new
-  // device instance, capped at 3, on every call), so this must not re-fire
-  // just because a parent re-render gave onOpenChange a new closure.
+  // identity: activateLicense() is treated as non-idempotent (a new device
+  // instance per call, against a limit of 3 — see lib/export/license.ts for
+  // why that is an inference rather than a documented guarantee), so this must
+  // not re-fire just because a parent re-render gave onOpenChange a new closure.
   const activatedKeyRef = useRef<string | null>(null);
 
   const runActivation = useCallback(

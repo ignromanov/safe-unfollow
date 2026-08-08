@@ -13,7 +13,11 @@ function mockResponse(status: number, body: unknown): void {
 describe('export/license', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
-    vi.stubEnv('VITE_DODO_CHECKOUT_URL', 'https://dodo.pe/vb124ghir3');
+    // A resolvable live checkout URL. Deliberately not the dodo.pe short link:
+    // its hostname carries no mode, and the API host is derived from this value.
+    vi.stubEnv('VITE_DODO_CHECKOUT_URL', 'https://checkout.dodopayments.com/buy/pdt_x');
+    // So that "did not call the network" is assertable, not just unobserved.
+    vi.stubGlobal('fetch', vi.fn());
   });
 
   afterEach(() => {
@@ -48,6 +52,7 @@ describe('export/license', () => {
 
   describe('API host selection', () => {
     it('should call the live host for a live checkout URL', async () => {
+      vi.stubEnv('VITE_DODO_CHECKOUT_URL', 'https://checkout.dodopayments.com/buy/pdt_x');
       mockResponse(201, { id: INSTANCE });
 
       await activateLicense(KEY);
@@ -58,8 +63,6 @@ describe('export/license', () => {
     });
 
     it('should call the test host for a test-mode checkout URL', async () => {
-      // Mode is derived from the one configured URL rather than a second env
-      // var, so a test checkout can never be paired with live validation.
       vi.stubEnv(
         'VITE_DODO_CHECKOUT_URL',
         'https://test.checkout.dodopayments.com/buy/pdt_0NkqSXsvL97EqSoBcfbcE'
@@ -73,15 +76,33 @@ describe('export/license', () => {
       );
     });
 
-    it('should fall back to the live host when the checkout URL is unparseable', async () => {
+    it('should refuse to guess a mode for a short link', async () => {
+      // https://dodo.pe/vb124ghir3 — the link this product actually shipped
+      // with — 301s to the TEST checkout, but its own hostname says nothing
+      // about mode. Defaulting such a URL to live is the worst outcome
+      // available: the buyer pays in test mode, gets a test-mode key, and we
+      // reject it against the live host with a 404 they cannot act on.
+      vi.stubEnv('VITE_DODO_CHECKOUT_URL', 'https://dodo.pe/vb124ghir3');
+
+      await expect(activateLicense(KEY)).resolves.toEqual({ ok: false, reason: 'unknown' });
+      expect(fetch).not.toHaveBeenCalled();
+    });
+
+    it('should refuse to guess a mode for an unparseable checkout URL', async () => {
       vi.stubEnv('VITE_DODO_CHECKOUT_URL', 'not-a-url');
-      mockResponse(201, { id: INSTANCE });
 
-      await activateLicense(KEY);
+      await expect(activateLicense(KEY)).resolves.toEqual({ ok: false, reason: 'unknown' });
+      expect(fetch).not.toHaveBeenCalled();
+    });
 
-      expect(vi.mocked(fetch).mock.calls[0][0]).toBe(
-        'https://live.dodopayments.com/licenses/activate'
-      );
+    it('should not validate against a guessed host either', async () => {
+      vi.stubEnv('VITE_DODO_CHECKOUT_URL', 'https://dodo.pe/vb124ghir3');
+
+      await expect(validateLicense(KEY, INSTANCE)).resolves.toEqual({
+        ok: false,
+        reason: 'unknown',
+      });
+      expect(fetch).not.toHaveBeenCalled();
     });
   });
 

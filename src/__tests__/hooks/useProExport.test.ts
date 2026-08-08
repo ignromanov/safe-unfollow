@@ -18,7 +18,7 @@ describe('useProExport', () => {
     localStorage.clear();
     resetUnlockCache();
     vi.clearAllMocks();
-    vi.stubEnv('VITE_DODO_CHECKOUT_URL', 'https://checkout.example/buy');
+    vi.stubEnv('VITE_DODO_CHECKOUT_URL', 'https://checkout.dodopayments.com/buy/pdt_x');
     window.history.replaceState({}, '', '/results');
   });
 

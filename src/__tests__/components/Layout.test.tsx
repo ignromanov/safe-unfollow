@@ -597,7 +597,7 @@ describe('Layout', () => {
 
   describe('license capture', () => {
     beforeEach(() => {
-      vi.stubEnv('VITE_DODO_CHECKOUT_URL', 'https://checkout.example/buy');
+      vi.stubEnv('VITE_DODO_CHECKOUT_URL', 'https://checkout.dodopayments.com/buy/pdt_x');
     });
 
     afterEach(async () => {
