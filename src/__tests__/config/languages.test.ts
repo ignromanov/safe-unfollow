@@ -24,7 +24,7 @@ describe('languages configuration', () => {
 
     it('should contain expected languages', () => {
       // Languages sorted alphabetically after 'en' (default)
-      const expectedLanguages = ['en', 'ar', 'de', 'es', 'fr', 'hi', 'id', 'ja', 'pt', 'ru', 'tr'];
+      const expectedLanguages = ['en', 'ar', 'de', 'es', 'fr', 'id', 'ja', 'pt', 'ru', 'tr'];
       expect(SUPPORTED_LANGUAGES).toEqual(expectedLanguages);
     });
 
@@ -63,7 +63,6 @@ describe('languages configuration', () => {
       expect(LANGUAGE_NAMES.en).toBe('English');
       expect(LANGUAGE_NAMES.es).toBe('Español');
       expect(LANGUAGE_NAMES.pt).toBe('Português');
-      expect(LANGUAGE_NAMES.hi).toBe('हिन्दी');
       expect(LANGUAGE_NAMES.id).toBe('Indonesia');
       expect(LANGUAGE_NAMES.tr).toBe('Türkçe');
       expect(LANGUAGE_NAMES.ja).toBe('日本語');
@@ -306,14 +305,18 @@ describe('languages configuration', () => {
       expect(detectBrowserLanguage()).toBe('es');
     });
 
-    it('should detect Hindi language', () => {
+    it('should fall back to English for a locale the app no longer ships', () => {
+      // Hindi was removed after measuring zero demand: no /hi page cleared Search
+      // Console's reporting threshold in 91 days, and Umami saw four sessions in
+      // fifteen. India's traffic is real and large — it is served in English.
+      // A browser reporting hi-IN must land on English, not on a dead prefix.
       Object.defineProperty(global, 'navigator', {
         value: { languages: ['hi-IN'], language: 'hi-IN' },
         writable: true,
         configurable: true,
       });
 
-      expect(detectBrowserLanguage()).toBe('hi');
+      expect(detectBrowserLanguage()).toBe('en');
     });
 
     it('should detect Indonesian language', () => {

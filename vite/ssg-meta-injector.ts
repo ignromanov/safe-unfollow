@@ -32,7 +32,6 @@ const _LANGUAGE_FONT_SUBSETS: Record<SupportedLanguage, string[]> = {
   de: ['latin', 'latin-ext'], // German: ä, ö, ü, ß
   ru: ['latin', 'cyrillic', 'cyrillic-ext'], // Russian: cyrillic for Inter, cyrillic-ext for Plus Jakarta Sans
   ar: ['latin'], // Arabic script not supported, only Latin UI
-  hi: ['latin'], // Devanagari not supported, only Latin UI
   ja: ['latin'], // Japanese not supported, only Latin UI
   id: ['latin'], // Indonesian: standard Latin
   tr: ['latin', 'latin-ext'], // Turkish: ş, ğ, ı, ö, ü, ç

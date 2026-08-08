@@ -212,7 +212,7 @@ describe('useAppStore', () => {
     it('should handle all supported languages', () => {
       const { result } = renderHook(() => useAppStore());
 
-      const languages = ['en', 'es', 'pt', 'ru', 'de', 'hi', 'ja', 'tr', 'id', 'ar'] as const;
+      const languages = ['en', 'es', 'pt', 'ru', 'de', 'ja', 'tr', 'id', 'ar'] as const;
 
       for (const lang of languages) {
         act(() => {

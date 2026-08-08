@@ -131,7 +131,7 @@ vi.mock('i18next', () => ({
 // Mock locales
 vi.mock('@/locales', () => ({
   RTL_LANGUAGES: ['ar', 'he'],
-  SUPPORTED_LANGUAGES: ['en', 'es', 'pt', 'ru', 'de', 'hi', 'ja', 'tr', 'id', 'ar'],
+  SUPPORTED_LANGUAGES: ['en', 'es', 'pt', 'ru', 'de', 'ja', 'tr', 'id', 'ar'],
   subscribeToI18nInit: vi.fn(() => () => {}),
   isI18nReady: vi.fn(() => true),
 }));

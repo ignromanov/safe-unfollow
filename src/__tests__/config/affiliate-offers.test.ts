@@ -15,7 +15,7 @@ describe('resolveAffiliateOffer', () => {
   });
 
   it('routes everything else to the main offer', () => {
-    for (const language of ['en', 'es', 'pt', 'de', 'fr', 'hi', 'ja', 'id']) {
+    for (const language of ['en', 'es', 'pt', 'de', 'fr', 'ja', 'id']) {
       expect(resolveAffiliateOffer(language)?.id).toBe('nordvpn_global');
     }
   });
