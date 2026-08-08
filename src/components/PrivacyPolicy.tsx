@@ -24,7 +24,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
           </div>
           <h1 className="text-4xl md:text-5xl font-display font-bold">Privacy Policy</h1>
         </div>
-        <p className="text-muted-foreground text-lg">Last updated: July 27, 2026</p>
+        <p className="text-muted-foreground text-lg">Last updated: August 8, 2026</p>
       </header>
 
       {/* Content */}
@@ -125,7 +125,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             <li>UI state (filter selections)</li>
             <li>
               Pro Export license (<code>su-pro-export</code>) — the license key from your purchase
-              and the activation id returned by LemonSqueezy, stored so the export stays available
+              and the activation id returned by Dodo Payments, stored so the export stays available
               on this device
             </li>
           </ul>
@@ -213,27 +213,36 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             .
           </p>
 
-          <h3 className="text-lg font-semibold mt-6 mb-3">5.2 Payments (LemonSqueezy)</h3>
+          <h3 className="text-lg font-semibold mt-6 mb-3">5.2 Payments (Dodo Payments)</h3>
           <p className="text-muted-foreground">
-            If you choose to unlock Pro Export, clicking the purchase button redirects you to
-            LemonSqueezy, our payment provider, where any payment details you enter are handled
-            entirely by them — we never see or store them. Your Instagram data is not sent anywhere
-            during this: the export file is still generated inside your browser. See{' '}
+            If you choose to unlock Pro Export, clicking the purchase button redirects you to Dodo
+            Payments, our payment provider (merchant of record), where any payment details you enter
+            are handled entirely by them — we never see or store them. Your Instagram data is not
+            sent anywhere during this: the export file is still generated inside your browser. See{' '}
             <a
-              href="https://www.lemonsqueezy.com/privacy"
+              href="https://dodopayments.com/privacy-policy"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary hover:underline"
             >
-              LemonSqueezy's Privacy Policy
+              Dodo Payments' Privacy Policy
             </a>
             .
           </p>
           <p className="text-muted-foreground mt-4">
-            Unlocking the export sends your license key to LemonSqueezy's license service (
-            <code>api.lemonsqueezy.com</code>) to activate it on this device. We check it again at
+            After a successful payment, Dodo Payments sends you back to this site with your license
+            key, a payment reference and the email address you used at checkout attached to the web
+            address. We remove all of them from the address bar on the first render, so they do not
+            reach your browser history, the referrer sent to other sites, or our analytics. One copy
+            is outside our reach: like every request to this site, that web address is recorded in
+            our hosting provider's short-term request log before any of our code runs. We do not
+            read those logs to identify buyers, and we store your email address nowhere else.
+          </p>
+          <p className="text-muted-foreground mt-4">
+            Unlocking the export sends your license key to Dodo Payments' license service (
+            <code>live.dodopayments.com</code>) to activate it on this device. We check it again at
             most once per browser session, when you open the export dialog; that check also sends
-            the activation id LemonSqueezy issued for this device. Nothing else is sent — the
+            the activation id Dodo Payments issued for this device. Nothing else is sent — the
             response is neither logged nor passed to analytics, and no part of your Instagram data
             is included in either request.
           </p>

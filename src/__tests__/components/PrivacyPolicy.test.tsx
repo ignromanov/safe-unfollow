@@ -33,7 +33,7 @@ describe('PrivacyPolicy Component', () => {
     it('should render the last updated date', () => {
       render(<PrivacyPolicy onBack={mockOnBack} />);
 
-      expect(screen.getByText(/last updated: july 27, 2026/i)).toBeInTheDocument();
+      expect(screen.getByText(/last updated: august 8, 2026/i)).toBeInTheDocument();
     });
   });
 
@@ -59,6 +59,29 @@ describe('PrivacyPolicy Component', () => {
         screen.getByText(/Ads are never targeted using your Instagram data/i)
       ).toBeInTheDocument();
       expect(screen.getByText(/consent management platform/i)).toBeInTheDocument();
+    });
+
+    // Pro Export sends the buyer to a payment processor and calls its license
+    // API from the browser (see lib/export/license.ts). §5.2 had no guard while
+    // §5.3 and §5.4 did, which is how the whole section could be rewritten from
+    // one processor to another with the suite staying green. The two facts
+    // pinned here are the ones a reader cannot verify for themselves: which
+    // company receives the payment, and which host receives the license key.
+    it('should name the payment processor and the license host it contacts', () => {
+      render(<PrivacyPolicy onBack={mockOnBack} />);
+
+      expect(screen.getByText(/5\.2 Payments \(Dodo Payments\)/i)).toBeInTheDocument();
+      expect(screen.getByText(/live\.dodopayments\.com/i)).toBeInTheDocument();
+    });
+
+    // The return URL carries the buyer's email address. We strip it on the
+    // first render, but it is in the request our host logs before any of our
+    // code runs — a limit we cannot engineer away and therefore must state.
+    it('should disclose that the checkout return URL carries the buyer email', () => {
+      render(<PrivacyPolicy onBack={mockOnBack} />);
+
+      expect(screen.getByText(/email address you used at checkout/i)).toBeInTheDocument();
+      expect(screen.getByText(/hosting provider's short-term request log/i)).toBeInTheDocument();
     });
 
     // The upload screen carries a persistent affiliate block (see
