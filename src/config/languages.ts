@@ -14,7 +14,6 @@ export const SUPPORTED_LANGUAGES = [
   'de', // Deutsch
   'es', // Español
   'fr', // Français
-  'hi', // हिन्दी
   'id', // Indonesia
   'ja', // 日本語
   'pt', // Português
@@ -30,7 +29,6 @@ export const LANGUAGE_NAMES: Record<SupportedLanguage, string> = {
   de: 'Deutsch',
   es: 'Español',
   fr: 'Français',
-  hi: 'हिन्दी',
   id: 'Indonesia',
   ja: '日本語',
   pt: 'Português',
@@ -55,7 +53,6 @@ export const LOCALE_CODES: Record<SupportedLanguage, string> = {
   de: 'de_DE',
   es: 'es_ES',
   fr: 'fr_FR',
-  hi: 'hi_IN',
   id: 'id_ID',
   ja: 'ja_JP',
   pt: 'pt_BR',

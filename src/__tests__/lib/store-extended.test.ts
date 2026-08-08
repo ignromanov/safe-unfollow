@@ -300,7 +300,7 @@ describe('useAppStore - Extended Coverage', () => {
 
     it('should accept all supported languages', () => {
       const { setLanguage } = useAppStore.getState();
-      const supportedLanguages = ['en', 'es', 'pt', 'hi', 'id', 'tr', 'ja', 'ru', 'de'] as const;
+      const supportedLanguages = ['en', 'es', 'pt', 'id', 'tr', 'ja', 'ru', 'de'] as const;
 
       supportedLanguages.forEach(lang => {
         setLanguage(lang);

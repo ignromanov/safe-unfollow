@@ -157,7 +157,10 @@ describe('useLanguageFromPath', () => {
       expect(mockSetLanguage).toHaveBeenCalledWith('de');
     });
 
-    it('should detect Hindi from /hi/ path', () => {
+    it('should treat a retired locale prefix as English', () => {
+      // /hi/* is redirected away at the edge, but the client must not resolve it
+      // to a language either — a removed prefix has to read as English, not as an
+      // unknown that leaves i18next on whatever was loaded last.
       mockUseLocation.mockReturnValue({
         pathname: '/hi/',
         search: '',
@@ -167,13 +170,13 @@ describe('useLanguageFromPath', () => {
       });
 
       mockUseAppStore.mockReturnValue({
-        language: 'en' as SupportedLanguage,
+        language: 'de' as SupportedLanguage,
         setLanguage: mockSetLanguage,
       });
 
       renderHook(() => useLanguageFromPath());
 
-      expect(mockSetLanguage).toHaveBeenCalledWith('hi');
+      expect(mockSetLanguage).toHaveBeenCalledWith('en');
     });
 
     it('should detect Indonesian from /id/privacy path', () => {

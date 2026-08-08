@@ -22,7 +22,7 @@
       (function() {
         var STORE_KEY = 'unfollow-radar-store';
         // SYNC with src/config/languages.ts NON_ENGLISH_LANGUAGES
-        var NON_EN_LANGS = ['ar','de','es','fr','hi','id','ja','pt','ru','tr'];
+        var NON_EN_LANGS = ['ar','de','es','fr','id','ja','pt','ru','tr'];
 
         // Skip if path already has language prefix
         var path = location.pathname;
@@ -40,7 +40,7 @@
           if (storedLang) {
             // User has explicit preference - respect it
             if (storedLang !== 'en' && NON_EN_LANGS.indexOf(storedLang) !== -1) {
-              location.href = '/' + storedLang + path;
+              location.href = '/' + storedLang + path + location.search + location.hash;
             }
             // storedLang is 'en' - stay on English path
             return;
@@ -49,7 +49,7 @@
           // No stored preference - first visit, detect browser language
           var browserLang = (navigator.language || '').split('-')[0].toLowerCase();
           if (browserLang && browserLang !== 'en' && NON_EN_LANGS.indexOf(browserLang) !== -1) {
-            location.href = '/' + browserLang + path;
+            location.href = '/' + browserLang + path + location.search + location.hash;
           }
         } catch (e) {
           // localStorage unavailable (private mode) - continue with English

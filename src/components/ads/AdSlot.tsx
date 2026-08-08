@@ -15,6 +15,14 @@ import { cn } from '@/lib/utils';
  * - `multiplex` — native grid of related-content tiles. It sizes its own rows,
  *   so `minHeight` only reserves space up front and the unit may grow past it.
  *   Use it at the end of a page, where growth pushes nothing but the footer.
+ *
+ * No placement currently uses `multiplex`. The one that did — `home_footer`,
+ * below the footer CTA — was measured over its first 12 days and removed:
+ * 725 impressions returned $0.03 at 2.49% Active View viewable, against 46.8%
+ * for the manually placed display units on the same site. The site's own event
+ * pipeline agreed independently: 7,392 slot renders produced one viewable
+ * event. Below-the-fold multiplex on this layout is not a revenue question,
+ * it is a page-weight question. Re-introduce it only against fresh numbers.
  */
 export type AdSlotFormat = 'display' | 'multiplex';
 

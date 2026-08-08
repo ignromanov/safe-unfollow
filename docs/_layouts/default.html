@@ -6,17 +6,29 @@
     <title>{% if page.title %}{{ page.title }} - {% endif %}Instagram Unfollow Tracker</title>
     <meta name="description" content="{% if page.description %}{{ page.description }}{% else %}Free Instagram unfollow tracker - analyze your followers and following{% endif %}">
     
+    {%- comment -%}
+      Vercel serves this site with trailingSlash: false, so /docs/faq/ 308-redirects
+      to /docs/faq. Jekyll's pretty permalinks end in a slash, so page.url alone would
+      point every canonical at a URL that redirects away from itself. Strip it.
+    {%- endcomment -%}
+    {%- capture canonical_path -%}{{ site.baseurl }}{{ page.url }}{%- endcapture -%}
+    {%- assign canonical_last = canonical_path | slice: -1 -%}
+    {%- if canonical_last == '/' -%}
+      {%- assign canonical_trimmed = canonical_path | size | minus: 1 -%}
+      {%- assign canonical_path = canonical_path | slice: 0, canonical_trimmed -%}
+    {%- endif -%}
+
     <!-- SEO and social meta tags -->
     <meta property="og:title" content="{% if page.title %}{{ page.title }} - {% endif %}Instagram Unfollow Tracker">
     <meta property="og:description" content="{% if page.description %}{{ page.description }}{% else %}Free Instagram unfollow tracker - analyze your followers and following{% endif %}">
-    <meta property="og:url" content="{{ site.url }}{{ site.baseurl }}{{ page.url }}">
+    <meta property="og:url" content="{{ site.url }}{{ canonical_path }}">
     <meta property="og:type" content="website">
     
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="{% if page.title %}{{ page.title }} - {% endif %}Instagram Unfollow Tracker">
     <meta name="twitter:description" content="{% if page.description %}{{ page.description }}{% else %}Free Instagram unfollow tracker - analyze your followers and following{% endif %}">
 
-    <link rel="canonical" href="{{ site.url }}{{ site.baseurl }}{{ page.url }}"/>
+    <link rel="canonical" href="{{ site.url }}{{ canonical_path }}"/>
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">

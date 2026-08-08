@@ -5,8 +5,6 @@ interface ImportMetaEnv {
   readonly VITE_ADSENSE_CLIENT?: string;
   /** AdSense ad unit slot ID for the HomePage in-content placement. */
   readonly VITE_ADSENSE_SLOT_HOME?: string;
-  /** AdSense ad unit slot ID for the HomePage end-of-page multiplex placement. */
-  readonly VITE_ADSENSE_SLOT_HOME_FOOTER?: string;
   /** AdSense ad unit slot ID for the Results placement. */
   readonly VITE_ADSENSE_SLOT_RESULTS?: string;
   /** AdSense ad unit slot ID for the low-profile unit at the end of Results. */

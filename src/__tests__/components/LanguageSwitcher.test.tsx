@@ -29,12 +29,11 @@ vi.mock('@/lib/store', () => ({
 
 // Mock locales exports - must match src/config/languages.ts
 vi.mock('@/locales', () => ({
-  SUPPORTED_LANGUAGES: ['en', 'es', 'pt', 'hi', 'id', 'tr', 'ja', 'ru', 'de', 'ar'] as const,
+  SUPPORTED_LANGUAGES: ['en', 'es', 'pt', 'id', 'tr', 'ja', 'ru', 'de', 'ar'] as const,
   LANGUAGE_NAMES: {
     en: 'English',
     es: 'Español',
     pt: 'Português',
-    hi: 'हिन्दी',
     id: 'Indonesia',
     tr: 'Türkçe',
     ja: '日本語',
@@ -128,7 +127,6 @@ describe('LanguageSwitcher', () => {
     expect(await screen.findByText('English')).toBeInTheDocument();
     expect(await screen.findByText('Español')).toBeInTheDocument();
     expect(await screen.findByText('Português')).toBeInTheDocument();
-    expect(await screen.findByText('हिन्दी')).toBeInTheDocument();
     expect(await screen.findByText('Indonesia')).toBeInTheDocument();
     expect(await screen.findByText('Türkçe')).toBeInTheDocument();
     expect(await screen.findByText('日本語')).toBeInTheDocument();

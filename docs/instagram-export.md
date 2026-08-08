@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Instagram Data Export: ZIP/JSON Guide (No Login Needed)
+title: "Instagram Data Export: ZIP/JSON Guide (No Login Needed)"
 description: Free step-by-step guide to export your Instagram ZIP/JSON file safely — no login or password shared. Avoid the #1 upload mistake.
 permalink: /instagram-export/
 last_updated: 2026-07-24

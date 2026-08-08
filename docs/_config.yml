@@ -15,9 +15,12 @@ permalink: pretty
 # Custom layout (no theme)
 
 # Plugins
+# jekyll-sitemap is deliberately absent: scripts/generate-sitemap.ts already emits
+# every /docs/* URL into the site-wide sitemap.xml in the slash-free form Vercel
+# actually serves. The plugin emitted a second sitemap at /docs/sitemap.xml listing
+# only trailing-slash URLs, every one of which 308-redirects.
 plugins:
   - jekyll-feed
-  - jekyll-sitemap
   - jekyll-seo-tag
 
 # Exclude files from processing
