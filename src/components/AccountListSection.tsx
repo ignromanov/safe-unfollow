@@ -156,7 +156,7 @@ export function AccountListSection({
             onClick={() => setSortOrder(prev => (prev === 'asc' ? 'desc' : 'asc'))}
             className={`cursor-pointer p-3.5 rounded-2xl border transition-all shadow-sm shrink-0 ${
               sortOrder === 'desc'
-                ? 'bg-primary text-white border-primary'
+                ? 'bg-primary text-primary-foreground border-primary'
                 : 'bg-card border-border text-zinc-500 hover:text-primary'
             }`}
             title={sortOrder === 'asc' ? t('sort.desc') : t('sort.asc')}

@@ -59,7 +59,7 @@ export function Hero({
                 onContinue?.();
                 analytics.heroCTAContinue?.();
               }}
-              className="cursor-pointer w-full sm:w-auto px-10 md:px-12 py-4 md:py-5 rounded-3xl bg-primary text-white font-bold text-base md:text-lg shadow-2xl shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 group"
+              className="cursor-pointer w-full sm:w-auto px-10 md:px-12 py-4 md:py-5 rounded-3xl bg-primary text-primary-foreground font-bold text-base md:text-lg shadow-2xl shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 group"
             >
               {t('buttons.viewResults')}
               <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
@@ -70,7 +70,7 @@ export function Hero({
                 onStartGuide();
                 analytics.heroCTAGuide?.();
               }}
-              className="cursor-pointer w-full sm:w-auto px-10 md:px-12 py-4 md:py-5 rounded-3xl bg-primary text-white font-bold text-base md:text-lg shadow-2xl shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 group"
+              className="cursor-pointer w-full sm:w-auto px-10 md:px-12 py-4 md:py-5 rounded-3xl bg-primary text-primary-foreground font-bold text-base md:text-lg shadow-2xl shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 group"
             >
               {t('buttons.getGuide')}
               <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />

@@ -35,7 +35,7 @@ export const StatCard = memo(function StatCard({
     >
       <div
         className={`p-2.5 rounded-xl transition-transform ${
-          isActive ? 'bg-white/20 text-white' : `${colorClass} group-hover:scale-110`
+          isActive ? 'bg-white/20 text-primary-foreground' : `${colorClass} group-hover:scale-110`
         }`}
       >
         {icon}
@@ -43,14 +43,14 @@ export const StatCard = memo(function StatCard({
       <div className="space-y-0.5 md:space-y-1">
         <div
           className={`text-xl md:text-3xl font-display font-black tracking-tight leading-none ${
-            isActive ? 'text-white' : 'text-zinc-900 dark:text-zinc-100'
+            isActive ? 'text-primary-foreground' : 'text-zinc-900 dark:text-zinc-100'
           }`}
         >
           {value.toLocaleString()}
         </div>
         <div
           className={`text-xs font-black uppercase tracking-widest leading-none ${
-            isActive ? 'text-white/80' : 'text-zinc-400'
+            isActive ? 'text-primary-foreground/90' : 'text-zinc-400'
           }`}
         >
           {label}

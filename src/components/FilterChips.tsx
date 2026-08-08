@@ -45,7 +45,7 @@ const numberFormatter = new Intl.NumberFormat();
 function getBadgeIcon(type: BadgeKey, isActive: boolean): ReactNode {
   const config = BADGE_ICON_MAP[type];
   const IconComponent = config.icon;
-  return <IconComponent size={18} className={isActive ? 'text-white' : config.defaultClass} />;
+  return <IconComponent size={18} className={isActive ? 'text-primary-foreground' : config.defaultClass} />;
 }
 
 // Filter configuration with badge types (labels come from i18n)
@@ -125,7 +125,7 @@ export const FilterChips = memo(function FilterChips({
               onClick={() => handleFilterToggle(cfg.type)}
               className={`cursor-pointer flex flex-col items-start justify-between p-4 rounded-2xl text-xs font-bold transition-all border min-h-[85px] relative ${
                 isActive
-                  ? 'bg-primary text-white border-primary shadow-md'
+                  ? 'bg-primary text-primary-foreground border-primary shadow-md'
                   : 'text-zinc-600 dark:text-zinc-400 border-border bg-zinc-50/50 dark:bg-zinc-900/20 hover:border-primary/40'
               }`}
               aria-label={
@@ -140,7 +140,7 @@ export const FilterChips = memo(function FilterChips({
                 <span
                   className={`px-2 py-0.5 rounded-lg text-xs font-black ${
                     isActive
-                      ? 'bg-white/20 text-white'
+                      ? 'bg-white/20 text-primary-foreground'
                       : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-500'
                   }`}
                 >

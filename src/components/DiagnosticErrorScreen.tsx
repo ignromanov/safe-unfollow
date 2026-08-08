@@ -143,7 +143,7 @@ export function DiagnosticErrorScreen({
           {onTryAgain && (
             <button
               onClick={handleTryAgain}
-              className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl bg-primary px-6 py-3 text-sm font-bold text-white transition-all hover:bg-primary/90 hover:shadow-lg"
+              className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-lg"
             >
               <RefreshCw size={18} />
               {t('diagnostic.tryAgain')}
