@@ -153,6 +153,19 @@ export function ResultsExportControls({
     setIsLicenseDialogOpen(true);
   };
 
+  // Passed to the dialog's onOpenChange, which Radix calls only for the X
+  // button, Escape, and an overlay click — the three ways a reader leaves
+  // without choosing anything. `onCheckout` navigates away without touching
+  // this prop, and `onManualEntry` above closes the paywall by calling
+  // `setIsPaywallOpen` directly rather than through this handler, so neither
+  // purchase path is at risk of also counting as a dismiss.
+  const handlePaywallOpenChange = (open: boolean): void => {
+    if (!open) {
+      analytics.paywallDismiss();
+    }
+    setIsPaywallOpen(open);
+  };
+
   const handleDownloadClick = (): void => {
     if (isRunningRef.current) return;
     analytics.exportClick(isUnlocked);
@@ -215,7 +228,7 @@ export function ResultsExportControls({
         {isPaywallOpen && saved ? (
           <PaywallModal
             open={isPaywallOpen}
-            onOpenChange={setIsPaywallOpen}
+            onOpenChange={handlePaywallOpenChange}
             onCheckout={startCheckout}
             onManualEntry={openLicenseDialog}
             savedFilename={saved.filename}

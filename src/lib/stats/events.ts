@@ -422,6 +422,16 @@ export const analytics = {
     trackEvent(AnalyticsEvents.PAYWALL_VIEW);
   },
 
+  // Fires only for the three Radix-driven closes (X, Escape, overlay click) —
+  // not for checkout (navigates away without touching the dialog's open
+  // state) or manual key entry (closes the paywall by calling setState
+  // directly, bypassing this handler). Both of those already have their own
+  // event, and double-counting them here would corrupt the one ratio this
+  // event exists to produce.
+  paywallDismiss: () => {
+    trackEvent(AnalyticsEvents.PAYWALL_DISMISS);
+  },
+
   checkoutStart: () => {
     trackEvent(AnalyticsEvents.CHECKOUT_START);
   },

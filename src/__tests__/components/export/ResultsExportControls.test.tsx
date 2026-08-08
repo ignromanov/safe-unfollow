@@ -17,6 +17,7 @@ vi.mock('@/lib/stats', async importOriginal => {
       ...actual.analytics,
       exportClick: vi.fn(),
       paywallView: vi.fn(),
+      paywallDismiss: vi.fn(),
       exportTriggerViewable: vi.fn(),
       freeExportDownload: vi.fn(),
       exportError: vi.fn(),
@@ -419,6 +420,71 @@ describe('ResultsExportControls', () => {
     );
 
     expect(await screen.findByRole('textbox')).toBeInTheDocument();
+  });
+
+  // What no other event distinguishes: of the ~99% who never buy, did they
+  // read the offer and decline it (this), or leave the page with it still
+  // open (uncaptured)? `paywall_dismiss` must fire for the former only, and
+  // specifically must not fire on either purchase path, or it would corrupt
+  // the ratio it exists to produce.
+  describe('paywall dismiss', () => {
+    async function openPaywall() {
+      unlocked(false);
+      const user = userEvent.setup();
+
+      render(<ResultsExportControls {...defaultProps} />);
+      await user.click(screen.getByRole('button', { name: triggerLabel }));
+      await screen.findByText(paywallHeadline);
+
+      return user;
+    }
+
+    // The built-in close button (X) is one of the three Radix-driven closes
+    // (X, Escape, overlay click) — all three share the same onOpenChange
+    // callback, so exercising one proves the wiring for all.
+    it('should fire when closed via the built-in close button', async () => {
+      const user = await openPaywall();
+
+      const closeButton = document.querySelector('[data-slot="dialog-close"]');
+      await user.click(closeButton as Element);
+
+      expect(vi.mocked(analytics.paywallDismiss)).toHaveBeenCalledTimes(1);
+      expect(screen.queryByText(paywallHeadline)).not.toBeInTheDocument();
+    });
+
+    // startCheckout only sets window.location.href — it never touches
+    // isPaywallOpen. A version that (wrongly) fired the dismiss from a
+    // useEffect watching that state, rather than from the Radix callback
+    // itself, would still pass this if the effect never ran here — the CTA
+    // click is what proves the checkout path was taken at all.
+    it('should not fire when leaving via checkout', async () => {
+      const startCheckout = vi.fn();
+      mockUseProExport.mockReturnValue({ isEnabled: true, isUnlocked: false, startCheckout });
+      const user = userEvent.setup();
+
+      render(<ResultsExportControls {...defaultProps} />);
+      await user.click(screen.getByRole('button', { name: triggerLabel }));
+      await screen.findByText(paywallHeadline);
+      await user.click(screen.getByRole('button', { name: resultsEN.export.paywall.cta }));
+
+      expect(startCheckout).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(analytics.paywallDismiss)).not.toHaveBeenCalled();
+    });
+
+    // Manual entry closes the paywall by calling setIsPaywallOpen directly
+    // (see openLicenseDialog), not through the onOpenChange prop this event
+    // is wired to — a naive `onOpenChange` hook covering all closes would
+    // fire here too, since Radix still sees `open` go from true to false.
+    it('should not fire when leaving via manual key entry', async () => {
+      const user = await openPaywall();
+
+      await user.click(
+        await screen.findByRole('button', { name: resultsEN.export.license.havePurchase })
+      );
+
+      expect(await screen.findByRole('textbox')).toBeInTheDocument();
+      expect(vi.mocked(analytics.paywallDismiss)).not.toHaveBeenCalled();
+    });
   });
 
   it('should not mount any modal before the button is clicked', () => {

@@ -76,6 +76,11 @@ export const AnalyticsEvents = {
   // stays the paid artefact: mixing them would destroy the purchase count.
   FREE_EXPORT_DOWNLOAD: 'free_export_download',
   PAYWALL_VIEW: 'paywall_view',
+  // Closed via the X button, Escape, or an overlay click — the reader saw the
+  // offer and chose to keep using the tool instead of buying. Distinguishes
+  // "offer is wrong" (this) from "moment is wrong" (leaving the page with the
+  // paywall still open, which this does not capture).
+  PAYWALL_DISMISS: 'paywall_dismiss',
   CHECKOUT_START: 'checkout_start',
   PURCHASE_SUCCESS: 'purchase_success',
   DOWNLOAD: 'download',

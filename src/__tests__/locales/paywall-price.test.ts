@@ -77,6 +77,13 @@ describe('paywall sample-size copy', () => {
       for (const field of ['headline', 'subtitle'] as const) {
         expect(String(paywall[field]), `${language} ${field}`).toContain('{{rows}}');
       }
+
+      // `export.saved.capped` names the file the free-tier click just wrote
+      // and interpolates the same FREE_EXPORT_ROWS constant (commit
+      // d45970b). A locale that hardcodes "10" here drifts the same way
+      // headline/subtitle would, and this key has no guard yet.
+      const savedCapped = String(bundleFor(language).export.saved.capped);
+      expect(savedCapped, `${language} export.saved.capped`).toContain('{{rows}}');
     }
   });
 });
