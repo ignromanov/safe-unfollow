@@ -9,7 +9,7 @@
 import { useSyncExternalStore } from 'react';
 
 import {
-  getCheckoutUrl,
+  buildCheckoutUrl,
   isExportFeatureEnabled,
   isExportUnlocked,
   subscribeUnlock,
@@ -35,7 +35,7 @@ export function useProExport(): UseProExportResult {
   );
 
   const startCheckout = (): void => {
-    const checkoutUrl = getCheckoutUrl();
+    const checkoutUrl = buildCheckoutUrl();
     if (!checkoutUrl) return;
 
     analytics.checkoutStart();

@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  buildCheckoutUrl,
   clearLicense,
   consumeLicenseParam,
   getCheckoutUrl,
@@ -71,6 +72,57 @@ describe('export/unlock', () => {
     it('should return the configured URL', () => {
       vi.stubEnv('VITE_DODO_CHECKOUT_URL', 'https://checkout.example/buy');
       expect(getCheckoutUrl()).toBe('https://checkout.example/buy');
+    });
+  });
+
+  describe('buildCheckoutUrl', () => {
+    const CHECKOUT = 'https://test.checkout.dodopayments.com/buy/pdt_x';
+
+    it('should attach the current page as the return address', () => {
+      // Without redirect_url Dodo keeps the buyer on its own status page and
+      // the key never reaches us — observed on a real test purchase.
+      vi.stubEnv('VITE_DODO_CHECKOUT_URL', CHECKOUT);
+      window.history.replaceState({}, '', '/results');
+
+      const built = new URL(buildCheckoutUrl() ?? '');
+
+      expect(built.searchParams.get('redirect_url')).toBe(`${window.location.origin}/results`);
+    });
+
+    it('should return the buyer to the language they bought in', () => {
+      // Built from the live path rather than a configured constant, so a
+      // Russian buyer lands on /ru/results instead of bouncing through the
+      // language redirect with their key in tow.
+      vi.stubEnv('VITE_DODO_CHECKOUT_URL', CHECKOUT);
+      window.history.replaceState({}, '', '/ru/results');
+
+      const built = new URL(buildCheckoutUrl() ?? '');
+
+      expect(built.searchParams.get('redirect_url')).toBe(`${window.location.origin}/ru/results`);
+    });
+
+    it('should replace a redirect_url already baked into the configured URL', () => {
+      // The dashboard hands out links with redirect_url pre-filled to the
+      // production host. Kept as-is, no preview deploy or localhost could ever
+      // complete a purchase loop.
+      vi.stubEnv(
+        'VITE_DODO_CHECKOUT_URL',
+        `${CHECKOUT}?quantity=1&redirect_url=https://safeunfollow.app/results`
+      );
+      window.history.replaceState({}, '', '/results');
+
+      const built = new URL(buildCheckoutUrl() ?? '');
+
+      expect(built.searchParams.getAll('redirect_url')).toEqual([
+        `${window.location.origin}/results`,
+      ]);
+      expect(built.searchParams.get('quantity')).toBe('1');
+    });
+
+    it('should return null when checkout is not configured', () => {
+      vi.stubEnv('VITE_DODO_CHECKOUT_URL', '');
+
+      expect(buildCheckoutUrl()).toBeNull();
     });
   });
 

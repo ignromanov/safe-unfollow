@@ -84,7 +84,36 @@ export function isExportFeatureEnabled(): boolean {
   return getApiBase() !== null;
 }
 
-/** The Dodo Payments hosted checkout URL, or null if not configured. */
+/**
+ * The checkout URL with the return address attached, or null if not configured.
+ *
+ * `redirect_url` is built from the live location rather than baked into the
+ * configured value, for two reasons found the hard way. Without the parameter,
+ * Dodo keeps the buyer on its own status page and the license key never reaches
+ * us — observed on a real test purchase. And a value baked in from the
+ * dashboard points at production, so no preview deploy and no localhost could
+ * ever complete a purchase loop; testing the paid path would require shipping
+ * it first.
+ *
+ * The current pathname is the results route in the buyer's own language, so
+ * this also returns them to /ru/results rather than bouncing them through the
+ * language redirect with their key in tow.
+ */
+export function buildCheckoutUrl(): string | null {
+  const configured = getCheckoutUrl();
+  if (configured === null || typeof window === 'undefined') return configured;
+
+  try {
+    const url = new URL(configured);
+    // set(), not append(): a dashboard-issued link already carries one.
+    url.searchParams.set('redirect_url', window.location.origin + window.location.pathname);
+    return url.toString();
+  } catch {
+    return configured;
+  }
+}
+
+/** The Dodo Payments hosted checkout URL as configured, or null if unset. */
 export function getCheckoutUrl(): string | null {
   const url = import.meta.env.VITE_DODO_CHECKOUT_URL;
   return url ? url : null;
