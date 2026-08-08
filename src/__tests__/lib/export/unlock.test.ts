@@ -227,6 +227,26 @@ describe('export/unlock', () => {
       expect(window.location.search).toBe('');
     });
 
+    it('should handle a real Dodo return URL, captured from a test purchase', () => {
+      // The only assertion in this file built from an observed transaction
+      // rather than from reading the docs. Recorded 2026-08-08, test mode,
+      // payment pay_0NkvPGIP0zCPcXtVGqc76 — param names, their order, the
+      // percent-encoded email and the language-prefixed path are all exactly
+      // as Dodo delivered them. The key is a UUID v4, which is what Dodo
+      // auto-generates; the docs' LK-001 / PRO-AAAA examples are imported
+      // keys, which is why isLicenseKeyFormat stays permissive.
+      window.history.replaceState(
+        {},
+        '',
+        '/ru/results?payment_id=pay_0NkvPGIP0zCPcXtVGqc76&status=succeeded' +
+          '&license_key=7209f960-d2f9-4d23-ab81-2f251ea8e70b&email=test%40test.com'
+      );
+
+      expect(consumeLicenseParam()).toBe('7209f960-d2f9-4d23-ab81-2f251ea8e70b');
+      expect(window.location.search).toBe('');
+      expect(window.location.pathname).toBe('/ru/results');
+    });
+
     it('should take the first key when the redirect carries several', () => {
       // Dodo comma-joins keys when a purchase grants more than one. One product
       // grants one, but a second entitlement added later would silently pass a
