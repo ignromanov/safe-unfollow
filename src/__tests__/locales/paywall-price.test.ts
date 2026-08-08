@@ -67,3 +67,25 @@ describe('paywall price copy', () => {
     }
   });
 });
+
+// The activation limit lives in Dodo's dashboard, so this can no more prove the
+// number is right than the price test can. What it prevents is the state this
+// copy was written to fix: the limit is real and was stated nowhere, so a buyer
+// met it for the first time as a `limit_reached` error on their fourth device —
+// a dispute, at roughly five sales each, that the sentence costs nothing to
+// avoid. A locale that drops it sells the same licence without the term.
+describe('paywall device-limit copy', () => {
+  const DEVICES = '3';
+
+  it('states the same activation limit in every supported language', () => {
+    for (const language of SUPPORTED_LANGUAGES) {
+      const bullet3 = String(bundleFor(language).export.paywall.bullet3);
+
+      // Any digit that is not part of the price — the price test owns that one.
+      const withoutPrice = bullet3.replace(/\d+(?:[.,]\d{2})?\s*\$|\$\s*\d+(?:[.,]\d{2})?/g, '');
+      const numbers = withoutPrice.match(/\d+/g) ?? [];
+
+      expect(numbers, `${language} bullet3 states a device count`).toContain(DEVICES);
+    }
+  });
+});
