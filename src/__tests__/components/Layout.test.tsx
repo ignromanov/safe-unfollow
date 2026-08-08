@@ -597,7 +597,7 @@ describe('Layout', () => {
 
   describe('license capture', () => {
     beforeEach(() => {
-      vi.stubEnv('VITE_LEMONSQUEEZY_URL', 'https://checkout.example/buy');
+      vi.stubEnv('VITE_DODO_CHECKOUT_URL', 'https://checkout.example/buy');
     });
 
     afterEach(async () => {
@@ -612,7 +612,11 @@ describe('Layout', () => {
     });
 
     it('should strip the license param from the URL on mount', async () => {
-      window.history.replaceState({}, '', '/results?license=38b1460a-5104-4067-a91d-77b872934d51');
+      window.history.replaceState(
+        {},
+        '',
+        '/results?license_key=38b1460a-5104-4067-a91d-77b872934d51'
+      );
 
       renderLayout();
 
@@ -636,7 +640,11 @@ describe('Layout', () => {
       const { consumeLicenseParam } = await import('@/lib/export/unlock');
       const { userEvent } = await import('@testing-library/user-event');
       const user = userEvent.setup();
-      window.history.replaceState({}, '', '/results?license=38b1460a-5104-4067-a91d-77b872934d51');
+      window.history.replaceState(
+        {},
+        '',
+        '/results?license_key=38b1460a-5104-4067-a91d-77b872934d51'
+      );
 
       renderLayout('/results');
 
@@ -659,8 +667,12 @@ describe('Layout', () => {
       // ever use it, since the dialog itself stays flag-gated below.
       // (No need for vi.unstubAllEnvs() here — the afterEach already ran it
       // after every previous test, and vi.stubEnv freely overwrites a stub.)
-      vi.stubEnv('VITE_LEMONSQUEEZY_URL', '');
-      window.history.replaceState({}, '', '/results?license=38b1460a-5104-4067-a91d-77b872934d51');
+      vi.stubEnv('VITE_DODO_CHECKOUT_URL', '');
+      window.history.replaceState(
+        {},
+        '',
+        '/results?license_key=38b1460a-5104-4067-a91d-77b872934d51'
+      );
 
       renderLayout();
 
@@ -672,7 +684,7 @@ describe('Layout', () => {
       const KEY = '38b1460a-5104-4067-a91d-77b872934d51';
       const { storeLicense } = await import('@/lib/export/unlock');
       storeLicense(KEY, 'f90ec370-fd83-46a5-8bbd-44a241e78665');
-      window.history.replaceState({}, '', `/results?license=${KEY}`);
+      window.history.replaceState({}, '', `/results?license_key=${KEY}`);
 
       renderLayout();
 
@@ -687,7 +699,7 @@ describe('Layout', () => {
       const NEW_KEY = 'a1a2a3a4-b1b2-c1c2-d1d2-e1e2e3e4e5e6';
       const { storeLicense } = await import('@/lib/export/unlock');
       storeLicense(STORED_KEY, 'f90ec370-fd83-46a5-8bbd-44a241e78665');
-      window.history.replaceState({}, '', `/results?license=${NEW_KEY}`);
+      window.history.replaceState({}, '', `/results?license_key=${NEW_KEY}`);
 
       renderLayout();
 
@@ -695,7 +707,7 @@ describe('Layout', () => {
     });
 
     it('should not open the dialog for an empty license param', () => {
-      window.history.replaceState({}, '', '/results?license=');
+      window.history.replaceState({}, '', '/results?license_key=');
 
       renderLayout();
 

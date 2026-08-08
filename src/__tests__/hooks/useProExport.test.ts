@@ -18,7 +18,7 @@ describe('useProExport', () => {
     localStorage.clear();
     resetUnlockCache();
     vi.clearAllMocks();
-    vi.stubEnv('VITE_LEMONSQUEEZY_URL', 'https://checkout.example/buy');
+    vi.stubEnv('VITE_DODO_CHECKOUT_URL', 'https://checkout.example/buy');
     window.history.replaceState({}, '', '/results');
   });
 
@@ -27,7 +27,7 @@ describe('useProExport', () => {
   });
 
   it('should report the feature as disabled without a checkout URL', () => {
-    vi.stubEnv('VITE_LEMONSQUEEZY_URL', '');
+    vi.stubEnv('VITE_DODO_CHECKOUT_URL', '');
 
     const { result } = renderHook(() => useProExport());
 
@@ -64,11 +64,15 @@ describe('useProExport', () => {
   });
 
   it('should leave the `license` param in the URL for the Layout-level capture', () => {
-    window.history.replaceState({}, '', '/results?license=38b1460a-5104-4067-a91d-77b872934d51');
+    window.history.replaceState(
+      {},
+      '',
+      '/results?license_key=38b1460a-5104-4067-a91d-77b872934d51'
+    );
 
     renderHook(() => useProExport());
 
-    expect(window.location.search).toBe('?license=38b1460a-5104-4067-a91d-77b872934d51');
+    expect(window.location.search).toBe('?license_key=38b1460a-5104-4067-a91d-77b872934d51');
   });
 
   it('should report checkout start before navigating', () => {

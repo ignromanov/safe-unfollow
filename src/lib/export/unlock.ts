@@ -1,7 +1,7 @@
 /**
  * Pro Export unlock state.
  *
- * The unlock is a LemonSqueezy license: the key plus the instance id returned
+ * The unlock is a Dodo Payments license: the key plus the instance id returned
  * by activation. Both live in localStorage because there is no server to hold
  * them. A forged entry is still possible, but it can no longer be handed to
  * someone else as a URL, and a leaked key can be disabled in the dashboard —
@@ -9,7 +9,15 @@
  */
 
 const UNLOCK_STORAGE_KEY = 'su-pro-export';
-const LICENSE_QUERY_PARAM = 'license';
+const LICENSE_QUERY_PARAM = 'license_key';
+
+/**
+ * Everything else Dodo appends to the return URL. None of it is ours to keep:
+ * `email` identifies the buyer, and `payment_id` links this browser to a
+ * purchase record. Both are stripped in the same pass as the key so they never
+ * reach history, the referrer, or the Umami pageview.
+ */
+const CHECKOUT_QUERY_PARAMS = ['payment_id', 'subscription_id', 'status', 'email'] as const;
 
 export interface StoredLicense {
   v: 1;
@@ -64,12 +72,12 @@ export function subscribeUnlock(listener: () => void): () => void {
 
 /** Whether Pro Export is configured at all. When false, no export UI renders. */
 export function isExportFeatureEnabled(): boolean {
-  return Boolean(import.meta.env.VITE_LEMONSQUEEZY_URL);
+  return Boolean(import.meta.env.VITE_DODO_CHECKOUT_URL);
 }
 
-/** The LemonSqueezy hosted checkout URL, or null if not configured. */
+/** The Dodo Payments hosted checkout URL, or null if not configured. */
 export function getCheckoutUrl(): string | null {
-  const url = import.meta.env.VITE_LEMONSQUEEZY_URL;
+  const url = import.meta.env.VITE_DODO_CHECKOUT_URL;
   return url ? url : null;
 }
 
@@ -134,9 +142,10 @@ export function clearLicense(): void {
 }
 
 /**
- * Reads `?license=` from the current URL and strips it, leaving other params
- * intact. Stripping immediately keeps the key out of history entries, the
- * referrer, and any analytics that read location.search.
+ * Reads `?license_key=` from the current URL and strips the whole checkout
+ * return payload, leaving unrelated params (UTM tags and the like) intact.
+ * Stripping immediately keeps both the key and the buyer's identity out of
+ * history entries, the referrer, and any analytics that read location.search.
  *
  * Returns the raw key; activation is the caller's job.
  */
@@ -144,13 +153,26 @@ export function consumeLicenseParam(): string | null {
   if (typeof window === 'undefined') return null;
 
   const url = new URL(window.location.href);
-  const key = url.searchParams.get(LICENSE_QUERY_PARAM);
-  if (key === null) return null;
+  const rawKey = url.searchParams.get(LICENSE_QUERY_PARAM);
 
-  url.searchParams.delete(LICENSE_QUERY_PARAM);
-  window.history.replaceState({}, '', url.pathname + url.search + url.hash);
+  const strippedAny = [LICENSE_QUERY_PARAM, ...CHECKOUT_QUERY_PARAMS].reduce((stripped, param) => {
+    if (!url.searchParams.has(param)) return stripped;
+    url.searchParams.delete(param);
+    return true;
+  }, false);
 
-  return key;
+  // Rewriting an untouched URL would push a needless history entry on every
+  // ordinary page load.
+  if (strippedAny) {
+    window.history.replaceState({}, '', url.pathname + url.search + url.hash);
+  }
+
+  if (rawKey === null) return null;
+
+  // Dodo comma-joins keys when one purchase grants several. We grant one, so
+  // anything past the first comma is a misconfiguration — better to activate
+  // the first key than to send the whole string and get an unexplainable 404.
+  return rawKey.split(',')[0] ?? rawKey;
 }
 
 /** True until the first validation of this browser session. */

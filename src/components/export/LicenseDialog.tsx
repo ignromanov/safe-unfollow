@@ -39,14 +39,19 @@ const ERROR_KEYS = {
   not_found: 'export.license.errorNotFound',
   limit_reached: 'export.license.errorLimit',
   disabled: 'export.license.revoked',
+  // Unreachable from this dialog — 'invalid' is the reason validateLicense
+  // returns for Dodo's bare `valid: false`, and this dialog only activates.
+  // The exhaustive `satisfies` below still demands an entry, and "revoked" is
+  // the honest copy for a key the server no longer accepts.
+  invalid: 'export.license.revoked',
   invalid_input: 'export.license.errorGeneric',
   network: 'export.license.errorGeneric',
   unknown: 'export.license.errorGeneric',
 } as const satisfies Record<LicenseFailureReason | 'format', string>;
 
-// not_found, limit_reached and disabled are permanent verdicts from
-// LemonSqueezy — the same key fails the same way forever, so offering
-// "Try again" for those reasons would just invite a click that cannot help.
+// not_found, limit_reached and disabled are permanent verdicts from Dodo —
+// the same key fails the same way forever, so offering "Try again" for those
+// reasons would just invite a click that cannot help.
 const RETRYABLE_REASONS = new Set<LicenseFailureReason | 'format'>([
   'invalid_input',
   'network',
@@ -63,7 +68,7 @@ const RETRYABLE_REASONS = new Set<LicenseFailureReason | 'format'>([
  */
 export function LicenseDialog({ open, onOpenChange, initialKey, source }: LicenseDialogProps) {
   const { t } = useTranslation('results');
-  // A redirect URL can carry `?license=` with nothing after it — treat that
+  // A redirect URL can carry `?license_key=` with nothing after it — treat that
   // the same as "no key" (show the manual form) rather than activating an
   // empty string and paying for a network round-trip to learn what a regex
   // already knew.
@@ -74,7 +79,7 @@ export function LicenseDialog({ open, onOpenChange, initialKey, source }: Licens
   );
   const [inputValue, setInputValue] = useState('');
   // Guards the automatic mount activation independently of runActivation's
-  // identity: activateLicense() is not idempotent (LemonSqueezy mints a new
+  // identity: activateLicense() is not idempotent (Dodo mints a new
   // device instance, capped at 3, on every call), so this must not re-fire
   // just because a parent re-render gave onOpenChange a new closure.
   const activatedKeyRef = useRef<string | null>(null);

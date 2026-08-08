@@ -32,25 +32,25 @@ describe('export/unlock', () => {
   });
 
   describe('isExportFeatureEnabled', () => {
-    it('should be false when VITE_LEMONSQUEEZY_URL is not set', () => {
-      vi.stubEnv('VITE_LEMONSQUEEZY_URL', '');
+    it('should be false when VITE_DODO_CHECKOUT_URL is not set', () => {
+      vi.stubEnv('VITE_DODO_CHECKOUT_URL', '');
       expect(isExportFeatureEnabled()).toBe(false);
     });
 
-    it('should be true when VITE_LEMONSQUEEZY_URL is set', () => {
-      vi.stubEnv('VITE_LEMONSQUEEZY_URL', 'https://checkout.example/buy');
+    it('should be true when VITE_DODO_CHECKOUT_URL is set', () => {
+      vi.stubEnv('VITE_DODO_CHECKOUT_URL', 'https://checkout.example/buy');
       expect(isExportFeatureEnabled()).toBe(true);
     });
   });
 
   describe('getCheckoutUrl', () => {
     it('should return null when not configured', () => {
-      vi.stubEnv('VITE_LEMONSQUEEZY_URL', '');
+      vi.stubEnv('VITE_DODO_CHECKOUT_URL', '');
       expect(getCheckoutUrl()).toBeNull();
     });
 
     it('should return the configured URL', () => {
-      vi.stubEnv('VITE_LEMONSQUEEZY_URL', 'https://checkout.example/buy');
+      vi.stubEnv('VITE_DODO_CHECKOUT_URL', 'https://checkout.example/buy');
       expect(getCheckoutUrl()).toBe('https://checkout.example/buy');
     });
   });
@@ -118,21 +118,55 @@ describe('export/unlock', () => {
     });
 
     it('should return the key and strip the param', () => {
-      window.history.replaceState({}, '', `/results?license=${KEY}`);
+      window.history.replaceState({}, '', `/results?license_key=${KEY}`);
 
       expect(consumeLicenseParam()).toBe(KEY);
       expect(window.location.search).toBe('');
     });
 
     it('should preserve unrelated params while stripping the key', () => {
-      window.history.replaceState({}, '', `/results?utm_source=email&license=${KEY}`);
+      window.history.replaceState({}, '', `/results?utm_source=email&license_key=${KEY}`);
 
       expect(consumeLicenseParam()).toBe(KEY);
       expect(window.location.search).toBe('?utm_source=email');
     });
 
+    it('should strip the buyer email and payment id the redirect carries', () => {
+      // Dodo appends payment_id, status and email alongside the key. Only the
+      // key is ours to use; the rest is the buyer's identity, and leaving it in
+      // the URL would hand it to history, the referrer, and the Umami pageview
+      // on a site whose entire promise is that nothing personal leaves the
+      // device.
+      window.history.replaceState(
+        {},
+        '',
+        `/results?payment_id=pay_abc&status=succeeded&license_key=${KEY}&email=buyer%40example.com`
+      );
+
+      expect(consumeLicenseParam()).toBe(KEY);
+      expect(window.location.search).toBe('');
+    });
+
+    it('should strip the checkout params even when no key came back', () => {
+      // A product misconfiguration delivers a payment without a license. The
+      // email must not survive that path either.
+      window.history.replaceState({}, '', '/results?payment_id=pay_abc&email=buyer%40example.com');
+
+      expect(consumeLicenseParam()).toBeNull();
+      expect(window.location.search).toBe('');
+    });
+
+    it('should take the first key when the redirect carries several', () => {
+      // Dodo comma-joins keys when a purchase grants more than one. One product
+      // grants one, but a second entitlement added later would silently pass a
+      // two-key string to activate and fail with a 404 nobody could explain.
+      window.history.replaceState({}, '', `/results?license_key=${KEY},SECOND-KEY-0002`);
+
+      expect(consumeLicenseParam()).toBe(KEY);
+    });
+
     it('should not store anything by itself', () => {
-      window.history.replaceState({}, '', `/results?license=${KEY}`);
+      window.history.replaceState({}, '', `/results?license_key=${KEY}`);
 
       consumeLicenseParam();
 
@@ -143,7 +177,7 @@ describe('export/unlock', () => {
       // Guards the invariant Critical 2's stored-license check depends on —
       // the param must not still be readable after Layout's first render
       // consumes it, or a re-render could hand the key to activation again.
-      window.history.replaceState({}, '', `/results?license=${KEY}`);
+      window.history.replaceState({}, '', `/results?license_key=${KEY}`);
 
       expect(consumeLicenseParam()).toBe(KEY);
       expect(consumeLicenseParam()).toBeNull();

@@ -79,7 +79,7 @@ export function Layout({ lang }: LayoutProps) {
     return isExportFeatureEnabled() ? key : null;
   });
   const [isLicenseDialogOpen, setIsLicenseDialogOpen] = useState(() => {
-    // An empty or whitespace-only `?license=` (e.g. a truncated link) is not
+    // An empty or whitespace-only `?license_key=` (e.g. a truncated link) is not
     // a key at all — opening the manual-entry form for it would show a
     // license prompt to someone who never bought anything.
     const trimmed = capturedLicenseKey?.trim() ?? '';
