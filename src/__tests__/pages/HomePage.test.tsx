@@ -212,7 +212,6 @@ describe('HomePage', () => {
     const withAdEnv = (fn: () => void) => {
       vi.stubEnv('VITE_ADSENSE_CLIENT', 'ca-pub-test');
       vi.stubEnv('VITE_ADSENSE_SLOT_HOME', '111');
-      vi.stubEnv('VITE_ADSENSE_SLOT_HOME_FOOTER', '222');
       try {
         fn();
       } finally {
@@ -243,15 +242,19 @@ describe('HomePage', () => {
       });
     });
 
-    it('should place the multiplex ad after the footer CTA, so the CTA is seen first', () => {
+    it('should carry exactly one ad unit, and nothing below the footer CTA', () => {
+      // The end-of-page multiplex was removed after measurement: 725 impressions
+      // returned $0.03 at 2.49% viewability. Asserting the count rather than the
+      // absence of one name means a second unit cannot reappear here unnoticed.
       withAdEnv(() => {
-        render(<HomePage />);
+        const { container } = render(<HomePage />);
 
-        const ad = document.querySelector('[data-ad-name="home_footer"]') as HTMLElement;
-        expect(ad).not.toBeNull();
+        const ads = container.querySelectorAll('[data-ad-name]');
+        expect(ads).toHaveLength(1);
+        expect(ads[0]?.getAttribute('data-ad-name')).toBe('home');
         expect(
-          screen.getByTestId('footer-cta').compareDocumentPosition(ad) &
-            Node.DOCUMENT_POSITION_FOLLOWING
+          screen.getByTestId('footer-cta').compareDocumentPosition(ads[0] as HTMLElement) &
+            Node.DOCUMENT_POSITION_PRECEDING
         ).toBeTruthy();
       });
     });
