@@ -138,6 +138,32 @@ describe('ResultsExportControls', () => {
     expect(screen.getByRole('button', { name: triggerLabel })).not.toHaveTextContent('$7');
   });
 
+  /**
+   * The weight guard.
+   *
+   * jsdom computes no layout, so it cannot see that this button was a grey
+   * outline while a donation card two blocks down ran a gradient, a shadow and
+   * a filled-primary CTA. What it can pin is the treatment: one sale nets
+   * $5.50 against about $4.90 for a month of all the advertising on this
+   * property, and the highest-earning action on the screen gets the one
+   * primary rank Apple HIG allows per screen.
+   *
+   * Token-exact, because the variant also emits `hover:bg-primary/90` and a
+   * substring match on "bg-primary" would stay green against `variant="ghost"`.
+   */
+  it('should dress the trigger as the primary action', () => {
+    unlocked(false);
+
+    render(<ResultsExportControls {...defaultProps} />);
+
+    const classes = screen
+      .getByRole('button', { name: triggerLabel })
+      .className.split(/\s+/)
+      .filter(Boolean);
+
+    expect(classes).toContain('bg-primary');
+  });
+
   // WCAG 2.5.3 Label in Name: the old icon button carried an aria-label of
   // "Export accounts", which would now override visible text reading
   // "Export · $7" — a voice-control user says what they can see and matches

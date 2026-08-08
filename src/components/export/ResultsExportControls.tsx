@@ -184,6 +184,23 @@ export function ResultsExportControls({
           `min-h-11` keeps the 44px touch target the icon button got from its
           padding. */}
       <div className="flex flex-col items-end gap-1 shrink-0">
+        {/* Filled primary, and it is only honest because of Phase 2. While the
+            click opened an invoice, the loudest button on the page would have
+            been a lure: maximum pull toward a paywall the reader had been given
+            no reason to trust. Since the click builds and hands over a real
+            ten-row CSV first — and the paywall appears afterwards, only when
+            the file was actually capped — the loudest action here is a free one
+            that delivers. Revert Phase 2 and this treatment has to go back to
+            `outline` in the same commit.
+
+            The text colour is overridden because the palette cannot carry the
+            default pairing: `--primary-foreground` on `--primary` measures
+            3.95:1 in light mode (3.39:1 on hover), under the 4.5:1 AA floor for
+            this 14px label. Near-black text on the same blue fill measures
+            4.84:1 / 5.65:1, and dark mode already ships dark-on-blue, so both
+            themes now read the same way. `text-foreground` is a token, not a
+            one-off — and tailwind-merge drops the variant's own text colour
+            because this className is appended last. */}
         <Button
           ref={triggerRef}
           onClick={handleDownloadClick}
@@ -191,8 +208,8 @@ export function ResultsExportControls({
           onFocus={preloadModal}
           disabled={isBusy}
           aria-busy={isBusy}
-          variant="outline"
-          className="h-auto min-h-11 gap-2 rounded-2xl px-4 py-2.5 font-semibold"
+          variant="default"
+          className="h-auto min-h-11 gap-2 rounded-2xl px-4 py-2.5 font-semibold text-foreground dark:text-primary-foreground"
         >
           <Download size={18} />
           {t('export.trigger')}
