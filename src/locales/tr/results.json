@@ -136,7 +136,7 @@
     }
   },
   "export": {
-    "downloadAriaLabel": "Hesapları dışa aktar",
+    "trigger": "Dışa aktar · 7$",
     "paywall": {
       "headline": "Listeni yanında götür",
       "subtitle": "Excel, Sheets veya kendi araçlarınla her yerde çalışan bir dosya indir.",

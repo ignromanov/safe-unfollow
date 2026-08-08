@@ -136,7 +136,7 @@
     }
   },
   "export": {
-    "downloadAriaLabel": "Ekspor akun",
+    "trigger": "Ekspor · $7",
     "paywall": {
       "headline": "Bawa daftarmu ke mana pun",
       "subtitle": "Unduh file yang bisa dibuka di mana saja — Excel, Sheets, atau alatmu sendiri.",

@@ -136,7 +136,7 @@
     }
   },
   "export": {
-    "downloadAriaLabel": "Exportar cuentas",
+    "trigger": "Exportar · $7",
     "paywall": {
       "headline": "Llévate tu lista contigo",
       "subtitle": "Descarga un archivo que funciona en todas partes: Excel, Sheets o tus propias herramientas.",

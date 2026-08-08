@@ -136,7 +136,7 @@
     }
   },
   "export": {
-    "downloadAriaLabel": "アカウントをエクスポート",
+    "trigger": "エクスポート・$7",
     "paywall": {
       "headline": "リストを持ち出そう",
       "subtitle": "Excel、Sheets、お好きなツールでそのまま使えるファイルをダウンロード。",

@@ -398,6 +398,15 @@ export const analytics = {
   },
 
   // Pro Export
+  //
+  // Batched like the ad impressions it shares a gate with: an impression is
+  // worth counting, not worth a serverless call each. Carries the unlock state
+  // because a returning purchaser sees this trigger every visit and will never
+  // buy again — leaving them in the denominator understates the real CTR.
+  exportTriggerViewable: (isUnlocked: boolean) => {
+    enqueueEvent(AnalyticsEvents.EXPORT_TRIGGER_VIEWABLE, { is_unlocked: isUnlocked });
+  },
+
   exportClick: (isUnlocked: boolean) => {
     trackEvent(AnalyticsEvents.EXPORT_CLICK, { is_unlocked: isUnlocked });
   },

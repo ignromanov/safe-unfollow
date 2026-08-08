@@ -65,6 +65,11 @@ const createFilteringMock = () => ({
   processingTime: 0,
 });
 
+const triggerLabel = resultsEN.export.trigger;
+
+const enableExport = () =>
+  mockUseProExport.mockReturnValue({ isEnabled: true, isUnlocked: false, startCheckout: vi.fn() });
+
 describe('AccountListSection — Pro Export gating', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -80,32 +85,81 @@ describe('AccountListSection — Pro Export gating', () => {
 
     renderWithRouter(<AccountListSection {...defaultProps} />);
 
-    expect(screen.queryByLabelText(resultsEN.export.downloadAriaLabel)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: triggerLabel })).not.toBeInTheDocument();
   });
 
   it('should render the export button when the feature is enabled', () => {
-    mockUseProExport.mockReturnValue({
-      isEnabled: true,
-      isUnlocked: false,
-      startCheckout: vi.fn(),
-    });
+    enableExport();
 
     renderWithRouter(<AccountListSection {...defaultProps} />);
 
-    expect(screen.getByLabelText(resultsEN.export.downloadAriaLabel)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: triggerLabel })).toBeInTheDocument();
   });
 
   // Sample data is 1,180 generated demo accounts — offering a paid export of it
   // would take money for a file the user has no use for.
   it('should not render the export button for sample data', () => {
-    mockUseProExport.mockReturnValue({
-      isEnabled: true,
-      isUnlocked: false,
-      startCheckout: vi.fn(),
-    });
+    enableExport();
 
     renderWithRouter(<AccountListSection {...defaultProps} isSample />);
 
-    expect(screen.queryByLabelText(resultsEN.export.downloadAriaLabel)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: triggerLabel })).not.toBeInTheDocument();
+  });
+});
+
+describe('AccountListSection — export trigger placement', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockUseAccountFiltering.mockReturnValue(createFilteringMock());
+    enableExport();
+  });
+
+  // The ask used to sit above the list, before the visitor had seen what they
+  // came for — the same inversion chunk B corrected when it moved the donation
+  // card below the list. Position is asserted through the DOM rather than
+  // `order-*` utilities so it is also the order a screen reader announces.
+  it('should place the trigger after the search field and before the list', () => {
+    renderWithRouter(<AccountListSection {...defaultProps} />);
+
+    const search = screen.getByPlaceholderText(resultsEN.search.placeholder);
+    const trigger = screen.getByRole('button', { name: triggerLabel });
+    const list = screen.getByTestId('account-list');
+
+    expect(search.compareDocumentPosition(trigger)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(trigger.compareDocumentPosition(list)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
+  // The sticky bar is ~90px of permanently-occupied viewport under a 64px app
+  // header, on a page whose traffic is 84.5% mobile. Two `p-3.5` icon buttons
+  // took ~112px from the search field at 390px; only sort keeps its place.
+  it('should not keep the trigger inside the sticky bar', () => {
+    const { container } = renderWithRouter(<AccountListSection {...defaultProps} />);
+
+    const sticky = container.querySelector('.sticky');
+    const trigger = screen.getByRole('button', { name: triggerLabel });
+
+    expect(sticky).not.toBeNull();
+    expect(sticky?.contains(trigger)).toBe(false);
+  });
+
+  // A visible count and an sr-only live region saying the same thing read the
+  // string twice to a screen reader. The visible one carries the live region.
+  it('should announce the result count exactly once', () => {
+    renderWithRouter(<AccountListSection {...defaultProps} />);
+
+    const announcements = screen.getAllByText(/Showing 21 of 21 accounts/);
+
+    expect(announcements).toHaveLength(1);
+    expect(announcements[0]).toHaveAttribute('aria-live', 'polite');
+    expect(announcements[0]).not.toHaveClass('sr-only');
+  });
+
+  // The count is content, not a paid surface: it renders for sample data too,
+  // where the trigger deliberately does not.
+  it('should keep the count when the trigger is absent', () => {
+    renderWithRouter(<AccountListSection {...defaultProps} isSample />);
+
+    expect(screen.getByText(/Showing 21 of 21 accounts/)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: triggerLabel })).not.toBeInTheDocument();
   });
 });

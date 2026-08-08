@@ -66,6 +66,11 @@ export const AnalyticsEvents = {
   AFFILIATE_BLOCK_CLICK: 'affiliate_block_click',
 
   // Pro Export
+  //
+  // The trigger sits below the fold, so /results pageviews are not its
+  // denominator — this event is. Emitted from the same MRC dwell gate the ad
+  // slots use, never on mount.
+  EXPORT_TRIGGER_VIEWABLE: 'export_trigger_viewable',
   EXPORT_CLICK: 'export_click',
   PAYWALL_VIEW: 'paywall_view',
   CHECKOUT_START: 'checkout_start',

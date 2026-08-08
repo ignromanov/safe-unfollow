@@ -136,7 +136,7 @@
     }
   },
   "export": {
-    "downloadAriaLabel": "Экспортировать аккаунты",
+    "trigger": "Экспорт · $7",
     "paywall": {
       "headline": "Заберите список с собой",
       "subtitle": "Скачайте файл, который работает везде — в Excel, Google Sheets или ваших инструментах.",

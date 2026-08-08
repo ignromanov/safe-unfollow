@@ -136,7 +136,7 @@
     }
   },
   "export": {
-    "downloadAriaLabel": "تصدير الحسابات",
+    "trigger": "تصدير · 7$",
     "paywall": {
       "headline": "خذ قائمتك معك",
       "subtitle": "نزّل ملفًا يعمل في كل مكان — Excel أو Sheets أو أدواتك الخاصة.",

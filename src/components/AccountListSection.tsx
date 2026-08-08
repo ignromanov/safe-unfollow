@@ -46,7 +46,7 @@ export function AccountListSection({
   filename,
   isSample = false,
 }: AccountListSectionProps) {
-  const { t } = useTranslation('results');
+  const { t, i18n } = useTranslation('results');
   const prefix = useLanguagePrefix();
   const {
     query,
@@ -102,15 +102,6 @@ export function AccountListSection({
 
   return (
     <div className="max-w-7xl mx-auto py-6 md:py-16 space-y-6 md:space-y-12 animate-in fade-in duration-500 mb-12 px-4">
-      {/* Screen reader announcement for results count */}
-      <span aria-live="polite" aria-atomic="true" className="sr-only">
-        {t('results.liveCount', {
-          count: displayCount,
-          total: totalCount,
-          defaultValue: 'Showing {{count}} of {{total}} accounts',
-        })}
-      </span>
-
       {/* Sample Data Indicator Banner */}
       {isSample && (
         <Alert className="border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950/50">
@@ -174,15 +165,6 @@ export function AccountListSection({
           >
             <ArrowUpDown size={20} />
           </button>
-          {/* Sample data is demo content — never worth paying to export */}
-          {!isSample && (
-            <ResultsExportControls
-              fileHash={fileHash}
-              indices={sortedIndices}
-              totalCount={totalCount}
-              filename={filename.replace(/\.[^/.]+$/, '') || 'safeunfollow-export'}
-            />
-          )}
         </div>
       </div>
 
@@ -268,6 +250,38 @@ export function AccountListSection({
 
         {/* Account List */}
         <div className="min-w-0">
+          {/* Content header for the list: what you are looking at on the left,
+              what it costs to take it with you on the right. Deliberately
+              outside the list card — the card is the virtualiser's measured
+              box, and the trigger sits where every reviewed competitor puts
+              export, at the top of the content area rather than in a toolbar.
+
+              The count carries the live region that used to be a separate
+              sr-only span. Two elements saying the same thing read it twice to
+              a screen reader; one visible element that also announces is both
+              cheaper and honest about what sighted users can see. */}
+          <div className="flex items-center justify-between gap-3 mb-3 md:mb-4">
+            <p
+              aria-live="polite"
+              aria-atomic="true"
+              className="text-sm font-semibold text-zinc-500 min-w-0"
+            >
+              {t('header.showing', {
+                filtered: displayCount.toLocaleString(i18n.language),
+                total: totalCount.toLocaleString(i18n.language),
+              })}
+            </p>
+            {/* Sample data is demo content — never worth paying to export */}
+            {!isSample && (
+              <ResultsExportControls
+                fileHash={fileHash}
+                indices={sortedIndices}
+                totalCount={totalCount}
+                filename={filename.replace(/\.[^/.]+$/, '') || 'safeunfollow-export'}
+              />
+            )}
+          </div>
+
           <AccountList
             fileHash={fileHash}
             accountCount={accountCount}
