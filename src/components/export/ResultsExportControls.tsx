@@ -40,12 +40,12 @@ export interface ResultsExportControlsProps {
  * paywall re-renders this control instead of the whole results view (and its
  * virtualized account list).
  *
- * The trigger states its price. Every reviewed competitor leaves export
- * unpriced, but their click downloads a real file — ours opens a paywall, and a
- * bare download glyph that bills you is exactly the kind of trick this product
- * sells the absence of. Pricing the trigger also moves the filter one step
- * earlier: the same sales need a ~3.3% click-through against a pre-qualified
- * paywall instead of 17% against a cold one.
+ * The trigger does not state a price, because its click delivers a file. The
+ * rule is "either the click gives you something, or the button says what it
+ * costs": a bare download glyph that bills you is the kind of trick this
+ * product sells the absence of. Phase 1 satisfied that rule with a price on the
+ * button; this satisfies it with a real ten-row sample, which also puts the
+ * filter after the value instead of before it.
  */
 export function ResultsExportControls({
   fileHash,
@@ -128,6 +128,11 @@ export function ResultsExportControls({
     }
   };
 
+  const openLicenseDialog = (): void => {
+    setIsPaywallOpen(false);
+    setIsLicenseDialogOpen(true);
+  };
+
   const handleDownloadClick = (): void => {
     if (isRunningRef.current) return;
     analytics.exportClick(isUnlocked);
@@ -170,6 +175,28 @@ export function ResultsExportControls({
             {t('export.dialog.error')}
           </p>
         )}
+
+        {/* Restoring a purchase must not go through the sample. Someone setting
+            up a second device has already paid, and the paywall — the only
+            other place this link lives — now opens *after* a download, so
+            without this they would be handed a ten-row file they did not ask
+            for before being allowed to unlock the one they own.
+
+            Kept in the paywall as well rather than moved: that dialog is a
+            focus trap, and a dead end inside one is worse than a duplicate
+            outside it. Quiet on purpose — this is a recovery path, not an
+            offer, and it must not compete with the trigger above it. */}
+        {!isUnlocked && (
+          <button
+            type="button"
+            onClick={openLicenseDialog}
+            onMouseEnter={() => void import('./LicenseDialog')}
+            onFocus={() => void import('./LicenseDialog')}
+            className="cursor-pointer px-1 py-2 text-xs text-zinc-500 underline underline-offset-2 transition-colors hover:text-primary focus-visible:text-primary"
+          >
+            {t('export.license.havePurchase')}
+          </button>
+        )}
       </div>
 
       <Suspense fallback={null}>
@@ -178,10 +205,7 @@ export function ResultsExportControls({
             open={isPaywallOpen}
             onOpenChange={setIsPaywallOpen}
             onCheckout={startCheckout}
-            onManualEntry={() => {
-              setIsPaywallOpen(false);
-              setIsLicenseDialogOpen(true);
-            }}
+            onManualEntry={openLicenseDialog}
           />
         ) : null}
         {isExportDialogOpen ? (

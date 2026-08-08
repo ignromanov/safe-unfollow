@@ -296,6 +296,50 @@ describe('ResultsExportControls', () => {
     expect(vi.mocked(analytics.exportClick)).toHaveBeenCalledWith(true);
   });
 
+  // A buyer setting up a second device has already paid. Leaving the only way
+  // to prove it behind the free sample means handing them a ten-row file they
+  // did not ask for before letting them unlock the one they own.
+  describe('restoring a purchase', () => {
+    it('should offer the key entry without making a buyer take the sample first', async () => {
+      unlocked(false);
+      const user = userEvent.setup();
+
+      render(<ResultsExportControls {...defaultProps} />);
+      await user.click(screen.getByRole('button', { name: resultsEN.export.license.havePurchase }));
+
+      expect(await screen.findByRole('textbox')).toBeInTheDocument();
+      expect(vi.mocked(buildExportCsv)).not.toHaveBeenCalled();
+      expect(vi.mocked(downloadBlob)).not.toHaveBeenCalled();
+      expect(vi.mocked(analytics.paywallView)).not.toHaveBeenCalled();
+    });
+
+    // Someone who has already activated has nothing to restore, and the link
+    // would be pure noise above their list.
+    it('should not offer it to someone already unlocked', () => {
+      unlocked(true);
+
+      render(<ResultsExportControls {...defaultProps} />);
+
+      expect(
+        screen.queryByRole('button', { name: resultsEN.export.license.havePurchase })
+      ).not.toBeInTheDocument();
+    });
+
+    it('should not offer it when the feature is off', () => {
+      mockUseProExport.mockReturnValue({
+        isEnabled: false,
+        isUnlocked: false,
+        startCheckout: vi.fn(),
+      });
+
+      render(<ResultsExportControls {...defaultProps} />);
+
+      expect(
+        screen.queryByRole('button', { name: resultsEN.export.license.havePurchase })
+      ).not.toBeInTheDocument();
+    });
+  });
+
   it('should open the manual license dialog from the paywall', async () => {
     const user = userEvent.setup();
     unlocked(false);
