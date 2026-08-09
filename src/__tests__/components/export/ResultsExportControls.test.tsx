@@ -209,15 +209,10 @@ describe('ResultsExportControls', () => {
     expect(trigger).toHaveAccessibleName(trigger.textContent?.trim() ?? '');
   });
 
-  // The paywall headline interpolates the row cap and the reader's own total,
-  // so the rendered text is not the raw string. Matching on the stable half
-  // keeps the assertion honest without duplicating i18next's interpolation in
-  // the test.
-  const paywallHeadline = new RegExp(
-    resultsEN.export.paywall.headline
-      .replace('{{rows}}', String(FREE_EXPORT_ROWS))
-      .replace('{{total}}', String(defaultProps.totalCount))
-  );
+  // The headline no longer interpolates: the two counts moved into the hero
+  // pair, which renders them from the constant and from props. So this is a
+  // plain string match, and the numbers get their own assertions below.
+  const paywallHeadline = resultsEN.export.paywall.headline;
 
   describe('the free sample', () => {
     it('should download a capped file and only then ask for money', async () => {
@@ -283,10 +278,35 @@ describe('ResultsExportControls', () => {
       expect(vi.mocked(analytics.paywallView)).not.toHaveBeenCalled();
     });
 
-    // The paywall's headline offers "all 42" of a file the reader may never
-    // have seen land — 85% of traffic is mobile, and an iOS Safari blob
-    // download can be silent or blocked. The receipt is what makes the offer
-    // checkable rather than an assertion about something unseen.
+    // What the paywall leads with is the reader's own two counts, and they are
+    // the one claim on that screen checkable without trusting us: the sample is
+    // in Downloads and its rows can be counted. A headline that says "the rest"
+    // over a hero showing someone else's numbers would be the opposite.
+    it('should lead with the reader own counts, and not repeat them to a screen reader', async () => {
+      unlocked(false);
+      const user = userEvent.setup();
+
+      render(<ResultsExportControls {...defaultProps} />);
+      await user.click(screen.getByRole('button', { name: triggerLabel }));
+
+      const total = await screen.findByText(String(defaultProps.totalCount));
+      const held = screen.getByText(String(FREE_EXPORT_ROWS));
+
+      expect(total).toBeInTheDocument();
+      expect(held).toBeInTheDocument();
+
+      // Hidden from the accessibility tree on purpose: the receipt above states
+      // both numbers in a sentence, and read a second time the pair is two bare
+      // numerals and two fragments. Asserted on the shared ancestor, because
+      // that is where the attribute has to sit for both to be covered.
+      expect(total.closest('[aria-hidden="true"]')).toBe(held.closest('[aria-hidden="true"]'));
+      expect(total.closest('[aria-hidden="true"]')).not.toBeNull();
+    });
+
+    // The paywall offers the rest of a file the reader may never have seen land
+    // — 85% of traffic is mobile, and an iOS Safari blob download can be silent
+    // or blocked. The receipt is what makes the offer checkable rather than an
+    // assertion about something unseen.
     it('should name the downloaded file in the paywall, matching what was written', async () => {
       unlocked(false);
       const user = userEvent.setup();

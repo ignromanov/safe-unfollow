@@ -47,10 +47,10 @@ describe('paywall price copy', () => {
     for (const language of SUPPORTED_LANGUAGES) {
       const paywall = bundleFor(language).export?.paywall;
 
-      expect(paywall?.bullet3, `${language} bullet3`).toBeTruthy();
+      expect(paywall?.terms, `${language} terms`).toBeTruthy();
       expect(paywall?.cta, `${language} cta`).toBeTruthy();
 
-      for (const text of [paywall.bullet3, paywall.cta]) {
+      for (const text of [paywall.terms, paywall.cta]) {
         const amounts = amountsIn(String(text));
         expect(amounts, `${language} states a price in "${text}"`).not.toHaveLength(0);
         for (const amount of amounts) {
@@ -82,21 +82,55 @@ describe('paywall price copy', () => {
 describe('paywall sample-size copy', () => {
   it('interpolates the row cap rather than hardcoding it', () => {
     for (const language of SUPPORTED_LANGUAGES) {
-      const paywall = bundleFor(language).export.paywall;
-
-      // `subtitle` used to restate the cap and is checked no longer: it now
-      // carries the contrast anchor, and the cap is stated by the receipt strip
-      // directly above it. `headline` must name the reader's own total, not
-      // "the rest" — a vague headline over a precise receipt reads as evasion.
-      expect(String(paywall.headline), `${language} headline`).toContain('{{rows}}');
-      expect(String(paywall.headline), `${language} headline`).toContain('{{total}}');
-
       // `export.saved.capped` names the file the free-tier click just wrote
-      // and interpolates the same FREE_EXPORT_ROWS constant (commit
-      // d45970b). A locale that hardcodes "10" here drifts the same way
-      // headline/subtitle would, and this key has no guard yet.
+      // and interpolates the same FREE_EXPORT_ROWS constant. It is now the only
+      // place in this flow that states the cap in a sentence, so it carries the
+      // whole guard: the hero pair renders its numerals from the constant and
+      // from props, which no locale can drift.
       const savedCapped = String(bundleFor(language).export.saved.capped);
       expect(savedCapped, `${language} export.saved.capped`).toContain('{{rows}}');
+      expect(savedCapped, `${language} export.saved.capped`).toContain('{{total}}');
+    }
+  });
+
+  // The headline stopped interpolating when the numerals moved into the hero
+  // pair, and i18next leaves an unknown placeholder in the output verbatim. A
+  // locale left on the old string therefore shows a buyer literal `{{rows}}` on
+  // the screen that asks for money — valid JSON, valid string, visible bug.
+  // Only `refund` still takes a value, so the rule is stated as a whitelist:
+  // anything else carrying `{{` is copy nobody will fill. `instantNote` is in
+  // the sweep too — it lives in this namespace but is rendered by
+  // `LicenseDialog`, and it takes no values either.
+  it('leaves no placeholder its renderer does not fill', () => {
+    const INTERPOLATED = ['refund'];
+
+    for (const language of SUPPORTED_LANGUAGES) {
+      const paywall = bundleFor(language).export.paywall as Record<string, string>;
+
+      for (const [key, value] of Object.entries(paywall)) {
+        const hasPlaceholder = /\{\{/.test(String(value));
+
+        expect(hasPlaceholder, `${language} paywall.${key}: "${value}"`).toBe(
+          INTERPOLATED.includes(key)
+        );
+      }
+    }
+  });
+
+  // Both labels sit under a numeral the component renders. A locale that writes
+  // its own count into the label ("Alle 1.284") states a number that is true
+  // for one reader and wrong for everybody else, and unlike the headline it is
+  // too short for a reviewer to notice it drifting.
+  it('keeps the hero labels free of counts', () => {
+    for (const language of SUPPORTED_LANGUAGES) {
+      const paywall = bundleFor(language).export.paywall;
+
+      for (const key of ['haveLabel', 'getLabel']) {
+        const label = String(paywall[key]);
+
+        expect(label, `${language} ${key}`).toBeTruthy();
+        expect(/\d/.test(label), `${language} ${key}: "${label}"`).toBe(false);
+      }
     }
   });
 });
@@ -186,13 +220,13 @@ describe('paywall device-limit copy', () => {
 
   it('states the same activation limit in every supported language', () => {
     for (const language of SUPPORTED_LANGUAGES) {
-      const bullet3 = String(bundleFor(language).export.paywall.bullet3);
+      const terms = String(bundleFor(language).export.paywall.terms);
 
       // Any digit that is not part of the price — the price test owns that one.
-      const withoutPrice = bullet3.replace(/\d+(?:[.,]\d{2})?\s*\$|\$\s*\d+(?:[.,]\d{2})?/g, '');
+      const withoutPrice = terms.replace(/\d+(?:[.,]\d{2})?\s*\$|\$\s*\d+(?:[.,]\d{2})?/g, '');
       const numbers = withoutPrice.match(/\d+/g) ?? [];
 
-      expect(numbers, `${language} bullet3 states a device count`).toContain(DEVICES);
+      expect(numbers, `${language} terms states a device count`).toContain(DEVICES);
     }
   });
 });

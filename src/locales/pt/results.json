@@ -142,18 +142,15 @@
       "full": "{{filename}} salvo — todas as {{total}} linhas"
     },
     "paywall": {
-      "headline": "As primeiras {{rows}} já foram baixadas — agora todas as {{total}}",
+      "headline": "O resto da sua lista, em um único arquivo.",
+      "haveLabel": "Você tem",
+      "getLabel": "Sua lista",
       "subtitle": "Rastreadores parecidos cobram $5–10 por mês enquanto você quiser continuar acompanhando seus seguidores. Aqui são $7 uma única vez, pelo arquivo.",
-      "bullet1": "Funciona no Excel e no Google Sheets",
-      "bullet2": "Respeita seus filtros ativos",
-      "bullet3": "Pagamento único de $7 — não é uma assinatura. Ativa em até 3 dispositivos.",
-      "bullet4": "Continua 100% privado: o arquivo é gerado no seu navegador",
-      "teaserPdf": "Relatório em PDF",
-      "teaserCompare": "Comparar duas exportações",
-      "comingSoon": "Em breve",
       "cta": "Desbloquear exportação — $7",
-      "instantNote": "Desbloqueio instantâneo após o pagamento",
-      "refund": "Não é o que você esperava? Escreva para {{email}} em até 30 dias e devolvemos o dinheiro."
+      "terms": "Pagamento único de $7 — não é uma assinatura. Ativa em até 3 dispositivos.",
+      "featureLine": "Desbloqueio instantâneo após o pagamento. Funciona no Excel e no Google Sheets, respeita seus filtros e é gerado no seu navegador.",
+      "refund": "Não é o que você esperava? Escreva para {{email}} em até 30 dias e devolvemos o dinheiro.",
+      "instantNote": "Desbloqueio instantâneo após o pagamento"
     },
     "license": {
       "title": "Ative sua exportação",

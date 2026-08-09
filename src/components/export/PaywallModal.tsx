@@ -1,4 +1,4 @@
-import { Check, FileText, GitCompare } from 'lucide-react';
+import { ArrowRight, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { FREE_EXPORT_ROWS } from '@/lib/export/free-tier';
@@ -32,6 +32,43 @@ export interface PaywallModalProps {
   totalRows: number;
 }
 
+/**
+ * The paywall, reached only from a capped free export.
+ *
+ * What goes big here is the reader's own two numbers, not our price. The price
+ * appears once, on the button, where it is a term of the transaction rather
+ * than an argument for it — the same rule Phase 2 applied to the trigger
+ * ("either the click gives you something, or the button says what it costs").
+ * The click already gave them a file; a price restated as a headline would put
+ * the filter back in front of the value it was just moved behind.
+ *
+ * The pair is also the only claim on this screen the reader can verify without
+ * trusting us: the sample is in their Downloads folder and its rows can be
+ * counted. That is the same property the whole product sells, applied to the
+ * one screen that asks for money.
+ *
+ * Both labels name a state — what you hold, and what the view holds — because
+ * the pair is meant to report the reader's position, not to make the offer. An
+ * imperative on the right ("Get all") turns the arrow from a measure of the gap
+ * into a second call to action competing with the button below, which is the
+ * one thing this layout was chosen to avoid.
+ *
+ * Four bullets collapsed to two lines. The decision at this point is "is the
+ * rest worth $7", not "which formats does it support", and a spec list reads as
+ * an answer to the second question. The split between the two lines is not
+ * cosmetic: the description line may be quiet, the terms line may not. "Not a
+ * subscription" and the device cap exist to prevent disputes, and a dispute
+ * costs $30 against $5.50 net — at current volume one of them can exceed a
+ * month of revenue. That economics is what sets the terms line's contrast and
+ * size; it is separated from the quiet line by colour rather than by weight,
+ * because bolding a disclaimer under a call to action reads as a defence
+ * against an accusation nobody has made yet.
+ *
+ * There is no small-view branch. `isFreeExportCapped` will not open this modal
+ * below `PAYWALL_MIN_ROWS`, so the gap is always worth drawing by the time the
+ * reader gets here — a suppressed-pair fallback would be code for a caller that
+ * cannot exist.
+ */
 export function PaywallModal({
   open,
   onOpenChange,
@@ -50,19 +87,12 @@ export function PaywallModal({
     email: REFUND_EMAIL,
   }).split(REFUND_EMAIL);
 
-  const bullets = [
-    t('export.paywall.bullet1'),
-    t('export.paywall.bullet2'),
-    t('export.paywall.bullet3'),
-    t('export.paywall.bullet4'),
-  ];
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         {/* The dialog arrives together with a file the reader never asked for,
             and on iOS Safari a blob download can be silent or blocked outright.
-            Naming the file is what turns the headline below from an assertion
+            Naming the file is what turns everything below from an assertion
             about something unseen into a claim the reader can go and check.
             Muted and small on purpose: a receipt, not a second headline. */}
         <p className="flex items-start gap-2 text-xs text-muted-foreground">
@@ -76,58 +106,69 @@ export function PaywallModal({
           </span>
         </p>
 
+        {/* aria-hidden: the pair is a restatement of the receipt above, which
+            already gives a screen reader both numbers in a sentence. Read out a
+            second time it is two bare numerals and two fragments. */}
+        <div aria-hidden="true" className="flex items-center justify-center gap-3.5 pt-1">
+          <div className="flex min-w-0 flex-col items-center gap-1">
+            <span className="text-[2.875rem] leading-none font-extrabold tracking-tighter text-muted-foreground">
+              {FREE_EXPORT_ROWS.toLocaleString(i18n.language)}
+            </span>
+            <span className="text-center text-[0.625rem] font-extrabold tracking-wider text-muted-foreground uppercase text-balance">
+              {t('export.paywall.haveLabel')}
+            </span>
+          </div>
+
+          {/* Logical, not visual: the arrow points from held to offered, which
+              in Arabic and Hebrew is right to left. */}
+          <ArrowRight className="h-6 w-6 shrink-0 mb-3.5 text-muted-foreground rtl:-scale-x-100" />
+
+          <div className="flex min-w-0 flex-col items-center gap-1">
+            <span className="text-[2.875rem] leading-none font-extrabold tracking-tighter text-primary">
+              {totalRows.toLocaleString(i18n.language)}
+            </span>
+            <span className="text-center text-[0.625rem] font-extrabold tracking-wider text-primary uppercase text-balance">
+              {t('export.paywall.getLabel')}
+            </span>
+          </div>
+        </div>
+
         <DialogHeader>
-          <DialogTitle>
-            {t('export.paywall.headline', {
-              rows: FREE_EXPORT_ROWS,
-              total: totalRows.toLocaleString(i18n.language),
-            })}
-          </DialogTitle>
-          {/* The anchor, not a restatement of the cap — the receipt strip above
-              already names the file and the row count. Category pricing measured
-              on the App Store 2026-08-08: modal Pro tiers $4.99/mo, advanced
-              tiers $9.99/mo. That is a dated observation, not a standing fact.
-              It compares the pricing *model* only: none of those trackers sells
-              a data export, so claiming to undercut them on this feature would
-              be false. */}
-          <DialogDescription>{t('export.paywall.subtitle')}</DialogDescription>
+          {/* Says what is being sold, and answers the unspoken "can I not just
+              scroll and copy these out myself?" — the unit is a file, not a
+              view. */}
+          <DialogTitle className="text-center">{t('export.paywall.headline')}</DialogTitle>
+          {/* Category pricing measured on the App Store 2026-08-08: modal Pro
+              tiers $4.99/mo, advanced tiers $9.99/mo. A dated observation, not a
+              standing fact — it needs re-checking, and there is no test that can
+              do that for us. It compares the pricing *model* only: none of those
+              trackers sells a data export, so claiming to undercut them on this
+              feature would be false. */}
+          <DialogDescription className="text-center">
+            {t('export.paywall.subtitle')}
+          </DialogDescription>
         </DialogHeader>
-
-        <ul className="space-y-2 text-sm">
-          {bullets.map(bullet => (
-            <li key={bullet} className="flex items-start gap-2">
-              <Check className="h-4 w-4 shrink-0 text-emerald-500 mt-0.5" />
-              <span>{bullet}</span>
-            </li>
-          ))}
-        </ul>
-
-        <ul className="space-y-2 text-sm text-muted-foreground border-t pt-4">
-          <li className="flex items-center gap-2 opacity-60">
-            <FileText className="h-4 w-4 shrink-0" />
-            <span>{t('export.paywall.teaserPdf')}</span>
-            <span className="ms-auto text-xs uppercase tracking-wide">
-              {t('export.paywall.comingSoon')}
-            </span>
-          </li>
-          <li className="flex items-center gap-2 opacity-60">
-            <GitCompare className="h-4 w-4 shrink-0" />
-            <span>{t('export.paywall.teaserCompare')}</span>
-            <span className="ms-auto text-xs uppercase tracking-wide">
-              {t('export.paywall.comingSoon')}
-            </span>
-          </li>
-        </ul>
 
         <DialogFooter className="flex-col items-stretch gap-2 sm:flex-col sm:items-stretch">
           <Button onClick={onCheckout} size="lg">
             {t('export.paywall.cta')}
           </Button>
+
+          {/* Dispute defence, at full contrast and body size — see the class
+              note above for why that is economics rather than hierarchy. */}
+          <p className="text-center text-sm">{t('export.paywall.terms')}</p>
+
+          {/* Description, and the only line here that may be quiet. "Excel and
+              Google Sheets" rather than "CSV and JSON" deliberately: 85% of
+              sessions are mobile and ~39% come from ID/IN/PH, where the open
+              question is whether the file opens at all, not what it is encoded
+              as. */}
           <p className="text-center text-xs text-muted-foreground">
-            {t('export.paywall.instantNote')}
+            {t('export.paywall.featureLine')}
           </p>
+
           {/* Risk reversal belongs next to the action it de-risks, not among the
-              feature bullets. `dir="ltr"` on the address keeps its dot-separated
+              feature lines. `dir="ltr"` on the address keeps its dot-separated
               run intact inside the Arabic sentence that surrounds it. */}
           <p className="text-center text-xs text-muted-foreground">
             {refundBefore}
@@ -140,6 +181,7 @@ export function PaywallModal({
             </a>
             {refundAfter}
           </p>
+
           {/* A recovery path, not a second offer. As a full-width ghost button
               it read as a rival primary action next to the CTA above it; as a
               quiet centred link it reads as what it is. Still a real button, so

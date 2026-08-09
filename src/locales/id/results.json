@@ -142,18 +142,15 @@
       "full": "{{filename}} tersimpan — semua {{total}} baris"
     },
     "paywall": {
-      "headline": "{{rows}} baris pertama sudah diunduh — sekarang semua {{total}}",
+      "headline": "Sisa daftarmu, dalam satu file.",
+      "haveLabel": "Kamu punya",
+      "getLabel": "Daftarmu",
       "subtitle": "Pelacak sejenis menagih $5–10 per bulan selama kamu ingin terus memantau pengikutmu. Yang ini $7 sekali bayar, untuk filenya.",
-      "bullet1": "Berfungsi di Excel dan Google Sheets",
-      "bullet2": "Mengikuti filter aktifmu",
-      "bullet3": "Sekali bayar $7 — bukan langganan. Berlaku di maksimal 3 perangkat.",
-      "bullet4": "Tetap 100% privat: file dibuat langsung di browsermu",
-      "teaserPdf": "Laporan PDF",
-      "teaserCompare": "Bandingkan dua ekspor",
-      "comingSoon": "Segera hadir",
       "cta": "Buka ekspor — $7",
-      "instantNote": "Langsung terbuka setelah pembayaran",
-      "refund": "Tidak sesuai harapan? Kirim email ke {{email}} dalam 30 hari dan kami kembalikan uangmu."
+      "terms": "Sekali bayar $7 — bukan langganan. Berlaku di maksimal 3 perangkat.",
+      "featureLine": "Langsung terbuka setelah pembayaran. Berfungsi di Excel dan Google Sheets, filter aktifmu diikuti, dibuat di browsermu.",
+      "refund": "Tidak sesuai harapan? Kirim email ke {{email}} dalam 30 hari dan kami kembalikan uangmu.",
+      "instantNote": "Langsung terbuka setelah pembayaran"
     },
     "license": {
       "title": "Aktifkan ekspormu",
