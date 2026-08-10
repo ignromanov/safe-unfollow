@@ -338,6 +338,8 @@ export const analytics = {
       NO_DATA_FILES: AnalyticsEvents.UPLOAD_ERROR_NO_DATA,
       MISSING_FOLLOWING: AnalyticsEvents.UPLOAD_ERROR_MISSING_FOLLOWING,
       MISSING_FOLLOWERS: AnalyticsEvents.UPLOAD_ERROR_MISSING_FOLLOWERS,
+      INVALID_FOLLOWING_FORMAT: AnalyticsEvents.UPLOAD_ERROR_INVALID_FOLLOWING_FORMAT,
+      INVALID_FOLLOWERS_FORMAT: AnalyticsEvents.UPLOAD_ERROR_INVALID_FOLLOWERS_FORMAT,
       CORRUPTED_ZIP: AnalyticsEvents.UPLOAD_ERROR_CORRUPTED_ZIP,
       ZIP_ENCRYPTED: AnalyticsEvents.UPLOAD_ERROR_ZIP_ENCRYPTED,
       EMPTY_FILE: AnalyticsEvents.UPLOAD_ERROR_EMPTY_FILE,
@@ -394,6 +396,17 @@ export const analytics = {
   adSlotViewable: (slot: string) => {
     enqueueEvent(AnalyticsEvents.AD_SLOT_VIEWABLE, {
       slot,
+    });
+  },
+
+  // GH#21: fires once per optional relationship file whose shape drifted
+  // (pending/restricted/close_friends/unfollowed/dismissed/permanent — see
+  // instagram-file-specs.ts driftCode). Immediate, not batched: this is a
+  // rare diagnostic signal about an upstream format change, not a high-volume
+  // impression where losing a few events to a dropped batch is acceptable.
+  optionalFileFormatDrift: (fileCode: string) => {
+    trackEvent(AnalyticsEvents.OPTIONAL_FILE_FORMAT_DRIFT, {
+      file_code: fileCode,
     });
   },
 

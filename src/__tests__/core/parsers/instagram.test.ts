@@ -5,6 +5,14 @@ import {
   parseInstagramZipFile,
 } from '@/core/parsers/instagram';
 import type { InstagramExportEntry } from '@/core/types';
+import {
+  ARRAY_NO_USERNAME_FIELD,
+  EMPTY_ARRAY,
+  NULL_PAYLOAD,
+  UNKNOWN_TOP_LEVEL_KEY,
+  VALID_ARRAY_OF_ONE,
+  objectInsteadOfArray,
+} from '../../fixtures/instagram-format-drift';
 
 // Mock JSZip
 let mockZipInstance: any;
@@ -552,6 +560,149 @@ describe('Instagram Parser', () => {
       expect(result.data.followers.has('newformat_follower1')).toBe(true);
       expect(result.data.followingTimestamps.get('newformat_user1')).toBe(1765477864);
       expect(result.data.followersTimestamps.get('newformat_follower1')).toBe(1765000000);
+    });
+  });
+
+  // GH#21: following.json is PRESENT but its top-level shape is unrecognized.
+  // Before the fix this silently produced an empty Set, indistinguishable from
+  // a genuinely empty file — and downstream badge math (notFollowedBack =
+  // followers not in following) confidently flagged every follower as
+  // "not following back". These tests go through parseInstagramZipFile, the
+  // actual production entry point — not the deprecated parseFollowingJson
+  // standalone helper.
+  describe('following.json format drift (GH#21)', () => {
+    beforeEach(() => {
+      mockZipInstance = new MockJSZip();
+      // A valid, non-empty followers file so hasMinimalData stays true and we
+      // can observe the following-specific warning in isolation.
+      mockZipInstance._addFile(
+        'connections/followers_and_following/followers_1.json',
+        vi.fn().mockResolvedValue(JSON.stringify([{ ...VALID_ARRAY_OF_ONE[0]!, title: 'flw' }]))
+      );
+    });
+
+    it.each([
+      ['unknown top-level key', UNKNOWN_TOP_LEVEL_KEY],
+      ['null payload', NULL_PAYLOAD],
+      ['object instead of array', objectInsteadOfArray('relationships_following')],
+    ])('flags following.json as INVALID_FOLLOWING_FORMAT (error) for %s', async (_label, data) => {
+      mockZipInstance._addFile(
+        'connections/followers_and_following/following.json',
+        vi.fn().mockResolvedValue(JSON.stringify(data))
+      );
+
+      const mockFile = new File(['test'], 'test.zip', { type: 'application/zip' });
+      const result = await parseInstagramZipFile(mockFile);
+
+      const drift = result.warnings.find(w => w.code === 'INVALID_FOLLOWING_FORMAT');
+      expect(drift).toBeDefined();
+      expect(drift?.severity).toBe('error');
+      expect(result.data.following.size).toBe(0);
+      // Must not ALSO report the old empty-file signal — that would make the
+      // new error indistinguishable from the case it's meant to separate from.
+      expect(result.warnings.find(w => w.code === 'EMPTY_FOLLOWING')).toBeUndefined();
+    });
+
+    it('does NOT trip INVALID_FOLLOWING_FORMAT for a genuinely empty array (regression)', async () => {
+      mockZipInstance._addFile(
+        'connections/followers_and_following/following.json',
+        vi.fn().mockResolvedValue(JSON.stringify(EMPTY_ARRAY))
+      );
+
+      const mockFile = new File(['test'], 'test.zip', { type: 'application/zip' });
+      const result = await parseInstagramZipFile(mockFile);
+
+      expect(result.warnings.find(w => w.code === 'INVALID_FOLLOWING_FORMAT')).toBeUndefined();
+      const info = result.warnings.find(w => w.code === 'EMPTY_FOLLOWING');
+      expect(info).toBeDefined();
+      expect(info?.severity).toBe('info');
+    });
+
+    it('does NOT trip INVALID_FOLLOWING_FORMAT for an array with no recognizable username field (regression)', async () => {
+      mockZipInstance._addFile(
+        'connections/followers_and_following/following.json',
+        vi.fn().mockResolvedValue(JSON.stringify(ARRAY_NO_USERNAME_FIELD))
+      );
+
+      const mockFile = new File(['test'], 'test.zip', { type: 'application/zip' });
+      const result = await parseInstagramZipFile(mockFile);
+
+      expect(result.warnings.find(w => w.code === 'INVALID_FOLLOWING_FORMAT')).toBeUndefined();
+      expect(result.warnings.find(w => w.code === 'EMPTY_FOLLOWING')).toBeDefined();
+    });
+  });
+
+  // GH#21, followers side. followers_*.json is glob-matched and multi-file —
+  // the fix must aggregate drift across shards rather than lose it silently
+  // when at least one shard has a recognized shape.
+  describe('followers_*.json format drift (GH#21)', () => {
+    beforeEach(() => {
+      mockZipInstance = new MockJSZip();
+      // A valid, non-empty following file so hasMinimalData stays true and we
+      // can observe the followers-specific warning in isolation.
+      mockZipInstance._addFile(
+        'connections/followers_and_following/following.json',
+        vi.fn().mockResolvedValue(JSON.stringify(VALID_ARRAY_OF_ONE))
+      );
+    });
+
+    it.each([
+      ['unknown top-level key', UNKNOWN_TOP_LEVEL_KEY],
+      ['null payload', NULL_PAYLOAD],
+      ['object instead of array', objectInsteadOfArray('relationships_followers')],
+    ])(
+      'flags followers_*.json as INVALID_FOLLOWERS_FORMAT (error) for %s',
+      async (_label, data) => {
+        mockZipInstance._addFile(
+          'connections/followers_and_following/followers_1.json',
+          vi.fn().mockResolvedValue(JSON.stringify(data))
+        );
+
+        const mockFile = new File(['test'], 'test.zip', { type: 'application/zip' });
+        const result = await parseInstagramZipFile(mockFile);
+
+        const drift = result.warnings.find(w => w.code === 'INVALID_FOLLOWERS_FORMAT');
+        expect(drift).toBeDefined();
+        expect(drift?.severity).toBe('error');
+        expect(result.data.followers.size).toBe(0);
+        expect(result.warnings.find(w => w.code === 'EMPTY_FOLLOWERS')).toBeUndefined();
+      }
+    );
+
+    it('does NOT trip INVALID_FOLLOWERS_FORMAT for a genuinely empty array (regression)', async () => {
+      mockZipInstance._addFile(
+        'connections/followers_and_following/followers_1.json',
+        vi.fn().mockResolvedValue(JSON.stringify(EMPTY_ARRAY))
+      );
+
+      const mockFile = new File(['test'], 'test.zip', { type: 'application/zip' });
+      const result = await parseInstagramZipFile(mockFile);
+
+      expect(result.warnings.find(w => w.code === 'INVALID_FOLLOWERS_FORMAT')).toBeUndefined();
+      const info = result.warnings.find(w => w.code === 'EMPTY_FOLLOWERS');
+      expect(info).toBeDefined();
+      expect(info?.severity).toBe('info');
+    });
+
+    it('flags the whole followers set when one shard drifts even though another shard is valid', async () => {
+      mockZipInstance._addFile(
+        'connections/followers_and_following/followers_1.json',
+        vi.fn().mockResolvedValue(JSON.stringify(VALID_ARRAY_OF_ONE))
+      );
+      mockZipInstance._addFile(
+        'connections/followers_and_following/followers_2.json',
+        vi.fn().mockResolvedValue(JSON.stringify(UNKNOWN_TOP_LEVEL_KEY))
+      );
+
+      const mockFile = new File(['test'], 'test.zip', { type: 'application/zip' });
+      const result = await parseInstagramZipFile(mockFile);
+
+      const drift = result.warnings.find(w => w.code === 'INVALID_FOLLOWERS_FORMAT');
+      expect(drift).toBeDefined();
+      expect(drift?.severity).toBe('error');
+      // The good shard's data is not silently discarded, just the drift is
+      // surfaced loudly instead of being masked — followers_1 still parsed.
+      expect(result.data.followers.has('validuser')).toBe(true);
     });
   });
 });

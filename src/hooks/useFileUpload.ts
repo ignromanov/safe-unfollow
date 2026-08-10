@@ -1,3 +1,4 @@
+import { OPTIONAL_FILE_DRIFT_CODES } from '@/core/parsers/instagram-file-specs';
 import type { FileDiscovery, ParseWarning } from '@/core/types';
 import { analytics } from '@/lib/analytics';
 import type { ParseOutcome } from '@/lib/analytics';
@@ -18,6 +19,31 @@ const MAX_FILE_SIZE = 500 * 1024 * 1024;
 
 // localStorage key for tracking return uploads
 const LAST_UPLOAD_KEY = 'analytics_last_upload';
+
+/**
+ * Report optional relationship files whose top-level shape we no longer recognise
+ * (GH#21). Those parse to an empty map that is indistinguishable from "the user has
+ * none", and severity `'warning'` is rendered nowhere — `UploadZone.tsx` and
+ * `DiagnosticErrorScreen.tsx` both read only `'error'` — so this event is the whole
+ * detection surface.
+ *
+ * It must run on the main thread: `enqueueEvent` and `trackEvent` both return early
+ * on `typeof window === 'undefined'` (`lib/stats/queue.ts`, `lib/stats/core.ts`), and
+ * a Web Worker's global is `self`, so emitting from the parser itself would be a
+ * silent no-op. The warnings already cross the boundary inside the parse result.
+ *
+ * Called on every path that observes warnings, including the failure path: drift is a
+ * fact about the export, not about whether the upload finished. A format change would
+ * plausibly hit several files at once, so the case where drift accompanies a failure
+ * is precisely the one worth seeing.
+ */
+function reportOptionalFileDrift(warnings: ParseWarning[] | undefined): void {
+  for (const warning of warnings ?? []) {
+    if (OPTIONAL_FILE_DRIFT_CODES.has(warning.code)) {
+      analytics.optionalFileFormatDrift(warning.code);
+    }
+  }
+}
 
 /**
  * Check if this is a return upload and track it
@@ -206,14 +232,17 @@ export function useFileUpload() {
                 fileDiscovery: result.discovery,
               });
             }
+            reportOptionalFileDrift(result.warnings);
           } catch (error) {
             // Extract warnings/discovery from error if available
             if (error instanceof Error && 'warnings' in error) {
+              const failureWarnings = (error as { warnings?: ParseWarning[] }).warnings;
               setUploadInfo({
-                parseWarnings: (error as { warnings?: ParseWarning[] }).warnings ?? [],
+                parseWarnings: failureWarnings ?? [],
                 fileDiscovery: (error as { discovery?: import('@/core/types').FileDiscovery })
                   .discovery,
               });
+              reportOptionalFileDrift(failureWarnings);
             }
             throw error;
           }
@@ -233,6 +262,7 @@ export function useFileUpload() {
             parseWarnings: result.warnings ?? [],
             fileDiscovery: result.discovery,
           });
+          reportOptionalFileDrift(result.warnings);
         }
 
         // Data already cached in IndexedDB by worker during chunked processing

@@ -21,6 +21,7 @@ vi.mock('@/lib/analytics', () => ({
     returnUpload: vi.fn(),
     linkClick: vi.fn(),
     uploadParseDuration: vi.fn(),
+    optionalFileFormatDrift: vi.fn(),
   },
 }));
 
@@ -125,6 +126,62 @@ describe('useFileUpload', () => {
         fileHash: mockFileHash,
       })
     );
+  });
+
+  /**
+   * GH#21 — the six optional relationship files parse to an empty map when their
+   * top-level shape drifts, which looks exactly like "this user has none". The
+   * parser now flags that at severity 'warning', but `'warning'` is rendered
+   * NOWHERE (`UploadZone.tsx` and `DiagnosticErrorScreen.tsx` both read only
+   * `'error'`), so this event is the entire detection surface. Without it the
+   * drift is silent to the user AND to us.
+   *
+   * The second assertion carries most of the weight: an implementation that fired
+   * on every warning would satisfy the first one and flood the event with ordinary
+   * empty-file notices, destroying the signal it exists to carry.
+   */
+  it('should report each drifted optional file and stay silent for ordinary warnings', async () => {
+    const { parseInstagramZipFile } = await import('@/core/parsers/instagram');
+    vi.mocked(parseInstagramZipFile).mockResolvedValue({
+      data: {
+        following: new Set(['user1']),
+        followers: new Set(['user2']),
+        pendingSent: new Map(),
+        permanentRequests: new Map(),
+        restricted: new Map(),
+        closeFriends: new Map(),
+        unfollowed: new Map(),
+        dismissedSuggestions: new Map(),
+        followingTimestamps: new Map(),
+        followersTimestamps: new Map(),
+      },
+      warnings: [
+        {
+          code: 'INVALID_UNFOLLOWED_FORMAT',
+          message: 'unfollowed shape not recognised',
+          severity: 'warning',
+        },
+        { code: 'EMPTY_FOLLOWING', message: 'following.json is empty', severity: 'info' },
+        {
+          code: 'INVALID_DISMISSED_FORMAT',
+          message: 'dismissed shape not recognised',
+          severity: 'warning',
+        },
+        { code: 'MISSING_PENDING', message: 'pending file absent', severity: 'warning' },
+      ],
+      discovery: { format: 'json', isInstagramExport: true, basePath: '', files: [] },
+      hasMinimalData: true,
+    } as any);
+
+    const { result } = renderHook(() => useFileUpload());
+
+    await act(async () => {
+      await result.current.handleZipUpload(mockFile);
+    });
+
+    expect(analytics.optionalFileFormatDrift).toHaveBeenCalledWith('INVALID_UNFOLLOWED_FORMAT');
+    expect(analytics.optionalFileFormatDrift).toHaveBeenCalledWith('INVALID_DISMISSED_FORMAT');
+    expect(analytics.optionalFileFormatDrift).toHaveBeenCalledTimes(2);
   });
 
   it('should not override existing filters', async () => {

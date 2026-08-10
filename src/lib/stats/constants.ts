@@ -104,6 +104,10 @@ export const AnalyticsEvents = {
   UPLOAD_ERROR_NO_DATA: 'upload_error_no_data',
   UPLOAD_ERROR_MISSING_FOLLOWING: 'upload_error_missing_following',
   UPLOAD_ERROR_MISSING_FOLLOWERS: 'upload_error_missing_followers',
+  // GH#21: following.json/followers_*.json found, but shape unrecognized —
+  // distinct from MISSING_* (file absent) and from a silent empty result.
+  UPLOAD_ERROR_INVALID_FOLLOWING_FORMAT: 'upload_error_invalid_following_format',
+  UPLOAD_ERROR_INVALID_FOLLOWERS_FORMAT: 'upload_error_invalid_followers_format',
   UPLOAD_ERROR_UNKNOWN: 'upload_error_unknown',
 
   // Extended Upload Errors
@@ -159,6 +163,15 @@ export const AnalyticsEvents = {
   // Ads — a viewable impression opportunity by the MRC display standard (50%
   // of pixels for 1 continuous second).
   AD_SLOT_VIEWABLE: 'ad_slot_viewable',
+
+  // GH#21: an OPTIONAL relationship file (pending, restricted, close_friends,
+  // recently_unfollowed, dismissed_suggestions, permanent requests) was found
+  // but its shape didn't match anything known. Severity 'warning' on the
+  // parser side isn't rendered anywhere in the UI, so this is the only signal
+  // that reaches the dashboard when Instagram drifts one of these formats.
+  // Rare/diagnostic, not high-volume — delivered immediately (trackEvent),
+  // not batched like impressions.
+  OPTIONAL_FILE_FORMAT_DRIFT: 'optional_file_format_drift',
 } as const;
 
 export type AnalyticsEventName = (typeof AnalyticsEvents)[keyof typeof AnalyticsEvents];

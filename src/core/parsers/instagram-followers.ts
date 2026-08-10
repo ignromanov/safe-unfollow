@@ -48,6 +48,10 @@ export async function parseFollowersFromZip(
   const followersFilesByName = new Map<string, JSZip.JSZipObject>();
   const foundFollowerPaths: string[] = [];
   const warnings: ParseWarning[] = [];
+  // Names of shards whose top-level shape matched neither a bare array nor
+  // `{ relationships_followers: [...] }` (GH#21). A malformed shard is not
+  // silently dropped into an empty result indistinguishable from having none.
+  const formatInvalidFiles: string[] = [];
 
   for (const g of followersGlobs) {
     const regex = new RegExp('^' + g + '$', 'i');
@@ -82,10 +86,16 @@ export async function parseFollowersFromZip(
       });
       continue;
     }
-    const entries = Array.isArray(json)
+    const entries: unknown = Array.isArray(json)
       ? json
-      : (json as { relationships_followers?: InstagramExportEntry[] })?.relationships_followers;
-    const items = listToRaw(entries);
+      : (json as Record<string, unknown> | null)?.relationships_followers;
+
+    if (!Array.isArray(entries)) {
+      formatInvalidFiles.push(f.name);
+      continue;
+    }
+
+    const items = listToRaw(entries as InstagramExportEntry[]);
     for (const it of items) {
       if (followersSeen.has(it.username)) continue;
       followersSeen.add(it.username);
@@ -115,6 +125,19 @@ export async function parseFollowersFromZip(
       message: 'followers_*.json files not found — cannot detect who follows you.',
       severity: 'warning',
       fix: 'Make sure your Instagram export includes "Followers and following" data. Re-request if needed.',
+    });
+  } else if (formatInvalidFiles.length > 0) {
+    // Loud failure beats an undetectable wrong answer: at least one shard was
+    // found but its shape wasn't recognized, so we can't be sure the
+    // followers set is complete. Severity 'error' routes this to
+    // DiagnosticErrorScreen (see UploadZone's hasCriticalError gate) even
+    // though other shards may have parsed fine and left followersUsers
+    // non-empty.
+    warnings.push({
+      code: 'INVALID_FOLLOWERS_FORMAT',
+      message: `followers data was found (${formatInvalidFiles.join(', ')}), but its structure is not recognized — cannot detect who follows you.`,
+      severity: 'error',
+      fix: 'Instagram may have changed their export format. Please report this issue so we can add support.',
     });
   } else if (followersUsers.length === 0) {
     warnings.push({

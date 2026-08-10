@@ -2,6 +2,7 @@ import JSZip from 'jszip';
 import type {
   FileDiscovery,
   FileExpectation,
+  InstagramExportEntry,
   ParsedAll,
   ParseResult,
   ParseWarning,
@@ -30,6 +31,34 @@ export async function parseFollowingJson(jsonText: string): Promise<string[]> {
   if (!data.relationships_following)
     throw new Error('Invalid following.json: missing relationships_following');
   return extractUsernames(data.relationships_following);
+}
+
+/**
+ * Interpret the top level of following.json.
+ *
+ * `formatInvalid` is true only when a payload was present but matched neither a bare
+ * array nor `{ relationships_following: [...] }` (GH#21). A genuinely empty array is
+ * recognised and leaves it false — that distinction is the entire point, because
+ * `listToRaw(undefined)` returns `[]` for both and an unrecognised shape must not be
+ * allowed to look like an empty file.
+ *
+ * Extracted from `parseInstagramZipFile` rather than inlined: the shape check pushed
+ * that function past the complexity ceiling, and this mirrors how followers is already
+ * delegated to `parseFollowersFromZip`.
+ */
+function interpretFollowingPayload(payload: unknown): {
+  raw: RawItem[];
+  formatInvalid: boolean;
+} {
+  if (payload === undefined) return { raw: [], formatInvalid: false };
+
+  const entries: unknown = Array.isArray(payload)
+    ? payload
+    : (payload as Record<string, unknown> | null)?.relationships_following;
+
+  return Array.isArray(entries)
+    ? { raw: listToRaw(entries as InstagramExportEntry[]), formatInvalid: false }
+    : { raw: [], formatInvalid: true };
 }
 
 // === Main Parser ===
@@ -157,18 +186,11 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
     .map(b => `${b}/following.json`)
     .concat(['following.json']);
   const followingResult = await readJsonFromZip(followingFilePatterns);
-  let followingRaw: RawItem[] = [];
-  let followingFound = false;
-  let followingPath: string | undefined;
-
-  if (followingResult) {
-    followingFound = true;
-    followingPath = followingResult.path;
-    const entries = Array.isArray(followingResult.data)
-      ? followingResult.data
-      : (followingResult.data as { relationships_following?: RawItem[] })?.relationships_following;
-    followingRaw = listToRaw(entries);
-  }
+  const { raw: followingRaw, formatInvalid: followingFormatInvalid } = interpretFollowingPayload(
+    followingResult?.data
+  );
+  const followingFound = followingResult !== null;
+  const followingPath = followingResult?.path;
 
   const followingUsers = followingRaw.map(r => r.username);
   const followingTimestamps = new Map(
@@ -191,6 +213,19 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
       message: 'following.json not found — cannot detect who you follow.',
       severity: 'warning',
       fix: 'Make sure your Instagram export includes "Followers and following" data. Re-request if needed.',
+    });
+  } else if (followingFormatInvalid) {
+    // Loud failure beats an undetectable wrong answer: following.json was
+    // found but neither known shape matched, so following stays an empty Set
+    // and — unflagged — would make badge math (notFollowedBack) confidently
+    // wrong for every follower. Severity 'error' routes this to
+    // DiagnosticErrorScreen (see UploadZone's hasCriticalError gate).
+    warnings.push({
+      code: 'INVALID_FOLLOWING_FORMAT',
+      message:
+        'following.json was found, but its structure is not recognized — cannot detect who you follow.',
+      severity: 'error',
+      fix: 'Instagram may have changed their export format. Please report this issue so we can add support.',
     });
   } else if (followingUsers.length === 0) {
     warnings.push({

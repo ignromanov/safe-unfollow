@@ -10,6 +10,8 @@ export type DiagnosticErrorCode =
   | 'NO_DATA_FILES' // No following.json or followers files
   | 'MISSING_FOLLOWING' // following.json not found
   | 'MISSING_FOLLOWERS' // followers_*.json not found
+  | 'INVALID_FOLLOWING_FORMAT' // following.json found, but shape unrecognized (GH#21)
+  | 'INVALID_FOLLOWERS_FORMAT' // followers_*.json found, but shape unrecognized (GH#21)
   // New - ZIP/File errors
   | 'CORRUPTED_ZIP' // JSZip failed to open
   | 'ZIP_ENCRYPTED' // ZIP is password-protected
@@ -54,6 +56,8 @@ export function mapWarningToDiagnosticCode(code: string): DiagnosticErrorCode {
     NO_DATA_FILES: 'NO_DATA_FILES',
     MISSING_FOLLOWING: 'MISSING_FOLLOWING',
     MISSING_FOLLOWERS: 'MISSING_FOLLOWERS',
+    INVALID_FOLLOWING_FORMAT: 'INVALID_FOLLOWING_FORMAT',
+    INVALID_FOLLOWERS_FORMAT: 'INVALID_FOLLOWERS_FORMAT',
     // New - ZIP/File
     CORRUPTED_ZIP: 'CORRUPTED_ZIP',
     ZIP_ENCRYPTED: 'ZIP_ENCRYPTED',
@@ -135,6 +139,22 @@ export function createDiagnosticError(
       fix: 'Re-request your data and ensure "Followers and following" is selected.',
       icon: 'file',
       severity: 'warning',
+    },
+    INVALID_FOLLOWING_FORMAT: {
+      title: 'Unrecognized Following Data',
+      message:
+        'following.json was found, but its structure does not match any known Instagram export format.',
+      fix: 'Instagram may have changed their export format. Please report this issue on GitHub so we can add support.',
+      icon: 'file',
+      severity: 'error',
+    },
+    INVALID_FOLLOWERS_FORMAT: {
+      title: 'Unrecognized Followers Data',
+      message:
+        'followers_*.json was found, but its structure does not match any known Instagram export format.',
+      fix: 'Instagram may have changed their export format. Please report this issue on GitHub so we can add support.',
+      icon: 'file',
+      severity: 'error',
     },
     // New - ZIP/File errors
     CORRUPTED_ZIP: {
@@ -280,6 +300,8 @@ export const ALL_DIAGNOSTIC_ERROR_CODES: DiagnosticErrorCode[] = [
   'NO_DATA_FILES',
   'MISSING_FOLLOWING',
   'MISSING_FOLLOWERS',
+  'INVALID_FOLLOWING_FORMAT',
+  'INVALID_FOLLOWERS_FORMAT',
   'CORRUPTED_ZIP',
   'ZIP_ENCRYPTED',
   'EMPTY_FILE',

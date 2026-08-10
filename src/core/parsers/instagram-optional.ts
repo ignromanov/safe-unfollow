@@ -12,6 +12,13 @@ export interface OptionalFileResult {
   found: boolean;
   path?: string;
   count: number;
+  /**
+   * False when the file was found but its top-level shape matched neither a
+   * bare array nor any propCandidate holding one (GH#21). Defaults to true
+   * when the file is absent — there's no shape to judge — and when a
+   * recognized shape happens to be genuinely empty.
+   */
+  formatValid: boolean;
 }
 
 export interface OptionalFilesParsed {
@@ -33,7 +40,7 @@ async function readListMapFlexible(
   readFirstExistingJson: (fileNames: string[]) => Promise<{ data: unknown; path: string } | null>
 ): Promise<OptionalFileResult> {
   const result = await readFirstExistingJson(spec.fileNames);
-  if (!result) return { map: new Map(), found: false, count: 0 };
+  if (!result) return { map: new Map(), found: false, count: 0, formatValid: true };
 
   const entries = Array.isArray(result.data)
     ? result.data
@@ -41,8 +48,15 @@ async function readListMapFlexible(
         ?.map(p => (result.data as Record<string, unknown>)?.[p])
         .find(e => Array.isArray(e)) as InstagramExportEntry[] | undefined);
 
+  if (!Array.isArray(entries)) {
+    // Found but neither shape matched: a genuinely empty array ([]) takes the
+    // branch above and never reaches here, so this is specifically "shape not
+    // recognized", not "empty file" — see instagram-format-drift.ts fixtures.
+    return { map: new Map(), found: true, path: result.path, count: 0, formatValid: false };
+  }
+
   const map = listToMap(entries);
-  return { map, found: true, path: result.path, count: map.size };
+  return { map, found: true, path: result.path, count: map.size, formatValid: true };
 }
 
 /** Parse all optional relationship files from ZIP */
@@ -69,6 +83,7 @@ export async function parseOptionalFiles(
     map: new Map<string, number>(),
     found: false,
     count: 0,
+    formatValid: true,
   };
   const pendingResult = optionalResults[0] ?? emptyResult;
   const restrictedResult = optionalResults[1] ?? emptyResult;
@@ -79,8 +94,15 @@ export async function parseOptionalFiles(
   // Parse permanent follow requests (separate spec for historical reasons)
   const permanentResult = await readListMapFlexible(PERMANENT_REQUESTS_SPEC, readFirstExistingJson);
 
-  // Build file expectations for optional files
+  // Build file expectations and format-drift warnings for optional files.
+  //
+  // Severity 'warning', not 'error': optional-file drift zeroes one badge
+  // without inverting the core following/followers math, so failing the
+  // whole upload is disproportionate (GH#21). Each spec carries its own
+  // driftCode (instagram-file-specs.ts) so a consumer can tell which file
+  // drifted without parsing the message text.
   const fileExpectations: FileExpectation[] = [];
+  const warnings: ParseWarning[] = [];
   for (let i = 0; i < optionalSpecs.length; i++) {
     const spec = optionalSpecs[i]!;
     const result = optionalResults[i]!;
@@ -92,6 +114,21 @@ export async function parseOptionalFiles(
       itemCount: result.count,
       foundPath: result.path,
     });
+    if (result.found && !result.formatValid && spec.driftCode) {
+      warnings.push({
+        code: spec.driftCode,
+        message: `${spec.name} was found, but its structure is not recognized — Instagram may have changed this file's format.`,
+        severity: 'warning',
+      });
+    }
+  }
+
+  if (permanentResult.found && !permanentResult.formatValid && PERMANENT_REQUESTS_SPEC.driftCode) {
+    warnings.push({
+      code: PERMANENT_REQUESTS_SPEC.driftCode,
+      message: `${PERMANENT_REQUESTS_SPEC.name} was found, but its structure is not recognized — Instagram may have changed this file's format.`,
+      severity: 'warning',
+    });
   }
 
   return {
@@ -102,6 +139,6 @@ export async function parseOptionalFiles(
     unfollowedResult,
     dismissedResult,
     fileExpectations,
-    warnings: [],
+    warnings,
   };
 }
