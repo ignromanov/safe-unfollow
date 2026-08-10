@@ -1,6 +1,7 @@
 import type { AccountBadges, BadgeKey } from '@/core/types';
 import { indexedDBService } from '@/lib/indexeddb/indexeddb-service';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import * as transactionHelpers from '@/lib/indexeddb/transaction-helpers';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 /**
  * Integration tests for IndexedDBService using fake-indexeddb.
@@ -52,6 +53,11 @@ describe('IndexedDBService (Integration Tests)', () => {
   });
 
   describe('saveFileMetadata and getFileMetadata', () => {
+    // These fixtures pass `accountsComplete: true` explicitly: saveFileMetadata alone
+    // (without a following storeAllAccounts) now defaults new records to `false` so
+    // getFileMetadata hides them (GH#23, see the "orphaned metadata" describe block
+    // below). These tests are exercising metadata round-trip fidelity in isolation,
+    // which is a real, separate contract from the completeness flag.
     it('should save and retrieve file metadata', async () => {
       const metadata = {
         fileHash: mockFileHash,
@@ -61,6 +67,7 @@ describe('IndexedDBService (Integration Tests)', () => {
         accountCount: 100,
         lastAccessed: Date.now(),
         version: 2,
+        accountsComplete: true,
       };
 
       await indexedDBService.saveFileMetadata(metadata);
@@ -91,6 +98,7 @@ describe('IndexedDBService (Integration Tests)', () => {
         accountCount: 100,
         lastAccessed: Date.now(),
         version: 2,
+        accountsComplete: true,
       };
 
       await indexedDBService.saveFileMetadata(metadata);
@@ -119,6 +127,7 @@ describe('IndexedDBService (Integration Tests)', () => {
         accountCount: 100,
         lastAccessed: Date.now(),
         version: 2,
+        accountsComplete: true,
       };
 
       await indexedDBService.saveFileMetadata(metadata);
@@ -126,6 +135,134 @@ describe('IndexedDBService (Integration Tests)', () => {
 
       expect(retrieved?.uploadDate).toBeInstanceOf(Date);
       expect(retrieved?.uploadDate.toISOString()).toBe(uploadDate.toISOString());
+    });
+  });
+
+  describe('GH#23: orphaned metadata after a failed/incomplete account-data write', () => {
+    /**
+     * A record written by a build that predates `accountsComplete` has no such key —
+     * `getFileMetadata` reads that as complete, which is the decision we want. But
+     * `saveFileMetadata` stamps `accountsComplete: false` onto anything arriving
+     * without the key, and `indexeddb-cache.ts` re-saves the record on EVERY cache hit
+     * just to bump `lastAccessed`. So the two halves of the contract disagree, and a
+     * legacy record demotes itself after exactly one read.
+     *
+     * No fixture can be written for this shape through the public API — an absent key
+     * is not a value a caller can pass, it is a shape that exists only in the browsers
+     * of people who used an earlier build. Hence the raw connection below.
+     */
+    it('should not demote a record written before accountsComplete existed', async () => {
+      const { DB_CONFIG, STORES } = await import('@/lib/indexeddb/indexeddb-schema');
+      const legacyHash = 'legacy-record-hash';
+      usedFileHashes.add(legacyHash);
+
+      const db = await new Promise<IDBDatabase>((resolve, reject) => {
+        const req = indexedDB.open(DB_CONFIG.name, DB_CONFIG.version);
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+      await new Promise<void>((resolve, reject) => {
+        const tx = db.transaction([STORES.FILES], 'readwrite');
+        // Deliberately no `accountsComplete` key at all.
+        tx.objectStore(STORES.FILES).put({
+          fileHash: legacyHash,
+          fileName: mockFileName,
+          fileSize: mockFileSize,
+          uploadDate: new Date(),
+          accountCount: 42,
+          lastAccessed: Date.now(),
+          version: 2,
+        });
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+      db.close();
+
+      const beforeResave = await indexedDBService.getFileMetadata(legacyHash);
+      expect(beforeResave).not.toBeNull();
+
+      // Exactly what indexeddb-cache.ts does on a cache hit.
+      await indexedDBService.saveFileMetadata({
+        ...(beforeResave as NonNullable<typeof beforeResave>),
+        lastAccessed: Date.now(),
+      });
+
+      expect(await indexedDBService.getFileMetadata(legacyHash)).not.toBeNull();
+    });
+
+    it('should hide metadata whose account data was never confirmed (fresh save, no storeAllAccounts yet)', async () => {
+      // This is the state a retry sees if the tab closes (or the promise is never
+      // awaited to completion) between saveFileMetadata committing and storeAllAccounts
+      // starting: metadata exists, but nothing has confirmed the account data landed.
+      await indexedDBService.saveFileMetadata({
+        fileHash: mockFileHash,
+        fileName: mockFileName,
+        fileSize: mockFileSize,
+        uploadDate: new Date(),
+        accountCount: 100,
+        lastAccessed: Date.now(),
+        version: 2,
+      });
+
+      const retrieved = await indexedDBService.getFileMetadata(mockFileHash);
+
+      expect(retrieved).toBeNull();
+    });
+
+    it('should reveal metadata once storeAllAccounts confirms the account data landed', async () => {
+      await indexedDBService.saveFileMetadata({
+        fileHash: mockFileHash,
+        fileName: mockFileName,
+        fileSize: mockFileSize,
+        uploadDate: new Date(),
+        accountCount: 1,
+        lastAccessed: Date.now(),
+        version: 2,
+      });
+
+      // Not yet visible — this is the assertion the previous test makes on its own;
+      // repeating it here pins the "before" half of the before/after this test compares.
+      expect(await indexedDBService.getFileMetadata(mockFileHash)).toBeNull();
+
+      await indexedDBService.storeAllAccounts(mockFileHash, [
+        { username: 'user1', badges: { following: badge() } },
+      ]);
+
+      const retrieved = await indexedDBService.getFileMetadata(mockFileHash);
+      expect(retrieved).not.toBeNull();
+      expect(retrieved?.fileHash).toBe(mockFileHash);
+    });
+
+    it('should not orphan metadata when the account-data transaction fails', async () => {
+      await indexedDBService.saveFileMetadata({
+        fileHash: mockFileHash,
+        fileName: mockFileName,
+        fileSize: mockFileSize,
+        uploadDate: new Date(),
+        accountCount: 1,
+        lastAccessed: Date.now(),
+        version: 2,
+      });
+
+      const waitSpy = vi
+        .spyOn(transactionHelpers, 'waitForTransaction')
+        .mockRejectedValueOnce(new Error('simulated transaction failure'));
+
+      await expect(
+        indexedDBService.storeAllAccounts(mockFileHash, [
+          { username: 'user1', badges: { following: badge() } },
+        ])
+      ).rejects.toThrow('simulated transaction failure');
+
+      waitSpy.mockRestore();
+
+      // A retry must see this as "no data here" and reparse — not a stale success.
+      const retrieved = await indexedDBService.getFileMetadata(mockFileHash);
+      expect(retrieved).toBeNull();
+
+      // The failure path also cleans up so the orphan doesn't sit in storage forever.
+      const files = await indexedDBService.getAllFiles();
+      expect(files.map(f => f.fileHash)).not.toContain(mockFileHash);
     });
   });
 

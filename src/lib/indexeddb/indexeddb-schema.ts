@@ -81,6 +81,18 @@ export interface FileMetadataRecord {
   lastAccessed: number;
   version: number;
   processingTime?: number;
+  /**
+   * Commit marker for the account-data write (GH#23). `saveFileMetadata` and
+   * `storeAllAccounts` are separate IndexedDB transactions with no rollback between
+   * them — if the account-data write fails (or the tab closes) after metadata already
+   * landed, this flag is what stops the orphaned record from being read back as a
+   * finished upload. `false` until `storeAllAccounts` confirms the account data is in;
+   * absent (undefined) on records written before this field existed. Those are treated
+   * as complete — see `IndexedDBService.getFileMetadata` for the reasoning, and note it
+   * is NOT that they cannot be orphans. They can: the split predates this fix, which is
+   * what GH#23 is about.
+   */
+  accountsComplete?: boolean;
 }
 
 // ===== Conversion Utilities =====
