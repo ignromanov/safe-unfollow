@@ -1,146 +1,47 @@
 ---
 layout: default
 title: Privacy Policy — Your Data Never Leaves Your Device
-description: Instagram Unfollow Tracker privacy policy. 100% local processing, no data collection, no tracking cookies. Your Instagram data never leaves your browser.
+description: Where to read the Instagram Unfollow Tracker privacy policy, and the short version — your Instagram export is processed in your browser and never uploaded.
 permalink: /privacy/
-last_updated: 2026-01-16
+last_updated: 2026-08-09
 ---
 
-# Privacy Policy - Instagram Unfollow Tracker
+# Privacy Policy
 
-## Our Privacy Commitment
+**The full, current policy lives at [safeunfollow.app/privacy](https://safeunfollow.app/privacy).**
+That page is the only one we maintain, and it is the one to read before deciding whether to
+trust this tool. This page exists so the documentation has a Privacy entry; it deliberately
+does not restate the policy, because a second copy is a second thing to keep true.
 
-**Instagram Unfollow Tracker is designed with privacy as the core principle.** This document explains in plain English how we handle your data (spoiler: we don't collect any).
+## The short version
 
-## What We Do NOT Do
+**Your Instagram export never leaves your browser.** The ZIP is opened, parsed and stored
+locally in IndexedDB. There is no account, no Instagram login, and no server that receives
+your data — which is also why no third party on this page can be targeting ads at it.
 
-### ❌ No Personal Data Collection
-- We don't collect any personal information
-- We don't track individual user behavior
-- We don't use tracking cookies
-- We don't store your Instagram data on any server
+That claim is about *your Instagram data*, and only about it. The site itself does talk to a
+handful of third parties, and the canonical policy names what each one receives:
 
-### ❌ No Server Processing
-- Your data never leaves your device
-- No servers process your Instagram export
-- No cloud storage or databases involved
-- No network requests after the initial page load
+| Who | What they get | Where |
+|-----|---------------|-------|
+| Vercel | standard web server logs (IP, timestamp, requested URL) | every page |
+| Umami | anonymous page views and product events, no personal identifiers | every page |
+| Google AdSense | ad requests and advertising cookies, subject to your consent choice | `/` and `/results` |
+| Google (Funding Choices) | your consent choice, stored so the banner stops asking | consent regions |
+| Affiliate networks | only what a link click sends, and only if you click | `/upload` |
+| Dodo Payments | your licence key, and your email if you buy the export | export only |
 
-### ❌ No Invasive Third-Party Services
-- No Google Analytics, Facebook Pixel, or similar invasive tracking
-- No external APIs processing your Instagram data
-- No data sharing with third parties
-- No advertising or marketing integrations
+Ads run on this site, and `/upload` carries one affiliate link. That is how the free analysis
+is paid for. None of it touches the export, because the export is never uploaded anywhere.
 
-## What We DO
+## Verify rather than believe
 
-### ✅ Local Processing Only
-- Your Instagram ZIP file is processed entirely in your browser
-- All calculations happen on your device using JavaScript
-- Results are displayed locally and never transmitted
+- **Source code**: [github.com/ignromanov/safe-unfollow](https://github.com/ignromanov/safe-unfollow) — MIT, auditable
+- **Network tab**: upload a file with DevTools open; no request carries its contents
+- **Offline**: after the first load the analysis works with the network off
 
-### ✅ Local Storage (IndexedDB)
-- Your Instagram data is stored locally in IndexedDB for fast access
-- Filter preferences are stored in LocalStorage
-- All data stays on your device and never leaves
-- You can clear this data anytime through browser settings or by uploading new data
+## Related
 
-### ✅ Privacy-Respecting Analytics
-We use minimal, privacy-focused analytics to improve the app:
-- **Umami Analytics** — anonymous page view counts, no personal data, GDPR-compliant
-
-**What we track:**
-- Page views (anonymous counts)
-- Performance metrics (load times)
-- Error rates (to fix bugs)
-
-**What we DON'T track:**
-- Your Instagram data or usernames
-- Individual user behavior or sessions
-- Personal identifiers or IP addresses
-- Any content from your uploads
-
-### ✅ Open Source Transparency
-- All code is publicly available on GitHub
-- You can review exactly what the app does
-- No hidden functionality or secret data collection
-- Community can audit and verify our privacy claims
-
-## Technical Details
-
-### How It Works
-1. You upload your Instagram Data Download ZIP file
-2. The app extracts and processes the JSON files in your browser
-3. Results are calculated locally and displayed
-4. No data is sent anywhere or stored permanently
-
-### Browser Storage
-- **IndexedDB**: Stores your Instagram data locally for fast filtering (~5MB for 1M accounts)
-- **LocalStorage**: Stores filter preferences and theme choice
-- **Memory**: Active data during filtering operations
-
-### Network Activity
-- **Initial Load**: Downloads the app files (HTML, CSS, JavaScript)
-- **Analytics**: Minimal anonymous requests to Umami (page views only)
-- **No Data Upload**: Your Instagram data is NEVER sent anywhere
-
-## Your Rights
-
-### You Control Your Data
-- Your Instagram data never leaves your device
-- You can delete the ZIP file anytime
-- You can clear browser storage anytime
-- You can use the app offline after initial load
-
-### You Can Verify
-- Review the source code on GitHub
-- Deploy your own version
-- Modify the code for your needs
-- No hidden functionality
-
-## Third-Party Hosting
-
-### Vercel Hosting
-- The live app is hosted on Vercel (safeunfollow.app)
-- Vercel may collect standard web server logs (IP addresses, timestamps)
-- No personal Instagram data is collected or transmitted
-
-### Self-Hosting
-If you deploy your own version:
-- Check your hosting provider's privacy policies
-- This project contains no tracking by default
-- You control what analytics (if any) to add
-
-## Data Security
-
-### Your Instagram Export
-- Contains personal information (usernames, profile URLs)
-- Keep the ZIP file secure on your device
-- Don't share it with others
-- Delete it when no longer needed
-
-### Browser Security
-- Use a modern, updated browser
-- Clear browser data regularly if desired
-- Use private/incognito mode if preferred
-
-## Contact & Questions
-
-### Privacy Questions
-- **GitHub Issues**: [Report privacy concerns](https://github.com/ignromanov/safe-unfollow/issues)
-- **Security**: See [SECURITY.md](https://github.com/ignromanov/safe-unfollow/blob/main/SECURITY.md) for security-related issues
-
-### Verification
-- **Source Code**: [GitHub Repository](https://github.com/ignromanov/safe-unfollow)
-- **Live Demo**: [Try the app](https://safeunfollow.app)
-
-## Changes to This Policy
-
-This privacy policy may be updated to reflect changes in the app or legal requirements. Changes will be posted on GitHub with clear version history.
-
-**Last Updated**: January 2026
-**Version**: 1.5
-
----
-
-*This privacy policy is written in plain English to be easily understood. The app is designed to be as private as possible - your data stays on your device, period.*
+- **[Full Privacy Policy](https://safeunfollow.app/privacy)** — the canonical document
+- **[Terms of Service](https://safeunfollow.app/terms)**
+- **[Security policy](https://github.com/ignromanov/safe-unfollow/blob/main/SECURITY.md)** — for reporting vulnerabilities
