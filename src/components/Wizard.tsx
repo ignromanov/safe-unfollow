@@ -173,7 +173,7 @@ export function Wizard({ initialStep = 1, onComplete, onCancel }: WizardProps) {
                       href={step.externalLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="cursor-pointer inline-flex items-center justify-center gap-3 px-8 py-4 bg-primary text-white rounded-2xl font-black shadow-xl hover:scale-105 active:scale-95 transition-all text-sm md:text-base w-full sm:w-auto"
+                      className="cursor-pointer inline-flex items-center justify-center gap-3 px-8 py-4 bg-primary text-primary-foreground rounded-2xl font-black shadow-xl hover:scale-105 active:scale-95 transition-all text-sm md:text-base w-full sm:w-auto"
                     >
                       {t('buttons.openInstagram')} <ExternalLink size={20} />
                     </a>
@@ -196,7 +196,7 @@ export function Wizard({ initialStep = 1, onComplete, onCancel }: WizardProps) {
                 {isLastStep && (
                   <button
                     onClick={handleCalendarReminder}
-                    className="cursor-pointer inline-flex items-center justify-center gap-3 px-8 py-4 bg-primary text-white rounded-2xl font-black shadow-xl hover:scale-105 active:scale-95 transition-all text-sm md:text-base w-full sm:w-auto"
+                    className="cursor-pointer inline-flex items-center justify-center gap-3 px-8 py-4 bg-primary text-primary-foreground rounded-2xl font-black shadow-xl hover:scale-105 active:scale-95 transition-all text-sm md:text-base w-full sm:w-auto"
                   >
                     <Calendar size={20} />
                     {t('calendar.addReminder')}
@@ -221,7 +221,7 @@ export function Wizard({ initialStep = 1, onComplete, onCancel }: WizardProps) {
             </button>
             <button
               onClick={handleNext}
-              className="cursor-pointer flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-bold text-sm shadow-lg hover:scale-105 active:scale-95 transition-all"
+              className="cursor-pointer flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-xl font-bold text-sm shadow-lg hover:scale-105 active:scale-95 transition-all"
             >
               {isLastStep ? t('buttons.done') : t('buttons.next')}
               <ArrowRight size={18} />

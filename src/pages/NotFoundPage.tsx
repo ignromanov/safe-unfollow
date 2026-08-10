@@ -45,7 +45,7 @@ export function Component() {
           {/* Action - using <a> for pre-hydration functionality */}
           <a
             href={`${prefix}/`}
-            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-8 py-4 text-base font-bold text-white transition-all hover:bg-primary/90 hover:shadow-lg"
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-8 py-4 text-base font-bold text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-lg"
           >
             <Home size={20} />
             Go to Home

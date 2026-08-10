@@ -140,4 +140,17 @@ describe('SearchBar Component', () => {
     // Input should still be focused
     expect(input).toHaveFocus();
   });
+
+  // This button is the app's only live rendering of the ghost variant, and so
+  // was the one place the ghost hover defect actually reached users: in dark
+  // mode the near-black X sat on accent/50 over a dark card at 2.43:1, missing
+  // even the 3:1 allowed for graphics. Asserted here as well as on the variant
+  // because this is the surface that made it a real bug rather than a latent one.
+  it('clears its X glyph against the hover fill, not into it', () => {
+    render(<SearchBar {...defaultProps} value="test" />);
+
+    const clearButton = screen.getByRole('button');
+    expect(clearButton).toHaveClass('hover:text-foreground');
+    expect(clearButton).not.toHaveClass('hover:text-accent-foreground');
+  });
 });

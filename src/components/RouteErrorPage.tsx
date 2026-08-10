@@ -66,7 +66,7 @@ export function RouteErrorPage() {
             <div className="flex flex-col gap-3 sm:flex-row">
               <button
                 onClick={handleGoHome}
-                className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl bg-primary px-6 py-3 text-sm font-bold text-white transition-all hover:bg-primary/90 hover:shadow-lg"
+                className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-lg"
               >
                 <Home size={18} />
                 Go Home
@@ -126,7 +126,7 @@ export function RouteErrorPage() {
             <div className="flex flex-col gap-3 sm:flex-row">
               <button
                 onClick={handleGoHome}
-                className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl bg-primary px-6 py-3 text-sm font-bold text-white transition-all hover:bg-primary/90 hover:shadow-lg"
+                className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-lg"
               >
                 <Home size={18} />
                 Go Home
@@ -173,7 +173,7 @@ export function RouteErrorPage() {
           <div className="flex flex-col gap-3 sm:flex-row">
             <button
               onClick={handleGoHome}
-              className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl bg-primary px-6 py-3 text-sm font-bold text-white transition-all hover:bg-primary/90 hover:shadow-lg"
+              className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-lg"
             >
               <Home size={18} />
               Go Home

@@ -287,4 +287,50 @@ describe('StatCard', () => {
     const button = screen.getByRole('button');
     expect(button).toHaveAttribute('aria-pressed', 'true');
   });
+
+  // The active card fills with --primary. A literal white on it measures 3.95:1
+  // in light and 3.30:1 in dark; the token clears AA in both. The repo-wide text
+  // sweep in a11y/primary-contrast.test.ts cannot see this file, because the
+  // `bg-primary` is eight lines above the colours it governs — so assert on the
+  // rendered classes instead.
+  describe('active state drives its text from the token, not a literal colour', () => {
+    const renderActive = () =>
+      render(
+        <StatCard
+          icon={<Users data-testid="users-icon" />}
+          label="Following"
+          value={500}
+          colorClass="bg-blue-500/10 text-blue-500"
+          badgeType="following"
+          isActive={true}
+          onClick={mockOnClick}
+        />
+      );
+
+    it('has no literal text-white anywhere in the active card', () => {
+      const { container } = renderActive();
+
+      const withWhiteText = container.querySelectorAll('[class*="text-white"]');
+      expect(Array.from(withWhiteText).map(el => el.className)).toEqual([]);
+    });
+
+    it('colours the value with text-primary-foreground', () => {
+      renderActive();
+
+      expect(screen.getByText('500')).toHaveClass('text-primary-foreground');
+    });
+
+    it('fades the label to /90, the deepest fade that still clears AA', () => {
+      renderActive();
+
+      expect(screen.getByText('Following')).toHaveClass('text-primary-foreground/90');
+    });
+
+    it('colours the icon pill with the token', () => {
+      renderActive();
+
+      const pill = screen.getByTestId('users-icon').parentElement;
+      expect(pill).toHaveClass('text-primary-foreground');
+    });
+  });
 });

@@ -113,7 +113,10 @@ describe('HeaderV2', () => {
       render(<Header hasData={false} activeScreen={AppState.UPLOAD} />);
 
       const uploadButton = screen.getByText(commonEN.buttons.uploadFile).closest('button');
-      expect(uploadButton).toHaveClass('bg-primary', 'text-white');
+      // The label must come from the token, not a literal white: on --primary a
+      // hardcoded white measures 3.95:1 in light and 3.30:1 in dark, both below AA.
+      expect(uploadButton).toHaveClass('bg-primary', 'text-primary-foreground');
+      expect(uploadButton).not.toHaveClass('text-white');
     });
   });
 
@@ -144,7 +147,8 @@ describe('HeaderV2', () => {
       render(<Header hasData={true} activeScreen={AppState.RESULTS} />);
 
       const viewResultsButton = screen.getByText(commonEN.buttons.viewResults).closest('button');
-      expect(viewResultsButton).toHaveClass('bg-primary', 'text-white');
+      expect(viewResultsButton).toHaveClass('bg-primary', 'text-primary-foreground');
+      expect(viewResultsButton).not.toHaveClass('text-white');
     });
 
     it('should open delete confirmation dialog when delete button is clicked', () => {

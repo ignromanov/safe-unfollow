@@ -57,7 +57,7 @@ export function RescueToolCard({ tool, index, onToolClick }: RescueToolCardProps
 
       {/* Recommended label for first item */}
       {isFirst && (
-        <span className="absolute -top-2 start-3 px-2 py-0.5 text-xs font-bold rounded-full bg-primary text-white">
+        <span className="absolute -top-2 start-3 px-2 py-0.5 text-xs font-bold rounded-full bg-primary text-primary-foreground">
           ⭐ {t('rescue.recommended')}
         </span>
       )}
@@ -93,8 +93,8 @@ export function RescueToolCard({ tool, index, onToolClick }: RescueToolCardProps
       <div
         className={`w-full py-1.5 md:py-2 px-3 rounded-xl text-center text-sm font-semibold transition-all mt-auto ${
           isFirst
-            ? 'bg-primary text-white group-hover:bg-primary/90'
-            : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 group-hover:bg-primary group-hover:text-white'
+            ? 'bg-primary text-primary-foreground group-hover:bg-primary/90'
+            : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 group-hover:bg-primary group-hover:text-primary-foreground'
         }`}
       >
         <span className="flex items-center justify-center gap-1.5">
