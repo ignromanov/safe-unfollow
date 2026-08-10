@@ -258,7 +258,7 @@ describe('generateFileHash', () => {
     expect(hash1).not.toBe(hash2);
   });
 
-  it('should only hash first 1MB of large files', async () => {
+  it('should hash large files by sampling head/tail, not the whole file', async () => {
     // Create a file larger than 1MB
     const largeContent = new Uint8Array(2 * 1024 * 1024); // 2MB
     largeContent.fill(1);
@@ -268,6 +268,42 @@ describe('generateFileHash', () => {
     const hash = await generateFileHash(largeFile);
 
     expect(hash).toMatch(/^[0-9a-f]{64}$/);
+  });
+
+  // GH#22: the cache key used to be a hash of the first megabyte only. An Instagram
+  // export ZIP has stable, alphabetically-early entries up front (ads_information/…)
+  // and the data this product actually reads (connections/followers_and_following/…)
+  // much deeper in the archive — so two different exports could share their first
+  // megabyte and collide on the cache key, silently serving the stale snapshot.
+  it('should produce different hashes for files sharing the first megabyte but differing later (GH#22)', async () => {
+    const sharedHead = new Uint8Array(1.5 * 1024 * 1024).fill(1); // > 1MB, so it fully covers the old head-only sample
+    const tailA = new Uint8Array(512 * 1024).fill(2);
+    const tailB = new Uint8Array(512 * 1024).fill(3);
+
+    const fileA = new File([sharedHead, tailA], 'export-a.zip', { type: 'application/zip' });
+    const fileB = new File([sharedHead, tailB], 'export-b.zip', { type: 'application/zip' });
+
+    const hashA = await generateFileHash(fileA);
+    const hashB = await generateFileHash(fileB);
+
+    expect(hashA).not.toBe(hashB);
+  });
+
+  // GH#22: the fix folds file.size into the digest, since two files can share an
+  // identical sampled head AND tail while differing only in an unsampled middle.
+  it('should produce different hashes for files with matching head/tail but different size (GH#22)', async () => {
+    const head = new Uint8Array(1024 * 1024).fill(7); // exactly the sampled head
+    const tail = new Uint8Array(1024 * 1024).fill(9); // exactly the sampled tail
+    const middleA = new Uint8Array(512 * 1024).fill(3); // unsampled middle, size = 2.5MB
+    const middleB = new Uint8Array(1024 * 1024).fill(3); // unsampled middle, size = 3MB
+
+    const fileA = new File([head, middleA, tail], 'a.zip', { type: 'application/zip' });
+    const fileB = new File([head, middleB, tail], 'b.zip', { type: 'application/zip' });
+
+    const hashA = await generateFileHash(fileA);
+    const hashB = await generateFileHash(fileB);
+
+    expect(hashA).not.toBe(hashB);
   });
 
   it('should hash entire file if smaller than 1MB', async () => {
