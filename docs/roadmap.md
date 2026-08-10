@@ -113,8 +113,9 @@ last_updated: 2026-01-16
 
 ### Data Collection
 - ❌ **Server-side processing** — All processing remains client-side
-- ❌ **Personal data collection** — No tracking of individual user behavior
-- ❌ **Third-party data sharing** — No data sharing with external services
+- ❌ **Profiling you from your export** — it never reaches us, so nothing can be built from it
+- ❌ **Handing your export to anyone** — it never leaves your browser. What the site's own
+  third parties do receive is spelled out below and in the Privacy Policy
 
 ### Commercial Features
 - ❌ **Subscriptions** — Finding your unfollowers is free in full, forever. The only paid item is a one-time $7 unlock for downloading the list as a file, and the download gives you a free sample first
