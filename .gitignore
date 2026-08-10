@@ -133,3 +133,10 @@ umami-backup-*.sql.gz
 
 # Retention script must ship despite the scripts/ ignore above (CI runs it)
 !scripts/umami-retention.sql
+
+# design-sync (staged converter, generated bundle, machine state)
+.ds-sync/
+ds-bundle/
+.design-sync/.cache/
+.design-sync/learnings/
+.design-sync/node_modules
