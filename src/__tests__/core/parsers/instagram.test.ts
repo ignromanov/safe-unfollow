@@ -741,6 +741,73 @@ describe('Instagram Parser', () => {
       expect(drift?.severity).toBe('warning');
       expect(drift?.message).not.toMatch(/none of them/i);
     });
+
+    // The wrapper half of the same gate. An unrecognised wrapper and an
+    // unreadable set of records produce the identical wrong answer — every
+    // follower badged notFollowedBack — so they cannot be gated differently.
+    // Severity alone does not route: instagram.ts only consults warnings after
+    // hasMinimalData has already said false.
+    it('refuses minimal data when following.json’s wrapper is unrecognised', async () => {
+      const result = await parseInstagramZipFile(
+        zipWith(UNKNOWN_TOP_LEVEL_KEY, VALID_ARRAY_OF_ONE)
+      );
+
+      expect(result.data.followers.size).toBe(1);
+      expect(result.data.following.size).toBe(0);
+      expect(result.hasMinimalData).toBe(false);
+      expect(result.warnings.find(w => w.code === 'INVALID_FOLLOWING_FORMAT')?.severity).toBe(
+        'error'
+      );
+      // Ours stays the first error, so the generic "no data" copy never fronts it.
+      expect(result.warnings.find(w => w.severity === 'error')?.code).toBe(
+        'INVALID_FOLLOWING_FORMAT'
+      );
+      expect(result.warnings.find(w => w.code === 'NO_DATA_FILES')).toBeUndefined();
+    });
+
+    it('refuses minimal data when a followers shard’s wrapper is unrecognised', async () => {
+      const result = await parseInstagramZipFile(
+        zipWith(VALID_ARRAY_OF_ONE, UNKNOWN_TOP_LEVEL_KEY)
+      );
+
+      expect(result.data.following.size).toBe(1);
+      expect(result.hasMinimalData).toBe(false);
+      expect(result.warnings.find(w => w.code === 'INVALID_FOLLOWERS_FORMAT')?.severity).toBe(
+        'error'
+      );
+      expect(result.warnings.find(w => w.code === 'NO_DATA_FILES')).toBeUndefined();
+    });
+
+    // The two cases this change could plausibly break, and breaking either
+    // turns working uploads into error screens.
+    it('leaves a genuinely empty required file alone, either side', async () => {
+      const emptyFollowing = await parseInstagramZipFile(zipWith(EMPTY_ARRAY, VALID_ARRAY_OF_ONE));
+      expect(emptyFollowing.hasMinimalData).toBe(true);
+      expect(emptyFollowing.warnings.find(w => w.severity === 'error')).toBeUndefined();
+
+      const emptyFollowers = await parseInstagramZipFile(zipWith(VALID_ARRAY_OF_ONE, EMPTY_ARRAY));
+      expect(emptyFollowers.hasMinimalData).toBe(true);
+      expect(emptyFollowers.warnings.find(w => w.severity === 'error')).toBeUndefined();
+    });
+
+    it('leaves an absent required file alone', async () => {
+      // "Absent" and "present but unreadable" are different answers and this
+      // whole task exists to keep them apart. interpretFollowingPayload
+      // (undefined) reports formatInvalid: false, and the gate must not read
+      // that as a failure to parse.
+      mockZipInstance = new MockJSZip();
+      mockZipInstance._addFile(
+        'connections/followers_and_following/followers_1.json',
+        vi.fn().mockResolvedValue(JSON.stringify(VALID_ARRAY_OF_ONE))
+      );
+      const result = await parseInstagramZipFile(
+        new File(['test'], 'test.zip', { type: 'application/zip' })
+      );
+
+      expect(result.hasMinimalData).toBe(true);
+      expect(result.warnings.find(w => w.code === 'MISSING_FOLLOWING')?.severity).toBe('warning');
+      expect(result.warnings.find(w => w.severity === 'error')).toBeUndefined();
+    });
   });
 
   // GH#21, followers side. followers_*.json is glob-matched and multi-file —

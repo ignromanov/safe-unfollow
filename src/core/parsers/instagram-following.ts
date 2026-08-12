@@ -29,12 +29,20 @@ export interface FollowingParsed {
   warnings: ParseWarning[];
   fileExpectation: FileExpectation;
   /**
-   * True when the file was found, its shape was recognized, it held records —
-   * and not one of them could be read (GH#21 Task 3). This is not "you follow
-   * nobody"; it is a following list we cannot see, and `instagram.ts` uses it to
-   * keep the two out of the same exit.
+   * True when the file was found and yielded no accounts because we could not
+   * read it — either its wrapper matched no known shape, or every record in it
+   * did (GH#21 Task 3). This is not "you follow nobody"; it is a following list
+   * we cannot see, and `instagram.ts` uses it to keep the two out of the same
+   * exit.
+   *
+   * One flag rather than two because the two failures produce the identical
+   * wrong answer downstream — `following` ends up empty, so every follower is
+   * badged notFollowedBack — and a caller that had to remember to check both
+   * would eventually check one. Which failure it was stays visible in the
+   * warning code and in `FileExpectation`; what is collapsed here is only the
+   * decision, not the diagnosis.
    */
-  entriesUnreadable: boolean;
+  unreadable: boolean;
 }
 
 /**
@@ -79,7 +87,9 @@ export function parseFollowingPayload(
   const { raw, formatInvalid, unresolved } = interpretFollowingPayload(readResult?.data);
   const followingFound = readResult !== null;
   const followingUsers = raw.map(r => r.username);
-  const entriesUnreadable = followingUsers.length === 0 && unresolved > 0;
+  // `formatInvalid` is false for an absent file, so "missing" never lands here.
+  const nothingRead = followingUsers.length === 0;
+  const unreadable = formatInvalid || (nothingRead && unresolved > 0);
 
   const fileExpectation: FileExpectation = {
     name: 'following.json',
@@ -120,7 +130,7 @@ export function parseFollowingPayload(
     warnings.push({
       code: 'UNRESOLVED_ENTRIES_FOLLOWING',
       message: describeUnreadableEntries('following.json', unresolved, followingUsers.length),
-      severity: entriesUnreadable ? 'error' : 'warning',
+      severity: nothingRead ? 'error' : 'warning',
       fix: UNREADABLE_ENTRIES_FIX,
     });
   } else if (followingUsers.length === 0) {
@@ -136,6 +146,6 @@ export function parseFollowingPayload(
     followingTimestamps: new Map(raw.map(r => [r.username, r.timestamp ?? 0] as const)),
     warnings,
     fileExpectation,
-    entriesUnreadable,
+    unreadable,
   };
 }

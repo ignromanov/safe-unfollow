@@ -23,12 +23,19 @@ export interface FollowersParsed {
   warnings: ParseWarning[];
   fileExpectation: FileExpectation;
   /**
-   * True when shards were found, their shape was recognized, they held records
-   * — and not one of those records could be read (GH#21 Task 3). This is not
-   * "no followers"; it is followers we cannot see, and `instagram.ts` uses it
-   * to keep the two out of the same exit.
+   * True when the followers data was found but we could not read it — any shard
+   * whose wrapper matched no known shape, or shards that yielded no accounts at
+   * all because every record in them was unreadable (GH#21 Task 3). This is not
+   * "no followers"; it is followers we cannot see.
+   *
+   * An unrecognised shard counts even when a sibling shard parsed fine, which
+   * is stricter than the entry-level half. The asymmetry is deliberate: an
+   * unreadable record is a loss we can count and report, while an unreadable
+   * shard is a loss of unknown size — it could be most of the list — and the
+   * followers set silently missing an unknown fraction is what makes
+   * notFollowedBack wrong without appearing to be.
    */
-  entriesUnreadable: boolean;
+  unreadable: boolean;
 }
 
 /** Parse a single followers JSON text */
@@ -46,6 +53,78 @@ export async function parseFollowersJson(jsonText: string): Promise<string[]> {
       (data as { relationships_followers: InstagramExportEntry[] }).relationships_followers
     );
   throw new Error('Invalid followers json format');
+}
+
+/**
+ * Turn the outcome of reading the shards into at most one warning.
+ *
+ * Extracted from `parseFollowersFromZip` rather than left inline: adding the
+ * entry-level branch took that function to complexity 21 against a limit of 20.
+ * The branches are ordered worst-first and are mutually exclusive by intent —
+ * a reader who has been told the shards are missing does not also need to be
+ * told they are empty.
+ */
+function describeFollowersOutcome(outcome: {
+  followersFound: boolean;
+  formatInvalidFiles: string[];
+  unresolvedEntries: number;
+  resolvedCount: number;
+}): ParseWarning[] {
+  const { followersFound, formatInvalidFiles, unresolvedEntries, resolvedCount } = outcome;
+
+  if (!followersFound) {
+    return [
+      {
+        code: 'MISSING_FOLLOWERS',
+        message: 'followers_*.json files not found — cannot detect who follows you.',
+        severity: 'warning',
+        fix: 'Make sure your Instagram export includes "Followers and following" data. Re-request if needed.',
+      },
+    ];
+  }
+
+  // Loud failure beats an undetectable wrong answer: at least one shard was
+  // found but its shape wasn't recognized, so we can't be sure the followers
+  // set is complete — and unlike an unreadable record, an unreadable shard is
+  // a loss of unknown size.
+  if (formatInvalidFiles.length > 0) {
+    return [
+      {
+        code: 'INVALID_FOLLOWERS_FORMAT',
+        message: `followers data was found (${formatInvalidFiles.join(', ')}), but its structure is not recognized — cannot detect who follows you.`,
+        severity: 'error',
+        fix: 'Instagram may have changed their export format. Please report this issue so we can add support.',
+      },
+    ];
+  }
+
+  // The wrapper parsed and the records did not. Severity follows how much was
+  // lost: nothing readable at all inverts the badge math for every follower and
+  // has to reach DiagnosticErrorScreen, while losing some of them leaves the
+  // answer incomplete rather than backwards, and blocking an otherwise good
+  // upload over that is disproportionate.
+  if (unresolvedEntries > 0) {
+    return [
+      {
+        code: 'UNRESOLVED_ENTRIES_FOLLOWERS',
+        message: describeUnreadableEntries('followers_*.json', unresolvedEntries, resolvedCount),
+        severity: resolvedCount === 0 ? 'error' : 'warning',
+        fix: UNREADABLE_ENTRIES_FIX,
+      },
+    ];
+  }
+
+  if (resolvedCount === 0) {
+    return [
+      {
+        code: 'EMPTY_FOLLOWERS',
+        message: 'Followers files are empty or contain no valid accounts.',
+        severity: 'info',
+      },
+    ];
+  }
+
+  return [];
 }
 
 /** Parse followers_*.json files from ZIP with dedup and multi-file merge */
@@ -127,7 +206,8 @@ export async function parseFollowersFromZip(
   );
 
   const followersFound = followersFilesByName.size > 0;
-  const entriesUnreadable = followersUsers.length === 0 && unresolvedEntries > 0;
+  const nothingRead = followersUsers.length === 0;
+  const unreadable = formatInvalidFiles.length > 0 || (nothingRead && unresolvedEntries > 0);
   const followersSpec = FILE_SPECS[1]!;
   const fileExpectation: FileExpectation = {
     name: 'followers_*.json',
@@ -140,49 +220,14 @@ export async function parseFollowersFromZip(
     formatUnreadable: formatInvalidFiles.length > 0,
   };
 
-  if (!followersFound) {
-    warnings.push({
-      code: 'MISSING_FOLLOWERS',
-      message: 'followers_*.json files not found — cannot detect who follows you.',
-      severity: 'warning',
-      fix: 'Make sure your Instagram export includes "Followers and following" data. Re-request if needed.',
-    });
-  } else if (formatInvalidFiles.length > 0) {
-    // Loud failure beats an undetectable wrong answer: at least one shard was
-    // found but its shape wasn't recognized, so we can't be sure the
-    // followers set is complete. Severity 'error' routes this to
-    // DiagnosticErrorScreen (see UploadZone's hasCriticalError gate) even
-    // though other shards may have parsed fine and left followersUsers
-    // non-empty.
-    warnings.push({
-      code: 'INVALID_FOLLOWERS_FORMAT',
-      message: `followers data was found (${formatInvalidFiles.join(', ')}), but its structure is not recognized — cannot detect who follows you.`,
-      severity: 'error',
-      fix: 'Instagram may have changed their export format. Please report this issue so we can add support.',
-    });
-  } else if (unresolvedEntries > 0) {
-    // The wrapper parsed and the records did not. Severity follows how much
-    // was lost: nothing readable at all inverts the badge math for every
-    // follower and has to reach DiagnosticErrorScreen, while losing some of
-    // them leaves the answer incomplete rather than backwards — and blocking
-    // an otherwise good upload over that is disproportionate.
-    warnings.push({
-      code: 'UNRESOLVED_ENTRIES_FOLLOWERS',
-      message: describeUnreadableEntries(
-        'followers_*.json',
-        unresolvedEntries,
-        followersUsers.length
-      ),
-      severity: entriesUnreadable ? 'error' : 'warning',
-      fix: UNREADABLE_ENTRIES_FIX,
-    });
-  } else if (followersUsers.length === 0) {
-    warnings.push({
-      code: 'EMPTY_FOLLOWERS',
-      message: 'Followers files are empty or contain no valid accounts.',
-      severity: 'info',
-    });
-  }
+  warnings.push(
+    ...describeFollowersOutcome({
+      followersFound,
+      formatInvalidFiles,
+      unresolvedEntries,
+      resolvedCount: followersUsers.length,
+    })
+  );
 
   return {
     followersRaw,
@@ -192,6 +237,6 @@ export async function parseFollowersFromZip(
     foundFollowerPaths,
     warnings,
     fileExpectation,
-    entriesUnreadable,
+    unreadable,
   };
 }

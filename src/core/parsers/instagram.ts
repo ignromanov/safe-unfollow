@@ -172,19 +172,33 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
   warnings.push(...optionalParsed.warnings);
   fileExpectations.push(...optionalParsed.fileExpectations);
 
-  // A required file that was found, held records, and yielded no usernames is
-  // not "no data" — it is data we cannot read, and the two must not share an
-  // exit (GH#21). Widening the OR below would have said "we found nothing";
-  // gating it says "we found it and failed", which is the true and actionable
-  // one. Both callers of hasMinimalData take the first error warning as the
-  // code, so the critical error is withheld to leave ours first.
-  const requiredEntriesUnreadable =
-    followingParsed.entriesUnreadable || followersParsed.entriesUnreadable;
+  // A required file that was found and could not be read is not "no data" — it
+  // is data we cannot read, and the two must not share an exit (GH#21).
+  // Widening the OR below would have said "we found nothing"; gating it says
+  // "we found it and failed", which is the true and actionable one.
+  //
+  // "Could not read it" covers both halves, and each file reports them as one
+  // flag: the wrapper matched no known shape, or the wrapper was fine and every
+  // record inside it drifted. They are one condition because they produce one
+  // outcome — the set comes back empty, so every follower is badged
+  // notFollowedBack — and that outcome is the worst in GH#21 whichever half
+  // caused it. Splitting them here would mean a caller could gate one and
+  // forget the other, which is exactly how the entry half shipped without the
+  // wrapper half. Which one it was is not lost: it stays in the warning code
+  // and in `FileExpectation`. Only the decision is shared, not the diagnosis.
+  //
+  // An absent file is not unreadable and must not reach this — "missing" and
+  // "present but unintelligible" are different answers and keeping them apart
+  // is the point of the whole task.
+  //
+  // Both callers of hasMinimalData take the first error warning as the code, so
+  // the critical error is withheld to leave ours first.
+  const requiredFileUnreadable = followingParsed.unreadable || followersParsed.unreadable;
   const hasMinimalData =
-    !requiredEntriesUnreadable &&
+    !requiredFileUnreadable &&
     (followingUsers.length > 0 || followersParsed.followersUsers.length > 0);
 
-  if (!hasMinimalData && !requiredEntriesUnreadable) {
+  if (!hasMinimalData && !requiredFileUnreadable) {
     warnings.push(createCriticalError(analysis));
   }
 
