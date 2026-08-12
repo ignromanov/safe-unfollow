@@ -3,9 +3,10 @@
  * Handles parsing of optional relationship files (pending, restricted, close friends, etc.)
  */
 
-import type { FileExpectation, InstagramExportEntry, ParseWarning } from '@/core/types';
+import type { FileExpectation, ParseWarning } from '@/core/types';
 import { FILE_SPECS, PERMANENT_REQUESTS_SPEC, type FileSpec } from './instagram-file-specs';
-import { listToMap, resolveEntryList } from './instagram-utils';
+import { resolveUsernameLabel } from './instagram-labels';
+import { resolveEntries, resolveEntryList } from './instagram-utils';
 
 export interface OptionalFileResult {
   map: Map<string, number>;
@@ -19,6 +20,13 @@ export interface OptionalFileResult {
    * recognized shape happens to be genuinely empty.
    */
   formatValid: boolean;
+  /**
+   * Entries whose shape was recognized at the file level but whose username
+   * could not be read (GH#21 Task 1). `count: 0` on its own cannot tell a
+   * genuinely empty file from one whose every record drifted — this is the
+   * number that can, and the entry-level diagnostics build on it.
+   */
+  unresolvedEntries: number;
 }
 
 export interface OptionalFilesParsed {
@@ -34,25 +42,72 @@ export interface OptionalFilesParsed {
 
 type ReadJsonFromZip = (patterns: string[]) => Promise<{ data: unknown; path: string } | null>;
 
-/** Read and parse a single optional file using flexible property lookup */
-async function readListMapFlexible(
+/**
+ * One optional file after reading and top-level shape resolution, but before
+ * its entries are read.
+ *
+ * Reading and mapping are separate passes because the username label is
+ * resolved from the whole archive at once, not per file — see
+ * `instagram-labels.ts`. Mapping inside the read, as this module used to do,
+ * makes the single-record files (`restricted_profiles.json`,
+ * `removed_suggestions.json`) unreadable: one record carries no signal about
+ * which label holds the username.
+ */
+interface ReadOptionalFile {
+  found: boolean;
+  path?: string;
+  /** `null` means the top-level shape was not recognized. */
+  entries: unknown[] | null;
+}
+
+/** Read a single optional file and resolve its top level, nothing more. */
+async function readOptionalFile(
   spec: FileSpec,
   readFirstExistingJson: (fileNames: string[]) => Promise<{ data: unknown; path: string } | null>
-): Promise<OptionalFileResult> {
+): Promise<ReadOptionalFile> {
   const result = await readFirstExistingJson(spec.fileNames);
-  if (!result) return { map: new Map(), found: false, count: 0, formatValid: true };
+  if (!result) return { found: false, entries: null };
 
-  const entries = resolveEntryList(result.data, spec.propCandidates);
+  // A genuinely empty array resolves to `[]`; only an unrecognized shape
+  // resolves to `null` — see instagram-format-drift.ts fixtures.
+  return {
+    found: true,
+    path: result.path,
+    entries: resolveEntryList(result.data, spec.propCandidates),
+  };
+}
 
-  if (entries === null) {
-    // Found but no known shape matched: a genuinely empty array ([]) takes the
-    // branch above and never reaches here, so this is specifically "shape not
-    // recognized", not "empty file" — see instagram-format-drift.ts fixtures.
-    return { map: new Map(), found: true, path: result.path, count: 0, formatValid: false };
+/** Map one already-read file's entries using the archive-wide username label. */
+function toOptionalFileResult(
+  file: ReadOptionalFile,
+  usernameLabel: string | null
+): OptionalFileResult {
+  if (!file.found) {
+    return { map: new Map(), found: false, count: 0, formatValid: true, unresolvedEntries: 0 };
   }
 
-  const map = listToMap(entries as InstagramExportEntry[]);
-  return { map, found: true, path: result.path, count: map.size, formatValid: true };
+  if (file.entries === null) {
+    return {
+      map: new Map(),
+      found: true,
+      path: file.path,
+      count: 0,
+      formatValid: false,
+      unresolvedEntries: 0,
+    };
+  }
+
+  const resolved = resolveEntries(file.entries, usernameLabel);
+  const map = new Map(resolved.items.map(item => [item.username, item.timestamp ?? 0] as const));
+
+  return {
+    map,
+    found: true,
+    path: file.path,
+    count: map.size,
+    formatValid: true,
+    unresolvedEntries: resolved.unresolved,
+  };
 }
 
 /** Parse all optional relationship files from ZIP */
@@ -71,24 +126,37 @@ export async function parseOptionalFiles(
   };
 
   const optionalSpecs = FILE_SPECS.slice(2); // Skip following and followers
-  const optionalResults = await Promise.all(
-    optionalSpecs.map(spec => readListMapFlexible(spec, readFirstExistingJson))
+
+  // Pass 1: read every optional file and resolve its top-level shape. Includes
+  // permanent-requests, which is a separate spec for historical reasons but
+  // carries the same entries and must contribute to the same label pool.
+  const readFiles = await Promise.all(
+    [...optionalSpecs, PERMANENT_REQUESTS_SPEC].map(spec =>
+      readOptionalFile(spec, readFirstExistingJson)
+    )
   );
+
+  // Resolve the username label once, over every entry in the archive. Doing it
+  // per file would leave the single-record files unreadable, and doing it
+  // seven times would be seven chances to disagree.
+  const usernameLabel = resolveUsernameLabel(readFiles.flatMap(file => file.entries ?? []));
+
+  // Pass 2: map each file's entries with that label.
+  const optionalResults = readFiles.map(file => toOptionalFileResult(file, usernameLabel));
 
   const emptyResult: OptionalFileResult = {
     map: new Map<string, number>(),
     found: false,
     count: 0,
     formatValid: true,
+    unresolvedEntries: 0,
   };
   const pendingResult = optionalResults[0] ?? emptyResult;
   const restrictedResult = optionalResults[1] ?? emptyResult;
   const closeFriendsResult = optionalResults[2] ?? emptyResult;
   const unfollowedResult = optionalResults[3] ?? emptyResult;
   const dismissedResult = optionalResults[4] ?? emptyResult;
-
-  // Parse permanent follow requests (separate spec for historical reasons)
-  const permanentResult = await readListMapFlexible(PERMANENT_REQUESTS_SPEC, readFirstExistingJson);
+  const permanentResult = optionalResults[optionalSpecs.length] ?? emptyResult;
 
   // Build file expectations and format-drift warnings for optional files.
   //

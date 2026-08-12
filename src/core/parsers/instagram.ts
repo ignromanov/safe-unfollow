@@ -2,14 +2,18 @@ import JSZip from 'jszip';
 import type {
   FileDiscovery,
   FileExpectation,
-  InstagramExportEntry,
   ParsedAll,
   ParseResult,
   ParseWarning,
   RawItem,
 } from '@/core/types';
 import { BASE_PATH_CANDIDATES, FILE_SPECS } from './instagram-file-specs';
-import { escapeRegExp, extractUsernames, listToRaw, resolveEntryList } from './instagram-utils';
+import {
+  escapeRegExp,
+  extractUsernames,
+  resolveEntries,
+  resolveEntryList,
+} from './instagram-utils';
 import { analyzeZipStructure, createCriticalError } from './instagram-zip-analysis';
 import { parseFollowersFromZip } from './instagram-followers';
 import { parseOptionalFiles } from './instagram-optional';
@@ -42,8 +46,12 @@ export async function parseFollowingJson(jsonText: string): Promise<string[]> {
  * shape, but it shared the same latent gap the optional files did.
  * `formatInvalid` is true only when none of those match. A genuinely empty
  * array is recognised and leaves it false — that distinction is the entire
- * point, because `listToRaw(undefined)` returns `[]` for both and an
+ * point, because `resolveEntries` yields no items for both and an
  * unrecognised shape must not be allowed to look like an empty file.
+ *
+ * `resolveEntries` is called with no username label: following.json still
+ * uses `title`/`string_list_data`, not the localised `label_values` shape the
+ * optional files drifted to (see `instagram-labels.ts` for the scope seam).
  *
  * Extracted from `parseInstagramZipFile` rather than inlined: the shape check
  * pushed that function past the complexity ceiling, and this mirrors how
@@ -58,7 +66,7 @@ function interpretFollowingPayload(payload: unknown): {
   const entries = resolveEntryList(payload, ['relationships_following']);
 
   return entries !== null
-    ? { raw: listToRaw(entries as InstagramExportEntry[]), formatInvalid: false }
+    ? { raw: resolveEntries(entries).items, formatInvalid: false }
     : { raw: [], formatInvalid: true };
 }
 

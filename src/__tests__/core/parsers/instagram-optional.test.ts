@@ -13,7 +13,7 @@ import {
 /**
  * GH#21, Path B: the six OPTIONAL relationship files (pending, restricted,
  * close_friends, recently_unfollowed, dismissed_suggestions, permanent
- * requests) use `readListMapFlexible`, which previously did
+ * requests) went through `readListMapFlexible`, which did
  * `.find(e => Array.isArray(e))` and silently returned `found: true, count: 0`
  * whenever no candidate matched — indistinguishable from a genuinely empty
  * file. That is disproportionate to fail the whole upload over (optional
@@ -104,11 +104,79 @@ describe('parseOptionalFiles format drift (GH#21)', () => {
 
     expect(result.warnings.find(w => w.code === 'INVALID_PENDING_FORMAT')).toBeUndefined();
     expect(result.pendingResult.found).toBe(true);
-    // Task 2 only fixes the wrapper — the shape is now recognized, so no
-    // drift warning fires. The entry itself uses the new label_values shape,
-    // which listToMap doesn't understand yet (GH#21 Task 1, tracked
-    // separately); count staying 0 here is correct for now.
+    // Task 2 fixed the wrapper; Task 1 reads the entry. The English label
+    // takes the fast path, so one lone record is enough here.
+    expect(result.pendingResult.count).toBe(1);
+    expect(result.pendingResult.map.get('sample_test_user')).toBe(1_700_000_000);
+  });
+
+  it('resolves a localised username label across files, not per file (GH#21 Task 1)', async () => {
+    // The username label is localised, so it is inferred from how its values
+    // behave across the whole archive. restricted_profiles.json holds ONE
+    // record in the real export, where a display name and a username can both
+    // look like usernames — that file is only readable because the other five
+    // are pooled with it. Labels here are invented, values are invented.
+    const usernameLabel = 'Χρήστης';
+    const nameLabel = 'Όνομα';
+    const record = (username: string, name: string) => ({
+      timestamp: 1_700_000_000,
+      media: [],
+      label_values: [
+        { label: 'URL', value: '' },
+        { label: nameLabel, value: name },
+        { label: usernameLabel, value: username },
+      ],
+      fbid: '10000000000000001',
+    });
+
+    const closeFriends = [
+      record('sample_user_a', 'A Display Name'),
+      record('sample_user_b', 'Another Person'),
+      record('sample_user_c', 'Third Person Here'),
+      record('sample_user_d', 'Fourth Person'),
+    ];
+    // Single bare object, and its display name is itself username-shaped.
+    const restricted = record('sample_user_e', 'ninthperson');
+
+    const reader = vi.fn().mockImplementation(async (patterns: string[]) => {
+      if (patterns.some(p => p.endsWith('close_friends.json'))) {
+        return { data: closeFriends, path: 'close_friends.json' };
+      }
+      if (patterns.some(p => p.endsWith('restricted_profiles.json'))) {
+        return { data: restricted, path: 'restricted_profiles.json' };
+      }
+      return null;
+    });
+    const result = await parseOptionalFiles([], reader);
+
+    expect(result.closeFriendsResult.count).toBe(4);
+    expect(result.restrictedResult.count).toBe(1);
+    expect(result.restrictedResult.map.has('sample_user_e')).toBe(true);
+    expect(result.restrictedResult.map.has('ninthperson')).toBe(false);
+    expect(result.warnings).toHaveLength(0);
+  });
+
+  it('counts entries it could not read (contract with Task 3 diagnostics)', async () => {
+    // Two labels whose values both look like usernames every time: the
+    // archive gives no signal, so nothing is resolved and every record is
+    // unreadable. Reporting count 0 alone is what let a drifted export look
+    // like an empty file.
+    const pair = (left: string, right: string) => ({
+      timestamp: 1_700_000_000,
+      label_values: [
+        { label: 'Χρήστης', value: left },
+        { label: 'Ψευδώνυμο', value: right },
+      ],
+    });
+    const unreadable = [
+      pair('sample_user_a', 'sample_user_b'),
+      pair('sample_user_c', 'sample_user_d'),
+    ];
+    const reader = makeReader(unreadable);
+    const result = await parseOptionalFiles([], reader);
+
     expect(result.pendingResult.count).toBe(0);
+    expect(result.pendingResult.unresolvedEntries).toBe(2);
   });
 
   it('returns no warnings and found:false when the file is absent entirely', async () => {

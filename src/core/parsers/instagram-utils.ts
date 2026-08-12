@@ -3,7 +3,7 @@
  * Shared functions for parsing and processing Instagram export data
  */
 
-import type { InstagramExportEntry, RawItem } from '@/core/types';
+import type { InstagramExportEntry, InstagramLabelValueEntry, RawItem } from '@/core/types';
 
 /** Instagram usernames: 1-30 chars, alphanumeric + dots + underscores */
 const INSTAGRAM_USERNAME_RE = /^[a-zA-Z0-9._]{1,30}$/;
@@ -35,56 +35,100 @@ export function escapeRegExp(literal: string): string {
 }
 
 /**
- * Extract usernames from Instagram export entries
- * Handles both old format (item.value) and new format (entry.title)
+ * Read one export entry down to a username, or `null` if it cannot be read.
+ *
+ * Three shapes are known, tried in this order — the first two are the
+ * established formats and must not regress:
+ *
+ * 1. `string_list_data[0].value` — the classic shape.
+ * 2. `title` — the 2026-01 `following.json` shape, where `string_list_data`
+ *    still carries the `href` but no longer the username.
+ * 3. `label_values` — the 2026-08 shape, where the username sits under a
+ *    localised label. `usernameLabel` is the label resolved for this archive
+ *    (see `instagram-labels.ts`); it is matched **exactly**, because that
+ *    function returns the label as the archive spells it.
+ *
+ * `href` is deliberately left undefined for shape 3. The `URL` label holds the
+ * profile's bio link, not an Instagram profile URL — in one real
+ * `removed_suggestions.json` it is a third-party scheduling page. Storing it
+ * as `href` would aim a profile click off Instagram entirely.
+ *
+ * Returning `null` rather than guessing is the point: on the Russian archive
+ * the display-name label alone produced eight username-shaped values, so a
+ * per-entry "first thing that looks like a username" fallback would invent
+ * accounts instead of finding them.
  */
-export function extractUsernames(entries: InstagramExportEntry[]): string[] {
-  const usernames: string[] = [];
-  for (const entry of entries) {
-    const item = entry.string_list_data?.[0];
-    // Instagram changed format: username can be in item.value (old) or entry.title (new)
-    const norm = normalize(item?.value) ?? normalize(entry.title);
-    if (norm) usernames.push(norm);
+export function resolveEntry(entry: unknown, usernameLabel: string | null): RawItem | null {
+  if (typeof entry !== 'object' || entry === null) return null;
+
+  const legacy = entry as Partial<InstagramExportEntry>;
+  const item = legacy.string_list_data?.[0];
+  const username = normalize(item?.value) ?? normalize(legacy.title);
+  if (username) return { username, href: item?.href, timestamp: item?.timestamp };
+
+  if (usernameLabel === null) return null;
+
+  const labelled = entry as InstagramLabelValueEntry;
+  if (!Array.isArray(labelled.label_values)) return null;
+
+  for (const pair of labelled.label_values) {
+    if (pair?.label !== usernameLabel) continue;
+    const labelledUsername = normalize(pair.value);
+    // Keep scanning: a repeated label with one empty value must not mask the
+    // populated one. The entry's own timestamp is the only one this shape has.
+    if (labelledUsername) return { username: labelledUsername, timestamp: labelled.timestamp };
   }
-  return Array.from(new Set(usernames));
+
+  return null;
+}
+
+export interface ResolvedEntries {
+  /** Deduplicated by username, first occurrence winning, in entry order. */
+  items: RawItem[];
+  /**
+   * Entries `resolveEntry` could not read. Counted rather than dropped: an
+   * export whose shape drifted must leave a trace, or it comes back as a
+   * confidently empty list indistinguishable from a genuinely empty file.
+   */
+  unresolved: number;
 }
 
 /**
- * Convert Instagram export entries to RawItem format with deduplication
+ * Resolve a list of entries, keeping count of the ones that could not be read.
+ *
+ * `usernameLabel` defaults to `null` — "no label resolution was done for this
+ * list". That is the honest state for `following.json` and `followers_*.json`,
+ * which have not migrated to the `label_values` shape yet; when they do, they
+ * need a label resolved over all eight files rather than the six
+ * `parseOptionalFiles` pools today.
  */
-export function listToRaw(entries: InstagramExportEntry[] | undefined): RawItem[] {
-  const result: RawItem[] = [];
-  if (!entries) return result;
+export function resolveEntries(
+  entries: readonly unknown[] | undefined,
+  usernameLabel: string | null = null
+): ResolvedEntries {
+  const items: RawItem[] = [];
   const seen = new Set<string>();
+  let unresolved = 0;
 
-  for (const e of entries) {
-    const item = e.string_list_data?.[0];
-    // Instagram changed format: username can be in item.value (old) or entry.title (new)
-    const username = normalize(item?.value) ?? normalize(e.title);
-    if (!username || seen.has(username)) continue;
-    seen.add(username);
-    result.push({ username, href: item?.href, timestamp: item?.timestamp });
+  for (const entry of entries ?? []) {
+    const item = resolveEntry(entry, usernameLabel);
+    if (!item) {
+      unresolved += 1;
+      continue;
+    }
+    if (seen.has(item.username)) continue;
+    seen.add(item.username);
+    items.push(item);
   }
 
-  return result;
+  return { items, unresolved };
 }
 
 /**
- * Convert Instagram export entries to username -> timestamp map
+ * Extract deduplicated usernames from Instagram export entries
  */
-export function listToMap(entries: InstagramExportEntry[] | undefined): Map<string, number> {
-  const m = new Map<string, number>();
-  if (!entries) return m;
-
-  for (const e of entries) {
-    const item = e.string_list_data?.[0];
-    // Instagram changed format: username can be in item.value (old) or entry.title (new)
-    const u = normalize(item?.value) ?? normalize(e.title);
-    if (!u) continue;
-    if (!m.has(u)) m.set(u, item?.timestamp ?? 0);
-  }
-
-  return m;
+export function extractUsernames(entries: readonly unknown[] | undefined): string[] {
+  return resolveEntries(entries).items.map(item => item.username);
 }
 
 /**

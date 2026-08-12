@@ -6,7 +6,7 @@
 import type JSZip from 'jszip';
 import type { FileExpectation, InstagramExportEntry, ParseWarning, RawItem } from '@/core/types';
 import { FILE_SPECS } from './instagram-file-specs';
-import { extractUsernames, listToRaw, resolveEntryList } from './instagram-utils';
+import { extractUsernames, resolveEntries, resolveEntryList } from './instagram-utils';
 
 export interface FollowersParsed {
   followersRaw: RawItem[];
@@ -94,7 +94,7 @@ export async function parseFollowersFromZip(
       continue;
     }
 
-    const items = listToRaw(entries as InstagramExportEntry[]);
+    const items = resolveEntries(entries).items;
     for (const it of items) {
       if (followersSeen.has(it.username)) continue;
       followersSeen.add(it.username);
