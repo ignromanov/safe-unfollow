@@ -18,8 +18,9 @@ export function Default() {
   );
 }
 
-// Same offer, a much larger view — exercises the `toLocaleString` comma
-// formatting on the headline ("Get all 48,213.") instead of a two-digit one.
+// Same offer, a much larger view — exercises `toLocaleString` comma formatting
+// on the right-hand number of the gap pair, and the widest realistic line the
+// layout has to hold, instead of a three-digit one.
 export function LargeDataset() {
   return (
     <PaywallModal

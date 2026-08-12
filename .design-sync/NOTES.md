@@ -38,6 +38,21 @@ Backup: `designs/claude-design-project/` in the repo. `DESIGN-GUIDE.md` is copie
 remaining text files were not (nothing is being deleted, so the copy is belt-and-braces). The
 8 assets all have local sources already (`public/`, `designs/screenshots/`).
 
+## The `--remote` anchor is already on disk — check before fetching it
+
+`resync.mjs --remote` wants the project's `_ds_sync.json`, and the skill text says to fetch it
+with `DesignSync get_file`. In practice the last successful upload left a byte-identical copy at
+`ds-bundle/_ds_sync.json`, since that is the file the previous run emitted and uploaded. Compare
+`bundleSha12` and `auxSha` against the remote before trusting it — if they match, it _is_ the
+anchor, and copying it aside costs nothing while transcribing ~300 hashes through the model
+costs thousands of tokens and can corrupt one.
+
+Copy it aside **before** running the build: `package-build` rewrites `ds-bundle/` in place.
+
+`.design-sync/.cache/baseline-sync.json` is **not** a substitute — on 2026-08-12 it held 95
+components against the project's 99, with three of four shas different. It predates the last
+upload rather than recording it.
+
 ## This repo is an app, not a published component library
 
 `package.json` is `private: true` with no `main` / `module` / `exports`, and
@@ -84,6 +99,27 @@ The wrapper at `.design-sync/.cache/ds-tailwind.css` adds `@source "../previews"
 utility classes used _only_ by authored preview `.tsx` files still get generated.
 **If an authored preview renders unstyled, check this first** — a class no app source
 file uses will not exist in the compiled CSS otherwise.
+
+⚠ **Re-run `compile-css.mjs` after every source change, not once per session.** The
+failure it prevents does not look like a failure. On 2026-08-12 a paywall fix added
+`pe-6` — the first use of that utility anywhere in the app — with the stylesheet compiled
+before the edit. Everything downstream was green: the class was in `_ds_bundle.js`,
+`package-validate` reported 98/99 clean, and the contact sheet rendered a component that
+looked exactly like the one before the fix, because the rule did not exist to apply. Four
+other new utilities in the same commit (`font-display`, `text-5xl`, `min-h-11`,
+`shadow-primary/30`) were already used elsewhere and compiled fine, so only the novel one
+went silently inert.
+
+The check is one line, and it is on the CSS rather than on the render:
+
+```sh
+grep -c '<the-new-class>' .design-sync/.cache/app-compiled.css   # 0 means inert
+```
+
+Production is unaffected either way — the app's own Tailwind pass scans `src/` at build
+time. The divergence lives only in the design system, which makes it worse, not better:
+the design agent would be building against a component that behaves differently from the
+shipped one.
 
 Verified after compiling: 22 `@font-face` rules harvested, 11 `url()`s rewritten into
 `fonts/`, 284 OKLCH token references, and Tailwind rewrites font urls to correctly
