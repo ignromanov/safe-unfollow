@@ -17,6 +17,20 @@ export interface FileSpec {
    * 'error' instead, since those two are required for badge math.
    */
   driftCode?: string;
+  /**
+   * True when appearing in this file implies the account is **currently** in
+   * `following ∪ followers`. Used only by the membership tiebreak in
+   * `instagram-labels.ts`, to identify a localised username label when value
+   * shape alone cannot.
+   *
+   * `recently_unfollowed.json` is the one that looks eligible and is not: an
+   * account you unfollowed is by definition gone from `following.json`, and if
+   * it never followed you it is in neither set. Measured against the real
+   * exports, its correct label matched 0 of 2 (English) and 0 of 22 (Russian).
+   * Pending and permanent follow requests are excluded for the same reason —
+   * the request was never accepted.
+   */
+  impliesKnownAccount?: boolean;
 }
 
 /**
@@ -53,6 +67,7 @@ export const FILE_SPECS: FileSpec[] = [
     fileNames: ['restricted_profiles.json'],
     propCandidates: ['relationships_restricted_users'],
     driftCode: 'INVALID_RESTRICTED_FORMAT',
+    impliesKnownAccount: true,
   },
   {
     name: 'close_friends.json',
@@ -61,6 +76,7 @@ export const FILE_SPECS: FileSpec[] = [
     fileNames: ['close_friends.json', 'friends.json'],
     propCandidates: ['relationships_close_friends'],
     driftCode: 'INVALID_CLOSE_FRIENDS_FORMAT',
+    impliesKnownAccount: true,
   },
   {
     name: 'recently_unfollowed.json',
@@ -81,6 +97,7 @@ export const FILE_SPECS: FileSpec[] = [
     fileNames: ['removed_suggestions.json', 'dismissed_suggestions.json'],
     propCandidates: ['relationships_dismissed_suggested_users'],
     driftCode: 'INVALID_DISMISSED_FORMAT',
+    impliesKnownAccount: true,
   },
 ];
 

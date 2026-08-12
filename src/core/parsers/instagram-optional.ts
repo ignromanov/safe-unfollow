@@ -110,10 +110,19 @@ function toOptionalFileResult(
   };
 }
 
-/** Parse all optional relationship files from ZIP */
+/**
+ * Parse all optional relationship files from ZIP.
+ *
+ * `knownUsernames` is `following ∪ followers`, already normalised. It feeds
+ * only the membership tiebreak that identifies a localised username label when
+ * value shape cannot (see `instagram-labels.ts`). It defaults to empty, which
+ * leaves the tiebreak inert rather than crashing or guessing — the right
+ * behaviour when `following.json` is missing or its own shape drifted.
+ */
 export async function parseOptionalFiles(
   baseCandidates: string[],
-  readJsonFromZip: ReadJsonFromZip
+  readJsonFromZip: ReadJsonFromZip,
+  knownUsernames: ReadonlySet<string> = new Set()
 ): Promise<OptionalFilesParsed> {
   const readFirstExistingJson = async (
     fileNames: string[]
@@ -126,20 +135,34 @@ export async function parseOptionalFiles(
   };
 
   const optionalSpecs = FILE_SPECS.slice(2); // Skip following and followers
+  // Permanent-requests is a separate spec for historical reasons, but carries
+  // the same entries and must contribute to the same label pool. `readFiles`
+  // is index-aligned to this array below, and the tiebreak filter depends on
+  // that alignment.
+  const specs = [...optionalSpecs, PERMANENT_REQUESTS_SPEC];
 
-  // Pass 1: read every optional file and resolve its top-level shape. Includes
-  // permanent-requests, which is a separate spec for historical reasons but
-  // carries the same entries and must contribute to the same label pool.
+  // Pass 1: read every optional file and resolve its top-level shape.
   const readFiles = await Promise.all(
-    [...optionalSpecs, PERMANENT_REQUESTS_SPEC].map(spec =>
-      readOptionalFile(spec, readFirstExistingJson)
-    )
+    specs.map(spec => readOptionalFile(spec, readFirstExistingJson))
   );
 
   // Resolve the username label once, over every entry in the archive. Doing it
   // per file would leave the single-record files unreadable, and doing it
   // seven times would be seven chances to disagree.
-  const usernameLabel = resolveUsernameLabel(readFiles.flatMap(file => file.entries ?? []));
+  //
+  // `custom_lists.json` also carries label_values and would pollute this pool
+  // with a different label set. It stays out as a consequence of not being in
+  // FILE_SPECS, not because anything filters it — adding it to the specs for
+  // some unrelated reason would silently drag it in here too.
+  const usernameLabel = resolveUsernameLabel(
+    readFiles.flatMap(file => file.entries ?? []),
+    {
+      tiebreakEntries: readFiles.flatMap((file, index) =>
+        specs[index]?.impliesKnownAccount === true ? (file.entries ?? []) : []
+      ),
+      knownUsernames,
+    }
+  );
 
   // Pass 2: map each file's entries with that label.
   const optionalResults = readFiles.map(file => toOptionalFileResult(file, usernameLabel));

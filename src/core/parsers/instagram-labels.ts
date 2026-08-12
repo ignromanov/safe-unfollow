@@ -51,6 +51,21 @@ const MIN_WINNER_RATE = 0.9;
  */
 const MIN_RUNNER_UP_RATIO = 2;
 
+export interface LabelResolutionContext {
+  /**
+   * Entries from the files where listing an account implies it is currently in
+   * `following ∪ followers` (`FileSpec.impliesKnownAccount`). A subset of the
+   * scoring pool, and deliberately not all of it.
+   */
+  tiebreakEntries?: readonly unknown[];
+  /**
+   * `following ∪ followers`, normalised the same way usernames are everywhere
+   * else. Absent or empty leaves the tiebreak inert — never crashing, never
+   * guessing — which is what an unreadable `following.json` must degrade to.
+   */
+  knownUsernames?: ReadonlySet<string>;
+}
+
 interface LabelTally {
   /** Non-empty values under this label that are shaped like usernames. */
   valid: number;
@@ -78,14 +93,20 @@ interface LabelTally {
  * do migrate, this needs a pass spanning all eight files — the pass does not
  * exist yet and this comment is the marker for building it.
  */
-export function resolveUsernameLabel(entries: readonly unknown[]): string | null {
+export function resolveUsernameLabel(
+  entries: readonly unknown[],
+  context: LabelResolutionContext = {}
+): string | null {
   const tallies = tallyLabels(entries);
 
   for (const label of tallies.keys()) {
     if (label.trim().toLowerCase() === USERNAME_LABEL_FAST_PATH) return label;
   }
 
-  return pickWinner(tallies);
+  const scored = pickWinner(tallies);
+  if (scored !== null) return scored;
+
+  return pickByMembership(context.tiebreakEntries ?? [], context.knownUsernames ?? new Set());
 }
 
 /** Count, per label, how many of its non-empty values look like usernames. */
@@ -114,16 +135,9 @@ function tallyLabels(entries: readonly unknown[]): Map<string, LabelTally> {
 }
 
 /**
- * The clear-winner rule. Ambiguity resolves to `null` rather than to a guess:
- * a wrong label does not fail loudly, it invents accounts.
- *
- * There is no tiebreak against `following ∪ followers` as a second opinion.
- * Measured on the real archives, the correct label reaches only 76.9%
- * (English) and 30.3% (Russian) membership in those sets, because
- * `recently_unfollowed_profiles.json` lists precisely the accounts that are no
- * longer in `following.json`. It would need a threshold looser than the one
- * above, invented for the single path whose purpose is not to guess — and it
- * fires on neither archive, both of which resolve here.
+ * The clear-winner rule. Ambiguity falls through to the membership tiebreak
+ * below rather than to a guess: a wrong label does not fail loudly, it invents
+ * accounts.
  */
 function pickWinner(tallies: ReadonlyMap<string, LabelTally>): string | null {
   const ranked = [...tallies]
@@ -138,6 +152,57 @@ function pickWinner(tallies: ReadonlyMap<string, LabelTally>): string | null {
   if (runnerUp && winner.rate < runnerUp.rate * MIN_RUNNER_UP_RATIO) return null;
 
   return winner.label;
+}
+
+/**
+ * Second opinion when value shape cannot separate two labels: which label's
+ * values are accounts the user demonstrably has a relationship with?
+ *
+ * Scored by **count**, not rate. Every label appears once per entry, so the
+ * denominators are equal and counts give the same ranking with less
+ * small-sample noise. The winner must have strictly more hits than every other
+ * candidate; a tie at the top resolves nothing, and a board where nobody
+ * scores resolves nothing — `hits` only ever records a hit, so an empty map is
+ * exactly the all-zero case.
+ *
+ * **The threshold is a judgement, not a measurement.** No archive on disk
+ * reaches this function: the English export resolves at the fast path and the
+ * Russian one at scoring (100% against 17.8%). It exists for the archive where
+ * scoring is genuinely ambiguous. What justifies "strictly better with at
+ * least one hit" is the separation shape it is built for — on both August
+ * archives the correct label scores 8 here and every other label scores 0, a
+ * gap no percentage threshold reads better than a comparison does.
+ *
+ * `entries` must come only from files whose `impliesKnownAccount` is set.
+ * `recently_unfollowed` is the trap: those accounts were unfollowed, so they
+ * are gone from `following.json` by definition, and pooling them in scores the
+ * correct label 0/2 (English) and 0/22 (Russian) against noise.
+ */
+function pickByMembership(
+  entries: readonly unknown[],
+  knownUsernames: ReadonlySet<string>
+): string | null {
+  if (knownUsernames.size === 0) return null;
+
+  const hits = new Map<string, number>();
+  for (const entry of entries) {
+    for (const pair of labelValuesOf(entry)) {
+      const label = pair?.label;
+      if (typeof label !== 'string') continue;
+      const username = normalize(pair.value);
+      if (username === null || !knownUsernames.has(username)) continue;
+      hits.set(label, (hits.get(label) ?? 0) + 1);
+    }
+  }
+
+  const ranked = [...hits].sort(([, left], [, right]) => right - left);
+  const winner = ranked[0];
+  if (!winner) return null;
+
+  const runnerUp = ranked[1];
+  if (runnerUp && runnerUp[1] >= winner[1]) return null;
+
+  return winner[0];
 }
 
 function labelValuesOf(entry: unknown): readonly InstagramLabelValue[] {

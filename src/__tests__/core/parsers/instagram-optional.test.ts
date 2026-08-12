@@ -156,6 +156,78 @@ describe('parseOptionalFiles format drift (GH#21)', () => {
     expect(result.warnings).toHaveLength(0);
   });
 
+  it('feeds the membership tiebreak from close/restricted/dismissed only', async () => {
+    // Both labels are 100% username-shaped, so scoring cannot separate them and
+    // the tiebreak decides. close_friends puts TWO of its `wanted` values in
+    // following union followers; recently_unfollowed puts FIVE of its `decoy`
+    // values there. If recently_unfollowed were pooled into the tiebreak, the
+    // decoy would win 5-2 and every account in the archive would come back
+    // under the wrong label. It is excluded because an account you unfollowed
+    // is by definition gone from following.json — measured 0/2 and 0/22 on the
+    // real archives.
+    const wanted = 'Χρήστης';
+    const decoy = 'Ψευδώνυμο';
+    const record = (wantedValue: string, decoyValue: string) => ({
+      timestamp: 1_700_000_000,
+      label_values: [
+        { label: wanted, value: wantedValue },
+        { label: decoy, value: decoyValue },
+      ],
+    });
+
+    const closeFriends = [record('known_one', 'other_one'), record('known_two', 'other_two')];
+    const recentlyUnfollowed = Array.from({ length: 5 }, (_unused, index) =>
+      record(`fresh_user_${index}`, `known_decoy_${index}`)
+    );
+    const known = new Set([
+      'known_one',
+      'known_two',
+      ...Array.from({ length: 5 }, (_unused, index) => `known_decoy_${index}`),
+    ]);
+
+    const reader = vi.fn().mockImplementation(async (patterns: string[]) => {
+      if (patterns.some(p => p.endsWith('close_friends.json'))) {
+        return { data: closeFriends, path: 'close_friends.json' };
+      }
+      if (patterns.some(p => p.endsWith('recently_unfollowed_profiles.json'))) {
+        return { data: recentlyUnfollowed, path: 'recently_unfollowed_profiles.json' };
+      }
+      return null;
+    });
+    const result = await parseOptionalFiles([], reader, known);
+
+    expect([...result.closeFriendsResult.map.keys()]).toEqual(['known_one', 'known_two']);
+    expect([...result.unfollowedResult.map.keys()]).toEqual([
+      'fresh_user_0',
+      'fresh_user_1',
+      'fresh_user_2',
+      'fresh_user_3',
+      'fresh_user_4',
+    ]);
+  });
+
+  it('leaves the tiebreak inert when no known usernames are passed', async () => {
+    // Same ambiguous archive, no following union followers. Nothing resolves,
+    // and every entry is counted rather than guessed at.
+    const record = (left: string, right: string) => ({
+      timestamp: 1_700_000_000,
+      label_values: [
+        { label: 'Χρήστης', value: left },
+        { label: 'Ψευδώνυμο', value: right },
+      ],
+    });
+    const reader = vi.fn().mockImplementation(async (patterns: string[]) => {
+      if (patterns.some(p => p.endsWith('close_friends.json'))) {
+        return { data: [record('known_one', 'other_one')], path: 'close_friends.json' };
+      }
+      return null;
+    });
+    const result = await parseOptionalFiles([], reader);
+
+    expect(result.closeFriendsResult.count).toBe(0);
+    expect(result.closeFriendsResult.unresolvedEntries).toBe(1);
+  });
+
   it('counts entries it could not read (contract with Task 3 diagnostics)', async () => {
     // Two labels whose values both look like usernames every time: the
     // archive gives no signal, so nothing is resolved and every record is

@@ -142,6 +142,81 @@ describe('resolveUsernameLabel', () => {
     });
   });
 
+  /**
+   * The membership tiebreak, reached only when scoring is genuinely ambiguous.
+   * No archive on disk exercises it — English resolves at the fast path and
+   * Russian at scoring — so these are the only tests it will ever have.
+   */
+  describe('membership tiebreak', () => {
+    /** Two labels, both 100% username-shaped: scoring alone cannot separate them. */
+    function ambiguousPool(): unknown[] {
+      return [
+        entry([
+          [XX_NAME, 'sample_user_a'],
+          [XX_USERNAME, 'sample_user_p'],
+        ]),
+        entry([
+          [XX_NAME, 'sample_user_b'],
+          [XX_USERNAME, 'sample_user_q'],
+        ]),
+      ];
+    }
+
+    it('breaks the tie toward the label whose values the user actually follows', () => {
+      const pooled = ambiguousPool();
+      expect(resolveUsernameLabel(pooled)).toBeNull();
+
+      expect(
+        resolveUsernameLabel(pooled, {
+          tiebreakEntries: pooled,
+          knownUsernames: new Set(['sample_user_p', 'sample_user_q']),
+        })
+      ).toBe(XX_USERNAME);
+    });
+
+    it('returns null when both labels land the same number of hits', () => {
+      const pooled = ambiguousPool();
+      expect(
+        resolveUsernameLabel(pooled, {
+          tiebreakEntries: pooled,
+          knownUsernames: new Set(['sample_user_a', 'sample_user_p']),
+        })
+      ).toBeNull();
+    });
+
+    it('returns null when no candidate lands a single hit', () => {
+      const pooled = ambiguousPool();
+      expect(
+        resolveUsernameLabel(pooled, {
+          tiebreakEntries: pooled,
+          knownUsernames: new Set(['someone_else_entirely']),
+        })
+      ).toBeNull();
+    });
+
+    it('degrades to null when no known usernames are available at all', () => {
+      // following.json missing or unreadable must leave the tiebreak inert,
+      // not crash and not guess.
+      const pooled = ambiguousPool();
+      expect(resolveUsernameLabel(pooled, { tiebreakEntries: pooled })).toBeNull();
+      expect(
+        resolveUsernameLabel(pooled, { tiebreakEntries: pooled, knownUsernames: new Set() })
+      ).toBeNull();
+    });
+
+    it('never runs when scoring already produced a clear winner', () => {
+      // Scoring says XX_USERNAME (9/9 against 1/9). Membership would say
+      // XX_NAME. Scoring is the stronger signal and must not be second-guessed.
+      const pooled = archive(XX_USERNAME, XX_NAME);
+      expect(
+        resolveUsernameLabel(pooled, {
+          tiebreakEntries: pooled,
+          knownUsernames: new Set(['ninthperson']),
+        })
+      ).toBe(XX_USERNAME);
+    });
+  });
+
   describe('refuses to guess', () => {
     it('returns null when two labels both score 100%', () => {
       const pooled = [

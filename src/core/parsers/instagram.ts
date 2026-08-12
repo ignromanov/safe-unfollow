@@ -250,7 +250,10 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
   fileExpectations.push(followersParsed.fileExpectation);
 
   // === Parse Optional Files (delegated) ===
-  const optionalParsed = await parseOptionalFiles(baseCandidates, readJsonFromZip);
+  // Membership in following ∪ followers identifies a localised username label
+  // when value shape alone is ambiguous (GH#21, instagram-labels.ts).
+  const knownUsernames = new Set([...followingUsers, ...followersParsed.followersUsers]);
+  const optionalParsed = await parseOptionalFiles(baseCandidates, readJsonFromZip, knownUsernames);
   warnings.push(...optionalParsed.warnings);
   fileExpectations.push(...optionalParsed.fileExpectations);
 
