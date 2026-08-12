@@ -2,27 +2,39 @@
  * Instagram Following Parser
  * Interprets following.json — top-level shape, records, and its diagnostics
  *
- * Sibling to `instagram-followers.ts`. Both required files hand back their
- * accounts, their warnings and their file expectation, so a caller cannot
- * handle one and forget the other. The returned fields are only those
- * `instagram.ts` actually reads; the followers module carries two more that
- * nothing outside it uses, and copying them for symmetry's sake would be
- * surface with no reader.
+ * Sibling to `instagram-followers.ts`. Both required files now hand back the
+ * same four things — their accounts, their warnings, their file expectation,
+ * and whether their records were readable — so a caller cannot handle one and
+ * forget the other. The returned fields are only those `instagram.ts` actually
+ * reads; the followers module carries two more that nothing outside it uses,
+ * and copying them for symmetry's sake would be surface with no reader.
  *
- * This half used to live inline in `parseInstagramZipFile` while the followers
- * half had a module of its own — the asymmetry is why a gap in one was easy to
- * notice and the same gap in the other was not.
+ * Until GH#21 Task 3 this half lived inline in `parseInstagramZipFile`, which
+ * is why its entry-level failure went unnoticed while the followers half had a
+ * home to grow in.
  */
 
 import type { FileExpectation, ParseWarning, RawItem } from '@/core/types';
 import { FILE_SPECS } from './instagram-file-specs';
-import { resolveEntries, resolveEntryList } from './instagram-utils';
+import {
+  UNREADABLE_ENTRIES_FIX,
+  describeUnreadableEntries,
+  resolveEntries,
+  resolveEntryList,
+} from './instagram-utils';
 
 export interface FollowingParsed {
   followingUsers: string[];
   followingTimestamps: Map<string, number>;
   warnings: ParseWarning[];
   fileExpectation: FileExpectation;
+  /**
+   * True when the file was found, its shape was recognized, it held records —
+   * and not one of them could be read (GH#21 Task 3). This is not "you follow
+   * nobody"; it is a following list we cannot see, and `instagram.ts` uses it to
+   * keep the two out of the same exit.
+   */
+  entriesUnreadable: boolean;
 }
 
 /**
@@ -36,20 +48,20 @@ export interface FollowingParsed {
  * `resolveEntries` yields no items either way and an unrecognised shape must
  * not be allowed to look like an empty file. No username label is passed:
  * following.json still uses `title`/`string_list_data` (`instagram-labels.ts`
- * has the scope seam). Extracted rather than inlined because the shape check
- * pushed `parseInstagramZipFile` past the complexity ceiling.
+ * has the scope seam).
  */
 function interpretFollowingPayload(payload: unknown): {
   raw: RawItem[];
   formatInvalid: boolean;
+  unresolved: number;
 } {
-  if (payload === undefined) return { raw: [], formatInvalid: false };
+  if (payload === undefined) return { raw: [], formatInvalid: false, unresolved: 0 };
 
   const entries = resolveEntryList(payload, ['relationships_following']);
+  if (entries === null) return { raw: [], formatInvalid: true, unresolved: 0 };
 
-  return entries !== null
-    ? { raw: resolveEntries(entries).items, formatInvalid: false }
-    : { raw: [], formatInvalid: true };
+  const resolved = resolveEntries(entries);
+  return { raw: resolved.items, formatInvalid: false, unresolved: resolved.unresolved };
 }
 
 /**
@@ -64,9 +76,10 @@ function interpretFollowingPayload(payload: unknown): {
 export function parseFollowingPayload(
   readResult: { data: unknown; path: string } | null
 ): FollowingParsed {
-  const { raw, formatInvalid } = interpretFollowingPayload(readResult?.data);
+  const { raw, formatInvalid, unresolved } = interpretFollowingPayload(readResult?.data);
   const followingFound = readResult !== null;
   const followingUsers = raw.map(r => r.username);
+  const entriesUnreadable = followingUsers.length === 0 && unresolved > 0;
 
   const fileExpectation: FileExpectation = {
     name: 'following.json',
@@ -75,6 +88,8 @@ export function parseFollowingPayload(
     found: followingFound,
     itemCount: followingUsers.length,
     foundPath: readResult?.path,
+    unreadableItemCount: unresolved,
+    formatUnreadable: followingFound && formatInvalid,
   };
 
   const warnings: ParseWarning[] = [];
@@ -97,6 +112,17 @@ export function parseFollowingPayload(
       severity: 'error',
       fix: 'Instagram may have changed their export format. Please report this issue so we can add support.',
     });
+  } else if (unresolved > 0) {
+    // Wrapper recognized, records not. Severity tracks how much was lost:
+    // reading none of them empties `following` and flags every follower
+    // notFollowedBack, so that has to reach DiagnosticErrorScreen; reading
+    // some leaves the answer incomplete rather than inverted.
+    warnings.push({
+      code: 'UNRESOLVED_ENTRIES_FOLLOWING',
+      message: describeUnreadableEntries('following.json', unresolved, followingUsers.length),
+      severity: entriesUnreadable ? 'error' : 'warning',
+      fix: UNREADABLE_ENTRIES_FIX,
+    });
   } else if (followingUsers.length === 0) {
     warnings.push({
       code: 'EMPTY_FOLLOWING',
@@ -110,5 +136,6 @@ export function parseFollowingPayload(
     followingTimestamps: new Map(raw.map(r => [r.username, r.timestamp ?? 0] as const)),
     warnings,
     fileExpectation,
+    entriesUnreadable,
   };
 }

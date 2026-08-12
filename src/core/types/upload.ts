@@ -47,6 +47,21 @@ export interface FileExpectation {
   itemCount?: number;
   /** Actual path where file was found */
   foundPath?: string;
+  /**
+   * Records present in the file that could not be read (GH#21). `itemCount: 0`
+   * on its own cannot separate "genuinely empty" from "full of records whose
+   * shape we no longer understand" — this is the number that can. Undefined
+   * when the file was absent, or when its top level was not recognized at all
+   * and nothing was countable; `formatUnreadable` covers that case.
+   */
+  unreadableItemCount?: number;
+  /**
+   * True when the file was found but its top-level shape matched neither a bare
+   * array, a known wrapper key, nor a single bare entry (GH#21). Kept distinct
+   * from `unreadableItemCount` because they are different failures: Instagram
+   * renaming the wrapper, versus Instagram changing the record.
+   */
+  formatUnreadable?: boolean;
 }
 
 /** Discovery status of expected files */

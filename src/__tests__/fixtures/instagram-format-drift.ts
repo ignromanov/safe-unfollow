@@ -43,3 +43,31 @@ export const NULL_PAYLOAD = null;
 export function objectInsteadOfArray(propName: string) {
   return { [propName]: { not: 'an array' } };
 }
+
+/**
+ * One record in the 2026-08 `label_values` form, carrying two labels whose
+ * values are both username-shaped. Values and labels are invented; the shape is
+ * the one in `raw/connections-2026-08-11`.
+ */
+export function makeAmbiguousLabelEntry(left: string, right: string) {
+  return {
+    timestamp: 1_700_000_000,
+    label_values: [
+      { label: 'Χρήστης', value: left },
+      { label: 'Ψευδώνυμο', value: right },
+    ],
+  };
+}
+
+/**
+ * Recognized shape (bare array) whose every record is unreadable: both labels
+ * score identically on every entry, so no username label resolves and nothing
+ * comes back. This is the 2026-08-11 signature that `formatValid` cannot see —
+ * `Array.isArray` passes, the wrapper is fine, and the file still yields zero
+ * accounts (GH#21 Task 3).
+ */
+export const ARRAY_UNREADABLE_ENTRIES = [
+  makeAmbiguousLabelEntry('sample_user_a', 'sample_user_b'),
+  makeAmbiguousLabelEntry('sample_user_c', 'sample_user_d'),
+  makeAmbiguousLabelEntry('sample_user_e', 'sample_user_f'),
+];

@@ -618,7 +618,11 @@ describe('Instagram Parser', () => {
       expect(info?.severity).toBe('info');
     });
 
-    it('does NOT trip INVALID_FOLLOWING_FORMAT for an array with no recognizable username field (regression)', async () => {
+    it('reports an array with no recognizable username field as unreadable, not empty (GH#21 Task 3)', async () => {
+      // Behaviour change. This case used to report EMPTY_FOLLOWING, which is
+      // the exact conflation GH#21 is about: one record was present and we
+      // could not read it. The wrapper was fine, so #32's file-level signal
+      // stays silent and only the entry-level one fires.
       mockZipInstance._addFile(
         'connections/followers_and_following/following.json',
         vi.fn().mockResolvedValue(JSON.stringify(ARRAY_NO_USERNAME_FIELD))
@@ -628,7 +632,8 @@ describe('Instagram Parser', () => {
       const result = await parseInstagramZipFile(mockFile);
 
       expect(result.warnings.find(w => w.code === 'INVALID_FOLLOWING_FORMAT')).toBeUndefined();
-      expect(result.warnings.find(w => w.code === 'EMPTY_FOLLOWING')).toBeDefined();
+      expect(result.warnings.find(w => w.code === 'EMPTY_FOLLOWING')).toBeUndefined();
+      expect(result.warnings.find(w => w.code === 'UNRESOLVED_ENTRIES_FOLLOWING')).toBeDefined();
     });
 
     it('accepts a single bare entry object without INVALID_FOLLOWING_FORMAT (GH#21 Task 2)', async () => {
@@ -645,6 +650,96 @@ describe('Instagram Parser', () => {
 
       expect(result.warnings.find(w => w.code === 'INVALID_FOLLOWING_FORMAT')).toBeUndefined();
       expect(result.data.following.has('validuser')).toBe(true);
+    });
+  });
+
+  /**
+   * GH#21 Task 3, the worst outcome the issue predicted and the one #32 does
+   * not reach. `hasMinimalData` was `following.length > 0 || followers > 0` —
+   * an OR — so a following.json that is a well-formed array of unreadable
+   * records left followers alone holding the flag true, the upload succeeded,
+   * and every single follower came back badged "not following back".
+   */
+  describe('required files with unreadable records (GH#21 Task 3)', () => {
+    // A well-formed array whose records use no shape we can read. The wrapper
+    // parses, so formatValid stays true and #32 sees nothing wrong.
+    const unreadableRecords = [{ media_list_data: [] }, { media_list_data: [] }];
+
+    function zipWith(following: unknown, followers: unknown) {
+      mockZipInstance = new MockJSZip();
+      mockZipInstance._addFile(
+        'connections/followers_and_following/following.json',
+        vi.fn().mockResolvedValue(JSON.stringify(following))
+      );
+      mockZipInstance._addFile(
+        'connections/followers_and_following/followers_1.json',
+        vi.fn().mockResolvedValue(JSON.stringify(followers))
+      );
+      return new File(['test'], 'test.zip', { type: 'application/zip' });
+    }
+
+    it('refuses minimal data when following.json is present but unreadable', async () => {
+      const result = await parseInstagramZipFile(zipWith(unreadableRecords, VALID_ARRAY_OF_ONE));
+
+      // Followers parsed fine and alone would have carried the OR.
+      expect(result.data.followers.size).toBe(1);
+      expect(result.data.following.size).toBe(0);
+      expect(result.hasMinimalData).toBe(false);
+
+      const drift = result.warnings.find(w => w.code === 'UNRESOLVED_ENTRIES_FOLLOWING');
+      expect(drift).toBeDefined();
+      expect(drift?.severity).toBe('error');
+      expect(drift?.message).toMatch(/none of them/i);
+      expect(drift?.fix).toMatch(/re-requesting/i);
+    });
+
+    it('refuses minimal data when followers_*.json is present but unreadable', async () => {
+      const result = await parseInstagramZipFile(zipWith(VALID_ARRAY_OF_ONE, unreadableRecords));
+
+      expect(result.data.following.size).toBe(1);
+      expect(result.hasMinimalData).toBe(false);
+
+      const drift = result.warnings.find(w => w.code === 'UNRESOLVED_ENTRIES_FOLLOWERS');
+      expect(drift).toBeDefined();
+      expect(drift?.severity).toBe('error');
+    });
+
+    it('does not send "cannot read this" out through the "no data" exit', async () => {
+      const result = await parseInstagramZipFile(zipWith(unreadableRecords, VALID_ARRAY_OF_ONE));
+
+      // Both callers of hasMinimalData (parse-worker, parse-orchestration) take
+      // the FIRST error warning as the diagnostic code. If the generic critical
+      // error were appended too, a reader whose export is intact would be told
+      // to re-request data they already have.
+      expect(result.warnings.find(w => w.code === 'NO_DATA_FILES')).toBeUndefined();
+      expect(result.warnings.find(w => w.code === 'INCOMPLETE_EXPORT')).toBeUndefined();
+      expect(result.warnings.find(w => w.code === 'NOT_INSTAGRAM_EXPORT')).toBeUndefined();
+      expect(result.warnings.find(w => w.severity === 'error')?.code).toBe(
+        'UNRESOLVED_ENTRIES_FOLLOWING'
+      );
+    });
+
+    it('keeps a genuinely empty following.json on the old, quiet path', async () => {
+      const result = await parseInstagramZipFile(zipWith(EMPTY_ARRAY, VALID_ARRAY_OF_ONE));
+
+      // Nothing was unreadable, so nothing is loud, and one working required
+      // file is still enough to analyse.
+      expect(result.hasMinimalData).toBe(true);
+      expect(result.warnings.find(w => w.code === 'UNRESOLVED_ENTRIES_FOLLOWING')).toBeUndefined();
+      expect(result.warnings.find(w => w.code === 'EMPTY_FOLLOWING')?.severity).toBe('info');
+    });
+
+    it('degrades rather than fails when only some records are unreadable', async () => {
+      const partial = [...VALID_ARRAY_OF_ONE, { media_list_data: [] }];
+      const result = await parseInstagramZipFile(zipWith(partial, VALID_ARRAY_OF_ONE));
+
+      // One account read, one lost. The result is incomplete, not wrong-way-
+      // round, and blocking the whole upload over it would be disproportionate.
+      expect(result.hasMinimalData).toBe(true);
+      const drift = result.warnings.find(w => w.code === 'UNRESOLVED_ENTRIES_FOLLOWING');
+      expect(drift).toBeDefined();
+      expect(drift?.severity).toBe('warning');
+      expect(drift?.message).not.toMatch(/none of them/i);
     });
   });
 

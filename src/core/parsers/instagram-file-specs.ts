@@ -18,6 +18,19 @@ export interface FileSpec {
    */
   driftCode?: string;
   /**
+   * ParseWarning code emitted when this file's top level WAS recognized but its
+   * records were not — `unresolvedEntries > 0` (GH#21). Deliberately a second
+   * code rather than a reuse of `driftCode`: four of the six files that broke in
+   * the 2026-08-11 export were plain arrays, so the wrapper parsed and only the
+   * records had changed. Collapsing the two would lose the ability to tell
+   * Instagram renaming the wrapper from Instagram changing the record.
+   *
+   * Required files are absent here for the same reason they have no
+   * `driftCode`: their codes carry severity 'error' and are raised where the
+   * file is parsed, in `instagram.ts` and `instagram-followers.ts`.
+   */
+  entryDriftCode?: string;
+  /**
    * True when appearing in this file implies the account is **currently** in
    * `following ∪ followers`. Used only by the membership tiebreak in
    * `instagram-labels.ts`, to identify a localised username label when value
@@ -59,6 +72,7 @@ export const FILE_SPECS: FileSpec[] = [
     fileNames: ['pending_follow_requests.json'],
     propCandidates: ['relationships_follow_requests_sent'],
     driftCode: 'INVALID_PENDING_FORMAT',
+    entryDriftCode: 'UNRESOLVED_ENTRIES_PENDING',
   },
   {
     name: 'restricted_profiles.json',
@@ -67,6 +81,7 @@ export const FILE_SPECS: FileSpec[] = [
     fileNames: ['restricted_profiles.json'],
     propCandidates: ['relationships_restricted_users'],
     driftCode: 'INVALID_RESTRICTED_FORMAT',
+    entryDriftCode: 'UNRESOLVED_ENTRIES_RESTRICTED',
     impliesKnownAccount: true,
   },
   {
@@ -76,6 +91,7 @@ export const FILE_SPECS: FileSpec[] = [
     fileNames: ['close_friends.json', 'friends.json'],
     propCandidates: ['relationships_close_friends'],
     driftCode: 'INVALID_CLOSE_FRIENDS_FORMAT',
+    entryDriftCode: 'UNRESOLVED_ENTRIES_CLOSE_FRIENDS',
     impliesKnownAccount: true,
   },
   {
@@ -89,6 +105,7 @@ export const FILE_SPECS: FileSpec[] = [
     ],
     propCandidates: ['relationships_unfollowed_users'],
     driftCode: 'INVALID_UNFOLLOWED_FORMAT',
+    entryDriftCode: 'UNRESOLVED_ENTRIES_UNFOLLOWED',
   },
   {
     name: 'dismissed_suggestions.json',
@@ -97,6 +114,7 @@ export const FILE_SPECS: FileSpec[] = [
     fileNames: ['removed_suggestions.json', 'dismissed_suggestions.json'],
     propCandidates: ['relationships_dismissed_suggested_users'],
     driftCode: 'INVALID_DISMISSED_FORMAT',
+    entryDriftCode: 'UNRESOLVED_ENTRIES_DISMISSED',
     impliesKnownAccount: true,
   },
 ];
@@ -114,21 +132,26 @@ export const PERMANENT_REQUESTS_SPEC: FileSpec = {
     'relationships_follow_requests_permanent',
   ],
   driftCode: 'INVALID_PERMANENT_FORMAT',
+  entryDriftCode: 'UNRESOLVED_ENTRIES_PERMANENT',
 };
 
 /**
- * Every `driftCode` any optional spec can emit, derived rather than restated.
+ * Every drift code any optional spec can emit — both the file-level
+ * `driftCode` and the entry-level `entryDriftCode` — derived rather than
+ * restated.
  *
- * The consumer is `useFileUpload`, which reports optional-file shape drift to
+ * The consumer is `useFileUpload`, which reports optional-file drift to
  * analytics — that event is the only detection surface these warnings have, since
  * severity `'warning'` is rendered nowhere. Deriving the set here means adding a
- * seventh optional file with a `driftCode` wires its reporting automatically; a
+ * seventh optional file wires its reporting automatically; a
  * hardcoded list in the hook would leave the new file silently unmeasured, which
- * is the exact failure mode GH#21 is about.
+ * is the exact failure mode GH#21 is about. The two kinds share one set because
+ * they share one consumer; they stay separate codes so the event can still say
+ * which of the two failures happened.
  */
 export const OPTIONAL_FILE_DRIFT_CODES: ReadonlySet<string> = new Set(
   [...FILE_SPECS, PERMANENT_REQUESTS_SPEC]
-    .map(spec => spec.driftCode)
+    .flatMap(spec => [spec.driftCode, spec.entryDriftCode])
     .filter((code): code is string => code !== undefined)
 );
 

@@ -6,7 +6,12 @@
 import type { FileExpectation, ParseWarning } from '@/core/types';
 import { FILE_SPECS, PERMANENT_REQUESTS_SPEC, type FileSpec } from './instagram-file-specs';
 import { resolveUsernameLabel } from './instagram-labels';
-import { resolveEntries, resolveEntryList } from './instagram-utils';
+import {
+  UNREADABLE_ENTRIES_FIX,
+  describeUnreadableEntries,
+  resolveEntries,
+  resolveEntryList,
+} from './instagram-utils';
 
 export interface OptionalFileResult {
   map: Map<string, number>;
@@ -182,17 +187,23 @@ export async function parseOptionalFiles(
   const dismissedResult = optionalResults[4] ?? emptyResult;
   const permanentResult = optionalResults[optionalSpecs.length] ?? emptyResult;
 
-  // Build file expectations and format-drift warnings for optional files.
+  // Build file expectations and drift warnings for optional files.
   //
   // Severity 'warning', not 'error': optional-file drift zeroes one badge
   // without inverting the core following/followers math, so failing the
   // whole upload is disproportionate (GH#21). Each spec carries its own
-  // driftCode (instagram-file-specs.ts) so a consumer can tell which file
-  // drifted without parsing the message text.
+  // driftCode and entryDriftCode (instagram-file-specs.ts) so a consumer can
+  // tell which file drifted, and how, without parsing the message text.
+  //
+  // `specs` rather than `optionalSpecs`: permanent-requests was parsed and
+  // warned about but never appended to fileExpectations, so nothing downstream
+  // could report on one of the two files feeding notFollowingBack. Walking the
+  // same array the read pass walked is what keeps a seventh file from
+  // inheriting that hole.
   const fileExpectations: FileExpectation[] = [];
   const warnings: ParseWarning[] = [];
-  for (let i = 0; i < optionalSpecs.length; i++) {
-    const spec = optionalSpecs[i]!;
+  for (let i = 0; i < specs.length; i++) {
+    const spec = specs[i]!;
     const result = optionalResults[i]!;
     fileExpectations.push({
       name: spec.name,
@@ -201,6 +212,8 @@ export async function parseOptionalFiles(
       found: result.found,
       itemCount: result.count,
       foundPath: result.path,
+      unreadableItemCount: result.unresolvedEntries,
+      formatUnreadable: result.found && !result.formatValid,
     });
     if (result.found && !result.formatValid && spec.driftCode) {
       warnings.push({
@@ -209,14 +222,17 @@ export async function parseOptionalFiles(
         severity: 'warning',
       });
     }
-  }
-
-  if (permanentResult.found && !permanentResult.formatValid && PERMANENT_REQUESTS_SPEC.driftCode) {
-    warnings.push({
-      code: PERMANENT_REQUESTS_SPEC.driftCode,
-      message: `${PERMANENT_REQUESTS_SPEC.name} was found, but its structure is not recognized — Instagram may have changed this file's format.`,
-      severity: 'warning',
-    });
+    // Deliberately not an `else`: the two are exclusive today only because an
+    // unrecognized top level yields no entries to count. Keeping them
+    // independent means the day that stops being true, both fire.
+    if (result.unresolvedEntries > 0 && spec.entryDriftCode) {
+      warnings.push({
+        code: spec.entryDriftCode,
+        message: describeUnreadableEntries(spec.name, result.unresolvedEntries, result.count),
+        severity: 'warning',
+        fix: UNREADABLE_ENTRIES_FIX,
+      });
+    }
   }
 
   return {

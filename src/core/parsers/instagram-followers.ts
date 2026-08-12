@@ -6,7 +6,13 @@
 import type JSZip from 'jszip';
 import type { FileExpectation, InstagramExportEntry, ParseWarning, RawItem } from '@/core/types';
 import { FILE_SPECS } from './instagram-file-specs';
-import { extractUsernames, resolveEntries, resolveEntryList } from './instagram-utils';
+import {
+  UNREADABLE_ENTRIES_FIX,
+  describeUnreadableEntries,
+  extractUsernames,
+  resolveEntries,
+  resolveEntryList,
+} from './instagram-utils';
 
 export interface FollowersParsed {
   followersRaw: RawItem[];
@@ -16,6 +22,13 @@ export interface FollowersParsed {
   foundFollowerPaths: string[];
   warnings: ParseWarning[];
   fileExpectation: FileExpectation;
+  /**
+   * True when shards were found, their shape was recognized, they held records
+   * — and not one of those records could be read (GH#21 Task 3). This is not
+   * "no followers"; it is followers we cannot see, and `instagram.ts` uses it
+   * to keep the two out of the same exit.
+   */
+  entriesUnreadable: boolean;
 }
 
 /** Parse a single followers JSON text */
@@ -53,6 +66,10 @@ export async function parseFollowersFromZip(
   // single bare entry object. A malformed shard is not silently dropped into
   // an empty result indistinguishable from having none.
   const formatInvalidFiles: string[] = [];
+  // Summed across shards, not per shard: the reader has one followers list, so
+  // "40 of your followers could not be read" is the fact, and which of three
+  // files each came from is not something they can act on.
+  let unresolvedEntries = 0;
 
   for (const g of followersGlobs) {
     const regex = new RegExp('^' + g + '$', 'i');
@@ -94,8 +111,10 @@ export async function parseFollowersFromZip(
       continue;
     }
 
-    const items = resolveEntries(entries).items;
-    for (const it of items) {
+    const resolved = resolveEntries(entries);
+    unresolvedEntries += resolved.unresolved;
+
+    for (const it of resolved.items) {
       if (followersSeen.has(it.username)) continue;
       followersSeen.add(it.username);
       followersRaw.push(it);
@@ -108,6 +127,7 @@ export async function parseFollowersFromZip(
   );
 
   const followersFound = followersFilesByName.size > 0;
+  const entriesUnreadable = followersUsers.length === 0 && unresolvedEntries > 0;
   const followersSpec = FILE_SPECS[1]!;
   const fileExpectation: FileExpectation = {
     name: 'followers_*.json',
@@ -116,6 +136,8 @@ export async function parseFollowersFromZip(
     found: followersFound,
     itemCount: followersUsers.length,
     foundPath: foundFollowerPaths[0],
+    unreadableItemCount: unresolvedEntries,
+    formatUnreadable: formatInvalidFiles.length > 0,
   };
 
   if (!followersFound) {
@@ -138,6 +160,22 @@ export async function parseFollowersFromZip(
       severity: 'error',
       fix: 'Instagram may have changed their export format. Please report this issue so we can add support.',
     });
+  } else if (unresolvedEntries > 0) {
+    // The wrapper parsed and the records did not. Severity follows how much
+    // was lost: nothing readable at all inverts the badge math for every
+    // follower and has to reach DiagnosticErrorScreen, while losing some of
+    // them leaves the answer incomplete rather than backwards — and blocking
+    // an otherwise good upload over that is disproportionate.
+    warnings.push({
+      code: 'UNRESOLVED_ENTRIES_FOLLOWERS',
+      message: describeUnreadableEntries(
+        'followers_*.json',
+        unresolvedEntries,
+        followersUsers.length
+      ),
+      severity: entriesUnreadable ? 'error' : 'warning',
+      fix: UNREADABLE_ENTRIES_FIX,
+    });
   } else if (followersUsers.length === 0) {
     warnings.push({
       code: 'EMPTY_FOLLOWERS',
@@ -154,5 +192,6 @@ export async function parseFollowersFromZip(
     foundFollowerPaths,
     warnings,
     fileExpectation,
+    entriesUnreadable,
   };
 }

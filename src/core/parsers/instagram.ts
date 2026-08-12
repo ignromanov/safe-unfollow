@@ -172,10 +172,19 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
   warnings.push(...optionalParsed.warnings);
   fileExpectations.push(...optionalParsed.fileExpectations);
 
-  // Determine if we have minimal data
-  const hasMinimalData = followingUsers.length > 0 || followersParsed.followersUsers.length > 0;
+  // A required file that was found, held records, and yielded no usernames is
+  // not "no data" — it is data we cannot read, and the two must not share an
+  // exit (GH#21). Widening the OR below would have said "we found nothing";
+  // gating it says "we found it and failed", which is the true and actionable
+  // one. Both callers of hasMinimalData take the first error warning as the
+  // code, so the critical error is withheld to leave ours first.
+  const requiredEntriesUnreadable =
+    followingParsed.entriesUnreadable || followersParsed.entriesUnreadable;
+  const hasMinimalData =
+    !requiredEntriesUnreadable &&
+    (followingUsers.length > 0 || followersParsed.followersUsers.length > 0);
 
-  if (!hasMinimalData) {
+  if (!hasMinimalData && !requiredEntriesUnreadable) {
     warnings.push(createCriticalError(analysis));
   }
 

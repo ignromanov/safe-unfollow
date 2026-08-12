@@ -3,10 +3,12 @@ import { parseOptionalFiles } from '@/core/parsers/instagram-optional';
 import { FILE_SPECS, PERMANENT_REQUESTS_SPEC } from '@/core/parsers/instagram-file-specs';
 import {
   ARRAY_NO_USERNAME_FIELD,
+  ARRAY_UNREADABLE_ENTRIES,
   EMPTY_ARRAY,
   NULL_PAYLOAD,
   UNKNOWN_TOP_LEVEL_KEY,
   VALID_ARRAY_OF_ONE,
+  makeEntry,
   objectInsteadOfArray,
 } from '../../fixtures/instagram-format-drift';
 
@@ -289,5 +291,129 @@ describe('parseOptionalFiles format drift (GH#21)', () => {
     expect(drift).toBeDefined();
     expect(drift?.severity).toBe('warning');
     expect((result[resultKey as keyof typeof result] as { found: boolean }).found).toBe(true);
+  });
+});
+
+/**
+ * GH#21 Task 3. #32 asks "did the wrapper parse". Four of the six files that
+ * broke in the 2026-08-11 export are plain arrays, so `Array.isArray` passes,
+ * `formatValid` stays true, and every record still resolves to nothing. These
+ * are the tests for the signal that reaches those four.
+ */
+describe('parseOptionalFiles entry-level drift (GH#21 Task 3)', () => {
+  const closeFriendsSpec = FILE_SPECS[4]!;
+  const closeFriendsFile = closeFriendsSpec.fileNames[0]!;
+
+  it('sanity: FILE_SPECS[4] is close_friends.json', () => {
+    expect(closeFriendsSpec.name).toBe('close_friends.json');
+  });
+
+  it('warns at entry level, not file level, when the wrapper is fine and no record reads', async () => {
+    const reader = makeReader(ARRAY_UNREADABLE_ENTRIES, closeFriendsFile);
+    const result = await parseOptionalFiles([], reader);
+
+    const entryDrift = result.warnings.find(w => w.code === 'UNRESOLVED_ENTRIES_CLOSE_FRIENDS');
+    expect(entryDrift).toBeDefined();
+    expect(entryDrift?.severity).toBe('warning');
+    expect(entryDrift?.message).toContain('3');
+    // The fix must not send the reader back to Instagram for a fresh export:
+    // the export is fine, we are the ones who cannot read it.
+    expect(entryDrift?.fix).toMatch(/re-requesting/i);
+
+    // #32's file-level signal must stay quiet — the wrapper was recognized.
+    expect(result.warnings.find(w => w.code === 'INVALID_CLOSE_FRIENDS_FORMAT')).toBeUndefined();
+    expect(result.closeFriendsResult.formatValid).toBe(true);
+    expect(result.closeFriendsResult.unresolvedEntries).toBe(3);
+  });
+
+  it('leaves #32 alone: an unrecognized wrapper stays file-level only', async () => {
+    const reader = makeReader({ nonsense: 1 }, closeFriendsFile);
+    const result = await parseOptionalFiles([], reader);
+
+    expect(result.warnings.find(w => w.code === 'INVALID_CLOSE_FRIENDS_FORMAT')).toBeDefined();
+    expect(
+      result.warnings.find(w => w.code === 'UNRESOLVED_ENTRIES_CLOSE_FRIENDS')
+    ).toBeUndefined();
+  });
+
+  it.each([
+    ['bare empty array', EMPTY_ARRAY],
+    ['empty wrapper object', { relationships_close_friends: [] }],
+  ])('stays completely silent for a genuinely empty file (%s)', async (_label, data) => {
+    const reader = makeReader(data, closeFriendsFile);
+    const result = await parseOptionalFiles([], reader);
+
+    // Not "no entry-level warning" — no warning at all. Most people have no
+    // close friends list, and a diagnostic that fires for them is noise that
+    // buries the one that matters.
+    expect(result.warnings).toHaveLength(0);
+    expect(result.closeFriendsResult.unresolvedEntries).toBe(0);
+  });
+
+  it('reads a total failure differently from a partial one', async () => {
+    const total = await parseOptionalFiles(
+      [],
+      makeReader(ARRAY_UNREADABLE_ENTRIES, closeFriendsFile)
+    );
+    const partial = await parseOptionalFiles(
+      [],
+      makeReader([makeEntry('sample_user_a'), { media_list_data: [] }], closeFriendsFile)
+    );
+
+    const totalMessage = total.warnings.find(
+      w => w.code === 'UNRESOLVED_ENTRIES_CLOSE_FRIENDS'
+    )?.message;
+    const partialMessage = partial.warnings.find(
+      w => w.code === 'UNRESOLVED_ENTRIES_CLOSE_FRIENDS'
+    )?.message;
+
+    // Zero of three is the 2026-08-11 signature and a different fact from
+    // "one of two records changed": the first means the file is gone, the
+    // second means it is degraded.
+    expect(totalMessage).toMatch(/none of them/i);
+    expect(partialMessage).toBeDefined();
+    expect(partialMessage).not.toMatch(/none of them/i);
+    expect(partialMessage).toContain('1');
+    expect(partial.closeFriendsResult.count).toBe(1);
+  });
+
+  it('reports permanent_follow_requests in fileExpectations', async () => {
+    // Pre-existing hole: the file is read and warned about, but the loop that
+    // builds fileExpectations only walked FILE_SPECS.slice(2), so nothing
+    // downstream could say anything about one of the two files feeding
+    // notFollowingBack.
+    const reader = makeReader(VALID_ARRAY_OF_ONE, PERMANENT_REQUESTS_SPEC.fileNames[0]!);
+    const result = await parseOptionalFiles([], reader);
+
+    const expectation = result.fileExpectations.find(f => f.name === PERMANENT_REQUESTS_SPEC.name);
+    expect(expectation).toBeDefined();
+    expect(expectation?.found).toBe(true);
+    expect(expectation?.itemCount).toBe(1);
+    expect(result.fileExpectations).toHaveLength(6);
+  });
+
+  it('lets a FileExpectation say "present, not understood" three different ways', async () => {
+    const readExpectation = async (data: unknown) => {
+      const result = await parseOptionalFiles([], makeReader(data, closeFriendsFile));
+      return result.fileExpectations.find(f => f.name === closeFriendsSpec.name);
+    };
+
+    const empty = await readExpectation(EMPTY_ARRAY);
+    const unreadableEntries = await readExpectation(ARRAY_UNREADABLE_ENTRIES);
+    const unreadableShape = await readExpectation({ nonsense: 1 });
+
+    // All three report itemCount 0. Without the extra fields a renderer cannot
+    // tell them apart, and "found: 0" is the wrong story for two of them.
+    expect(empty?.itemCount).toBe(0);
+    expect(unreadableEntries?.itemCount).toBe(0);
+    expect(unreadableShape?.itemCount).toBe(0);
+
+    expect(empty?.unreadableItemCount).toBe(0);
+    expect(empty?.formatUnreadable).toBe(false);
+
+    expect(unreadableEntries?.unreadableItemCount).toBe(3);
+    expect(unreadableEntries?.formatUnreadable).toBe(false);
+
+    expect(unreadableShape?.formatUnreadable).toBe(true);
   });
 });

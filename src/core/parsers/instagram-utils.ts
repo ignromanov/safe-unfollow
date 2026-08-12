@@ -131,6 +131,46 @@ export function resolveEntries(
 }
 
 /**
+ * The `fix` line every unreadable-records warning carries.
+ *
+ * It has to say the export is fine, because the reflex it is fighting is the
+ * one every other diagnostic on this screen encourages — go back to Instagram
+ * and request the data again. A fresh export of the same drifted format costs
+ * the reader days and changes nothing.
+ *
+ * Punctuation here is plain ASCII, unlike the em-dashed prose elsewhere: the
+ * no-hardcoded-label guard in `instagram-labels.test.ts` exempts non-ASCII only
+ * in a literal written directly at a `message`/`fix` key, and this copy is
+ * shared rather than inlined. Widening that guard to admit a constant would
+ * cost more than the dash is worth.
+ */
+export const UNREADABLE_ENTRIES_FIX =
+  'Your export is fine. This is a gap in this app, so re-requesting your data from Instagram will not help. Please report this so we can add support for the new format.';
+
+/**
+ * Describe a file whose records were counted but not understood.
+ *
+ * Total and partial failure are different facts and must read differently:
+ * zero of N means the file is effectively gone and the badge it feeds is now
+ * empty; some of N means the file is degraded and the badge is now incomplete.
+ * One is a missing feature, the other a wrong answer, and a reader who cannot
+ * tell them apart cannot judge how much of the result to trust.
+ *
+ * Shared by all eight relationship files so a drift affecting several of them
+ * does not come back phrased six different ways.
+ */
+export function describeUnreadableEntries(
+  fileName: string,
+  unresolved: number,
+  resolved: number
+): string {
+  const records = `${unresolved} ${unresolved === 1 ? 'record' : 'records'}`;
+  return resolved === 0
+    ? `${fileName} was found with ${records}, but none of them could be read. Instagram appears to have changed the format of the records themselves.`
+    : `${fileName} was found, but ${records} of ${unresolved + resolved} could not be read. Instagram appears to have changed the format of some records.`;
+}
+
+/**
  * Extract deduplicated usernames from Instagram export entries
  */
 export function extractUsernames(entries: readonly unknown[] | undefined): string[] {
