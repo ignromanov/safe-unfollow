@@ -108,13 +108,20 @@ export function PaywallModal({
 
         {/* aria-hidden: the pair is a restatement of the receipt above, which
             already gives a screen reader both numbers in a sentence. Read out a
-            second time it is two bare numerals and two fragments. */}
+            second time it is two bare numerals and two fragments.
+
+            Both registers are the design system's, not hand-rolled: `font-display`
+            for the numerals because the guide assigns it to every stat number —
+            and it carries the -0.04em / 1.15 pairing plus the RTL reset that a
+            manual `tracking-tighter` would miss in Arabic — and 12px / black /
+            widest for the labels, which is the uppercase micro-label used for
+            every stat label in the product. */}
         <div aria-hidden="true" className="flex items-center justify-center gap-3.5 pt-1">
           <div className="flex min-w-0 flex-col items-center gap-1">
-            <span className="text-[2.875rem] leading-none font-extrabold tracking-tighter text-muted-foreground">
+            <span className="font-display text-5xl font-extrabold text-muted-foreground">
               {FREE_EXPORT_ROWS.toLocaleString(i18n.language)}
             </span>
-            <span className="text-center text-[0.625rem] font-extrabold tracking-wider text-muted-foreground uppercase text-balance">
+            <span className="text-center text-xs font-black tracking-widest text-muted-foreground uppercase text-balance">
               {t('export.paywall.haveLabel')}
             </span>
           </div>
@@ -124,10 +131,10 @@ export function PaywallModal({
           <ArrowRight className="h-6 w-6 shrink-0 mb-3.5 text-muted-foreground rtl:-scale-x-100" />
 
           <div className="flex min-w-0 flex-col items-center gap-1">
-            <span className="text-[2.875rem] leading-none font-extrabold tracking-tighter text-primary">
+            <span className="font-display text-5xl font-extrabold text-primary">
               {totalRows.toLocaleString(i18n.language)}
             </span>
-            <span className="text-center text-[0.625rem] font-extrabold tracking-wider text-primary uppercase text-balance">
+            <span className="text-center text-xs font-black tracking-widest text-primary uppercase text-balance">
               {t('export.paywall.getLabel')}
             </span>
           </div>
@@ -150,7 +157,21 @@ export function PaywallModal({
         </DialogHeader>
 
         <DialogFooter className="flex-col items-stretch gap-2 sm:flex-col sm:items-stretch">
-          <Button onClick={onCheckout} size="lg">
+          {/* Three classes the variant does not give, each from a written rule
+              rather than taste. `min-h-11`: `size="lg"` is `h-10`, i.e. 40px,
+              under the 44px touch target the mobile contract sets — and 85% of
+              sessions are mobile, on the highest-value button in the product.
+              `rounded-2xl`: the app lives at the large end of the radius scale;
+              the variant's `rounded-md` is the shadcn default nothing else here
+              uses. The coloured `shadow-2xl` is the one heavy shadow in the
+              product and the guide reserves it for primary CTAs — Hero and
+              FooterCTA are its only other wearers, which is the company this
+              button belongs in. */}
+          <Button
+            onClick={onCheckout}
+            size="lg"
+            className="min-h-11 rounded-2xl font-semibold shadow-2xl shadow-primary/30"
+          >
             {t('export.paywall.cta')}
           </Button>
 

@@ -303,6 +303,23 @@ describe('ResultsExportControls', () => {
       expect(total.closest('[aria-hidden="true"]')).not.toBeNull();
     });
 
+    // `size="lg"` reads as "the big one" and is `h-10` — 40px, under the 44px
+    // touch target this product holds itself to, on its highest-value button
+    // with 85% of sessions on a phone. The height therefore cannot come from
+    // the size alone. jsdom measures nothing, so the class is the only proxy
+    // available; it is pinned by name for that reason and not as a style
+    // preference.
+    it('should give the paywall CTA a 44px touch target, not the size default', async () => {
+      unlocked(false);
+      const user = userEvent.setup();
+
+      render(<ResultsExportControls {...defaultProps} />);
+      await user.click(screen.getByRole('button', { name: triggerLabel }));
+
+      const cta = await screen.findByRole('button', { name: resultsEN.export.paywall.cta });
+      expect(cta.className).toMatch(/\bmin-h-11\b/);
+    });
+
     // The paywall offers the rest of a file the reader may never have seen land
     // — 85% of traffic is mobile, and an iOS Safari blob download can be silent
     // or blocked. The receipt is what makes the offer checkable rather than an
