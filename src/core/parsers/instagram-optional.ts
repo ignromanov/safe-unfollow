@@ -5,7 +5,7 @@
 
 import type { FileExpectation, InstagramExportEntry, ParseWarning } from '@/core/types';
 import { FILE_SPECS, PERMANENT_REQUESTS_SPEC, type FileSpec } from './instagram-file-specs';
-import { listToMap } from './instagram-utils';
+import { listToMap, resolveEntryList } from './instagram-utils';
 
 export interface OptionalFileResult {
   map: Map<string, number>;
@@ -42,20 +42,16 @@ async function readListMapFlexible(
   const result = await readFirstExistingJson(spec.fileNames);
   if (!result) return { map: new Map(), found: false, count: 0, formatValid: true };
 
-  const entries = Array.isArray(result.data)
-    ? result.data
-    : (spec.propCandidates
-        ?.map(p => (result.data as Record<string, unknown>)?.[p])
-        .find(e => Array.isArray(e)) as InstagramExportEntry[] | undefined);
+  const entries = resolveEntryList(result.data, spec.propCandidates);
 
-  if (!Array.isArray(entries)) {
-    // Found but neither shape matched: a genuinely empty array ([]) takes the
+  if (entries === null) {
+    // Found but no known shape matched: a genuinely empty array ([]) takes the
     // branch above and never reaches here, so this is specifically "shape not
     // recognized", not "empty file" — see instagram-format-drift.ts fixtures.
     return { map: new Map(), found: true, path: result.path, count: 0, formatValid: false };
   }
 
-  const map = listToMap(entries);
+  const map = listToMap(entries as InstagramExportEntry[]);
   return { map, found: true, path: result.path, count: map.size, formatValid: true };
 }
 

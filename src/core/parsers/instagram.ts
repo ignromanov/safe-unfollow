@@ -9,7 +9,7 @@ import type {
   RawItem,
 } from '@/core/types';
 import { BASE_PATH_CANDIDATES, FILE_SPECS } from './instagram-file-specs';
-import { escapeRegExp, extractUsernames, listToRaw } from './instagram-utils';
+import { escapeRegExp, extractUsernames, listToRaw, resolveEntryList } from './instagram-utils';
 import { analyzeZipStructure, createCriticalError } from './instagram-zip-analysis';
 import { parseFollowersFromZip } from './instagram-followers';
 import { parseOptionalFiles } from './instagram-optional';
@@ -36,15 +36,18 @@ export async function parseFollowingJson(jsonText: string): Promise<string[]> {
 /**
  * Interpret the top level of following.json.
  *
- * `formatInvalid` is true only when a payload was present but matched neither a bare
- * array nor `{ relationships_following: [...] }` (GH#21). A genuinely empty array is
- * recognised and leaves it false — that distinction is the entire point, because
- * `listToRaw(undefined)` returns `[]` for both and an unrecognised shape must not be
- * allowed to look like an empty file.
+ * Shape resolution is delegated to `resolveEntryList` (GH#21): a bare array,
+ * the `relationships_following` wrapper, or a single bare entry object are
+ * all accepted — this file hasn't been observed to drift into the last
+ * shape, but it shared the same latent gap the optional files did.
+ * `formatInvalid` is true only when none of those match. A genuinely empty
+ * array is recognised and leaves it false — that distinction is the entire
+ * point, because `listToRaw(undefined)` returns `[]` for both and an
+ * unrecognised shape must not be allowed to look like an empty file.
  *
- * Extracted from `parseInstagramZipFile` rather than inlined: the shape check pushed
- * that function past the complexity ceiling, and this mirrors how followers is already
- * delegated to `parseFollowersFromZip`.
+ * Extracted from `parseInstagramZipFile` rather than inlined: the shape check
+ * pushed that function past the complexity ceiling, and this mirrors how
+ * followers is already delegated to `parseFollowersFromZip`.
  */
 function interpretFollowingPayload(payload: unknown): {
   raw: RawItem[];
@@ -52,11 +55,9 @@ function interpretFollowingPayload(payload: unknown): {
 } {
   if (payload === undefined) return { raw: [], formatInvalid: false };
 
-  const entries: unknown = Array.isArray(payload)
-    ? payload
-    : (payload as Record<string, unknown> | null)?.relationships_following;
+  const entries = resolveEntryList(payload, ['relationships_following']);
 
-  return Array.isArray(entries)
+  return entries !== null
     ? { raw: listToRaw(entries as InstagramExportEntry[]), formatInvalid: false }
     : { raw: [], formatInvalid: true };
 }

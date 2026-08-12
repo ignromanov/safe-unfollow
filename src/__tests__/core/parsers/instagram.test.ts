@@ -630,6 +630,22 @@ describe('Instagram Parser', () => {
       expect(result.warnings.find(w => w.code === 'INVALID_FOLLOWING_FORMAT')).toBeUndefined();
       expect(result.warnings.find(w => w.code === 'EMPTY_FOLLOWING')).toBeDefined();
     });
+
+    it('accepts a single bare entry object without INVALID_FOLLOWING_FORMAT (GH#21 Task 2)', async () => {
+      // following.json has not been observed to drift into this shape, but it
+      // shared the same Array.isArray ladder the optional files did — this
+      // pins that the shared resolveEntryList fix reaches it too.
+      mockZipInstance._addFile(
+        'connections/followers_and_following/following.json',
+        vi.fn().mockResolvedValue(JSON.stringify(VALID_ARRAY_OF_ONE[0]))
+      );
+
+      const mockFile = new File(['test'], 'test.zip', { type: 'application/zip' });
+      const result = await parseInstagramZipFile(mockFile);
+
+      expect(result.warnings.find(w => w.code === 'INVALID_FOLLOWING_FORMAT')).toBeUndefined();
+      expect(result.data.following.has('validuser')).toBe(true);
+    });
   });
 
   // GH#21, followers side. followers_*.json is glob-matched and multi-file —
@@ -702,6 +718,22 @@ describe('Instagram Parser', () => {
       expect(drift?.severity).toBe('error');
       // The good shard's data is not silently discarded, just the drift is
       // surfaced loudly instead of being masked — followers_1 still parsed.
+      expect(result.data.followers.has('validuser')).toBe(true);
+    });
+
+    it('accepts a single bare entry object without INVALID_FOLLOWERS_FORMAT (GH#21 Task 2)', async () => {
+      // followers_*.json has not been observed to drift into this shape, but
+      // it shared the same Array.isArray ladder the optional files did — this
+      // pins that the shared resolveEntryList fix reaches it too.
+      mockZipInstance._addFile(
+        'connections/followers_and_following/followers_1.json',
+        vi.fn().mockResolvedValue(JSON.stringify(VALID_ARRAY_OF_ONE[0]))
+      );
+
+      const mockFile = new File(['test'], 'test.zip', { type: 'application/zip' });
+      const result = await parseInstagramZipFile(mockFile);
+
+      expect(result.warnings.find(w => w.code === 'INVALID_FOLLOWERS_FORMAT')).toBeUndefined();
       expect(result.data.followers.has('validuser')).toBe(true);
     });
   });

@@ -89,6 +89,28 @@ describe('parseOptionalFiles format drift (GH#21)', () => {
     expect(result.pendingResult.map.has('validuser')).toBe(true);
   });
 
+  it('accepts a single bare entry object without a format-drift warning (GH#21 Task 2)', async () => {
+    // Real shape observed in restricted_profiles.json / removed_suggestions.json
+    // in the 2026-08-11 export — a single record with the array wrapper
+    // omitted entirely (see raw/connections-2026-08-11).
+    const singleObjectPayload = {
+      timestamp: 1_700_000_000,
+      media: [],
+      label_values: [{ label: 'Username', value: 'sample_test_user' }],
+      fbid: '10000000000000001',
+    };
+    const reader = makeReader(singleObjectPayload);
+    const result = await parseOptionalFiles([], reader);
+
+    expect(result.warnings.find(w => w.code === 'INVALID_PENDING_FORMAT')).toBeUndefined();
+    expect(result.pendingResult.found).toBe(true);
+    // Task 2 only fixes the wrapper — the shape is now recognized, so no
+    // drift warning fires. The entry itself uses the new label_values shape,
+    // which listToMap doesn't understand yet (GH#21 Task 1, tracked
+    // separately); count staying 0 here is correct for now.
+    expect(result.pendingResult.count).toBe(0);
+  });
+
   it('returns no warnings and found:false when the file is absent entirely', async () => {
     const reader = vi.fn().mockResolvedValue(null);
     const result = await parseOptionalFiles([], reader);

@@ -6,7 +6,7 @@
 import type JSZip from 'jszip';
 import type { FileExpectation, InstagramExportEntry, ParseWarning, RawItem } from '@/core/types';
 import { FILE_SPECS } from './instagram-file-specs';
-import { extractUsernames, listToRaw } from './instagram-utils';
+import { extractUsernames, listToRaw, resolveEntryList } from './instagram-utils';
 
 export interface FollowersParsed {
   followersRaw: RawItem[];
@@ -48,9 +48,10 @@ export async function parseFollowersFromZip(
   const followersFilesByName = new Map<string, JSZip.JSZipObject>();
   const foundFollowerPaths: string[] = [];
   const warnings: ParseWarning[] = [];
-  // Names of shards whose top-level shape matched neither a bare array nor
-  // `{ relationships_followers: [...] }` (GH#21). A malformed shard is not
-  // silently dropped into an empty result indistinguishable from having none.
+  // Names of shards whose top-level shape didn't resolve via `resolveEntryList`
+  // (GH#21) — neither a bare array, `{ relationships_followers: [...] }`, nor a
+  // single bare entry object. A malformed shard is not silently dropped into
+  // an empty result indistinguishable from having none.
   const formatInvalidFiles: string[] = [];
 
   for (const g of followersGlobs) {
@@ -86,11 +87,9 @@ export async function parseFollowersFromZip(
       });
       continue;
     }
-    const entries: unknown = Array.isArray(json)
-      ? json
-      : (json as Record<string, unknown> | null)?.relationships_followers;
+    const entries = resolveEntryList(json, ['relationships_followers']);
 
-    if (!Array.isArray(entries)) {
+    if (entries === null) {
       formatInvalidFiles.push(f.name);
       continue;
     }
