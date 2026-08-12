@@ -41,21 +41,15 @@ export async function parseFollowingJson(jsonText: string): Promise<string[]> {
  * Interpret the top level of following.json.
  *
  * Shape resolution is delegated to `resolveEntryList` (GH#21): a bare array,
- * the `relationships_following` wrapper, or a single bare entry object are
- * all accepted — this file hasn't been observed to drift into the last
- * shape, but it shared the same latent gap the optional files did.
- * `formatInvalid` is true only when none of those match. A genuinely empty
- * array is recognised and leaves it false — that distinction is the entire
- * point, because `resolveEntries` yields no items for both and an
- * unrecognised shape must not be allowed to look like an empty file.
- *
- * `resolveEntries` is called with no username label: following.json still
- * uses `title`/`string_list_data`, not the localised `label_values` shape the
- * optional files drifted to (see `instagram-labels.ts` for the scope seam).
- *
- * Extracted from `parseInstagramZipFile` rather than inlined: the shape check
- * pushed that function past the complexity ceiling, and this mirrors how
- * followers is already delegated to `parseFollowersFromZip`.
+ * the `relationships_following` wrapper, or a single bare entry object. This
+ * file hasn't been observed to drift into the last shape but shared the same
+ * latent gap. `formatInvalid` is true only when none match; a genuinely empty
+ * array is recognised and leaves it false — the entire point, since
+ * `resolveEntries` yields no items either way and an unrecognised shape must
+ * not be allowed to look like an empty file. No username label is passed:
+ * following.json still uses `title`/`string_list_data` (`instagram-labels.ts`
+ * has the scope seam). Extracted rather than inlined because the shape check
+ * pushed `parseInstagramZipFile` past the complexity ceiling.
  */
 function interpretFollowingPayload(payload: unknown): {
   raw: RawItem[];
@@ -165,7 +159,6 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
     };
   }
 
-  // Try common paths
   const baseCandidates = BASE_PATH_CANDIDATES;
 
   const readJsonFromZip = async (
@@ -224,11 +217,10 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
       fix: 'Make sure your Instagram export includes "Followers and following" data. Re-request if needed.',
     });
   } else if (followingFormatInvalid) {
-    // Loud failure beats an undetectable wrong answer: following.json was
-    // found but neither known shape matched, so following stays an empty Set
-    // and — unflagged — would make badge math (notFollowedBack) confidently
-    // wrong for every follower. Severity 'error' routes this to
-    // DiagnosticErrorScreen (see UploadZone's hasCriticalError gate).
+    // Loud failure beats an undetectable wrong answer: no known shape matched,
+    // so following stays an empty Set and — unflagged — would make badge math
+    // (notFollowedBack) confidently wrong for every follower. Severity 'error'
+    // routes this to DiagnosticErrorScreen (UploadZone's hasCriticalError).
     warnings.push({
       code: 'INVALID_FOLLOWING_FORMAT',
       message:
@@ -250,8 +242,7 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
   fileExpectations.push(followersParsed.fileExpectation);
 
   // === Parse Optional Files (delegated) ===
-  // Membership in following ∪ followers identifies a localised username label
-  // when value shape alone is ambiguous (GH#21, instagram-labels.ts).
+  // Membership breaks localised-username-label ties (GH#21, instagram-labels).
   const knownUsernames = new Set([...followingUsers, ...followersParsed.followersUsers]);
   const optionalParsed = await parseOptionalFiles(baseCandidates, readJsonFromZip, knownUsernames);
   warnings.push(...optionalParsed.warnings);
@@ -264,7 +255,6 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
     warnings.push(createCriticalError(analysis));
   }
 
-  // Create discovery object
   const discovery: FileDiscovery = {
     format,
     isInstagramExport: true,

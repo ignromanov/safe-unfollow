@@ -18,9 +18,15 @@ export function isValidUsername(username: string): boolean {
 /**
  * Normalize username to lowercase and trim whitespace
  * Returns null for empty, malformed, or invalid usernames
+ *
+ * Takes `unknown` because every caller feeds it a field straight out of parsed
+ * JSON, where the declared types are a hope rather than a guarantee. A number
+ * or object used to reach `.trim()` and throw, which failed the **whole
+ * upload** — the opposite of what this subsystem is for. An unrecognised shape
+ * must be counted and skipped, never fatal.
  */
-export function normalize(username: string | undefined | null): string | null {
-  if (!username) return null;
+export function normalize(username: unknown): string | null {
+  if (typeof username !== 'string') return null;
   const trimmed = username.trim().toLowerCase();
   if (!trimmed.length) return null;
   if (!isValidUsername(trimmed)) return null;

@@ -18,15 +18,18 @@
  * because reaching for the literal is the obvious first move when a
  * non-English fixture fails.
  *
- * Two further things the real archives teach:
+ * Two further notes:
  *
- * 1. Non-ASCII labels arrive **double-encoded** — the UTF-8 bytes of the label,
- *    each taken as a codepoint — so `JSON.parse` yields mojibake, not readable
- *    text. Irrelevant to the code below, which treats the label as an opaque
- *    key, and fatal to any approach that compares it to a written-out string.
- * 2. Scoring must pool the whole archive. `restricted_profiles.json` and
- *    `removed_suggestions.json` hold a single record each, where a display
- *    name and a username can both look like usernames and the margin vanishes.
+ * 1. Measured on both August archives: non-ASCII labels arrive
+ *    **double-encoded** — the UTF-8 bytes of the label, each taken as a
+ *    codepoint — so `JSON.parse` yields mojibake, not readable text.
+ *    Irrelevant to the code below, which treats the label as an opaque key,
+ *    and fatal to any approach that compares it to a written-out string.
+ * 2. Scoring pools the whole archive **defensively**. That is a judgement, not
+ *    a repair: measured per file, every optional file in both August archives
+ *    resolves standalone, including the two that hold a single record. Pooling
+ *    covers the case those files cannot survive — a display name that is
+ *    itself username-shaped, which leaves one record scoring 1/1 against 1/1.
  */
 
 import type { InstagramLabelValue, InstagramLabelValueEntry } from '@/core/types';
@@ -76,8 +79,8 @@ interface LabelTally {
 /**
  * Resolve which label holds the username, for one archive.
  *
- * Pass every entry from every relationship file at once — per-file resolution
- * fails on the single-record files (see the note above). Returns the label
+ * Pass every entry from every relationship file at once — a small file can be
+ * ambiguous on its own even though none on disk is (see note 2). Returns the label
  * spelled exactly as the archive spells it, padding and casing included, so
  * `resolveEntry` can match it without a second normalisation the two could
  * drift apart on.

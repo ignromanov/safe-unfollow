@@ -127,8 +127,10 @@ describe('resolveUsernameLabel', () => {
   describe('archive-wide pooling', () => {
     it('cannot resolve a single-entry file in isolation', () => {
       // restricted_profiles.json and removed_suggestions.json hold one record
-      // each in the real export. On one record a display name and a username
-      // can both look like usernames and the margin vanishes.
+      // each in the real export — and both resolve standalone there, because
+      // their display names are not username-shaped. This is the case they do
+      // NOT cover: one record where a display name is itself username-shaped,
+      // so the margin vanishes. Constructed, not observed.
       const lone = AMBIGUOUS_SINGLE_ENTRY(XX_USERNAME, XX_NAME);
       expect(resolveUsernameLabel([lone])).toBeNull();
     });
@@ -202,6 +204,30 @@ describe('resolveUsernameLabel', () => {
       expect(
         resolveUsernameLabel(pooled, { tiebreakEntries: pooled, knownUsernames: new Set() })
       ).toBeNull();
+    });
+
+    it('survives a non-string value instead of throwing', () => {
+      // The tiebreak reads raw JSON fields too. `tallyLabels` has always
+      // guarded this; here and in resolveEntry it was missing.
+      const pooled = [
+        entry([
+          [XX_NAME, 'sample_user_a'],
+          [XX_USERNAME, 'sample_user_p'],
+        ]),
+        { timestamp: 1_700_000_000, label_values: [{ label: XX_USERNAME, value: 42 }] },
+      ];
+      expect(() =>
+        resolveUsernameLabel(pooled, {
+          tiebreakEntries: pooled,
+          knownUsernames: new Set(['sample_user_p']),
+        })
+      ).not.toThrow();
+      expect(
+        resolveUsernameLabel(pooled, {
+          tiebreakEntries: pooled,
+          knownUsernames: new Set(['sample_user_p']),
+        })
+      ).toBe(XX_USERNAME);
     });
 
     it('never runs when scoring already produced a clear winner', () => {

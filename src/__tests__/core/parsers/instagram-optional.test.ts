@@ -112,10 +112,13 @@ describe('parseOptionalFiles format drift (GH#21)', () => {
 
   it('resolves a localised username label across files, not per file (GH#21 Task 1)', async () => {
     // The username label is localised, so it is inferred from how its values
-    // behave across the whole archive. restricted_profiles.json holds ONE
-    // record in the real export, where a display name and a username can both
-    // look like usernames — that file is only readable because the other five
-    // are pooled with it. Labels here are invented, values are invented.
+    // behave across the whole archive. This fixture builds the case pooling
+    // exists for: a single-record file whose display name is ITSELF
+    // username-shaped, so standalone it scores 1/1 against 1/1 and resolves
+    // nothing. (In both real August archives the single-record files do
+    // resolve standalone — their display names are not username-shaped. This
+    // is the defensive case, constructed, not observed.) Labels and values
+    // here are invented.
     const usernameLabel = 'Χρήστης';
     const nameLabel = 'Όνομα';
     const record = (username: string, name: string) => ({

@@ -48,10 +48,11 @@ type ReadJsonFromZip = (patterns: string[]) => Promise<{ data: unknown; path: st
  *
  * Reading and mapping are separate passes because the username label is
  * resolved from the whole archive at once, not per file — see
- * `instagram-labels.ts`. Mapping inside the read, as this module used to do,
- * makes the single-record files (`restricted_profiles.json`,
- * `removed_suggestions.json`) unreadable: one record carries no signal about
- * which label holds the username.
+ * `instagram-labels.ts`. Pooling is **defensive**, not a fix for a known
+ * failure: measured per file, all six optional files in both August archives
+ * resolve standalone, single-record ones included. It protects the case a
+ * small file cannot survive — a display name that is itself username-shaped,
+ * leaving one record scoring 1/1 against 1/1 with nothing to separate them.
  */
 interface ReadOptionalFile {
   found: boolean;

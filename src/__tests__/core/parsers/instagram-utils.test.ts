@@ -227,4 +227,25 @@ describe('resolveEntries', () => {
   it('returns an empty result for undefined', () => {
     expect(resolveEntries(undefined, null)).toEqual({ items: [], unresolved: 0 });
   });
+
+  /**
+   * A non-string where a username should be is an unrecognised shape, and this
+   * subsystem's rule for those is "count it and skip". Throwing would fail the
+   * entire upload over one bad field — turning a recoverable unknown shape into
+   * a total failure, which is exactly backwards.
+   */
+  it.each([
+    [
+      'label_values value',
+      { timestamp: 1_700_000_000, label_values: [{ label: 'Username', value: 123 }] },
+    ],
+    ['string_list_data value', { string_list_data: [{ href: 'h', value: 123 }] }],
+    ['title', { title: 123 }],
+    ['null value', { label_values: [{ label: 'Username', value: null }] }],
+    ['object value', { label_values: [{ label: 'Username', value: { nested: 'x' } }] }],
+  ])('counts a non-string %s as unresolved instead of throwing', (_label, entry) => {
+    expect(() => resolveEntry(entry, 'Username')).not.toThrow();
+    expect(resolveEntry(entry, 'Username')).toBeNull();
+    expect(resolveEntries([entry], 'Username')).toEqual({ items: [], unresolved: 1 });
+  });
 });
