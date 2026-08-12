@@ -94,8 +94,16 @@ export function PaywallModal({
             and on iOS Safari a blob download can be silent or blocked outright.
             Naming the file is what turns everything below from an assertion
             about something unseen into a claim the reader can go and check.
-            Muted and small on purpose: a receipt, not a second headline. */}
-        <p className="flex items-start gap-2 text-xs text-muted-foreground">
+            Muted and small on purpose: a receipt, not a second headline.
+
+            `pe-6` because this is the dialog's first child and its first line
+            shares a band with the close button, which sits `absolute top-4
+            end-4` and reaches 32px into the content box against a 24px inset.
+            Whether they collide is otherwise decided by how long the user's
+            filename happens to be — it cleared by 14px in the reference render
+            and would not on a narrower viewport. Logical, not `pr`, so Arabic
+            gets the same clearance on the other side. */}
+        <p className="flex items-start gap-2 pe-6 text-xs text-muted-foreground">
           <Check className="h-3.5 w-3.5 shrink-0 text-emerald-500 mt-0.5" />
           <span className="min-w-0 break-words">
             {t('export.saved.capped', {
