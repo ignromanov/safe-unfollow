@@ -5,17 +5,12 @@ import type {
   ParsedAll,
   ParseResult,
   ParseWarning,
-  RawItem,
 } from '@/core/types';
 import { BASE_PATH_CANDIDATES, FILE_SPECS } from './instagram-file-specs';
-import {
-  escapeRegExp,
-  extractUsernames,
-  resolveEntries,
-  resolveEntryList,
-} from './instagram-utils';
+import { escapeRegExp, extractUsernames } from './instagram-utils';
 import { analyzeZipStructure, createCriticalError } from './instagram-zip-analysis';
 import { parseFollowersFromZip } from './instagram-followers';
+import { parseFollowingPayload } from './instagram-following';
 import { parseOptionalFiles } from './instagram-optional';
 import { createEmptyParsedAll } from './instagram-validation';
 
@@ -35,33 +30,6 @@ export async function parseFollowingJson(jsonText: string): Promise<string[]> {
   if (!data.relationships_following)
     throw new Error('Invalid following.json: missing relationships_following');
   return extractUsernames(data.relationships_following);
-}
-
-/**
- * Interpret the top level of following.json.
- *
- * Shape resolution is delegated to `resolveEntryList` (GH#21): a bare array,
- * the `relationships_following` wrapper, or a single bare entry object. This
- * file hasn't been observed to drift into the last shape but shared the same
- * latent gap. `formatInvalid` is true only when none match; a genuinely empty
- * array is recognised and leaves it false — the entire point, since
- * `resolveEntries` yields no items either way and an unrecognised shape must
- * not be allowed to look like an empty file. No username label is passed:
- * following.json still uses `title`/`string_list_data` (`instagram-labels.ts`
- * has the scope seam). Extracted rather than inlined because the shape check
- * pushed `parseInstagramZipFile` past the complexity ceiling.
- */
-function interpretFollowingPayload(payload: unknown): {
-  raw: RawItem[];
-  formatInvalid: boolean;
-} {
-  if (payload === undefined) return { raw: [], formatInvalid: false };
-
-  const entries = resolveEntryList(payload, ['relationships_following']);
-
-  return entries !== null
-    ? { raw: resolveEntries(entries).items, formatInvalid: false }
-    : { raw: [], formatInvalid: true };
 }
 
 // === Main Parser ===
@@ -187,54 +155,10 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
   const followingFilePatterns = baseCandidates
     .map(b => `${b}/following.json`)
     .concat(['following.json']);
-  const followingResult = await readJsonFromZip(followingFilePatterns);
-  const { raw: followingRaw, formatInvalid: followingFormatInvalid } = interpretFollowingPayload(
-    followingResult?.data
-  );
-  const followingFound = followingResult !== null;
-  const followingPath = followingResult?.path;
-
-  const followingUsers = followingRaw.map(r => r.username);
-  const followingTimestamps = new Map(
-    followingRaw.map(r => [r.username, r.timestamp ?? 0] as const)
-  );
-
-  const followingSpec = FILE_SPECS[0]!;
-  fileExpectations.push({
-    name: 'following.json',
-    description: followingSpec.description,
-    required: true,
-    found: followingFound,
-    itemCount: followingUsers.length,
-    foundPath: followingPath,
-  });
-
-  if (!followingFound) {
-    warnings.push({
-      code: 'MISSING_FOLLOWING',
-      message: 'following.json not found — cannot detect who you follow.',
-      severity: 'warning',
-      fix: 'Make sure your Instagram export includes "Followers and following" data. Re-request if needed.',
-    });
-  } else if (followingFormatInvalid) {
-    // Loud failure beats an undetectable wrong answer: no known shape matched,
-    // so following stays an empty Set and — unflagged — would make badge math
-    // (notFollowedBack) confidently wrong for every follower. Severity 'error'
-    // routes this to DiagnosticErrorScreen (UploadZone's hasCriticalError).
-    warnings.push({
-      code: 'INVALID_FOLLOWING_FORMAT',
-      message:
-        'following.json was found, but its structure is not recognized — cannot detect who you follow.',
-      severity: 'error',
-      fix: 'Instagram may have changed their export format. Please report this issue so we can add support.',
-    });
-  } else if (followingUsers.length === 0) {
-    warnings.push({
-      code: 'EMPTY_FOLLOWING',
-      message: 'following.json is empty or contains no valid accounts.',
-      severity: 'info',
-    });
-  }
+  const followingParsed = parseFollowingPayload(await readJsonFromZip(followingFilePatterns));
+  const followingUsers = followingParsed.followingUsers;
+  warnings.push(...followingParsed.warnings);
+  fileExpectations.push(followingParsed.fileExpectation);
 
   // === Parse Followers (delegated) ===
   const followersParsed = await parseFollowersFromZip(zip, baseCandidates);
@@ -272,7 +196,7 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
       closeFriends: optionalParsed.closeFriendsResult.map,
       unfollowed: optionalParsed.unfollowedResult.map,
       dismissedSuggestions: optionalParsed.dismissedResult.map,
-      followingTimestamps,
+      followingTimestamps: followingParsed.followingTimestamps,
       followersTimestamps: followersParsed.followersTimestamps,
     },
     warnings,
