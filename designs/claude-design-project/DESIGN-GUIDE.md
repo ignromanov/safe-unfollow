@@ -22,7 +22,7 @@ Three pillars, from the project constitution:
 | Pillar | Meaning |
 |---|---|
 | Privacy-first | "We can't leak your data if we never have it." IndexedDB only, no telemetry on user data. |
-| Free forever | No subscription, no premium tier gating the core. MIT licensed, auditable. |
+| The analysis is free | Every badge, filter and account, at any export size. No subscription, no account, MIT licensed. The one paid thing is a $7 file — see the trust budget below. |
 | Performance at scale | 1M+ accounts, filter under 5ms, virtualized list at 60fps. |
 
 Slogan: *"The only unfollow tracker that works even if we shut down."*
@@ -71,7 +71,7 @@ plural for the project ("we value your trust", "we could not find this license k
 qualifier: *"Find out who unfollowed you on Instagram — free, no login required."*
 
 **The bullet separator is `•`**, used to chain trust claims:
-`Completely Free • Forever` · `No Password • No Account Risk` · `100% Private • Local Analysis`
+`Free Analysis • No Limits` · `No Password • No Account Risk` · `100% Private • Local Analysis`
 and to join metadata: `sample-data.json • 8,930 Total`.
 
 **Numbers are the argument.** Real figures appear everywhere and are always locale-formatted:
@@ -89,9 +89,15 @@ effect and never invent one.
 Check the key in your purchase email."* No "Oops", no "Something went wrong", no exclamation
 marks outside the one deliberate wizard warning (*"Critical step!"*).
 
-**Money copy is disarming, never pressuring**: *"This tool has no ads and no investors."* ·
-*"You analyzed 8,930 accounts. It was free."* · *"If this saved you time, a coffee keeps it going."*
-Dismissals are gentle: *Not now*, *Maybe later*.
+**Money copy is disarming, never pressuring**: *"You analyzed 8,930 accounts. It was free."* ·
+*"If this saved you time, a coffee keeps it going."* · *"Ads and the odd recommendation keep
+this running — your export is never part of it."* Dismissals are gentle: *Not now*, *Maybe later*.
+
+⚠ This line used to open with *"This tool has no ads and no investors."* It was true when it
+was written and has been false since 2026-07-27, which is exactly why it is quoted here rather
+than deleted: it is the shape to avoid, not a phrasing preference. What survives the change is
+the narrow claim — the export never leaves the browser, so no ad, network or processor can be
+targeting it — and that is stronger than the blanket one because it is still true.
 
 **No emoji in product UI.** (Emoji appear in internal docs only.) No exclamation-heavy hype,
 no fake urgency in the core flow — the one urgency line lives in the affiliate rescue banner
@@ -133,9 +139,17 @@ hero, OG image, docs, meta description:
 | "Works with your Instagram ZIP file" | Names the safe, official method |
 | "Handles 1,000,000+ accounts" | The influencer segment's hard requirement |
 | "100% local, private" | The core differentiator |
-| "Free forever, open source" | Trust through auditability |
+| "Free analysis, open source" | Trust through auditability |
 
 They are stated as facts and never softened into adjectives (*"blazing fast"*, *"secure"*).
+
+⚠ The fifth one used to read *"Free forever"* and must not be written that way again. Since
+2026-07-27 the product carries ads, one affiliate placement and a $7 export unlock, so an
+unqualified *free* is false — and `src/__tests__/docs/monetization-claims.test.ts` bans that
+shape of claim in the docs. That guard reads Markdown, not generated designs: nothing will
+turn red if a design ships the sentence. The narrow claim is the true one and the one that
+does the work anyway — *the analysis is free*, and *the Instagram export never leaves the
+browser*.
 
 **The biggest known UX failure is a copy problem**: 26% of uploads fail, and 48% of those are
 users who picked HTML instead of JSON in Meta's export dialog. That is why step 6 of the guide
