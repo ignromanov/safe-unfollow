@@ -31,17 +31,25 @@ export interface FileSpec {
    */
   entryDriftCode?: string;
   /**
-   * True when appearing in this file implies the account is **currently** in
+   * True when this file's entries are worth scoring against
    * `following ∪ followers`. Used only by the membership tiebreak in
    * `instagram-labels.ts`, to identify a localised username label when value
-   * shape alone cannot.
+   * shape alone cannot: the label whose values hit that set is the username.
    *
-   * `recently_unfollowed.json` is the one that looks eligible and is not: an
-   * account you unfollowed is by definition gone from `following.json`, and if
-   * it never followed you it is in neither set. Measured against the real
-   * exports, its correct label matched 0 of 2 (English) and 0 of 22 (Russian).
-   * Pending and permanent follow requests are excluded for the same reason —
-   * the request was never accepted.
+   * The flag selects files that can only *add* hits, never mislead. Restricted
+   * profiles and close friends are accounts you follow, so they hit. Dismissed
+   * suggestions are **not** — by construction you do not follow them — and are
+   * flagged anyway because they contribute few or no hits either way while
+   * being entries in the drifted shape. Membership is not implied there; the
+   * scoring simply survives their absence from the set.
+   *
+   * What the flag must keep out is a file whose entries score the *correct*
+   * label to zero while noise scores above it. `recently_unfollowed.json` is
+   * exactly that: an account you unfollowed is by definition gone from
+   * `following.json`, and measured against the real exports its correct label
+   * matched 0 of 2 (English) and 0 of 22 (Russian) — enough volume to bury the
+   * signal. Pending and permanent follow requests are excluded for the same
+   * reason; the request was never accepted.
    */
   impliesKnownAccount?: boolean;
 }

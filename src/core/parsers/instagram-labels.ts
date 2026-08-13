@@ -58,11 +58,28 @@ const MIN_WINNER_RATE = 0.9;
  */
 const MIN_RUNNER_UP_RATIO = 2;
 
+/**
+ * ...and may only rank at all once it carries this share of the best-covered
+ * label's scorable values. The username is written on every record — it is
+ * what identifies the account — so a label populated on a fraction of the pool
+ * cannot be it, and must not be allowed to tie with it. Without this floor a
+ * `URL` label holding two link-in-bio values scores a perfect 2/2, ties the
+ * true winner's 47/47, fails `MIN_RUNNER_UP_RATIO` and returns `null` for the
+ * **whole archive**, including the two files that feed `notFollowingBack`.
+ * `normalize` accepts a bare domain, so that input is reachable.
+ *
+ * Relative, with no absolute minimum: an absolute floor would refuse an
+ * archive whose six optional files hold two records between them — the same
+ * silent collapse in a smaller place. Half is the widest cut that still leaves
+ * two equally populated labels tied, which is the ambiguity this must refuse.
+ */
+const MIN_POOL_COVERAGE = 0.5;
+
 export interface LabelResolutionContext {
   /**
-   * Entries from the files where listing an account implies it is currently in
-   * `following ∪ followers` (`FileSpec.impliesKnownAccount`). A subset of the
-   * scoring pool, and deliberately not all of it.
+   * Entries from the files flagged `FileSpec.impliesKnownAccount` — those
+   * whose accounts can hit `following ∪ followers` without scoring the correct
+   * label to zero. A subset of the scoring pool, deliberately not all of it.
    */
   tiebreakEntries?: readonly unknown[];
   /**
@@ -184,8 +201,11 @@ function tallyLabels(entries: readonly unknown[]): Map<string, LabelTally> {
  * accounts.
  */
 function pickWinner(tallies: ReadonlyMap<string, LabelTally>): string | null {
+  const maxScored = Math.max(0, ...[...tallies.values()].map(tally => tally.scored));
+  const minScored = maxScored * MIN_POOL_COVERAGE;
+
   const ranked = [...tallies]
-    .filter(([, tally]) => tally.scored > 0)
+    .filter(([, tally]) => tally.scored > 0 && tally.scored >= minScored)
     .map(([label, tally]) => ({ label, rate: tally.valid / tally.scored }))
     .sort((left, right) => right.rate - left.rate);
 

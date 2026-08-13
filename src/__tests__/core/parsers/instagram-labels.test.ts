@@ -246,6 +246,42 @@ describe('resolveUsernameLabel', () => {
     });
   });
 
+  /**
+   * A perfect rate on two values is not evidence. The username label is on
+   * every record; a label on a handful of them cannot be it, and before the
+   * coverage floor such a label tied the true winner and collapsed the
+   * resolution for the **whole archive** — all six optional files at once,
+   * including the two that feed `notFollowingBack`.
+   */
+  describe('minimum pool coverage', () => {
+    it('resolves despite a sparse label scoring a perfect rate on two values', () => {
+      // `URL` is empty on every profile without a bio link, and `normalize`
+      // accepts a bare domain — so two link-in-bio values score 2/2 against
+      // the username label's 10/10.
+      const pooled = Array.from({ length: 10 }, (_unused, index) =>
+        entry([
+          ['URL', index < 2 ? 'example.link' : ''],
+          [XX_NAME, 'A Display Name'],
+          [XX_USERNAME, `sample_user_u${index}`],
+        ])
+      );
+      expect(resolveUsernameLabel(pooled)).toBe(XX_USERNAME);
+    });
+
+    it('still lets a label covering half the pool block the resolution', () => {
+      // The floor prunes sparse labels only. Half is the boundary, and a rival
+      // populated that widely is a genuine ambiguity that must still refuse —
+      // as must the equally populated pair in `ARRAY_UNREADABLE_ENTRIES`.
+      const pooled = Array.from({ length: 10 }, (_unused, index) =>
+        entry([
+          [XX_NAME, index < 5 ? `sample_user_n${index}` : ''],
+          [XX_USERNAME, `sample_user_u${index}`],
+        ])
+      );
+      expect(resolveUsernameLabel(pooled)).toBeNull();
+    });
+  });
+
   describe('refuses to guess', () => {
     it('returns null when two labels both score 100%', () => {
       const pooled = [
