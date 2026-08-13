@@ -3,6 +3,7 @@ import { LicenseDialogMount } from '@/components/export/LicenseDialogMount';
 import type { FileMetadata } from '@/core/types';
 import { AppState } from '@/core/types';
 import resultsEN from '@/locales/en/results.json';
+import { useAppStore } from '@/lib/store';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -336,18 +337,21 @@ describe('Layout', () => {
   });
 
   describe('header hasData prop', () => {
-    it('should pass hasData as false when no data uploaded', () => {
-      mockUseInstagramData.uploadState.status = 'idle';
-      mockUseInstagramData.fileMetadata = null;
+    // hasResults (Header's hasData) is now sourced from useAppStore via useHasResults,
+    // not from the mocked useInstagramData — the mock above is unrelated to it after the
+    // pre-hydration-flip fix, so these tests drive the real store instead.
+    beforeEach(() => {
+      useAppStore.setState({ uploadStatus: 'idle', fileMetadata: null });
+    });
 
+    it('should pass hasData as false when no data uploaded', () => {
       renderLayout();
 
       expect(screen.getByText('Header - hasData: false')).toBeInTheDocument();
     });
 
     it('should pass hasData as false when upload is loading', () => {
-      mockUseInstagramData.uploadState.status = 'loading';
-      mockUseInstagramData.fileMetadata = null;
+      useAppStore.setState({ uploadStatus: 'loading', fileMetadata: null });
 
       renderLayout();
 
@@ -355,8 +359,7 @@ describe('Layout', () => {
     });
 
     it('should pass hasData as false when upload has error', () => {
-      mockUseInstagramData.uploadState.status = 'error';
-      mockUseInstagramData.fileMetadata = null;
+      useAppStore.setState({ uploadStatus: 'error', fileMetadata: null });
 
       renderLayout();
 
@@ -364,13 +367,16 @@ describe('Layout', () => {
     });
 
     it('should pass hasData as true when upload is successful and has metadata', () => {
-      mockUseInstagramData.uploadState.status = 'success';
-      mockUseInstagramData.fileMetadata = {
-        hash: 'abc123',
-        fileName: 'test.zip',
-        uploadedAt: Date.now(),
-        accountCount: 100,
-      };
+      useAppStore.setState({
+        uploadStatus: 'success',
+        fileMetadata: {
+          name: 'test.zip',
+          size: 1,
+          uploadDate: new Date(),
+          fileHash: 'abc123',
+          accountCount: 100,
+        },
+      });
 
       renderLayout();
 
@@ -378,8 +384,7 @@ describe('Layout', () => {
     });
 
     it('should pass hasData as false when status is success but no metadata', () => {
-      mockUseInstagramData.uploadState.status = 'success';
-      mockUseInstagramData.fileMetadata = null;
+      useAppStore.setState({ uploadStatus: 'success', fileMetadata: null });
 
       renderLayout();
 

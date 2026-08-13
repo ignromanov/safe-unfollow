@@ -11,6 +11,7 @@ import { Header } from '@/components/Header';
 import { OrganizationSchema } from '@/components/OrganizationSchema';
 import { ThemeProvider } from '@/components/theme-provider';
 import { useEventQueueFlush } from '@/hooks/useEventQueueFlush';
+import { useHasResults } from '@/hooks/useHasResults';
 import { useInstagramData } from '@/hooks/useInstagramData';
 import { useLanguageFromPath } from '@/hooks/useLanguageFromPath';
 import { useLanguageRedirect } from '@/hooks/useLanguageRedirect';
@@ -40,7 +41,7 @@ interface LayoutProps {
  * - Structured data (SEO)
  */
 export function Layout({ lang }: LayoutProps) {
-  const { uploadState, handleClearData, fileMetadata } = useInstagramData();
+  const { handleClearData } = useInstagramData();
 
   // Extracted hooks
   const {
@@ -52,7 +53,7 @@ export function Layout({ lang }: LayoutProps) {
     handleLogoClick,
     handleClear,
   } = useLayoutNavigation();
-  const { mounted } = useLayoutState(pathname);
+  useLayoutState(pathname);
 
   // Analytics (UTM capture, page view, PWA install)
   useLayoutAnalytics();
@@ -113,9 +114,7 @@ export function Layout({ lang }: LayoutProps) {
   // Determine text direction for RTL languages (Arabic, etc.)
   const isRTL = lang ? RTL_LANGUAGES.includes(lang) : false;
 
-  // Guard with mounted to prevent hydration mismatch
-  // SSG renders with hasResults=false, client updates after mount
-  const hasResults = mounted && uploadState.status === 'success' && fileMetadata !== null;
+  const hasResults = useHasResults();
 
   return (
     <ErrorBoundary>
