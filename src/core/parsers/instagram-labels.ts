@@ -32,7 +32,11 @@
  *    itself username-shaped, which leaves one record scoring 1/1 against 1/1.
  */
 
-import type { InstagramLabelValue, InstagramLabelValueEntry } from '@/core/types';
+import type {
+  InstagramLabelValue,
+  InstagramLabelValueEntry,
+  LabelResolutionMode,
+} from '@/core/types';
 import { normalize } from './instagram-utils';
 
 /**
@@ -100,16 +104,53 @@ export function resolveUsernameLabel(
   entries: readonly unknown[],
   context: LabelResolutionContext = {}
 ): string | null {
+  return resolveUsernameLabelWithMode(entries, context).label;
+}
+
+/** `resolveUsernameLabel`'s result, plus how it got there. */
+export interface LabelResolutionResult {
+  label: string | null;
+  mode: LabelResolutionMode;
+}
+
+/**
+ * Same resolution as `resolveUsernameLabel`, plus the mode that produced it
+ * (GH#21 Task 5) — the signal `useFileUpload` reports to telemetry as
+ * `usernameLabelResolution`. A separate export rather than widening
+ * `resolveUsernameLabel`'s return type: that function's tests and its one
+ * caller in `instagram-utils.ts`'s doc comments assume a plain
+ * `string | null`, and every other call site of the label-only form stays
+ * unaffected by this addition.
+ *
+ * `not-applicable` vs `unresolved` is read off `tallies`, not off `entries`
+ * directly: `tallyLabels` already discards non-object entries and pairs whose
+ * `label` isn't a string, so an empty `tallies` map means no entry anywhere
+ * in the pool carried a recognizable `label_values` pair — the honest
+ * "nothing to resolve" case — while a non-empty map with no winner means
+ * labels existed and genuinely tied or missed the threshold.
+ */
+export function resolveUsernameLabelWithMode(
+  entries: readonly unknown[],
+  context: LabelResolutionContext = {}
+): LabelResolutionResult {
   const tallies = tallyLabels(entries);
 
   for (const label of tallies.keys()) {
-    if (label.trim().toLowerCase() === USERNAME_LABEL_FAST_PATH) return label;
+    if (label.trim().toLowerCase() === USERNAME_LABEL_FAST_PATH) {
+      return { label, mode: 'fast-path' };
+    }
   }
 
   const scored = pickWinner(tallies);
-  if (scored !== null) return scored;
+  if (scored !== null) return { label: scored, mode: 'inferred' };
 
-  return pickByMembership(context.tiebreakEntries ?? [], context.knownUsernames ?? new Set());
+  const tiebreak = pickByMembership(
+    context.tiebreakEntries ?? [],
+    context.knownUsernames ?? new Set()
+  );
+  if (tiebreak !== null) return { label: tiebreak, mode: 'inferred' };
+
+  return { label: null, mode: tallies.size === 0 ? 'not-applicable' : 'unresolved' };
 }
 
 /** Count, per label, how many of its non-empty values look like usernames. */

@@ -3,9 +3,9 @@
  * Handles parsing of optional relationship files (pending, restricted, close friends, etc.)
  */
 
-import type { FileExpectation, ParseWarning } from '@/core/types';
+import type { FileExpectation, LabelResolutionMode, ParseWarning } from '@/core/types';
 import { FILE_SPECS, PERMANENT_REQUESTS_SPEC, type FileSpec } from './instagram-file-specs';
-import { resolveUsernameLabel } from './instagram-labels';
+import { resolveUsernameLabelWithMode } from './instagram-labels';
 import {
   UNREADABLE_ENTRIES_FIX,
   describeUnreadableEntries,
@@ -43,6 +43,8 @@ export interface OptionalFilesParsed {
   dismissedResult: OptionalFileResult;
   fileExpectations: FileExpectation[];
   warnings: ParseWarning[];
+  /** How the username label was resolved for this archive (GH#21 Task 5). */
+  labelResolutionMode: LabelResolutionMode;
 }
 
 type ReadJsonFromZip = (patterns: string[]) => Promise<{ data: unknown; path: string } | null>;
@@ -160,7 +162,7 @@ export async function parseOptionalFiles(
   // with a different label set. It stays out as a consequence of not being in
   // FILE_SPECS, not because anything filters it — adding it to the specs for
   // some unrelated reason would silently drag it in here too.
-  const usernameLabel = resolveUsernameLabel(
+  const { label: usernameLabel, mode: labelResolutionMode } = resolveUsernameLabelWithMode(
     readFiles.flatMap(file => file.entries ?? []),
     {
       tiebreakEntries: readFiles.flatMap((file, index) =>
@@ -244,5 +246,6 @@ export async function parseOptionalFiles(
     dismissedResult,
     fileExpectations,
     warnings,
+    labelResolutionMode,
   };
 }

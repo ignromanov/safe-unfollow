@@ -57,6 +57,7 @@ self.onmessage = async (
         error: errorWarning?.message ?? 'Could not parse Instagram data',
         warnings: parseResult.warnings,
         discovery: parseResult.discovery,
+        labelResolutionMode: parseResult.labelResolutionMode,
       });
       return;
     }
@@ -122,6 +123,7 @@ self.onmessage = async (
       accountCount: unified.length,
       warnings: parseResult.warnings,
       discovery: parseResult.discovery,
+      labelResolutionMode: parseResult.labelResolutionMode,
     });
   } catch (error) {
     // Send error result with classified code

@@ -21,6 +21,24 @@ export interface FileMetadata {
 /** Severity of a parse warning */
 export type ParseWarningSeverity = 'info' | 'warning' | 'error';
 
+/**
+ * How the localised username label was resolved for one parse (GH#21 Task 5).
+ * `instagram-labels.ts` decides this once per parse, pooled across every
+ * optional relationship file present in the archive — see
+ * `resolveUsernameLabelWithMode`.
+ *
+ * - `fast-path`: the literal label `username` (case/whitespace-insensitive)
+ *   matched — the common case for an English-language export.
+ * - `inferred`: no label was literally `username`, but archive-wide scoring
+ *   (or its membership tiebreak) picked a clear winner.
+ * - `unresolved`: `label_values` entries were present but no label won.
+ *   A rise in this across many parses at once is the earliest signal that
+ *   Instagram changed the record shape again — one archive alone is not.
+ * - `not-applicable`: no `label_values` entry existed anywhere in the
+ *   archive, so there was nothing to resolve.
+ */
+export type LabelResolutionMode = 'fast-path' | 'inferred' | 'unresolved' | 'not-applicable';
+
 /** Warning about missing or malformed data during parsing */
 export interface ParseWarning {
   /** Warning code for programmatic handling */
@@ -95,6 +113,8 @@ export interface ParseResult {
   discovery: FileDiscovery;
   /** Whether we have enough data for meaningful analysis */
   hasMinimalData: boolean;
+  /** How the username label was resolved for this parse (GH#21 Task 5). */
+  labelResolutionMode: LabelResolutionMode;
 }
 
 /**

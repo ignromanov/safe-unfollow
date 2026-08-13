@@ -8,6 +8,7 @@ import {
   NULL_PAYLOAD,
   UNKNOWN_TOP_LEVEL_KEY,
   VALID_ARRAY_OF_ONE,
+  labelValuesEntry,
   makeEntry,
   objectInsteadOfArray,
 } from '../../fixtures/instagram-format-drift';
@@ -429,5 +430,32 @@ describe('parseOptionalFiles entry-level drift (GH#21 Task 3)', () => {
     expect(absent?.found).toBe(false);
     expect(absent?.unreadableItemCount).toBe(0);
     expect(absent?.formatUnreadable).toBe(false);
+  });
+});
+
+/**
+ * GH#21 Task 5: `parseOptionalFiles` now surfaces how the username label was
+ * resolved for the archive it just read, so a caller can report it without
+ * recomputing anything. `resolveUsernameLabelWithMode` itself is exercised
+ * exhaustively in `instagram-labels.test.ts`; these tests only pin that the
+ * field reaches `OptionalFilesParsed` correctly.
+ */
+describe('parseOptionalFiles labelResolutionMode (GH#21 Task 5)', () => {
+  it('is not-applicable when no optional file is found at all', async () => {
+    const result = await parseOptionalFiles([], vi.fn().mockResolvedValue(null));
+    expect(result.labelResolutionMode).toBe('not-applicable');
+  });
+
+  it('is not-applicable when the only file present carries the classic shape, not label_values', async () => {
+    const reader = makeReader(VALID_ARRAY_OF_ONE, pendingSpec.fileNames[0]!);
+    const result = await parseOptionalFiles([], reader);
+    expect(result.labelResolutionMode).toBe('not-applicable');
+  });
+
+  it('is fast-path when a label_values entry uses the literal username label', async () => {
+    const closeFriendsFile = FILE_SPECS[4]!.fileNames[0]!;
+    const reader = makeReader([labelValuesEntry('sample_user_a')], closeFriendsFile);
+    const result = await parseOptionalFiles([], reader);
+    expect(result.labelResolutionMode).toBe('fast-path');
   });
 });

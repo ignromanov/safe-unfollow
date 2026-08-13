@@ -172,6 +172,15 @@ export const AnalyticsEvents = {
   // Rare/diagnostic, not high-volume — delivered immediately (trackEvent),
   // not batched like impressions.
   OPTIONAL_FILE_FORMAT_DRIFT: 'optional_file_format_drift',
+
+  // GH#21 Task 5: how the localised username label was resolved for this
+  // parse (LabelResolutionMode in core/types/upload.ts). One field, fires
+  // once per parse, always — including a clean parse, unlike the drift event
+  // above. ALARM: a rise in `unresolved` across many uploads at once, in the
+  // same window as a rise in the entry-level drift codes above, is Instagram
+  // having changed the record shape again. One archive reporting
+  // `not-applicable` (it carries none of the six optional files) is not.
+  USERNAME_LABEL_RESOLUTION: 'username_label_resolution',
 } as const;
 
 export type AnalyticsEventName = (typeof AnalyticsEvents)[keyof typeof AnalyticsEvents];

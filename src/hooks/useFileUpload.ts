@@ -1,5 +1,5 @@
 import { OPTIONAL_FILE_DRIFT_CODES } from '@/core/parsers/instagram-file-specs';
-import type { FileDiscovery, ParseWarning } from '@/core/types';
+import type { FileDiscovery, LabelResolutionMode, ParseWarning } from '@/core/types';
 import { analytics } from '@/lib/analytics';
 import type { ParseOutcome } from '@/lib/analytics';
 import { extractErrorCode } from '@/lib/error-classifier';
@@ -43,6 +43,18 @@ function reportOptionalFileDrift(warnings: ParseWarning[] | undefined): void {
       analytics.optionalFileFormatDrift(warning.code);
     }
   }
+}
+
+/**
+ * Report how this parse resolved the localised username label (GH#21 Task 5).
+ * `mode` is `undefined` only when nothing was parsed this call — a genuine
+ * exception thrown before `parseInstagramZipFile` ever ran (e.g. the worker's
+ * own IndexedDB-quota branch, which never posts `labelResolutionMode`) — and
+ * silently no-ops rather than reporting a fabricated mode.
+ */
+function reportUsernameLabelResolution(mode: LabelResolutionMode | undefined): void {
+  if (!mode) return;
+  analytics.usernameLabelResolution(mode);
 }
 
 /**
@@ -233,6 +245,7 @@ export function useFileUpload() {
               });
             }
             reportOptionalFileDrift(result.warnings);
+            reportUsernameLabelResolution(result.labelResolutionMode);
           } catch (error) {
             // Extract warnings/discovery from error if available
             if (error instanceof Error && 'warnings' in error) {
@@ -243,6 +256,9 @@ export function useFileUpload() {
                   .discovery,
               });
               reportOptionalFileDrift(failureWarnings);
+              reportUsernameLabelResolution(
+                (error as { labelResolutionMode?: LabelResolutionMode }).labelResolutionMode
+              );
             }
             throw error;
           }
@@ -263,6 +279,7 @@ export function useFileUpload() {
             fileDiscovery: result.discovery,
           });
           reportOptionalFileDrift(result.warnings);
+          reportUsernameLabelResolution(result.labelResolutionMode);
         }
 
         // Data already cached in IndexedDB by worker during chunked processing

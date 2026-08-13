@@ -3,7 +3,10 @@ import { resolve } from 'node:path';
 
 import { describe, it, expect } from 'vitest';
 
-import { resolveUsernameLabel } from '@/core/parsers/instagram-labels';
+import {
+  resolveUsernameLabel,
+  resolveUsernameLabelWithMode,
+} from '@/core/parsers/instagram-labels';
 
 /**
  * GH#21, Task 1. The 2026-08 export names the username field with a
@@ -299,6 +302,76 @@ describe('resolveUsernameLabel', () => {
       );
       expect(resolveUsernameLabel(pooled)).toBe(XX_USERNAME);
     });
+  });
+});
+
+/**
+ * GH#21, Task 5. `resolveUsernameLabelWithMode` is the same resolution as
+ * `resolveUsernameLabel` above, plus a record of *how* it got there — the
+ * signal `useFileUpload` reports to telemetry as `usernameLabelResolution`.
+ * These tests exercise each of the four modes directly rather than through
+ * `resolveUsernameLabel`'s string-only return, which cannot distinguish them.
+ */
+describe('resolveUsernameLabelWithMode', () => {
+  it('reports fast-path when the literal `username` label matches', () => {
+    expect(resolveUsernameLabelWithMode(archive('Username', 'Name'))).toEqual({
+      label: 'Username',
+      mode: 'fast-path',
+    });
+  });
+
+  it('reports inferred when archive-wide scoring picks a clear winner', () => {
+    expect(resolveUsernameLabelWithMode(archive(RU_USERNAME, RU_NAME))).toEqual({
+      label: RU_USERNAME,
+      mode: 'inferred',
+    });
+  });
+
+  it('reports inferred when the membership tiebreak decides, not just scoring', () => {
+    const pooled = [
+      entry([
+        [XX_NAME, 'sample_user_a'],
+        [XX_USERNAME, 'sample_user_p'],
+      ]),
+      entry([
+        [XX_NAME, 'sample_user_b'],
+        [XX_USERNAME, 'sample_user_q'],
+      ]),
+    ];
+    expect(
+      resolveUsernameLabelWithMode(pooled, {
+        tiebreakEntries: pooled,
+        knownUsernames: new Set(['sample_user_p', 'sample_user_q']),
+      })
+    ).toEqual({ label: XX_USERNAME, mode: 'inferred' });
+  });
+
+  it('reports unresolved when label_values entries exist but no label wins', () => {
+    // Same ambiguous pool `resolveUsernameLabel` returns null for above — the
+    // point here is that null alone cannot tell this apart from an archive
+    // with no label_values at all, and the mode must.
+    const pooled = [
+      entry([
+        [XX_NAME, 'sample_user_a'],
+        [XX_USERNAME, 'sample_user_b'],
+      ]),
+      entry([
+        [XX_NAME, 'sample_user_c'],
+        [XX_USERNAME, 'sample_user_d'],
+      ]),
+    ];
+    expect(resolveUsernameLabelWithMode(pooled)).toEqual({ label: null, mode: 'unresolved' });
+  });
+
+  it('reports not-applicable when no entry carries label_values at all', () => {
+    expect(resolveUsernameLabelWithMode([{ title: 'sample_user_a' }, {}, null, 42])).toEqual({
+      label: null,
+      mode: 'not-applicable',
+    });
+  });
+
+  it('reports not-applicable for an empty pool', () => {
+    expect(resolveUsernameLabelWithMode([])).toEqual({ label: null, mode: 'not-applicable' });
   });
 });
 
