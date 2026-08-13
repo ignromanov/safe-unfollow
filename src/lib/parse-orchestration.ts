@@ -5,7 +5,6 @@
 
 import type { FileDiscovery, ParseWarning } from '@/core/types';
 import { buildAccountBadgeIndex } from '@/core/badges';
-import { parseInstagramZipFile } from '@/core/parsers/instagram';
 import { indexedDBService } from './indexeddb/indexeddb-service';
 import { logger } from './logger';
 
@@ -104,6 +103,12 @@ export async function parseOnMainThread(
 ): Promise<ParseResult> {
   logger.warn('[Upload] Worker not available, falling back to main thread parsing');
   logger.warn('[Upload] This will be slower for large files!');
+
+  // Static at module scope, this dragged JSZip (~96 KB) into the entry bundle of all 80
+  // prerendered pages, because parseWithWorker lives in this same module and IS statically
+  // reachable from Layout. Dynamic-importing the *call site* in useFileUpload would not
+  // have helped, for exactly that reason.
+  const { parseInstagramZipFile } = await import('@/core/parsers/instagram');
 
   const parseResult = await parseInstagramZipFile(file);
 

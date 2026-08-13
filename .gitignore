@@ -136,3 +136,6 @@ umami-backup-*.sql.gz
 
 # Retention script must ship despite the scripts/ ignore above (CI runs it)
 !scripts/umami-retention.sql
+
+# Entry-bundle budget guard must ship despite the scripts/ ignore above (npm run perf:budget)
+!scripts/assert-entry-budget.mjs

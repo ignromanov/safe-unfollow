@@ -54,6 +54,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "code:check": "npm run lint:strict && npm run type-check",
+    "perf:budget": "node scripts/assert-entry-budget.mjs 423240",
     "prepare": "husky"
   },
   "lint-staged": {
