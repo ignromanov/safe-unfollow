@@ -164,14 +164,9 @@ export async function loadLanguage(lang: SupportedLanguage): Promise<void> {
     const resources = await loadLanguageResources(lang);
 
     // Add resources to i18next
-    i18n.addResourceBundle(lang, 'common', resources.common);
-    i18n.addResourceBundle(lang, 'hero', resources.hero);
-    i18n.addResourceBundle(lang, 'wizard', resources.wizard);
-    i18n.addResourceBundle(lang, 'upload', resources.upload);
-    i18n.addResourceBundle(lang, 'results', resources.results);
-    i18n.addResourceBundle(lang, 'faq', resources.faq);
-    i18n.addResourceBundle(lang, 'howto', resources.howto);
-    i18n.addResourceBundle(lang, 'meta', resources.meta);
+    for (const ns of I18N_NAMESPACES) {
+      i18n.addResourceBundle(lang, ns, resources[ns]);
+    }
 
     await i18n.changeLanguage(lang);
   } catch (error) {
