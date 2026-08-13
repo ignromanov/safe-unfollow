@@ -415,5 +415,19 @@ describe('parseOptionalFiles entry-level drift (GH#21 Task 3)', () => {
     expect(unreadableEntries?.formatUnreadable).toBe(false);
 
     expect(unreadableShape?.formatUnreadable).toBe(true);
+    // Pins what the docblock on FileExpectation.unreadableItemCount claims: a
+    // number is always written, and 0 does NOT mean "nothing was wrong" — an
+    // unrecognized top level leaves nothing to count. A renderer needs both
+    // fields. The doc previously promised `undefined` here, which no producer
+    // ever wrote.
+    expect(unreadableShape?.unreadableItemCount).toBe(0);
+
+    const absent = await (async () => {
+      const result = await parseOptionalFiles([], vi.fn().mockResolvedValue(null));
+      return result.fileExpectations.find(f => f.name === closeFriendsSpec.name);
+    })();
+    expect(absent?.found).toBe(false);
+    expect(absent?.unreadableItemCount).toBe(0);
+    expect(absent?.formatUnreadable).toBe(false);
   });
 });

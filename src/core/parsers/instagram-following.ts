@@ -41,6 +41,14 @@ export interface FollowingParsed {
    * would eventually check one. Which failure it was stays visible in the
    * warning code and in `FileExpectation`; what is collapsed here is only the
    * decision, not the diagnosis.
+   *
+   * **Derived from the warnings**, not computed alongside them: it is exactly
+   * "this file produced an error-severity warning". Both consumers of
+   * `hasMinimalData` take the FIRST error-severity warning as the diagnostic
+   * code, and this task removed the unconditional `createCriticalError` that
+   * used to guarantee one existed — so `unreadable` without an error warning
+   * would be a silent dead end on the most critical path. Defining one in terms
+   * of the other makes that state unreachable rather than merely absent today.
    */
   unreadable: boolean;
 }
@@ -87,9 +95,7 @@ export function parseFollowingPayload(
   const { raw, formatInvalid, unresolved } = interpretFollowingPayload(readResult?.data);
   const followingFound = readResult !== null;
   const followingUsers = raw.map(r => r.username);
-  // `formatInvalid` is false for an absent file, so "missing" never lands here.
   const nothingRead = followingUsers.length === 0;
-  const unreadable = formatInvalid || (nothingRead && unresolved > 0);
 
   const fileExpectation: FileExpectation = {
     name: 'following.json',
@@ -146,6 +152,9 @@ export function parseFollowingPayload(
     followingTimestamps: new Map(raw.map(r => [r.username, r.timestamp ?? 0] as const)),
     warnings,
     fileExpectation,
-    unreadable,
+    // Derived, so it cannot disagree with what we told the reader. An absent
+    // file yields MISSING_FOLLOWING at severity 'warning' and so is not
+    // unreadable — "missing" and "present but unintelligible" stay apart.
+    unreadable: warnings.some(w => w.severity === 'error'),
   };
 }

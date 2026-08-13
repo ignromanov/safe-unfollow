@@ -790,6 +790,30 @@ describe('Instagram Parser', () => {
       expect(emptyFollowers.warnings.find(w => w.severity === 'error')).toBeUndefined();
     });
 
+    // `hasMinimalData: false` with no error-severity warning is a silent dead
+    // end on the most critical path: parse-worker.ts:51 and
+    // parse-orchestration.ts:115 both take the FIRST error warning as the
+    // diagnostic code, and this task deliberately removed the unconditional
+    // createCriticalError that used to guarantee one existed. Nothing else
+    // enforces the implication, so this does.
+    it.each([
+      ['following wrapper unrecognised', UNKNOWN_TOP_LEVEL_KEY, VALID_ARRAY_OF_ONE],
+      ['following records unreadable', [{ media_list_data: [] }], VALID_ARRAY_OF_ONE],
+      ['followers wrapper unrecognised', VALID_ARRAY_OF_ONE, UNKNOWN_TOP_LEVEL_KEY],
+      ['followers records unreadable', VALID_ARRAY_OF_ONE, [{ media_list_data: [] }]],
+      ['both genuinely empty', EMPTY_ARRAY, EMPTY_ARRAY],
+    ])(
+      'never refuses an upload without saying why (%s)',
+      async (_label, following, followers) => {
+        const result = await parseInstagramZipFile(zipWith(following, followers));
+
+        expect(result.hasMinimalData).toBe(false);
+        const firstError = result.warnings.find(w => w.severity === 'error');
+        expect(firstError).toBeDefined();
+        expect(firstError?.message).toBeTruthy();
+      }
+    );
+
     it('leaves an absent required file alone', async () => {
       // "Absent" and "present but unreadable" are different answers and this
       // whole task exists to keep them apart. interpretFollowingPayload
@@ -881,6 +905,36 @@ describe('Instagram Parser', () => {
       // The good shard's data is not silently discarded, just the drift is
       // surfaced loudly instead of being masked — followers_1 still parsed.
       expect(result.data.followers.has('validuser')).toBe(true);
+    });
+
+    it('reports a drifted wrapper AND drifted records when shards disagree', async () => {
+      // followers is the only multi-shard required file, so it is the only
+      // place the two failures can co-occur — one shard with a renamed
+      // wrapper, another whose records changed, is one plausible Meta change.
+      // The upload fails either way; what the second warning adds is the
+      // diagnosis. "The records also changed" is what separates a global
+      // format drift from a single mangled file.
+      mockZipInstance._addFile(
+        'connections/followers_and_following/followers_1.json',
+        vi.fn().mockResolvedValue(JSON.stringify(UNKNOWN_TOP_LEVEL_KEY))
+      );
+      mockZipInstance._addFile(
+        'connections/followers_and_following/followers_2.json',
+        vi.fn().mockResolvedValue(JSON.stringify([{ media_list_data: [] }]))
+      );
+
+      const result = await parseInstagramZipFile(
+        new File(['test'], 'test.zip', { type: 'application/zip' })
+      );
+
+      expect(result.warnings.find(w => w.code === 'INVALID_FOLLOWERS_FORMAT')).toBeDefined();
+      expect(result.warnings.find(w => w.code === 'UNRESOLVED_ENTRIES_FOLLOWERS')).toBeDefined();
+      // The wrapper failure is the graver diagnosis and stays first, because
+      // both hasMinimalData consumers report the FIRST error warning.
+      expect(result.warnings.find(w => w.severity === 'error')?.code).toBe(
+        'INVALID_FOLLOWERS_FORMAT'
+      );
+      expect(result.hasMinimalData).toBe(false);
     });
 
     it('accepts a single bare entry object without INVALID_FOLLOWERS_FORMAT (GH#21 Task 2)', async () => {

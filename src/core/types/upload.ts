@@ -50,9 +50,18 @@ export interface FileExpectation {
   /**
    * Records present in the file that could not be read (GH#21). `itemCount: 0`
    * on its own cannot separate "genuinely empty" from "full of records whose
-   * shape we no longer understand" — this is the number that can. Undefined
-   * when the file was absent, or when its top level was not recognized at all
-   * and nothing was countable; `formatUnreadable` covers that case.
+   * shape we no longer understand" — this is the number that can.
+   *
+   * Every producer always writes a number, including `0` for an absent file, so
+   * do not read `undefined` as a state: it only means the expectation was built
+   * by older code. In particular `0` does **not** imply "nothing was wrong" —
+   * when the top level was not recognized there were no records to count, and
+   * that case is `formatUnreadable: true` with this at `0`. A renderer needs
+   * both fields to tell the three outcomes apart.
+   *
+   * (This paragraph used to promise `undefined` for absent and unrecognized
+   * files. No producer ever did that, so a renderer written against it would
+   * have been wrong on every file.)
    */
   unreadableItemCount?: number;
   /**

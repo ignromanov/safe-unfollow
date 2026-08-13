@@ -23,17 +23,28 @@ export interface FollowersParsed {
   warnings: ParseWarning[];
   fileExpectation: FileExpectation;
   /**
-   * True when the followers data was found but we could not read it — any shard
-   * whose wrapper matched no known shape, or shards that yielded no accounts at
-   * all because every record in them was unreadable (GH#21 Task 3). This is not
-   * "no followers"; it is followers we cannot see.
+   * True when the followers data was found but we could not read it (GH#21
+   * Task 3). This is not "no followers"; it is followers we cannot see, and
+   * `instagram.ts` uses it to keep the two out of the same exit.
    *
-   * An unrecognised shard counts even when a sibling shard parsed fine, which
-   * is stricter than the entry-level half. The asymmetry is deliberate: an
-   * unreadable record is a loss we can count and report, while an unreadable
-   * shard is a loss of unknown size — it could be most of the list — and the
-   * followers set silently missing an unknown fraction is what makes
-   * notFollowedBack wrong without appearing to be.
+   * **Derived from the warnings**, not computed alongside them: it is exactly
+   * "this file produced an error-severity warning". That is deliberate and
+   * load-bearing. Both consumers of `hasMinimalData` take the FIRST
+   * error-severity warning as the diagnostic code, and this task removed the
+   * unconditional `createCriticalError` that used to guarantee one existed —
+   * so `unreadable` without an error warning would be a silent dead end on the
+   * most critical path. Defining one in terms of the other makes that state
+   * unreachable instead of merely absent today.
+   *
+   * **An unrecognised shard counts even when a sibling shard parsed fine.**
+   * Stricter than the entry-level half, and confirmed as intended: a partial
+   * follower list is not a smaller right answer, it is a wrong one. Every
+   * account in the missing shard is silently mislabelled `notFollowingBack` —
+   * the exact failure class this plan exists to remove — and the reader has no
+   * way to detect it. Showing thousands of readable followers beside a wrong
+   * verdict is worse than failing loudly. The contrast with an unreadable
+   * *record* is that the record is a loss we can count and report; a shard is a
+   * loss of unknown size.
    */
   unreadable: boolean;
 }
@@ -60,9 +71,18 @@ export async function parseFollowersJson(jsonText: string): Promise<string[]> {
  *
  * Extracted from `parseFollowersFromZip` rather than left inline: adding the
  * entry-level branch took that function to complexity 21 against a limit of 20.
- * The branches are ordered worst-first and are mutually exclusive by intent —
- * a reader who has been told the shards are missing does not also need to be
- * told they are empty.
+ *
+ * The wrapper and entry findings **accumulate** here, unlike in
+ * `instagram-following.ts` where they are exclusive. That is not an
+ * inconsistency, it is the multi-shard case: one shard with a renamed wrapper
+ * and another whose records drifted is a single plausible Meta change, and only
+ * followers can be in both states at once. Reporting the wrapper alone would
+ * lose "the records also changed", which is the signal that separates a global
+ * format drift from one mangled file — the diagnosis is the whole product of
+ * this task, even where it does not change the decision.
+ *
+ * Worst first: both consumers of `hasMinimalData` report the FIRST error
+ * warning, so the graver finding has to be at the front.
  */
 function describeFollowersOutcome(outcome: {
   followersFound: boolean;
@@ -72,6 +92,7 @@ function describeFollowersOutcome(outcome: {
 }): ParseWarning[] {
   const { followersFound, formatInvalidFiles, unresolvedEntries, resolvedCount } = outcome;
 
+  // Genuinely exclusive: with no shards at all, nothing below can be true.
   if (!followersFound) {
     return [
       {
@@ -83,19 +104,19 @@ function describeFollowersOutcome(outcome: {
     ];
   }
 
+  const warnings: ParseWarning[] = [];
+
   // Loud failure beats an undetectable wrong answer: at least one shard was
   // found but its shape wasn't recognized, so we can't be sure the followers
   // set is complete — and unlike an unreadable record, an unreadable shard is
   // a loss of unknown size.
   if (formatInvalidFiles.length > 0) {
-    return [
-      {
-        code: 'INVALID_FOLLOWERS_FORMAT',
-        message: `followers data was found (${formatInvalidFiles.join(', ')}), but its structure is not recognized — cannot detect who follows you.`,
-        severity: 'error',
-        fix: 'Instagram may have changed their export format. Please report this issue so we can add support.',
-      },
-    ];
+    warnings.push({
+      code: 'INVALID_FOLLOWERS_FORMAT',
+      message: `followers data was found (${formatInvalidFiles.join(', ')}), but its structure is not recognized — cannot detect who follows you.`,
+      severity: 'error',
+      fix: 'Instagram may have changed their export format. Please report this issue so we can add support.',
+    });
   }
 
   // The wrapper parsed and the records did not. Severity follows how much was
@@ -104,27 +125,25 @@ function describeFollowersOutcome(outcome: {
   // answer incomplete rather than backwards, and blocking an otherwise good
   // upload over that is disproportionate.
   if (unresolvedEntries > 0) {
-    return [
-      {
-        code: 'UNRESOLVED_ENTRIES_FOLLOWERS',
-        message: describeUnreadableEntries('followers_*.json', unresolvedEntries, resolvedCount),
-        severity: resolvedCount === 0 ? 'error' : 'warning',
-        fix: UNREADABLE_ENTRIES_FIX,
-      },
-    ];
+    warnings.push({
+      code: 'UNRESOLVED_ENTRIES_FOLLOWERS',
+      message: describeUnreadableEntries('followers_*.json', unresolvedEntries, resolvedCount),
+      severity: resolvedCount === 0 ? 'error' : 'warning',
+      fix: UNREADABLE_ENTRIES_FIX,
+    });
   }
 
-  if (resolvedCount === 0) {
-    return [
-      {
-        code: 'EMPTY_FOLLOWERS',
-        message: 'Followers files are empty or contain no valid accounts.',
-        severity: 'info',
-      },
-    ];
+  // Only when nothing above fired: "empty" is a claim about a file we could
+  // read, and saying it alongside a drift warning would contradict it.
+  if (warnings.length === 0 && resolvedCount === 0) {
+    warnings.push({
+      code: 'EMPTY_FOLLOWERS',
+      message: 'Followers files are empty or contain no valid accounts.',
+      severity: 'info',
+    });
   }
 
-  return [];
+  return warnings;
 }
 
 /** Parse followers_*.json files from ZIP with dedup and multi-file merge */
@@ -206,8 +225,6 @@ export async function parseFollowersFromZip(
   );
 
   const followersFound = followersFilesByName.size > 0;
-  const nothingRead = followersUsers.length === 0;
-  const unreadable = formatInvalidFiles.length > 0 || (nothingRead && unresolvedEntries > 0);
   const followersSpec = FILE_SPECS[1]!;
   const fileExpectation: FileExpectation = {
     name: 'followers_*.json',
@@ -220,14 +237,17 @@ export async function parseFollowersFromZip(
     formatUnreadable: formatInvalidFiles.length > 0,
   };
 
-  warnings.push(
-    ...describeFollowersOutcome({
-      followersFound,
-      formatInvalidFiles,
-      unresolvedEntries,
-      resolvedCount: followersUsers.length,
-    })
-  );
+  const outcome = describeFollowersOutcome({
+    followersFound,
+    formatInvalidFiles,
+    unresolvedEntries,
+    resolvedCount: followersUsers.length,
+  });
+  warnings.push(...outcome);
+
+  // Derived from the warnings rather than recomputed alongside them, so the
+  // two cannot disagree. See FollowersParsed.unreadable.
+  const unreadable = outcome.some(w => w.severity === 'error');
 
   return {
     followersRaw,
