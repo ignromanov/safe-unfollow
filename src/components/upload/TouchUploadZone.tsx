@@ -16,7 +16,7 @@ export function TouchUploadZone({ fileInputRef, isProcessing, onFileInput }: Tou
     <div className="flex flex-col items-center gap-4">
       <label
         htmlFor="upload-file-input"
-        className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-2xl bg-primary px-6 py-5 text-lg font-bold text-white shadow-lg transition-all active:scale-[0.98] active:shadow-md"
+        className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-2xl bg-primary px-6 py-5 text-lg font-bold text-primary-foreground shadow-lg transition-all active:scale-[0.98] active:shadow-md"
       >
         <Smartphone size={24} aria-hidden="true" />
         {t('zone.tapToSelect', { defaultValue: 'Tap to select your ZIP file' })}

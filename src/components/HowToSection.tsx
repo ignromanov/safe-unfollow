@@ -161,7 +161,7 @@ export function HowToSection({ onStart }: HowToSectionProps) {
                         e.stopPropagation();
                         navigate(`${prefix}/upload`);
                       }}
-                      className="cursor-pointer mt-6 inline-flex items-center justify-center gap-3 px-8 py-4 bg-primary text-white rounded-2xl font-black shadow-xl hover:scale-105 active:scale-95 transition-all text-sm md:text-base"
+                      className="cursor-pointer mt-6 inline-flex items-center justify-center gap-3 px-8 py-4 bg-primary text-primary-foreground rounded-2xl font-black shadow-xl hover:scale-105 active:scale-95 transition-all text-sm md:text-base"
                     >
                       <Upload size={20} />
                       {t('uploadButton')}
@@ -177,7 +177,7 @@ export function HowToSection({ onStart }: HowToSectionProps) {
             ))}
           </ol>
 
-          <div className="mt-24 md:mt-40 p-10 md:p-16 rounded-4xl bg-primary text-white flex flex-col md:flex-row items-center justify-between gap-10 shadow-2xl shadow-primary/30">
+          <div className="mt-24 md:mt-40 p-10 md:p-16 rounded-4xl bg-primary text-primary-foreground flex flex-col md:flex-row items-center justify-between gap-10 shadow-2xl shadow-primary/30">
             <div className="text-center md:text-start space-y-4">
               <h4 className="text-3xl md:text-5xl font-display font-black tracking-tight leading-none">
                 {t('cta.title')}

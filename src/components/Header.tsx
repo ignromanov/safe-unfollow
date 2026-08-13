@@ -82,7 +82,7 @@ export function Header({
                 onClick={onViewResults}
                 className={`cursor-pointer flex items-center gap-2 px-3 py-3 md:px-4 md:py-2 rounded-xl text-xs md:text-sm font-bold transition-all ${
                   activeScreen === AppState.RESULTS
-                    ? 'bg-primary text-white shadow-md'
+                    ? 'bg-primary text-primary-foreground shadow-md'
                     : 'text-zinc-500 hover:bg-[oklch(0.5_0_0_/_0.05)]'
                 }`}
                 aria-label={t('buttons.viewResults')}
@@ -128,7 +128,7 @@ export function Header({
               onClick={onUpload}
               className={`cursor-pointer flex items-center gap-2 px-3 py-3 md:px-4 md:py-2 rounded-xl text-xs md:text-sm font-bold transition-all ${
                 activeScreen === AppState.UPLOAD
-                  ? 'bg-primary text-white shadow-md'
+                  ? 'bg-primary text-primary-foreground shadow-md'
                   : 'text-zinc-500 hover:bg-[oklch(0.5_0_0_/_0.05)]'
               }`}
               aria-label={t('buttons.uploadFile')}

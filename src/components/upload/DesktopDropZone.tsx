@@ -83,8 +83,8 @@ export function DesktopDropZone({
               md:h-24 md:w-24
               ${
                 isDragOver
-                  ? 'rotate-12 bg-primary text-white'
-                  : 'bg-zinc-100 text-zinc-400 group-hover:rotate-6 group-hover:bg-primary group-hover:text-white dark:bg-zinc-800'
+                  ? 'rotate-12 bg-primary text-primary-foreground'
+                  : 'bg-zinc-100 text-zinc-400 group-hover:rotate-6 group-hover:bg-primary group-hover:text-primary-foreground dark:bg-zinc-800'
               }
             `}
           >

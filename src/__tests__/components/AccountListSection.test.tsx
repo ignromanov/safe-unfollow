@@ -519,4 +519,27 @@ describe('AccountListSection', () => {
       expect(sticky.querySelector('button[aria-pressed]')).not.toBeNull();
     });
   });
+
+  describe('sort toggle contrast', () => {
+    // Descending fills the toggle with --primary. A literal white glyph on it
+    // measures 3.95:1 in light and 3.30:1 in dark — below AA, and below the 3:1
+    // graphics allowance in dark once the /90 hover is taken into account.
+    const sortToggle = (container: HTMLElement) =>
+      container.querySelector('button[aria-pressed]') as HTMLElement;
+
+    it('drives the descending state from the token, not a literal colour', () => {
+      const { container } = render(
+        <AccountListSection fileHash="abc" accountCount={100} filename="d.zip" />
+      );
+
+      const toggle = sortToggle(container);
+      expect(toggle).toHaveAttribute('aria-pressed', 'false');
+
+      fireEvent.click(toggle);
+
+      expect(toggle).toHaveAttribute('aria-pressed', 'true');
+      expect(toggle).toHaveClass('bg-primary', 'text-primary-foreground');
+      expect(toggle.className).not.toMatch(/\btext-white\b/);
+    });
+  });
 });

@@ -287,4 +287,70 @@ describe('FilterChips Component', () => {
       expect(chipName('Add Not following back filter')).not.toHaveAccessibleName(hintPattern);
     });
   });
+
+  // An active chip fills with --primary. A literal white on it measures 3.95:1 in
+  // light and 3.30:1 in dark; inside the bg-white/20 count pill it drops further,
+  // to 2.97:1 and 2.53:1, which fails even the 3:1 allowance for graphics.
+  describe('active chip drives its text from the token, not a literal colour', () => {
+    const renderWithActiveChip = () =>
+      render(<FilterChips {...defaultProps} selectedFilters={new Set<BadgeKey>(['following'])} />);
+
+    const activeChip = () => screen.getByRole('button', { pressed: true, name: /following/i });
+
+    it('has no literal text-white anywhere in the active chip', () => {
+      renderWithActiveChip();
+
+      const chip = activeChip();
+      // `querySelectorAll` does not return the element it is called on, so the
+      // chip itself has to be prepended — without it this assertion stays green
+      // while the chip's own class carries the literal (verified by mutation).
+      const candidates = [chip, ...Array.from(chip.querySelectorAll<HTMLElement>('*'))];
+      // bg-white/20 is a surface tint and stays — it lightens the fill, which is
+      // what lifts the dark token on it to 6.84:1 (light) / 8.03:1 (dark).
+      const offenders = candidates.filter(el => /(?<!bg-)\btext-white\b/.test(el.className));
+      expect(offenders.map(el => el.className)).toEqual([]);
+    });
+
+    it('colours the chip itself with text-primary-foreground', () => {
+      renderWithActiveChip();
+
+      expect(activeChip()).toHaveClass('bg-primary', 'text-primary-foreground');
+    });
+
+    it('colours the count pill with the token', () => {
+      renderWithActiveChip();
+
+      const pill = screen.getByText('150');
+      expect(pill).toHaveClass('bg-white/20', 'text-primary-foreground');
+    });
+
+    it('colours the badge icon with the token', () => {
+      renderWithActiveChip();
+
+      const icon = activeChip().querySelector('svg');
+      expect(icon).toHaveClass('text-primary-foreground');
+    });
+
+    // The GH#41 marker renders on a condition, so it is absent from every case
+    // above — and it arrived carrying the literal this describe forbids while
+    // all of them stayed green. `toHaveClass`, not the class sweep: an SVG's
+    // `className` is an SVGAnimatedString, so the regex above reads
+    // "[object SVGAnimatedString]" and matches nothing on any icon.
+    it('colours the overstated marker with the token', () => {
+      render(
+        <FilterChips
+          {...defaultProps}
+          selectedFilters={new Set<BadgeKey>(['notFollowingBack'])}
+          followRequestsUnreadable
+        />
+      );
+
+      const chip = screen.getByRole('button', { pressed: true, name: /not following back/i });
+      const icons = chip.querySelectorAll('svg');
+      // Badge icon first, marker second — the marker sits beside the label.
+      expect(icons).toHaveLength(2);
+      expect(icons[1]).toHaveClass('text-primary-foreground');
+      expect(icons[1]).not.toHaveClass('text-white');
+    });
+  });
 });

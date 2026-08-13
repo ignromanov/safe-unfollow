@@ -123,7 +123,7 @@ export function FAQSection() {
                     <div
                       className={`shrink-0 w-11 h-11 md:w-14 md:h-14 rounded-full flex items-center justify-center transition-all ${
                         openIndex === index
-                          ? 'bg-primary text-white'
+                          ? 'bg-primary text-primary-foreground'
                           : 'bg-[oklch(0.5_0_0_/_0.05)] text-zinc-400'
                       }`}
                     >

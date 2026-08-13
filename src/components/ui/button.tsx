@@ -12,10 +12,24 @@ const buttonVariants = cva(
         default: 'bg-primary text-primary-foreground shadow-xs hover:bg-primary/90',
         destructive:
           'bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60',
+        // The hover surface is overridden per theme (`dark:hover:bg-input/50`)
+        // but the hover foreground was not, so `--accent-foreground` — a colour
+        // chosen to sit on `--accent` — landed on near-black `--input` in dark
+        // mode at 1.16:1. Light was no better: near-white `--accent-foreground`
+        // on `--accent` is 3.50:1. `--foreground` is legible on both hover
+        // surfaces (5.46:1 light, 16.52:1 dark), i.e. hover changes the fill and
+        // leaves the label alone.
         outline:
-          'border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50',
+          'border bg-background shadow-xs hover:bg-accent hover:text-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50',
         secondary: 'bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80',
-        ghost: 'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50',
+        // Same defect as `outline`, and the token flip alone does not close it.
+        // Light hover is flat `--accent`, which the corrected token now handles
+        // (5.63:1) — but dark hover is `accent/50` composited over a dark page,
+        // so the surface stays dark and the near-black `--accent-foreground`
+        // that is right on flat accent measures 2.43:1 on it. `--foreground` is
+        // correct on both (5.46:1 light, 7.88:1 dark): hover moves the fill,
+        // not the ink.
+        ghost: 'hover:bg-accent hover:text-foreground dark:hover:bg-accent/50',
         link: 'text-primary underline-offset-4 hover:underline',
       },
       size: {

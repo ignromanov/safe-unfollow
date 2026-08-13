@@ -193,14 +193,14 @@ export function ResultsExportControls({
             that delivers. Revert Phase 2 and this treatment has to go back to
             `outline` in the same commit.
 
-            The text colour is overridden because the palette cannot carry the
-            default pairing: `--primary-foreground` on `--primary` measures
-            3.95:1 in light mode (3.39:1 on hover), under the 4.5:1 AA floor for
-            this 14px label. Near-black text on the same blue fill measures
-            4.84:1 / 5.65:1, and dark mode already ships dark-on-blue, so both
-            themes now read the same way. `text-foreground` is a token, not a
-            one-off — and tailwind-merge drops the variant's own text colour
-            because this className is appended last. */}
+            The text colour used to be overridden here, because
+            `--primary-foreground` on `--primary` measured 3.95:1 in light mode
+            and this 14px label needs 4.5:1. That premise is gone: the token was
+            flipped to near-black in both themes, so the variant's own pairing
+            now measures 5.00:1 flat and 5.85:1 on hover. Keeping the override
+            would leave this button the one element in the app that does not
+            read its colour from the variant — which is how the next palette
+            change silently misses it. */}
         <Button
           ref={triggerRef}
           onClick={handleDownloadClick}
@@ -209,7 +209,7 @@ export function ResultsExportControls({
           disabled={isBusy}
           aria-busy={isBusy}
           variant="default"
-          className="h-auto min-h-11 gap-2 rounded-2xl px-4 py-2.5 font-semibold text-foreground dark:text-primary-foreground"
+          className="h-auto min-h-11 gap-2 rounded-2xl px-4 py-2.5 font-semibold"
         >
           <Download size={18} />
           {t('export.trigger')}
