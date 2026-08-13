@@ -1,8 +1,27 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { renderToString } from 'react-dom/server';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { Component as HomePage } from '@/pages/HomePage';
 import commonEN from '@/locales/en/common.json';
+import { useAppStore } from '@/lib/store';
+import type { FileMetadata } from '@/core/types';
+
+// Wraps (not replaces) the real useHasResults so its SSR-safe behavior stays
+// real while call count stays observable — hasResults must be sourced from
+// this shared hook, not recomputed locally from useInstagramData.
+vi.mock('@/hooks/useHasResults', async importOriginal => {
+  const actual = await importOriginal<typeof import('@/hooks/useHasResults')>();
+  return { ...actual, useHasResults: vi.fn(actual.useHasResults) };
+});
+
+const FILE: FileMetadata = {
+  name: 'test.zip',
+  size: 1,
+  uploadDate: new Date('2026-01-01'),
+  fileHash: 'abc123',
+  accountCount: 100,
+};
 
 // Mock child components
 vi.mock('@/components/Hero', () => ({
@@ -52,22 +71,13 @@ vi.mock('@/hooks/useLanguagePrefix', () => ({
   useLanguagePrefix: () => mockUseLanguagePrefix(),
 }));
 
-const mockUseInstagramData = vi.fn(() => ({
-  uploadState: { status: 'idle', error: null, fileName: null },
-  fileMetadata: null,
-}));
-vi.mock('@/hooks/useInstagramData', () => ({
-  useInstagramData: () => mockUseInstagramData(),
-}));
-
 describe('HomePage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseLanguagePrefix.mockReturnValue('');
-    mockUseInstagramData.mockReturnValue({
-      uploadState: { status: 'idle', error: null, fileName: null },
-      fileMetadata: null,
-    });
+    // hasResults (Hero's hasData) is sourced from useAppStore via useHasResults,
+    // not from useInstagramData — reset the real store directly.
+    useAppStore.setState({ uploadStatus: 'idle', fileMetadata: null });
   });
 
   describe('rendering', () => {
@@ -93,14 +103,43 @@ describe('HomePage', () => {
     });
 
     it('should pass hasData as true when upload is successful', () => {
-      mockUseInstagramData.mockReturnValue({
-        uploadState: { status: 'success', error: null, fileName: 'test.zip' },
-        fileMetadata: { fileHash: 'abc123', accountCount: 100, name: 'test.zip' },
-      });
+      useAppStore.setState({ uploadStatus: 'success', fileMetadata: FILE });
 
       render(<HomePage />);
 
       expect(screen.getByTestId('has-data')).toHaveTextContent('true');
+    });
+  });
+
+  describe('hydration parity', () => {
+    it('sources hasData from the shared useHasResults hook, not a page-local computation', async () => {
+      // The regression this guards against: HomePage used to derive hasResults
+      // itself from useInstagramData(), independently of Layout's useHasResults.
+      // That duplication is what let the two fall out of sync — Layout gates on
+      // hydration, HomePage did not. Asserting the shared hook is actually
+      // invoked (not just that some boolean happens to match) is what catches
+      // a page-local computation creeping back in.
+      const { useHasResults } = await import('@/hooks/useHasResults');
+
+      render(<HomePage />);
+
+      expect(useHasResults).toHaveBeenCalled();
+    });
+
+    it('renders the no-data CTA set when the store already has data but the hook has not updated yet', () => {
+      // renderToString always invokes useSyncExternalStore's getServerSnapshot,
+      // which is exactly what happens on a returning visitor's first render:
+      // zustand's persist middleware rehydrates the store synchronously from
+      // localStorage before hydration runs, so the store already says "success"
+      // while the prerendered HTML was built with no data. HomePage must defer
+      // to useHasResults (which forces false here) instead of computing
+      // hasResults itself, or this disagrees with the prerendered HTML and
+      // React throws #423/#425, discarding the prerendered DOM.
+      useAppStore.setState({ uploadStatus: 'success', fileMetadata: FILE });
+
+      const html = renderToString(<HomePage />);
+
+      expect(html).toContain('has-data">false');
     });
   });
 
