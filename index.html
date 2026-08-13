@@ -32,8 +32,12 @@
         }
 
         try {
-          // Check if user has explicit language preference (from store)
-          // This is set by LanguageSwitcher via persistLanguageSync()
+          // Only an explicit language preference redirects (set by LanguageSwitcher via
+          // persistLanguageSync()). A first visit with no stored choice stays on the
+          // English path it asked for - guessing the browser's language cost a full
+          // second document load (Google also advises against this: "Avoid automatically
+          // redirecting users from one language version of a site to a different language
+          // version of a site").
           var store = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
           var storedLang = store.state && store.state.language;
 
@@ -43,13 +47,6 @@
               location.href = '/' + storedLang + path + location.search + location.hash;
             }
             // storedLang is 'en' - stay on English path
-            return;
-          }
-
-          // No stored preference - first visit, detect browser language
-          var browserLang = (navigator.language || '').split('-')[0].toLowerCase();
-          if (browserLang && browserLang !== 'en' && NON_EN_LANGS.indexOf(browserLang) !== -1) {
-            location.href = '/' + browserLang + path + location.search + location.hash;
           }
         } catch (e) {
           // localStorage unavailable (private mode) - continue with English
