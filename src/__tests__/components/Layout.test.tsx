@@ -89,8 +89,9 @@ vi.mock('@/components/PageLoader', () => ({
 }));
 
 // The dialog's own activation behavior is covered by LicenseDialog.test.tsx, and
-// LicenseDialogMount's Suspense wiring is covered by its own test file; here we only
-// care about whether Layout mounts the license flow at all, and with what key.
+// LicenseDialogMount's Suspense/lazy/memo composition and prop forwarding are covered
+// by LicenseDialogMount.test.tsx; here we only care about whether Layout mounts the
+// license flow at all, and with what key.
 vi.mock('@/components/export/LicenseDialogMount', () => ({
   LicenseDialogMount: vi.fn(({ licenseKey }: { licenseKey: string }) => (
     <div data-testid="license-dialog">
@@ -624,7 +625,7 @@ describe('Layout', () => {
       resetUnlockCache();
     });
 
-    it('should strip the license param from the URL on mount', async () => {
+    it('should strip the license param from the URL on mount', () => {
       window.history.replaceState(
         {},
         '',
@@ -635,10 +636,10 @@ describe('Layout', () => {
 
       expect(window.location.search).toBe('');
 
-      // Let the lazily-loaded dialog resolve inside act() — otherwise React
-      // warns about a suspended resource finishing loading after the test body
-      // already returned.
-      await screen.findByTestId('license-dialog');
+      // LicenseDialogMount is mocked as a plain synchronous component in this
+      // file (see the vi.mock above), so nothing here suspends — it renders
+      // in the same pass as Layout. getByTestId, not findByTestId.
+      expect(screen.getByTestId('license-dialog')).toBeInTheDocument();
     });
 
     it('should not render the license dialog without the param', () => {
