@@ -279,8 +279,10 @@ describe('Badge Logic', () => {
    * If this fails you have changed which sets `notFollowingBack` excludes.
    * Decide whether the caveat still covers the badge:
    *  - a new exclusion from an OPTIONAL file that can be present-but-unreadable
-   *    must be added to `requestFileUnreadable` in `instagram-optional.ts`,
-   *    or the badge overstates itself again with nothing on screen saying so;
+   *    must carry `feedsNotFollowingBackExclusion` on its spec
+   *    (`instagram-file-specs.ts`) — that flag is what `parseOptionalFiles`
+   *    folds `followRequestsUnreadable` over — or the badge overstates itself
+   *    again with nothing on screen saying so;
    *  - `followers` needs nothing: it is required, and an unreadable required
    *    file already fails the upload loudly (`hasMinimalData`).
    * Then update the list below.

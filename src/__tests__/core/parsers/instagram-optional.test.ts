@@ -200,7 +200,7 @@ describe('parseOptionalFiles format drift (GH#21)', () => {
       }
       return null;
     });
-    const result = await parseOptionalFiles([], reader, known);
+    const result = await parseOptionalFiles([], reader, () => known);
 
     expect([...result.closeFriendsResult.map.keys()]).toEqual(['known_one', 'known_two']);
     expect([...result.unfollowedResult.map.keys()]).toEqual([

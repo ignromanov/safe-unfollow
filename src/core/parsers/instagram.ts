@@ -175,8 +175,18 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
 
   // === Parse Optional Files (delegated) ===
   // Membership breaks localised-username-label ties (GH#21, instagram-labels).
-  const knownUsernames = new Set([...followingUsers, ...followersParsed.followersUsers]);
-  const optionalParsed = await parseOptionalFiles(baseCandidates, readJsonFromZip, knownUsernames);
+  // Passed unbuilt: these are the two files that reach 1M accounts, the tiebreak
+  // is the resolver's last resort, and no measured archive gets that far.
+  const readKnownUsernames = (): ReadonlySet<string> => {
+    const known = new Set(followingUsers);
+    for (const username of followersParsed.followersUsers) known.add(username);
+    return known;
+  };
+  const optionalParsed = await parseOptionalFiles(
+    baseCandidates,
+    readJsonFromZip,
+    readKnownUsernames
+  );
   warnings.push(...optionalParsed.warnings);
   fileExpectations.push(...optionalParsed.fileExpectations);
 

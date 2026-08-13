@@ -12,6 +12,7 @@ import {
   AlertTriangle,
   Ghost,
 } from 'lucide-react';
+import { BADGES_OVERSTATED_BY_UNREADABLE_REQUESTS } from '@/core/badges';
 import type { BadgeKey } from '@/core/types';
 interface FilterChipsProps {
   selectedFilters: Set<BadgeKey>;
@@ -134,7 +135,8 @@ export const FilterChips = memo(function FilterChips({
           const label = t(`badges.${cfg.type}`);
           // GH#41. The count itself is the thing that is wrong, so the mark
           // goes on the chip, not only in the notice above the list.
-          const isOverstated = followRequestsUnreadable && cfg.type === 'notFollowingBack';
+          const isOverstated =
+            followRequestsUnreadable && BADGES_OVERSTATED_BY_UNREADABLE_REQUESTS.has(cfg.type);
           const chipLabel = isActive
             ? t('filters.removeFilter', { label, count })
             : t('filters.addFilter', { label, count });

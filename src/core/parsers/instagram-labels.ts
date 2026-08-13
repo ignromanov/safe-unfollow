@@ -86,8 +86,13 @@ export interface LabelResolutionContext {
    * `following ∪ followers`, normalised the same way usernames are everywhere
    * else. Absent or empty leaves the tiebreak inert — never crashing, never
    * guessing — which is what an unreadable `following.json` must degrade to.
+   *
+   * A thunk, not the set: it is read only by `pickByMembership`, which the two
+   * stages above it reach past on every archive measured so far. Materialising
+   * it eagerly would union both required files — the only two that reach the
+   * app's 1M-account ceiling — on every parse, to be discarded unread.
    */
-  knownUsernames?: ReadonlySet<string>;
+  knownUsernames?: () => ReadonlySet<string>;
 }
 
 interface LabelTally {
@@ -95,6 +100,12 @@ interface LabelTally {
   valid: number;
   /** Non-empty values under this label. Empty ones carry no signal. */
   scored: number;
+}
+
+/** Which label holds the username, and how that was decided. */
+export interface LabelResolutionResult {
+  label: string | null;
+  mode: LabelResolutionMode;
 }
 
 /**
@@ -106,9 +117,14 @@ interface LabelTally {
  * `resolveEntry` can match it without a second normalisation the two could
  * drift apart on.
  *
- * `null` means "no clear winner". Callers must then leave entries unresolved
- * and count them, never fall back to picking the first username-shaped value
- * in a record.
+ * A `label` of `null` means "no clear winner". Callers must then leave entries
+ * unresolved and count them, never fall back to picking the first
+ * username-shaped value in a record.
+ *
+ * `mode` is the signal `useFileUpload` reports to telemetry as
+ * `usernameLabelResolution` (GH#21 Task 5). It is returned alongside the label
+ * rather than from a second entry point: the only production caller wants both,
+ * and a label-only wrapper beside this one ended up with no caller at all.
  *
  * **Scope seam.** Today this is called from `parseOptionalFiles` and therefore
  * pools the six optional files only; `following.json` and `followers_*.json`
@@ -116,28 +132,6 @@ interface LabelTally {
  * serialiser has been rolling across Meta's products since 2024, so when they
  * do migrate, this needs a pass spanning all eight files — the pass does not
  * exist yet and this comment is the marker for building it.
- */
-export function resolveUsernameLabel(
-  entries: readonly unknown[],
-  context: LabelResolutionContext = {}
-): string | null {
-  return resolveUsernameLabelWithMode(entries, context).label;
-}
-
-/** `resolveUsernameLabel`'s result, plus how it got there. */
-export interface LabelResolutionResult {
-  label: string | null;
-  mode: LabelResolutionMode;
-}
-
-/**
- * Same resolution as `resolveUsernameLabel`, plus the mode that produced it
- * (GH#21 Task 5) — the signal `useFileUpload` reports to telemetry as
- * `usernameLabelResolution`. A separate export rather than widening
- * `resolveUsernameLabel`'s return type: that function's tests and its one
- * caller in `instagram-utils.ts`'s doc comments assume a plain
- * `string | null`, and every other call site of the label-only form stays
- * unaffected by this addition.
  *
  * `not-applicable` vs `unresolved` is read off `tallies`, not off `entries`
  * directly: `tallyLabels` already discards non-object entries and pairs whose
@@ -161,10 +155,7 @@ export function resolveUsernameLabelWithMode(
   const scored = pickWinner(tallies);
   if (scored !== null) return { label: scored, mode: 'inferred' };
 
-  const tiebreak = pickByMembership(
-    context.tiebreakEntries ?? [],
-    context.knownUsernames ?? new Set()
-  );
+  const tiebreak = pickByMembership(context.tiebreakEntries ?? [], context.knownUsernames);
   if (tiebreak !== null) return { label: tiebreak, mode: 'inferred' };
 
   return { label: null, mode: tallies.size === 0 ? 'not-applicable' : 'unresolved' };
@@ -244,9 +235,10 @@ function pickWinner(tallies: ReadonlyMap<string, LabelTally>): string | null {
  */
 function pickByMembership(
   entries: readonly unknown[],
-  knownUsernames: ReadonlySet<string>
+  readKnownUsernames?: () => ReadonlySet<string>
 ): string | null {
-  if (knownUsernames.size === 0) return null;
+  const knownUsernames = readKnownUsernames?.();
+  if (!knownUsernames || knownUsernames.size === 0) return null;
 
   const hits = new Map<string, number>();
   for (const entry of entries) {

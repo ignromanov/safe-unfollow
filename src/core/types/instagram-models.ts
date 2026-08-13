@@ -32,13 +32,6 @@ export interface InstagramLabelValueEntry {
   fbid?: string;
 }
 
-/**
- * Every entry shape the parser accepts. Widened here rather than by loosening
- * `InstagramExportEntry`, whose required `title`/`string_list_data` are what
- * make the two older formats checkable at all.
- */
-export type InstagramEntry = InstagramExportEntry | InstagramLabelValueEntry;
-
 export interface ParsedAll {
   // Core relationship data
   following: Set<string>; // Accounts that the user follows

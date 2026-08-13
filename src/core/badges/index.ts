@@ -14,6 +14,21 @@ function collectAllUsernames(parsed: ParsedAll): Set<string> {
   ]);
 }
 
+/**
+ * Badges whose count is too HIGH when a follow-requests file is present and
+ * unreadable (GH#41), because `computeDerivedRelationships` below subtracts
+ * those files' accounts and an empty map subtracts nobody.
+ *
+ * Declared beside the subtraction that causes it, and read by `FilterChips` to
+ * mark the chip: which badge inflates is a fact about the derivation, and a UI
+ * component comparing against a badge key by hand is a third independent copy
+ * of it. Only overstatement is listed — `pending` and `permanent` read the same
+ * maps and fall to 0, which is a different failure the caveat's own copy names.
+ */
+export const BADGES_OVERSTATED_BY_UNREADABLE_REQUESTS: ReadonlySet<BadgeKey> = new Set([
+  'notFollowingBack',
+]);
+
 // Helper function to compute derived relationship categories
 function computeDerivedRelationships(parsed: ParsedAll) {
   // notFollowingBack: User follows but account doesn't follow back (excluding pending/permanent requests)
@@ -24,6 +39,8 @@ function computeDerivedRelationships(parsed: ParsedAll) {
   // carries `followRequestsUnreadable` for exactly this, and `/results` renders
   // a caveat from it. Adding a THIRD exclusion here means asking whether that
   // flag still covers the badge — `badges.test.ts` fails until someone does.
+  // What they must set is `feedsNotFollowingBackExclusion` on the new file's
+  // spec (`instagram-file-specs.ts`); the flag is what the caveat folds over.
   const notFollowingBack = new Set(
     [...parsed.following].filter(
       u =>

@@ -21,40 +21,48 @@ const MAX_FILE_SIZE = 500 * 1024 * 1024;
 const LAST_UPLOAD_KEY = 'analytics_last_upload';
 
 /**
- * Report optional relationship files whose top-level shape we no longer recognise
- * (GH#21). Those parse to an empty map that is indistinguishable from "the user has
+ * Report everything this parse observed about the export's shape, from whichever
+ * of the three parse exit points reached it (worker success, worker failure,
+ * main-thread fallback).
+ *
+ * One function rather than one per signal, because the two always fire together
+ * and a future exit path that emits one and forgets the other is a diagnostic
+ * that silently does not fire — the failure class this whole change exists to
+ * remove.
+ *
+ * **Optional-file drift (GH#21)**: files whose top-level shape we no longer
+ * recognise parse to an empty map that is indistinguishable from "the user has
  * none", and severity `'warning'` is rendered nowhere — `UploadZone.tsx` and
- * `DiagnosticErrorScreen.tsx` both read only `'error'` — so this event is the whole
- * detection surface.
+ * `DiagnosticErrorScreen.tsx` both read only `'error'` — so this event is the
+ * whole detection surface. Reported on the failure path too: drift is a fact
+ * about the export, not about whether the upload finished, and a format change
+ * would plausibly hit several files at once, so drift accompanying a failure is
+ * precisely the case worth seeing.
  *
- * It must run on the main thread: `enqueueEvent` and `trackEvent` both return early
- * on `typeof window === 'undefined'` (`lib/stats/queue.ts`, `lib/stats/core.ts`), and
- * a Web Worker's global is `self`, so emitting from the parser itself would be a
- * silent no-op. The warnings already cross the boundary inside the parse result.
+ * **Label resolution (GH#21 Task 5)**: `mode` is `undefined` only when nothing
+ * was parsed this call — an exception thrown before `parseInstagramZipFile` ever
+ * ran (e.g. the worker's own IndexedDB-quota branch, which never posts
+ * `labelResolutionMode`) — and silently no-ops rather than reporting a
+ * fabricated mode.
  *
- * Called on every path that observes warnings, including the failure path: drift is a
- * fact about the export, not about whether the upload finished. A format change would
- * plausibly hit several files at once, so the case where drift accompanies a failure
- * is precisely the one worth seeing.
+ * Both must run on the main thread: `enqueueEvent` and `trackEvent` return early
+ * on `typeof window === 'undefined'` (`lib/stats/queue.ts`, `lib/stats/core.ts`),
+ * and a Web Worker's global is `self`, so emitting from the parser itself would
+ * be a silent no-op. Both signals already cross the boundary inside the result.
  */
-function reportOptionalFileDrift(warnings: ParseWarning[] | undefined): void {
+function reportParseDiagnostics(
+  warnings: ParseWarning[] | undefined,
+  labelResolutionMode: LabelResolutionMode | undefined
+): void {
   for (const warning of warnings ?? []) {
     if (OPTIONAL_FILE_DRIFT_CODES.has(warning.code)) {
       analytics.optionalFileFormatDrift(warning.code);
     }
   }
-}
 
-/**
- * Report how this parse resolved the localised username label (GH#21 Task 5).
- * `mode` is `undefined` only when nothing was parsed this call — a genuine
- * exception thrown before `parseInstagramZipFile` ever ran (e.g. the worker's
- * own IndexedDB-quota branch, which never posts `labelResolutionMode`) — and
- * silently no-ops rather than reporting a fabricated mode.
- */
-function reportUsernameLabelResolution(mode: LabelResolutionMode | undefined): void {
-  if (!mode) return;
-  analytics.usernameLabelResolution(mode);
+  if (labelResolutionMode) {
+    analytics.usernameLabelResolution(labelResolutionMode);
+  }
 }
 
 /**
@@ -244,8 +252,7 @@ export function useFileUpload() {
                 fileDiscovery: result.discovery,
               });
             }
-            reportOptionalFileDrift(result.warnings);
-            reportUsernameLabelResolution(result.labelResolutionMode);
+            reportParseDiagnostics(result.warnings, result.labelResolutionMode);
           } catch (error) {
             // Extract warnings/discovery from error if available
             if (error instanceof Error && 'warnings' in error) {
@@ -255,8 +262,8 @@ export function useFileUpload() {
                 fileDiscovery: (error as { discovery?: import('@/core/types').FileDiscovery })
                   .discovery,
               });
-              reportOptionalFileDrift(failureWarnings);
-              reportUsernameLabelResolution(
+              reportParseDiagnostics(
+                failureWarnings,
                 (error as { labelResolutionMode?: LabelResolutionMode }).labelResolutionMode
               );
             }
@@ -278,8 +285,7 @@ export function useFileUpload() {
             parseWarnings: result.warnings ?? [],
             fileDiscovery: result.discovery,
           });
-          reportOptionalFileDrift(result.warnings);
-          reportUsernameLabelResolution(result.labelResolutionMode);
+          reportParseDiagnostics(result.warnings, result.labelResolutionMode);
         }
 
         // Data already cached in IndexedDB by worker during chunked processing

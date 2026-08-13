@@ -52,6 +52,21 @@ export interface FileSpec {
    * reason; the request was never accepted.
    */
   impliesKnownAccount?: boolean;
+  /**
+   * True when `notFollowingBack` is computed by *subtracting* this file's
+   * accounts (`core/badges/index.ts`), so failing to read it does not zero a
+   * badge — it inflates one, silently (GH#41).
+   *
+   * Declared on the spec rather than read off two named results in
+   * `parseOptionalFiles`, for the same reason `OPTIONAL_FILE_DRIFT_CODES` is
+   * derived: a third exclusion added to the badge subtraction fails
+   * `badges.test.ts`, whoever fixes that arrives at the exclusion set, and the
+   * flag they must also set is one field on the file they are already holding.
+   * Spelled out as an OR of two variables instead, the caveat keeps compiling
+   * while covering two of three files — a wrong answer with no warning, which
+   * is the class this change exists to remove.
+   */
+  feedsNotFollowingBackExclusion?: boolean;
 }
 
 /**
@@ -81,6 +96,7 @@ export const FILE_SPECS: FileSpec[] = [
     propCandidates: ['relationships_follow_requests_sent'],
     driftCode: 'INVALID_PENDING_FORMAT',
     entryDriftCode: 'UNRESOLVED_ENTRIES_PENDING',
+    feedsNotFollowingBackExclusion: true,
   },
   {
     name: 'restricted_profiles.json',
@@ -141,6 +157,7 @@ export const PERMANENT_REQUESTS_SPEC: FileSpec = {
   ],
   driftCode: 'INVALID_PERMANENT_FORMAT',
   entryDriftCode: 'UNRESOLVED_ENTRIES_PERMANENT',
+  feedsNotFollowingBackExclusion: true,
 };
 
 /**

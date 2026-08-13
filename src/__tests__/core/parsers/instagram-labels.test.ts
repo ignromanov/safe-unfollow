@@ -3,10 +3,18 @@ import { resolve } from 'node:path';
 
 import { describe, it, expect } from 'vitest';
 
-import {
-  resolveUsernameLabel,
-  resolveUsernameLabelWithMode,
-} from '@/core/parsers/instagram-labels';
+import { resolveUsernameLabelWithMode } from '@/core/parsers/instagram-labels';
+
+/**
+ * The label alone. `resolveUsernameLabelWithMode` is the module's only exported
+ * resolver; a label-only wrapper beside it had no production caller and was
+ * kept alive solely by the assertions below, so it lives here instead. The
+ * assertions are unchanged — most of this file is about *which* label wins, not
+ * about how it was reached, and the mode has its own describe block at the end.
+ */
+const resolveUsernameLabel = (
+  ...args: Parameters<typeof resolveUsernameLabelWithMode>
+): string | null => resolveUsernameLabelWithMode(...args).label;
 
 /**
  * GH#21, Task 1. The 2026-08 export names the username field with a
@@ -174,7 +182,7 @@ describe('resolveUsernameLabel', () => {
       expect(
         resolveUsernameLabel(pooled, {
           tiebreakEntries: pooled,
-          knownUsernames: new Set(['sample_user_p', 'sample_user_q']),
+          knownUsernames: () => new Set(['sample_user_p', 'sample_user_q']),
         })
       ).toBe(XX_USERNAME);
     });
@@ -184,7 +192,7 @@ describe('resolveUsernameLabel', () => {
       expect(
         resolveUsernameLabel(pooled, {
           tiebreakEntries: pooled,
-          knownUsernames: new Set(['sample_user_a', 'sample_user_p']),
+          knownUsernames: () => new Set(['sample_user_a', 'sample_user_p']),
         })
       ).toBeNull();
     });
@@ -194,7 +202,7 @@ describe('resolveUsernameLabel', () => {
       expect(
         resolveUsernameLabel(pooled, {
           tiebreakEntries: pooled,
-          knownUsernames: new Set(['someone_else_entirely']),
+          knownUsernames: () => new Set(['someone_else_entirely']),
         })
       ).toBeNull();
     });
@@ -205,7 +213,7 @@ describe('resolveUsernameLabel', () => {
       const pooled = ambiguousPool();
       expect(resolveUsernameLabel(pooled, { tiebreakEntries: pooled })).toBeNull();
       expect(
-        resolveUsernameLabel(pooled, { tiebreakEntries: pooled, knownUsernames: new Set() })
+        resolveUsernameLabel(pooled, { tiebreakEntries: pooled, knownUsernames: () => new Set() })
       ).toBeNull();
     });
 
@@ -222,13 +230,13 @@ describe('resolveUsernameLabel', () => {
       expect(() =>
         resolveUsernameLabel(pooled, {
           tiebreakEntries: pooled,
-          knownUsernames: new Set(['sample_user_p']),
+          knownUsernames: () => new Set(['sample_user_p']),
         })
       ).not.toThrow();
       expect(
         resolveUsernameLabel(pooled, {
           tiebreakEntries: pooled,
-          knownUsernames: new Set(['sample_user_p']),
+          knownUsernames: () => new Set(['sample_user_p']),
         })
       ).toBe(XX_USERNAME);
     });
@@ -240,7 +248,7 @@ describe('resolveUsernameLabel', () => {
       expect(
         resolveUsernameLabel(pooled, {
           tiebreakEntries: pooled,
-          knownUsernames: new Set(['ninthperson']),
+          knownUsernames: () => new Set(['ninthperson']),
         })
       ).toBe(XX_USERNAME);
     });
@@ -377,7 +385,7 @@ describe('resolveUsernameLabelWithMode', () => {
     expect(
       resolveUsernameLabelWithMode(pooled, {
         tiebreakEntries: pooled,
-        knownUsernames: new Set(['sample_user_p', 'sample_user_q']),
+        knownUsernames: () => new Set(['sample_user_p', 'sample_user_q']),
       })
     ).toEqual({ label: XX_USERNAME, mode: 'inferred' });
   });

@@ -127,16 +127,19 @@ function toOptionalFileResult(
 /**
  * Parse all optional relationship files from ZIP.
  *
- * `knownUsernames` is `following ∪ followers`, already normalised. It feeds
- * only the membership tiebreak that identifies a localised username label when
- * value shape cannot (see `instagram-labels.ts`). It defaults to empty, which
- * leaves the tiebreak inert rather than crashing or guessing — the right
- * behaviour when `following.json` is missing or its own shape drifted.
+ * `readKnownUsernames` yields `following ∪ followers`, already normalised. It
+ * feeds only the membership tiebreak that identifies a localised username label
+ * when value shape cannot (see `instagram-labels.ts`), so it is a thunk the
+ * tiebreak calls rather than a set built for every parse — the union spans the
+ * only two files that reach 1M accounts, and no archive measured so far gets
+ * far enough down the resolver to read it. It defaults to empty, which leaves
+ * the tiebreak inert rather than crashing or guessing — the right behaviour
+ * when `following.json` is missing or its own shape drifted.
  */
 export async function parseOptionalFiles(
   baseCandidates: string[],
   readJsonFromZip: ReadJsonFromZip,
-  knownUsernames: ReadonlySet<string> = new Set()
+  readKnownUsernames: () => ReadonlySet<string> = () => new Set()
 ): Promise<OptionalFilesParsed> {
   const readFirstExistingJson = async (
     fileNames: string[]
@@ -174,7 +177,7 @@ export async function parseOptionalFiles(
       tiebreakEntries: readFiles.flatMap((file, index) =>
         specs[index]?.impliesKnownAccount === true ? (file.entries ?? []) : []
       ),
-      knownUsernames,
+      knownUsernames: readKnownUsernames,
     }
   );
 
@@ -195,11 +198,17 @@ export async function parseOptionalFiles(
   const dismissedResult = optionalResults[4] ?? emptyResult;
   const permanentResult = optionalResults[optionalSpecs.length] ?? emptyResult;
 
-  // GH#41. These two files are the only optional ones a *computed* badge is
-  // derived from: `notFollowingBack` subtracts both from `following`
-  // (`core/badges/index.ts`). Either failing empties its map, and every account
-  // whose request is still outstanding silently joins the app's most-used
-  // filter.
+  // GH#41. Some optional files are the ones a *computed* badge is derived from:
+  // `notFollowingBack` subtracts them from `following` (`core/badges/index.ts`).
+  // One failing empties its map, and every account whose request is still
+  // outstanding silently joins the app's most-used filter.
+  //
+  // Taken from `feedsNotFollowingBackExclusion` rather than from `pendingResult`
+  // and `permanentResult` by name: those two are the whole set today, and an OR
+  // of two variables would keep compiling — and keep covering two of three — the
+  // day a third exclusion is added to the badge. `optionalResults` is
+  // index-aligned to `specs`, the same alignment the tiebreak pool above relies
+  // on.
   //
   // Both failure shapes count, for the same reason `instagram.ts` gates the
   // required files on both: the wrapper was not recognised (nothing to count,
@@ -210,10 +219,11 @@ export async function parseOptionalFiles(
   // `formatValid` defaults to true for an absent file, so a user with no
   // pending requests (most users) reads as false here rather than raising a
   // caveat nobody can act on.
-  const requestFileUnreadable = (result: OptionalFileResult): boolean =>
-    !result.formatValid || result.unresolvedEntries > 0;
-  const followRequestsUnreadable =
-    requestFileUnreadable(pendingResult) || requestFileUnreadable(permanentResult);
+  const followRequestsUnreadable = optionalResults.some(
+    (result, index) =>
+      specs[index]?.feedsNotFollowingBackExclusion === true &&
+      (!result.formatValid || result.unresolvedEntries > 0)
+  );
 
   // Build file expectations and drift warnings for optional files.
   //

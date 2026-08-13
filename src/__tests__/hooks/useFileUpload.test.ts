@@ -879,8 +879,8 @@ describe('useFileUpload', () => {
 
     /**
      * GH#21 Task 5: drift is a fact about the export, not about whether the
-     * upload finished — `reportUsernameLabelResolution` runs on the worker's
-     * failure path the same as `reportOptionalFileDrift` does. This goes
+     * upload finished — `reportParseDiagnostics` runs on the worker's failure
+     * path, carrying the resolution mode and the drift warnings alike. This goes
      * through the real (unmocked) `parseWithWorker`, so it also pins that
      * `labelResolutionMode` survives the worker message boundary on the
      * `hasMinimalData: false` branch, not just the success one.
