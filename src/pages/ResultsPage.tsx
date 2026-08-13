@@ -21,17 +21,10 @@ export function Component() {
     Boolean(fileMetadata.fileHash) &&
     typeof fileMetadata.accountCount === 'number';
 
-  // Fallback handlers for Hero
+  // Fallback handler for the DiagnosticErrorScreen's "open wizard" action.
+  // The Hero fallback below navigates on its own via real anchors.
   const handleStartGuide = () => {
     navigate(`${prefix}/wizard`);
-  };
-
-  const handleLoadSample = () => {
-    navigate(`${prefix}/sample`);
-  };
-
-  const handleUploadDirect = () => {
-    navigate(`${prefix}/upload`);
   };
 
   const handleTryAgain = () => {
@@ -62,14 +55,7 @@ export function Component() {
   }
 
   // Fallback to Hero if no data
-  return (
-    <Hero
-      onStartGuide={handleStartGuide}
-      onLoadSample={handleLoadSample}
-      onUploadDirect={handleUploadDirect}
-      hasData={false}
-    />
-  );
+  return <Hero hasData={false} />;
 }
 
 export default Component;

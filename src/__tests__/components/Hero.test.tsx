@@ -1,21 +1,17 @@
 import { vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { screen } from '@testing-library/react';
 
 // Import translation before mocking
 import heroEN from '@/locales/en/hero.json';
 import { createI18nMock } from '@/__tests__/utils/mockI18n';
+import { renderWithRouter as render } from '@/__tests__/test-utils';
 
 vi.mock('react-i18next', () => createI18nMock(heroEN));
 
 import { Hero } from '@/components/Hero';
 
 describe('Hero Component', () => {
-  const defaultProps = {
-    onStartGuide: vi.fn(),
-    onLoadSample: vi.fn(),
-    onUploadDirect: vi.fn(),
-  };
+  const defaultProps = {};
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -51,27 +47,27 @@ describe('Hero Component', () => {
   });
 
   describe('CTA buttons', () => {
-    it('should render primary CTA button when no data', () => {
+    it('should render primary CTA link when no data', () => {
       render(<Hero {...defaultProps} hasData={false} />);
 
       expect(
-        screen.getByRole('button', { name: new RegExp(heroEN.buttons.getGuide, 'i') })
+        screen.getByRole('link', { name: new RegExp(heroEN.buttons.getGuide, 'i') })
       ).toBeInTheDocument();
     });
 
-    it('should render "View Results" button when hasData is true', () => {
-      render(<Hero {...defaultProps} hasData={true} onContinue={vi.fn()} />);
+    it('should render "View Results" link when hasData is true', () => {
+      render(<Hero {...defaultProps} hasData={true} />);
 
       expect(
-        screen.getByRole('button', { name: new RegExp(heroEN.buttons.viewResults, 'i') })
+        screen.getByRole('link', { name: new RegExp(heroEN.buttons.viewResults, 'i') })
       ).toBeInTheDocument();
     });
 
-    it('should render sample data button', () => {
+    it('should render sample data link', () => {
       render(<Hero {...defaultProps} />);
 
       expect(
-        screen.getByRole('button', { name: new RegExp(heroEN.buttons.trySample, 'i') })
+        screen.getByRole('link', { name: new RegExp(heroEN.buttons.trySample, 'i') })
       ).toBeInTheDocument();
     });
 
@@ -79,7 +75,7 @@ describe('Hero Component', () => {
       render(<Hero {...defaultProps} hasData={false} />);
 
       expect(
-        screen.getByRole('button', { name: new RegExp(heroEN.buttons.haveFile, 'i') })
+        screen.getByRole('link', { name: new RegExp(heroEN.buttons.haveFile, 'i') })
       ).toBeInTheDocument();
     });
 
@@ -87,7 +83,7 @@ describe('Hero Component', () => {
       render(<Hero {...defaultProps} hasData={true} />);
 
       expect(
-        screen.queryByRole('button', { name: new RegExp(heroEN.buttons.haveFile, 'i') })
+        screen.queryByRole('link', { name: new RegExp(heroEN.buttons.haveFile, 'i') })
       ).not.toBeInTheDocument();
     });
   });
@@ -122,50 +118,48 @@ describe('Hero Component', () => {
     });
   });
 
-  describe('button interactions', () => {
-    it('should call onStartGuide when primary CTA is clicked', async () => {
-      const user = userEvent.setup();
-      render(<Hero {...defaultProps} />);
-
-      await user.click(
-        screen.getByRole('button', { name: new RegExp(heroEN.buttons.getGuide, 'i') })
-      );
-
-      expect(defaultProps.onStartGuide).toHaveBeenCalledTimes(1);
+  describe('CTA hrefs', () => {
+    // A <button> calling useNavigate() is dead until React hydrates — 3.7s on a cold
+    // mobile load. An anchor navigates natively that whole time.
+    it('renders the primary CTA as a real anchor to the wizard', () => {
+      render(<Hero hasData={false} />);
+      expect(
+        screen.getByRole('link', { name: new RegExp(heroEN.buttons.getGuide, 'i') })
+      ).toHaveAttribute('href', '/wizard/step/1');
     });
 
-    it('should call onLoadSample when sample button is clicked', async () => {
-      const user = userEvent.setup();
-      render(<Hero {...defaultProps} />);
-
-      await user.click(
-        screen.getByRole('button', { name: new RegExp(heroEN.buttons.trySample, 'i') })
-      );
-
-      expect(defaultProps.onLoadSample).toHaveBeenCalledTimes(1);
+    it('renders the sample CTA as a real anchor', () => {
+      render(<Hero hasData={false} />);
+      expect(
+        screen.getByRole('link', { name: new RegExp(heroEN.buttons.trySample, 'i') })
+      ).toHaveAttribute('href', '/sample');
     });
 
-    it('should call onUploadDirect when "I already have my ZIP file" is clicked', async () => {
-      const user = userEvent.setup();
-      render(<Hero {...defaultProps} />);
-
-      await user.click(
-        screen.getByRole('button', { name: new RegExp(heroEN.buttons.haveFile, 'i') })
-      );
-
-      expect(defaultProps.onUploadDirect).toHaveBeenCalledTimes(1);
+    it('renders the direct-upload CTA as a real anchor', () => {
+      render(<Hero hasData={false} />);
+      expect(
+        screen.getByRole('link', { name: new RegExp(heroEN.buttons.haveFile, 'i') })
+      ).toHaveAttribute('href', '/upload');
     });
 
-    it('should call onContinue when "View Results" is clicked', async () => {
-      const user = userEvent.setup();
-      const onContinue = vi.fn();
-      render(<Hero {...defaultProps} hasData={true} onContinue={onContinue} />);
+    it('renders the results CTA as a real anchor when data is loaded', () => {
+      render(<Hero hasData={true} />);
+      expect(
+        screen.getByRole('link', { name: new RegExp(heroEN.buttons.viewResults, 'i') })
+      ).toHaveAttribute('href', '/results');
+    });
 
-      await user.click(
-        screen.getByRole('button', { name: new RegExp(heroEN.buttons.viewResults, 'i') })
-      );
-
-      expect(onContinue).toHaveBeenCalledTimes(1);
+    it('prefixes every CTA href with the current language', () => {
+      render(<Hero hasData={false} />, { initialEntries: ['/ru/'] });
+      expect(
+        screen.getByRole('link', { name: new RegExp(heroEN.buttons.getGuide, 'i') })
+      ).toHaveAttribute('href', '/ru/wizard/step/1');
+      expect(
+        screen.getByRole('link', { name: new RegExp(heroEN.buttons.trySample, 'i') })
+      ).toHaveAttribute('href', '/ru/sample');
+      expect(
+        screen.getByRole('link', { name: new RegExp(heroEN.buttons.haveFile, 'i') })
+      ).toHaveAttribute('href', '/ru/upload');
     });
   });
 });

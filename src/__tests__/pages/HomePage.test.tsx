@@ -2,29 +2,12 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { Component as HomePage } from '@/pages/HomePage';
-import heroEN from '@/locales/en/hero.json';
 import commonEN from '@/locales/en/common.json';
 
 // Mock child components
 vi.mock('@/components/Hero', () => ({
-  Hero: ({
-    onStartGuide,
-    onLoadSample,
-    onUploadDirect,
-    hasData,
-    onContinue,
-  }: {
-    onStartGuide: (stepIndex?: number) => void;
-    onLoadSample: () => void;
-    onUploadDirect: () => void;
-    hasData?: boolean;
-    onContinue?: () => void;
-  }) => (
+  Hero: ({ hasData }: { hasData?: boolean }) => (
     <div data-testid="hero">
-      <button onClick={() => onStartGuide(0)}>{heroEN.buttons.getGuide}</button>
-      <button onClick={onLoadSample}>{heroEN.buttons.trySample}</button>
-      <button onClick={onUploadDirect}>{heroEN.buttons.haveFile}</button>
-      {hasData && onContinue && <button onClick={onContinue}>{heroEN.buttons.viewResults}</button>}
       <span data-testid="has-data">{String(hasData)}</span>
     </div>
   ),
@@ -121,49 +104,6 @@ describe('HomePage', () => {
     });
   });
 
-  describe('navigation - Hero handlers', () => {
-    it('should navigate to wizard step 1 when Start Guide is clicked', async () => {
-      const user = userEvent.setup();
-      render(<HomePage />);
-
-      await user.click(screen.getByText(heroEN.buttons.getGuide));
-
-      expect(mockNavigate).toHaveBeenCalledWith('/wizard/step/1');
-    });
-
-    it('should navigate to sample page when Load Sample is clicked', async () => {
-      const user = userEvent.setup();
-      render(<HomePage />);
-
-      await user.click(screen.getByText(heroEN.buttons.trySample));
-
-      expect(mockNavigate).toHaveBeenCalledWith('/sample');
-    });
-
-    it('should navigate to upload page when Upload Direct is clicked', async () => {
-      const user = userEvent.setup();
-      render(<HomePage />);
-
-      await user.click(screen.getByText(heroEN.buttons.haveFile));
-
-      expect(mockNavigate).toHaveBeenCalledWith('/upload');
-    });
-
-    it('should navigate to results when Continue is clicked', async () => {
-      mockUseInstagramData.mockReturnValue({
-        uploadState: { status: 'success', error: null, fileName: 'test.zip' },
-        fileMetadata: { fileHash: 'abc123', accountCount: 100, name: 'test.zip' },
-      });
-
-      const user = userEvent.setup();
-      render(<HomePage />);
-
-      await user.click(screen.getByText(heroEN.buttons.viewResults));
-
-      expect(mockNavigate).toHaveBeenCalledWith('/results');
-    });
-  });
-
   describe('navigation - HowToSection handlers', () => {
     it('should navigate to wizard with step index from HowTo section', async () => {
       const user = userEvent.setup();
@@ -202,7 +142,10 @@ describe('HomePage', () => {
       const user = userEvent.setup();
       render(<HomePage />);
 
-      await user.click(screen.getByText(heroEN.buttons.getGuide));
+      // Hero itself is mocked here — its own href-prefixing is covered by
+      // Hero.test.tsx. This exercises the prefix reaching handleStartGuide,
+      // the handler HowToSection and FooterCTA still depend on.
+      await user.click(screen.getByText(commonEN.cta.getStarted));
 
       expect(mockNavigate).toHaveBeenCalledWith('/es/wizard/step/1');
     });

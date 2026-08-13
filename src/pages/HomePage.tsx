@@ -56,23 +56,9 @@ export function Component() {
     navigate(`${prefix}/sample`);
   };
 
-  const handleUploadDirect = () => {
-    navigate(`${prefix}/upload`);
-  };
-
-  const handleContinue = () => {
-    navigate(`${prefix}/results`);
-  };
-
   return (
     <>
-      <Hero
-        onStartGuide={handleStartGuide}
-        onLoadSample={handleLoadSample}
-        onUploadDirect={handleUploadDirect}
-        hasData={hasResults}
-        onContinue={handleContinue}
-      />
+      <Hero hasData={hasResults} />
       <div className="animate-in fade-in duration-1000">
         <HowToSection onStart={handleStartGuide} />
         <AdSlot name="home" slot={import.meta.env.VITE_ADSENSE_SLOT_HOME} className="my-8" />
