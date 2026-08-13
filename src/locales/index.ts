@@ -129,21 +129,21 @@ export async function initI18n(options?: InitI18nOptions): Promise<void> {
       // Client: Load only the language from URL (lazy loading)
       const urlLang = detectLanguageFromUrl();
 
-      // Always load English as fallback
-      const enResources = await loadLanguageResources('en');
-      const resources: Record<string, typeof enResources> = {
-        en: enResources,
-      };
+      // English is always needed as the fallback bundle and the URL language is needed to
+      // render. Awaiting them in sequence made every non-English visitor pay two serial
+      // round trips through the same 8-chunk fetch.
+      const [enResources, urlResources] = await Promise.all([
+        loadLanguageResources('en'),
+        urlLang === 'en'
+          ? Promise.resolve(null)
+          : loadLanguageResources(urlLang).catch(error => {
+              console.error(`Failed to load language: ${urlLang}`, error);
+              return null;
+            }),
+      ]);
 
-      // If URL specifies non-English language, load it too
-      if (urlLang !== 'en') {
-        try {
-          resources[urlLang] = await loadLanguageResources(urlLang);
-        } catch (error) {
-          console.error(`Failed to load language: ${urlLang}`, error);
-          // Fall back to English if loading fails
-        }
-      }
+      const resources: Record<string, typeof enResources> = { en: enResources };
+      if (urlResources !== null) resources[urlLang] = urlResources;
 
       await i18n
         .use(LanguageDetector)

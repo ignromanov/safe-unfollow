@@ -11,6 +11,56 @@ import {
 
 const BASE_URL = 'https://safeunfollow.app';
 
+/** The eight i18next namespaces every page loads. Mirrors src/locales/index.ts. */
+const I18N_NAMESPACES = [
+  'common',
+  'faq',
+  'hero',
+  'howto',
+  'meta',
+  'results',
+  'upload',
+  'wizard',
+] as const;
+
+/**
+ * modulepreload hrefs for the locale chunks a page will fetch, English first.
+ *
+ * initI18n awaits English unconditionally before the URL language, so a non-English page
+ * must preload both sets or the tags prioritise the second wave and leave the gating one
+ * cold.
+ *
+ * Throws on a missing entry instead of emitting a dead href: a 404 modulepreload is
+ * silent in the network panel and buys nothing, which is exactly the class of bug that
+ * survives review.
+ */
+export function localeChunkHrefs(
+  lang: string,
+  manifest: Record<string, { file: string }>
+): string[] {
+  const langs = lang === 'en' ? ['en'] : ['en', lang];
+  return langs.flatMap(l =>
+    I18N_NAMESPACES.map(ns => {
+      const key = `src/locales/${l}/${ns}.json`;
+      const entry = manifest[key];
+      if (!entry) throw new Error(`vite manifest has no entry for ${key}`);
+      return `/${entry.file}`;
+    })
+  );
+}
+
+let manifestCache: Record<string, { file: string }> | null = null;
+
+function readViteManifest(rootDir: string): Record<string, { file: string }> {
+  if (manifestCache) return manifestCache;
+  const manifestPath = path.join(rootDir, 'dist', '.vite', 'manifest.json');
+  manifestCache = JSON.parse(fs.readFileSync(manifestPath, 'utf-8')) as Record<
+    string,
+    { file: string }
+  >;
+  return manifestCache;
+}
+
 /**
  * Font subsets needed for each language (for future reference).
  *
@@ -155,6 +205,12 @@ export async function injectLocalizedMeta(
     .map(locale => `<meta property="og:locale:alternate" content="${locale}"/>`)
     .join('\n    ');
 
+  // Preload the locale chunks this page will fetch during hydration, so they start
+  // downloading with the entry bundle instead of after it parses.
+  const preloadTags = localeChunkHrefs(currentLang, readViteManifest(rootDir))
+    .map(href => `<link rel="modulepreload" crossorigin href="${href}">`)
+    .join('\n    ');
+
   // SEO tags to inject before </head>
   const seoTags = `
     <!-- SSG SEO: canonical, hreflang, og:locale -->
@@ -163,6 +219,8 @@ export async function injectLocalizedMeta(
     ${xDefaultLink}
     <meta property="og:locale" content="${localeCode}"/>
     ${alternateLocales}
+    <!-- SSG i18n: preload locale chunks for the entry bundle -->
+    ${preloadTags}
   `;
 
   // OG image URL - static image for all languages (API doesn't work with Vercel SSG)
