@@ -115,6 +115,28 @@ export interface ParseResult {
   hasMinimalData: boolean;
   /** How the username label was resolved for this parse (GH#21 Task 5). */
   labelResolutionMode: LabelResolutionMode;
+  /**
+   * True when a follow-requests file was found and could not be read, so the
+   * `notFollowingBack` badge is overstated (GH#41).
+   *
+   * `notFollowingBack` is `following` minus `followers`, minus `pendingSent`,
+   * minus `permanentRequests` (`core/badges/index.ts`). The last two come from
+   * `pending_follow_requests.json` and the permanent-requests file; when either
+   * is present but unreadable its map is empty, the subtraction removes nobody,
+   * and every account with an outstanding request is badged "not following you
+   * back". The drift warnings that record this carry severity 'warning', which
+   * is rendered on no screen in the app — so without this field the wrong answer
+   * ships as a right one.
+   *
+   * Required, not optional: every exit in `parseInstagramZipFile` knows the
+   * answer, including the early ones that read no file at all (nothing was
+   * read, so nothing is overstated — `false`). Same reasoning as
+   * `labelResolutionMode`'s `'not-applicable'`.
+   *
+   * An absent request file is NOT a failure: most users have no pending
+   * requests, and a caveat shown to everyone is a caveat nobody reads.
+   */
+  followRequestsUnreadable: boolean;
 }
 
 /**

@@ -116,6 +116,63 @@ describe('IndexedDBService (Integration Tests)', () => {
       expect(retrieved?.accountCount).toBe(200);
     });
 
+    /**
+     * GH#41. `/results` is reached long after the parse — a returning visitor
+     * never re-parses at all — so the caveat has to live in this store or it
+     * shows once and disappears, leaving the returning user with the silent
+     * overstatement the issue is about.
+     */
+    it('should round-trip followRequestsUnreadable so the caveat survives the parse', async () => {
+      const caveatHash = 'follow-requests-unreadable-hash';
+      usedFileHashes.add(caveatHash);
+
+      await indexedDBService.saveFileMetadata({
+        fileHash: caveatHash,
+        fileName: mockFileName,
+        fileSize: mockFileSize,
+        uploadDate: new Date('2024-01-01'),
+        accountCount: 100,
+        lastAccessed: Date.now(),
+        version: 2,
+        accountsComplete: true,
+        followRequestsUnreadable: true,
+      });
+
+      expect((await indexedDBService.getFileMetadata(caveatHash))?.followRequestsUnreadable).toBe(
+        true
+      );
+
+      // The cache-hit re-save (indexeddb-cache.ts bumps lastAccessed on every
+      // hit) must not drop it — that path runs far more often than the parse.
+      const stored = await indexedDBService.getFileMetadata(caveatHash);
+      await indexedDBService.saveFileMetadata({
+        ...(stored as NonNullable<typeof stored>),
+        lastAccessed: Date.now(),
+      });
+
+      expect((await indexedDBService.getFileMetadata(caveatHash))?.followRequestsUnreadable).toBe(
+        true
+      );
+    });
+
+    it('should leave followRequestsUnreadable absent when the parse raised no caveat', async () => {
+      // Absent means "no caveat", the same default accountsComplete takes.
+      // A record from before this field existed must not start warning people.
+      await indexedDBService.saveFileMetadata({
+        fileHash: mockFileHash,
+        fileName: mockFileName,
+        fileSize: mockFileSize,
+        uploadDate: new Date('2024-01-01'),
+        accountCount: 100,
+        lastAccessed: Date.now(),
+        version: 2,
+        accountsComplete: true,
+      });
+
+      const retrieved = await indexedDBService.getFileMetadata(mockFileHash);
+      expect(retrieved?.followRequestsUnreadable).toBeUndefined();
+    });
+
     it('should handle Date conversion correctly', async () => {
       const uploadDate = new Date('2024-06-15T10:30:00Z');
 

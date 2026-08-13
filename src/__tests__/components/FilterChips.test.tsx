@@ -246,4 +246,45 @@ describe('FilterChips Component', () => {
       expect(screen.getByText(resultsEN.filters.title)).toBeInTheDocument();
     });
   });
+
+  /**
+   * GH#41. The page-level notice explains the problem; the chip is where the
+   * wrong number is actually read, and on a phone the two are a scroll apart.
+   */
+  describe('overstated notFollowingBack chip', () => {
+    const chipName = (fragment: string) =>
+      screen.getByRole('button', { name: new RegExp(fragment, 'i') });
+
+    const hint = resultsEN.caveat.followRequests.chipHint;
+    const hintPattern = new RegExp(hint.slice(0, 20), 'i');
+
+    it('marks the notFollowingBack chip when a follow-requests file was unreadable', () => {
+      render(<FilterChips {...defaultProps} followRequestsUnreadable />);
+
+      const chipLabel = resultsEN.filters.addFilter
+        .replace('{{label}}', resultsEN.badges.notFollowingBack)
+        .replace('{{count, number}}', '25');
+
+      // The whole accessible name, not a fragment: the separator between the
+      // two halves comes from `filters.chipWithHint`, which is what lets `ar`
+      // and `ja` join them without the em dash their own copy avoids. A
+      // hardcoded dash in the component would pass a fragment match and fail
+      // this one.
+      expect(chipName('Add Not following back filter')).toHaveAccessibleName(
+        resultsEN.filters.chipWithHint.replace('{{label}}', chipLabel).replace('{{hint}}', hint)
+      );
+    });
+
+    it('leaves every other chip alone', () => {
+      render(<FilterChips {...defaultProps} followRequestsUnreadable />);
+
+      expect(chipName('Add Followers filter')).not.toHaveAccessibleName(hintPattern);
+    });
+
+    it('marks nothing when the follow-requests files read fine', () => {
+      render(<FilterChips {...defaultProps} />);
+
+      expect(chipName('Add Not following back filter')).not.toHaveAccessibleName(hintPattern);
+    });
+  });
 });

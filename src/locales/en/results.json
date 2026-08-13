@@ -33,7 +33,8 @@
     "reset": "Reset",
     "emptyCategories": "Empty Categories ({{count, number}})",
     "addFilter": "Add {{label}} filter ({{count, number}} accounts)",
-    "removeFilter": "Remove {{label}} filter ({{count, number}} accounts)"
+    "removeFilter": "Remove {{label}} filter ({{count, number}} accounts)",
+    "chipWithHint": "{{label}} — {{hint}}"
   },
   "badges": {
     "followers": "Followers",
@@ -47,6 +48,13 @@
     "restricted": "Restricted",
     "close": "Close friend",
     "dismissed": "Dismissed suggestion"
+  },
+  "caveat": {
+    "followRequests": {
+      "title": "“Not following back” may be overstated.",
+      "body": "We could not read your follow-requests file, so accounts you have requested may appear in this list, and your pending-request counts show as empty. Your Followers, Following and Mutuals are unaffected.",
+      "chipHint": "May be overstated — we could not read your follow-requests file."
+    }
   },
   "empty": {
     "noUsers": "No users found",

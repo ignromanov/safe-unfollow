@@ -17,6 +17,13 @@ function collectAllUsernames(parsed: ParsedAll): Set<string> {
 // Helper function to compute derived relationship categories
 function computeDerivedRelationships(parsed: ParsedAll) {
   // notFollowingBack: User follows but account doesn't follow back (excluding pending/permanent requests)
+  //
+  // GH#41: the two request exclusions come from optional files that can be
+  // present and unreadable, in which case their maps are empty, nobody is
+  // subtracted, and this badge silently overstates itself. `ParseResult`
+  // carries `followRequestsUnreadable` for exactly this, and `/results` renders
+  // a caveat from it. Adding a THIRD exclusion here means asking whether that
+  // flag still covers the badge — `badges.test.ts` fails until someone does.
   const notFollowingBack = new Set(
     [...parsed.following].filter(
       u =>

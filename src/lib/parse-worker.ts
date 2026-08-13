@@ -75,6 +75,9 @@ self.onmessage = async (
         accountCount: unified.length,
         lastAccessed: Date.now(),
         version: 2,
+        // GH#41: the caveat has to survive the parse — /results reads this
+        // record, not the ParseResult that is about to go out of scope.
+        followRequestsUnreadable: parseResult.followRequestsUnreadable,
       });
 
       // Store all accounts at once (optimized bulk mode)

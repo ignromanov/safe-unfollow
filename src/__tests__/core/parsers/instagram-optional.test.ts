@@ -434,6 +434,81 @@ describe('parseOptionalFiles entry-level drift (GH#21 Task 3)', () => {
 });
 
 /**
+ * GH#41: `notFollowingBack` is defined by EXCLUDING pendingSent and
+ * permanentRequests. When either request file is present but unreadable, both
+ * maps come back empty, and every still-pending outgoing follow request lands
+ * in the app's most-used filter as "not following you back" — with no error and
+ * no banner, because severity 'warning' reaches no screen anywhere. This flag
+ * is the one fact the results page needs to say so out loud.
+ */
+describe('parseOptionalFiles followRequestsUnreadable (GH#41)', () => {
+  const permanentFile = PERMANENT_REQUESTS_SPEC.fileNames[0]!;
+
+  it('raises the caveat when the pending file was found and its records could not be read', async () => {
+    const reader = makeReader(ARRAY_UNREADABLE_ENTRIES);
+    const result = await parseOptionalFiles([], reader);
+
+    // The wrapper parsed — this is the entry-level half, the one `formatValid`
+    // cannot see and the one four of the six 2026-08-11 files landed in.
+    expect(result.pendingResult.formatValid).toBe(true);
+    expect(result.pendingResult.unresolvedEntries).toBe(3);
+    expect(result.followRequestsUnreadable).toBe(true);
+  });
+
+  it('raises the caveat when the pending file’s top-level shape was not recognised', async () => {
+    const reader = makeReader(UNKNOWN_TOP_LEVEL_KEY);
+    const result = await parseOptionalFiles([], reader);
+
+    // The wrapper-level half: nothing to count, so `unresolvedEntries` is 0 and
+    // reading it alone would miss this failure entirely.
+    expect(result.pendingResult.formatValid).toBe(false);
+    expect(result.pendingResult.unresolvedEntries).toBe(0);
+    expect(result.followRequestsUnreadable).toBe(true);
+  });
+
+  it('raises the caveat for the permanent-requests file, not just the pending one', async () => {
+    // Both files feed the same two exclusions, so either one failing overstates
+    // the badge. permanent-requests is the easier one to forget: it is not part
+    // of FILE_SPECS.slice(2) and had to be appended to the spec list by hand.
+    const reader = makeReader(UNKNOWN_TOP_LEVEL_KEY, permanentFile);
+    const result = await parseOptionalFiles([], reader);
+
+    expect(result.permanentResult.formatValid).toBe(false);
+    expect(result.followRequestsUnreadable).toBe(true);
+  });
+
+  it('does NOT raise the caveat when the request files are simply absent', async () => {
+    // Most people have no pending requests at all. A caveat here would show to
+    // nearly everyone, and a warning everyone sees is a warning nobody reads.
+    const reader = vi.fn().mockResolvedValue(null);
+    const result = await parseOptionalFiles([], reader);
+
+    expect(result.pendingResult.found).toBe(false);
+    expect(result.permanentResult.found).toBe(false);
+    expect(result.followRequestsUnreadable).toBe(false);
+  });
+
+  it('does NOT raise the caveat when a request file is present and genuinely empty', async () => {
+    const reader = makeReader(EMPTY_ARRAY);
+    const result = await parseOptionalFiles([], reader);
+
+    expect(result.pendingResult.found).toBe(true);
+    expect(result.followRequestsUnreadable).toBe(false);
+  });
+
+  it('does NOT raise the caveat when some OTHER optional file drifts', async () => {
+    // close_friends.json drifting zeroes the `close` badge and nothing else.
+    // The caveat names one specific badge, so it must not fire for a file that
+    // badge is not derived from.
+    const reader = makeReader(ARRAY_UNREADABLE_ENTRIES, FILE_SPECS[4]!.fileNames[0]!);
+    const result = await parseOptionalFiles([], reader);
+
+    expect(result.closeFriendsResult.unresolvedEntries).toBe(3);
+    expect(result.followRequestsUnreadable).toBe(false);
+  });
+});
+
+/**
  * GH#21 Task 5: `parseOptionalFiles` now surfaces how the username label was
  * resolved for the archive it just read, so a caller can report it without
  * recomputing anything. `resolveUsernameLabelWithMode` itself is exercised

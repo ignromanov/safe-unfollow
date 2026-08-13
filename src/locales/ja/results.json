@@ -33,7 +33,8 @@
     "reset": "リセット",
     "emptyCategories": "空のカテゴリ（{{count, number}}件）",
     "addFilter": "{{label}}フィルタを追加（{{count, number}}件）",
-    "removeFilter": "{{label}}フィルタを削除（{{count, number}}件）"
+    "removeFilter": "{{label}}フィルタを削除（{{count, number}}件）",
+    "chipWithHint": "{{label}}。{{hint}}"
   },
   "badges": {
     "followers": "フォロワー",
@@ -47,6 +48,13 @@
     "restricted": "制限中",
     "close": "親しい友達",
     "dismissed": "非表示にした候補"
+  },
+  "caveat": {
+    "followRequests": {
+      "title": "「フォローバックなし」は実際より多く表示されている可能性があります。",
+      "body": "フォローリクエストのファイルを読み取れなかったため、リクエスト済みのアカウントがこの一覧に含まれている可能性があり、リクエスト中の件数は0と表示されます。フォロワー、フォロー中、相互フォローには影響ありません。",
+      "chipHint": "実際より多く表示されている可能性があります。フォローリクエストのファイルを読み取れませんでした。"
+    }
   },
   "empty": {
     "noUsers": "ユーザーが見つかりません",

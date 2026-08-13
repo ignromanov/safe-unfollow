@@ -33,7 +33,8 @@
     "reset": "Reset",
     "emptyCategories": "Kategori Kosong ({{count, number}})",
     "addFilter": "Tambah filter {{label}} ({{count, number}} akun)",
-    "removeFilter": "Hapus filter {{label}} ({{count, number}} akun)"
+    "removeFilter": "Hapus filter {{label}} ({{count, number}} akun)",
+    "chipWithHint": "{{label}} — {{hint}}"
   },
   "badges": {
     "followers": "Pengikut",
@@ -47,6 +48,13 @@
     "restricted": "Dibatasi",
     "close": "Teman dekat",
     "dismissed": "Saran ditolak"
+  },
+  "caveat": {
+    "followRequests": {
+      "title": "“Tidak mengikuti balik” mungkin terlalu tinggi.",
+      "body": "Kami tidak dapat membaca file permintaan mengikuti Anda, jadi akun yang sudah Anda kirimi permintaan bisa muncul di daftar ini, dan hitungan permintaan tertunda Anda tampil kosong. Pengikut, Mengikuti, dan Saling mengikuti tidak terpengaruh.",
+      "chipHint": "Mungkin terlalu tinggi — kami tidak dapat membaca file permintaan mengikuti Anda."
+    }
   },
   "empty": {
     "noUsers": "Tidak ada pengguna ditemukan",

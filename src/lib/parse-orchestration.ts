@@ -144,6 +144,8 @@ export async function parseOnMainThread(
       accountCount: unified.length,
       lastAccessed: Date.now(),
       version: 2,
+      // GH#41 — see parse-worker.ts; the fallback path must persist it too.
+      followRequestsUnreadable: parseResult.followRequestsUnreadable,
     });
 
     await indexedDBService.storeAllAccounts(fileHash, unified);

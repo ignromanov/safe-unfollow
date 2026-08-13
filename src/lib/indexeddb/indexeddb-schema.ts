@@ -93,6 +93,25 @@ export interface FileMetadataRecord {
    * what GH#23 is about.
    */
   accountsComplete?: boolean;
+  /**
+   * True when this upload's follow-requests file was found and could not be read,
+   * so its `notFollowingBack` badge is overstated (GH#41). See
+   * `ParseResult.followRequestsUnreadable` for how the badge inflates.
+   *
+   * Stored here because it must outlive the parse. `/results` is reached long
+   * after `ParseResult` is gone — a returning visitor never re-parses at all —
+   * and this store is the only place the upload's facts survive that gap. Thread
+   * it through the live parse alone and the caveat appears once and vanishes on
+   * the next visit, leaving the returning user with exactly the silent wrong
+   * answer this field exists to prevent.
+   *
+   * Optional, and absent means "no caveat" — the same default `accountsComplete`
+   * takes above, for the same documented reason: GH#22 changed the cache-key
+   * derivation, so records written before this field existed are not looked up
+   * under their old key again. No DB version bump: object stores here are
+   * schemaless (GH#23).
+   */
+  followRequestsUnreadable?: boolean;
 }
 
 // ===== Conversion Utilities =====

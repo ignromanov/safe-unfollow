@@ -45,6 +45,12 @@ export interface OptionalFilesParsed {
   warnings: ParseWarning[];
   /** How the username label was resolved for this archive (GH#21 Task 5). */
   labelResolutionMode: LabelResolutionMode;
+  /**
+   * True when `pending_follow_requests.json` or the permanent-requests file was
+   * found and could not be read (GH#41). See `followRequestsUnreadable` on
+   * `ParseResult` for what depends on it.
+   */
+  followRequestsUnreadable: boolean;
 }
 
 type ReadJsonFromZip = (patterns: string[]) => Promise<{ data: unknown; path: string } | null>;
@@ -189,11 +195,40 @@ export async function parseOptionalFiles(
   const dismissedResult = optionalResults[4] ?? emptyResult;
   const permanentResult = optionalResults[optionalSpecs.length] ?? emptyResult;
 
+  // GH#41. These two files are the only optional ones a *computed* badge is
+  // derived from: `notFollowingBack` subtracts both from `following`
+  // (`core/badges/index.ts`). Either failing empties its map, and every account
+  // whose request is still outstanding silently joins the app's most-used
+  // filter.
+  //
+  // Both failure shapes count, for the same reason `instagram.ts` gates the
+  // required files on both: the wrapper was not recognised (nothing to count,
+  // so `unresolvedEntries` stays 0), or the wrapper was fine and the records
+  // inside it drifted. They produce one outcome — an empty map — so they make
+  // one flag.
+  //
+  // `formatValid` defaults to true for an absent file, so a user with no
+  // pending requests (most users) reads as false here rather than raising a
+  // caveat nobody can act on.
+  const requestFileUnreadable = (result: OptionalFileResult): boolean =>
+    !result.formatValid || result.unresolvedEntries > 0;
+  const followRequestsUnreadable =
+    requestFileUnreadable(pendingResult) || requestFileUnreadable(permanentResult);
+
   // Build file expectations and drift warnings for optional files.
   //
-  // Severity 'warning', not 'error': optional-file drift zeroes one badge
+  // Severity 'warning', not 'error': optional-file drift costs one badge
   // without inverting the core following/followers math, so failing the
-  // whole upload is disproportionate (GH#21). Each spec carries its own
+  // whole upload is disproportionate (GH#21).
+  //
+  // That justification was written as "zeroes one badge", which is true of four
+  // of these six files and FALSE of the two request files (GH#41): zeroing them
+  // does not empty `notFollowingBack`, it INFLATES it, because that badge is
+  // defined by subtracting them. A silently wrong answer, not a missing one.
+  // The severity stays 'warning' — losing the whole free analysis over one
+  // optional file is worse, at a measured 70.5% upload success rate — and
+  // `followRequestsUnreadable` above is what makes the overstatement visible
+  // instead. Each spec carries its own
   // driftCode and entryDriftCode (instagram-file-specs.ts) so a consumer can
   // tell which file drifted, and how, without parsing the message text.
   //
@@ -247,5 +282,6 @@ export async function parseOptionalFiles(
     fileExpectations,
     warnings,
     labelResolutionMode,
+    followRequestsUnreadable,
   };
 }

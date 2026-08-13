@@ -8,6 +8,8 @@ import {
 } from '@/core/badges';
 import { createTestParsedData, TEST_ACCOUNTS } from '@tests/fixtures/testData';
 import type { BadgeKey } from '@/core/types';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 describe('Badge Logic', () => {
   const testData = createTestParsedData();
@@ -264,6 +266,35 @@ describe('Badge Logic', () => {
 
       expect(badgeKeys).toEqual(labelKeys);
       expect(badgeKeys).toEqual(colorKeys);
+    });
+  });
+
+  /**
+   * GH#41. `followRequestsUnreadable` is derived from exactly two files —
+   * `pending_follow_requests.json` and the permanent-requests file — because
+   * `notFollowingBack` is defined by subtracting exactly those two sets. The
+   * flag and the badge are two halves of one fact held in two files, and
+   * nothing but this test connects them.
+   *
+   * If this fails you have changed which sets `notFollowingBack` excludes.
+   * Decide whether the caveat still covers the badge:
+   *  - a new exclusion from an OPTIONAL file that can be present-but-unreadable
+   *    must be added to `requestFileUnreadable` in `instagram-optional.ts`,
+   *    or the badge overstates itself again with nothing on screen saying so;
+   *  - `followers` needs nothing: it is required, and an unreadable required
+   *    file already fails the upload loudly (`hasMinimalData`).
+   * Then update the list below.
+   */
+  describe('notFollowingBack exclusions stay in sync with the GH#41 caveat flag', () => {
+    it('excludes exactly followers, pendingSent and permanentRequests', () => {
+      const source = readFileSync(join(process.cwd(), 'src/core/badges/index.ts'), 'utf-8');
+
+      const filterBody = source.match(/const notFollowingBack = new Set\(([\s\S]*?)\n {2}\);/)?.[1];
+      expect(filterBody, 'could not locate the notFollowingBack filter').toBeDefined();
+
+      const excluded = [...filterBody!.matchAll(/!parsed\.(\w+)\.has\(u\)/g)].map(m => m[1]);
+
+      expect(excluded).toEqual(['followers', 'pendingSent', 'permanentRequests']);
     });
   });
 });

@@ -61,8 +61,10 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
       ],
       discovery: { format: 'unknown', isInstagramExport: false, files: [] },
       hasMinimalData: false,
-      // No optional file was ever read — nothing to resolve a label from.
+      // No optional file was ever read — nothing to resolve a label from, and
+      // nothing to overstate (GH#41).
       labelResolutionMode: 'not-applicable',
+      followRequestsUnreadable: false,
     };
   }
 
@@ -84,6 +86,7 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
       discovery: { format: 'unknown', isInstagramExport: false, files: [] },
       hasMinimalData: false,
       labelResolutionMode: 'not-applicable',
+      followRequestsUnreadable: false,
     };
   }
 
@@ -128,6 +131,7 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
       },
       hasMinimalData: false,
       labelResolutionMode: 'not-applicable',
+      followRequestsUnreadable: false,
     };
   }
 
@@ -230,6 +234,7 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
     discovery,
     hasMinimalData,
     labelResolutionMode: optionalParsed.labelResolutionMode,
+    followRequestsUnreadable: optionalParsed.followRequestsUnreadable,
   };
 }
 

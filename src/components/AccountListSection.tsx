@@ -9,6 +9,7 @@ import {
   Upload,
 } from 'lucide-react';
 import { FilterChips } from './FilterChips';
+import { FollowRequestsCaveat } from './FollowRequestsCaveat';
 import { AccountList } from './AccountList';
 import { StatCard } from './StatCard';
 import { InlineDonationCard } from './InlineDonationCard';
@@ -19,6 +20,7 @@ import { ResultsExportControls } from './export/ResultsExportControls';
 import type { BadgeKey } from '@/core/types';
 import { RESCUE_PLAN_BANNER_ENABLED } from '@/config/feature-flags';
 import { useAccountFiltering } from '@/hooks/useAccountFiltering';
+import { useFollowRequestsCaveat } from '@/hooks/useFollowRequestsCaveat';
 import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
 import { useTimeOnResults } from '@/hooks/useTimeOnResults';
 import { useState } from 'react';
@@ -59,6 +61,9 @@ export function AccountListSection({
     totalCount,
     hasLoadedData,
   } = useAccountFiltering({ fileHash, accountCount });
+
+  // GH#41: a follow-requests file we could not read inflates notFollowingBack.
+  const followRequestsUnreadable = useFollowRequestsCaveat(fileHash);
 
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
@@ -208,6 +213,11 @@ export function AccountListSection({
         />
       </div>
 
+      {/* Between the "Not Following" stat card and the filter chips — the two
+          places the overstated number is read — and full width in both layouts,
+          because the sidebar it would otherwise sit in is 20rem on desktop. */}
+      {followRequestsUnreadable && <FollowRequestsCaveat />}
+
       {/* Main Content Layout - grid for flexible banner positioning */}
       <div className="grid grid-cols-1 lg:grid-cols-[20rem_1fr] gap-6 md:gap-12">
         {RESCUE_PLAN_BANNER_ENABLED && !isSample && (
@@ -225,6 +235,7 @@ export function AccountListSection({
             onFiltersChange={setFilters}
             filterCounts={filterCounts}
             isFiltering={isFiltering}
+            followRequestsUnreadable={followRequestsUnreadable}
           />
         </div>
 
