@@ -1,10 +1,11 @@
 import i18n from 'i18next';
-import { Suspense, lazy, useEffect, useLayoutEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 
 import { BreadcrumbSchema } from '@/components/BreadcrumbSchema';
 import { BuyMeCoffeeWidget } from '@/components/BuyMeCoffeeWidget';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { LicenseDialogMount } from '@/components/export/LicenseDialogMount';
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { OrganizationSchema } from '@/components/OrganizationSchema';
@@ -18,12 +19,6 @@ import { useLayoutNavigation } from '@/hooks/useLayoutNavigation';
 import { useLayoutState } from '@/hooks/useLayoutState';
 import { consumeLicenseParam, getStoredLicense, isExportFeatureEnabled } from '@/lib/export/unlock';
 import { RTL_LANGUAGES, type SupportedLanguage } from '@/locales';
-
-// Only ever needed on the one page load that carries a checkout redirect, so it
-// stays out of the bundle that all 88 prerendered pages ship.
-const LicenseDialog = lazy(() =>
-  import('@/components/export/LicenseDialog').then(module => ({ default: module.LicenseDialog }))
-);
 
 // Use useLayoutEffect on client to sync language BEFORE paint,
 // preventing a flash of wrong language. Falls back to useEffect during SSG.
@@ -164,16 +159,13 @@ export function Layout({ lang }: LayoutProps) {
           <BreadcrumbSchema />
           <OrganizationSchema />
 
-          <Suspense fallback={null}>
-            {capturedLicenseKey !== null && isLicenseDialogOpen ? (
-              <LicenseDialog
-                open={isLicenseDialogOpen}
-                onOpenChange={setIsLicenseDialogOpen}
-                initialKey={capturedLicenseKey}
-                source="redirect"
-              />
-            ) : null}
-          </Suspense>
+          {capturedLicenseKey !== null && isLicenseDialogOpen ? (
+            <LicenseDialogMount
+              licenseKey={capturedLicenseKey}
+              open={isLicenseDialogOpen}
+              onOpenChange={setIsLicenseDialogOpen}
+            />
+          ) : null}
         </div>
       </ThemeProvider>
     </ErrorBoundary>

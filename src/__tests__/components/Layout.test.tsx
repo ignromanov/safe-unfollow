@@ -1,4 +1,5 @@
 import { Layout } from '@/components/Layout';
+import { LicenseDialogMount } from '@/components/export/LicenseDialogMount';
 import type { FileMetadata } from '@/core/types';
 import { AppState } from '@/core/types';
 import resultsEN from '@/locales/en/results.json';
@@ -87,14 +88,15 @@ vi.mock('@/components/PageLoader', () => ({
   PageLoader: () => <div data-testid="page-loader">Loading...</div>,
 }));
 
-// The dialog's own activation behavior is covered by LicenseDialog.test.tsx;
-// here we only care about whether Layout mounts it and with what props.
-vi.mock('@/components/export/LicenseDialog', () => ({
-  LicenseDialog: ({ initialKey, source }: { initialKey: string | null; source: string }) => (
+// The dialog's own activation behavior is covered by LicenseDialog.test.tsx, and
+// LicenseDialogMount's Suspense wiring is covered by its own test file; here we only
+// care about whether Layout mounts the license flow at all, and with what key.
+vi.mock('@/components/export/LicenseDialogMount', () => ({
+  LicenseDialogMount: vi.fn(({ licenseKey }: { licenseKey: string }) => (
     <div data-testid="license-dialog">
-      {resultsEN.export.license.title} / {initialKey} / {source}
+      {resultsEN.export.license.title} / {licenseKey} / redirect
     </div>
-  ),
+  )),
 }));
 
 // Wraps (not replaces) the real consumeLicenseParam so the URL-stripping
@@ -592,6 +594,17 @@ describe('Layout', () => {
       await waitFor(() => {
         expect(screen.getByText(`activeScreen: ${AppState.HERO}`)).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('license dialog mount', () => {
+    it('mounts nothing license-related on a load with no ?license_key=', () => {
+      // The Suspense boundary used to sit in Layout unconditionally, so SSR emitted an
+      // empty dehydrated boundary into all 80 prerendered pages and React bailed out of
+      // the server HTML for that subtree on every load. The boundary must not exist in
+      // the tree at all when there is no key.
+      renderLayout();
+      expect(LicenseDialogMount).not.toHaveBeenCalled();
     });
   });
 
