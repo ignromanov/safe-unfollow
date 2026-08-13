@@ -14,9 +14,11 @@ export {
 
 import {
   SUPPORTED_LANGUAGES,
+  I18N_NAMESPACES,
   detectLanguageFromUrl,
   type SupportedLanguage,
 } from '@/config/languages';
+import { loadLanguageResources } from './loadLanguageResources';
 
 // Track initialization state
 let isInitialized = false;
@@ -45,33 +47,6 @@ export function subscribeToI18nInit(callback: () => void): () => void {
  */
 function notifyInitSubscribers(): void {
   initSubscribers.forEach(cb => cb());
-}
-
-/**
- * Load resources for a specific language
- */
-async function loadLanguageResources(lang: SupportedLanguage) {
-  const [common, hero, wizard, upload, results, faq, howto, meta] = await Promise.all([
-    import(`./${lang}/common.json`),
-    import(`./${lang}/hero.json`),
-    import(`./${lang}/wizard.json`),
-    import(`./${lang}/upload.json`),
-    import(`./${lang}/results.json`),
-    import(`./${lang}/faq.json`),
-    import(`./${lang}/howto.json`),
-    import(`./${lang}/meta.json`),
-  ]);
-
-  return {
-    common: common.default,
-    hero: hero.default,
-    wizard: wizard.default,
-    upload: upload.default,
-    results: results.default,
-    faq: faq.default,
-    howto: howto.default,
-    meta: meta.default,
-  };
 }
 
 /**
@@ -120,7 +95,7 @@ export async function initI18n(options?: InitI18nOptions): Promise<void> {
         lng: 'en', // Default, will be switched per-page in Layout
         fallbackLng: 'en',
         defaultNS: 'common',
-        ns: ['common', 'hero', 'wizard', 'upload', 'results', 'faq', 'howto', 'meta'],
+        ns: I18N_NAMESPACES,
         interpolation: {
           escapeValue: false,
         },
@@ -153,7 +128,7 @@ export async function initI18n(options?: InitI18nOptions): Promise<void> {
           lng: urlLang, // Set language immediately from URL
           fallbackLng: 'en',
           defaultNS: 'common',
-          ns: ['common', 'hero', 'wizard', 'upload', 'results', 'faq', 'howto', 'meta'],
+          ns: I18N_NAMESPACES,
           interpolation: {
             escapeValue: false,
           },

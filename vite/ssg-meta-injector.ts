@@ -4,24 +4,13 @@ import {
   SUPPORTED_LANGUAGES,
   LOCALE_CODES,
   RTL_LANGUAGES,
+  I18N_NAMESPACES,
   getLocaleCode,
   createLanguagePrefixRegex,
   type SupportedLanguage,
 } from '../src/config/languages.js';
 
 const BASE_URL = 'https://safeunfollow.app';
-
-/** The eight i18next namespaces every page loads. Mirrors src/locales/index.ts. */
-const I18N_NAMESPACES = [
-  'common',
-  'faq',
-  'hero',
-  'howto',
-  'meta',
-  'results',
-  'upload',
-  'wizard',
-] as const;
 
 /**
  * modulepreload hrefs for the locale chunks a page will fetch, English first.
@@ -51,6 +40,9 @@ export function localeChunkHrefs(
 
 let manifestCache: Record<string, { file: string }> | null = null;
 
+// Caches on the first call and ignores rootDir on every later one. Safe today: this hook runs
+// once per `vite build` process, and every call within that process shares the same rootDir.
+// Would need a rootDir-keyed cache if this module were ever reused across builds in one process.
 function readViteManifest(rootDir: string): Record<string, { file: string }> {
   if (manifestCache) return manifestCache;
   const manifestPath = path.join(rootDir, 'dist', '.vite', 'manifest.json');
