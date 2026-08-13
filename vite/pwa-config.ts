@@ -82,6 +82,9 @@ export const pwaConfig: Partial<VitePWAOptions> = {
         handler: 'NetworkFirst',
         options: {
           cacheName: 'pages-cache',
+          // Without this Workbox never builds the race against the cache and simply
+          // awaits fetch() until the browser's own long mobile timeout.
+          networkTimeoutSeconds: 3,
           expiration: {
             maxEntries: 50,
             maxAgeSeconds: 60 * 60 * 24 * 7, // 1 week
