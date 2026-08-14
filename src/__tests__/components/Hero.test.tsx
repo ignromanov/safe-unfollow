@@ -24,21 +24,19 @@ vi.mock('@/lib/analytics', () => ({
 import { Hero } from '@/components/Hero';
 
 describe('Hero Component', () => {
-  const defaultProps = {};
-
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   describe('rendering', () => {
     it('should render without crashing', () => {
-      render(<Hero {...defaultProps} />);
+      render(<Hero />);
 
       expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
     });
 
     it('should render main headline with translated text', () => {
-      render(<Hero {...defaultProps} />);
+      render(<Hero />);
 
       const heading = screen.getByRole('heading', { level: 1 });
       expect(heading).toHaveTextContent(heroEN.headline.prefix);
@@ -47,13 +45,13 @@ describe('Hero Component', () => {
     });
 
     it('should render subheadline', () => {
-      render(<Hero {...defaultProps} />);
+      render(<Hero />);
 
       expect(screen.getByText(heroEN.subheadline)).toBeInTheDocument();
     });
 
     it('should render version badge', () => {
-      render(<Hero {...defaultProps} />);
+      render(<Hero />);
 
       expect(screen.getByText(heroEN.version)).toBeInTheDocument();
     });
@@ -61,7 +59,7 @@ describe('Hero Component', () => {
 
   describe('CTA buttons', () => {
     it('should render primary CTA link when no data', () => {
-      render(<Hero {...defaultProps} hasData={false} />);
+      render(<Hero hasData={false} />);
 
       expect(
         screen.getByRole('link', { name: new RegExp(heroEN.buttons.getGuide, 'i') })
@@ -69,7 +67,7 @@ describe('Hero Component', () => {
     });
 
     it('should render "View Results" link when hasData is true', () => {
-      render(<Hero {...defaultProps} hasData={true} />);
+      render(<Hero hasData={true} />);
 
       expect(
         screen.getByRole('link', { name: new RegExp(heroEN.buttons.viewResults, 'i') })
@@ -77,7 +75,7 @@ describe('Hero Component', () => {
     });
 
     it('should render sample data link', () => {
-      render(<Hero {...defaultProps} />);
+      render(<Hero />);
 
       expect(
         screen.getByRole('link', { name: new RegExp(heroEN.buttons.trySample, 'i') })
@@ -85,7 +83,7 @@ describe('Hero Component', () => {
     });
 
     it('should render "I already have my ZIP file" link when no data', () => {
-      render(<Hero {...defaultProps} hasData={false} />);
+      render(<Hero hasData={false} />);
 
       expect(
         screen.getByRole('link', { name: new RegExp(heroEN.buttons.haveFile, 'i') })
@@ -93,7 +91,7 @@ describe('Hero Component', () => {
     });
 
     it('should not render "I already have my ZIP file" link when hasData is true', () => {
-      render(<Hero {...defaultProps} hasData={true} />);
+      render(<Hero hasData={true} />);
 
       expect(
         screen.queryByRole('link', { name: new RegExp(heroEN.buttons.haveFile, 'i') })
@@ -103,7 +101,7 @@ describe('Hero Component', () => {
 
   describe('trust badges', () => {
     it('should render trust badges', () => {
-      render(<Hero {...defaultProps} />);
+      render(<Hero />);
 
       expect(screen.getByText(heroEN.trust.free)).toBeInTheDocument();
       expect(screen.getByText(heroEN.trust.noPassword)).toBeInTheDocument();
@@ -113,7 +111,7 @@ describe('Hero Component', () => {
 
   describe('feature cards', () => {
     it('should render all four feature cards', () => {
-      render(<Hero {...defaultProps} />);
+      render(<Hero />);
 
       expect(screen.getByText(heroEN.features.local.title)).toBeInTheDocument();
       expect(screen.getByText(heroEN.features.noLogin.title)).toBeInTheDocument();
@@ -122,7 +120,7 @@ describe('Hero Component', () => {
     });
 
     it('should render feature descriptions', () => {
-      render(<Hero {...defaultProps} />);
+      render(<Hero />);
 
       expect(screen.getByText(heroEN.features.local.description)).toBeInTheDocument();
       expect(screen.getByText(heroEN.features.noLogin.description)).toBeInTheDocument();

@@ -1,6 +1,5 @@
 import { Layout } from '@/components/Layout';
 import { LicenseDialogMount } from '@/components/export/LicenseDialogMount';
-import type { FileMetadata } from '@/core/types';
 import { AppState } from '@/core/types';
 import resultsEN from '@/locales/en/results.json';
 import { useAppStore } from '@/lib/store';
@@ -114,8 +113,6 @@ vi.mock('@/lib/export/unlock', async importOriginal => {
 // Mock hooks
 const mockHandleClearData = vi.fn();
 const mockUseInstagramData = {
-  uploadState: { status: 'idle' as const, error: null, fileName: null },
-  fileMetadata: null as FileMetadata | null,
   handleClearData: mockHandleClearData,
   handleZipUpload: vi.fn(),
   uploadProgress: 0,
@@ -194,8 +191,6 @@ describe('Layout', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    mockUseInstagramData.uploadState = { status: 'idle', error: null, fileName: null };
-    mockUseInstagramData.fileMetadata = null;
 
     // Get mock reference after module is loaded
     const { analytics } = await import('@/lib/analytics');
