@@ -1,9 +1,7 @@
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { renderToString } from 'react-dom/server';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { Component as HomePage } from '@/pages/HomePage';
-import commonEN from '@/locales/en/common.json';
 import { useAppStore } from '@/lib/store';
 import type { FileMetadata } from '@/core/types';
 
@@ -33,11 +31,7 @@ vi.mock('@/components/Hero', () => ({
 }));
 
 vi.mock('@/components/HowToSection', () => ({
-  HowToSection: ({ onStart }: { onStart: (stepIndex?: number) => void }) => (
-    <div data-testid="how-to-section">
-      <button onClick={() => onStart(2)}>How To Start</button>
-    </div>
-  ),
+  HowToSection: () => <div data-testid="how-to-section" />,
 }));
 
 vi.mock('@/components/FAQSection', () => ({
@@ -45,36 +39,12 @@ vi.mock('@/components/FAQSection', () => ({
 }));
 
 vi.mock('@/components/FooterCTA', () => ({
-  FooterCTA: ({
-    onStart,
-    onSample,
-  }: {
-    onStart: (stepIndex?: number) => void;
-    onSample: () => void;
-  }) => (
-    <div data-testid="footer-cta">
-      <button onClick={() => onStart()}>{commonEN.cta.getStarted}</button>
-      <button onClick={onSample}>{commonEN.cta.trySample}</button>
-    </div>
-  ),
-}));
-
-// Mock react-router-dom
-const mockNavigate = vi.fn();
-vi.mock('react-router-dom', () => ({
-  useNavigate: () => mockNavigate,
-}));
-
-// Mock hooks with vi.fn() for dynamic returns
-const mockUseLanguagePrefix = vi.fn(() => '');
-vi.mock('@/hooks/useLanguagePrefix', () => ({
-  useLanguagePrefix: () => mockUseLanguagePrefix(),
+  FooterCTA: () => <div data-testid="footer-cta" />,
 }));
 
 describe('HomePage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseLanguagePrefix.mockReturnValue('');
     // hasResults (Hero's hasData) is sourced from useAppStore via useHasResults,
     // not from useInstagramData — reset the real store directly.
     useAppStore.setState({ uploadStatus: 'idle', fileMetadata: null });
@@ -143,50 +113,43 @@ describe('HomePage', () => {
     });
   });
 
-  describe('navigation - HowToSection handlers', () => {
-    it('should navigate to wizard with step index from HowTo section', async () => {
-      const user = userEvent.setup();
-      render(<HomePage />);
-
-      await user.click(screen.getByText('How To Start'));
-
-      expect(mockNavigate).toHaveBeenCalledWith('/wizard/step/3');
-    });
-  });
-
-  describe('navigation - FooterCTA handlers', () => {
-    it('should navigate to wizard step 1 from FooterCTA', async () => {
-      const user = userEvent.setup();
-      render(<HomePage />);
-
-      await user.click(screen.getByText(commonEN.cta.getStarted));
-
-      expect(mockNavigate).toHaveBeenCalledWith('/wizard/step/1');
+  describe('wizard prefetch', () => {
+    afterEach(() => {
+      vi.unstubAllGlobals();
+      vi.useRealTimers();
     });
 
-    it('should navigate to sample from FooterCTA', async () => {
-      const user = userEvent.setup();
-      render(<HomePage />);
+    it('schedules a WizardPage prefetch via requestIdleCallback when available', () => {
+      const requestIdleCallbackSpy = vi.fn(() => 1);
+      const cancelIdleCallbackSpy = vi.fn();
+      vi.stubGlobal('requestIdleCallback', requestIdleCallbackSpy);
+      vi.stubGlobal('cancelIdleCallback', cancelIdleCallbackSpy);
 
-      await user.click(screen.getByText(commonEN.cta.trySample));
+      const { unmount } = render(<HomePage />);
 
-      expect(mockNavigate).toHaveBeenCalledWith('/sample');
+      expect(requestIdleCallbackSpy).toHaveBeenCalledWith(expect.any(Function), {
+        timeout: 3000,
+      });
+
+      unmount();
+
+      expect(cancelIdleCallbackSpy).toHaveBeenCalledWith(1);
     });
-  });
 
-  describe('language prefix support', () => {
-    it('should use language prefix in navigation when set', async () => {
-      mockUseLanguagePrefix.mockReturnValue('/es');
+    it('falls back to a 2s timeout when requestIdleCallback is unavailable', () => {
+      // jsdom has no requestIdleCallback by default, so this exercises the
+      // real fallback branch rather than a simulated one.
+      vi.useFakeTimers();
+      const setTimeoutSpy = vi.spyOn(window, 'setTimeout');
+      const clearTimeoutSpy = vi.spyOn(window, 'clearTimeout');
 
-      const user = userEvent.setup();
-      render(<HomePage />);
+      const { unmount } = render(<HomePage />);
 
-      // Hero itself is mocked here — its own href-prefixing is covered by
-      // Hero.test.tsx. This exercises the prefix reaching handleStartGuide,
-      // the handler HowToSection and FooterCTA still depend on.
-      await user.click(screen.getByText(commonEN.cta.getStarted));
+      expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 2000);
 
-      expect(mockNavigate).toHaveBeenCalledWith('/es/wizard/step/1');
+      unmount();
+
+      expect(clearTimeoutSpy).toHaveBeenCalled();
     });
   });
 

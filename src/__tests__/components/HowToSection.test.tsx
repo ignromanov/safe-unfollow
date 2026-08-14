@@ -1,5 +1,5 @@
 import { vi, beforeEach } from 'vitest';
-import { screen, fireEvent } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { renderWithRouter } from '@/__tests__/test-utils';
 import howtoEN from '@/locales/en/howto.json';
 import { createI18nMock } from '@/__tests__/utils/mockI18n';
@@ -7,6 +7,26 @@ import { createI18nMock } from '@/__tests__/utils/mockI18n';
 vi.mock('react-i18next', () => createI18nMock(howtoEN));
 
 import { HowToSection } from '@/components/HowToSection';
+
+// Step titles indexed by step number (1-9), avoiding a computed-key lookup on the
+// narrowly-typed `howtoEN.steps` object.
+const STEP_TITLES = [
+  howtoEN.steps['1'].title,
+  howtoEN.steps['2'].title,
+  howtoEN.steps['3'].title,
+  howtoEN.steps['4'].title,
+  howtoEN.steps['5'].title,
+  howtoEN.steps['6'].title,
+  howtoEN.steps['7'].title,
+  howtoEN.steps['8'].title,
+  howtoEN.steps['9'].title,
+];
+
+// Mirrors the mockI18n interpolation used for openStepAria, which becomes the accessible
+// name of each step's PrefixedLink via its aria-label.
+function stepAriaLabel(step: number, title: string): string {
+  return howtoEN.openStepAria.replace('{{step}}', String(step)).replace('{{title}}', title);
+}
 
 describe('HowToSection', () => {
   beforeEach(() => {
@@ -149,137 +169,61 @@ describe('HowToSection', () => {
       expect(screen.getByText(howtoEN.cta.subtitle)).toBeInTheDocument();
     });
 
-    it('should render CTA button', () => {
+    it('should render CTA link', () => {
       renderWithRouter(<HowToSection />);
 
-      const button = screen.getByRole('button', { name: /Open Analysis Guide/i });
-      expect(button).toBeInTheDocument();
+      const cta = screen.getByRole('link', { name: /Open Analysis Guide/i });
+      expect(cta).toBeInTheDocument();
     });
   });
 
-  describe('interactions', () => {
-    it('should call onStart callback when CTA button is clicked', () => {
-      const onStart = vi.fn();
-      renderWithRouter(<HowToSection onStart={onStart} />);
-
-      const button = screen.getByRole('button', { name: /Open Analysis Guide/i });
-      fireEvent.click(button);
-
-      expect(onStart).toHaveBeenCalledWith(0);
-    });
-
-    it('should call onStart with step index when step is clicked', () => {
-      const onStart = vi.fn();
-      renderWithRouter(<HowToSection onStart={onStart} />);
-
-      // Click on step 3 (index 2)
-      const step3Title = screen.getByText(howtoEN.steps['3'].title);
-      const stepElement = step3Title.closest('li');
-      expect(stepElement).not.toBeNull();
-
-      fireEvent.click(stepElement!);
-
-      expect(onStart).toHaveBeenCalledWith(2);
-    });
-
-    it('should navigate via router when no onStart callback provided', () => {
-      // Since we use navigate() instead of hash, we need to check the mock was called
-      // The MemoryRouter handles navigation internally, so we verify the component renders
+  describe('step links', () => {
+    it('should link step cards 1-8 to their wizard step', () => {
       renderWithRouter(<HowToSection />);
 
-      const button = screen.getByRole('button', { name: /Open Analysis Guide/i });
-      fireEvent.click(button);
-
-      // Navigation happens via react-router's navigate(), which MemoryRouter handles
-      // The test passes if no errors occur during click
-      expect(button).toBeInTheDocument();
+      STEP_TITLES.slice(0, 8).forEach((title, idx) => {
+        const step = idx + 1;
+        const link = screen.getByRole('link', { name: stepAriaLabel(step, title) });
+        expect(link).toHaveAttribute('href', `/wizard/step/${step}`);
+      });
     });
 
-    it('should navigate to upload page when step 9 is clicked', () => {
-      const onStart = vi.fn();
-      renderWithRouter(<HowToSection onStart={onStart} />);
-
-      // Step 9 is the upload step (index 8)
-      const step9Title = screen.getByText(howtoEN.steps['9'].title);
-      const stepElement = step9Title.closest('li');
-      expect(stepElement).not.toBeNull();
-
-      fireEvent.click(stepElement!);
-
-      // Step 9 should NOT call onStart, it navigates directly to upload
-      expect(onStart).not.toHaveBeenCalled();
-    });
-
-    it('should navigate to upload page when upload button in step 9 is clicked', () => {
+    it('should link the ninth step card to the upload page', () => {
       renderWithRouter(<HowToSection />);
 
-      // Find the upload button (it's distinct from the CTA button)
-      const uploadButton = screen.getByRole('button', { name: howtoEN.uploadButton });
-      expect(uploadButton).toBeInTheDocument();
+      const link = screen.getByRole('link', { name: stepAriaLabel(9, STEP_TITLES[8]) });
+      expect(link).toHaveAttribute('href', '/upload');
+    });
 
-      // Click should work and stop propagation
-      fireEvent.click(uploadButton);
+    it('should link the final CTA to wizard step 1', () => {
+      renderWithRouter(<HowToSection />);
 
-      // Navigation happens via react-router's navigate()
-      // The test passes if no errors occur during click
-      expect(uploadButton).toBeInTheDocument();
+      const cta = screen.getByRole('link', { name: /Open Analysis Guide/i });
+      expect(cta).toHaveAttribute('href', '/wizard/step/1');
+    });
+
+    it('should carry the language prefix on step links under a localized route', () => {
+      renderWithRouter(<HowToSection />, { initialEntries: ['/id'] });
+
+      const link = screen.getByRole('link', { name: stepAriaLabel(1, STEP_TITLES[0]) });
+      expect(link).toHaveAttribute('href', '/id/wizard/step/1');
     });
   });
 
   describe('keyboard accessibility', () => {
-    it('should trigger step click on Enter key press', () => {
-      const onStart = vi.fn();
-      renderWithRouter(<HowToSection onStart={onStart} />);
+    // The hand-rolled onKeyDown handler (Enter/Space) that these tests used to assert is
+    // gone — each step card is now a PrefixedLink, i.e. a real <a href>, which browsers
+    // make keyboard-operable natively. Asserting the anchor tag is the accessibility
+    // property that actually matters post-refactor; there is no custom key handling left
+    // to test.
+    it('should render every step card as a native anchor', () => {
+      renderWithRouter(<HowToSection />);
 
-      // Get step 2 (index 1)
-      const step2Title = screen.getByText(howtoEN.steps['2'].title);
-      const stepElement = step2Title.closest('li');
-      expect(stepElement).not.toBeNull();
-
-      fireEvent.keyDown(stepElement!, { key: 'Enter' });
-
-      expect(onStart).toHaveBeenCalledWith(1);
-    });
-
-    it('should trigger step click on Space key press', () => {
-      const onStart = vi.fn();
-      renderWithRouter(<HowToSection onStart={onStart} />);
-
-      // Get step 4 (index 3)
-      const step4Title = screen.getByText(howtoEN.steps['4'].title);
-      const stepElement = step4Title.closest('li');
-      expect(stepElement).not.toBeNull();
-
-      fireEvent.keyDown(stepElement!, { key: ' ' });
-
-      expect(onStart).toHaveBeenCalledWith(3);
-    });
-
-    it('should not trigger step click on other key press', () => {
-      const onStart = vi.fn();
-      renderWithRouter(<HowToSection onStart={onStart} />);
-
-      const step1Title = screen.getByText(howtoEN.steps['1'].title);
-      const stepElement = step1Title.closest('li');
-      expect(stepElement).not.toBeNull();
-
-      fireEvent.keyDown(stepElement!, { key: 'Tab' });
-
-      expect(onStart).not.toHaveBeenCalled();
-    });
-
-    it('should navigate to upload on Enter key for step 9', () => {
-      const onStart = vi.fn();
-      renderWithRouter(<HowToSection onStart={onStart} />);
-
-      const step9Title = screen.getByText(howtoEN.steps['9'].title);
-      const stepElement = step9Title.closest('li');
-      expect(stepElement).not.toBeNull();
-
-      fireEvent.keyDown(stepElement!, { key: 'Enter' });
-
-      // Step 9 navigates to upload, not calls onStart
-      expect(onStart).not.toHaveBeenCalled();
+      STEP_TITLES.forEach((title, idx) => {
+        const step = idx + 1;
+        const link = screen.getByRole('link', { name: stepAriaLabel(step, title) });
+        expect(link.tagName).toBe('A');
+      });
     });
   });
 });

@@ -13,6 +13,7 @@ import { FollowRequestsCaveat } from './FollowRequestsCaveat';
 import { AccountList } from './AccountList';
 import { StatCard } from './StatCard';
 import { InlineDonationCard } from './InlineDonationCard';
+import { PrefixedLink } from './PrefixedLink';
 import { AdSlot } from './ads/AdSlot';
 import { RescuePlanBanner } from './RescuePlanBanner';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
@@ -21,10 +22,8 @@ import type { BadgeKey } from '@/core/types';
 import { RESCUE_PLAN_BANNER_ENABLED } from '@/config/feature-flags';
 import { useAccountFiltering } from '@/hooks/useAccountFiltering';
 import { useFollowRequestsCaveat } from '@/hooks/useFollowRequestsCaveat';
-import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
 import { useTimeOnResults } from '@/hooks/useTimeOnResults';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 /**
@@ -49,7 +48,6 @@ export function AccountListSection({
   isSample = false,
 }: AccountListSectionProps) {
   const { t, i18n } = useTranslation('results');
-  const prefix = useLanguagePrefix();
   const {
     query,
     setQuery,
@@ -114,12 +112,12 @@ export function AccountListSection({
           <AlertTitle className="text-blue-800 dark:text-blue-200">{t('sample.banner')}</AlertTitle>
           <AlertDescription className="block text-blue-700 dark:text-blue-300">
             {t('sample.hint')}{' '}
-            <Link
-              to={`${prefix}/upload`}
+            <PrefixedLink
+              to="/upload"
               className="font-semibold underline underline-offset-2 hover:text-blue-900 dark:hover:text-blue-100"
             >
               <Upload className="h-3 w-3 inline align-text-bottom" /> {t('sample.uploadPrompt')}
-            </Link>{' '}
+            </PrefixedLink>{' '}
             {t('sample.toSeeReal')}
           </AlertDescription>
         </Alert>

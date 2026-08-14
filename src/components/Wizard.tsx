@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import FocusTrap from 'focus-trap-react';
 
 import { analytics } from '@/lib/analytics';
+import { PrefixedLink } from '@/components/PrefixedLink';
 import { ResponsiveGif } from '@/components/ResponsiveGif';
 import { WIZARD_STEPS } from '@/config/wizard-steps';
 import { useWizardNavigation } from '@/hooks/useWizardNavigation';
@@ -16,7 +17,7 @@ interface WizardProps {
 
 export function Wizard({ initialStep = 1, onComplete, onCancel }: WizardProps) {
   const { t } = useTranslation('wizard');
-  const { currentStep, goToStep, prefix, navigate } = useWizardNavigation(initialStep);
+  const { currentStep, goToStep } = useWizardNavigation(initialStep);
 
   // Track analytics on step view
   useEffect(() => {
@@ -179,8 +180,8 @@ export function Wizard({ initialStep = 1, onComplete, onCancel }: WizardProps) {
                     </a>
 
                     {/* Already have file shortcut */}
-                    <button
-                      onClick={() => navigate(`${prefix}/upload`)}
+                    <PrefixedLink
+                      to="/upload"
                       className="cursor-pointer inline-flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400 hover:text-primary dark:hover:text-primary transition-colors group"
                     >
                       {t('buttons.alreadyHaveFile')}
@@ -188,7 +189,7 @@ export function Wizard({ initialStep = 1, onComplete, onCancel }: WizardProps) {
                         size={14}
                         className="opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all"
                       />
-                    </button>
+                    </PrefixedLink>
                   </div>
                 )}
 
