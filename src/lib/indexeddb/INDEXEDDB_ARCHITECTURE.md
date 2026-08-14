@@ -12,7 +12,7 @@ Instagram Unfollow Tracker uses IndexedDB v2 with columnar storage and bitset-ba
 
 - ✅ **Columnar Storage** - Separate username, badge, and timestamp columns
 - ✅ **Bitset Filtering** - 32x faster badge filtering using FastBitSet.js
-- ✅ **Chunked Ingestion** - Progressive loading with 10k account chunks
+- ✅ **Bulk Ingestion** - `storeAllAccounts()` writes every column in one transaction (the "10k account chunks" this line claimed until 2026-08-14 do not exist — see Configuration below)
 - ✅ **Search Indexes** - Trigram and prefix indexes for O(1) search
 - ✅ **Lazy Loading** - TanStack Virtual integration for on-demand rendering
 - ✅ **Auto-Migration** - Seamless upgrade from localStorage/v1
@@ -150,11 +150,12 @@ interface SearchIndexRecord {
 4. Parse ZIP in Web Worker
    ├─→ parseInstagramZipFile()
    ├─→ buildAccountBadgeIndex()
-   └─→ Progress events (every 10k accounts)
+   └─→ Progress events (worker → parse-orchestration.ts:61; cadence is
+       set by the worker, not by any 10k constant)
 
-5. Chunked Ingestion (parallel)
+5. Bulk Ingestion — storeAllAccounts(), one transaction
    ├─→ Save file metadata
-   ├─→ Append username columns (10k chunks)
+   ├─→ Build username columns in a single pass
    ├─→ Update badge bitsets
    └─→ Store timestamps (sparse)
 
@@ -193,6 +194,16 @@ interface SearchIndexRecord {
 ```
 
 ## Performance Characteristics
+
+> **Provenance**: audited 2026-08-14 against commit `8380b0d`. The figures below are **design
+> targets and complexity arguments**, not measurements of the current implementation — the
+> repository has no benchmark harness that reproduces any of them. The full breakdown of which
+> number is backed by what lives in one place, `src/lib/filtering/FILTER_OPTIMIZATION.md`
+> ("Performance Results → Provenance"); it is deliberately not copied here, because these
+> numbers drifting apart across documents is the defect that audit found.
+>
+> Do not restate any figure below as "achieved", and do not put one into user-facing copy
+> without measuring it first.
 
 ### Storage Size
 
@@ -361,16 +372,29 @@ indexedDBService.clearCaches(); // Clear all caches
 
 ## Configuration
 
-### Chunk Sizes
+### Chunk Sizes — there is no account chunking on the write path
+
+This section used to quote `const CHUNK_SIZE = 10000` from `src/lib/parse-worker.ts`. **That
+constant does not exist there and never runs.** Corrected 2026-08-14 against commit `8380b0d`.
+
+The real write path is a single bulk call:
 
 ```typescript
-// src/lib/parse-worker.ts
-const CHUNK_SIZE = 10000; // Optimized for 1M+ datasets
-
-// Balance:
-// - Smaller: More progress updates, more overhead
-// - Larger: Faster processing, less frequent updates
+// src/lib/parse-worker.ts — also parse-orchestration.ts and sample-data.ts
+await indexedDBService.storeAllAccounts(fileHash, unified);
 ```
+
+`storeAllAccounts` builds every column in one pass and commits one transaction. No batching
+constant is involved.
+
+`IndexedDBService.appendAccountsChunk()` is the chunked API this section described. It has
+**zero production callers on any branch** — `indexeddb-cache.ts`'s deprecated `set()` prints a
+warning naming it and returns without calling it. Do not wire new code into it expecting the
+documented flow; it is dead.
+
+The only `10_000` in the parse pipeline is `MAX_ZIP_ENTRIES` in `src/core/parsers/instagram.ts`,
+a safety cap on ZIP entry count — unrelated to account batching. The only real `CHUNK_SIZE` is
+`1000` in `src/lib/export/data.ts`, for export files.
 
 ### Cache TTL
 

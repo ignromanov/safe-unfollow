@@ -610,7 +610,7 @@ describe('Layout', () => {
   describe('license dialog mount', () => {
     it('mounts nothing license-related on a load with no ?license_key=', () => {
       // The Suspense boundary used to sit in Layout unconditionally, so SSR emitted an
-      // empty dehydrated boundary into all 80 prerendered pages and React bailed out of
+      // empty dehydrated boundary into all 160 prerendered pages and React bailed out of
       // the server HTML for that subtree on every load. The boundary must not exist in
       // the tree at all when there is no key.
       renderLayout();
