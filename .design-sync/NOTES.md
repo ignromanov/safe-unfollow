@@ -463,6 +463,32 @@ row they actually ship in.
 - `[RENDER_THIN] Logo` — the mark is an SVG with no text nodes.
 - `[RENDER_THIN] ThemeProvider` — a context provider; it paints nothing by design.
 
+## PaywallModal's doc drifted from an unmerged branch (found 2026-08-14)
+
+A resync on `chore/design-sync-main` flagged `PaywallModal` as changed via `sourceKeys`
+even though `renderHash` was byte-identical and HEAD hadn't moved since the last upload.
+Root cause: `PaywallModal.prompt.md` on the remote project carried a long JSDoc-derived
+rationale ("the reader's own two numbers…", `pe-6` padding note, etc.) that belongs to
+the **unmerged** `feat/paywall-gap-hero` branch (PR #26, checked out at
+`.worktrees/paywall-2b`), not to what `chore/design-sync-main` actually ships. The two
+branches' `PaywallModal.tsx` share the same `PaywallModalProps` interface (so `.d.ts`
+matched) but have completely different JSX/JSDoc — the rich prose must have been present
+in this branch's working tree during some earlier sync and never landed in a commit here.
+
+**Resolved by uploading the corrected (simpler, auto-synthesized) prompt.md** — it now
+accurately describes the shipped component. Render was never affected (renderHash
+unchanged both before and after); only the docs text was wrong.
+
+**When PR #26 merges**, a future resync will naturally pick up its richer JSDoc and
+`PaywallModal`'s docs will improve again — no action needed then. Until it merges, do
+**not** re-introduce the gap-hero JSDoc into this branch's `PaywallModal.tsx` just to
+make the DS docs richer — that would misrepresent what's actually shipped, which is the
+exact trap the "plausible-but-not-real" section above warns about.
+
+**Lesson**: `sourceKeys`-flagged changes with an unchanged `renderHash` are worth
+diffing the actual doc/prop-source content before assuming they're pipeline churn — this
+one was a real (if narrow) content-accuracy bug, not noise.
+
 ## Re-sync risks
 
 - **The two setup steps above are not committed** (both live under gitignored paths —
