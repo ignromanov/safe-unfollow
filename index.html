@@ -54,6 +54,33 @@
       })();
     </script>
 
+    <!-- GH#36 — hand vite-react-ssg its static loader data so it never fetches for it.
+
+         Every prerendered page carries [data-server-rendered=true], and on that
+         signal vite-react-ssg injects a loader onto EVERY route during hydration
+         (node_modules/vite-react-ssg/dist/index.mjs:184). That loader fetches
+         /static-loader-data-manifest-<hash>.json and calls .json() on the response
+         with no response.ok check and no try/catch (:171). The hash is
+         Math.random().toString(36) (shared/vite-react-ssg.qp2k9AZ2.mjs:705), NOT
+         derived from content, so every deploy orphans the previous filename — and
+         any page served from the service worker's week-long pages-cache asks for a
+         file that no longer exists. Vercel answers that with 404 AND an HTML body,
+         .json() throws, and a loader rejection goes straight to the router's
+         errorElement: 263 route_error events, 24 Jul - 12 Aug 2026.
+
+         The variable short-circuits the fetch entirely (:167-169). {} is the correct
+         value, not a stub: the real manifest holds null for every route, because no
+         route in this app declares a loader, and the loader ends in `routeData ??
+         null` either way. src/__tests__/build/ssg-loader-manifest.test.ts asserts
+         that stays true, so adding a real SSG loader fails the build rather than
+         silently losing its data here.
+
+         Declaring `loader` on our own routes does NOT work: the transform assigns
+         route.loader unconditionally and overwrites it. -->
+    <script>
+      window.__VITE_REACT_SSG_STATIC_LOADER_DATA__ = {};
+    </script>
+
     <!-- Preload critical fonts to reduce LCP -->
     <link rel="preload" href="/node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/node_modules/@fontsource-variable/plus-jakarta-sans/files/plus-jakarta-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
