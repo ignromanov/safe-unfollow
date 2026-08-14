@@ -1,5 +1,4 @@
 import type { RouteRecord } from 'vite-react-ssg';
-import React from 'react';
 import { Layout } from '@/components/Layout';
 import { RouteErrorPage } from '@/components/RouteErrorPage';
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '@/locales';
