@@ -3,7 +3,7 @@
  * Shared functions for parsing and processing Instagram export data
  */
 
-import type { InstagramExportEntry, RawItem } from '@/core/types';
+import type { InstagramExportEntry, InstagramLabelValueEntry, RawItem } from '@/core/types';
 
 /** Instagram usernames: 1-30 chars, alphanumeric + dots + underscores */
 const INSTAGRAM_USERNAME_RE = /^[a-zA-Z0-9._]{1,30}$/;
@@ -18,9 +18,15 @@ export function isValidUsername(username: string): boolean {
 /**
  * Normalize username to lowercase and trim whitespace
  * Returns null for empty, malformed, or invalid usernames
+ *
+ * Takes `unknown` because every caller feeds it a field straight out of parsed
+ * JSON, where the declared types are a hope rather than a guarantee. A number
+ * or object used to reach `.trim()` and throw, which failed the **whole
+ * upload** — the opposite of what this subsystem is for. An unrecognised shape
+ * must be counted and skipped, never fatal.
  */
-export function normalize(username: string | undefined | null): string | null {
-  if (!username) return null;
+export function normalize(username: unknown): string | null {
+  if (typeof username !== 'string') return null;
   const trimmed = username.trim().toLowerCase();
   if (!trimmed.length) return null;
   if (!isValidUsername(trimmed)) return null;
@@ -35,54 +41,189 @@ export function escapeRegExp(literal: string): string {
 }
 
 /**
- * Extract usernames from Instagram export entries
- * Handles both old format (item.value) and new format (entry.title)
+ * Read one export entry down to a username, or `null` if it cannot be read.
+ *
+ * Three shapes are known, tried in this order — the first two are the
+ * established formats and must not regress:
+ *
+ * 1. `string_list_data[0].value` — the classic shape.
+ * 2. `title` — the 2026-01 `following.json` shape, where `string_list_data`
+ *    still carries the `href` but no longer the username.
+ * 3. `label_values` — the 2026-08 shape, where the username sits under a
+ *    localised label. `usernameLabel` is the label resolved for this archive
+ *    (see `instagram-labels.ts`); it is matched **exactly**, because that
+ *    function returns the label as the archive spells it.
+ *
+ * `href` is deliberately left undefined for shape 3. The `URL` label holds the
+ * profile's bio link, not an Instagram profile URL — in one real
+ * `removed_suggestions.json` it is a third-party scheduling page. Storing it
+ * as `href` would aim a profile click off Instagram entirely.
+ *
+ * Returning `null` rather than guessing is the point: on the Russian archive
+ * the display-name label alone produced eight username-shaped values, so a
+ * per-entry "first thing that looks like a username" fallback would invent
+ * accounts instead of finding them.
  */
-export function extractUsernames(entries: InstagramExportEntry[]): string[] {
-  const usernames: string[] = [];
-  for (const entry of entries) {
-    const item = entry.string_list_data?.[0];
-    // Instagram changed format: username can be in item.value (old) or entry.title (new)
-    const norm = normalize(item?.value) ?? normalize(entry.title);
-    if (norm) usernames.push(norm);
+export function resolveEntry(entry: unknown, usernameLabel: string | null): RawItem | null {
+  if (typeof entry !== 'object' || entry === null) return null;
+
+  const legacy = entry as Partial<InstagramExportEntry>;
+  const item = legacy.string_list_data?.[0];
+  const username = normalize(item?.value) ?? normalize(legacy.title);
+  if (username) return { username, href: item?.href, timestamp: item?.timestamp };
+
+  if (usernameLabel === null) return null;
+
+  const labelled = entry as InstagramLabelValueEntry;
+  if (!Array.isArray(labelled.label_values)) return null;
+
+  for (const pair of labelled.label_values) {
+    if (pair?.label !== usernameLabel) continue;
+    const labelledUsername = normalize(pair.value);
+    // Keep scanning: a repeated label with one empty value must not mask the
+    // populated one. The entry's own timestamp is the only one this shape has.
+    if (labelledUsername) return { username: labelledUsername, timestamp: labelled.timestamp };
   }
-  return Array.from(new Set(usernames));
+
+  return null;
+}
+
+export interface ResolvedEntries {
+  /** Deduplicated by username, first occurrence winning, in entry order. */
+  items: RawItem[];
+  /**
+   * Entries `resolveEntry` could not read. Counted rather than dropped: an
+   * export whose shape drifted must leave a trace, or it comes back as a
+   * confidently empty list indistinguishable from a genuinely empty file.
+   */
+  unresolved: number;
 }
 
 /**
- * Convert Instagram export entries to RawItem format with deduplication
+ * Resolve a list of entries, keeping count of the ones that could not be read.
+ *
+ * `usernameLabel` defaults to `null` — "no label resolution was done for this
+ * list". That is the honest state for `following.json` and `followers_*.json`,
+ * which have not migrated to the `label_values` shape yet; when they do, they
+ * need a label resolved over all eight files rather than the six
+ * `parseOptionalFiles` pools today.
  */
-export function listToRaw(entries: InstagramExportEntry[] | undefined): RawItem[] {
-  const result: RawItem[] = [];
-  if (!entries) return result;
+export function resolveEntries(
+  entries: readonly unknown[] | undefined,
+  usernameLabel: string | null = null
+): ResolvedEntries {
+  const items: RawItem[] = [];
   const seen = new Set<string>();
+  let unresolved = 0;
 
-  for (const e of entries) {
-    const item = e.string_list_data?.[0];
-    // Instagram changed format: username can be in item.value (old) or entry.title (new)
-    const username = normalize(item?.value) ?? normalize(e.title);
-    if (!username || seen.has(username)) continue;
-    seen.add(username);
-    result.push({ username, href: item?.href, timestamp: item?.timestamp });
+  for (const entry of entries ?? []) {
+    const item = resolveEntry(entry, usernameLabel);
+    if (!item) {
+      unresolved += 1;
+      continue;
+    }
+    if (seen.has(item.username)) continue;
+    seen.add(item.username);
+    items.push(item);
   }
 
-  return result;
+  return { items, unresolved };
 }
 
 /**
- * Convert Instagram export entries to username -> timestamp map
+ * The `fix` line every unreadable-records warning carries.
+ *
+ * It has to say the export is fine, because the reflex it is fighting is the
+ * one every other diagnostic on this screen encourages — go back to Instagram
+ * and request the data again. A fresh export of the same drifted format costs
+ * the reader days and changes nothing.
+ *
+ * Punctuation here is plain ASCII, unlike the em-dashed prose elsewhere: the
+ * no-hardcoded-label guard in `instagram-labels.test.ts` exempts non-ASCII only
+ * in a literal written directly at a `message`/`fix` key, and this copy is
+ * shared rather than inlined. Widening that guard to admit a constant would
+ * cost more than the dash is worth.
  */
-export function listToMap(entries: InstagramExportEntry[] | undefined): Map<string, number> {
-  const m = new Map<string, number>();
-  if (!entries) return m;
+export const UNREADABLE_ENTRIES_FIX =
+  'Your export is fine. This is a gap in this app, so re-requesting your data from Instagram will not help. Please report this so we can add support for the new format.';
 
-  for (const e of entries) {
-    const item = e.string_list_data?.[0];
-    // Instagram changed format: username can be in item.value (old) or entry.title (new)
-    const u = normalize(item?.value) ?? normalize(e.title);
-    if (!u) continue;
-    if (!m.has(u)) m.set(u, item?.timestamp ?? 0);
+/**
+ * Describe a file whose records were counted but not understood.
+ *
+ * Total and partial failure are different facts and must read differently:
+ * zero of N means the file is effectively gone and the badge it feeds is now
+ * empty; some of N means the file is degraded and the badge is now incomplete.
+ * One is a missing feature, the other a wrong answer, and a reader who cannot
+ * tell them apart cannot judge how much of the result to trust.
+ *
+ * Shared by all eight relationship files so a drift affecting several of them
+ * does not come back phrased six different ways.
+ */
+export function describeUnreadableEntries(
+  fileName: string,
+  unresolved: number,
+  resolved: number
+): string {
+  const records = `${unresolved} ${unresolved === 1 ? 'record' : 'records'}`;
+  return resolved === 0
+    ? `${fileName} was found with ${records}, but none of them could be read. Instagram appears to have changed the format of the records themselves.`
+    : `${fileName} was found, but ${records} of ${unresolved + resolved} could not be read. Instagram appears to have changed the format of some records.`;
+}
+
+/**
+ * Extract deduplicated usernames from Instagram export entries
+ */
+export function extractUsernames(entries: readonly unknown[] | undefined): string[] {
+  return resolveEntries(entries).items.map(item => item.username);
+}
+
+/**
+ * Resolve an unknown top-level JSON payload down to a list of raw entries.
+ *
+ * Instagram's relationship-file shape has drifted across three known forms,
+ * checked in this order (first match wins):
+ * 1. A bare array (`[...]`).
+ * 2. A wrapper object holding the array under a known key
+ *    (`{ relationships_close_friends: [...] }`).
+ * 3. A single record with the array wrapper omitted entirely — observed on
+ *    `restricted_profiles.json`/`removed_suggestions.json` in the
+ *    2026-08-11 export, both holding exactly one record. This is a
+ *    hypothesis about the serializer (single-record collections may skip
+ *    the array), not a documented contract, so it's recognized by a
+ *    positive shape test — does the object itself look like an entry? —
+ *    never by counting.
+ *
+ * `null` means "shape not recognized" and is what callers turn into
+ * `formatValid: false` / `formatInvalid: true`. An empty array is a
+ * distinct, valid result: shape recognized, genuinely no records. Those two
+ * must never collapse into one value.
+ *
+ * Replaces the `Array.isArray` ladder that used to be duplicated across
+ * `instagram-optional.ts`, `instagram.ts` (following.json) and
+ * `instagram-followers.ts` (followers_*.json) — the duplication is how the
+ * missing "bare single entry" case stayed hidden in all three for so long.
+ */
+export function resolveEntryList(data: unknown, propCandidates?: string[]): unknown[] | null {
+  if (Array.isArray(data)) return data;
+
+  if (propCandidates) {
+    for (const key of propCandidates) {
+      const value = (data as Record<string, unknown> | null)?.[key];
+      if (Array.isArray(value)) return value;
+    }
   }
 
-  return m;
+  return looksLikeEntry(data) ? [data] : null;
+}
+
+/**
+ * Positive test for "this object is itself a single Instagram export entry",
+ * not a wrapper whose expected array key got renamed or corrupted. A
+ * `{ relationships_*: <non-array> }` wrapper must NOT pass this check, or a
+ * genuine key rename would be silently swallowed as one garbage record
+ * instead of surfacing a drift warning.
+ */
+function looksLikeEntry(data: unknown): data is Record<string, unknown> {
+  if (typeof data !== 'object' || data === null || Array.isArray(data)) return false;
+  return 'label_values' in data || 'string_list_data' in data || 'title' in data;
 }

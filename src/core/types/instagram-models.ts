@@ -10,6 +10,28 @@ export interface InstagramExportEntry {
   media_list_data: unknown[];
 }
 
+/** One `{ label, value }` pair inside a `label_values` entry. */
+export interface InstagramLabelValue {
+  label?: string;
+  value?: string;
+}
+
+/**
+ * Entry shape introduced by the 2026-08 export. It carries neither `title` nor
+ * `string_list_data`; every field is behind a **localised** label, so the
+ * username cannot be found by key name — see `instagram-labels.ts` for how the
+ * label is resolved per archive.
+ *
+ * `fbid` is Instagram's internal account id. It is declared because the shape
+ * has it, not because anything reads it: it identifies a person more durably
+ * than a username does, and this app has no use that would justify storing it.
+ */
+export interface InstagramLabelValueEntry {
+  timestamp?: number;
+  label_values?: InstagramLabelValue[];
+  fbid?: string;
+}
+
 export interface ParsedAll {
   // Core relationship data
   following: Set<string>; // Accounts that the user follows

@@ -96,6 +96,18 @@ describe('Diagnostic Error Mapping', () => {
       expect(mapWarningToDiagnosticCode('MISSING_FOLLOWERS')).toBe('MISSING_FOLLOWERS');
     });
 
+    it('never tells a reader with an intact export to re-download it (GH#21 Task 3)', () => {
+      // These two fire when the ZIP is fine and we are the ones who cannot read
+      // it. Left unmapped they fall through to UNKNOWN, whose fix is "Try
+      // uploading the file again... make sure the ZIP file is not corrupted" —
+      // advice that is false here and costs the reader a days-long re-export.
+      for (const code of ['UNRESOLVED_ENTRIES_FOLLOWING', 'UNRESOLVED_ENTRIES_FOLLOWERS']) {
+        const mapped = mapWarningToDiagnosticCode(code);
+        expect(mapped).toBe('INVALID_DATA_STRUCTURE');
+        expect(createDiagnosticError(mapped).fix).not.toMatch(/again|corrupt/i);
+      }
+    });
+
     it('should return UNKNOWN for unmapped codes', () => {
       expect(mapWarningToDiagnosticCode('SOME_RANDOM_CODE')).toBe('UNKNOWN');
       expect(mapWarningToDiagnosticCode('NOT_MAPPED')).toBe('UNKNOWN');

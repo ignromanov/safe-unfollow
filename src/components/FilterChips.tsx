@@ -9,14 +9,22 @@ import {
   ChevronDown,
   ChevronUp,
   AlertCircle,
+  AlertTriangle,
   Ghost,
 } from 'lucide-react';
+import { BADGES_OVERSTATED_BY_UNREADABLE_REQUESTS } from '@/core/badges';
 import type { BadgeKey } from '@/core/types';
 interface FilterChipsProps {
   selectedFilters: Set<BadgeKey>;
   onFiltersChange: (filters: Set<BadgeKey>) => void;
   filterCounts: Record<BadgeKey, number>;
   isFiltering?: boolean;
+  /**
+   * Marks the notFollowingBack chip as overstated (GH#41). The page-level
+   * notice explains why; this is what connects the explanation to the number,
+   * since the two are far apart on a phone.
+   */
+  followRequestsUnreadable?: boolean;
 }
 import { analytics } from '@/lib/analytics';
 import type { ReactNode } from 'react';
@@ -45,7 +53,12 @@ const numberFormatter = new Intl.NumberFormat();
 function getBadgeIcon(type: BadgeKey, isActive: boolean): ReactNode {
   const config = BADGE_ICON_MAP[type];
   const IconComponent = config.icon;
-  return <IconComponent size={18} className={isActive ? 'text-primary-foreground' : config.defaultClass} />;
+  return (
+    <IconComponent
+      size={18}
+      className={isActive ? 'text-primary-foreground' : config.defaultClass}
+    />
+  );
 }
 
 // Filter configuration with badge types (labels come from i18n)
@@ -68,6 +81,7 @@ export const FilterChips = memo(function FilterChips({
   onFiltersChange,
   filterCounts,
   isFiltering: _isFiltering = false,
+  followRequestsUnreadable = false,
 }: FilterChipsProps) {
   const { t } = useTranslation('results');
   const [showEmptyFilters, setShowEmptyFilters] = useState(false);
@@ -119,6 +133,13 @@ export const FilterChips = memo(function FilterChips({
           const isActive = selectedFilters.has(cfg.type);
           const count = getBadgeCount(cfg.type);
           const label = t(`badges.${cfg.type}`);
+          // GH#41. The count itself is the thing that is wrong, so the mark
+          // goes on the chip, not only in the notice above the list.
+          const isOverstated =
+            followRequestsUnreadable && BADGES_OVERSTATED_BY_UNREADABLE_REQUESTS.has(cfg.type);
+          const chipLabel = isActive
+            ? t('filters.removeFilter', { label, count })
+            : t('filters.addFilter', { label, count });
           return (
             <button
               key={cfg.type}
@@ -128,10 +149,19 @@ export const FilterChips = memo(function FilterChips({
                   ? 'bg-primary text-primary-foreground border-primary shadow-md'
                   : 'text-zinc-600 dark:text-zinc-400 border-border bg-zinc-50/50 dark:bg-zinc-900/20 hover:border-primary/40'
               }`}
+              // Appended, not a separate element: an aria-label overrides the
+              // button's content, so a visually-hidden span inside would never
+              // be announced. The join is a translated template, not a
+              // hardcoded dash — `ar` and `ja` avoid that character in their own
+              // copy and would otherwise get one injected between two non-Latin
+              // runs.
               aria-label={
-                isActive
-                  ? t('filters.removeFilter', { label, count })
-                  : t('filters.addFilter', { label, count })
+                isOverstated
+                  ? t('filters.chipWithHint', {
+                      label: chipLabel,
+                      hint: t('caveat.followRequests.chipHint'),
+                    })
+                  : chipLabel
               }
               aria-pressed={isActive}
             >
@@ -147,7 +177,18 @@ export const FilterChips = memo(function FilterChips({
                   {numberFormatter.format(count)}
                 </span>
               </div>
-              <span className="mt-3 block leading-snug text-start text-xs">{label}</span>
+              <span className="mt-3 flex items-center gap-1.5 leading-snug text-start text-xs">
+                {label}
+                {isOverstated && (
+                  <AlertTriangle
+                    size={13}
+                    aria-hidden="true"
+                    className={
+                      isActive ? 'text-primary-foreground shrink-0' : 'text-amber-500 shrink-0'
+                    }
+                  />
+                )}
+              </span>
             </button>
           );
         })}

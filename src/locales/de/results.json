@@ -33,7 +33,8 @@
     "reset": "Zurücksetzen",
     "emptyCategories": "Leere Kategorien ({{count, number}})",
     "addFilter": "Filter {{label}} hinzufügen ({{count, number}} Accounts)",
-    "removeFilter": "Filter {{label}} entfernen ({{count, number}} Accounts)"
+    "removeFilter": "Filter {{label}} entfernen ({{count, number}} Accounts)",
+    "chipWithHint": "{{label}} — {{hint}}"
   },
   "badges": {
     "followers": "Follower",
@@ -47,6 +48,13 @@
     "restricted": "Eingeschränkt",
     "close": "Enge Freunde",
     "dismissed": "Abgelehnter Vorschlag"
+  },
+  "caveat": {
+    "followRequests": {
+      "title": "„Folgt dir nicht zurück“ ist möglicherweise zu hoch.",
+      "body": "Wir konnten deine Datei mit den Follow-Anfragen nicht lesen. Konten, denen du eine Anfrage geschickt hast, können deshalb in dieser Liste auftauchen, und deine Zähler für ausstehende Anfragen stehen auf null. Follower, „Folge ich“ und „Gegenseitig“ sind davon nicht betroffen.",
+      "chipHint": "Möglicherweise zu hoch — wir konnten deine Datei mit den Follow-Anfragen nicht lesen."
+    }
   },
   "empty": {
     "noUsers": "Keine Benutzer gefunden",

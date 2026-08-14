@@ -484,6 +484,19 @@ describe('Analytics', () => {
         );
       });
 
+      // GH#21 Task 5: payload is exactly `{ mode }` — never a username or the
+      // resolved label string. See
+      // `usernameLabelResolutionTelemetry.test.ts` for the end-to-end version
+      // of this guarantee, run against a real parse.
+      it('should track how the username label was resolved', () => {
+        analytics.usernameLabelResolution('unresolved');
+
+        expect(windowSpy.umami.track).toHaveBeenCalledWith(
+          AnalyticsEvents.USERNAME_LABEL_RESOLUTION,
+          { mode: 'unresolved' }
+        );
+      });
+
       describe('license events', () => {
         it('should track a restored license', () => {
           analytics.licenseRestored();

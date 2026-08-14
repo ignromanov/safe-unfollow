@@ -38,7 +38,7 @@ import * as columnStore from './stores/column-store';
 import * as bitsetStore from './stores/bitset-store';
 import * as searchStore from './stores/search-store';
 
-class IndexedDBService {
+export class IndexedDBService {
   private db: IDBDatabase | null = null;
   private initPromise: Promise<IDBDatabase> | null = null;
   private cache = new CacheManager();
@@ -53,10 +53,35 @@ class IndexedDBService {
     this.initPromise = new Promise((resolve, reject) => {
       const request = indexedDB.open(DB_CONFIG.name, DB_CONFIG.version);
 
-      request.onerror = () => reject(request.error);
+      request.onerror = () => {
+        // Reset so a later call retries with a fresh open() instead of replaying
+        // this same rejection forever (open() itself may succeed next time).
+        this.initPromise = null;
+        reject(request.error);
+      };
       request.onsuccess = () => {
         this.db = request.result;
         resolve(request.result);
+      };
+
+      // GH#24: without this handler, a version-change request blocked by another tab's
+      // open connection never fires any event — init() hangs with no error and no
+      // timeout. No artificial timeout is added alongside it: onblocked already fires
+      // as soon as the browser detects the block, so a timer would only race a signal
+      // we already have, and picking an arbitrary duration would either cut off a tab
+      // that was about to close on its own or leave the user waiting regardless.
+      // Known, accepted gap: the browser gives no way to cancel this request. If the
+      // blocking tab closes later on its own, onsuccess can still fire for it after we've
+      // already rejected and moved on, silently adopting a second connection as `this.db`.
+      // Benign in practice (a retry finds a working connection either way) — not worth the
+      // teardown complexity to close it out explicitly.
+      request.onblocked = () => {
+        this.initPromise = null;
+        reject(
+          new Error(
+            'Database upgrade blocked: another tab has this app open. Close other tabs of this app and try again.'
+          )
+        );
       };
 
       request.onupgradeneeded = event => {
@@ -85,18 +110,67 @@ class IndexedDBService {
 
   /**
    * Save file metadata
+   *
+   * GH#23: metadata and account data are separate transactions with no rollback
+   * between them, so a record freshly written here starts `accountsComplete: false`
+   * — "not yet confirmed" — until `storeAllAccounts` flips it.
+   *
+   * The default applies only to a hash with no record yet. Defaulting unconditionally
+   * would demote a record written before this field existed: such a record has no
+   * `accountsComplete` key at all, so a spread cannot carry a value through, and
+   * `indexeddb-cache.ts` re-saves the record on every cache hit just to bump
+   * `lastAccessed`. `getFileMetadata` reads an absent field as complete, so the two
+   * halves of the contract would disagree and a legacy record would hide itself after
+   * exactly one read. Legacy records are materialised as complete rather than left
+   * absent, so the decision is recorded in the data instead of re-derived every read.
    */
   async saveFileMetadata(metadata: FileMetadataRecord): Promise<void> {
     const db = await this.init();
-    await fileStore.saveFileMetadata(db, metadata);
+    let record = metadata;
+    if (metadata.accountsComplete === undefined) {
+      const existing = await fileStore.getFileMetadata(db, metadata.fileHash);
+      record = {
+        ...metadata,
+        accountsComplete: existing ? existing.accountsComplete !== false : false,
+      };
+    }
+    await fileStore.saveFileMetadata(db, record);
   }
 
   /**
    * Get file metadata
+   *
+   * GH#23: hides records whose account-data write never completed. Every real caller
+   * (cache-hit check, sample-data idempotency check, filter engine) is asking "is this
+   * file's data usable" — returning a record with no matching account data behind it
+   * is wrong for all of them, not just the one that first reported the bug.
+   *
+   * Records with no `accountsComplete` field are treated as complete. Not because
+   * they could not be orphans — they can: the two transactions were already split
+   * before this fix, which is exactly what GH#23 is about, so genuine orphans predate
+   * this field and this default hides none of them. The reason is that GH#22 changes
+   * the cache-key derivation in this same change, so a pre-fix record is not looked up
+   * under its old key again; treating it as incomplete would force a re-parse the new
+   * key already forces, at the cost of a wrong answer for anyone whose key does survive.
    */
   async getFileMetadata(fileHash: string): Promise<FileMetadataRecord | null> {
     const db = await this.init();
-    return fileStore.getFileMetadata(db, fileHash);
+    const record = await fileStore.getFileMetadata(db, fileHash);
+    if (record && record.accountsComplete === false) {
+      return null;
+    }
+    return record;
+  }
+
+  /**
+   * Mark a file's account data as durably present, so `getFileMetadata` stops
+   * hiding it. No-op if metadata was never saved for this hash (e.g. `storeAllAccounts`
+   * called directly, without a preceding `saveFileMetadata` — there is nothing to flip).
+   */
+  private async markAccountsComplete(db: IDBDatabase, fileHash: string): Promise<void> {
+    const existing = await fileStore.getFileMetadata(db, fileHash);
+    if (!existing) return;
+    await fileStore.saveFileMetadata(db, { ...existing, accountsComplete: true });
   }
 
   /**
@@ -195,7 +269,22 @@ class IndexedDBService {
     await Promise.all(bitsetPromises);
 
     // Wait for transaction to complete
-    await waitForTransaction(tx);
+    try {
+      await waitForTransaction(tx);
+    } catch (error) {
+      // GH#23: this write failed after `saveFileMetadata` (if the caller made that call)
+      // already committed in its own transaction — with no cleanup, that record would
+      // survive as an orphan: `getFileMetadata` already hides it via `accountsComplete`,
+      // but leaving it and any partial column/bitset rows behind would still leak
+      // storage forever. Best-effort: drop everything for this hash so a retry starts
+      // from a clean slate. Best-effort because a second failure here must not shadow
+      // the original error — that's what the caller (and the user's error message)
+      // needs to see.
+      await this.clearFile(fileHash).catch(() => {});
+      throw error;
+    }
+
+    await this.markAccountsComplete(db, fileHash);
   }
 
   /**

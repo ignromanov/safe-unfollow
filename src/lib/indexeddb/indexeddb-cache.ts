@@ -90,9 +90,27 @@ interface CodedError extends Error {
   code?: string;
 }
 
+/** Bytes sampled from each end of the file for hashing */
+const HASH_SAMPLE_SIZE = 1024 * 1024;
+
 /**
  * Generate file hash for caching
- * Uses first 1MB of file for fast hash generation
+ *
+ * Samples the first and last HASH_SAMPLE_SIZE bytes (plus file.size) instead of
+ * loading the whole file into memory — bounded cost even for the 272MB stress
+ * fixture. An Instagram export ZIP has stable, alphabetically-early entries up
+ * front (e.g. ads_information/…) that don't change between exports, while the
+ * data this product actually reads (connections/followers_and_following/…) sits
+ * deep in the archive. Hashing the head alone (GH#22) let two different exports
+ * collide on the same cache key, silently serving the stale snapshot. A ZIP's
+ * central directory — which encodes every entry's name, size and CRC — lives at
+ * the end of the file, so the tail sample is where most real differences show up.
+ * file.size is folded in too, so a collision now requires agreement on three
+ * independent things instead of one.
+ *
+ * This is not a full-file hash: two files differing only in an unsampled middle
+ * region of matching length would still collide. That's an accepted trade-off
+ * for staying memory-bounded, not a full integrity guarantee.
  */
 export async function generateFileHash(file: File): Promise<string> {
   // Check crypto API availability
@@ -110,17 +128,40 @@ export async function generateFileHash(file: File): Promise<string> {
   }
 
   try {
-    // Read only first 1MB for hashing — avoids loading entire file into memory
-    const hashSize = Math.min(file.size, 1024 * 1024);
-    let buffer: ArrayBuffer;
+    const headEnd = Math.min(file.size, HASH_SAMPLE_SIZE);
+    // Clamped to headEnd so a file no larger than the sample size (headEnd === file.size)
+    // yields an empty tail slice below — it is not hashed twice.
+    const tailStart = Math.max(headEnd, file.size - HASH_SAMPLE_SIZE);
+
+    let headBuffer: ArrayBuffer;
+    let tailBuffer: ArrayBuffer;
     if (typeof file.slice === 'function') {
-      buffer = await file.slice(0, hashSize).arrayBuffer();
+      headBuffer = await file.slice(0, headEnd).arrayBuffer();
+      tailBuffer =
+        tailStart < file.size
+          ? await file.slice(tailStart, file.size).arrayBuffer()
+          : new ArrayBuffer(0);
     } else {
       // Fallback for environments where slice is not available (e.g., test mocks)
       const fullBuffer = await file.arrayBuffer();
-      buffer = fullBuffer.slice(0, hashSize);
+      headBuffer = fullBuffer.slice(0, headEnd);
+      tailBuffer =
+        tailStart < file.size ? fullBuffer.slice(tailStart, file.size) : new ArrayBuffer(0);
     }
-    const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+
+    // Fold file.size into the digest input — two files can share an identical
+    // sampled head and tail while differing only in an unsampled middle length.
+    const sizeBuffer = new ArrayBuffer(8);
+    new DataView(sizeBuffer).setFloat64(0, file.size);
+
+    const combined = new Uint8Array(
+      headBuffer.byteLength + tailBuffer.byteLength + sizeBuffer.byteLength
+    );
+    combined.set(new Uint8Array(headBuffer), 0);
+    combined.set(new Uint8Array(tailBuffer), headBuffer.byteLength);
+    combined.set(new Uint8Array(sizeBuffer), headBuffer.byteLength + tailBuffer.byteLength);
+
+    const hashBuffer = await crypto.subtle.digest('SHA-256', combined);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   } catch (err) {

@@ -33,7 +33,8 @@
     "reset": "Limpar",
     "emptyCategories": "Categorias Vazias ({{count, number}})",
     "addFilter": "Adicionar filtro {{label}} ({{count, number}} contas)",
-    "removeFilter": "Remover filtro {{label}} ({{count, number}} contas)"
+    "removeFilter": "Remover filtro {{label}} ({{count, number}} contas)",
+    "chipWithHint": "{{label}} — {{hint}}"
   },
   "badges": {
     "followers": "Seguidores",
@@ -47,6 +48,13 @@
     "restricted": "Restrito",
     "close": "Amigo próximo",
     "dismissed": "Sugestão ignorada"
+  },
+  "caveat": {
+    "followRequests": {
+      "title": "“Não te seguem de volta” pode estar inflado.",
+      "body": "Não conseguimos ler o seu arquivo de solicitações de seguir, então contas para as quais você enviou uma solicitação podem aparecer nesta lista, e seus contadores de solicitações pendentes aparecem vazios. Seguidores, Seguindo e Mútuos não são afetados.",
+      "chipHint": "Pode estar inflado — não conseguimos ler o seu arquivo de solicitações de seguir."
+    }
   },
   "empty": {
     "noUsers": "Nenhum usuário encontrado",

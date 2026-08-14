@@ -247,6 +247,47 @@ describe('FilterChips Component', () => {
     });
   });
 
+  /**
+   * GH#41. The page-level notice explains the problem; the chip is where the
+   * wrong number is actually read, and on a phone the two are a scroll apart.
+   */
+  describe('overstated notFollowingBack chip', () => {
+    const chipName = (fragment: string) =>
+      screen.getByRole('button', { name: new RegExp(fragment, 'i') });
+
+    const hint = resultsEN.caveat.followRequests.chipHint;
+    const hintPattern = new RegExp(hint.slice(0, 20), 'i');
+
+    it('marks the notFollowingBack chip when a follow-requests file was unreadable', () => {
+      render(<FilterChips {...defaultProps} followRequestsUnreadable />);
+
+      const chipLabel = resultsEN.filters.addFilter
+        .replace('{{label}}', resultsEN.badges.notFollowingBack)
+        .replace('{{count, number}}', '25');
+
+      // The whole accessible name, not a fragment: the separator between the
+      // two halves comes from `filters.chipWithHint`, which is what lets `ar`
+      // and `ja` join them without the em dash their own copy avoids. A
+      // hardcoded dash in the component would pass a fragment match and fail
+      // this one.
+      expect(chipName('Add Not following back filter')).toHaveAccessibleName(
+        resultsEN.filters.chipWithHint.replace('{{label}}', chipLabel).replace('{{hint}}', hint)
+      );
+    });
+
+    it('leaves every other chip alone', () => {
+      render(<FilterChips {...defaultProps} followRequestsUnreadable />);
+
+      expect(chipName('Add Followers filter')).not.toHaveAccessibleName(hintPattern);
+    });
+
+    it('marks nothing when the follow-requests files read fine', () => {
+      render(<FilterChips {...defaultProps} />);
+
+      expect(chipName('Add Not following back filter')).not.toHaveAccessibleName(hintPattern);
+    });
+  });
+
   // An active chip fills with --primary. A literal white on it measures 3.95:1 in
   // light and 3.30:1 in dark; inside the bg-white/20 count pill it drops further,
   // to 2.97:1 and 2.53:1, which fails even the 3:1 allowance for graphics.
@@ -254,9 +295,7 @@ describe('FilterChips Component', () => {
     const renderWithActiveChip = () =>
       render(<FilterChips {...defaultProps} selectedFilters={new Set<BadgeKey>(['following'])} />);
 
-    const activeChip = () =>
-      screen
-        .getByRole('button', { pressed: true, name: /following/i });
+    const activeChip = () => screen.getByRole('button', { pressed: true, name: /following/i });
 
     it('has no literal text-white anywhere in the active chip', () => {
       renderWithActiveChip();
@@ -290,6 +329,28 @@ describe('FilterChips Component', () => {
 
       const icon = activeChip().querySelector('svg');
       expect(icon).toHaveClass('text-primary-foreground');
+    });
+
+    // The GH#41 marker renders on a condition, so it is absent from every case
+    // above — and it arrived carrying the literal this describe forbids while
+    // all of them stayed green. `toHaveClass`, not the class sweep: an SVG's
+    // `className` is an SVGAnimatedString, so the regex above reads
+    // "[object SVGAnimatedString]" and matches nothing on any icon.
+    it('colours the overstated marker with the token', () => {
+      render(
+        <FilterChips
+          {...defaultProps}
+          selectedFilters={new Set<BadgeKey>(['notFollowingBack'])}
+          followRequestsUnreadable
+        />
+      );
+
+      const chip = screen.getByRole('button', { pressed: true, name: /not following back/i });
+      const icons = chip.querySelectorAll('svg');
+      // Badge icon first, marker second — the marker sits beside the label.
+      expect(icons).toHaveLength(2);
+      expect(icons[1]).toHaveClass('text-primary-foreground');
+      expect(icons[1]).not.toHaveClass('text-white');
     });
   });
 });

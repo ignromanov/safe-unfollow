@@ -33,7 +33,8 @@
     "reset": "Sıfırla",
     "emptyCategories": "Boş Kategoriler ({{count, number}})",
     "addFilter": "{{label}} filtresi ekle ({{count, number}} hesap)",
-    "removeFilter": "{{label}} filtresini kaldır ({{count, number}} hesap)"
+    "removeFilter": "{{label}} filtresini kaldır ({{count, number}} hesap)",
+    "chipWithHint": "{{label}} — {{hint}}"
   },
   "badges": {
     "followers": "Takipçiler",
@@ -47,6 +48,13 @@
     "restricted": "Kısıtlanmış",
     "close": "Yakın arkadaş",
     "dismissed": "Reddedilen öneri"
+  },
+  "caveat": {
+    "followRequests": {
+      "title": "“Geri takip etmeyenler” olduğundan fazla görünüyor olabilir.",
+      "body": "Takip istekleri dosyanı okuyamadık, bu yüzden istek gönderdiğin hesaplar bu listede çıkabilir ve bekleyen istek sayıların boş görünür. Takipçiler, Takip edilenler ve Karşılıklı takip bundan etkilenmedi.",
+      "chipHint": "Olduğundan fazla görünüyor olabilir — takip istekleri dosyanı okuyamadık."
+    }
   },
   "empty": {
     "noUsers": "Kullanıcı bulunamadı",

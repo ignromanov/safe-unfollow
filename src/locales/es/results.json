@@ -33,7 +33,8 @@
     "reset": "Restablecer",
     "emptyCategories": "Categorías vacías ({{count, number}})",
     "addFilter": "Agregar filtro {{label}} ({{count, number}} cuentas)",
-    "removeFilter": "Quitar filtro {{label}} ({{count, number}} cuentas)"
+    "removeFilter": "Quitar filtro {{label}} ({{count, number}} cuentas)",
+    "chipWithHint": "{{label}} — {{hint}}"
   },
   "badges": {
     "followers": "Seguidores",
@@ -47,6 +48,13 @@
     "restricted": "Restringido",
     "close": "Amigo cercano",
     "dismissed": "Sugerencia descartada"
+  },
+  "caveat": {
+    "followRequests": {
+      "title": "«No te siguen de vuelta» puede estar inflado.",
+      "body": "No pudimos leer tu archivo de solicitudes de seguimiento, así que las cuentas a las que enviaste una solicitud pueden aparecer en esta lista, y tus contadores de solicitudes pendientes se muestran vacíos. Seguidores, Siguiendo y Mutuos no se ven afectados.",
+      "chipHint": "Puede estar inflado — no pudimos leer tu archivo de solicitudes de seguimiento."
+    }
   },
   "empty": {
     "noUsers": "No se encontraron usuarios",

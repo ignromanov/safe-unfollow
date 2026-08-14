@@ -1,4 +1,5 @@
-import type { FileDiscovery, ParseWarning } from '@/core/types';
+import { OPTIONAL_FILE_DRIFT_CODES } from '@/core/parsers/instagram-file-specs';
+import type { FileDiscovery, LabelResolutionMode, ParseWarning } from '@/core/types';
 import { analytics } from '@/lib/analytics';
 import type { ParseOutcome } from '@/lib/analytics';
 import { extractErrorCode } from '@/lib/error-classifier';
@@ -18,6 +19,51 @@ const MAX_FILE_SIZE = 500 * 1024 * 1024;
 
 // localStorage key for tracking return uploads
 const LAST_UPLOAD_KEY = 'analytics_last_upload';
+
+/**
+ * Report everything this parse observed about the export's shape, from whichever
+ * of the three parse exit points reached it (worker success, worker failure,
+ * main-thread fallback).
+ *
+ * One function rather than one per signal, because the two always fire together
+ * and a future exit path that emits one and forgets the other is a diagnostic
+ * that silently does not fire — the failure class this whole change exists to
+ * remove.
+ *
+ * **Optional-file drift (GH#21)**: files whose top-level shape we no longer
+ * recognise parse to an empty map that is indistinguishable from "the user has
+ * none", and severity `'warning'` is rendered nowhere — `UploadZone.tsx` and
+ * `DiagnosticErrorScreen.tsx` both read only `'error'` — so this event is the
+ * whole detection surface. Reported on the failure path too: drift is a fact
+ * about the export, not about whether the upload finished, and a format change
+ * would plausibly hit several files at once, so drift accompanying a failure is
+ * precisely the case worth seeing.
+ *
+ * **Label resolution (GH#21 Task 5)**: `mode` is `undefined` only when nothing
+ * was parsed this call — an exception thrown before `parseInstagramZipFile` ever
+ * ran (e.g. the worker's own IndexedDB-quota branch, which never posts
+ * `labelResolutionMode`) — and silently no-ops rather than reporting a
+ * fabricated mode.
+ *
+ * Both must run on the main thread: `enqueueEvent` and `trackEvent` return early
+ * on `typeof window === 'undefined'` (`lib/stats/queue.ts`, `lib/stats/core.ts`),
+ * and a Web Worker's global is `self`, so emitting from the parser itself would
+ * be a silent no-op. Both signals already cross the boundary inside the result.
+ */
+function reportParseDiagnostics(
+  warnings: ParseWarning[] | undefined,
+  labelResolutionMode: LabelResolutionMode | undefined
+): void {
+  for (const warning of warnings ?? []) {
+    if (OPTIONAL_FILE_DRIFT_CODES.has(warning.code)) {
+      analytics.optionalFileFormatDrift(warning.code);
+    }
+  }
+
+  if (labelResolutionMode) {
+    analytics.usernameLabelResolution(labelResolutionMode);
+  }
+}
 
 /**
  * Check if this is a return upload and track it
@@ -206,14 +252,20 @@ export function useFileUpload() {
                 fileDiscovery: result.discovery,
               });
             }
+            reportParseDiagnostics(result.warnings, result.labelResolutionMode);
           } catch (error) {
             // Extract warnings/discovery from error if available
             if (error instanceof Error && 'warnings' in error) {
+              const failureWarnings = (error as { warnings?: ParseWarning[] }).warnings;
               setUploadInfo({
-                parseWarnings: (error as { warnings?: ParseWarning[] }).warnings ?? [],
+                parseWarnings: failureWarnings ?? [],
                 fileDiscovery: (error as { discovery?: import('@/core/types').FileDiscovery })
                   .discovery,
               });
+              reportParseDiagnostics(
+                failureWarnings,
+                (error as { labelResolutionMode?: LabelResolutionMode }).labelResolutionMode
+              );
             }
             throw error;
           }
@@ -233,6 +285,7 @@ export function useFileUpload() {
             parseWarnings: result.warnings ?? [],
             fileDiscovery: result.discovery,
           });
+          reportParseDiagnostics(result.warnings, result.labelResolutionMode);
         }
 
         // Data already cached in IndexedDB by worker during chunked processing

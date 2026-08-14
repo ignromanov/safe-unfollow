@@ -33,7 +33,8 @@
     "reset": "Réinitialiser",
     "emptyCategories": "Catégories vides ({{count, number}})",
     "addFilter": "Ajouter le filtre {{label}} ({{count, number}} comptes)",
-    "removeFilter": "Retirer le filtre {{label}} ({{count, number}} comptes)"
+    "removeFilter": "Retirer le filtre {{label}} ({{count, number}} comptes)",
+    "chipWithHint": "{{label}} — {{hint}}"
   },
   "badges": {
     "followers": "Abonnés",
@@ -47,6 +48,13 @@
     "restricted": "Restreint",
     "close": "Ami proche",
     "dismissed": "Suggestion ignorée"
+  },
+  "caveat": {
+    "followRequests": {
+      "title": "« Ne vous suivent pas » est peut-être surestimé.",
+      "body": "Nous n’avons pas pu lire votre fichier de demandes d’abonnement : les comptes à qui vous avez envoyé une demande peuvent apparaître dans cette liste, et vos compteurs de demandes en attente sont vides. Abonnés, Abonnements et Mutuels ne sont pas affectés.",
+      "chipHint": "Peut-être surestimé — nous n’avons pas pu lire votre fichier de demandes d’abonnement."
+    }
   },
   "empty": {
     "noUsers": "Aucun utilisateur trouvé",

@@ -1,8 +1,19 @@
 import type { DiagnosticError, DiagnosticErrorCode } from '@/core/types';
 import { Code2, FileArchive, FileQuestion, FileX2, FolderX } from 'lucide-react';
 
-/** Error codes that warrant GitHub issue reporting */
+/**
+ * Error codes that warrant GitHub issue reporting.
+ *
+ * The two format codes are the strongest case in the list: they fire only when a
+ * required relationship file is present but its top-level shape matches nothing we
+ * know (GH#21), which means Instagram changed the export and every user is about to
+ * hit it. Analytics tells us it happened; the report tells us what the new shape is,
+ * and only the user has that file. Note this Set is not exhaustive over
+ * `DiagnosticErrorCode`, so the compiler will not remind anyone to revisit it.
+ */
 export const REPORTABLE_ERROR_CODES: Set<DiagnosticErrorCode> = new Set([
+  'INVALID_FOLLOWING_FORMAT',
+  'INVALID_FOLLOWERS_FORMAT',
   'CORRUPTED_ZIP',
   'JSON_PARSE_ERROR',
   'INVALID_DATA_STRUCTURE',

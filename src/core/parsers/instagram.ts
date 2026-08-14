@@ -5,12 +5,12 @@ import type {
   ParsedAll,
   ParseResult,
   ParseWarning,
-  RawItem,
 } from '@/core/types';
 import { BASE_PATH_CANDIDATES, FILE_SPECS } from './instagram-file-specs';
-import { escapeRegExp, extractUsernames, listToRaw } from './instagram-utils';
+import { escapeRegExp, extractUsernames } from './instagram-utils';
 import { analyzeZipStructure, createCriticalError } from './instagram-zip-analysis';
 import { parseFollowersFromZip } from './instagram-followers';
+import { parseFollowingPayload } from './instagram-following';
 import { parseOptionalFiles } from './instagram-optional';
 import { createEmptyParsedAll } from './instagram-validation';
 
@@ -61,6 +61,10 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
       ],
       discovery: { format: 'unknown', isInstagramExport: false, files: [] },
       hasMinimalData: false,
+      // No optional file was ever read — nothing to resolve a label from, and
+      // nothing to overstate (GH#41).
+      labelResolutionMode: 'not-applicable',
+      followRequestsUnreadable: false,
     };
   }
 
@@ -81,6 +85,8 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
       ],
       discovery: { format: 'unknown', isInstagramExport: false, files: [] },
       hasMinimalData: false,
+      labelResolutionMode: 'not-applicable',
+      followRequestsUnreadable: false,
     };
   }
 
@@ -124,10 +130,11 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
         files: fileExpectations,
       },
       hasMinimalData: false,
+      labelResolutionMode: 'not-applicable',
+      followRequestsUnreadable: false,
     };
   }
 
-  // Try common paths
   const baseCandidates = BASE_PATH_CANDIDATES;
 
   const readJsonFromZip = async (
@@ -156,49 +163,10 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
   const followingFilePatterns = baseCandidates
     .map(b => `${b}/following.json`)
     .concat(['following.json']);
-  const followingResult = await readJsonFromZip(followingFilePatterns);
-  let followingRaw: RawItem[] = [];
-  let followingFound = false;
-  let followingPath: string | undefined;
-
-  if (followingResult) {
-    followingFound = true;
-    followingPath = followingResult.path;
-    const entries = Array.isArray(followingResult.data)
-      ? followingResult.data
-      : (followingResult.data as { relationships_following?: RawItem[] })?.relationships_following;
-    followingRaw = listToRaw(entries);
-  }
-
-  const followingUsers = followingRaw.map(r => r.username);
-  const followingTimestamps = new Map(
-    followingRaw.map(r => [r.username, r.timestamp ?? 0] as const)
-  );
-
-  const followingSpec = FILE_SPECS[0]!;
-  fileExpectations.push({
-    name: 'following.json',
-    description: followingSpec.description,
-    required: true,
-    found: followingFound,
-    itemCount: followingUsers.length,
-    foundPath: followingPath,
-  });
-
-  if (!followingFound) {
-    warnings.push({
-      code: 'MISSING_FOLLOWING',
-      message: 'following.json not found — cannot detect who you follow.',
-      severity: 'warning',
-      fix: 'Make sure your Instagram export includes "Followers and following" data. Re-request if needed.',
-    });
-  } else if (followingUsers.length === 0) {
-    warnings.push({
-      code: 'EMPTY_FOLLOWING',
-      message: 'following.json is empty or contains no valid accounts.',
-      severity: 'info',
-    });
-  }
+  const followingParsed = parseFollowingPayload(await readJsonFromZip(followingFilePatterns));
+  const followingUsers = followingParsed.followingUsers;
+  warnings.push(...followingParsed.warnings);
+  fileExpectations.push(followingParsed.fileExpectation);
 
   // === Parse Followers (delegated) ===
   const followersParsed = await parseFollowersFromZip(zip, baseCandidates);
@@ -206,18 +174,52 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
   fileExpectations.push(followersParsed.fileExpectation);
 
   // === Parse Optional Files (delegated) ===
-  const optionalParsed = await parseOptionalFiles(baseCandidates, readJsonFromZip);
+  // Membership breaks localised-username-label ties (GH#21, instagram-labels).
+  // Passed unbuilt: these are the two files that reach 1M accounts, the tiebreak
+  // is the resolver's last resort, and no measured archive gets that far.
+  const readKnownUsernames = (): ReadonlySet<string> => {
+    const known = new Set(followingUsers);
+    for (const username of followersParsed.followersUsers) known.add(username);
+    return known;
+  };
+  const optionalParsed = await parseOptionalFiles(
+    baseCandidates,
+    readJsonFromZip,
+    readKnownUsernames
+  );
   warnings.push(...optionalParsed.warnings);
   fileExpectations.push(...optionalParsed.fileExpectations);
 
-  // Determine if we have minimal data
-  const hasMinimalData = followingUsers.length > 0 || followersParsed.followersUsers.length > 0;
+  // A required file that was found and could not be read is not "no data" — it
+  // is data we cannot read, and the two must not share an exit (GH#21).
+  // Widening the OR below would have said "we found nothing"; gating it says
+  // "we found it and failed", which is the true and actionable one.
+  //
+  // "Could not read it" covers both halves, and each file reports them as one
+  // flag: the wrapper matched no known shape, or the wrapper was fine and every
+  // record inside it drifted. They are one condition because they produce one
+  // outcome — the set comes back empty, so every follower is badged
+  // notFollowedBack — and that outcome is the worst in GH#21 whichever half
+  // caused it. Splitting them here would mean a caller could gate one and
+  // forget the other, which is exactly how the entry half shipped without the
+  // wrapper half. Which one it was is not lost: it stays in the warning code
+  // and in `FileExpectation`. Only the decision is shared, not the diagnosis.
+  //
+  // An absent file is not unreadable and must not reach this — "missing" and
+  // "present but unintelligible" are different answers and keeping them apart
+  // is the point of the whole task.
+  //
+  // Both callers of hasMinimalData take the first error warning as the code, so
+  // the critical error is withheld to leave ours first.
+  const requiredFileUnreadable = followingParsed.unreadable || followersParsed.unreadable;
+  const hasMinimalData =
+    !requiredFileUnreadable &&
+    (followingUsers.length > 0 || followersParsed.followersUsers.length > 0);
 
-  if (!hasMinimalData) {
+  if (!hasMinimalData && !requiredFileUnreadable) {
     warnings.push(createCriticalError(analysis));
   }
 
-  // Create discovery object
   const discovery: FileDiscovery = {
     format,
     isInstagramExport: true,
@@ -235,12 +237,14 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
       closeFriends: optionalParsed.closeFriendsResult.map,
       unfollowed: optionalParsed.unfollowedResult.map,
       dismissedSuggestions: optionalParsed.dismissedResult.map,
-      followingTimestamps,
+      followingTimestamps: followingParsed.followingTimestamps,
       followersTimestamps: followersParsed.followersTimestamps,
     },
     warnings,
     discovery,
     hasMinimalData,
+    labelResolutionMode: optionalParsed.labelResolutionMode,
+    followRequestsUnreadable: optionalParsed.followRequestsUnreadable,
   };
 }
 
