@@ -66,6 +66,27 @@ function reportParseDiagnostics(
 }
 
 /**
+ * Build the error a pre-parse guard throws, carrying the code that identifies
+ * it rather than only the sentence shown to the reader.
+ *
+ * GH#35 — the guards used to report the failure themselves and then throw a
+ * bare `new Error(message)`. That message has already been through i18n, so the
+ * catch below ran `extractErrorCode` over translated prose, got `UNKNOWN`, and
+ * reported the same failure a second time: 296 phantom `upload_error_unknown`
+ * events against 307 real `upload_error_not_zip` in the 24 Jul – 12 Aug window.
+ *
+ * The fix is one reporting point, not two. Reporting stays in the catch, which
+ * every failure passes through, and the guards' job is to make their failure
+ * classifiable when it arrives there.
+ */
+function guardFailure(warning: ParseWarning): Error {
+  return Object.assign(new Error(warning.message), {
+    code: warning.code,
+    warnings: [warning],
+  });
+}
+
+/**
  * Check if this is a return upload and track it
  */
 function trackReturnUploadIfApplicable(fileHash: string): void {
@@ -166,8 +187,7 @@ export function useFileUpload() {
             parseWarnings: [notZipWarning],
           });
 
-          analytics.uploadErrorByCode('', 'NOT_ZIP', notZipWarning.message);
-          throw new Error(notZipWarning.message);
+          throw guardFailure(notZipWarning);
         }
 
         // File size guard: reject files over 500MB
@@ -187,8 +207,7 @@ export function useFileUpload() {
             parseWarnings: [tooLargeWarning],
           });
 
-          analytics.uploadErrorByCode('', 'FILE_TOO_LARGE', tooLargeWarning.message);
-          throw new Error(tooLargeWarning.message);
+          throw guardFailure(tooLargeWarning);
         }
 
         // Generate file hash for cache lookup and analytics correlation
