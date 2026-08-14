@@ -1,30 +1,32 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { renderToString } from 'react-dom/server';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { Component as HomePage } from '@/pages/HomePage';
-import heroEN from '@/locales/en/hero.json';
 import commonEN from '@/locales/en/common.json';
+import { useAppStore } from '@/lib/store';
+import type { FileMetadata } from '@/core/types';
+
+// Wraps (not replaces) the real useHasResults so its SSR-safe behavior stays
+// real while call count stays observable — hasResults must be sourced from
+// this shared hook, not recomputed locally from useInstagramData.
+vi.mock('@/hooks/useHasResults', async importOriginal => {
+  const actual = await importOriginal<typeof import('@/hooks/useHasResults')>();
+  return { ...actual, useHasResults: vi.fn(actual.useHasResults) };
+});
+
+const FILE: FileMetadata = {
+  name: 'test.zip',
+  size: 1,
+  uploadDate: new Date('2026-01-01'),
+  fileHash: 'abc123',
+  accountCount: 100,
+};
 
 // Mock child components
 vi.mock('@/components/Hero', () => ({
-  Hero: ({
-    onStartGuide,
-    onLoadSample,
-    onUploadDirect,
-    hasData,
-    onContinue,
-  }: {
-    onStartGuide: (stepIndex?: number) => void;
-    onLoadSample: () => void;
-    onUploadDirect: () => void;
-    hasData?: boolean;
-    onContinue?: () => void;
-  }) => (
+  Hero: ({ hasData }: { hasData?: boolean }) => (
     <div data-testid="hero">
-      <button onClick={() => onStartGuide(0)}>{heroEN.buttons.getGuide}</button>
-      <button onClick={onLoadSample}>{heroEN.buttons.trySample}</button>
-      <button onClick={onUploadDirect}>{heroEN.buttons.haveFile}</button>
-      {hasData && onContinue && <button onClick={onContinue}>{heroEN.buttons.viewResults}</button>}
       <span data-testid="has-data">{String(hasData)}</span>
     </div>
   ),
@@ -69,22 +71,13 @@ vi.mock('@/hooks/useLanguagePrefix', () => ({
   useLanguagePrefix: () => mockUseLanguagePrefix(),
 }));
 
-const mockUseInstagramData = vi.fn(() => ({
-  uploadState: { status: 'idle', error: null, fileName: null },
-  fileMetadata: null,
-}));
-vi.mock('@/hooks/useInstagramData', () => ({
-  useInstagramData: () => mockUseInstagramData(),
-}));
-
 describe('HomePage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseLanguagePrefix.mockReturnValue('');
-    mockUseInstagramData.mockReturnValue({
-      uploadState: { status: 'idle', error: null, fileName: null },
-      fileMetadata: null,
-    });
+    // hasResults (Hero's hasData) is sourced from useAppStore via useHasResults,
+    // not from useInstagramData — reset the real store directly.
+    useAppStore.setState({ uploadStatus: 'idle', fileMetadata: null });
   });
 
   describe('rendering', () => {
@@ -110,10 +103,7 @@ describe('HomePage', () => {
     });
 
     it('should pass hasData as true when upload is successful', () => {
-      mockUseInstagramData.mockReturnValue({
-        uploadState: { status: 'success', error: null, fileName: 'test.zip' },
-        fileMetadata: { fileHash: 'abc123', accountCount: 100, name: 'test.zip' },
-      });
+      useAppStore.setState({ uploadStatus: 'success', fileMetadata: FILE });
 
       render(<HomePage />);
 
@@ -121,46 +111,35 @@ describe('HomePage', () => {
     });
   });
 
-  describe('navigation - Hero handlers', () => {
-    it('should navigate to wizard step 1 when Start Guide is clicked', async () => {
-      const user = userEvent.setup();
+  describe('hydration parity', () => {
+    it('sources hasData from the shared useHasResults hook, not a page-local computation', async () => {
+      // The regression this guards against: HomePage used to derive hasResults
+      // itself from useInstagramData(), independently of Layout's useHasResults.
+      // That duplication is what let the two fall out of sync — Layout gates on
+      // hydration, HomePage did not. Asserting the shared hook is actually
+      // invoked (not just that some boolean happens to match) is what catches
+      // a page-local computation creeping back in.
+      const { useHasResults } = await import('@/hooks/useHasResults');
+
       render(<HomePage />);
 
-      await user.click(screen.getByText(heroEN.buttons.getGuide));
-
-      expect(mockNavigate).toHaveBeenCalledWith('/wizard/step/1');
+      expect(useHasResults).toHaveBeenCalled();
     });
 
-    it('should navigate to sample page when Load Sample is clicked', async () => {
-      const user = userEvent.setup();
-      render(<HomePage />);
+    it('renders the no-data CTA set when the store already has data but the hook has not updated yet', () => {
+      // renderToString always invokes useSyncExternalStore's getServerSnapshot,
+      // which is exactly what happens on a returning visitor's first render:
+      // zustand's persist middleware rehydrates the store synchronously from
+      // localStorage before hydration runs, so the store already says "success"
+      // while the prerendered HTML was built with no data. HomePage must defer
+      // to useHasResults (which forces false here) instead of computing
+      // hasResults itself, or this disagrees with the prerendered HTML and
+      // React throws #423/#425, discarding the prerendered DOM.
+      useAppStore.setState({ uploadStatus: 'success', fileMetadata: FILE });
 
-      await user.click(screen.getByText(heroEN.buttons.trySample));
+      const html = renderToString(<HomePage />);
 
-      expect(mockNavigate).toHaveBeenCalledWith('/sample');
-    });
-
-    it('should navigate to upload page when Upload Direct is clicked', async () => {
-      const user = userEvent.setup();
-      render(<HomePage />);
-
-      await user.click(screen.getByText(heroEN.buttons.haveFile));
-
-      expect(mockNavigate).toHaveBeenCalledWith('/upload');
-    });
-
-    it('should navigate to results when Continue is clicked', async () => {
-      mockUseInstagramData.mockReturnValue({
-        uploadState: { status: 'success', error: null, fileName: 'test.zip' },
-        fileMetadata: { fileHash: 'abc123', accountCount: 100, name: 'test.zip' },
-      });
-
-      const user = userEvent.setup();
-      render(<HomePage />);
-
-      await user.click(screen.getByText(heroEN.buttons.viewResults));
-
-      expect(mockNavigate).toHaveBeenCalledWith('/results');
+      expect(html).toContain('has-data">false');
     });
   });
 
@@ -202,7 +181,10 @@ describe('HomePage', () => {
       const user = userEvent.setup();
       render(<HomePage />);
 
-      await user.click(screen.getByText(heroEN.buttons.getGuide));
+      // Hero itself is mocked here — its own href-prefixing is covered by
+      // Hero.test.tsx. This exercises the prefix reaching handleStartGuide,
+      // the handler HowToSection and FooterCTA still depend on.
+      await user.click(screen.getByText(commonEN.cta.getStarted));
 
       expect(mockNavigate).toHaveBeenCalledWith('/es/wizard/step/1');
     });

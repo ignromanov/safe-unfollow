@@ -43,6 +43,28 @@ export const RTL_LANGUAGES: SupportedLanguage[] = ['ar'];
 export const DEFAULT_LANGUAGE: SupportedLanguage = 'en';
 
 /**
+ * The i18next namespaces every page loads.
+ *
+ * Single source of truth: src/locales/index.ts derives its resource loader and its i18next
+ * `ns` list from this, and vite/ssg-meta-injector.ts derives the SSG modulepreload hrefs from
+ * it. A namespace added here reaches both without a second edit. Before this constant existed,
+ * the same eight-item list was hand-copied in three places with two different orderings —
+ * drift there would not throw, it would just under-preload or under-register one namespace.
+ */
+export const I18N_NAMESPACES = [
+  'common',
+  'faq',
+  'hero',
+  'howto',
+  'meta',
+  'results',
+  'upload',
+  'wizard',
+] as const;
+
+export type I18nNamespace = (typeof I18N_NAMESPACES)[number];
+
+/**
  * OpenGraph locale codes for each language
  * Format: language_COUNTRY (ISO 639-1 + ISO 3166-1 alpha-2)
  * Used for og:locale meta tags in SSG

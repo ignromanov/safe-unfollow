@@ -27,21 +27,8 @@ vi.mock('@/components/AccountListSection', () => ({
 }));
 
 vi.mock('@/components/Hero', () => ({
-  Hero: ({
-    onStartGuide,
-    onLoadSample,
-    onUploadDirect,
-    hasData,
-  }: {
-    onStartGuide: () => void;
-    onLoadSample: () => void;
-    onUploadDirect: () => void;
-    hasData: boolean;
-  }) => (
+  Hero: ({ hasData }: { hasData: boolean }) => (
     <div data-testid="hero-fallback">
-      <button onClick={onStartGuide}>{heroEN.buttons.getGuide}</button>
-      <button onClick={onLoadSample}>{heroEN.buttons.trySample}</button>
-      <button onClick={onUploadDirect}>{heroEN.buttons.haveFile}</button>
       <span data-testid="has-data">{String(hasData)}</span>
     </div>
   ),
@@ -195,58 +182,10 @@ describe('ResultsPage', () => {
     });
   });
 
-  describe('navigation - fallback Hero handlers', () => {
-    beforeEach(() => {
-      mockUseInstagramData.mockReturnValue({
-        uploadState: { status: 'idle', error: null, fileName: null },
-        fileMetadata: null,
-      });
-    });
-
-    it('should navigate to wizard when Start Guide is clicked', async () => {
-      const user = userEvent.setup();
-      render(<ResultsPage />);
-
-      await user.click(screen.getByText(heroEN.buttons.getGuide));
-
-      expect(mockNavigate).toHaveBeenCalledWith('/wizard');
-    });
-
-    it('should navigate to sample page when Load Sample is clicked', async () => {
-      const user = userEvent.setup();
-      render(<ResultsPage />);
-
-      await user.click(screen.getByText(heroEN.buttons.trySample));
-
-      expect(mockNavigate).toHaveBeenCalledWith('/sample');
-    });
-
-    it('should navigate to upload page when Upload Direct is clicked', async () => {
-      const user = userEvent.setup();
-      render(<ResultsPage />);
-
-      await user.click(screen.getByText(heroEN.buttons.haveFile));
-
-      expect(mockNavigate).toHaveBeenCalledWith('/upload');
-    });
-  });
-
-  describe('language prefix support', () => {
-    it('should use language prefix in navigation', async () => {
-      mockUseLanguagePrefix.mockReturnValue('/es');
-      mockUseInstagramData.mockReturnValue({
-        uploadState: { status: 'idle', error: null, fileName: null },
-        fileMetadata: null,
-      });
-
-      const user = userEvent.setup();
-      render(<ResultsPage />);
-
-      await user.click(screen.getByText(heroEN.buttons.getGuide));
-
-      expect(mockNavigate).toHaveBeenCalledWith('/es/wizard');
-    });
-  });
+  // The Hero fallback's own CTAs are real anchors now — Hero navigates on its
+  // own (covered by Hero.test.tsx) and no longer takes navigation handlers
+  // from this page. "language prefix support" for the error-screen path is
+  // still covered below, under "navigation - DiagnosticErrorScreen handlers".
 
   describe('navigation - DiagnosticErrorScreen handlers', () => {
     beforeEach(() => {

@@ -6,7 +6,7 @@ import { FAQSection } from '@/components/FAQSection';
 import { FooterCTA } from '@/components/FooterCTA';
 import { Hero } from '@/components/Hero';
 import { HowToSection } from '@/components/HowToSection';
-import { useInstagramData } from '@/hooks/useInstagramData';
+import { useHasResults } from '@/hooks/useHasResults';
 import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
 
 // NOTE: Removed lazy() loading for SSG compatibility.
@@ -24,9 +24,7 @@ import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
 export function Component() {
   const navigate = useNavigate();
   const prefix = useLanguagePrefix();
-  const { uploadState, fileMetadata } = useInstagramData();
-
-  const hasResults = uploadState.status === 'success' && fileMetadata !== null;
+  const hasResults = useHasResults();
 
   // Prefetch wizard chunk on idle for instant navigation
   useEffect(() => {
@@ -56,23 +54,9 @@ export function Component() {
     navigate(`${prefix}/sample`);
   };
 
-  const handleUploadDirect = () => {
-    navigate(`${prefix}/upload`);
-  };
-
-  const handleContinue = () => {
-    navigate(`${prefix}/results`);
-  };
-
   return (
     <>
-      <Hero
-        onStartGuide={handleStartGuide}
-        onLoadSample={handleLoadSample}
-        onUploadDirect={handleUploadDirect}
-        hasData={hasResults}
-        onContinue={handleContinue}
-      />
+      <Hero hasData={hasResults} />
       <div className="animate-in fade-in duration-1000">
         <HowToSection onStart={handleStartGuide} />
         <AdSlot name="home" slot={import.meta.env.VITE_ADSENSE_SLOT_HOME} className="my-8" />

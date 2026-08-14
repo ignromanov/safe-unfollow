@@ -58,4 +58,18 @@ describe('index.html language redirect', () => {
 
     expect([...inHtml].sort()).toEqual([...NON_ENGLISH_LANGUAGES].sort());
   });
+
+  it('never guesses a language from the browser', () => {
+    // A guessed redirect costs a non-English visitor a full extra document load —
+    // measured: 2 main-frame navigations and ~130 KB downloaded and discarded, on mobile
+    // data, before the 3.7s dead window even starts. An explicit choice is a promise and
+    // stays; a guess is not, and goes.
+    expect(redirectScript).not.toContain('navigator.language');
+  });
+
+  it('still honours an explicitly stored language choice', () => {
+    // The other half of the same decision: deleting the whole script would break the one
+    // case the product actually promised.
+    expect(redirectScript).toContain('storedLang');
+  });
 });

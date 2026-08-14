@@ -14,9 +14,11 @@ export {
 
 import {
   SUPPORTED_LANGUAGES,
+  I18N_NAMESPACES,
   detectLanguageFromUrl,
   type SupportedLanguage,
 } from '@/config/languages';
+import { loadLanguageResources } from './loadLanguageResources';
 
 // Track initialization state
 let isInitialized = false;
@@ -45,33 +47,6 @@ export function subscribeToI18nInit(callback: () => void): () => void {
  */
 function notifyInitSubscribers(): void {
   initSubscribers.forEach(cb => cb());
-}
-
-/**
- * Load resources for a specific language
- */
-async function loadLanguageResources(lang: SupportedLanguage) {
-  const [common, hero, wizard, upload, results, faq, howto, meta] = await Promise.all([
-    import(`./${lang}/common.json`),
-    import(`./${lang}/hero.json`),
-    import(`./${lang}/wizard.json`),
-    import(`./${lang}/upload.json`),
-    import(`./${lang}/results.json`),
-    import(`./${lang}/faq.json`),
-    import(`./${lang}/howto.json`),
-    import(`./${lang}/meta.json`),
-  ]);
-
-  return {
-    common: common.default,
-    hero: hero.default,
-    wizard: wizard.default,
-    upload: upload.default,
-    results: results.default,
-    faq: faq.default,
-    howto: howto.default,
-    meta: meta.default,
-  };
 }
 
 /**
@@ -120,7 +95,7 @@ export async function initI18n(options?: InitI18nOptions): Promise<void> {
         lng: 'en', // Default, will be switched per-page in Layout
         fallbackLng: 'en',
         defaultNS: 'common',
-        ns: ['common', 'hero', 'wizard', 'upload', 'results', 'faq', 'howto', 'meta'],
+        ns: I18N_NAMESPACES,
         interpolation: {
           escapeValue: false,
         },
@@ -129,21 +104,21 @@ export async function initI18n(options?: InitI18nOptions): Promise<void> {
       // Client: Load only the language from URL (lazy loading)
       const urlLang = detectLanguageFromUrl();
 
-      // Always load English as fallback
-      const enResources = await loadLanguageResources('en');
-      const resources: Record<string, typeof enResources> = {
-        en: enResources,
-      };
+      // English is always needed as the fallback bundle and the URL language is needed to
+      // render. Awaiting them in sequence made every non-English visitor pay two serial
+      // round trips through the same 8-chunk fetch.
+      const [enResources, urlResources] = await Promise.all([
+        loadLanguageResources('en'),
+        urlLang === 'en'
+          ? Promise.resolve(null)
+          : loadLanguageResources(urlLang).catch(error => {
+              console.error(`Failed to load language: ${urlLang}`, error);
+              return null;
+            }),
+      ]);
 
-      // If URL specifies non-English language, load it too
-      if (urlLang !== 'en') {
-        try {
-          resources[urlLang] = await loadLanguageResources(urlLang);
-        } catch (error) {
-          console.error(`Failed to load language: ${urlLang}`, error);
-          // Fall back to English if loading fails
-        }
-      }
+      const resources: Record<string, typeof enResources> = { en: enResources };
+      if (urlResources !== null) resources[urlLang] = urlResources;
 
       await i18n
         .use(LanguageDetector)
@@ -153,7 +128,7 @@ export async function initI18n(options?: InitI18nOptions): Promise<void> {
           lng: urlLang, // Set language immediately from URL
           fallbackLng: 'en',
           defaultNS: 'common',
-          ns: ['common', 'hero', 'wizard', 'upload', 'results', 'faq', 'howto', 'meta'],
+          ns: I18N_NAMESPACES,
           interpolation: {
             escapeValue: false,
           },
@@ -189,14 +164,9 @@ export async function loadLanguage(lang: SupportedLanguage): Promise<void> {
     const resources = await loadLanguageResources(lang);
 
     // Add resources to i18next
-    i18n.addResourceBundle(lang, 'common', resources.common);
-    i18n.addResourceBundle(lang, 'hero', resources.hero);
-    i18n.addResourceBundle(lang, 'wizard', resources.wizard);
-    i18n.addResourceBundle(lang, 'upload', resources.upload);
-    i18n.addResourceBundle(lang, 'results', resources.results);
-    i18n.addResourceBundle(lang, 'faq', resources.faq);
-    i18n.addResourceBundle(lang, 'howto', resources.howto);
-    i18n.addResourceBundle(lang, 'meta', resources.meta);
+    for (const ns of I18N_NAMESPACES) {
+      i18n.addResourceBundle(lang, ns, resources[ns]);
+    }
 
     await i18n.changeLanguage(lang);
   } catch (error) {

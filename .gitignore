@@ -8,6 +8,9 @@ yarn-error.log*
 dist/
 build/
 coverage/
+# The bare "build/" rule above also catches src/__tests__/build/, which is a
+# test suite name, not a build artifact — un-ignore it explicitly.
+!src/__tests__/build/
 
 # Environment variables
 .env
@@ -133,3 +136,6 @@ umami-backup-*.sql.gz
 
 # Retention script must ship despite the scripts/ ignore above (CI runs it)
 !scripts/umami-retention.sql
+
+# Entry-bundle budget guard must ship despite the scripts/ ignore above (npm run perf:budget)
+!scripts/assert-entry-budget.mjs
