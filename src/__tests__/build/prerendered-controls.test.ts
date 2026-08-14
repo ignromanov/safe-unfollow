@@ -120,17 +120,30 @@ function controls(file: string): Control[] {
 
 const built = existsSync(dist) && existsSync(join(dist, 'index.html'));
 
-describe.runIf(built)('prerendered controls', () => {
-  const pages = englishPages();
-  const all = pages.flatMap(controls);
+/**
+ * Walked lazily, inside the tests. `describe.runIf` marks a suite skipped but still RUNS
+ * its callback during collection, so touching the filesystem in the suite body throws
+ * ENOENT in every CI job that does not build first — which is two of the three.
+ */
+let scanned: { pages: string[]; all: Control[] } | null = null;
+function scan(): { pages: string[]; all: Control[] } {
+  if (scanned === null) {
+    const pages = englishPages();
+    scanned = { pages, all: pages.flatMap(controls) };
+  }
+  return scanned;
+}
 
+describe.runIf(built)('prerendered controls', () => {
   it('scans the English prerendered pages, and there are some to scan', () => {
     // Guards the guard: a glob that silently matched nothing would report success.
+    const { pages, all } = scan();
     expect(pages.length).toBeGreaterThan(10);
     expect(all.length).toBeGreaterThan(10);
   });
 
   it('has no button-like control that is not accounted for', () => {
+    const { all } = scan();
     const unaccounted = all.filter(c => !(c.identity in ALLOWED));
     expect(
       unaccounted.map(c => `${c.page}: ${c.identity || '(no label, no text)'}`),
@@ -141,7 +154,7 @@ describe.runIf(built)('prerendered controls', () => {
   });
 
   it('does not carry a stale allow-list entry', () => {
-    const seen = new Set(all.map(c => c.identity));
+    const seen = new Set(scan().all.map(c => c.identity));
     const stale = Object.keys(ALLOWED).filter(identity => !seen.has(identity));
     expect(stale, 'These controls no longer exist. Remove them from the allow-list.').toEqual([]);
   });
@@ -171,8 +184,10 @@ describe.runIf(hrefBuilt)('prerendered CTA hrefs', () => {
     ({ page, prefix }) => {
       const html = readFileSync(join(dist, page), 'utf-8');
       for (const href of LANDING_HREFS) {
-        // The root link is `${prefix}/` — for English that is plain `/`.
-        const expected = href === '/' ? `${prefix}/` : `${prefix}${href}`;
+        // The home link must carry NO trailing slash: vercel.json sets trailingSlash:false,
+        // so `/ru/` is a 308 to `/ru` — a wasted round trip in the very window these
+        // anchors exist to serve. English has no prefix, so it stays plain `/`.
+        const expected = href === '/' ? prefix || '/' : `${prefix}${href}`;
         expect(html, `${page} is missing href="${expected}"`).toContain(`href="${expected}"`);
       }
     }

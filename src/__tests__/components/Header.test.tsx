@@ -160,8 +160,9 @@ describe('HeaderV2', () => {
       const logoLink = screen.getByRole('link', { name: commonEN.header.logoAria });
       const uploadLink = screen.getByRole('link', { name: commonEN.buttons.uploadFile });
 
-      // PrefixedLink builds href as `${prefix}${to}`; logo's `to="/"` yields "/ru/", not "/ru".
-      expect(logoLink).toHaveAttribute('href', '/ru/');
+      // No trailing slash: vercel.json sets trailingSlash:false, so "/ru/" would cost the
+      // browser a 308 during the pre-hydration window. PrefixedLink special-cases `to="/"`.
+      expect(logoLink).toHaveAttribute('href', '/ru');
       expect(uploadLink).toHaveAttribute('href', '/ru/upload');
     });
   });
