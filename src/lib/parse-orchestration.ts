@@ -9,7 +9,7 @@ import { indexedDBService } from './indexeddb/indexeddb-service';
 import { logger } from './logger';
 
 /** Extended error with structured data */
-interface ParseErrorData {
+export interface ParseErrorData {
   code?: string;
   warnings?: ParseWarning[];
   discovery?: FileDiscovery;

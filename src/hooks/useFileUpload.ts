@@ -6,6 +6,7 @@ import { extractErrorCode } from '@/lib/error-classifier';
 import { isValidZipFile } from '@/lib/file-validation';
 import { dbCache, generateFileHash } from '@/lib/indexeddb/indexeddb-cache';
 import { parseOnMainThread, parseWithWorker } from '@/lib/parse-orchestration';
+import type { ParseErrorData } from '@/lib/parse-orchestration';
 import { useAppStore } from '@/lib/store';
 import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -78,8 +79,12 @@ function reportParseDiagnostics(
  * The fix is one reporting point, not two. Reporting stays in the catch, which
  * every failure passes through, and the guards' job is to make their failure
  * classifiable when it arrives there.
+ *
+ * `ParseErrorData` is the shape `parse-orchestration` already rejects with from
+ * the worker and main-thread paths, so the catch reads one structure from all
+ * three sources rather than a per-thrower one.
  */
-function guardFailure(warning: ParseWarning): Error {
+function guardFailure(warning: ParseWarning): Error & ParseErrorData {
   return Object.assign(new Error(warning.message), {
     code: warning.code,
     warnings: [warning],

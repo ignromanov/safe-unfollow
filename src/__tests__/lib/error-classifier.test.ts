@@ -229,16 +229,16 @@ describe('error-classifier', () => {
       });
     });
 
-    describe('multi-keyword rules', () => {
-      it('requires ALL keywords to match for multi-keyword rules', () => {
-        // "worker" alone shouldn't match WORKER_INIT_ERROR (needs "worker" AND "init")
+    describe('qualified rules', () => {
+      it('requires the qualifier as well as one of the synonyms', () => {
+        // GH#35 — `qualifiedBy` narrows an ambiguous synonym rather than being a
+        // second synonym: the qualifier alone names no failure.
         expect(classifyErrorMessage('worker error')).toBe('UNKNOWN');
 
-        // Both keywords present
         expect(classifyErrorMessage('worker init error')).toBe('WORKER_INIT_ERROR');
       });
 
-      it('matches multi-keyword rules regardless of word order', () => {
+      it('matches qualified rules regardless of word order', () => {
         expect(classifyErrorMessage('init failed for worker')).toBe('WORKER_INIT_ERROR');
         expect(classifyErrorMessage('permission storage denied')).toBe('IDB_PERMISSION_DENIED');
       });

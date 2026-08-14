@@ -21,7 +21,9 @@ import { describe, it, expect } from 'vitest';
  * `route_error`.
  *
  * `index.html` defeats that by defining `window.__VITE_REACT_SSG_STATIC_LOADER_DATA__`
- * before the app loads, which short-circuits the fetch (`:167-169`).
+ * before the app loads, which short-circuits the fetch (`:167-169`). Declaring
+ * `loader` on our own routes does not work instead: the transform assigns
+ * `route.loader` unconditionally and overwrites whatever we declared.
  *
  * These tests hold the two facts that make `{}` the right value rather than a stub,
  * so neither can change silently:
@@ -38,8 +40,21 @@ const root = resolve(__dirname, '../../..');
 const dist = join(root, 'dist');
 const built = existsSync(dist) && existsSync(join(dist, 'index.html'));
 
-/** Pages that must carry the assignment: one per locale plus a nested route. */
-const PAGES = ['index.html', 'id.html', 'ru.html', 'results.html', 'id/results.html'];
+/**
+ * The pages that must carry the assignment, derived rather than listed: the
+ * injected loader keys off `[data-server-rendered=true]`, so that attribute IS
+ * the set at risk. A hand-picked sample would have to be extended by hand for
+ * every new locale and route, and would go on passing when it was not.
+ *
+ * Walked lazily, inside a test. `describe.runIf` marks a suite skipped but still
+ * runs its callback during collection, so reading `dist` from the suite body —
+ * or from an `it.each` argument — throws ENOENT in the CI jobs that do not build.
+ */
+function serverRenderedPages(): string[] {
+  return readdirSync(dist, { recursive: true })
+    .filter((entry): entry is string => typeof entry === 'string' && entry.endsWith('.html'))
+    .filter(page => readFileSync(join(dist, page), 'utf8').includes('data-server-rendered'));
+}
 
 function manifestPath(): string | null {
   const name = readdirSync(dist).find(
@@ -76,18 +91,26 @@ describe.runIf(built)('SSG static loader manifest', () => {
     ).toEqual([]);
   });
 
-  it.each(PAGES)('defines the loader data before the app loads on %s', page => {
-    const file = join(dist, page);
-    expect(existsSync(file), `${page} was not built`).toBe(true);
+  it('defines the loader data before the app loads, on every prerendered page', () => {
+    const pages = serverRenderedPages();
 
-    const html = readFileSync(file, 'utf8');
-    expect(html).toContain('__VITE_REACT_SSG_STATIC_LOADER_DATA__');
+    // Guards the guard: a walk that matched nothing would report success.
+    expect(pages.length, 'no [data-server-rendered] pages in dist').toBeGreaterThan(0);
 
     // Ordering is the whole point: the loader reads the variable during hydration,
     // so an assignment placed after the entry script would still race the fetch.
-    const assignment = html.indexOf('__VITE_REACT_SSG_STATIC_LOADER_DATA__');
-    const entry = html.indexOf('type="module"');
-    expect(entry, `${page} has no module entry script`).toBeGreaterThan(-1);
-    expect(assignment).toBeLessThan(entry);
+    const broken = pages.filter(page => {
+      const html = readFileSync(join(dist, page), 'utf8');
+      const assignment = html.indexOf('__VITE_REACT_SSG_STATIC_LOADER_DATA__');
+      const entry = html.indexOf('type="module"');
+      return assignment === -1 || entry === -1 || assignment > entry;
+    });
+
+    expect(
+      broken,
+      'These prerendered pages do not assign __VITE_REACT_SSG_STATIC_LOADER_DATA__ ' +
+        'before their module entry script, so the injected loader will fetch the ' +
+        'orphaned manifest on them (GH#36).'
+    ).toEqual([]);
   });
 });
