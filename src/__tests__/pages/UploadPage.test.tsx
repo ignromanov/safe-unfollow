@@ -44,7 +44,7 @@ vi.mock('@/hooks/useLanguagePrefix', () => ({
   useLanguagePrefix: () => mockUseLanguagePrefix(),
 }));
 
-const mockHandleZipUpload = vi.fn();
+const mockHandleZipUpload = vi.fn(() => Promise.resolve());
 const mockUseInstagramData = vi.fn(() => ({
   uploadState: { status: 'idle', error: null, fileName: null },
   handleZipUpload: mockHandleZipUpload,

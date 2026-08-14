@@ -89,16 +89,13 @@ export function flushEvents(): void {
     }))
   );
 
-  try {
-    // Returns false synchronously when the user-agent queue is full. It neither
-    // throws nor retries, so the boolean is the only failure signal there is.
-    if (navigator.sendBeacon?.(endpoint, new Blob([body], { type: 'application/json' }))) {
-      return;
-    }
-  } catch {
-    // Fall through to fetch.
-  }
-
+  // sendBeacon is not used here: the Beacon spec forces credentials mode
+  // 'include' with no way to opt out, and the Umami endpoint answers
+  // cross-origin requests with `Access-Control-Allow-Origin: *` — invalid for
+  // a credentialed request, so the browser silently drops the delivery while
+  // sendBeacon still reports success. `fetch` defaults to 'same-origin'
+  // credentials, which cross-origin behaves as omitted and satisfies the
+  // wildcard CORS response; `keepalive` keeps it reliable across unload.
   void fetch(endpoint, {
     method: 'POST',
     body,
