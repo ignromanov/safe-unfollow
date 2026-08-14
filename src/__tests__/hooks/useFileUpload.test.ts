@@ -638,6 +638,64 @@ describe('useFileUpload', () => {
         expect.any(String)
       );
     });
+
+    /**
+     * The same one-reporting-point rule applied to the screen, not the event.
+     * The guards no longer call `setUploadInfo`; these two tests are what makes
+     * that safe to have removed — the first proves the reader still gets the
+     * error, the second proves they no longer get one they cancelled.
+     */
+    it('paints the guard failure once, from the catch every failure passes through', async () => {
+      const notZip = createMockFile();
+      Object.defineProperty(notZip, 'name', { value: 'my-instagram-data.rar' });
+
+      const { result } = renderHook(() => useFileUpload());
+
+      await act(async () => {
+        try {
+          await result.current.handleZipUpload(notZip);
+        } catch {
+          // Expected — the hook rethrows for the caller's error UI
+        }
+      });
+
+      const errorCalls = mockSetUploadInfo.mock.calls.filter(
+        call => call[0].uploadStatus === 'error'
+      );
+
+      expect(errorCalls).toHaveLength(1);
+      expect(errorCalls[0][0]).toMatchObject({
+        currentFileName: 'my-instagram-data.rar',
+        parseWarnings: [expect.objectContaining({ code: 'NOT_ZIP', severity: 'error' })],
+      });
+      // The sentence on screen is the warning's own, not a second one written
+      // for the catch — DiagnosticErrorScreen renders both and they must agree.
+      expect(errorCalls[0][0].uploadError).toBe(errorCalls[0][0].parseWarnings[0].message);
+    });
+
+    it('leaves a cancelled upload cancelled, instead of erroring on a file already given up on', async () => {
+      const notZip = createMockFile();
+      Object.defineProperty(notZip, 'name', { value: 'my-instagram-data.rar' });
+
+      const { result } = renderHook(() => useFileUpload());
+
+      // Abort lands while handleZipUpload is suspended on `await isValidZipFile`:
+      // the extension check decides synchronously, but awaiting it still yields
+      // control back here first.
+      await act(async () => {
+        const promise = result.current.handleZipUpload(notZip).catch(() => {
+          // Cancellation is swallowed by design — the catch returns, not rethrows
+        });
+        result.current.abortUpload();
+        return promise;
+      });
+
+      expect(mockSetUploadInfo.mock.calls.filter(call => call[0].uploadStatus === 'error')).toEqual(
+        []
+      );
+      expect(analytics.uploadErrorByCode).toHaveBeenCalledTimes(1);
+      expect(analytics.uploadErrorByCode).toHaveBeenCalledWith('', 'UPLOAD_CANCELLED');
+    });
   });
 
   describe('Worker initialization', () => {

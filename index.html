@@ -54,18 +54,20 @@
       })();
     </script>
 
-    <!-- GH#36 — hands vite-react-ssg its static loader data so it never fetches for
-         it. The manifest filename is hashed with Math.random() rather than content,
-         so every deploy orphans the previous one and a page served from the service
-         worker's cache requests a file that is gone; the injected loader calls
-         .json() on the 404's HTML body with no guard, and the rejection lands on
-         errorElement. {} is exact rather than a stub: no route declares a loader, so
-         every value in the real manifest is null.
+    <!-- GH#36 — hands vite-react-ssg an empty loader-data manifest so it never
+         fetches one. The manifest filename is hashed with Math.random() rather
+         than content, so every deploy orphans the previous one and a page served
+         from the service worker's cache requests a file that is gone; the injected
+         loader calls .json() on the 404's HTML body with no guard, and the
+         rejection lands on errorElement. {} is exact rather than a stub: no route
+         declares a loader, so every value it would have resolved to is null.
 
-         Derivation, upstream line numbers and the asserted invariant:
+         The variable name is load-bearing and moved in 0.9.0. The test derives it
+         from the bundle rather than trusting this line, and names the current one
+         when they disagree — read it before editing:
          src/__tests__/build/ssg-loader-manifest.test.ts -->
     <script>
-      window.__VITE_REACT_SSG_STATIC_LOADER_DATA__ = {};
+      window.__VITE_REACT_SSG_STATIC_LOADER_MANIFEST__ = {};
     </script>
 
     <!-- Preload critical fonts to reduce LCP -->
