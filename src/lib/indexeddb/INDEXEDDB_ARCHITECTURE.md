@@ -12,7 +12,7 @@ Instagram Unfollow Tracker uses IndexedDB v2 with columnar storage and bitset-ba
 
 - ✅ **Columnar Storage** - Separate username, badge, and timestamp columns
 - ✅ **Bitset Filtering** - 32x faster badge filtering using FastBitSet.js
-- ✅ **Chunked Ingestion** - Progressive loading with 10k account chunks
+- ✅ **Bulk Ingestion** - `storeAllAccounts()` writes every column in one transaction (the "10k account chunks" this line claimed until 2026-08-14 do not exist — see Configuration below)
 - ✅ **Search Indexes** - Trigram and prefix indexes for O(1) search
 - ✅ **Lazy Loading** - TanStack Virtual integration for on-demand rendering
 - ✅ **Auto-Migration** - Seamless upgrade from localStorage/v1
@@ -150,11 +150,12 @@ interface SearchIndexRecord {
 4. Parse ZIP in Web Worker
    ├─→ parseInstagramZipFile()
    ├─→ buildAccountBadgeIndex()
-   └─→ Progress events (every 10k accounts)
+   └─→ Progress events (worker → parse-orchestration.ts:61; cadence is
+       set by the worker, not by any 10k constant)
 
-5. Chunked Ingestion (parallel)
+5. Bulk Ingestion — storeAllAccounts(), one transaction
    ├─→ Save file metadata
-   ├─→ Append username columns (10k chunks)
+   ├─→ Build username columns in a single pass
    ├─→ Update badge bitsets
    └─→ Store timestamps (sparse)
 

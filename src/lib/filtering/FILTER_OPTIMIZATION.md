@@ -6,7 +6,7 @@
 
 ## Overview
 
-This document describes the filter optimization architecture implemented to handle massive datasets (1M+ accounts) with **sub-5ms filter latency**. The v1.0 architecture is built on IndexedDB with columnar storage and eliminates in-memory constraints.
+This document describes the filter optimization architecture implemented to handle massive datasets (1M+ accounts). Sub-5ms filter latency is the **design target** it was built against — see "Performance Results → Provenance" below for what is actually measured, which is less than this document used to imply. The v1.0 architecture is built on IndexedDB with columnar storage and eliminates in-memory constraints.
 
 ## Key Technologies
 
@@ -47,7 +47,7 @@ The previous implementation had significant limitations:
 │ Parse Worker (background)                                    │
 │   ├─→ Parse ZIP file                                        │
 │   ├─→ Build AccountBadges                                   │
-│   └─→ Chunked Ingestion (10k/chunk)                         │
+│   └─→ storeAllAccounts() — one bulk write                   │
 │       ↓                                                      │
 │ IndexedDB v2                                                 │
 │   ├─→ files: metadata (hash, count, date)                   │
@@ -406,28 +406,24 @@ const virtualizer = useVirtualizer({
 
 ## Implementation Details
 
-### Chunked Ingestion
+### Ingestion — one bulk write, not chunks
+
+This section used to show a `CHUNK_SIZE = 10000` loop calling `appendAccountsChunk`.
+**That loop does not exist and never ran.** Corrected 2026-08-14 against commit `8380b0d`.
 
 ```typescript
-// Parse worker
-const CHUNK_SIZE = 10000; // Optimized for 1M+ datasets
-
-for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
-  const startIndex = chunkIndex * CHUNK_SIZE;
-  const endIndex = Math.min(startIndex + CHUNK_SIZE, unified.length);
-  const chunk = unified.slice(startIndex, endIndex);
-
-  await indexedDBService.appendAccountsChunk(fileHash, chunk, startIndex);
-
-  // Report progress
-  self.postMessage({
-    type: 'progress',
-    progress: ((chunkIndex + 1) / totalChunks) * 100,
-    processedCount: endIndex,
-    totalCount: unified.length,
-  });
-}
+// src/lib/parse-worker.ts — also parse-orchestration.ts and sample-data.ts
+await indexedDBService.storeAllAccounts(fileHash, unified);
 ```
+
+`storeAllAccounts` builds every column in a single pass and commits one transaction.
+`appendAccountsChunk` still exists on `IndexedDBService`, but it has **zero production
+callers on any branch**: the only thing naming it is `indexeddb-cache.ts`'s deprecated
+`set()`, whose body prints a warning telling you to use it and then returns without
+calling it. Do not wire new code into it expecting the flow described here.
+
+There is no account-batching constant anywhere. The only `10_000` in the parse pipeline
+is `MAX_ZIP_ENTRIES` (`src/core/parsers/instagram.ts`), a cap on ZIP entry count.
 
 ### Filter Engine
 
