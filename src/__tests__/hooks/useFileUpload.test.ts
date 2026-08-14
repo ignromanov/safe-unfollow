@@ -581,6 +581,65 @@ describe('useFileUpload', () => {
     });
   });
 
+  /**
+   * GH#35 — the two pre-parse guards report the failure themselves and then
+   * `throw new Error(message)` to unwind. That plain Error carries no `code` and
+   * its message has already been through i18n, so the hook's own catch runs
+   * `extractErrorCode` over a translated string, gets `UNKNOWN`, and reports the
+   * same failure a second time.
+   *
+   * Measured 24 Jul – 12 Aug 2026: 296 of the 653 `upload_error_unknown` events
+   * carry a translated NOT_ZIP message against 307 `upload_error_not_zip` — a 1:1
+   * shadow, not a partial loss. It also explains why `UNKNOWN` shows 6 diagnostic
+   * screens against 653 events: the phantom half has no screen behind it because
+   * the user saw the NOT_ZIP one, which counted under NOT_ZIP.
+   *
+   * The count is the whole assertion. An implementation that reported the right
+   * code and still double-fired would satisfy a `toHaveBeenCalledWith` check and
+   * leave the bucket exactly as wrong as it is now.
+   */
+  describe('one upload failure reports exactly one code (GH#35)', () => {
+    it('should report NOT_ZIP once, not once as itself and once as UNKNOWN', async () => {
+      const notZip = createMockFile();
+      Object.defineProperty(notZip, 'name', { value: 'my-instagram-data.rar' });
+
+      const { result } = renderHook(() => useFileUpload());
+
+      await act(async () => {
+        try {
+          await result.current.handleZipUpload(notZip);
+        } catch {
+          // Expected — the hook rethrows for the caller's error UI
+        }
+      });
+
+      expect(analytics.uploadErrorByCode).toHaveBeenCalledTimes(1);
+      expect(analytics.uploadErrorByCode).toHaveBeenCalledWith('', 'NOT_ZIP', expect.any(String));
+    });
+
+    it('should report FILE_TOO_LARGE once, not once as itself and once as UNKNOWN', async () => {
+      const tooLarge = createMockFile();
+      Object.defineProperty(tooLarge, 'size', { value: 502 * 1024 * 1024 });
+
+      const { result } = renderHook(() => useFileUpload());
+
+      await act(async () => {
+        try {
+          await result.current.handleZipUpload(tooLarge);
+        } catch {
+          // Expected — the hook rethrows for the caller's error UI
+        }
+      });
+
+      expect(analytics.uploadErrorByCode).toHaveBeenCalledTimes(1);
+      expect(analytics.uploadErrorByCode).toHaveBeenCalledWith(
+        '',
+        'FILE_TOO_LARGE',
+        expect.any(String)
+      );
+    });
+  });
+
   describe('Worker initialization', () => {
     let originalWorker: typeof Worker | undefined;
     let originalCreateElement: typeof document.createElement;
