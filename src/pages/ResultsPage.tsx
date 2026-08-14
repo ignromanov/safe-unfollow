@@ -1,6 +1,8 @@
 import { AccountListSection } from '@/components/AccountListSection';
 import { DiagnosticErrorScreen } from '@/components/DiagnosticErrorScreen';
 import { Hero } from '@/components/Hero';
+import { ResultsSkeleton } from '@/components/ResultsSkeleton';
+import { useIsClient } from '@/hooks/useIsClient';
 import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
 import { useResultsFile } from '@/hooks/useResultsFile';
 import { useStoreSSR } from '@/hooks/useStoreSSR';
@@ -16,13 +18,17 @@ import { useNavigate } from 'react-router-dom';
  * through `useStoreSSR` and renders the no-data branch while hydrating — by construction,
  * not by relying on zustand persist's undocumented `getInitialState` pinning.
  *
- * The visible flip that follows for a returning visitor (Hero replaced by the account
- * list one pass later) is GH#44, and is not fixed here.
+ * "No data yet" and "no data at all" are different pages, and until GH#44 they were the
+ * same branch. Both the prerender and the first client pass answer the first question —
+ * nobody has read the store yet — and that answer is `ResultsSkeleton`. The Hero answers
+ * the second, and is reached only once hydration has run and there is genuinely nothing
+ * to show.
  */
 export function Component() {
   const navigate = useNavigate();
   const prefix = useLanguagePrefix();
 
+  const isClient = useIsClient();
   const resultsFile = useResultsFile();
   const uploadStatus = useStoreSSR(s => s.uploadStatus, 'idle');
   const uploadError = useStoreSSR(s => s.uploadError, null);
@@ -36,6 +42,13 @@ export function Component() {
   const handleTryAgain = () => {
     navigate(`${prefix}/upload`);
   };
+
+  // Before hydration nobody has read the store, so no branch below can be answered yet.
+  // Stated as its own guard rather than left to fall through the ones underneath: those
+  // reach this same conclusion only because their `serverValue`s happen to be falsy today.
+  if (!isClient) {
+    return <ResultsSkeleton />;
+  }
 
   // Show error if upload failed
   if (uploadStatus === 'error') {
@@ -60,7 +73,7 @@ export function Component() {
     );
   }
 
-  // Fallback to Hero if no data
+  // Hydrated, and there is genuinely nothing to show.
   return <Hero hasData={false} />;
 }
 

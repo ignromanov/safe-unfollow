@@ -238,7 +238,7 @@ describe('ResultsPage', () => {
   });
 
   describe('SSR/hydration parity', () => {
-    it('renders the no-data branch on the server even when the store already holds a successful file', () => {
+    it('renders the skeleton on the server even when the store already holds a successful file', () => {
       // `/results` ships prerendered from an empty store (dist/results.html, no rewrite in
       // vercel.json). getServerSnapshot is the only thing standing between a returning
       // visitor and a first render that disagrees with that prerendered HTML.
@@ -246,8 +246,18 @@ describe('ResultsPage', () => {
 
       const html = renderToString(<ResultsPage />);
 
-      expect(html).toContain('hero-fallback');
+      expect(html).toContain('results-skeleton');
       expect(html).not.toContain('account-list-section');
+    });
+
+    it('prerenders a skeleton, not the landing page a returning visitor has already read', () => {
+      // GH#44. The prerendered document is what is on screen for the whole JS load window,
+      // so whatever this branch emits is what a returning visitor stares at while their own
+      // data loads. The Hero belongs to `/`, and stays the post-hydration no-data branch.
+      const html = renderToString(<ResultsPage />);
+
+      expect(html).toContain('results-skeleton');
+      expect(html).not.toContain('hero-fallback');
     });
   });
 });
