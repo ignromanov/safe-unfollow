@@ -28,9 +28,9 @@ export function TermsOfService({ onBack }: TermsOfServiceProps) {
       </header>
 
       {/* Content */}
-      <div className="prose prose-zinc dark:prose-invert max-w-none space-y-10">
+      <div className="space-y-10">
         {/* TL;DR */}
-        <section className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-6 md:p-8 not-prose">
+        <section className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-6 md:p-8">
           <h2 className="text-xl font-bold mb-4 flex items-center gap-3">
             <Scale className="w-5 h-5 text-amber-600 dark:text-amber-400" />
             TL;DR — Key Points
@@ -185,7 +185,7 @@ export function TermsOfService({ onBack }: TermsOfServiceProps) {
         </section>
 
         {/* Section 6 - Disclaimer */}
-        <section className="bg-rose-500/10 border border-rose-500/20 rounded-2xl p-6 md:p-8 not-prose">
+        <section className="bg-rose-500/10 border border-rose-500/20 rounded-2xl p-6 md:p-8">
           <h2 className="text-2xl font-bold mb-4 flex items-center gap-3">
             <AlertTriangle className="w-6 h-6 text-rose-600 dark:text-rose-400" />
             6. Disclaimer of Warranties
@@ -291,7 +291,7 @@ export function TermsOfService({ onBack }: TermsOfServiceProps) {
         </section>
 
         {/* Acceptance Notice */}
-        <section className="not-prose mt-12 p-6 bg-card border border-border rounded-2xl">
+        <section className="mt-12 p-6 bg-card border border-border rounded-2xl">
           <p className="text-muted-foreground text-center">
             By using SafeUnfollow, you acknowledge that you have read, understood, and agree to be
             bound by these Terms of Service.
