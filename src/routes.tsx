@@ -36,14 +36,26 @@ function createPageChildren(): RouteRecord[] {
 /**
  * Route definitions for SSG prerendering
  *
- * Structure:
+ * Structure (8 prerendered routes per language):
  * - / (hero)
  * - /wizard (step-by-step export guide)
  * - /upload (file upload)
- * - /results (client-only, not prerendered - requires user data)
+ * - /results
  * - /sample
  * - /privacy
  * - /terms
+ * - /404
+ *
+ * `wizard/step/:stepId` and the `*` catch-all are stripped by vite-react-ssg
+ * (it skips any path containing ':' or '*'). The eight concrete wizard steps are
+ * added back per language in vite.config.ts `includedRoutes`, so the real build
+ * emits 10 languages x (8 + 8) = 160 prerendered routes — not 8 per language.
+ *
+ * /results IS prerendered, despite needing user data: it is a static child route,
+ * so nothing excludes it and dist/<lang>/results.html ships for all 10 languages.
+ * What it contains is the Hero fallback, because useInstagramData() has no data
+ * during SSG (IndexedDB is browser-only). Treat that HTML as SSG-visible surface —
+ * meta tags and hydration safety apply to it. See GH#44.
  *
  * Each route also has language variants:
  * - /es, /es/wizard, /es/upload, etc.
