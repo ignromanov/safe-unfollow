@@ -1,6 +1,6 @@
 import { Header } from '@/components/Header';
 import { AppState } from '@/core/types';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, renderWithRouter, screen } from '@/__tests__/test-utils';
 import { beforeEach, vi } from 'vitest';
 import commonEN from '@/locales/en/common.json';
 
@@ -38,121 +38,100 @@ describe('HeaderV2', () => {
   });
 
   it('should render without crashing', () => {
-    render(<Header />);
+    renderWithRouter(<Header />);
 
     const header = screen.getByRole('banner');
     expect(header).toBeInTheDocument();
   });
 
   it('should render logo with ShieldCheck icon', () => {
-    render(<Header />);
+    renderWithRouter(<Header />);
 
     // Logo text should be visible
     expect(screen.getByText('SafeUnfollow')).toBeInTheDocument();
     expect(screen.getByText('.app')).toBeInTheDocument();
   });
 
-  it('should render logo as clickable button', () => {
-    render(<Header />);
+  it('should render the logo as a link to /', () => {
+    renderWithRouter(<Header />);
 
-    const logoButton = screen.getByRole('button', { name: /SafeUnfollow/i });
-    expect(logoButton).toBeInTheDocument();
-    expect(logoButton).toHaveAttribute('tabIndex', '0');
+    const logoLink = screen.getByRole('link', { name: commonEN.header.logoAria });
+    expect(logoLink).toHaveAttribute('href', '/');
   });
 
-  it('should call onLogoClick when logo is clicked', () => {
-    const onLogoClick = vi.fn();
-    render(<Header onLogoClick={onLogoClick} />);
-
-    const logoContainer = screen.getByText('SafeUnfollow').closest('[role="button"]');
-    fireEvent.click(logoContainer!);
-
-    expect(onLogoClick).toHaveBeenCalledTimes(1);
-  });
-
-  it('should call onLogoClick when Enter key is pressed on logo', () => {
-    const onLogoClick = vi.fn();
-    render(<Header onLogoClick={onLogoClick} />);
-
-    const logoContainer = screen.getByText('SafeUnfollow').closest('[role="button"]');
-    fireEvent.keyDown(logoContainer!, { key: 'Enter' });
-
-    expect(onLogoClick).toHaveBeenCalledTimes(1);
-  });
+  // Prerendered pages are inert until React hydrates, so navigation now goes through a
+  // real <a href> (PrefixedLink), not a onClick/onKeyDown handler. An anchor's Enter-key
+  // behavior is native browser behavior, not something this component implements — there
+  // is no component-level behavior left to assert here beyond the href check above, so
+  // the old "Enter key" test is deleted rather than retargeted.
 
   it('should render theme toggle button', () => {
-    render(<Header />);
+    renderWithRouter(<Header />);
 
     const themeButton = screen.getByTitle('Dark Mode');
     expect(themeButton).toBeInTheDocument();
   });
 
   it('should render language switcher', () => {
-    render(<Header />);
+    renderWithRouter(<Header />);
 
     expect(screen.getByTestId('language-switcher')).toBeInTheDocument();
   });
 
   describe('when hasData is false', () => {
     it('should render upload button', () => {
-      render(<Header hasData={false} />);
+      renderWithRouter(<Header hasData={false} />);
       expect(screen.getByText(commonEN.buttons.uploadFile)).toBeInTheDocument();
     });
 
-    it('should call onUpload when upload button is clicked', () => {
-      const onUpload = vi.fn();
-      render(<Header hasData={false} onUpload={onUpload} />);
+    it('should render the upload control as a link to /upload', () => {
+      renderWithRouter(<Header hasData={false} />);
 
-      const uploadButton = screen.getByText(commonEN.buttons.uploadFile).closest('button');
-      fireEvent.click(uploadButton!);
-
-      expect(onUpload).toHaveBeenCalledTimes(1);
+      const uploadLink = screen.getByRole('link', { name: commonEN.buttons.uploadFile });
+      expect(uploadLink).toHaveAttribute('href', '/upload');
     });
 
     it('should highlight upload button when activeScreen is UPLOAD', () => {
-      render(<Header hasData={false} activeScreen={AppState.UPLOAD} />);
+      renderWithRouter(<Header hasData={false} activeScreen={AppState.UPLOAD} />);
 
-      const uploadButton = screen.getByText(commonEN.buttons.uploadFile).closest('button');
+      const uploadLink = screen.getByRole('link', { name: commonEN.buttons.uploadFile });
       // The label must come from the token, not a literal white: on --primary a
       // hardcoded white measures 3.95:1 in light and 3.30:1 in dark, both below AA.
-      expect(uploadButton).toHaveClass('bg-primary', 'text-primary-foreground');
-      expect(uploadButton).not.toHaveClass('text-white');
+      expect(uploadLink).toHaveClass('bg-primary', 'text-primary-foreground');
+      expect(uploadLink).not.toHaveClass('text-white');
     });
   });
 
   describe('when hasData is true', () => {
     it('should render view results button', () => {
-      render(<Header hasData={true} />);
+      renderWithRouter(<Header hasData={true} />);
 
       expect(screen.getByText(commonEN.buttons.viewResults)).toBeInTheDocument();
     });
 
     it('should render delete button', () => {
-      render(<Header hasData={true} />);
+      renderWithRouter(<Header hasData={true} />);
 
       expect(screen.getByText(commonEN.buttons.delete)).toBeInTheDocument();
     });
 
-    it('should call onViewResults when view results button is clicked', () => {
-      const onViewResults = vi.fn();
-      render(<Header hasData={true} onViewResults={onViewResults} />);
+    it('should render the view results control as a link to /results', () => {
+      renderWithRouter(<Header hasData={true} />);
 
-      const viewResultsButton = screen.getByText(commonEN.buttons.viewResults).closest('button');
-      fireEvent.click(viewResultsButton!);
-
-      expect(onViewResults).toHaveBeenCalledTimes(1);
+      const viewResultsLink = screen.getByRole('link', { name: commonEN.buttons.viewResults });
+      expect(viewResultsLink).toHaveAttribute('href', '/results');
     });
 
     it('should highlight view results button when activeScreen is RESULTS', () => {
-      render(<Header hasData={true} activeScreen={AppState.RESULTS} />);
+      renderWithRouter(<Header hasData={true} activeScreen={AppState.RESULTS} />);
 
-      const viewResultsButton = screen.getByText(commonEN.buttons.viewResults).closest('button');
-      expect(viewResultsButton).toHaveClass('bg-primary', 'text-primary-foreground');
-      expect(viewResultsButton).not.toHaveClass('text-white');
+      const viewResultsLink = screen.getByRole('link', { name: commonEN.buttons.viewResults });
+      expect(viewResultsLink).toHaveClass('bg-primary', 'text-primary-foreground');
+      expect(viewResultsLink).not.toHaveClass('text-white');
     });
 
     it('should open delete confirmation dialog when delete button is clicked', () => {
-      render(<Header hasData={true} />);
+      renderWithRouter(<Header hasData={true} />);
 
       const deleteButton = screen.getByText(commonEN.buttons.delete).closest('button');
       fireEvent.click(deleteButton!);
@@ -163,7 +142,7 @@ describe('HeaderV2', () => {
     });
 
     it('should render cancel and confirm buttons in delete dialog', () => {
-      render(<Header hasData={true} />);
+      renderWithRouter(<Header hasData={true} />);
 
       const deleteButton = screen.getByText(commonEN.buttons.delete).closest('button');
       fireEvent.click(deleteButton!);
@@ -174,15 +153,28 @@ describe('HeaderV2', () => {
     });
   });
 
+  describe('when rendered under a language prefix', () => {
+    it('should carry the /ru prefix on both the logo and the upload link', () => {
+      renderWithRouter(<Header hasData={false} />, { initialEntries: ['/ru'] });
+
+      const logoLink = screen.getByRole('link', { name: commonEN.header.logoAria });
+      const uploadLink = screen.getByRole('link', { name: commonEN.buttons.uploadFile });
+
+      // PrefixedLink builds href as `${prefix}${to}`; logo's `to="/"` yields "/ru/", not "/ru".
+      expect(logoLink).toHaveAttribute('href', '/ru/');
+      expect(uploadLink).toHaveAttribute('href', '/ru/upload');
+    });
+  });
+
   it('should have sticky positioning', () => {
-    render(<Header />);
+    renderWithRouter(<Header />);
 
     const header = screen.getByRole('banner');
     expect(header).toHaveClass('sticky', 'top-0');
   });
 
   it('should have proper z-index for overlay behavior', () => {
-    render(<Header />);
+    renderWithRouter(<Header />);
 
     const header = screen.getByRole('banner');
     expect(header).toHaveClass('z-[80]');

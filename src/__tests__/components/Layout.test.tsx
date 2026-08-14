@@ -1,5 +1,6 @@
 import { Layout } from '@/components/Layout';
 import { LicenseDialogMount } from '@/components/export/LicenseDialogMount';
+import { PrefixedLink } from '@/components/PrefixedLink';
 import { AppState } from '@/core/types';
 import resultsEN from '@/locales/en/results.json';
 import { useAppStore } from '@/lib/store';
@@ -23,29 +24,28 @@ vi.mock('@/components/theme-provider', () => ({
   ThemeProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
-// Mock child components
+// Mock child components.
+// Header no longer takes onViewResults/onUpload/onLogoClick handlers — its logo, upload
+// and view-results controls are anchors now (PrefixedLink), so they work during the
+// pre-hydration window. This mock uses the real PrefixedLink so the anchor contract
+// (correct href, real router navigation on click) is still exercised, not just the
+// prop wiring. useLanguagePrefix is mocked to '' below, so hrefs are unprefixed here.
 vi.mock('@/components/Header', () => ({
   Header: ({
     hasData,
     activeScreen,
-    onViewResults,
-    onUpload,
-    onLogoClick,
     onClear,
   }: {
     hasData?: boolean;
     activeScreen?: AppState;
-    onViewResults?: () => void;
-    onUpload?: () => void;
-    onLogoClick?: () => void;
     onClear?: () => void;
   }) => (
     <header data-testid="header">
       <div>Header - hasData: {String(hasData)}</div>
       <div>activeScreen: {activeScreen}</div>
-      <button onClick={onViewResults}>View Results</button>
-      <button onClick={onUpload}>Upload</button>
-      <button onClick={onLogoClick}>Logo</button>
+      <PrefixedLink to="/results">View Results</PrefixedLink>
+      <PrefixedLink to="/upload">Upload</PrefixedLink>
+      <PrefixedLink to="/">Logo</PrefixedLink>
       <button onClick={onClear}>Clear</button>
     </header>
   ),
@@ -555,42 +555,51 @@ describe('Layout', () => {
       });
     });
 
-    it('should navigate to results when View Results is clicked', async () => {
+    it('should render View Results as an anchor to /results and navigate there when clicked', async () => {
       const { userEvent } = await import('@testing-library/user-event');
       const user = userEvent.setup();
 
       renderLayout('/');
 
-      const viewResultsButton = screen.getByRole('button', { name: 'View Results' });
-      await user.click(viewResultsButton);
+      const viewResultsLink = screen.getByRole('link', { name: 'View Results' });
+      // Prerendered pages are inert until React hydrates, so this control must be a real
+      // anchor with a real href — a button with an onClick would do nothing during that
+      // window. See PrefixedLink.tsx.
+      expect(viewResultsLink).toHaveAttribute('href', '/results');
+
+      await user.click(viewResultsLink);
 
       await waitFor(() => {
         expect(screen.getByText(`activeScreen: ${AppState.RESULTS}`)).toBeInTheDocument();
       });
     });
 
-    it('should navigate to upload when Upload is clicked', async () => {
+    it('should render Upload as an anchor to /upload and navigate there when clicked', async () => {
       const { userEvent } = await import('@testing-library/user-event');
       const user = userEvent.setup();
 
       renderLayout('/');
 
-      const uploadButton = screen.getByRole('button', { name: 'Upload' });
-      await user.click(uploadButton);
+      const uploadLink = screen.getByRole('link', { name: 'Upload' });
+      expect(uploadLink).toHaveAttribute('href', '/upload');
+
+      await user.click(uploadLink);
 
       await waitFor(() => {
         expect(screen.getByText(`activeScreen: ${AppState.UPLOAD}`)).toBeInTheDocument();
       });
     });
 
-    it('should navigate to home when Logo is clicked', async () => {
+    it('should render Logo as an anchor to / and navigate home when clicked', async () => {
       const { userEvent } = await import('@testing-library/user-event');
       const user = userEvent.setup();
 
       renderLayout('/results');
 
-      const logoButton = screen.getByRole('button', { name: 'Logo' });
-      await user.click(logoButton);
+      const logoLink = screen.getByRole('link', { name: 'Logo' });
+      expect(logoLink).toHaveAttribute('href', '/');
+
+      await user.click(logoLink);
 
       await waitFor(() => {
         expect(screen.getByText(`activeScreen: ${AppState.HERO}`)).toBeInTheDocument();
@@ -665,8 +674,8 @@ describe('Layout', () => {
       // Force Layout to re-render without unmounting (route stays nested under
       // the same top-level <Layout>) — a second read here would spend one of
       // the license's 3 device activations, so it must not happen.
-      const uploadButton = screen.getByRole('button', { name: 'Upload' });
-      await user.click(uploadButton);
+      const uploadLink = screen.getByRole('link', { name: 'Upload' });
+      await user.click(uploadLink);
 
       await waitFor(() => {
         expect(screen.getByText(`activeScreen: ${AppState.UPLOAD}`)).toBeInTheDocument();

@@ -15,11 +15,20 @@ const mockNavigate = vi.fn((path: string) => {
 vi.mock('react-router-dom', () => ({
   useLocation: () => ({ pathname: mockPathname }),
   useNavigate: () => mockNavigate,
+  // PrefixedLink renders <Link>; a real <a href> stub is enough since navigation
+  // itself is exercised via mockNavigate above, not by following hrefs.
+  Link: ({ to, children, ...props }: { to: string; children?: React.ReactNode }) => (
+    <a href={to} {...props}>
+      {children}
+    </a>
+  ),
 }));
 
-// Mock useLanguagePrefix
+// Mock useLanguagePrefix — vi.fn() wrapper so individual tests can vary the
+// locale prefix, matching the pattern in src/__tests__/pages/WizardPage.test.tsx
+const mockUseLanguagePrefix = vi.fn(() => '');
 vi.mock('@/hooks/useLanguagePrefix', () => ({
-  useLanguagePrefix: () => '',
+  useLanguagePrefix: () => mockUseLanguagePrefix(),
 }));
 
 vi.mock('react-i18next', () => createI18nMock(wizardEN));
@@ -44,6 +53,7 @@ describe('Wizard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockPathname = '/wizard';
+    mockUseLanguagePrefix.mockReturnValue('');
   });
 
   it('should render without crashing', () => {
@@ -185,35 +195,49 @@ describe('Wizard', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/wizard/step/4');
   });
 
-  it('should render "I already have my ZIP file" button on step 1', () => {
+  it('should render "I already have my ZIP file" link on step 1', () => {
     mockPathname = '/wizard/step/1';
     render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
 
-    const alreadyHaveFileButton = screen.getByRole('button', {
+    const alreadyHaveFileLink = screen.getByRole('link', {
       name: wizardEN.buttons.alreadyHaveFile,
     });
-    expect(alreadyHaveFileButton).toBeInTheDocument();
+    expect(alreadyHaveFileLink).toBeInTheDocument();
   });
 
-  it('should navigate to /upload when "I already have my ZIP file" is clicked', () => {
+  it('should link "I already have my ZIP file" to /upload', () => {
+    // Prerendered wizard step pages are inert until React hydrates, so this
+    // control must be a real <a href> — not a button firing navigate() on
+    // click — or it does nothing during that window. See PrefixedLink.tsx.
     mockPathname = '/wizard/step/1';
     render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
 
-    const alreadyHaveFileButton = screen.getByRole('button', {
+    const alreadyHaveFileLink = screen.getByRole('link', {
       name: wizardEN.buttons.alreadyHaveFile,
     });
-    fireEvent.click(alreadyHaveFileButton);
 
-    expect(mockNavigate).toHaveBeenCalledWith('/upload');
+    expect(alreadyHaveFileLink).toHaveAttribute('href', '/upload');
   });
 
-  it('should not render "I already have my ZIP file" button on other steps', () => {
+  it('should prefix the "I already have my ZIP file" href with the current locale', () => {
+    mockPathname = '/ru/wizard/step/1';
+    mockUseLanguagePrefix.mockReturnValue('/ru');
+    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+
+    const alreadyHaveFileLink = screen.getByRole('link', {
+      name: wizardEN.buttons.alreadyHaveFile,
+    });
+
+    expect(alreadyHaveFileLink).toHaveAttribute('href', '/ru/upload');
+  });
+
+  it('should not render "I already have my ZIP file" link on other steps', () => {
     mockPathname = '/wizard/step/2';
     render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
 
-    const alreadyHaveFileButton = screen.queryByRole('button', {
+    const alreadyHaveFileLink = screen.queryByRole('link', {
       name: wizardEN.buttons.alreadyHaveFile,
     });
-    expect(alreadyHaveFileButton).not.toBeInTheDocument();
+    expect(alreadyHaveFileLink).not.toBeInTheDocument();
   });
 });

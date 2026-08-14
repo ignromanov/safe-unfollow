@@ -1,27 +1,21 @@
 import { useState, useEffect } from 'react';
 import { Heart, Coffee, EyeOff, Eye, Github, BookOpen } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 import { analytics, isTrackingOptedOut, optOutOfTracking, optIntoTracking } from '@/lib/analytics';
-import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
-import { useAppStore } from '@/lib/store';
+import { useStoreSSR } from '@/hooks/useStoreSSR';
 import { Logo } from './Logo';
+import { PrefixedLink } from './PrefixedLink';
 
 export function Footer() {
   const { t } = useTranslation('common');
-  const prefix = useLanguagePrefix();
-  const fileMetadata = useAppStore(s => s.fileMetadata);
+  // The prerendered footer says "no ads, no investors"; the count replaces it only once
+  // the store is readable. Previously gated behind this component's own `mounted` flag.
+  const accountCount = useStoreSSR(s => s.fileMetadata?.accountCount, undefined);
 
-  // Prevent hydration mismatch - localStorage is unknown on server
-  const [mounted, setMounted] = useState(false);
+  // Not a hydration gate: `isOptedOut` is false until the effect reads localStorage, so
+  // the prerendered branch is the initial value itself.
   const [isOptedOut, setIsOptedOut] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    setIsOptedOut(isTrackingOptedOut());
-  }, []);
-
-  const accountCount = mounted ? fileMetadata?.accountCount : undefined;
+  useEffect(() => setIsOptedOut(isTrackingOptedOut()), []);
 
   const handleTrackingToggle = () => {
     if (isOptedOut) {
@@ -56,20 +50,20 @@ export function Footer() {
           <div className="flex flex-col items-center lg:items-end gap-8">
             {/* Navigation Links */}
             <div className="flex flex-wrap items-center justify-center lg:justify-end gap-x-12 gap-y-6 text-xs lg:text-sm font-black uppercase tracking-widest text-zinc-400">
-              <Link
-                to={`${prefix}/privacy`}
+              <PrefixedLink
+                to="/privacy"
                 className="hover:text-primary transition-colors py-2 px-1 cursor-pointer"
                 onClick={() => analytics.linkClick('privacy-policy')}
               >
                 {t('footer.privacyPolicy')}
-              </Link>
-              <Link
-                to={`${prefix}/terms`}
+              </PrefixedLink>
+              <PrefixedLink
+                to="/terms"
                 className="hover:text-primary transition-colors py-2 px-1 cursor-pointer"
                 onClick={() => analytics.linkClick('terms-of-service')}
               >
                 {t('footer.termsOfService')}
-              </Link>
+              </PrefixedLink>
               <a
                 href="https://safeunfollow.app/docs"
                 target="_blank"
@@ -110,19 +104,17 @@ export function Footer() {
               <button
                 onClick={handleTrackingToggle}
                 className={`cursor-pointer hover:text-primary transition-colors py-2 px-1 flex items-center gap-1.5 ${
-                  mounted && isOptedOut ? 'text-emerald-500' : ''
+                  isOptedOut ? 'text-emerald-500' : ''
                 }`}
-                title={
-                  mounted && isOptedOut ? t('footer.trackingDisabled') : t('footer.trackingEnabled')
-                }
+                title={isOptedOut ? t('footer.trackingDisabled') : t('footer.trackingEnabled')}
                 suppressHydrationWarning
               >
                 {/* Wrap children in spans with suppressHydrationWarning (shallow!) */}
                 <span suppressHydrationWarning>
-                  {mounted && isOptedOut ? <Eye size={14} /> : <EyeOff size={14} />}
+                  {isOptedOut ? <Eye size={14} /> : <EyeOff size={14} />}
                 </span>
                 <span suppressHydrationWarning>
-                  {mounted && isOptedOut ? t('footer.trackingOff') : t('footer.dontTrackMe')}
+                  {isOptedOut ? t('footer.trackingOff') : t('footer.dontTrackMe')}
                 </span>
               </button>
               <a

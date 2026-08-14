@@ -8,9 +8,8 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 import { analytics } from '@/lib/analytics';
-import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
+import { PrefixedLink } from '@/components/PrefixedLink';
 
 interface HeroProps {
   hasData?: boolean;
@@ -18,7 +17,6 @@ interface HeroProps {
 
 export function Hero({ hasData }: HeroProps) {
   const { t } = useTranslation('hero');
-  const prefix = useLanguagePrefix();
 
   return (
     <section className="py-12 md:py-32 text-center max-w-5xl mx-auto flex flex-col items-center animate-in fade-in duration-700">
@@ -47,34 +45,34 @@ export function Hero({ hasData }: HeroProps) {
       <div className="flex flex-col items-center gap-6 mb-20 md:mb-32 w-full max-w-3xl px-4">
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
           {hasData ? (
-            <Link
-              to={`${prefix}/results`}
+            <PrefixedLink
+              to="/results"
               onClick={() => analytics.heroCTAContinue?.()}
               className="cursor-pointer w-full sm:w-auto px-10 md:px-12 py-4 md:py-5 rounded-3xl bg-primary text-primary-foreground font-bold text-base md:text-lg shadow-2xl shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 group"
             >
               {t('buttons.viewResults')}
               <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-            </Link>
+            </PrefixedLink>
           ) : (
-            <Link
-              to={`${prefix}/wizard/step/1`}
+            <PrefixedLink
+              to="/wizard/step/1"
               onClick={() => analytics.heroCTAGuide?.()}
               className="cursor-pointer w-full sm:w-auto px-10 md:px-12 py-4 md:py-5 rounded-3xl bg-primary text-primary-foreground font-bold text-base md:text-lg shadow-2xl shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 group"
             >
               {t('buttons.getGuide')}
               <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-            </Link>
+            </PrefixedLink>
           )}
 
           {/* Secondary CTA */}
-          <Link
-            to={`${prefix}/sample`}
+          <PrefixedLink
+            to="/sample"
             onClick={() => analytics.heroCTASample?.()}
             className="cursor-pointer w-full sm:w-auto px-8 md:px-10 py-4 md:py-5 rounded-3xl border border-border bg-card font-bold text-base md:text-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all flex items-center justify-center gap-2"
           >
             <Database size={20} className="text-accent" />
             {t('buttons.trySample')}
-          </Link>
+          </PrefixedLink>
         </div>
 
         {/* Trust Badges */}
@@ -92,13 +90,13 @@ export function Hero({ hasData }: HeroProps) {
 
         {/* Tertiary Link */}
         {!hasData && (
-          <Link
-            to={`${prefix}/upload`}
+          <PrefixedLink
+            to="/upload"
             onClick={() => analytics.heroCTAUploadDirect?.()}
             className="cursor-pointer text-zinc-400 hover:text-primary font-bold text-xs uppercase tracking-widest transition-all underline underline-offset-4 decoration-zinc-200"
           >
             {t('buttons.haveFile')}
-          </Link>
+          </PrefixedLink>
         )}
       </div>
 

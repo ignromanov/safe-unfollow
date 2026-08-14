@@ -44,15 +44,7 @@ export function Layout({ lang }: LayoutProps) {
   const { handleClearData } = useInstagramData();
 
   // Extracted hooks
-  const {
-    pathname,
-    activeScreen,
-    isResultsPage,
-    handleViewResults,
-    handleUpload,
-    handleLogoClick,
-    handleClear,
-  } = useLayoutNavigation();
+  const { pathname, activeScreen, isResultsPage, handleClear } = useLayoutNavigation();
   useLayoutState(pathname);
 
   // Analytics (UTM capture, page view, PWA install)
@@ -134,9 +126,6 @@ export function Layout({ lang }: LayoutProps) {
           <Header
             hasData={hasResults}
             activeScreen={activeScreen}
-            onViewResults={handleViewResults}
-            onUpload={handleUpload}
-            onLogoClick={handleLogoClick}
             onClear={() => handleClear(handleClearData)}
           />
 

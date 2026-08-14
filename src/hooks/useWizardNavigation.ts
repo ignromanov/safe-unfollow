@@ -28,5 +28,7 @@ export function useWizardNavigation(initialStep: number = 1) {
     [navigate, prefix]
   );
 
-  return { currentStep, goToStep, prefix, navigate };
+  // `prefix` and `navigate` were also returned until the wizard's "I already have my ZIP
+  // file" shortcut became a PrefixedLink. Nothing reads them now.
+  return { currentStep, goToStep };
 }
