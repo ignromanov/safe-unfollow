@@ -83,6 +83,14 @@ function reportParseDiagnostics(
  * `ParseErrorData` is the shape `parse-orchestration` already rejects with from
  * the worker and main-thread paths, so the catch reads one structure from all
  * three sources rather than a per-thrower one.
+ *
+ * The guards do not paint the error screen either, for the same reason. The
+ * catch sets identical state from `err.message` and `err.warnings` in the same
+ * synchronous tick — `store.ts` merges with `?? state.x`, so a second call
+ * could only differ where the catch declines to paint at all. It declines on
+ * one path: an upload cancelled during `await isValidZipFile` returned to the
+ * reader's own cancellation, and the guard's copy used to overwrite that with
+ * an error screen for a file they had already given up on.
  */
 function guardFailure(warning: ParseWarning): Error & ParseErrorData {
   return Object.assign(new Error(warning.message), {
@@ -185,13 +193,6 @@ export function useFileUpload() {
             fix: t('diagnostic.errors.NOT_ZIP.fix'),
           };
 
-          setUploadInfo({
-            currentFileName: file.name,
-            uploadStatus: 'error',
-            uploadError: notZipWarning.message,
-            parseWarnings: [notZipWarning],
-          });
-
           throw guardFailure(notZipWarning);
         }
 
@@ -204,13 +205,6 @@ export function useFileUpload() {
             severity: 'error',
             fix: t('diagnostic.errors.FILE_TOO_LARGE.fix'),
           };
-
-          setUploadInfo({
-            currentFileName: file.name,
-            uploadStatus: 'error',
-            uploadError: tooLargeWarning.message,
-            parseWarnings: [tooLargeWarning],
-          });
 
           throw guardFailure(tooLargeWarning);
         }
