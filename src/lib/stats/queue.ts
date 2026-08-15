@@ -93,13 +93,17 @@ export function flushEvents(): void {
   // 'include' with no way to opt out, and the Umami endpoint answers
   // cross-origin requests with `Access-Control-Allow-Origin: *` — invalid for
   // a credentialed request, so the browser silently drops the delivery while
-  // sendBeacon still reports success. `fetch` defaults to 'same-origin'
-  // credentials, which cross-origin behaves as omitted and satisfies the
-  // wildcard CORS response; `keepalive` keeps it reliable across unload.
+  // sendBeacon still reports success.
+  //
+  // `credentials: 'omit'` is stated rather than left to fetch's 'same-origin'
+  // default, which only behaves as omitted while the instance stays on another
+  // origin (GH#63 tracks making that host configurable). `keepalive` keeps the
+  // request alive across unload. This is what Umami's own tracker sends.
   void fetch(endpoint, {
     method: 'POST',
     body,
     keepalive: true,
+    credentials: 'omit',
     headers: { 'Content-Type': 'application/json' },
   }).catch(() => {
     // Analytics must never break the app.

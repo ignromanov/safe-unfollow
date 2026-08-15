@@ -74,10 +74,11 @@ describe('event queue', () => {
     const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
     expect(init.keepalive).toBe(true);
     expect(init.method).toBe('POST');
-    // Explicit credentials mode is never set: fetch's 'same-origin' default,
-    // cross-origin, sends no cookies and satisfies a wildcard CORS response —
-    // unlike sendBeacon, which forces 'include' and cannot be told otherwise.
-    expect(init.credentials).toBeUndefined();
+    // Umami answers with `Access-Control-Allow-Origin: *`, which the browser
+    // rejects for any credentialed request. 'omit' is asserted rather than the
+    // 'same-origin' default because the default only happens to send no cookies
+    // while the instance lives on another origin (GH#63).
+    expect(init.credentials).toBe('omit');
   });
 
   it('flushes by itself once the size cap is reached', () => {
