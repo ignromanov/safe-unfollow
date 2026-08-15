@@ -57,8 +57,8 @@ export function trackEvent(
 }
 
 /**
- * Track event via sendBeacon for reliable delivery on page unload.
- * Falls back to regular trackEvent if sendBeacon is unavailable.
+ * Track one event over a request that survives page unload.
+ * Falls back to regular trackEvent when the Umami instance cannot be resolved.
  */
 export function trackBeacon(
   eventName: AnalyticsEventName,
@@ -67,37 +67,34 @@ export function trackBeacon(
   if (import.meta.env.DEV || isTrackingOptedOut()) return;
   if (typeof window === 'undefined') return;
 
-  // Try sendBeacon first for reliability on mobile page unload
-  if (navigator.sendBeacon && window.umami) {
-    const target = resolveUmamiTarget();
-    if (target) {
-      try {
-        navigator.sendBeacon(
-          `${target.origin}/api/send`,
-          new Blob(
-            [
-              JSON.stringify({
-                type: 'event',
-                payload: {
-                  website: target.websiteId,
-                  name: eventName,
-                  data: eventData,
-                  hostname: window.location.hostname,
-                  language: navigator.language,
-                  url: window.location.pathname,
-                },
-              }),
-            ],
-            { type: 'application/json' }
-          )
-        );
-        return;
-      } catch {
-        // Fall through to regular tracking.
-      }
-    }
+  const target = window.umami ? resolveUmamiTarget() : null;
+  if (target === null) {
+    trackEvent(eventName, eventData);
+    return;
   }
 
-  // Fallback: regular tracking
-  trackEvent(eventName, eventData);
+  // Same transport as the batch queue, and for the same reason: sendBeacon is
+  // spec'd with credentials mode 'include' and no way to opt out, while Umami
+  // answers cross-origin with `Access-Control-Allow-Origin: *` — invalid for a
+  // credentialed request, so the browser drops the delivery while sendBeacon
+  // reports success. See flushEvents() in ./queue.ts.
+  void fetch(`${target.origin}/api/send`, {
+    method: 'POST',
+    body: JSON.stringify({
+      type: 'event',
+      payload: {
+        website: target.websiteId,
+        name: eventName,
+        data: eventData,
+        hostname: window.location.hostname,
+        language: navigator.language,
+        url: window.location.pathname,
+      },
+    }),
+    keepalive: true,
+    credentials: 'omit',
+    headers: { 'Content-Type': 'application/json' },
+  }).catch(() => {
+    // Analytics must never break the app.
+  });
 }
