@@ -49,6 +49,14 @@ function umamiOrigin(): string {
 /**
  * Host → the directives it must appear in, and why. A host listed here for
  * three directives and present in two is the exact shape of the 2026-08-14 bug.
+ *
+ * This table is a record of what production has been observed to need, NOT a
+ * specification. Google publishes no allowlist for AdSense and says so plainly
+ * — "the domains that the AdSense ad code uses change over time" — recommending
+ * nonce-based strict CSP instead (support.google.com/adsense/answer/16283098).
+ * So an entry gets added here when a console reports it blocked, never on a
+ * guess, and this file cannot prove the list is complete. Only the shift to a
+ * nonce policy would, and that is a privacy-trust call, not an engineering one.
  */
 const REQUIRED: Array<{ host: string; directives: string[]; why: string }> = [
   {
@@ -65,6 +73,15 @@ const REQUIRED: Array<{ host: string; directives: string[]; why: string }> = [
     host: 'https://*.googlesyndication.com',
     directives: ['script-src', 'connect-src', 'frame-src'],
     why: 'AdSense ad serving',
+  },
+  {
+    host: 'https://www.google.com',
+    directives: ['frame-src'],
+    // Framing only: an AdSense creative embeds www.google.com, and a
+    // cross-origin frame executes nothing in this origin. Deliberately NOT
+    // added to script-src or connect-src, where it would grant far more than
+    // the observed violation asks for.
+    why: 'an AdSense creative frames www.google.com — reported blocked 2026-08-14',
   },
 ];
 
