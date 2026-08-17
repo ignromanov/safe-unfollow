@@ -19,7 +19,7 @@
     },
     "privacy": {
       "question": "Instagram takipten çıkan izleyici giriş yapmadan nasıl çalışır?",
-      "answer": "Bu izleyici, tarayıcınızda yerel olarak takipçileri analiz etmek için resmi Instagram veri dışa aktarımınızı (ZIP dosyası) kullanır. Giriş gerekmez. Tüm işleme cihazınızda gerçekleşir—verileriniz sunucularımıza asla ulaşmaz. Bu yöntem güvenlidir çünkü Instagram'ın resmi dışa aktarma aracını kullanır.",
+      "answer": "Bu izleyici, tarayıcınızda yerel olarak takipçileri analiz etmek için resmi Instagram veri dışa aktarımınızı (ZIP dosyası) kullanır. Giriş gerekmez. Ayrıştırma, filtreleme ve arama tamamen cihazınızda gerçekleşir ve Instagram dışa aktarımınız bu tarayıcıda kalır. Yalnızca anonim ziyaret istatistikleri alırız; bunları alt bilgiden kapatabilirsiniz. Bu yöntem güvenlidir çünkü Instagram'ın resmi dışa aktarma aracını kullanır.",
       "relatedLink": {
         "text": "Gizlilik politikamızı okuyun",
         "href": "/privacy"
@@ -63,7 +63,7 @@
     },
     "scale": {
       "question": "Ne büyüklükte Instagram hesap dışa aktarımı analiz edebilirsiniz?",
-      "answer": "Bu izleyici 1.000.000+ hesaba kadar dışa aktarımları işleyebilir. Yıldırım hızında filtreleme için sütunlu depolama ve bitset indeksleme kullanıyoruz—devasa veri setlerini 5ms'den az sürede işliyoruz. 100 takipçiniz veya 1M+ olsun, araç hızlı ve duyarlı kalır. Gerçek dışa aktarımlarla test edildi ve doğrulandı.",
+      "answer": "Bu izleyici 1.000.000+ hesaba kadar dışa aktarımları işleyebilir. Sütunlu depolama ve bitset indeksleme kullanıyoruz, böylece liste büyüdükçe filtreleme hızlı kalır. 100 takipçiniz veya 1M+ olsun, araç duyarlı kalır.",
       "relatedLink": {
         "text": "Örnek verilerle deneyin",
         "href": "/sample"
@@ -71,11 +71,11 @@
     },
     "free": {
       "question": "Ücretsiz Instagram takipten çıkan izleyicileri var mı?",
-      "answer": "Evet. Bu araç %100 ücretsiz, açık kaynaklı (MIT lisansı) ve abonelik, ödeme duvarı veya gizli limit içermez. Çoğu alternatif aylık 5-10$ alır. Bu izleyici, yerel olarak işlenen resmi Instagram veri dışa aktarımınızı kullanarak sunucu maliyetlerini tamamen ortadan kaldırır."
+      "answer": "Evet. Analiz %100 ücretsiz — tüm rozetler, filtreler ve istediğiniz kadar hesap, kayıt ve sınır olmadan. Çoğu abonelik tabanlı alternatif aylık 5-10$ ücret alır. Tek seferlik $7 ödeme, yalnızca filtrelenmiş listenizi dosya olarak dışa aktarmak istediğinizde gereklidir; burada görüntülemek her zaman ücretsizdir. Açık kaynak (MIT lisansı) ve Instagram dışa aktarımınız tarayıcınızda yerel olarak işlenir."
     },
     "analyzeData": {
       "question": "Takipten çıkanları bulmak için Instagram veri indirmemi nasıl analiz ederim?",
-      "answer": "Instagram ZIP dosyanızı bu izleyiciye yükleyin. Araç, tarayıcınızda yerel olarak takipçi/takip listellerinizi açar, karşılaştırır ve kimin takibi bıraktığını vurgular. Sonuçlar takipten çıkanları, karşılıksızları, karşılıklı takipçileri ve daha fazlasını gösterir—hepsi sunucu katılımı olmadan çevrimdışı işlenir. Tipik dışa aktarımlar için 30 saniyenin altında.",
+      "answer": "Instagram ZIP dosyanızı bu izleyiciye yükleyin. Araç, tarayıcınızda yerel olarak takipçi/takip listelerinizi açar, karşılaştırır ve kimin takibi bıraktığını vurgular. Sonuçlar takipten çıkanları, karşılıksızları, karşılıklı takipçileri ve daha fazlasını gösterir — karşılaştırma bir sunucuda değil, cihazınızda çalışır. Tipik dışa aktarımlar için 30 saniyenin altında.",
       "relatedLink": {
         "text": "Dosyanızı şimdi yükleyin",
         "href": "/upload"
@@ -83,7 +83,7 @@
     },
     "shareDataSafely": {
       "question": "Instagram veri indirmesini üçüncü taraf araçlara yüklemek güvenli mi?",
-      "answer": "Evet, uygulama verileri sunuculara yüklemeden tarayıcınızda yerel olarak işliyorsa güvenlidir. Bu izleyici ZIP dosyanızı tamamen cihazınızda işler—hiçbir sunucu verilerinizi depolamaz veya erişmez. ZIP'inizi bulut tabanlı takipten çıkan izleyicilere asla yüklemeyin. Uygulamanın verileri yerel olarak işlediğini her zaman doğrulayın.",
+      "answer": "Evet, uygulama dosyanızı tarayıcınızda yerel olarak işliyor ve orada tutuyorsa güvenlidir. Bu izleyici ZIP dosyanızı tamamen cihazınızda okur — dosyanın kendisi bu tarayıcıda kalır ve dışarı yalnızca anonim ziyaret istatistikleri çıkar. ZIP'inizi veya Instagram parolanızı teslim etmenizi isteyen bulut tabanlı takipten çıkan izleyicilerine karşı dikkatli olun: onlar dosyanızı başkasının makinesine gönderir. Uygulamanın resmi dışa aktarımdan çalıştığını ve giriş istemediğini her zaman doğrulayın.",
       "relatedLink": {
         "text": "Gizlilik taahhüdümüzü okuyun",
         "href": "/privacy"
@@ -99,7 +99,7 @@
     },
     "betterThanPaid": {
       "question": "SafeUnfollow ücretli uygulamalardan daha mı iyi?",
-      "answer": "Çoğu kullanıcı için evet. SafeUnfollow %100 ücretsiz, giriş gerektirmez (hesap engelleme riski yok), verileri yerel olarak işler (maksimum gizlilik), 1M+ hesabı destekler (çoğu ücretli uygulama 100K ile sınırlıdır) ve açık kaynaklıdır. Ücretli uygulamalar API erişimi gerektiren gerçek zamanlı izleme sunar — ancak bu Instagram'ın Kullanım Koşulları'nı ihlal eder ve hesabınızı riske atar. SafeUnfollow resmi ve güvenli veri dışa aktarma yöntemini kullanır."
+      "answer": "Çoğu kullanıcı için evet. Analiz ücretsizdir: kayıt yok, abonelik yok, dışa aktarımınızdaki hesap sayısında sınır yok. Giriş gerektirmez (hesap engelleme riski yok), verileri tarayıcınızda yerel olarak işler (maksimum gizlilik), 1M+ hesabı destekler (çoğu ücretli uygulama 100K ile sınırlıdır) ve açık kaynaklıdır. Filtrelenmiş listenizi dosya olarak dışa aktarmak tek seferlik $7 ödeme gerektirir; ekranda gördüğünüz her şey ücretsiz kalır. Ücretli uygulamalar API erişimi gerektiren gerçek zamanlı izleme sunar — ancak bu Instagram'ın Kullanım Koşulları'nı ihlal eder ve hesabınızı riske atar. SafeUnfollow resmi ve güvenli veri dışa aktarma yöntemini kullanır."
     },
     "mobileUse": {
       "question": "SafeUnfollow'u iPhone veya Android'da kullanabilir miyim?",

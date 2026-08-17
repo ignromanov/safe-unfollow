@@ -37,7 +37,7 @@
     "deleteData": "Daten löschen"
   },
   "footer": {
-    "description": "Der einzige Beziehungsanalyzer, der 100% in deinem Browser funktioniert. Kein Server, keine Logs, nur deine Daten und dein Gerät.",
+    "description": "Der einzige Beziehungsanalyzer, der 100% in deinem Browser funktioniert. Dein Instagram-Export wird auf deinem Gerät gelesen und bleibt dort.",
     "privacyPolicy": "Datenschutz",
     "termsOfService": "Nutzungsbedingungen",
     "contact": "Kontakt",
@@ -56,7 +56,7 @@
     "license": "MIT Lizenz",
     "viewSource": "Quellcode",
     "analyzedCount": "Du hast {{count}} Konten analysiert. Es war kostenlos.",
-    "noAdsNoInvestors": "Dieses Tool hat keine Werbung und keine Investoren.",
+    "exportNeverLeavesBrowser": "Dein Instagram-Export verlässt niemals diesen Browser.",
     "buyACoffee": "Kaffee spendieren"
   },
   "nav": {
@@ -71,7 +71,7 @@
     "subtitle": "Schließe dich Tausenden von Nutzern an, die ihre Follower verfolgen, ohne ihr Konto zu gefährden.",
     "getStarted": "Loslegen",
     "trySample": "Demo testen",
-    "tagline": "100% Kostenlos • Kein Login • Datenschutz garantiert"
+    "tagline": "Analyse Kostenlos • Kein Login • Datenschutz garantiert"
   },
   "ads": {
     "label": "Werbung"
