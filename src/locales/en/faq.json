@@ -19,7 +19,7 @@
     },
     "privacy": {
       "question": "How does Instagram unfollower tracker work without login?",
-      "answer": "This tracker uses your official Instagram data export (ZIP file) to analyze followers locally in your browser. No login required. All processing happens on your device—your data never reaches our servers. This method is safe because it uses Instagram's official export tool, not password scraping.",
+      "answer": "This tracker uses your official Instagram data export (ZIP file) to analyze followers locally in your browser. No login required. Parsing, filtering and search all happen on your device, and your Instagram export stays in this browser. We receive only anonymous page analytics, which you can switch off in the footer. This method is safe because it uses Instagram's official export tool, not password scraping.",
       "relatedLink": {
         "text": "Read our privacy policy",
         "href": "/privacy"
@@ -63,7 +63,7 @@
     },
     "scale": {
       "question": "What size Instagram account export can you analyze?",
-      "answer": "This tracker handles exports up to 1,000,000+ accounts. We use columnar storage and bitset indexing for lightning-fast filtering—processing massive datasets in under 5ms. Whether you have 100 followers or 1M+, the tool remains fast and responsive. Tested and verified with real exports.",
+      "answer": "This tracker handles exports up to 1,000,000+ accounts. We use columnar storage and bitset indexing so filtering stays fast as the list grows. Whether you have 100 followers or 1M+, the tool stays responsive.",
       "relatedLink": {
         "text": "Try with sample data",
         "href": "/sample"
@@ -71,11 +71,11 @@
     },
     "free": {
       "question": "Are there free Instagram unfollower trackers?",
-      "answer": "Yes. This tool is 100% free, open-source (MIT license), and includes no subscriptions, paywalls, or hidden limits. Most alternatives charge $5-10/month. This tracker uses your official Instagram data export processed locally, eliminating server costs entirely. View our code on GitHub."
+      "answer": "Yes. The analysis is 100% free — every badge, filter and account, with no signup and no limit. Most subscription alternatives charge $5-10/month. A one-time $7 unlock applies only if you want to export your filtered list as a file; viewing it here is always free. Open-source (MIT), and your Instagram export is processed locally in your browser."
     },
     "analyzeData": {
       "question": "How do I analyze my Instagram data download to find unfollowers?",
-      "answer": "Upload your Instagram ZIP file to this tracker. The tool unpacks your follower/following lists locally in your browser, compares them, and highlights who unfollowed you. Results show unfollowers, non-mutuals, mutual followers, and more—all processed offline with zero server involvement. Takes under 30 seconds for typical exports.",
+      "answer": "Upload your Instagram ZIP file to this tracker. The tool unpacks your follower/following lists locally in your browser, compares them, and highlights who unfollowed you. Results show unfollowers, non-mutuals, mutual followers, and more — the comparison runs on your device rather than on a server. Takes under 30 seconds for typical exports.",
       "relatedLink": {
         "text": "Upload your file now",
         "href": "/upload"
@@ -83,7 +83,7 @@
     },
     "shareDataSafely": {
       "question": "Is it safe to upload Instagram data download to third-party tools?",
-      "answer": "Yes, if the app processes data locally in your browser without uploading to servers. This tracker processes your ZIP file entirely on your device—no servers store or access your data. Never upload your ZIP to cloud-based unfollower trackers. Always verify the app processes data locally and doesn't require login.",
+      "answer": "Yes, if the app processes your file locally in your browser and keeps it there. This tracker reads your ZIP entirely on your device — the file itself stays in this browser, and only anonymous page analytics ever leave it. Be wary of cloud-based unfollower trackers that ask you to hand over your ZIP or your Instagram password: those send your file to someone else's machine. Always check that the app works from the official export and asks for no login.",
       "relatedLink": {
         "text": "Read our privacy commitment",
         "href": "/privacy"
@@ -99,7 +99,7 @@
     },
     "betterThanPaid": {
       "question": "Is SafeUnfollow better than paid Instagram unfollow apps?",
-      "answer": "For most users, yes. SafeUnfollow is 100% free, requires no login (eliminating account ban risk), processes data locally (maximum privacy), handles 1M+ accounts (most paid apps cap at 100K), and is open source. Paid apps offer real-time monitoring which requires API access—but that violates Instagram's Terms of Service and risks your account. SafeUnfollow uses the official, safe data export method."
+      "answer": "For most users, yes. The analysis is free — no signup, no subscription, every account in your export. It needs no login (so no account ban risk), processes your export locally in your browser (maximum privacy), handles 1M+ accounts (most paid apps cap at 100K), and is open source. Exporting your filtered list as a file is a one-time $7 unlock; everything you can see on screen stays free. Paid apps offer real-time monitoring which requires API access—but that violates Instagram's Terms of Service and risks your account. SafeUnfollow uses the official, safe data export method."
     },
     "mobileUse": {
       "question": "Can I use SafeUnfollow on iPhone or Android?",

@@ -66,9 +66,9 @@
   },
   "donation": {
     "headline": "Você analisou {{count}} contas — de graça.",
-    "body": "Sem login. Sem servidor. Nenhum dado enviado. Se economizou seu tempo, um café mantém o projeto.",
-    "headlineMobile": "Grátis. Privado. Sem login.",
-    "bodyMobile": "Se foi útil, considere um café.",
+    "body": "Sem login. Sua exportação do Instagram nunca saiu deste navegador. Se economizou seu tempo, um café mantém o projeto.",
+    "headlineMobile": "Análise grátis. Privado. Sem login.",
+    "bodyMobile": "Sua exportação nunca saiu do navegador. Se foi útil, considere um café.",
     "cta": "Pagar um Café",
     "ctaMobile": "Apoiar",
     "dismiss": "Agora não"
@@ -131,7 +131,7 @@
       "freeTrial14": "14 dias grátis",
       "freePlan": "Plano grátis",
       "freeContacts": "1K grátis",
-      "freeForever": "Grátis sempre"
+      "freeForever": "Grátis, sem prazo"
     },
     "social": {
       "creators50k": "50K+ criadores",

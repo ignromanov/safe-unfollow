@@ -19,7 +19,7 @@
     },
     "privacy": {
       "question": "Bagaimana pelacak unfollower Instagram bekerja tanpa login?",
-      "answer": "Pelacak ini menggunakan ekspor data Instagram resmi Anda (file ZIP) untuk menganalisis pengikut secara lokal di browser Anda. Tidak perlu login. Semua pemrosesan terjadi di perangkat Anda—data Anda tidak pernah mencapai server kami. Metode ini aman karena menggunakan alat ekspor resmi Instagram.",
+      "answer": "Pelacak ini menggunakan ekspor data Instagram resmi Anda (file ZIP) untuk menganalisis pengikut secara lokal di browser Anda. Tidak perlu login. Penguraian, pemfilteran, dan pencarian semuanya terjadi di perangkat Anda, dan ekspor Instagram Anda tetap berada di browser ini. Kami hanya menerima statistik kunjungan anonim, yang bisa Anda matikan di footer. Metode ini aman karena menggunakan alat ekspor resmi Instagram.",
       "relatedLink": {
         "text": "Baca kebijakan privasi kami",
         "href": "/privacy"
@@ -63,7 +63,7 @@
     },
     "scale": {
       "question": "Berapa ukuran ekspor akun Instagram yang bisa Anda analisis?",
-      "answer": "Pelacak ini menangani ekspor hingga 1.000.000+ akun. Kami menggunakan penyimpanan kolom dan pengindeksan bitset untuk pemfilteran sangat cepat—memproses dataset masif dalam waktu kurang dari 5ms. Baik Anda memiliki 100 pengikut atau 1M+, alat ini tetap cepat dan responsif. Diuji dan diverifikasi dengan ekspor nyata.",
+      "answer": "Pelacak ini menangani ekspor hingga 1.000.000+ akun. Kami menggunakan penyimpanan kolom dan pengindeksan bitset agar pemfilteran tetap cepat seiring bertambahnya daftar. Baik Anda memiliki 100 pengikut atau 1M+, alat ini tetap responsif.",
       "relatedLink": {
         "text": "Coba dengan data sampel",
         "href": "/sample"
@@ -71,11 +71,11 @@
     },
     "free": {
       "question": "Apakah ada pelacak unfollower Instagram gratis?",
-      "answer": "Ya. Alat ini 100% gratis, open-source (lisensi MIT), dan tidak termasuk langganan, paywall, atau batasan tersembunyi. Kebanyakan alternatif mengenakan biaya Rp75.000-150.000/bulan. Pelacak ini menggunakan ekspor data Instagram resmi Anda yang diproses secara lokal, menghilangkan biaya server sepenuhnya."
+      "answer": "Ya. Analisisnya 100% gratis — semua lencana, filter, dan berapa pun jumlah akunnya, tanpa pendaftaran dan tanpa batasan. Kebanyakan alternatif berlangganan mengenakan biaya Rp75.000-150.000/bulan. Pembayaran sekali sebesar $7 hanya diperlukan jika Anda ingin mengekspor daftar terfilter sebagai file; melihatnya di sini selalu gratis. Open-source (lisensi MIT), dan ekspor Instagram Anda diproses secara lokal di browser Anda."
     },
     "analyzeData": {
       "question": "Bagaimana cara menganalisis unduhan data Instagram saya untuk menemukan unfollower?",
-      "answer": "Unggah file ZIP Instagram Anda ke pelacak ini. Alat ini membongkar daftar pengikut/mengikuti Anda secara lokal di browser Anda, membandingkannya, dan menyorot siapa yang berhenti mengikuti Anda. Hasil menunjukkan unfollower, non-mutual, pengikut mutual, dan lainnya—semua diproses offline tanpa keterlibatan server. Memakan waktu kurang dari 30 detik untuk ekspor tipikal.",
+      "answer": "Unggah file ZIP Instagram Anda ke pelacak ini. Alat ini membongkar daftar pengikut/mengikuti Anda secara lokal di browser Anda, membandingkannya, dan menyorot siapa yang berhenti mengikuti Anda. Hasil menunjukkan unfollower, non-mutual, pengikut mutual, dan lainnya — perbandingannya berjalan di perangkat Anda, bukan di server. Memakan waktu kurang dari 30 detik untuk ekspor tipikal.",
       "relatedLink": {
         "text": "Unggah file Anda sekarang",
         "href": "/upload"
@@ -83,7 +83,7 @@
     },
     "shareDataSafely": {
       "question": "Apakah aman mengunggah unduhan data Instagram ke alat pihak ketiga?",
-      "answer": "Ya, jika aplikasi memproses data secara lokal di browser Anda tanpa mengunggah ke server. Pelacak ini memproses file ZIP Anda sepenuhnya di perangkat Anda—tidak ada server yang menyimpan atau mengakses data Anda. Jangan pernah mengunggah ZIP Anda ke pelacak unfollower berbasis cloud. Selalu verifikasi bahwa aplikasi memproses data secara lokal.",
+      "answer": "Ya, jika aplikasi memproses file Anda secara lokal di browser dan menyimpannya di sana. Pelacak ini membaca file ZIP Anda sepenuhnya di perangkat Anda — filenya sendiri tetap di browser ini, dan hanya statistik kunjungan anonim yang keluar. Waspadai pelacak unfollower berbasis cloud yang meminta Anda menyerahkan ZIP atau kata sandi Instagram Anda: mereka mengirim file Anda ke mesin orang lain. Selalu pastikan aplikasi bekerja dari ekspor resmi dan tidak meminta login.",
       "relatedLink": {
         "text": "Baca komitmen privasi kami",
         "href": "/privacy"
@@ -99,7 +99,7 @@
     },
     "betterThanPaid": {
       "question": "Apakah SafeUnfollow lebih baik dari aplikasi berbayar?",
-      "answer": "Untuk sebagian besar pengguna, ya. SafeUnfollow 100% gratis, tidak perlu login (tidak ada risiko banned), memproses data secara lokal (privasi maksimal), mendukung 1 juta+ akun (kebanyakan aplikasi berbayar terbatas di 100K), dan open source. Aplikasi berbayar menawarkan pemantauan real-time yang memerlukan akses API — namun ini melanggar Ketentuan Layanan Instagram dan membahayakan akun Anda. SafeUnfollow menggunakan metode ekspor data resmi dan aman."
+      "answer": "Untuk sebagian besar pengguna, ya. Analisisnya gratis: tanpa pendaftaran, tanpa langganan, berapa pun jumlah akun dalam ekspor Anda. Tidak perlu login (tidak ada risiko banned), data diproses secara lokal di browser Anda (privasi maksimal), mendukung 1 juta+ akun (kebanyakan aplikasi berbayar terbatas di 100K), dan open source. Mengekspor daftar terfilter sebagai file memerlukan pembayaran sekali sebesar $7; semua yang terlihat di layar tetap gratis. Aplikasi berbayar menawarkan pemantauan real-time yang memerlukan akses API — namun ini melanggar Ketentuan Layanan Instagram dan membahayakan akun Anda. SafeUnfollow menggunakan metode ekspor data resmi dan aman."
     },
     "mobileUse": {
       "question": "Bisakah saya menggunakan SafeUnfollow di iPhone atau Android?",

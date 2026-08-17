@@ -19,7 +19,7 @@
     },
     "privacy": {
       "question": "Wie funktioniert der Instagram-Entfolger-Tracker ohne Anmeldung?",
-      "answer": "Dieser Tracker verwendet deinen offiziellen Instagram-Datenexport (ZIP-Datei), um Follower lokal in deinem Browser zu analysieren. Keine Anmeldung erforderlich. Die gesamte Verarbeitung erfolgt auf deinem Gerät—deine Daten erreichen niemals unsere Server. Diese Methode ist sicher, weil sie Instagrams offizielles Export-Tool verwendet, nicht Passwort-Scraping.",
+      "answer": "Dieser Tracker verwendet deinen offiziellen Instagram-Datenexport (ZIP-Datei), um Follower lokal in deinem Browser zu analysieren. Keine Anmeldung erforderlich. Parsen, Filtern und Suchen passieren alle auf deinem Gerät, und dein Instagram-Export bleibt in diesem Browser. Wir erhalten nur anonyme Besuchsstatistiken, die du im Footer abschalten kannst. Diese Methode ist sicher, weil sie Instagrams offizielles Export-Tool verwendet, nicht Passwort-Scraping.",
       "relatedLink": {
         "text": "Lies unsere Datenschutzrichtlinie",
         "href": "/privacy"
@@ -63,7 +63,7 @@
     },
     "scale": {
       "question": "Welche Größe von Instagram-Konto-Export kannst du analysieren?",
-      "answer": "Dieser Tracker verarbeitet Exporte bis zu 1.000.000+ Konten. Wir verwenden spaltenbasierte Speicherung und Bitset-Indizierung für blitzschnelles Filtern—massive Datensätze werden in unter 5ms verarbeitet. Ob du 100 Follower oder 1M+ hast, das Tool bleibt schnell und reaktionsfreudig. Getestet und verifiziert mit echten Exporten.",
+      "answer": "Dieser Tracker verarbeitet Exporte bis zu 1.000.000+ Konten. Wir verwenden spaltenbasierte Speicherung und Bitset-Indizierung, damit das Filtern schnell bleibt, wenn die Liste wächst. Ob du 100 Follower oder 1M+ hast, das Tool bleibt reaktionsfreudig.",
       "relatedLink": {
         "text": "Mit Beispieldaten ausprobieren",
         "href": "/sample"
@@ -71,11 +71,11 @@
     },
     "free": {
       "question": "Gibt es kostenlose Instagram-Entfolger-Tracker?",
-      "answer": "Ja. Dieses Tool ist 100% kostenlos, Open-Source (MIT-Lizenz), und enthält keine Abonnements, Paywalls oder versteckten Limits. Die meisten Alternativen verlangen 5-10€/Monat. Dieser Tracker verwendet deinen offiziellen Instagram-Datenexport, der lokal verarbeitet wird, und eliminiert Serverkosten vollständig."
+      "answer": "Ja. Die Analyse ist zu 100% kostenlos – alle Abzeichen, Filter und beliebig viele Konten, ohne Anmeldung und ohne Limit. Die meisten Abo-Alternativen verlangen 5-10€/Monat. Ein einmaliger Kauf für $7 ist nur nötig, wenn du deine gefilterte Liste als Datei exportieren willst; das Ansehen hier ist immer kostenlos. Open-Source (MIT-Lizenz), und dein Instagram-Export wird lokal in deinem Browser verarbeitet."
     },
     "analyzeData": {
       "question": "Wie analysiere ich meinen Instagram-Daten-Download, um Entfolger zu finden?",
-      "answer": "Lade deine Instagram-ZIP-Datei in diesen Tracker hoch. Das Tool entpackt deine Follower/Following-Listen lokal in deinem Browser, vergleicht sie und hebt hervor, wer dir entfolgt ist. Ergebnisse zeigen Entfolger, Nicht-Gegenseitige, gegenseitige Follower und mehr—alles offline verarbeitet ohne Server-Beteiligung. Dauert unter 30 Sekunden für typische Exporte.",
+      "answer": "Lade deine Instagram-ZIP-Datei in diesen Tracker hoch. Das Tool entpackt deine Follower/Following-Listen lokal in deinem Browser, vergleicht sie und hebt hervor, wer dir entfolgt ist. Ergebnisse zeigen Entfolger, Nicht-Gegenseitige, gegenseitige Follower und mehr — der Vergleich läuft auf deinem Gerät statt auf einem Server. Dauert unter 30 Sekunden für typische Exporte.",
       "relatedLink": {
         "text": "Lade jetzt deine Datei hoch",
         "href": "/upload"
@@ -83,7 +83,7 @@
     },
     "shareDataSafely": {
       "question": "Ist es sicher, Instagram-Daten-Download zu Drittanbieter-Tools hochzuladen?",
-      "answer": "Ja, wenn die App Daten lokal in deinem Browser verarbeitet, ohne sie auf Server hochzuladen. Dieser Tracker verarbeitet deine ZIP-Datei vollständig auf deinem Gerät—keine Server speichern oder greifen auf deine Daten zu. Lade niemals deine ZIP zu cloud-basierten Entfolger-Trackern hoch. Überprüfe immer, dass die App Daten lokal verarbeitet.",
+      "answer": "Ja, wenn die App deine Datei lokal in deinem Browser verarbeitet und sie dort behält. Dieser Tracker liest deine ZIP-Datei vollständig auf deinem Gerät — die Datei selbst bleibt in diesem Browser, und hinaus gehen nur anonyme Besuchsstatistiken. Sei vorsichtig bei cloud-basierten Entfolger-Trackern, die dich deine ZIP oder dein Instagram-Passwort herausgeben lassen: die schicken deine Datei auf fremde Rechner. Prüfe immer, dass die App mit dem offiziellen Export arbeitet und keine Anmeldung verlangt.",
       "relatedLink": {
         "text": "Lies unser Datenschutz-Versprechen",
         "href": "/privacy"
@@ -99,7 +99,7 @@
     },
     "betterThanPaid": {
       "question": "Ist SafeUnfollow besser als kostenpflichtige Apps?",
-      "answer": "Für die meisten Nutzer ja. SafeUnfollow ist 100% kostenlos, erfordert kein Login (kein Bann-Risiko), verarbeitet Daten lokal (maximale Privatsphäre), unterstützt 1M+ Accounts und ist Open Source. Bezahl-Apps bieten Echtzeit-Monitoring, was aber gegen Instagrams Nutzungsbedingungen verstößt."
+      "answer": "Für die meisten Nutzer ja. Die Analyse ist kostenlos: keine Anmeldung, kein Abo, beliebig viele Konten aus deinem Export. Es erfordert kein Login (kein Bann-Risiko), verarbeitet deinen Export lokal in deinem Browser (maximale Privatsphäre), unterstützt 1M+ Accounts und ist Open Source. Nur der Datei-Export deiner gefilterten Liste kostet einmalig $7; alles, was du auf dem Bildschirm siehst, bleibt kostenlos. Bezahl-Apps bieten Echtzeit-Monitoring, was aber gegen Instagrams Nutzungsbedingungen verstößt."
     },
     "mobileUse": {
       "question": "Kann ich SafeUnfollow auf iPhone oder Android nutzen?",

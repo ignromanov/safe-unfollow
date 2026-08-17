@@ -13,7 +13,7 @@
     "viewResults": "Analiz Sonuçlarını Gör"
   },
   "trust": {
-    "free": "Sonsuza Kadar Ücretsiz",
+    "free": "Analiz Ücretsiz",
     "noPassword": "Şifre Gerekmez",
     "privacy": "Gizlilik Garantili"
   },
@@ -21,7 +21,7 @@
     "heading": "Temel Özellikler",
     "local": {
       "title": "%100 Yerel",
-      "description": "Verin asla cihazından çıkmaz"
+      "description": "Instagram dışa aktarman bu tarayıcıdan asla çıkmaz"
     },
     "noLogin": {
       "title": "Giriş Yok",

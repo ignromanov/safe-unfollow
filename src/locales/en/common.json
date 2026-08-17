@@ -37,7 +37,7 @@
     "deleteData": "Delete Data"
   },
   "footer": {
-    "description": "The only relationship analyzer that works 100% in your browser. No server, no logs, just your data and your device.",
+    "description": "The only relationship analyzer that runs 100% in your browser. Your Instagram export is read on your device and stays there.",
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service",
     "contact": "Contact",
@@ -56,7 +56,7 @@
     "license": "MIT Licensed",
     "viewSource": "Source Code",
     "analyzedCount": "You analyzed {{count}} accounts. It was free.",
-    "noAdsNoInvestors": "This tool has no ads and no investors.",
+    "exportNeverLeavesBrowser": "Your Instagram export never leaves this browser.",
     "buyACoffee": "Buy a Coffee"
   },
   "nav": {
@@ -71,7 +71,7 @@
     "subtitle": "Join thousands of privacy-conscious users who track their followers without risking their accounts.",
     "getStarted": "Get Started",
     "trySample": "Try Sample",
-    "tagline": "100% Free • No Login • Privacy First"
+    "tagline": "Free Analysis • No Login • Privacy First"
   },
   "ads": {
     "label": "Advertisement"

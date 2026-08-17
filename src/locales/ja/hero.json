@@ -13,7 +13,7 @@
     "viewResults": "分析結果を見る"
   },
   "trust": {
-    "free": "永久無料",
+    "free": "分析は無料",
     "noPassword": "パスワード不要",
     "privacy": "プライバシー保証"
   },
@@ -21,7 +21,7 @@
     "heading": "主な機能",
     "local": {
       "title": "100%ローカル",
-      "description": "データがデバイスから出ることはありません"
+      "description": "Instagramのエクスポートはこのブラウザから出ません"
     },
     "noLogin": {
       "title": "ログイン不要",

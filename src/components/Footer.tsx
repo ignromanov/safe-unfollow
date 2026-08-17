@@ -8,8 +8,10 @@ import { PrefixedLink } from './PrefixedLink';
 
 export function Footer() {
   const { t } = useTranslation('common');
-  // The prerendered footer says "no ads, no investors"; the count replaces it only once
-  // the store is readable. Previously gated behind this component's own `mounted` flag.
+  // The prerendered footer says the Instagram export never leaves the browser; the count
+  // replaces it only once the store is readable. Previously gated behind this component's
+  // own `mounted` flag. Both branches render into the same node, so they must agree on
+  // register in locales that have one — see `analyzedCount` in ru/tr common.json.
   const accountCount = useStoreSSR(s => s.fileMetadata?.accountCount, undefined);
 
   // Not a hydration gate: `isOptedOut` is false until the effect reads localStorage, so
@@ -138,7 +140,7 @@ export function Footer() {
               >
                 {accountCount
                   ? t('footer.analyzedCount', { count: accountCount })
-                  : t('footer.noAdsNoInvestors')}
+                  : t('footer.exportNeverLeavesBrowser')}
               </p>
               <a
                 href="https://www.buymeacoffee.com/ignromanov"

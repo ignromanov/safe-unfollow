@@ -13,7 +13,7 @@
     "viewResults": "Lihat Hasil Analisis"
   },
   "trust": {
-    "free": "Gratis Selamanya",
+    "free": "Analisis Gratis",
     "noPassword": "Tanpa Password",
     "privacy": "Privasi Terjamin"
   },
@@ -21,7 +21,7 @@
     "heading": "Fitur Utama",
     "local": {
       "title": "100% Lokal",
-      "description": "Data tidak pernah keluar dari perangkat Anda"
+      "description": "Ekspor Instagram Anda tidak pernah keluar dari browser ini"
     },
     "noLogin": {
       "title": "Tanpa Login",
