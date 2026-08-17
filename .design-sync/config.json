@@ -169,11 +169,16 @@
     "Header": {
       "cardMode": "column"
     },
-    "ResultsSection": {
-      "cardMode": "column"
-    },
     "ExpandedBanner": {
       "cardMode": "column"
+    },
+    "ResultsSkeleton": {
+      "viewport": "900x1060",
+      "cardMode": "column"
+    },
+    "LicenseDialogMount": {
+      "cardMode": "single",
+      "primaryStory": "Default"
     }
   },
   "readmeHeader": ".design-sync/conventions.md"

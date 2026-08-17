@@ -236,9 +236,12 @@ with content distinct from its siblings (otherwise four cards screenshot the sam
   `className` for a matching state variant before blaming a preview.
 - **`lucide-react` imports and renders fine inside preview files** — resolved from
   `node_modules` like any other dep, no bundler config needed.
-- **`Alert`/`AlertTitle`/`AlertDescription` have no real usage anywhere in `src/`** — every
-  "Alert" grep hit is `AlertDialog` or the lucide `AlertTriangle` icon. There was no
-  composition to port, so content was built from real copy strings in `locales/en/*.json`.
+- ⚠ **`Alert`/`AlertTitle`/`AlertDescription` — this bullet's original claim expired
+  2026-08-17.** It read: "no real usage anywhere in `src/` ... every 'Alert' grep hit is
+  `AlertDialog` or the lucide `AlertTriangle` icon", so the existing `Alert.tsx` preview was
+  built from locale copy strings, not ported usage. GH#41 shipped `FollowRequestsCaveat`, a
+  real `Alert` consumer (see the 2026-08-17 section below) — the existing preview is still
+  fine, but a future pass could re-derive it from that real composition instead.
 - ⚠ **The `Dialog` consumers NOW EXIST — this bullet's original claim expired on 2026-08-09.**
   It read: _"`PaywallModal`, `ExportDialog`, `LicenseDialog` live on the unmerged
   `feat/pro-export` branch"_. PR #11 merged as `8d18523`, so all three (plus
@@ -488,6 +491,61 @@ exact trap the "plausible-but-not-real" section above warns about.
 **Lesson**: `sourceKeys`-flagged changes with an unchanged `renderHash` are worth
 diffing the actual doc/prop-source content before assuming they're pipeline churn — this
 one was a real (if narrow) content-accuracy bug, not noise.
+
+## 2026-08-17 re-sync: main had drifted 13 commits / 164 files, one refactor renamed a component
+
+`chore/design-sync-main` was 5 commits ahead of its fork point but 13 commits **behind**
+`main` — real component-affecting changes had landed there since the last sync (Aug 14):
+`HomePage.tsx`, `ResultsPage.tsx`, `routes.tsx`, `styles.css`, ten locales. Brought current
+with `git merge main` (not rebase — this branch is already pushed to `origin`, and rebasing
+a pushed branch means a force-push, which the merge avoided needing).
+
+**Three merge conflicts, all the same shape**: `.gitignore`, `docs/privacy.md`,
+`src/__tests__/docs/monetization-claims.test.ts`. In each case `chore/design-sync-main` had
+made a fix directly (commit `4ebb7fd`, docs-privacy) or accumulated design-sync-only churn
+(the gitignore comment), and **the same fix had separately landed on `main`** as a squash-merged
+PR (`ee6b92d` / PR #67) carrying strictly more — `4ebb7fd`'s full content plus one more commit.
+Resolution was `git checkout --theirs` (main) for the two docs/test files, and a hand-merge of
+the gitignore comment block. **Lesson for the next re-sync**: if this branch and `main` both
+touch the same file for what reads like the same reason, check `git log -1 --format=%B` on
+both sides before resolving — a squash-merged duplicate is not a real conflict, main's copy is
+just the superset.
+
+### GH#44 renamed `ResultsSection` → four smaller components
+
+The diff caught this automatically and correctly: `removed: ["ResultsSection"]`,
+`added: ["FollowRequestsCaveat", "LicenseDialogMount", "PrefixedLink", "ResultsSkeleton"]`.
+This is exactly the "genuinely renamed or regrouped" case the deletes rule above anticipates —
+`upload.deletePaths` from the diff was already scoped to `ResultsSection`'s own 6 paths only,
+so using it verbatim did not conflict with "never wholesale-delete": the diff-scoped delete and
+the by-hand-scoped delete are the same 6 paths here, they just happened to agree.
+
+All four new components got authored previews (2-6 min of composition each, not floor cards):
+
+- **`FollowRequestsCaveat`** — real `Alert`/`AlertTitle`/`AlertDescription` usage now exists in
+  `src/`. **The "Component facts" section below is stale**: it says these three "have no real
+  usage anywhere in src/" — that was true until GH#41 shipped this caveat banner. The existing
+  `Alert.tsx` preview (built from locale strings, no ported usage) is still fine to keep, but a
+  future full re-author pass could port `FollowRequestsCaveat`'s real composition instead.
+- **`PrefixedLink`** — composed from Hero.tsx's three real call shapes (primary button,
+  secondary button, text link). Confirmed **not** a cross-bundle Context case like
+  `RouteErrorPage`: `DsPreviewProvider`'s `MemoryRouter` and `PrefixedLink`'s own `<Link>` both
+  come from the same `_ds_bundle.js` esbuild output (provider is wired via `extraEntries`, same
+  bundle as every component), so there's only one `react-router-dom` module instance. Worth
+  keeping in mind for any _future_ router-touching component: the failure mode is real but it's
+  specifically a cross-_bundle_ issue (`_ds_bundle.js` vs a separate `_preview/*.js`), not
+  "anything touching react-router-dom."
+- **`LicenseDialogMount`** — wraps a `React.lazy()` + `Suspense` around `LicenseDialog`. Worth
+  recording because it looked riskier than it was: esbuild's IIFE output has no code-splitting,
+  so the dynamic `import()` is inlined and the `Suspense` fallback resolves within a microtask —
+  well inside the capture harness's `networkidle` wait. Rendered fully open (`open: true`) on
+  the first try, no timing workaround needed. `cardMode: "single"` + `primaryStory: "Default"`
+  required (it's an overlay, same as every `*Dialog` in this file).
+- **`ResultsSkeleton`** — a loading skeleton, no props. Needed BOTH a `viewport` override
+  (`900x1060`, content measured at 1028px vs the 700px default) AND `cardMode: "column"` (the
+  validator's `[GRID_OVERFLOW]` "wider than grid cells" warning, separate from the height issue)
+  — the two fixes address different symptoms and both were needed together, unlike the usual
+  one-or-the-other choice described in "Tall full-bleed sections need viewport" below.
 
 ## Re-sync risks
 
