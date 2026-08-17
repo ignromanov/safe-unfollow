@@ -15,6 +15,12 @@ export default tseslint.config(
     'designs',
     'raw',
     'docs',
+    // design-sync working state. Gitignoring it is not enough: flat config does not
+    // read .gitignore, so a resync leaves ds-bundle/_vendor in scope and lint:strict
+    // fails on bundled React with 34 errors that have nothing to do with this app.
+    '.ds-sync',
+    'ds-bundle',
+    '.design-sync',
     '*.config.js',
     '*.config.ts',
     'scripts/**/*.js'
