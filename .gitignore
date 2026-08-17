@@ -139,3 +139,15 @@ umami-backup-*.sql.gz
 
 # Entry-bundle budget guard must ship despite the scripts/ ignore above (npm run perf:budget)
 !scripts/assert-entry-budget.mjs
+
+# design-sync working state — the converter, the generated bundle and the machine
+# caches a resync leaves behind. ~60 MB at repo root, untracked on every branch but
+# chore/design-sync-main, which is one `git add -A` away from a commit. Matches the
+# block that branch already carries, so the two do not disagree.
+.ds-sync/
+ds-bundle/
+.design-sync/.cache/
+.design-sync/learnings/
+# No trailing slash: this one is a symlink to ../.ds-sync/node_modules, and git
+# classifies a symlink as a blob — a directory-only pattern never matches it.
+.design-sync/node_modules
