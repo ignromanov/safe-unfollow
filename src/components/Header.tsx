@@ -11,36 +11,26 @@ import {
 } from '@/components/ui/alert-dialog';
 import { AppState } from '@/core/types';
 import { analytics } from '@/lib/analytics';
+import { useIsClient } from '@/hooks/useIsClient';
 import { LayoutDashboard, Moon, ShieldCheck, Sun, SunMoon, Trash2, Upload } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { PrefixedLink } from './PrefixedLink';
 
 interface HeaderProps {
   hasData?: boolean;
-  onViewResults?: () => void;
   onClear?: () => void;
-  onUpload?: () => void;
-  onLogoClick?: () => void;
   activeScreen?: AppState;
 }
 
-export function Header({
-  hasData = false,
-  onViewResults,
-  onClear,
-  onUpload,
-  onLogoClick,
-  activeScreen = AppState.HERO,
-}: HeaderProps) {
+export function Header({ hasData = false, onClear, activeScreen = AppState.HERO }: HeaderProps) {
   const { t } = useTranslation('common');
   const { theme, setTheme } = useTheme();
 
   // Prevent hydration mismatch - theme is unknown on server
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const mounted = useIsClient();
 
   const handleThemeToggle = () => {
     // Cycle: system → light → dark → system
@@ -58,13 +48,10 @@ export function Header({
     <header className="sticky top-0 z-[80] w-full border-b border-border bg-card md:bg-card/80 md:backdrop-blur-md">
       <div className="container mx-auto px-4 h-16 md:h-20 flex items-center justify-between">
         {/* Logo */}
-        <div
+        <PrefixedLink
+          to="/"
           className="flex items-center gap-3 cursor-pointer group"
-          onClick={onLogoClick}
-          role="button"
-          tabIndex={0}
           aria-label={t('header.logoAria')}
-          onKeyDown={e => e.key === 'Enter' && onLogoClick?.()}
         >
           <div className="w-9 h-9 md:w-10 md:h-10 rounded-2xl bg-gradient-brand flex items-center justify-center text-white shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all">
             <ShieldCheck size={22} strokeWidth={2.5} />
@@ -72,24 +59,24 @@ export function Header({
           <span className="font-display font-extrabold text-xl md:text-2xl tracking-tight hidden sm:block">
             SafeUnfollow<span className="text-primary">.app</span>
           </span>
-        </div>
+        </PrefixedLink>
 
         {/* Actions */}
         <div className="flex items-center gap-2 md:gap-4">
           {hasData ? (
             <div className="flex items-center gap-2">
-              <button
-                onClick={onViewResults}
+              <PrefixedLink
+                to="/results"
                 className={`cursor-pointer flex items-center gap-2 px-3 py-3 md:px-4 md:py-2 rounded-xl text-xs md:text-sm font-bold transition-all ${
                   activeScreen === AppState.RESULTS
-                    ? 'bg-primary text-white shadow-md'
+                    ? 'bg-primary text-primary-foreground shadow-md'
                     : 'text-zinc-500 hover:bg-[oklch(0.5_0_0_/_0.05)]'
                 }`}
                 aria-label={t('buttons.viewResults')}
               >
                 <LayoutDashboard size={18} />
                 <span className="hidden md:inline">{t('buttons.viewResults')}</span>
-              </button>
+              </PrefixedLink>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <button
@@ -124,18 +111,18 @@ export function Header({
               </AlertDialog>
             </div>
           ) : (
-            <button
-              onClick={onUpload}
+            <PrefixedLink
+              to="/upload"
               className={`cursor-pointer flex items-center gap-2 px-3 py-3 md:px-4 md:py-2 rounded-xl text-xs md:text-sm font-bold transition-all ${
                 activeScreen === AppState.UPLOAD
-                  ? 'bg-primary text-white shadow-md'
+                  ? 'bg-primary text-primary-foreground shadow-md'
                   : 'text-zinc-500 hover:bg-[oklch(0.5_0_0_/_0.05)]'
               }`}
               aria-label={t('buttons.uploadFile')}
             >
               <Upload size={18} />
               <span className="hidden md:inline">{t('buttons.uploadFile')}</span>
-            </button>
+            </PrefixedLink>
           )}
 
           {/* Divider */}

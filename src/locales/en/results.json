@@ -33,7 +33,8 @@
     "reset": "Reset",
     "emptyCategories": "Empty Categories ({{count, number}})",
     "addFilter": "Add {{label}} filter ({{count, number}} accounts)",
-    "removeFilter": "Remove {{label}} filter ({{count, number}} accounts)"
+    "removeFilter": "Remove {{label}} filter ({{count, number}} accounts)",
+    "chipWithHint": "{{label}} — {{hint}}"
   },
   "badges": {
     "followers": "Followers",
@@ -48,6 +49,13 @@
     "close": "Close friend",
     "dismissed": "Dismissed suggestion"
   },
+  "caveat": {
+    "followRequests": {
+      "title": "“Not following back” may be overstated.",
+      "body": "We could not read your follow-requests file, so accounts you have requested may appear in this list, and your pending-request counts show as empty. Your Followers, Following and Mutuals are unaffected.",
+      "chipHint": "May be overstated — we could not read your follow-requests file."
+    }
+  },
   "empty": {
     "noUsers": "No users found",
     "resetFilters": "Reset Filters"
@@ -58,9 +66,9 @@
   },
   "donation": {
     "headline": "You just analyzed {{count}} accounts — for free.",
-    "body": "No login. No server. No data sent anywhere. If this saved you time, a coffee keeps it going.",
-    "headlineMobile": "Free. Private. No login.",
-    "bodyMobile": "If it was useful, consider buying a coffee.",
+    "body": "No login. Your Instagram export never left this browser. If this saved you time, a coffee keeps it going.",
+    "headlineMobile": "Free analysis. Private. No login.",
+    "bodyMobile": "Your export never left this browser. If it was useful, consider buying a coffee.",
     "cta": "Buy a Coffee",
     "ctaMobile": "Support",
     "dismiss": "Not now"
@@ -123,7 +131,7 @@
       "freeTrial14": "14-day free trial",
       "freePlan": "Free plan available",
       "freeContacts": "Free up to 1K contacts",
-      "freeForever": "Free forever plan"
+      "freeForever": "Free plan, no expiry"
     },
     "social": {
       "creators50k": "50K+ creators",

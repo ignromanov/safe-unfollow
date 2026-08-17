@@ -1,28 +1,14 @@
-import { useEffect, useState } from 'react';
-
-interface LayoutStateResult {
-  /** Whether the component has mounted on the client (prevents hydration mismatch) */
-  mounted: boolean;
-}
+import { useEffect } from 'react';
 
 /**
- * Hook for Layout component state management:
- * - Client mount detection (hydration safety)
- * - Scroll-to-top on route change
+ * Scroll to top on route change.
+ *
+ * Also carried a `mounted` flag until Layout's no-data gate moved to useHasResults. Nothing
+ * read it after that, but the useState/useEffect pair still forced a second commit of the
+ * whole page shell on every load — the exact post-hydration cost this branch exists to remove.
  */
-export function useLayoutState(pathname: string): LayoutStateResult {
-  // Client-mounted check (prevents hydration mismatch)
-  // Effects run AFTER hydration, so this is safe
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Scroll to top on route change
+export function useLayoutState(pathname: string): void {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [pathname]);
-
-  return { mounted };
 }

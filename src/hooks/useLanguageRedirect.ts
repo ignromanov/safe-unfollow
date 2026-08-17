@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAppStore } from '@/lib/store';
 import { detectLanguageFromPathname, NON_ENGLISH_LANGUAGES } from '@/config/languages';
@@ -22,14 +22,13 @@ export function useLanguageRedirect(): void {
   const location = useLocation();
   const { language, setLanguage, _hasHydrated } = useAppStore();
 
-  // Wait until client is mounted to avoid SSR issues
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-
-  // Sync store with URL language
+  // Sync store with URL language.
+  //
+  // No `mounted` gate: an effect never runs during SSG, so the flag only ever delayed
+  // this by one commit. `_hasHydrated` is the condition that actually matters, and it is
+  // in the dependency list, so the sync re-runs when persist flips it.
   useEffect(() => {
-    // Wait for BOTH mount and store hydration
-    if (!mounted || !_hasHydrated) return;
+    if (!_hasHydrated) return;
 
     // Detect language from current URL
     const urlLang = detectLanguageFromPathname(location.pathname);
@@ -38,7 +37,7 @@ export function useLanguageRedirect(): void {
     if (urlLang !== language) {
       setLanguage(urlLang);
     }
-  }, [mounted, location.pathname, language, setLanguage, _hasHydrated]);
+  }, [location.pathname, language, setLanguage, _hasHydrated]);
 }
 
 // Re-export for backwards compatibility with tests

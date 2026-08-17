@@ -9,22 +9,13 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { analytics } from '@/lib/analytics';
+import { PrefixedLink } from '@/components/PrefixedLink';
 
 interface HeroProps {
-  onStartGuide: () => void;
-  onLoadSample: () => void;
-  onUploadDirect: () => void;
   hasData?: boolean;
-  onContinue?: () => void;
 }
 
-export function Hero({
-  onStartGuide,
-  onLoadSample,
-  onUploadDirect,
-  hasData,
-  onContinue,
-}: HeroProps) {
+export function Hero({ hasData }: HeroProps) {
   const { t } = useTranslation('hero');
 
   return (
@@ -54,40 +45,34 @@ export function Hero({
       <div className="flex flex-col items-center gap-6 mb-20 md:mb-32 w-full max-w-3xl px-4">
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
           {hasData ? (
-            <button
-              onClick={() => {
-                onContinue?.();
-                analytics.heroCTAContinue?.();
-              }}
-              className="cursor-pointer w-full sm:w-auto px-10 md:px-12 py-4 md:py-5 rounded-3xl bg-primary text-white font-bold text-base md:text-lg shadow-2xl shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 group"
+            <PrefixedLink
+              to="/results"
+              onClick={() => analytics.heroCTAContinue?.()}
+              className="cursor-pointer w-full sm:w-auto px-10 md:px-12 py-4 md:py-5 rounded-3xl bg-primary text-primary-foreground font-bold text-base md:text-lg shadow-2xl shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 group"
             >
               {t('buttons.viewResults')}
               <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-            </button>
+            </PrefixedLink>
           ) : (
-            <button
-              onClick={() => {
-                onStartGuide();
-                analytics.heroCTAGuide?.();
-              }}
-              className="cursor-pointer w-full sm:w-auto px-10 md:px-12 py-4 md:py-5 rounded-3xl bg-primary text-white font-bold text-base md:text-lg shadow-2xl shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 group"
+            <PrefixedLink
+              to="/wizard/step/1"
+              onClick={() => analytics.heroCTAGuide?.()}
+              className="cursor-pointer w-full sm:w-auto px-10 md:px-12 py-4 md:py-5 rounded-3xl bg-primary text-primary-foreground font-bold text-base md:text-lg shadow-2xl shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 group"
             >
               {t('buttons.getGuide')}
               <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-            </button>
+            </PrefixedLink>
           )}
 
           {/* Secondary CTA */}
-          <button
-            onClick={() => {
-              onLoadSample();
-              analytics.heroCTASample?.();
-            }}
+          <PrefixedLink
+            to="/sample"
+            onClick={() => analytics.heroCTASample?.()}
             className="cursor-pointer w-full sm:w-auto px-8 md:px-10 py-4 md:py-5 rounded-3xl border border-border bg-card font-bold text-base md:text-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all flex items-center justify-center gap-2"
           >
             <Database size={20} className="text-accent" />
             {t('buttons.trySample')}
-          </button>
+          </PrefixedLink>
         </div>
 
         {/* Trust Badges */}
@@ -105,15 +90,13 @@ export function Hero({
 
         {/* Tertiary Link */}
         {!hasData && (
-          <button
-            onClick={() => {
-              onUploadDirect();
-              analytics.heroCTAUploadDirect?.();
-            }}
+          <PrefixedLink
+            to="/upload"
+            onClick={() => analytics.heroCTAUploadDirect?.()}
             className="cursor-pointer text-zinc-400 hover:text-primary font-bold text-xs uppercase tracking-widest transition-all underline underline-offset-4 decoration-zinc-200"
           >
             {t('buttons.haveFile')}
-          </button>
+          </PrefixedLink>
         )}
       </div>
 

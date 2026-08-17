@@ -2,26 +2,47 @@
  * Error Classifier
  *
  * Classifies errors by message text when structured error codes are unavailable.
- * Used as fallback to reduce UNKNOWN errors from 82% to <5%.
+ * A fallback only: it reads English keywords, so it cannot classify anything
+ * that has already been through i18n. Failures this app raises itself must
+ * carry a `code` and reach `extractErrorCode` structured — see GH#35, where two
+ * guards threw their own translated message and had it binned as UNKNOWN.
+ *
+ * The "82% to <5%" figure this comment used to carry was never reproduced by
+ * anything in the repository and was false in production regardless: most rules
+ * could not match a real message at all.
  */
 
 import type { DiagnosticErrorCode } from '@/core/types';
 import { mapWarningToDiagnosticCode } from '@/core/types';
 
-/** Pattern matching rule: keywords to error code mapping */
+/**
+ * Pattern matching rule: keywords to error code mapping.
+ *
+ * The two fields exist because the rules mix two different intents, and a
+ * single list evaluated one way silently kills half of them (GH#35). `anyOf`
+ * holds synonyms — one is enough, because a thrower emits one of them, never
+ * all. `qualifiedBy` holds words that must ALSO be present, and exists only to
+ * scope an ambiguous synonym: 'crash' means WORKER_CRASHED when 'worker' is in
+ * the same message and nothing in particular otherwise.
+ */
 interface ClassificationRule {
-  keywords: string[];
+  anyOf: string[];
+  qualifiedBy?: string;
   code: DiagnosticErrorCode;
 }
 
 /**
  * Classification rules in priority order.
  * First matching rule wins.
+ *
+ * Order carries meaning where two rules can both match: 'database connection
+ * failed' is an INDEXEDDB_ERROR rather than a NETWORK_ERROR because the
+ * IndexedDB block is listed first.
  */
 const CLASSIFICATION_RULES: ClassificationRule[] = [
   // ZIP/File errors
   {
-    keywords: [
+    anyOf: [
       'not a valid zip',
       'corrupted',
       'bad local file header',
@@ -29,56 +50,46 @@ const CLASSIFICATION_RULES: ClassificationRule[] = [
     ],
     code: 'CORRUPTED_ZIP',
   },
-  { keywords: ['encrypted', 'password'], code: 'ZIP_ENCRYPTED' },
-  { keywords: ['file is empty'], code: 'EMPTY_FILE' },
-  { keywords: ['0 byte'], code: 'EMPTY_FILE' },
-  { keywords: ['too large', 'exceeds', 'maximum size'], code: 'FILE_TOO_LARGE' },
+  { anyOf: ['encrypted', 'password'], code: 'ZIP_ENCRYPTED' },
+  { anyOf: ['file is empty', '0 byte'], code: 'EMPTY_FILE' },
+  { anyOf: ['too large', 'exceeds', 'maximum size'], code: 'FILE_TOO_LARGE' },
 
   // JSON errors
-  { keywords: ['unexpected token', 'syntax error', 'parse error'], code: 'JSON_PARSE_ERROR' },
-  { keywords: ['json'], code: 'JSON_PARSE_ERROR' },
+  { anyOf: ['unexpected token', 'syntax error', 'parse error', 'json'], code: 'JSON_PARSE_ERROR' },
 
   // Worker errors
-  { keywords: ['timeout', 'took too long'], code: 'WORKER_TIMEOUT' },
-  { keywords: ['worker', 'init'], code: 'WORKER_INIT_ERROR' },
-  { keywords: ['worker', 'create'], code: 'WORKER_INIT_ERROR' },
-  { keywords: ['worker', 'start'], code: 'WORKER_INIT_ERROR' },
-  { keywords: ['worker', 'crash'], code: 'WORKER_CRASHED' },
-  { keywords: ['worker', 'terminate'], code: 'WORKER_CRASHED' },
-  { keywords: ['worker', 'died'], code: 'WORKER_CRASHED' },
+  { anyOf: ['timeout', 'took too long'], code: 'WORKER_TIMEOUT' },
+  { anyOf: ['init', 'create', 'start'], qualifiedBy: 'worker', code: 'WORKER_INIT_ERROR' },
+  { anyOf: ['crash', 'terminate', 'died'], qualifiedBy: 'worker', code: 'WORKER_CRASHED' },
 
   // IndexedDB errors
-  { keywords: ['quota', 'storage full', 'quotaexceeded'], code: 'QUOTA_EXCEEDED' },
-  { keywords: ['indexeddb', 'not supported'], code: 'IDB_NOT_SUPPORTED' },
-  { keywords: ['permission', 'denied'], code: 'IDB_PERMISSION_DENIED' },
-  { keywords: ['permission', 'storage'], code: 'IDB_PERMISSION_DENIED' },
-  { keywords: ['indexeddb'], code: 'INDEXEDDB_ERROR' },
-  { keywords: ['database'], code: 'INDEXEDDB_ERROR' },
-  { keywords: ['transaction'], code: 'INDEXEDDB_ERROR' },
+  { anyOf: ['quota', 'storage full', 'quotaexceeded'], code: 'QUOTA_EXCEEDED' },
+  { anyOf: ['not supported'], qualifiedBy: 'indexeddb', code: 'IDB_NOT_SUPPORTED' },
+  { anyOf: ['denied', 'storage'], qualifiedBy: 'permission', code: 'IDB_PERMISSION_DENIED' },
+  { anyOf: ['indexeddb', 'database', 'transaction'], code: 'INDEXEDDB_ERROR' },
 
   // Cancel/Abort
-  { keywords: ['cancel'], code: 'UPLOAD_CANCELLED' },
-  { keywords: ['abort'], code: 'UPLOAD_CANCELLED' },
+  { anyOf: ['cancel', 'abort'], code: 'UPLOAD_CANCELLED' },
 
   // Crypto
-  { keywords: ['crypto'], code: 'CRYPTO_NOT_AVAILABLE' },
-  { keywords: ['subtle'], code: 'CRYPTO_NOT_AVAILABLE' },
+  { anyOf: ['crypto', 'subtle'], code: 'CRYPTO_NOT_AVAILABLE' },
 
   // Network
-  { keywords: ['network'], code: 'NETWORK_ERROR' },
-  { keywords: ['fetch'], code: 'NETWORK_ERROR' },
-  { keywords: ['connection'], code: 'NETWORK_ERROR' },
+  { anyOf: ['network', 'fetch', 'connection'], code: 'NETWORK_ERROR' },
 
   // Instagram-specific (check after generic checks)
-  { keywords: ['html format', 'wrong format'], code: 'HTML_FORMAT' },
-  { keywords: ['not an instagram', 'not instagram'], code: 'NOT_INSTAGRAM_EXPORT' },
+  { anyOf: ['html format', 'wrong format'], code: 'HTML_FORMAT' },
+  { anyOf: ['not an instagram', 'not instagram'], code: 'NOT_INSTAGRAM_EXPORT' },
 ];
 
 /**
- * Check if all keywords in a rule match the message.
+ * Check whether a rule matches the message.
  */
 function matchesRule(lower: string, rule: ClassificationRule): boolean {
-  return rule.keywords.every(keyword => lower.includes(keyword));
+  if (rule.qualifiedBy !== undefined && !lower.includes(rule.qualifiedBy)) {
+    return false;
+  }
+  return rule.anyOf.some(keyword => lower.includes(keyword));
 }
 
 /**

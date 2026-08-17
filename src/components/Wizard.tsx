@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import FocusTrap from 'focus-trap-react';
 
 import { analytics } from '@/lib/analytics';
+import { PrefixedLink } from '@/components/PrefixedLink';
 import { ResponsiveGif } from '@/components/ResponsiveGif';
 import { WIZARD_STEPS } from '@/config/wizard-steps';
 import { useWizardNavigation } from '@/hooks/useWizardNavigation';
@@ -16,7 +17,7 @@ interface WizardProps {
 
 export function Wizard({ initialStep = 1, onComplete, onCancel }: WizardProps) {
   const { t } = useTranslation('wizard');
-  const { currentStep, goToStep, prefix, navigate } = useWizardNavigation(initialStep);
+  const { currentStep, goToStep } = useWizardNavigation(initialStep);
 
   // Track analytics on step view
   useEffect(() => {
@@ -173,14 +174,14 @@ export function Wizard({ initialStep = 1, onComplete, onCancel }: WizardProps) {
                       href={step.externalLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="cursor-pointer inline-flex items-center justify-center gap-3 px-8 py-4 bg-primary text-white rounded-2xl font-black shadow-xl hover:scale-105 active:scale-95 transition-all text-sm md:text-base w-full sm:w-auto"
+                      className="cursor-pointer inline-flex items-center justify-center gap-3 px-8 py-4 bg-primary text-primary-foreground rounded-2xl font-black shadow-xl hover:scale-105 active:scale-95 transition-all text-sm md:text-base w-full sm:w-auto"
                     >
                       {t('buttons.openInstagram')} <ExternalLink size={20} />
                     </a>
 
                     {/* Already have file shortcut */}
-                    <button
-                      onClick={() => navigate(`${prefix}/upload`)}
+                    <PrefixedLink
+                      to="/upload"
                       className="cursor-pointer inline-flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400 hover:text-primary dark:hover:text-primary transition-colors group"
                     >
                       {t('buttons.alreadyHaveFile')}
@@ -188,7 +189,7 @@ export function Wizard({ initialStep = 1, onComplete, onCancel }: WizardProps) {
                         size={14}
                         className="opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all"
                       />
-                    </button>
+                    </PrefixedLink>
                   </div>
                 )}
 
@@ -196,7 +197,7 @@ export function Wizard({ initialStep = 1, onComplete, onCancel }: WizardProps) {
                 {isLastStep && (
                   <button
                     onClick={handleCalendarReminder}
-                    className="cursor-pointer inline-flex items-center justify-center gap-3 px-8 py-4 bg-primary text-white rounded-2xl font-black shadow-xl hover:scale-105 active:scale-95 transition-all text-sm md:text-base w-full sm:w-auto"
+                    className="cursor-pointer inline-flex items-center justify-center gap-3 px-8 py-4 bg-primary text-primary-foreground rounded-2xl font-black shadow-xl hover:scale-105 active:scale-95 transition-all text-sm md:text-base w-full sm:w-auto"
                   >
                     <Calendar size={20} />
                     {t('calendar.addReminder')}
@@ -221,7 +222,7 @@ export function Wizard({ initialStep = 1, onComplete, onCancel }: WizardProps) {
             </button>
             <button
               onClick={handleNext}
-              className="cursor-pointer flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-bold text-sm shadow-lg hover:scale-105 active:scale-95 transition-all"
+              className="cursor-pointer flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-xl font-bold text-sm shadow-lg hover:scale-105 active:scale-95 transition-all"
             >
               {isLastStep ? t('buttons.done') : t('buttons.next')}
               <ArrowRight size={18} />

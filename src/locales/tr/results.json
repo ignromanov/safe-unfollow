@@ -33,7 +33,8 @@
     "reset": "Sıfırla",
     "emptyCategories": "Boş Kategoriler ({{count, number}})",
     "addFilter": "{{label}} filtresi ekle ({{count, number}} hesap)",
-    "removeFilter": "{{label}} filtresini kaldır ({{count, number}} hesap)"
+    "removeFilter": "{{label}} filtresini kaldır ({{count, number}} hesap)",
+    "chipWithHint": "{{label}} — {{hint}}"
   },
   "badges": {
     "followers": "Takipçiler",
@@ -48,6 +49,13 @@
     "close": "Yakın arkadaş",
     "dismissed": "Reddedilen öneri"
   },
+  "caveat": {
+    "followRequests": {
+      "title": "“Geri takip etmeyenler” olduğundan fazla görünüyor olabilir.",
+      "body": "Takip istekleri dosyanı okuyamadık, bu yüzden istek gönderdiğin hesaplar bu listede çıkabilir ve bekleyen istek sayıların boş görünür. Takipçiler, Takip edilenler ve Karşılıklı takip bundan etkilenmedi.",
+      "chipHint": "Olduğundan fazla görünüyor olabilir — takip istekleri dosyanı okuyamadık."
+    }
+  },
   "empty": {
     "noUsers": "Kullanıcı bulunamadı",
     "resetFilters": "Filtreleri Sıfırla"
@@ -58,9 +66,9 @@
   },
   "donation": {
     "headline": "Az önce {{count}} hesabı analiz ettiniz — ücretsiz.",
-    "body": "Giriş yok. Sunucu yok. Hiçbir veri gönderilmedi. Zaman kazandırdıysa, bir kahve projeyi ayakta tutar.",
-    "headlineMobile": "Ücretsiz. Özel. Giriş yok.",
-    "bodyMobile": "Faydalı olduysa, bir kahve ısmarlayın.",
+    "body": "Giriş yok. Instagram dışa aktarımınız bu tarayıcıdan hiç çıkmadı. Zaman kazandırdıysa, bir kahve projeyi ayakta tutar.",
+    "headlineMobile": "Analiz ücretsiz. Özel. Giriş yok.",
+    "bodyMobile": "Dışa aktarımınız tarayıcıdan hiç çıkmadı. Faydalı olduysa, bir kahve ısmarlayın.",
     "cta": "Kahve Ismarla",
     "ctaMobile": "Destekle",
     "dismiss": "Şimdi değil"
@@ -123,7 +131,7 @@
       "freeTrial14": "14 gün ücretsiz",
       "freePlan": "Ücretsiz plan",
       "freeContacts": "1K'ya kadar ücretsiz",
-      "freeForever": "Hep ücretsiz"
+      "freeForever": "Süresiz ücretsiz"
     },
     "social": {
       "creators50k": "50K+ üretici",

@@ -37,7 +37,7 @@
     "deleteData": "Supprimer les données"
   },
   "footer": {
-    "description": "Le seul analyseur de relations qui fonctionne 100% dans votre navigateur. Sans serveur, sans journaux, juste vos données et votre appareil.",
+    "description": "Le seul analyseur de relations qui fonctionne 100% dans votre navigateur. Votre export Instagram est lu sur votre appareil et y reste.",
     "privacyPolicy": "Politique de confidentialité",
     "termsOfService": "Conditions d'utilisation",
     "contact": "Contact",
@@ -56,7 +56,7 @@
     "license": "Licence MIT",
     "viewSource": "Code source",
     "analyzedCount": "Vous avez analysé {{count}} comptes. C'était gratuit.",
-    "noAdsNoInvestors": "Cet outil n'a ni publicité ni investisseurs.",
+    "exportNeverLeavesBrowser": "Votre export Instagram ne quitte jamais ce navigateur.",
     "buyACoffee": "Offrir un Café"
   },
   "nav": {
@@ -71,7 +71,7 @@
     "subtitle": "Rejoignez des milliers d'utilisateurs soucieux de leur vie privée qui suivent leurs abonnés sans risquer leurs comptes.",
     "getStarted": "Commencer",
     "trySample": "Essayer la démo",
-    "tagline": "100% Gratuit • Sans connexion • Confidentialité garantie"
+    "tagline": "Analyse Gratuite • Sans Connexion • Confidentialité garantie"
   },
   "ads": {
     "label": "Publicité"

@@ -33,7 +33,8 @@
     "reset": "Reset",
     "emptyCategories": "Kategori Kosong ({{count, number}})",
     "addFilter": "Tambah filter {{label}} ({{count, number}} akun)",
-    "removeFilter": "Hapus filter {{label}} ({{count, number}} akun)"
+    "removeFilter": "Hapus filter {{label}} ({{count, number}} akun)",
+    "chipWithHint": "{{label}} — {{hint}}"
   },
   "badges": {
     "followers": "Pengikut",
@@ -48,6 +49,13 @@
     "close": "Teman dekat",
     "dismissed": "Saran ditolak"
   },
+  "caveat": {
+    "followRequests": {
+      "title": "“Tidak mengikuti balik” mungkin terlalu tinggi.",
+      "body": "Kami tidak dapat membaca file permintaan mengikuti Anda, jadi akun yang sudah Anda kirimi permintaan bisa muncul di daftar ini, dan hitungan permintaan tertunda Anda tampil kosong. Pengikut, Mengikuti, dan Saling mengikuti tidak terpengaruh.",
+      "chipHint": "Mungkin terlalu tinggi — kami tidak dapat membaca file permintaan mengikuti Anda."
+    }
+  },
   "empty": {
     "noUsers": "Tidak ada pengguna ditemukan",
     "resetFilters": "Reset Filter"
@@ -58,9 +66,9 @@
   },
   "donation": {
     "headline": "Anda baru saja menganalisis {{count}} akun — gratis.",
-    "body": "Tanpa login. Tanpa server. Tidak ada data yang dikirim. Jika ini menghemat waktu Anda, secangkir kopi menjaga proyek tetap berjalan.",
-    "headlineMobile": "Gratis. Privat. Tanpa login.",
-    "bodyMobile": "Jika bermanfaat, pertimbangkan untuk mentraktir kopi.",
+    "body": "Tanpa login. Ekspor Instagram Anda tidak pernah keluar dari browser ini. Jika ini menghemat waktu Anda, secangkir kopi menjaga proyek tetap berjalan.",
+    "headlineMobile": "Analisis gratis. Privat. Tanpa login.",
+    "bodyMobile": "Ekspor Anda tidak pernah keluar dari browser. Jika bermanfaat, pertimbangkan untuk mentraktir kopi.",
     "cta": "Traktir Kopi",
     "ctaMobile": "Dukung",
     "dismiss": "Nanti saja"
@@ -123,7 +131,7 @@
       "freeTrial14": "14 hari gratis",
       "freePlan": "Paket gratis",
       "freeContacts": "1K gratis",
-      "freeForever": "Gratis selamanya"
+      "freeForever": "Gratis tanpa kedaluwarsa"
     },
     "social": {
       "creators50k": "50K+ kreator",

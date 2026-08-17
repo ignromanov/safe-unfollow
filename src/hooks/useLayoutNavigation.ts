@@ -21,16 +21,17 @@ interface LayoutNavigationResult {
   pathname: string;
   activeScreen: AppState;
   isResultsPage: boolean;
-  handleViewResults: () => void;
-  handleUpload: () => void;
-  handleLogoClick: () => void;
   handleClear: (clearData: () => void) => void;
 }
 
 /**
  * Hook for Layout navigation concerns:
  * - Route detection and active screen
- * - Navigation handlers with language prefix
+ * - Post-action navigation
+ *
+ * The header's plain navigation (logo, upload, results) is not here: those are anchors
+ * now, so they work during the pre-hydration window when no handler is attached. What
+ * remains is the one action that mutates before it navigates.
  */
 export function useLayoutNavigation(): LayoutNavigationResult {
   const location = useLocation();
@@ -41,10 +42,6 @@ export function useLayoutNavigation(): LayoutNavigationResult {
   const activeScreen = getActiveScreen(pathname);
   const isResultsPage = pathname.endsWith('/results') || pathname.endsWith('/sample');
 
-  const handleViewResults = useCallback(() => navigate(`${prefix}/results`), [navigate, prefix]);
-  const handleUpload = useCallback(() => navigate(`${prefix}/upload`), [navigate, prefix]);
-  const handleLogoClick = useCallback(() => navigate(`${prefix}/`), [navigate, prefix]);
-
   const handleClear = useCallback(
     (clearData: () => void) => {
       clearData();
@@ -53,13 +50,5 @@ export function useLayoutNavigation(): LayoutNavigationResult {
     [navigate, prefix]
   );
 
-  return {
-    pathname,
-    activeScreen,
-    isResultsPage,
-    handleViewResults,
-    handleUpload,
-    handleLogoClick,
-    handleClear,
-  };
+  return { pathname, activeScreen, isResultsPage, handleClear };
 }

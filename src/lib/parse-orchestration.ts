@@ -3,17 +3,17 @@
  * Handles ZIP parsing via Web Worker or fallback to main thread
  */
 
-import type { FileDiscovery, ParseWarning } from '@/core/types';
+import type { FileDiscovery, LabelResolutionMode, ParseWarning } from '@/core/types';
 import { buildAccountBadgeIndex } from '@/core/badges';
-import { parseInstagramZipFile } from '@/core/parsers/instagram';
 import { indexedDBService } from './indexeddb/indexeddb-service';
 import { logger } from './logger';
 
 /** Extended error with structured data */
-interface ParseErrorData {
+export interface ParseErrorData {
   code?: string;
   warnings?: ParseWarning[];
   discovery?: FileDiscovery;
+  labelResolutionMode?: LabelResolutionMode;
 }
 
 // Worker timeout constant (ms)
@@ -24,6 +24,7 @@ export interface ParseResult {
   accountCount: number;
   warnings?: ParseWarning[];
   discovery?: FileDiscovery;
+  labelResolutionMode?: LabelResolutionMode;
 }
 
 export interface ProgressCallback {
@@ -68,6 +69,7 @@ export async function parseWithWorker(
           accountCount: resultAccountCount,
           warnings,
           discovery,
+          labelResolutionMode,
         } = e.data;
         worker.removeEventListener('message', handleMessage);
         resolve({
@@ -75,6 +77,7 @@ export async function parseWithWorker(
           accountCount: resultAccountCount,
           warnings,
           discovery,
+          labelResolutionMode,
         });
       } else if (e.data?.type === 'error') {
         clearTimeout(timeoutId);
@@ -84,6 +87,7 @@ export async function parseWithWorker(
         error.code = e.data.code ?? 'UNKNOWN';
         error.warnings = e.data.warnings;
         error.discovery = e.data.discovery;
+        error.labelResolutionMode = e.data.labelResolutionMode;
 
         reject(error);
       }
@@ -105,6 +109,12 @@ export async function parseOnMainThread(
   logger.warn('[Upload] Worker not available, falling back to main thread parsing');
   logger.warn('[Upload] This will be slower for large files!');
 
+  // Static at module scope, this dragged JSZip (~96 KB) into the entry bundle of all 80
+  // prerendered pages, because parseWithWorker lives in this same module and IS statically
+  // reachable from Layout. Dynamic-importing the *call site* in useFileUpload would not
+  // have helped, for exactly that reason.
+  const { parseInstagramZipFile } = await import('@/core/parsers/instagram');
+
   const parseResult = await parseInstagramZipFile(file);
 
   if (abortSignal?.aborted) {
@@ -119,6 +129,7 @@ export async function parseOnMainThread(
     error.code = errorWarning?.code ?? 'NO_DATA_FILES';
     error.warnings = parseResult.warnings;
     error.discovery = parseResult.discovery;
+    error.labelResolutionMode = parseResult.labelResolutionMode;
     throw error;
   }
 
@@ -138,6 +149,8 @@ export async function parseOnMainThread(
       accountCount: unified.length,
       lastAccessed: Date.now(),
       version: 2,
+      // GH#41 — see parse-worker.ts; the fallback path must persist it too.
+      followRequestsUnreadable: parseResult.followRequestsUnreadable,
     });
 
     await indexedDBService.storeAllAccounts(fileHash, unified);
@@ -163,5 +176,6 @@ export async function parseOnMainThread(
     accountCount: unified.length,
     warnings: parseResult.warnings,
     discovery: parseResult.discovery,
+    labelResolutionMode: parseResult.labelResolutionMode,
   };
 }

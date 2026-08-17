@@ -13,7 +13,7 @@
     "viewResults": "Ver Resultados da Análise"
   },
   "trust": {
-    "free": "Gratuito para Sempre",
+    "free": "Análise Grátis",
     "noPassword": "Sem Precisar de Senha",
     "privacy": "Privacidade Garantida"
   },
@@ -21,7 +21,7 @@
     "heading": "Principais Recursos",
     "local": {
       "title": "100% Local",
-      "description": "Seus dados nunca saem do seu dispositivo"
+      "description": "Sua exportação do Instagram nunca sai deste navegador"
     },
     "noLogin": {
       "title": "Sem Login",

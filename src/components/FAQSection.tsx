@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { analytics } from '@/lib/analytics';
+import { PrefixedLink } from '@/components/PrefixedLink';
 import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
 
 interface FAQItem {
@@ -37,8 +37,8 @@ const FAQ_KEYS = [
 
 export function FAQSection() {
   const { t, i18n } = useTranslation('faq');
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
   const langPrefix = useLanguagePrefix();
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   // Build FAQ items from translations
   const faqItems: FAQItem[] = FAQ_KEYS.map(key => {
@@ -123,7 +123,7 @@ export function FAQSection() {
                     <div
                       className={`shrink-0 w-11 h-11 md:w-14 md:h-14 rounded-full flex items-center justify-center transition-all ${
                         openIndex === index
-                          ? 'bg-primary text-white'
+                          ? 'bg-primary text-primary-foreground'
                           : 'bg-[oklch(0.5_0_0_/_0.05)] text-zinc-400'
                       }`}
                     >
@@ -144,12 +144,12 @@ export function FAQSection() {
                     <p>{item.answer}</p>
                     {item.relatedLink && (
                       <p className="mt-4 text-sm">
-                        <Link
-                          to={`${langPrefix}${item.relatedLink.href}`}
+                        <PrefixedLink
+                          to={item.relatedLink.href}
                           className="text-primary hover:underline"
                         >
                           {item.relatedLink.text} →
-                        </Link>
+                        </PrefixedLink>
                       </p>
                     )}
                   </div>

@@ -9,9 +9,11 @@ import {
   Upload,
 } from 'lucide-react';
 import { FilterChips } from './FilterChips';
+import { FollowRequestsCaveat } from './FollowRequestsCaveat';
 import { AccountList } from './AccountList';
 import { StatCard } from './StatCard';
 import { InlineDonationCard } from './InlineDonationCard';
+import { PrefixedLink } from './PrefixedLink';
 import { AdSlot } from './ads/AdSlot';
 import { RescuePlanBanner } from './RescuePlanBanner';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
@@ -19,10 +21,9 @@ import { ResultsExportControls } from './export/ResultsExportControls';
 import type { BadgeKey } from '@/core/types';
 import { RESCUE_PLAN_BANNER_ENABLED } from '@/config/feature-flags';
 import { useAccountFiltering } from '@/hooks/useAccountFiltering';
-import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
+import { useFollowRequestsCaveat } from '@/hooks/useFollowRequestsCaveat';
 import { useTimeOnResults } from '@/hooks/useTimeOnResults';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 /**
@@ -47,7 +48,6 @@ export function AccountListSection({
   isSample = false,
 }: AccountListSectionProps) {
   const { t, i18n } = useTranslation('results');
-  const prefix = useLanguagePrefix();
   const {
     query,
     setQuery,
@@ -59,6 +59,9 @@ export function AccountListSection({
     totalCount,
     hasLoadedData,
   } = useAccountFiltering({ fileHash, accountCount });
+
+  // GH#41: a follow-requests file we could not read inflates notFollowingBack.
+  const followRequestsUnreadable = useFollowRequestsCaveat(fileHash);
 
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
@@ -109,12 +112,12 @@ export function AccountListSection({
           <AlertTitle className="text-blue-800 dark:text-blue-200">{t('sample.banner')}</AlertTitle>
           <AlertDescription className="block text-blue-700 dark:text-blue-300">
             {t('sample.hint')}{' '}
-            <Link
-              to={`${prefix}/upload`}
+            <PrefixedLink
+              to="/upload"
               className="font-semibold underline underline-offset-2 hover:text-blue-900 dark:hover:text-blue-100"
             >
               <Upload className="h-3 w-3 inline align-text-bottom" /> {t('sample.uploadPrompt')}
-            </Link>{' '}
+            </PrefixedLink>{' '}
             {t('sample.toSeeReal')}
           </AlertDescription>
         </Alert>
@@ -156,7 +159,7 @@ export function AccountListSection({
             onClick={() => setSortOrder(prev => (prev === 'asc' ? 'desc' : 'asc'))}
             className={`cursor-pointer p-3.5 rounded-2xl border transition-all shadow-sm shrink-0 ${
               sortOrder === 'desc'
-                ? 'bg-primary text-white border-primary'
+                ? 'bg-primary text-primary-foreground border-primary'
                 : 'bg-card border-border text-zinc-500 hover:text-primary'
             }`}
             title={sortOrder === 'asc' ? t('sort.desc') : t('sort.asc')}
@@ -208,6 +211,11 @@ export function AccountListSection({
         />
       </div>
 
+      {/* Between the "Not Following" stat card and the filter chips — the two
+          places the overstated number is read — and full width in both layouts,
+          because the sidebar it would otherwise sit in is 20rem on desktop. */}
+      {followRequestsUnreadable && <FollowRequestsCaveat />}
+
       {/* Main Content Layout - grid for flexible banner positioning */}
       <div className="grid grid-cols-1 lg:grid-cols-[20rem_1fr] gap-6 md:gap-12">
         {RESCUE_PLAN_BANNER_ENABLED && !isSample && (
@@ -225,6 +233,7 @@ export function AccountListSection({
             onFiltersChange={setFilters}
             filterCounts={filterCounts}
             isFiltering={isFiltering}
+            followRequestsUnreadable={followRequestsUnreadable}
           />
         </div>
 

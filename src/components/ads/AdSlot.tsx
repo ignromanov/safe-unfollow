@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState, type ReactElement } from 'rea
 import { useTranslation } from 'react-i18next';
 
 import { useAdViewability } from '@/hooks/useAdViewability';
+import { useIsClient } from '@/hooks/useIsClient';
 import { isSampleRoute } from '@/lib/ads/eligibility';
 import { pushAdSlot } from '@/lib/ads/loader';
 import { analytics } from '@/lib/analytics';
@@ -86,14 +87,10 @@ export function AdSlot({
   const client = import.meta.env.VITE_ADSENSE_CLIENT;
   // Client-only: avoid SSG/hydration mismatch since eligibility depends on
   // the runtime route.
-  const [mounted, setMounted] = useState(false);
+  const mounted = useIsClient();
   const [approaching, setApproaching] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const pushedRef = useRef(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const eligible = Boolean(client) && Boolean(slot) && !isSampleRoute();
 

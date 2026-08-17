@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
 import { Globe, ChevronDown } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
+import { useIsClient } from '@/hooks/useIsClient';
 import { persistLanguageSync } from '@/lib/store';
 import { SUPPORTED_LANGUAGES, LANGUAGE_NAMES, type SupportedLanguage } from '@/locales';
 import { detectLanguageFromPathname } from '@/config/languages';
@@ -36,8 +36,7 @@ export function LanguageSwitcher() {
   const location = useLocation();
 
   // Prevent hydration mismatch - Radix generates different IDs on server vs client
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const mounted = useIsClient();
 
   // Get currentLanguage from URL synchronously (source of truth)
   const currentLanguage = detectLanguageFromPathname(location.pathname);

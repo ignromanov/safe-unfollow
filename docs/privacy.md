@@ -17,7 +17,8 @@ does not restate the policy, because a second copy is a second thing to keep tru
 
 **Your Instagram export never leaves your browser.** The ZIP is opened, parsed and stored
 locally in IndexedDB. There is no account, no Instagram login, and no server that receives
-your data — which is also why no third party on this page can be targeting ads at it.
+your Instagram export — which is also why nothing on this page, advertising included, can be
+targeting it.
 
 That claim is about *your Instagram data*, and only about it. The site itself does talk to a
 handful of third parties, and the canonical policy names what each one receives:

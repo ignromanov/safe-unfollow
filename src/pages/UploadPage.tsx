@@ -27,7 +27,11 @@ export function Component() {
   }
 
   const handleUploadStart = (file: File) => {
-    handleZipUpload(file);
+    // handleZipUpload already reports failures through uploadState (read
+    // above); it also rejects its promise so callers that await it can react.
+    // This caller is fire-and-forget, so the rejection must be caught here or
+    // it surfaces as an uncaught promise rejection for an already-handled error.
+    handleZipUpload(file).catch(() => {});
   };
 
   const handleOpenWizard = () => {

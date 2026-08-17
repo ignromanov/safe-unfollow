@@ -1,48 +1,60 @@
 import { AccountListSection } from '@/components/AccountListSection';
 import { DiagnosticErrorScreen } from '@/components/DiagnosticErrorScreen';
 import { Hero } from '@/components/Hero';
-import { useInstagramData } from '@/hooks/useInstagramData';
+import { ResultsSkeleton } from '@/components/ResultsSkeleton';
+import { useIsClient } from '@/hooks/useIsClient';
 import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
+import { useResultsFile } from '@/hooks/useResultsFile';
+import { useStoreSSR } from '@/hooks/useStoreSSR';
 import { useNavigate } from 'react-router-dom';
 
 /**
  * Results page (account list)
- * NOT prerendered - requires user data from IndexedDB
- * Falls back to Hero if no data available
+ *
+ * This page IS prerendered, contrary to what this comment said until GH#49's follow-up:
+ * `dist/results.html` is emitted on every build and `vercel.json` carries no rewrite for
+ * `/results`, so with `cleanUrls` that file is what a visitor is served and what React
+ * hydrates against. It is built from an empty store, so every store read here goes
+ * through `useStoreSSR` and renders the no-data branch while hydrating — by construction,
+ * not by relying on zustand persist's undocumented `getInitialState` pinning.
+ *
+ * "No data yet" and "no data at all" are different pages, and until GH#44 they were the
+ * same branch. Both the prerender and the first client pass answer the first question —
+ * nobody has read the store yet — and that answer is `ResultsSkeleton`. The Hero answers
+ * the second, and is reached only once hydration has run and there is genuinely nothing
+ * to show.
  */
 export function Component() {
   const navigate = useNavigate();
   const prefix = useLanguagePrefix();
-  const { uploadState, fileMetadata } = useInstagramData();
 
-  const hasResults =
-    uploadState.status === 'success' &&
-    fileMetadata !== null &&
-    Boolean(fileMetadata.fileHash) &&
-    typeof fileMetadata.accountCount === 'number';
+  const isClient = useIsClient();
+  const resultsFile = useResultsFile();
+  const uploadStatus = useStoreSSR(s => s.uploadStatus, 'idle');
+  const uploadError = useStoreSSR(s => s.uploadError, null);
 
-  // Fallback handlers for Hero
+  // Fallback handler for the DiagnosticErrorScreen's "open wizard" action.
+  // The Hero fallback below navigates on its own via real anchors.
   const handleStartGuide = () => {
     navigate(`${prefix}/wizard`);
-  };
-
-  const handleLoadSample = () => {
-    navigate(`${prefix}/sample`);
-  };
-
-  const handleUploadDirect = () => {
-    navigate(`${prefix}/upload`);
   };
 
   const handleTryAgain = () => {
     navigate(`${prefix}/upload`);
   };
 
+  // Before hydration nobody has read the store, so no branch below can be answered yet.
+  // Stated as its own guard rather than left to fall through the ones underneath: those
+  // reach this same conclusion only because their `serverValue`s happen to be falsy today.
+  if (!isClient) {
+    return <ResultsSkeleton />;
+  }
+
   // Show error if upload failed
-  if (uploadState.status === 'error') {
+  if (uploadStatus === 'error') {
     return (
       <DiagnosticErrorScreen
-        errorMessage={uploadState.error || 'An error occurred while processing your file.'}
+        errorMessage={uploadError || 'An error occurred while processing your file.'}
         onTryAgain={handleTryAgain}
         onOpenWizard={handleStartGuide}
       />
@@ -50,26 +62,19 @@ export function Component() {
   }
 
   // Show results if data available
-  if (hasResults && fileMetadata) {
+  if (resultsFile) {
     return (
       <AccountListSection
-        fileHash={fileMetadata.fileHash!}
-        accountCount={fileMetadata.accountCount!}
-        filename={fileMetadata.name}
+        fileHash={resultsFile.fileHash!}
+        accountCount={resultsFile.accountCount!}
+        filename={resultsFile.name}
         isSample={false}
       />
     );
   }
 
-  // Fallback to Hero if no data
-  return (
-    <Hero
-      onStartGuide={handleStartGuide}
-      onLoadSample={handleLoadSample}
-      onUploadDirect={handleUploadDirect}
-      hasData={false}
-    />
-  );
+  // Hydrated, and there is genuinely nothing to show.
+  return <Hero hasData={false} />;
 }
 
 export default Component;

@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { Badge, badgeVariants } from '@/components/ui/badge';
+import { contrastRatio, token, WCAG_AA_NORMAL } from '@tests/utils/contrast';
 
 // Mock Radix UI Slot
 vi.mock('@radix-ui/react-slot', () => ({
@@ -260,5 +261,37 @@ describe('badgeVariants function', () => {
       expect(classes).toContain('text-xs');
       expect(classes).toContain('font-medium');
     });
+  });
+
+  /**
+   * The outline badge hovers to a *flat* `--accent` in both themes — it has no
+   * `dark:` override, unlike the ghost button. So unlike ghost, the corrected
+   * `--accent-foreground` token is the right answer here and no class change was
+   * needed; light went from 3.50:1 to 5.63:1 on the token flip alone. This
+   * asserts that outcome instead of assuming it.
+   */
+  describe('outline hover contrast', () => {
+    const hoverToken = () => {
+      const classes = badgeVariants({ variant: 'outline' });
+      const match = classes.match(/hover:text-([a-z-]+)/);
+      if (!match) throw new Error(`no hover:text-* in badge outline variant: ${classes}`);
+      return `--${match[1]}`;
+    };
+
+    it('hovers to a flat accent fill, with no dark-mode surface override', () => {
+      // If a `dark:hover:bg-accent/NN` ever appears here, the surface stops
+      // being flat accent and this token stops being the correct one — the
+      // exact trap the ghost button fell into.
+      const classes = badgeVariants({ variant: 'outline' });
+      expect(classes).toContain('[a&]:hover:bg-accent');
+      expect(classes).not.toMatch(/dark:[a-z[\]&:]*hover:bg-accent\//);
+    });
+
+    for (const theme of ['light', 'dark'] as const) {
+      it(`${theme}: hover label clears AA on --accent`, () => {
+        const ratio = contrastRatio(token(theme, hoverToken()), token(theme, '--accent'));
+        expect(ratio).toBeGreaterThanOrEqual(WCAG_AA_NORMAL);
+      });
+    }
   });
 });

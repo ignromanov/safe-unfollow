@@ -7,6 +7,7 @@ import type { FilterAction, LinkType, ParseOutcome } from './constants';
 import { trackEvent } from './core';
 import { enqueueEvent } from './queue';
 import { getStoredUTM, getEntryCTA, setEntryCTA } from './utm';
+import type { LabelResolutionMode } from '@/core/types';
 import type { LicenseFailureReason } from '@/lib/export/license';
 
 /**
@@ -338,6 +339,8 @@ export const analytics = {
       NO_DATA_FILES: AnalyticsEvents.UPLOAD_ERROR_NO_DATA,
       MISSING_FOLLOWING: AnalyticsEvents.UPLOAD_ERROR_MISSING_FOLLOWING,
       MISSING_FOLLOWERS: AnalyticsEvents.UPLOAD_ERROR_MISSING_FOLLOWERS,
+      INVALID_FOLLOWING_FORMAT: AnalyticsEvents.UPLOAD_ERROR_INVALID_FOLLOWING_FORMAT,
+      INVALID_FOLLOWERS_FORMAT: AnalyticsEvents.UPLOAD_ERROR_INVALID_FOLLOWERS_FORMAT,
       CORRUPTED_ZIP: AnalyticsEvents.UPLOAD_ERROR_CORRUPTED_ZIP,
       ZIP_ENCRYPTED: AnalyticsEvents.UPLOAD_ERROR_ZIP_ENCRYPTED,
       EMPTY_FILE: AnalyticsEvents.UPLOAD_ERROR_EMPTY_FILE,
@@ -395,6 +398,28 @@ export const analytics = {
     enqueueEvent(AnalyticsEvents.AD_SLOT_VIEWABLE, {
       slot,
     });
+  },
+
+  // GH#21: fires once per optional relationship file whose shape drifted
+  // (pending/restricted/close_friends/unfollowed/dismissed/permanent — see
+  // instagram-file-specs.ts driftCode). Immediate, not batched: this is a
+  // rare diagnostic signal about an upstream format change, not a high-volume
+  // impression where losing a few events to a dropped batch is acceptable.
+  optionalFileFormatDrift: (fileCode: string) => {
+    trackEvent(AnalyticsEvents.OPTIONAL_FILE_FORMAT_DRIFT, {
+      file_code: fileCode,
+    });
+  },
+
+  // GH#21 Task 5: fires once per parse, always — unlike the drift event
+  // above, a clean parse still emits this, as `fast-path`. Never the
+  // resolved label string: it is Meta's UI text in the export's own
+  // language, not the site's, and would leak that language. The mode alone
+  // carries what the diagnosis needs. Immediate for the same reason as
+  // `optionalFileFormatDrift`: a rare diagnostic about an upstream format
+  // change, not a high-volume impression.
+  usernameLabelResolution: (mode: LabelResolutionMode) => {
+    trackEvent(AnalyticsEvents.USERNAME_LABEL_RESOLUTION, { mode });
   },
 
   // Pro Export

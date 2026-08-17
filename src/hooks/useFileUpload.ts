@@ -1,10 +1,12 @@
-import type { FileDiscovery, ParseWarning } from '@/core/types';
+import { OPTIONAL_FILE_DRIFT_CODES } from '@/core/parsers/instagram-file-specs';
+import type { FileDiscovery, LabelResolutionMode, ParseWarning } from '@/core/types';
 import { analytics } from '@/lib/analytics';
 import type { ParseOutcome } from '@/lib/analytics';
 import { extractErrorCode } from '@/lib/error-classifier';
 import { isValidZipFile } from '@/lib/file-validation';
 import { dbCache, generateFileHash } from '@/lib/indexeddb/indexeddb-cache';
 import { parseOnMainThread, parseWithWorker } from '@/lib/parse-orchestration';
+import type { ParseErrorData } from '@/lib/parse-orchestration';
 import { useAppStore } from '@/lib/store';
 import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -18,6 +20,84 @@ const MAX_FILE_SIZE = 500 * 1024 * 1024;
 
 // localStorage key for tracking return uploads
 const LAST_UPLOAD_KEY = 'analytics_last_upload';
+
+/**
+ * Report everything this parse observed about the export's shape, from whichever
+ * of the three parse exit points reached it (worker success, worker failure,
+ * main-thread fallback).
+ *
+ * One function rather than one per signal, because the two always fire together
+ * and a future exit path that emits one and forgets the other is a diagnostic
+ * that silently does not fire — the failure class this whole change exists to
+ * remove.
+ *
+ * **Optional-file drift (GH#21)**: files whose top-level shape we no longer
+ * recognise parse to an empty map that is indistinguishable from "the user has
+ * none", and severity `'warning'` is rendered nowhere — `UploadZone.tsx` and
+ * `DiagnosticErrorScreen.tsx` both read only `'error'` — so this event is the
+ * whole detection surface. Reported on the failure path too: drift is a fact
+ * about the export, not about whether the upload finished, and a format change
+ * would plausibly hit several files at once, so drift accompanying a failure is
+ * precisely the case worth seeing.
+ *
+ * **Label resolution (GH#21 Task 5)**: `mode` is `undefined` only when nothing
+ * was parsed this call — an exception thrown before `parseInstagramZipFile` ever
+ * ran (e.g. the worker's own IndexedDB-quota branch, which never posts
+ * `labelResolutionMode`) — and silently no-ops rather than reporting a
+ * fabricated mode.
+ *
+ * Both must run on the main thread: `enqueueEvent` and `trackEvent` return early
+ * on `typeof window === 'undefined'` (`lib/stats/queue.ts`, `lib/stats/core.ts`),
+ * and a Web Worker's global is `self`, so emitting from the parser itself would
+ * be a silent no-op. Both signals already cross the boundary inside the result.
+ */
+function reportParseDiagnostics(
+  warnings: ParseWarning[] | undefined,
+  labelResolutionMode: LabelResolutionMode | undefined
+): void {
+  for (const warning of warnings ?? []) {
+    if (OPTIONAL_FILE_DRIFT_CODES.has(warning.code)) {
+      analytics.optionalFileFormatDrift(warning.code);
+    }
+  }
+
+  if (labelResolutionMode) {
+    analytics.usernameLabelResolution(labelResolutionMode);
+  }
+}
+
+/**
+ * Build the error a pre-parse guard throws, carrying the code that identifies
+ * it rather than only the sentence shown to the reader.
+ *
+ * GH#35 — the guards used to report the failure themselves and then throw a
+ * bare `new Error(message)`. That message has already been through i18n, so the
+ * catch below ran `extractErrorCode` over translated prose, got `UNKNOWN`, and
+ * reported the same failure a second time: 296 phantom `upload_error_unknown`
+ * events against 307 real `upload_error_not_zip` in the 24 Jul – 12 Aug window.
+ *
+ * The fix is one reporting point, not two. Reporting stays in the catch, which
+ * every failure passes through, and the guards' job is to make their failure
+ * classifiable when it arrives there.
+ *
+ * `ParseErrorData` is the shape `parse-orchestration` already rejects with from
+ * the worker and main-thread paths, so the catch reads one structure from all
+ * three sources rather than a per-thrower one.
+ *
+ * The guards do not paint the error screen either, for the same reason. The
+ * catch sets identical state from `err.message` and `err.warnings` in the same
+ * synchronous tick — `store.ts` merges with `?? state.x`, so a second call
+ * could only differ where the catch declines to paint at all. It declines on
+ * one path: an upload cancelled during `await isValidZipFile` returned to the
+ * reader's own cancellation, and the guard's copy used to overwrite that with
+ * an error screen for a file they had already given up on.
+ */
+function guardFailure(warning: ParseWarning): Error & ParseErrorData {
+  return Object.assign(new Error(warning.message), {
+    code: warning.code,
+    warnings: [warning],
+  });
+}
 
 /**
  * Check if this is a return upload and track it
@@ -113,15 +193,7 @@ export function useFileUpload() {
             fix: t('diagnostic.errors.NOT_ZIP.fix'),
           };
 
-          setUploadInfo({
-            currentFileName: file.name,
-            uploadStatus: 'error',
-            uploadError: notZipWarning.message,
-            parseWarnings: [notZipWarning],
-          });
-
-          analytics.uploadErrorByCode('', 'NOT_ZIP', notZipWarning.message);
-          throw new Error(notZipWarning.message);
+          throw guardFailure(notZipWarning);
         }
 
         // File size guard: reject files over 500MB
@@ -134,15 +206,7 @@ export function useFileUpload() {
             fix: t('diagnostic.errors.FILE_TOO_LARGE.fix'),
           };
 
-          setUploadInfo({
-            currentFileName: file.name,
-            uploadStatus: 'error',
-            uploadError: tooLargeWarning.message,
-            parseWarnings: [tooLargeWarning],
-          });
-
-          analytics.uploadErrorByCode('', 'FILE_TOO_LARGE', tooLargeWarning.message);
-          throw new Error(tooLargeWarning.message);
+          throw guardFailure(tooLargeWarning);
         }
 
         // Generate file hash for cache lookup and analytics correlation
@@ -206,14 +270,20 @@ export function useFileUpload() {
                 fileDiscovery: result.discovery,
               });
             }
+            reportParseDiagnostics(result.warnings, result.labelResolutionMode);
           } catch (error) {
             // Extract warnings/discovery from error if available
             if (error instanceof Error && 'warnings' in error) {
+              const failureWarnings = (error as { warnings?: ParseWarning[] }).warnings;
               setUploadInfo({
-                parseWarnings: (error as { warnings?: ParseWarning[] }).warnings ?? [],
+                parseWarnings: failureWarnings ?? [],
                 fileDiscovery: (error as { discovery?: import('@/core/types').FileDiscovery })
                   .discovery,
               });
+              reportParseDiagnostics(
+                failureWarnings,
+                (error as { labelResolutionMode?: LabelResolutionMode }).labelResolutionMode
+              );
             }
             throw error;
           }
@@ -233,6 +303,7 @@ export function useFileUpload() {
             parseWarnings: result.warnings ?? [],
             fileDiscovery: result.discovery,
           });
+          reportParseDiagnostics(result.warnings, result.labelResolutionMode);
         }
 
         // Data already cached in IndexedDB by worker during chunked processing

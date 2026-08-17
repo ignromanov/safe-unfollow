@@ -33,7 +33,8 @@
     "reset": "Zurücksetzen",
     "emptyCategories": "Leere Kategorien ({{count, number}})",
     "addFilter": "Filter {{label}} hinzufügen ({{count, number}} Accounts)",
-    "removeFilter": "Filter {{label}} entfernen ({{count, number}} Accounts)"
+    "removeFilter": "Filter {{label}} entfernen ({{count, number}} Accounts)",
+    "chipWithHint": "{{label}} — {{hint}}"
   },
   "badges": {
     "followers": "Follower",
@@ -48,6 +49,13 @@
     "close": "Enge Freunde",
     "dismissed": "Abgelehnter Vorschlag"
   },
+  "caveat": {
+    "followRequests": {
+      "title": "„Folgt dir nicht zurück“ ist möglicherweise zu hoch.",
+      "body": "Wir konnten deine Datei mit den Follow-Anfragen nicht lesen. Konten, denen du eine Anfrage geschickt hast, können deshalb in dieser Liste auftauchen, und deine Zähler für ausstehende Anfragen stehen auf null. Follower, „Folge ich“ und „Gegenseitig“ sind davon nicht betroffen.",
+      "chipHint": "Möglicherweise zu hoch — wir konnten deine Datei mit den Follow-Anfragen nicht lesen."
+    }
+  },
   "empty": {
     "noUsers": "Keine Benutzer gefunden",
     "resetFilters": "Filter zurücksetzen"
@@ -58,9 +66,9 @@
   },
   "donation": {
     "headline": "Du hast gerade {{count}} Konten analysiert — kostenlos.",
-    "body": "Kein Login. Kein Server. Keine Daten gesendet. Wenn es dir Zeit gespart hat, hält ein Kaffee das Projekt am Laufen.",
-    "headlineMobile": "Kostenlos. Privat. Kein Login.",
-    "bodyMobile": "Wenn es nützlich war, spendier einen Kaffee.",
+    "body": "Kein Login. Dein Instagram-Export hat diesen Browser nie verlassen. Wenn es dir Zeit gespart hat, hält ein Kaffee das Projekt am Laufen.",
+    "headlineMobile": "Analyse kostenlos. Privat. Kein Login.",
+    "bodyMobile": "Dein Export hat den Browser nie verlassen. Wenn es nützlich war, spendier einen Kaffee.",
     "cta": "Kaffee spendieren",
     "ctaMobile": "Unterstützen",
     "dismiss": "Nicht jetzt"
@@ -123,7 +131,7 @@
       "freeTrial14": "14 Tage gratis",
       "freePlan": "Gratis-Plan",
       "freeContacts": "Bis 1K gratis",
-      "freeForever": "Immer gratis"
+      "freeForever": "Unbefristet kostenlos"
     },
     "social": {
       "creators50k": "50K+ Creator",

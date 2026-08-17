@@ -164,6 +164,37 @@ describe('ResultsExportControls', () => {
     expect(classes).toContain('bg-primary');
   });
 
+  /**
+   * This button once carried `text-foreground dark:text-primary-foreground`,
+   * because `--primary-foreground` on `--primary` measured 3.95:1 in light
+   * mode. The token was flipped to near-black in both themes, so the variant
+   * now pairs correctly on its own and the local override became the one place
+   * in the app that reads its colour from somewhere other than the variant.
+   *
+   * Neither assertion names the former classes, because a future workaround
+   * will pick different ones and the defect is the exception itself, not its
+   * spelling. Instead both lean on how `cn()` merges:
+   *
+   * - a base `text-*` appended by the component EVICTS the variant's own
+   *   `text-primary-foreground`, so that class still being present is itself
+   *   the proof that no base override was added;
+   * - a `dark:text-*` override sits in a different variant group and evicts
+   *   nothing, so it has to be barred directly.
+   */
+  it('should take its label colour from the variant, not a local override', () => {
+    unlocked(false);
+
+    render(<ResultsExportControls {...defaultProps} />);
+
+    const classes = screen
+      .getByRole('button', { name: triggerLabel })
+      .className.split(/\s+/)
+      .filter(Boolean);
+
+    expect(classes).toContain('text-primary-foreground');
+    expect(classes.filter(c => c.startsWith('dark:text-'))).toEqual([]);
+  });
+
   // WCAG 2.5.3 Label in Name: the old icon button carried an aria-label of
   // "Export accounts", which would now override visible text reading
   // "Export · $7" — a voice-control user says what they can see and matches

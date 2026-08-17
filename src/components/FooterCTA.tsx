@@ -1,13 +1,9 @@
 import { Play, Database } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Logo } from './Logo';
+import { PrefixedLink } from './PrefixedLink';
 
-interface FooterCTAProps {
-  onStart: () => void;
-  onSample: () => void;
-}
-
-export function FooterCTA({ onStart, onSample }: FooterCTAProps) {
+export function FooterCTA() {
   const { t } = useTranslation('common');
 
   return (
@@ -26,20 +22,20 @@ export function FooterCTA({ onStart, onSample }: FooterCTAProps) {
       </p>
 
       <div className="flex flex-col sm:flex-row items-center justify-center gap-5 w-full max-w-lg px-6">
-        <button
-          onClick={onStart}
-          className="w-full sm:w-auto px-12 py-5 rounded-2xl bg-primary text-white font-black text-base md:text-xl shadow-2xl shadow-primary/40 hover:scale-[1.05] active:scale-95 transition-all flex items-center justify-center gap-3 cursor-pointer"
+        <PrefixedLink
+          to="/wizard/step/1"
+          className="w-full sm:w-auto px-12 py-5 rounded-2xl bg-primary text-primary-foreground font-black text-base md:text-xl shadow-2xl shadow-primary/40 hover:scale-[1.05] active:scale-95 transition-all flex items-center justify-center gap-3 cursor-pointer"
         >
           <Play size={22} fill="currentColor" />
           {t('cta.getStarted')}
-        </button>
-        <button
-          onClick={onSample}
+        </PrefixedLink>
+        <PrefixedLink
+          to="/sample"
           className="w-full sm:w-auto px-10 py-5 rounded-2xl border-2 border-border bg-card font-black text-base md:text-xl hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all flex items-center justify-center gap-3 cursor-pointer"
         >
           <Database size={22} />
           {t('cta.trySample')}
-        </button>
+        </PrefixedLink>
       </div>
 
       <p className="mt-16 text-xs md:text-sm text-zinc-400 uppercase tracking-[0.2em] font-black opacity-60">

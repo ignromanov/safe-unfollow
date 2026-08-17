@@ -9,9 +9,14 @@ vi.mock('react-i18next', () => createI18nMock(resultsEN));
 import { AccountListSection } from '@/components/AccountListSection';
 import type { BadgeKey } from '@/core/types';
 import { useAccountFiltering } from '@/hooks/useAccountFiltering';
+import { useFollowRequestsCaveat } from '@/hooks/useFollowRequestsCaveat';
 
 // Mock the useAccountFiltering hook
 vi.mock('@/hooks/useAccountFiltering');
+
+// GH#41 — reads IndexedDB, which jsdom does not provide. Mocked so every other
+// test in this file renders the clean page, and the caveat tests below opt in.
+vi.mock('@/hooks/useFollowRequestsCaveat');
 
 // Mock useLanguagePrefix
 vi.mock('@/hooks/useLanguagePrefix', () => ({
@@ -70,6 +75,7 @@ vi.mock('@/components/RescuePlanBanner', () => ({
 }));
 
 const mockUseAccountFiltering = vi.mocked(useAccountFiltering);
+const mockUseFollowRequestsCaveat = vi.mocked(useFollowRequestsCaveat);
 
 describe('AccountListSection', () => {
   const mockSetQuery = vi.fn();
@@ -115,6 +121,68 @@ describe('AccountListSection', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseAccountFiltering.mockReturnValue(createMockReturnValue());
+    mockUseFollowRequestsCaveat.mockReturnValue(false);
+  });
+
+  /**
+   * GH#41. When a follow-requests file is present and unreadable, both request
+   * maps come back empty and every outstanding request joins notFollowingBack.
+   * The badge still renders — showing 0 instead would read as good news and be
+   * wrong in the other direction — so the page has to say the number may be high.
+   */
+  describe('overstated notFollowingBack caveat', () => {
+    it('says nothing when the follow-requests files read fine', () => {
+      renderWithRouter(<AccountListSection {...defaultProps} />);
+
+      expect(screen.queryByText(resultsEN.caveat.followRequests.title)).not.toBeInTheDocument();
+    });
+
+    it('names the badge, the cause, and what is still trustworthy', () => {
+      mockUseFollowRequestsCaveat.mockReturnValue(true);
+      renderWithRouter(<AccountListSection {...defaultProps} />);
+
+      expect(screen.getByText(resultsEN.caveat.followRequests.title)).toBeInTheDocument();
+      expect(screen.getByText(resultsEN.caveat.followRequests.body)).toBeInTheDocument();
+    });
+
+    it('reassures only about counts that survive an unreadable requests file', () => {
+      // The body used to end "everything else on this page is unaffected",
+      // which was false about the same file: badges.pending and
+      // badges.permanent read the two maps the caveat is about
+      // (core/badges/index.ts:58-60), so they fall to 0 and FilterChips sweeps
+      // them into "empty categories" — the page says "no pending requests" off
+      // the file it could not read, and the notice vouched for it.
+      const body = resultsEN.caveat.followRequests.body;
+
+      // Followers, Following and Mutuals derive from following.json and
+      // followers_*.json alone. They are the only counts safe to name.
+      expect(body).toMatch(/followers/i);
+      expect(body).toMatch(/following/i);
+      expect(body).toMatch(/mutuals/i);
+      // The understatement is stated, not just the overstatement.
+      expect(body).toMatch(/pending/i);
+      expect(body).not.toMatch(/everything else/i);
+    });
+
+    it('announces politely — the notice arrives after paint, and is advisory', () => {
+      mockUseFollowRequestsCaveat.mockReturnValue(true);
+      renderWithRouter(<AccountListSection {...defaultProps} />);
+
+      // role="alert" (the Alert primitive's default) is assertive, and this is
+      // inserted into a live region once the stored flag resolves — cutting
+      // across a screen reader mid-announcement for something advisory.
+      const notice = screen.getByText(resultsEN.caveat.followRequests.title).closest('[role]');
+      expect(notice).toHaveAttribute('role', 'status');
+    });
+
+    it('keeps the notFollowingBack list rather than suppressing it', () => {
+      mockUseFollowRequestsCaveat.mockReturnValue(true);
+      renderWithRouter(<AccountListSection {...defaultProps} />);
+
+      // Suppressing the badge would render "0 Not Following Back", which reads
+      // as good news and lies in the other direction — silently, again.
+      expect(screen.getByTestId('stat-card-not following')).toHaveTextContent('3');
+    });
   });
 
   it('should render all main components', () => {
@@ -449,6 +517,29 @@ describe('AccountListSection', () => {
       const sticky = container.querySelector('.sticky') as HTMLElement;
       expect(sticky.querySelector('#account-search')).not.toBeNull();
       expect(sticky.querySelector('button[aria-pressed]')).not.toBeNull();
+    });
+  });
+
+  describe('sort toggle contrast', () => {
+    // Descending fills the toggle with --primary. A literal white glyph on it
+    // measures 3.95:1 in light and 3.30:1 in dark — below AA, and below the 3:1
+    // graphics allowance in dark once the /90 hover is taken into account.
+    const sortToggle = (container: HTMLElement) =>
+      container.querySelector('button[aria-pressed]') as HTMLElement;
+
+    it('drives the descending state from the token, not a literal colour', () => {
+      const { container } = render(
+        <AccountListSection fileHash="abc" accountCount={100} filename="d.zip" />
+      );
+
+      const toggle = sortToggle(container);
+      expect(toggle).toHaveAttribute('aria-pressed', 'false');
+
+      fireEvent.click(toggle);
+
+      expect(toggle).toHaveAttribute('aria-pressed', 'true');
+      expect(toggle).toHaveClass('bg-primary', 'text-primary-foreground');
+      expect(toggle.className).not.toMatch(/\btext-white\b/);
     });
   });
 });

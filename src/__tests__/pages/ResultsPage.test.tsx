@@ -1,8 +1,12 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { renderToString } from 'react-dom/server';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { Component as ResultsPage } from '@/pages/ResultsPage';
+import { useAppStore } from '@/lib/store';
 import heroEN from '@/locales/en/hero.json';
+
+import type { FileMetadata } from '@/core/types';
 
 // Mock child components
 vi.mock('@/components/AccountListSection', () => ({
@@ -27,21 +31,8 @@ vi.mock('@/components/AccountListSection', () => ({
 }));
 
 vi.mock('@/components/Hero', () => ({
-  Hero: ({
-    onStartGuide,
-    onLoadSample,
-    onUploadDirect,
-    hasData,
-  }: {
-    onStartGuide: () => void;
-    onLoadSample: () => void;
-    onUploadDirect: () => void;
-    hasData: boolean;
-  }) => (
+  Hero: ({ hasData }: { hasData: boolean }) => (
     <div data-testid="hero-fallback">
-      <button onClick={onStartGuide}>{heroEN.buttons.getGuide}</button>
-      <button onClick={onLoadSample}>{heroEN.buttons.trySample}</button>
-      <button onClick={onUploadDirect}>{heroEN.buttons.haveFile}</button>
       <span data-testid="has-data">{String(hasData)}</span>
     </div>
   ),
@@ -77,34 +68,24 @@ vi.mock('@/hooks/useLanguagePrefix', () => ({
   useLanguagePrefix: () => mockUseLanguagePrefix(),
 }));
 
-const mockUseInstagramData = vi.fn(() => ({
-  uploadState: { status: 'idle', error: null, fileName: null },
-  fileMetadata: null,
-}));
-vi.mock('@/hooks/useInstagramData', () => ({
-  useInstagramData: () => mockUseInstagramData(),
-}));
+const FILE: FileMetadata = {
+  name: 'instagram_export.zip',
+  size: 1,
+  uploadDate: new Date('2026-01-01'),
+  fileHash: 'abc123',
+  accountCount: 1500,
+};
 
 describe('ResultsPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseLanguagePrefix.mockReturnValue('');
-    mockUseInstagramData.mockReturnValue({
-      uploadState: { status: 'idle', error: null, fileName: null },
-      fileMetadata: null,
-    });
+    useAppStore.setState({ uploadStatus: 'idle', uploadError: null, fileMetadata: null });
   });
 
   describe('rendering with data', () => {
     it('should render AccountListSection when data is available', () => {
-      mockUseInstagramData.mockReturnValue({
-        uploadState: { status: 'success', error: null, fileName: 'test.zip' },
-        fileMetadata: {
-          fileHash: 'abc123',
-          accountCount: 1500,
-          name: 'instagram_export.zip',
-        },
-      });
+      useAppStore.setState({ uploadStatus: 'success', fileMetadata: FILE });
 
       render(<ResultsPage />);
 
@@ -113,13 +94,9 @@ describe('ResultsPage', () => {
     });
 
     it('should pass correct props to AccountListSection', () => {
-      mockUseInstagramData.mockReturnValue({
-        uploadState: { status: 'success', error: null, fileName: 'test.zip' },
-        fileMetadata: {
-          fileHash: 'def456',
-          accountCount: 2500,
-          name: 'my_data.zip',
-        },
+      useAppStore.setState({
+        uploadStatus: 'success',
+        fileMetadata: { ...FILE, fileHash: 'def456', accountCount: 2500, name: 'my_data.zip' },
       });
 
       render(<ResultsPage />);
@@ -131,9 +108,10 @@ describe('ResultsPage', () => {
     });
 
     it('should handle large account counts', () => {
-      mockUseInstagramData.mockReturnValue({
-        uploadState: { status: 'success', error: null, fileName: 'large.zip' },
+      useAppStore.setState({
+        uploadStatus: 'success',
         fileMetadata: {
+          ...FILE,
           fileHash: 'large123',
           accountCount: 1000000,
           name: 'large_export.zip',
@@ -148,11 +126,6 @@ describe('ResultsPage', () => {
 
   describe('rendering without data (fallback)', () => {
     it('should render Hero fallback when no data is available', () => {
-      mockUseInstagramData.mockReturnValue({
-        uploadState: { status: 'idle', error: null, fileName: null },
-        fileMetadata: null,
-      });
-
       render(<ResultsPage />);
 
       expect(screen.getByTestId('hero-fallback')).toBeInTheDocument();
@@ -160,10 +133,7 @@ describe('ResultsPage', () => {
     });
 
     it('should render DiagnosticErrorScreen when upload status is error', () => {
-      mockUseInstagramData.mockReturnValue({
-        uploadState: { status: 'error', error: 'Failed to parse', fileName: null },
-        fileMetadata: null,
-      });
+      useAppStore.setState({ uploadStatus: 'error', uploadError: 'Failed to parse' });
 
       render(<ResultsPage />);
 
@@ -173,10 +143,7 @@ describe('ResultsPage', () => {
     });
 
     it('should render Hero when upload status is loading', () => {
-      mockUseInstagramData.mockReturnValue({
-        uploadState: { status: 'loading', error: null, fileName: 'processing.zip' },
-        fileMetadata: null,
-      });
+      useAppStore.setState({ uploadStatus: 'loading' });
 
       render(<ResultsPage />);
 
@@ -184,76 +151,20 @@ describe('ResultsPage', () => {
     });
 
     it('should pass hasData as false to Hero fallback', () => {
-      mockUseInstagramData.mockReturnValue({
-        uploadState: { status: 'idle', error: null, fileName: null },
-        fileMetadata: null,
-      });
-
       render(<ResultsPage />);
 
       expect(screen.getByTestId('has-data')).toHaveTextContent('false');
     });
   });
 
-  describe('navigation - fallback Hero handlers', () => {
-    beforeEach(() => {
-      mockUseInstagramData.mockReturnValue({
-        uploadState: { status: 'idle', error: null, fileName: null },
-        fileMetadata: null,
-      });
-    });
-
-    it('should navigate to wizard when Start Guide is clicked', async () => {
-      const user = userEvent.setup();
-      render(<ResultsPage />);
-
-      await user.click(screen.getByText(heroEN.buttons.getGuide));
-
-      expect(mockNavigate).toHaveBeenCalledWith('/wizard');
-    });
-
-    it('should navigate to sample page when Load Sample is clicked', async () => {
-      const user = userEvent.setup();
-      render(<ResultsPage />);
-
-      await user.click(screen.getByText(heroEN.buttons.trySample));
-
-      expect(mockNavigate).toHaveBeenCalledWith('/sample');
-    });
-
-    it('should navigate to upload page when Upload Direct is clicked', async () => {
-      const user = userEvent.setup();
-      render(<ResultsPage />);
-
-      await user.click(screen.getByText(heroEN.buttons.haveFile));
-
-      expect(mockNavigate).toHaveBeenCalledWith('/upload');
-    });
-  });
-
-  describe('language prefix support', () => {
-    it('should use language prefix in navigation', async () => {
-      mockUseLanguagePrefix.mockReturnValue('/es');
-      mockUseInstagramData.mockReturnValue({
-        uploadState: { status: 'idle', error: null, fileName: null },
-        fileMetadata: null,
-      });
-
-      const user = userEvent.setup();
-      render(<ResultsPage />);
-
-      await user.click(screen.getByText(heroEN.buttons.getGuide));
-
-      expect(mockNavigate).toHaveBeenCalledWith('/es/wizard');
-    });
-  });
+  // The Hero fallback's own CTAs are real anchors now — Hero navigates on its
+  // own (covered by Hero.test.tsx) and no longer takes navigation handlers
+  // from this page. "language prefix support" for the error-screen path is
+  // still covered below, under "navigation - DiagnosticErrorScreen handlers".
 
   describe('navigation - DiagnosticErrorScreen handlers', () => {
     beforeEach(() => {
-      mockUseInstagramData.mockReturnValue({
-        uploadState: { status: 'error', error: 'Upload failed', fileName: null },
-        fileMetadata: null,
-      });
+      useAppStore.setState({ uploadStatus: 'error', uploadError: 'Upload failed' });
     });
 
     it('should navigate to upload when Try Again is clicked', async () => {
@@ -288,13 +199,9 @@ describe('ResultsPage', () => {
 
   describe('conditional rendering logic', () => {
     it('should show results when fileMetadata exists with fileHash', () => {
-      mockUseInstagramData.mockReturnValue({
-        uploadState: { status: 'success', error: null, fileName: 'test.zip' },
-        fileMetadata: {
-          fileHash: 'valid-hash',
-          accountCount: 100,
-          name: 'test.zip',
-        },
+      useAppStore.setState({
+        uploadStatus: 'success',
+        fileMetadata: { ...FILE, fileHash: 'valid-hash', accountCount: 100, name: 'test.zip' },
       });
 
       render(<ResultsPage />);
@@ -303,13 +210,9 @@ describe('ResultsPage', () => {
     });
 
     it('should show Hero when fileMetadata is missing fileHash', () => {
-      mockUseInstagramData.mockReturnValue({
-        uploadState: { status: 'success', error: null, fileName: 'test.zip' },
-        fileMetadata: {
-          fileHash: null,
-          accountCount: 100,
-          name: 'test.zip',
-        },
+      useAppStore.setState({
+        uploadStatus: 'success',
+        fileMetadata: { ...FILE, fileHash: undefined, accountCount: 100, name: 'test.zip' },
       });
 
       render(<ResultsPage />);
@@ -318,11 +221,12 @@ describe('ResultsPage', () => {
     });
 
     it('should show Hero when fileMetadata is missing accountCount', () => {
-      mockUseInstagramData.mockReturnValue({
-        uploadState: { status: 'success', error: null, fileName: 'test.zip' },
+      useAppStore.setState({
+        uploadStatus: 'success',
         fileMetadata: {
+          ...FILE,
           fileHash: 'valid-hash',
-          accountCount: null,
+          accountCount: undefined,
           name: 'test.zip',
         },
       });
@@ -330,6 +234,30 @@ describe('ResultsPage', () => {
       render(<ResultsPage />);
 
       expect(screen.getByTestId('hero-fallback')).toBeInTheDocument();
+    });
+  });
+
+  describe('SSR/hydration parity', () => {
+    it('renders the skeleton on the server even when the store already holds a successful file', () => {
+      // `/results` ships prerendered from an empty store (dist/results.html, no rewrite in
+      // vercel.json). getServerSnapshot is the only thing standing between a returning
+      // visitor and a first render that disagrees with that prerendered HTML.
+      useAppStore.setState({ uploadStatus: 'success', fileMetadata: FILE });
+
+      const html = renderToString(<ResultsPage />);
+
+      expect(html).toContain('results-skeleton');
+      expect(html).not.toContain('account-list-section');
+    });
+
+    it('prerenders a skeleton, not the landing page a returning visitor has already read', () => {
+      // GH#44. The prerendered document is what is on screen for the whole JS load window,
+      // so whatever this branch emits is what a returning visitor stares at while their own
+      // data loads. The Hero belongs to `/`, and stays the post-hydration no-data branch.
+      const html = renderToString(<ResultsPage />);
+
+      expect(html).toContain('results-skeleton');
+      expect(html).not.toContain('hero-fallback');
     });
   });
 });

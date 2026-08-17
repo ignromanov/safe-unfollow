@@ -32,8 +32,12 @@
         }
 
         try {
-          // Check if user has explicit language preference (from store)
-          // This is set by LanguageSwitcher via persistLanguageSync()
+          // Only an explicit language preference redirects (set by LanguageSwitcher via
+          // persistLanguageSync()). A first visit with no stored choice stays on the
+          // English path it asked for - guessing the browser's language cost a full
+          // second document load (Google also advises against this: "Avoid automatically
+          // redirecting users from one language version of a site to a different language
+          // version of a site").
           var store = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
           var storedLang = store.state && store.state.language;
 
@@ -43,18 +47,27 @@
               location.href = '/' + storedLang + path + location.search + location.hash;
             }
             // storedLang is 'en' - stay on English path
-            return;
-          }
-
-          // No stored preference - first visit, detect browser language
-          var browserLang = (navigator.language || '').split('-')[0].toLowerCase();
-          if (browserLang && browserLang !== 'en' && NON_EN_LANGS.indexOf(browserLang) !== -1) {
-            location.href = '/' + browserLang + path + location.search + location.hash;
           }
         } catch (e) {
           // localStorage unavailable (private mode) - continue with English
         }
       })();
+    </script>
+
+    <!-- GH#36 — hands vite-react-ssg an empty loader-data manifest so it never
+         fetches one. The manifest filename is hashed with Math.random() rather
+         than content, so every deploy orphans the previous one and a page served
+         from the service worker's cache requests a file that is gone; the injected
+         loader calls .json() on the 404's HTML body with no guard, and the
+         rejection lands on errorElement. {} is exact rather than a stub: no route
+         declares a loader, so every value it would have resolved to is null.
+
+         The variable name is load-bearing and moved in 0.9.0. The test derives it
+         from the bundle rather than trusting this line, and names the current one
+         when they disagree — read it before editing:
+         src/__tests__/build/ssg-loader-manifest.test.ts -->
+    <script>
+      window.__VITE_REACT_SSG_STATIC_LOADER_MANIFEST__ = {};
     </script>
 
     <!-- Preload critical fonts to reduce LCP -->
