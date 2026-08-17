@@ -57,6 +57,11 @@ function umamiOrigin(): string {
  * So an entry gets added here when a console reports it blocked, never on a
  * guess, and this file cannot prove the list is complete. Only the shift to a
  * nonce policy would, and that is a privacy-trust call, not an engineering one.
+ *
+ * A nonce policy is also not currently implementable: the CSP ships as one
+ * static header in vercel.json, the site has no middleware, and a nonce has to
+ * be minted per request. Adopting one means putting a serverless hop in front
+ * of a static site — a cost worth naming before anyone recommends it again.
  */
 const REQUIRED: Array<{ host: string; directives: string[]; why: string }> = [
   {
@@ -102,6 +107,32 @@ describe('vercel.json Content-Security-Policy', () => {
     expect(directives.get('script-src')).toContain(origin);
     expect(directives.get('connect-src')).toContain(origin);
   });
+
+  /**
+   * Deliberately blocked, decided 2026-08-14. AdSense asks for Google Sans Text
+   * and Roboto from fonts.googleapis.com; the returned stylesheet then points
+   * at fonts.gstatic.com, so allowing one without the other only moves the
+   * violation. Both were refused.
+   *
+   * This is not the same shape as the five violations above. Those blocked
+   * something the site had already hired — a script, a frame, a call home.
+   * This one blocks two NEW outbound origins that would see every ad-viewing
+   * visitor's IP and User-Agent, and it buys typography inside an ad unit
+   * earning $0.191 Page RPM. The CSP did its job here; the console line is the
+   * evidence, not the defect.
+   *
+   * Reopening this means updating docs/privacy.md, whose Third-Party Hosting
+   * section names Vercel alone.
+   */
+  it.each([
+    { host: 'https://fonts.googleapis.com', directive: 'style-src' },
+    { host: 'https://fonts.gstatic.com', directive: 'font-src' },
+  ])(
+    'keeps $host out of $directive — ad typography is not worth two more origins',
+    ({ host, directive }) => {
+      expect(directives.get(directive)).not.toContain(host);
+    }
+  );
 
   it('keeps the directives that make a missing source fail closed', () => {
     expect(directives.get('default-src')).toEqual(["'self'"]);
