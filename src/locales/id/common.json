@@ -37,7 +37,7 @@
     "deleteData": "Hapus Data"
   },
   "footer": {
-    "description": "Satu-satunya alat analisis hubungan yang bekerja 100% di browser Anda. Tanpa server, tanpa log, hanya data Anda dan perangkat Anda.",
+    "description": "Satu-satunya alat analisis hubungan yang bekerja 100% di browser Anda. Ekspor Instagram Anda dibaca di perangkat Anda dan tetap di sana.",
     "privacyPolicy": "Kebijakan Privasi",
     "termsOfService": "Syarat Layanan",
     "contact": "Kontak",
@@ -56,7 +56,7 @@
     "license": "Lisensi MIT",
     "viewSource": "Kode Sumber",
     "analyzedCount": "Anda menganalisis {{count}} akun. Itu gratis.",
-    "noAdsNoInvestors": "Alat ini tidak memiliki iklan maupun investor.",
+    "exportNeverLeavesBrowser": "Ekspor Instagram Anda tidak pernah keluar dari browser ini.",
     "buyACoffee": "Traktir Kopi"
   },
   "nav": {
@@ -71,7 +71,7 @@
     "subtitle": "Bergabung dengan ribuan pengguna yang melacak follower tanpa mempertaruhkan akun mereka.",
     "getStarted": "Mulai",
     "trySample": "Coba Demo",
-    "tagline": "100% Gratis • Tanpa Login • Privasi Terjamin"
+    "tagline": "Analisis Gratis • Tanpa Login • Privasi Terjamin"
   },
   "ads": {
     "label": "Iklan"

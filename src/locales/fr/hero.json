@@ -13,7 +13,7 @@
     "viewResults": "Voir les résultats de l'analyse"
   },
   "trust": {
-    "free": "100% Gratuit • Pour toujours",
+    "free": "Analyse Gratuite • Sans Compte",
     "noPassword": "Sans mot de passe • Sans risque",
     "privacy": "100% Privé • Analyse locale"
   },
@@ -21,7 +21,7 @@
     "heading": "Fonctionnalités principales",
     "local": {
       "title": "100% Local",
-      "description": "Vos données ne quittent jamais votre appareil"
+      "description": "Votre export Instagram ne quitte jamais ce navigateur"
     },
     "noLogin": {
       "title": "Sans connexion",

@@ -37,7 +37,7 @@
     "deleteData": "Eliminar datos"
   },
   "footer": {
-    "description": "El único analizador de relaciones que funciona 100% en tu navegador. Sin servidor, sin registros, solo tus datos y tu dispositivo.",
+    "description": "El único analizador de relaciones que funciona 100% en tu navegador. Tu exportación de Instagram se lee en tu dispositivo y se queda ahí.",
     "privacyPolicy": "Política de privacidad",
     "termsOfService": "Términos de servicio",
     "contact": "Contacto",
@@ -56,7 +56,7 @@
     "license": "Licencia MIT",
     "viewSource": "Código fuente",
     "analyzedCount": "Analizaste {{count}} cuentas. Fue gratis.",
-    "noAdsNoInvestors": "Esta herramienta no tiene anuncios ni inversores.",
+    "exportNeverLeavesBrowser": "Tu exportación de Instagram nunca sale de este navegador.",
     "buyACoffee": "Invitar un Café"
   },
   "nav": {
@@ -71,7 +71,7 @@
     "subtitle": "Únete a miles de usuarios que rastrean sus seguidores sin arriesgar sus cuentas.",
     "getStarted": "Comenzar",
     "trySample": "Probar Demo",
-    "tagline": "100% Gratis • Sin Login • Privacidad Garantizada"
+    "tagline": "Análisis Gratis • Sin Login • Privacidad Garantizada"
   },
   "ads": {
     "label": "Publicidad"
