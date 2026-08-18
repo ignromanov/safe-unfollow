@@ -18,7 +18,7 @@ import type { DragValidation } from './upload/DesktopDropZone';
 
 export interface UploadZoneProps {
   onUploadStart: (file: File) => void;
-  onOpenWizard?: () => void;
+  onOpenWizard?: (code?: DiagnosticErrorCode) => void;
   isProcessing?: boolean;
   parseWarnings?: ParseWarning[];
 }
@@ -184,7 +184,7 @@ export function UploadZone({
               <>
                 {' '}
                 <button
-                  onClick={onOpenWizard}
+                  onClick={() => onOpenWizard?.()}
                   className="inline font-semibold text-primary underline underline-offset-2 hover:text-primary/80"
                 >
                   {t('zone.seeGuide', { defaultValue: 'See the step-by-step guide' })}
@@ -228,7 +228,7 @@ export function UploadZone({
             </p>
             {onOpenWizard && (
               <button
-                onClick={onOpenWizard}
+                onClick={() => onOpenWizard?.()}
                 className="text-xs font-semibold text-primary underline underline-offset-2 hover:text-primary/80"
               >
                 {t('zone.notSureLink', {
@@ -281,7 +281,7 @@ export function UploadZone({
             </p>
             {onOpenWizard && (
               <button
-                onClick={onOpenWizard}
+                onClick={() => onOpenWizard?.()}
                 className="mt-4 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-primary hover:underline"
               >
                 {t('errors.learnFix')}{' '}
