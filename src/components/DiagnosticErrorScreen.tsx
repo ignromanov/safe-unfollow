@@ -189,7 +189,12 @@ export function DiagnosticErrorScreen({
             <span className="text-xs text-zinc-400 dark:text-zinc-500">
               {t('diagnostic.errorCode')}:
             </span>
-            <code className="rounded bg-zinc-100 px-2 py-1 font-mono text-xs text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+            {/* dir="ltr" keeps the underscore-separated code intact next to an RTL
+                label — same reasoning as the precedent at PaywallModal.tsx:129-131. */}
+            <code
+              dir="ltr"
+              className="rounded bg-zinc-100 px-2 py-1 font-mono text-xs text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
+            >
               {diagnosticError.code}
             </code>
             <button

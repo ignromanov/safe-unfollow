@@ -382,6 +382,12 @@ describe('DiagnosticErrorScreen', () => {
       expect(screen.getByText(uploadEN.diagnostic.errorCode + ':')).toBeInTheDocument();
     });
 
+    it('keeps the error code left-to-right, since it sits beside RTL text in other locales', () => {
+      renderWithRouter(<DiagnosticErrorScreen errorCode="HTML_FORMAT" />);
+
+      expect(screen.getByText('HTML_FORMAT')).toHaveAttribute('dir', 'ltr');
+    });
+
     it('should display copy button', () => {
       renderWithRouter(<DiagnosticErrorScreen errorCode="WORKER_TIMEOUT" />);
 
