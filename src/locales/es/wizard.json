@@ -31,7 +31,8 @@
       }
     },
     "accordion": {
-      "trigger": "Guía paso a paso"
+      "trigger_one": "Guía paso a paso — {{count}} paso",
+      "trigger_other": "Guía paso a paso — {{count}} pasos"
     }
   },
   "steps": {

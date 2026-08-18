@@ -33,8 +33,24 @@ export function StepAccordion() {
   const [isOpen, setIsOpen] = useState(false);
   const listId = useId();
 
+  // Derived from the row list itself, not hardcoded — stays correct if a
+  // step is ever added or removed. `_one`/`_other` are the two plural
+  // forms every locale's `entry.accordion.trigger` key defines; i18next
+  // falls back to `_other` for the mid-range categories some languages
+  // add (Russian "few", Arabic "few"/"many"), which is correct at the
+  // guide's actual length (7) and only imprecise for a hypothetical 2-4.
+  const stepCount = REMAINING_STEPS.length;
+
   return (
     <div className="rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+      {/*
+        A plain button, not <details>/<summary>: jsdom's native <details>
+        toggle behaviour is unreliable under click simulation, and a
+        controlled button gives a clean role="button" without leaning on
+        <summary>'s implicit ARIA mapping. Nothing here uses <details>, so
+        the "replace the default marker for RTL" rule has no marker to
+        replace.
+      */}
       <button
         id={TRIGGER_ID}
         type="button"
@@ -43,7 +59,7 @@ export function StepAccordion() {
         onClick={() => setIsOpen(open => !open)}
         className="flex h-14 w-full items-center justify-between gap-2 px-4 text-sm font-semibold text-zinc-900 dark:text-white"
       >
-        {t('entry.accordion.trigger')}
+        <span className="truncate">{t('entry.accordion.trigger', { count: stepCount })}</span>
         <ChevronDown
           size={18}
           aria-hidden="true"

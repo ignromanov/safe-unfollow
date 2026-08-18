@@ -5,6 +5,7 @@ import userEvent from '@testing-library/user-event';
 import wizardEN from '@/locales/en/wizard.json';
 import { createI18nMock } from '@/__tests__/utils/mockI18n';
 import { renderWithRouter as render } from '@/__tests__/test-utils';
+import { WIZARD_STEPS } from '@/config/wizard-steps';
 
 vi.mock('react-i18next', () => createI18nMock(wizardEN));
 
@@ -80,14 +81,18 @@ describe('StepAccordion', () => {
     );
   });
 
-  it('never mixes native details/summary markers with RTL', () => {
-    const { container } = render(<StepAccordion />);
+  it('labels the closed trigger with the derived step count, matching the links it opens to', async () => {
+    const user = userEvent.setup();
+    render(<StepAccordion />);
 
-    // If a <details> element is used anywhere, its default marker must be
-    // replaced — the native marker does not mirror under RTL (task-3 brief).
-    container.querySelectorAll('summary').forEach(summary => {
-      expect(summary).toHaveClass('list-none');
-    });
+    const trigger = screen.getByRole('button', { name: /step-by-step/i });
+    const expectedCount = WIZARD_STEPS.length - 1;
+    // Proves the count is read from config, not a copied literal: it has
+    // to equal the number of rows the same click actually reveals.
+    expect(trigger).toHaveTextContent(String(expectedCount));
+
+    await user.click(trigger);
+    expect(screen.getAllByRole('link')).toHaveLength(expectedCount);
   });
 
   it('labels the whole row so the row text names a real step', async () => {

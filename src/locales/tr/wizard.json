@@ -31,7 +31,8 @@
       }
     },
     "accordion": {
-      "trigger": "Adım adım rehber"
+      "trigger_one": "Adım adım rehber — {{count}} adım",
+      "trigger_other": "Adım adım rehber — {{count}} adım"
     }
   },
   "steps": {
