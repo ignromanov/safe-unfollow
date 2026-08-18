@@ -1,6 +1,8 @@
 {
   "header": {
-    "stepOf": "Langkah {{current}} dari {{total}}"
+    "stepOf": "Langkah {{current}} dari {{total}}",
+    "stepNavigation": "Navigasi langkah",
+    "stepLabel": "Langkah {{step}}"
   },
   "calendar": {
     "addReminder": "Tambah pengingat ke kalender",

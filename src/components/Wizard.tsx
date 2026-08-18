@@ -5,19 +5,18 @@ import FocusTrap from 'focus-trap-react';
 
 import { analytics } from '@/lib/analytics';
 import { GuideEntry } from '@/components/wizard/GuideEntry';
+import { PrefixedLink } from '@/components/PrefixedLink';
 import { ResponsiveGif } from '@/components/ResponsiveGif';
 import { WIZARD_STEPS } from '@/config/wizard-steps';
 import { useWizardNavigation } from '@/hooks/useWizardNavigation';
 
 interface WizardProps {
   initialStep?: number;
-  onComplete: () => void;
-  onCancel: () => void;
 }
 
-export function Wizard({ initialStep = 1, onComplete, onCancel }: WizardProps) {
+export function Wizard({ initialStep = 1 }: WizardProps) {
   const { t } = useTranslation('wizard');
-  const { currentStep, goToStep } = useWizardNavigation(initialStep);
+  const { currentStep, goToStep, goHome } = useWizardNavigation(initialStep);
 
   // Track analytics on step view. Step 1 is GuideEntry, which reports its
   // own guideEntryView — reporting wizardStepView here too would double the
@@ -35,24 +34,15 @@ export function Wizard({ initialStep = 1, onComplete, onCancel }: WizardProps) {
   const isFirstStep = currentStep === 1;
   const isLastStep = currentStep === WIZARD_STEPS.length;
 
-  const handleNext = () => {
-    if (isLastStep) {
-      onComplete();
-    } else {
-      goToStep(Math.min(currentStep + 1, WIZARD_STEPS.length));
-    }
-  };
-
+  // Back/Next/Done/the step dots/Close guide are now plain PrefixedLinks — each
+  // computes its own destination, so the browser can follow it before hydration.
+  // Escape cannot follow an `href`, so it keeps a real navigate() call here.
   const handleBack = () => {
     if (isFirstStep) {
-      onCancel();
+      goHome();
     } else {
       goToStep(Math.max(currentStep - 1, 1));
     }
-  };
-
-  const handleCancel = () => {
-    onCancel();
   };
 
   const handleCalendarReminder = useCallback(() => {
@@ -85,18 +75,13 @@ export function Wizard({ initialStep = 1, onComplete, onCancel }: WizardProps) {
               {t('header.stepOf', { current: currentStep, total: WIZARD_STEPS.length })}
             </span>
             {/* Step indicator dots — flex-1 to fill available space */}
-            <div
-              className="flex flex-1"
-              role="tablist"
-              aria-label={t('header.stepNavigation', { defaultValue: 'Step navigation' })}
-            >
+            <nav className="flex flex-1" aria-label={t('header.stepNavigation')}>
               {WIZARD_STEPS.map(s => (
-                <button
+                <PrefixedLink
                   key={s.id}
-                  role="tab"
-                  aria-selected={s.id === currentStep}
-                  aria-label={t('header.stepLabel', { step: s.id, defaultValue: `Step ${s.id}` })}
-                  onClick={() => goToStep(s.id)}
+                  to={`/wizard/step/${s.id}`}
+                  aria-current={s.id === currentStep ? 'step' : undefined}
+                  aria-label={t('header.stepLabel', { step: s.id })}
                   className="flex-1 min-h-[44px] flex items-center justify-center"
                 >
                   <span
@@ -104,17 +89,17 @@ export function Wizard({ initialStep = 1, onComplete, onCancel }: WizardProps) {
                       s.id <= currentStep ? 'bg-primary' : 'bg-border'
                     }`}
                   />
-                </button>
+                </PrefixedLink>
               ))}
-            </div>
+            </nav>
           </div>
-          <button
-            onClick={handleCancel}
+          <PrefixedLink
+            to="/"
             aria-label={t('buttons.close')}
             className="cursor-pointer p-2.5 rounded-full hover:bg-[oklch(0.5_0_0_/_0.05)] transition-colors"
           >
             <X size={24} aria-hidden="true" />
-          </button>
+          </PrefixedLink>
         </div>
 
         {/* Scrollable content area */}
@@ -191,22 +176,22 @@ export function Wizard({ initialStep = 1, onComplete, onCancel }: WizardProps) {
         {/* Pinned navigation bar — outside scrollable content */}
         <div className="shrink-0 border-t border-border bg-card px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           <div className="max-w-xl mx-auto flex items-center justify-between">
-            <button
-              onClick={handleBack}
+            <PrefixedLink
+              to={isFirstStep ? '/' : `/wizard/step/${currentStep - 1}`}
               className="cursor-pointer flex items-center gap-2 px-4 py-3 rounded-xl font-bold text-sm transition-all hover:bg-muted text-muted-foreground"
             >
               <ArrowLeft size={18} />
               <span>
                 {isFirstStep ? t('buttons.cancel', { defaultValue: 'Cancel' }) : t('buttons.back')}
               </span>
-            </button>
-            <button
-              onClick={handleNext}
+            </PrefixedLink>
+            <PrefixedLink
+              to={isLastStep ? '/upload' : `/wizard/step/${currentStep + 1}`}
               className="cursor-pointer flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-xl font-bold text-sm shadow-lg hover:scale-105 active:scale-95 transition-all"
             >
               {isLastStep ? t('buttons.done') : t('buttons.next')}
               <ArrowRight size={18} />
-            </button>
+            </PrefixedLink>
           </div>
         </div>
       </div>

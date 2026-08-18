@@ -1,6 +1,8 @@
 {
   "header": {
-    "stepOf": "ステップ {{current}} / {{total}}"
+    "stepOf": "ステップ {{current}} / {{total}}",
+    "stepNavigation": "ステップナビゲーション",
+    "stepLabel": "ステップ {{step}}"
   },
   "calendar": {
     "addReminder": "カレンダーにリマインダーを追加",

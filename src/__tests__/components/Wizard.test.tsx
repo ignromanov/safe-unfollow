@@ -15,8 +15,9 @@ const mockNavigate = vi.fn((path: string) => {
 vi.mock('react-router-dom', () => ({
   useLocation: () => ({ pathname: mockPathname }),
   useNavigate: () => mockNavigate,
-  // PrefixedLink renders <Link>; a real <a href> stub is enough since navigation
-  // itself is exercised via mockNavigate above, not by following hrefs.
+  // PrefixedLink renders <Link>; a real <a href> stub is enough to assert hrefs and to
+  // let Escape-key navigation (a real navigate() call, not a click) be exercised
+  // separately via mockNavigate above.
   Link: ({ to, children, ...props }: { to: string; children?: React.ReactNode }) => (
     <a href={to} {...props}>
       {children}
@@ -41,17 +42,15 @@ vi.mock('@/lib/analytics', () => ({
   analytics: {
     guideEntryView: vi.fn(),
     wizardStepView: vi.fn(),
-    wizardNextClick: vi.fn(),
-    wizardBackClick: vi.fn(),
-    wizardCancel: vi.fn(),
-    wizardExternalLinkClick: vi.fn(),
   },
 }));
 
-describe('Wizard', () => {
-  const mockOnComplete = vi.fn();
-  const mockOnCancel = vi.fn();
+function renderWizardAtStep(step: number) {
+  mockPathname = `/wizard/step/${step}`;
+  return render(<Wizard />);
+}
 
+describe('Wizard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockPathname = '/wizard';
@@ -59,33 +58,33 @@ describe('Wizard', () => {
   });
 
   it('should render without crashing', () => {
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+    render(<Wizard />);
 
     expect(screen.getByText('Step 1 of 8')).toBeInTheDocument();
   });
 
   it('should render step indicator with progress dots', () => {
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+    render(<Wizard />);
 
     // Step counter text
     expect(screen.getByText('Step 1 of 8')).toBeInTheDocument();
   });
 
   it('should render the GuideEntry headline on step 1', () => {
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+    render(<Wizard />);
 
     expect(screen.getByRole('heading', { name: wizardEN.entry.title })).toBeInTheDocument();
   });
 
-  it('should render navigation buttons', () => {
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+  it('should render navigation links', () => {
+    render(<Wizard />);
 
     expect(screen.getByText('Next Step')).toBeInTheDocument();
     expect(screen.getByText('buttons.cancel')).toBeInTheDocument();
   });
 
   it('should render the GuideEntry CTA linking to Accounts Center on step 1', () => {
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+    render(<Wizard />);
 
     const cta = screen.getByRole('link', { name: new RegExp(wizardEN.entry.cta) });
     expect(cta).toBeInTheDocument();
@@ -95,39 +94,51 @@ describe('Wizard', () => {
     );
   });
 
-  it('should call navigate to next step when Next is clicked', () => {
-    mockPathname = '/wizard/step/1';
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+  it('navigates by href, so the control works before hydration', () => {
+    renderWizardAtStep(3);
 
-    fireEvent.click(screen.getByText(wizardEN.buttons.next));
-
-    expect(mockNavigate).toHaveBeenCalledWith('/wizard/step/2');
+    expect(screen.getByRole('link', { name: /next step/i })).toHaveAttribute(
+      'href',
+      expect.stringContaining('/wizard/step/4')
+    );
+    expect(screen.getByRole('link', { name: /back/i })).toHaveAttribute(
+      'href',
+      expect.stringContaining('/wizard/step/2')
+    );
   });
 
-  it('should call navigate to previous step when Back is clicked', () => {
-    mockPathname = '/wizard/step/2';
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+  it('marks the current step without pretending to be a tablist', () => {
+    renderWizardAtStep(3);
 
-    expect(screen.getByText('Step 2 of 8')).toBeInTheDocument();
+    expect(screen.queryByRole('tablist')).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { current: 'step' })).toHaveAccessibleName(/step 3/i);
+  });
 
-    fireEvent.click(screen.getByText('Back'));
+  it('should navigate back one step on Escape', () => {
+    renderWizardAtStep(2);
+
+    fireEvent.keyDown(document, { key: 'Escape' });
 
     expect(mockNavigate).toHaveBeenCalledWith('/wizard/step/1');
   });
 
-  it('should call onCancel when close button is clicked', () => {
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+  it('should navigate home on Escape when on the first step', () => {
+    renderWizardAtStep(1);
 
-    // Find the close button by its aria-label from translations
-    const closeButton = screen.getByRole('button', { name: wizardEN.buttons.close });
-    fireEvent.click(closeButton);
+    fireEvent.keyDown(document, { key: 'Escape' });
 
-    expect(mockOnCancel).toHaveBeenCalled();
+    expect(mockNavigate).toHaveBeenCalledWith('/');
+  });
+
+  it('should link "Close guide" home', () => {
+    render(<Wizard />);
+
+    const closeLink = screen.getByRole('link', { name: wizardEN.buttons.close });
+    expect(closeLink).toHaveAttribute('href', '/');
   });
 
   it('should show warning badge on step 4', () => {
-    mockPathname = '/wizard/step/4';
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+    renderWizardAtStep(4);
 
     expect(screen.getByText(wizardEN.format.warning)).toBeInTheDocument();
     expect(
@@ -135,67 +146,50 @@ describe('Wizard', () => {
     ).toBeInTheDocument();
   });
 
-  it('should call onComplete on last step when Done is clicked', () => {
-    mockPathname = '/wizard/step/8';
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+  it('should link "Done, let\'s go!" to /upload on the last step', () => {
+    renderWizardAtStep(8);
 
-    expect(screen.getByText("Done, let's go!")).toBeInTheDocument();
-
-    fireEvent.click(screen.getByText("Done, let's go!"));
-
-    expect(mockOnComplete).toHaveBeenCalled();
+    const doneLink = screen.getByRole('link', { name: "Done, let's go!" });
+    expect(doneLink).toHaveAttribute('href', '/upload');
   });
 
   it('should render step video with alt text as aria-label', () => {
     // Step 1 is GuideEntry now, which carries no video — step 2 still uses
     // the generic step card this behavior belongs to.
-    mockPathname = '/wizard/step/2';
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+    renderWizardAtStep(2);
 
     const video = screen.getByLabelText(wizardEN.steps['2'].alt);
     expect(video).toBeInTheDocument();
   });
 
-  it('should navigate via goToStep when clicking Next', () => {
-    mockPathname = '/wizard/step/1';
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
-
-    fireEvent.click(screen.getByText('Next Step'));
-
-    // Navigation to step 2
-    expect(mockNavigate).toHaveBeenCalledWith('/wizard/step/2');
-  });
-
   it('should render correct step based on URL pathname', () => {
-    // Test step 5
-    mockPathname = '/wizard/step/5';
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+    renderWizardAtStep(5);
 
     expect(screen.getByText('Step 5 of 8')).toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 2 })).toBeInTheDocument();
   });
 
-  it('should navigate to correct path when Next is clicked', () => {
-    mockPathname = '/wizard/step/3';
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+  it('should prefix step-indicator and Back/Next hrefs with the current locale', () => {
+    mockUseLanguagePrefix.mockReturnValue('/ru');
+    mockPathname = '/ru/wizard/step/3';
+    render(<Wizard />);
 
-    fireEvent.click(screen.getByText(wizardEN.buttons.next));
-
-    expect(mockNavigate).toHaveBeenCalledWith('/wizard/step/4');
-  });
-
-  it('should navigate to correct path when Back is clicked', () => {
-    mockPathname = '/wizard/step/5';
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
-
-    fireEvent.click(screen.getByText('Back'));
-
-    expect(mockNavigate).toHaveBeenCalledWith('/wizard/step/4');
+    expect(screen.getByRole('link', { name: /next step/i })).toHaveAttribute(
+      'href',
+      '/ru/wizard/step/4'
+    );
+    expect(screen.getByRole('link', { name: /back/i })).toHaveAttribute(
+      'href',
+      '/ru/wizard/step/2'
+    );
+    expect(screen.getByRole('link', { current: 'step' })).toHaveAttribute(
+      'href',
+      '/ru/wizard/step/3'
+    );
   });
 
   it('should render "I already have my ZIP file" link on step 1', () => {
-    mockPathname = '/wizard/step/1';
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+    renderWizardAtStep(1);
 
     const alreadyHaveFileLink = screen.getByRole('link', {
       name: wizardEN.buttons.alreadyHaveFile,
@@ -207,8 +201,7 @@ describe('Wizard', () => {
     // Prerendered wizard step pages are inert until React hydrates, so this
     // control must be a real <a href> — not a button firing navigate() on
     // click — or it does nothing during that window. See PrefixedLink.tsx.
-    mockPathname = '/wizard/step/1';
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+    renderWizardAtStep(1);
 
     const alreadyHaveFileLink = screen.getByRole('link', {
       name: wizardEN.buttons.alreadyHaveFile,
@@ -220,7 +213,7 @@ describe('Wizard', () => {
   it('should prefix the "I already have my ZIP file" href with the current locale', () => {
     mockPathname = '/ru/wizard/step/1';
     mockUseLanguagePrefix.mockReturnValue('/ru');
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+    render(<Wizard />);
 
     const alreadyHaveFileLink = screen.getByRole('link', {
       name: wizardEN.buttons.alreadyHaveFile,
@@ -230,8 +223,7 @@ describe('Wizard', () => {
   });
 
   it('should not render "I already have my ZIP file" link on other steps', () => {
-    mockPathname = '/wizard/step/2';
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+    renderWizardAtStep(2);
 
     const alreadyHaveFileLink = screen.queryByRole('link', {
       name: wizardEN.buttons.alreadyHaveFile,
@@ -240,14 +232,13 @@ describe('Wizard', () => {
   });
 
   it('should not report wizardStepView for step 1 — GuideEntry owns its own view event', () => {
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+    render(<Wizard />);
 
     expect(analytics.wizardStepView).not.toHaveBeenCalled();
   });
 
   it('should report wizardStepView for step 2', () => {
-    mockPathname = '/wizard/step/2';
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+    renderWizardAtStep(2);
 
     expect(analytics.wizardStepView).toHaveBeenCalledWith(2);
   });

@@ -1,6 +1,8 @@
 {
   "header": {
-    "stepOf": "Étape {{current}} sur {{total}}"
+    "stepOf": "Étape {{current}} sur {{total}}",
+    "stepNavigation": "Navigation des étapes",
+    "stepLabel": "Étape {{step}}"
   },
   "calendar": {
     "addReminder": "Ajouter un rappel au calendrier",

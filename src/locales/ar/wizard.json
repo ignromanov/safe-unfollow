@@ -1,6 +1,8 @@
 {
   "header": {
-    "stepOf": "الخطوة {{current}} من {{total}}"
+    "stepOf": "الخطوة {{current}} من {{total}}",
+    "stepNavigation": "التنقل بين الخطوات",
+    "stepLabel": "الخطوة {{step}}"
   },
   "calendar": {
     "addReminder": "إضافة تذكير للتقويم",

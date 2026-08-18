@@ -1,6 +1,8 @@
 {
   "header": {
-    "stepOf": "Adım {{current}} / {{total}}"
+    "stepOf": "Adım {{current}} / {{total}}",
+    "stepNavigation": "Adım gezinmesi",
+    "stepLabel": "Adım {{step}}"
   },
   "calendar": {
     "addReminder": "Takvime hatırlatıcı ekle",

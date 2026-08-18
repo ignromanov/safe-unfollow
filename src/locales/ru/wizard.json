@@ -1,6 +1,8 @@
 {
   "header": {
-    "stepOf": "Шаг {{current}} из {{total}}"
+    "stepOf": "Шаг {{current}} из {{total}}",
+    "stepNavigation": "Навигация по шагам",
+    "stepLabel": "Шаг {{step}}"
   },
   "calendar": {
     "addReminder": "Добавить напоминание в календарь",
