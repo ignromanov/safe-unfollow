@@ -29,6 +29,9 @@
         "quality": "Toute qualité de média",
         "content": "Abonnés et abonnements"
       }
+    },
+    "accordion": {
+      "trigger": "Guide étape par étape"
     }
   },
   "steps": {

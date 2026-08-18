@@ -29,6 +29,9 @@
         "quality": "Herhangi bir medya kalitesi",
         "content": "Takipçiler ve takip edilenler"
       }
+    },
+    "accordion": {
+      "trigger": "Adım adım rehber"
     }
   },
   "steps": {

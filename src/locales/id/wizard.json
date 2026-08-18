@@ -29,6 +29,9 @@
         "quality": "Kualitas media apa pun",
         "content": "Pengikut dan mengikuti"
       }
+    },
+    "accordion": {
+      "trigger": "Panduan langkah demi langkah"
     }
   },
   "steps": {

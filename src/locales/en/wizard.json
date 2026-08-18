@@ -29,6 +29,9 @@
         "quality": "Any media quality",
         "content": "Followers and following"
       }
+    },
+    "accordion": {
+      "trigger": "Step-by-step guide"
     }
   },
   "steps": {

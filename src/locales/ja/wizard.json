@@ -29,6 +29,9 @@
         "quality": "メディア品質は任意",
         "content": "フォロワーとフォロー中"
       }
+    },
+    "accordion": {
+      "trigger": "手順ガイド"
     }
   },
   "steps": {

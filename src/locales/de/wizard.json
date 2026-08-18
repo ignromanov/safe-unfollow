@@ -29,6 +29,9 @@
         "quality": "Beliebige Medienqualität",
         "content": "Follower und Gefolgte"
       }
+    },
+    "accordion": {
+      "trigger": "Schritt-für-Schritt-Anleitung"
     }
   },
   "steps": {

@@ -29,6 +29,9 @@
         "quality": "Cualquier calidad de medios",
         "content": "Seguidores y seguidos"
       }
+    },
+    "accordion": {
+      "trigger": "Guía paso a paso"
     }
   },
   "steps": {
