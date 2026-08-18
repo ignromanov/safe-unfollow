@@ -5,7 +5,7 @@
 import { AnalyticsEvents, parseDurationBucket } from './constants';
 import type { FilterAction, LinkType, ParseOutcome } from './constants';
 import { trackEvent } from './core';
-import { enqueueEvent, trackNavigating } from './queue';
+import { enqueueEvent, flushEvents, trackNavigating } from './queue';
 import { getStoredUTM, getEntryCTA, setEntryCTA } from './utm';
 import type { LabelResolutionMode } from '@/core/types';
 import type { LicenseFailureReason } from '@/lib/export/license';
@@ -15,8 +15,17 @@ import type { LicenseFailureReason } from '@/lib/export/license';
  */
 export const analytics = {
   // File Upload events (V10: removed file_hash — not actionable in dashboard)
+  //
+  // The whole upload funnel is batched, and it moves as one unit on purpose:
+  // `file_upload_success` is divided by `file_upload_start`, and every
+  // `upload_error_<code>` is reported against that same denominator. Splitting
+  // the transports would split the gate — `enqueueEvent` needs only the script
+  // tag, `trackEvent` needs the script to have executed — and the 70.5% success
+  // rate would divide two populations. Nothing here unloads the page, and where
+  // an attempt's events are lost they are lost together, which leaves the ratio
+  // unbiased; losing a success while its start survived would understate it.
   fileUploadStart: (fileSizeMb: number) => {
-    trackEvent(AnalyticsEvents.FILE_UPLOAD_START, {
+    enqueueEvent(AnalyticsEvents.FILE_UPLOAD_START, {
       file_size_mb: Math.round(fileSizeMb * 100) / 100,
     });
   },
@@ -25,7 +34,7 @@ export const analytics = {
   fileUploadSuccess: (accountCount: number, fromCache: boolean) => {
     const utm = getStoredUTM();
     const entryCta = getEntryCTA();
-    trackEvent(AnalyticsEvents.FILE_UPLOAD_SUCCESS, {
+    enqueueEvent(AnalyticsEvents.FILE_UPLOAD_SUCCESS, {
       account_count: accountCount,
       from_cache: fromCache,
       ...(utm.utm_source && { utm_source: utm.utm_source }),
@@ -43,7 +52,7 @@ export const analytics = {
    * unappealing one look identical in the dashboard.
    */
   uploadParseDuration: (durationMs: number, outcome: ParseOutcome) => {
-    trackEvent(AnalyticsEvents.UPLOAD_PARSE_DURATION, {
+    enqueueEvent(AnalyticsEvents.UPLOAD_PARSE_DURATION, {
       duration_bucket: parseDurationBucket(durationMs),
       outcome,
     });
@@ -52,7 +61,7 @@ export const analytics = {
   // Filter events (V10: 3% sampling, was 10%)
   filterToggle: (filterName: string, action: FilterAction, activeCount: number) => {
     if (Math.random() > 0.03) return;
-    trackEvent(AnalyticsEvents.FILTER_TOGGLE, {
+    enqueueEvent(AnalyticsEvents.FILTER_TOGGLE, {
       filter_name: filterName,
       filter_action: action,
       active_filter_count: activeCount,
@@ -60,7 +69,7 @@ export const analytics = {
   },
 
   filterClearAll: (previousCount: number) => {
-    trackEvent(AnalyticsEvents.FILTER_CLEAR_ALL, {
+    enqueueEvent(AnalyticsEvents.FILTER_CLEAR_ALL, {
       previous_count: previousCount,
     });
   },
@@ -73,7 +82,7 @@ export const analytics = {
     hasFiltersActive: boolean
   ) => {
     if (Math.random() > 0.05) return;
-    trackEvent(AnalyticsEvents.SEARCH_PERFORM, {
+    enqueueEvent(AnalyticsEvents.SEARCH_PERFORM, {
       query_length: queryLength,
       result_count: resultCount,
       total_count: totalCount,
@@ -136,29 +145,35 @@ export const analytics = {
   },
 
   // Hero CTAs (sets entry CTA for conversion attribution)
+  //
+  // Batched, unlike the new-tab clicks above: these are PrefixedLink, so the
+  // click is preventDefault + pushState and the document never unloads. The
+  // route change that follows drains the queue on the next tick, so the event
+  // leaves as promptly as it did on the immediate path — it just shares a
+  // request with the rest of the landing page's set.
   heroCTAGuide: () => {
     setEntryCTA('guide');
-    trackEvent(AnalyticsEvents.HERO_CTA_GUIDE);
+    enqueueEvent(AnalyticsEvents.HERO_CTA_GUIDE);
   },
 
   heroCTASample: () => {
     setEntryCTA('sample');
-    trackEvent(AnalyticsEvents.HERO_CTA_SAMPLE);
+    enqueueEvent(AnalyticsEvents.HERO_CTA_SAMPLE);
   },
 
   heroCTAUploadDirect: () => {
     setEntryCTA('upload_direct');
-    trackEvent(AnalyticsEvents.HERO_CTA_UPLOAD_DIRECT);
+    enqueueEvent(AnalyticsEvents.HERO_CTA_UPLOAD_DIRECT);
   },
 
   heroCTAContinue: () => {
     setEntryCTA('continue');
-    trackEvent(AnalyticsEvents.HERO_CTA_CONTINUE);
+    enqueueEvent(AnalyticsEvents.HERO_CTA_CONTINUE);
   },
 
   // Navigation
   themeToggle: (mode: 'dark' | 'light' | 'system') => {
-    trackEvent(AnalyticsEvents.THEME_TOGGLE, { mode });
+    enqueueEvent(AnalyticsEvents.THEME_TOGGLE, { mode });
   },
 
   clearData: () => {
@@ -174,7 +189,7 @@ export const analytics = {
   // Wizard events (V10: 5% sampling, was 25%)
   wizardStepView: (stepId: number, _stepTitle?: string) => {
     if (Math.random() > 0.05) return;
-    trackEvent(AnalyticsEvents.WIZARD_STEP_VIEW, {
+    enqueueEvent(AnalyticsEvents.WIZARD_STEP_VIEW, {
       step_id: stepId,
     });
   },
@@ -197,7 +212,7 @@ export const analytics = {
 
   // Upload Zone
   uploadClick: () => {
-    trackEvent(AnalyticsEvents.UPLOAD_CLICK);
+    enqueueEvent(AnalyticsEvents.UPLOAD_CLICK);
   },
 
   // Diagnostic Errors
@@ -234,7 +249,7 @@ export const analytics = {
 
   // FAQ
   faqExpand: (questionId: number, _questionText?: string) => {
-    trackEvent(AnalyticsEvents.FAQ_EXPAND, {
+    enqueueEvent(AnalyticsEvents.FAQ_EXPAND, {
       question_id: questionId,
     });
   },
@@ -361,10 +376,31 @@ export const analytics = {
       NETWORK_ERROR: AnalyticsEvents.UPLOAD_ERROR_NETWORK,
       UNKNOWN: AnalyticsEvents.UPLOAD_ERROR_UNKNOWN,
     };
-    trackEvent(eventMap[code], {
+    enqueueEvent(eventMap[code], {
       file_hash: fileHash.slice(0, 12),
       error_message: errorMessage?.slice(0, 50) ?? '',
     });
+    // Drained here rather than left to `pagehide`: unlike the success path, a
+    // failed upload navigates nowhere, so nothing else would trigger a flush
+    // while the visitor stares at the error screen. One request per failure is
+    // the price of not stranding the diagnostic the HTML-format work reads.
+    flushEvents();
+  },
+
+  /**
+   * Which format the visitor believes they exported.
+   *
+   * Batched with the rest of `/upload`: it fires from a quiz on that page and
+   * navigates nowhere. Reached through this object rather than a raw
+   * `trackEvent` in the component, so its transport is decided in one place
+   * alongside the funnel it is read against.
+   */
+  formatQuizAnswer: (answer: string) => {
+    enqueueEvent(AnalyticsEvents.FORMAT_QUIZ_ANSWER, { answer });
+  },
+
+  formatQuizFixedIt: () => {
+    enqueueEvent(AnalyticsEvents.FORMAT_QUIZ_FIXED_IT);
   },
 
   // Session & Engagement
@@ -386,12 +422,15 @@ export const analytics = {
   },
 
   // PWA Install
+  //
+  // Batched together: the prompt is the denominator the install is divided by,
+  // so both must be gated on the same thing. Neither unloads the page.
   pwaInstallPrompt: () => {
-    trackEvent(AnalyticsEvents.PWA_INSTALL_PROMPT);
+    enqueueEvent(AnalyticsEvents.PWA_INSTALL_PROMPT);
   },
 
   pwaInstalled: () => {
-    trackEvent(AnalyticsEvents.PWA_INSTALLED);
+    enqueueEvent(AnalyticsEvents.PWA_INSTALLED);
   },
 
   // Ads — one viewable impression opportunity, by the MRC display standard.

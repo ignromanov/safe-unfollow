@@ -6,8 +6,11 @@ import { createI18nMock } from '@/__tests__/utils/mockI18n';
 
 vi.mock('react-i18next', () => createI18nMock(uploadEN));
 
-vi.mock('@/lib/stats/core', () => ({
-  trackEvent: vi.fn(),
+vi.mock('@/lib/stats/events', () => ({
+  analytics: {
+    formatQuizAnswer: vi.fn(),
+    formatQuizFixedIt: vi.fn(),
+  },
 }));
 
 import { FormatQuiz } from '@/components/upload/FormatQuiz';
@@ -81,13 +84,13 @@ describe('FormatQuiz', () => {
     });
 
     it('should track analytics event', async () => {
-      const { trackEvent } = await import('@/lib/stats/core');
+      const { analytics } = await import('@/lib/stats/events');
       const user = userEvent.setup();
       render(<FormatQuiz />);
 
       await user.click(screen.getByText(uploadEN.quiz.json));
 
-      expect(trackEvent).toHaveBeenCalledWith('format_quiz_answer', { answer: 'json' });
+      expect(analytics.formatQuizAnswer).toHaveBeenCalledWith('json');
     });
   });
 
@@ -152,14 +155,14 @@ describe('FormatQuiz', () => {
     });
 
     it('should track analytics event for fixedIt', async () => {
-      const { trackEvent } = await import('@/lib/stats/core');
+      const { analytics } = await import('@/lib/stats/events');
       const user = userEvent.setup();
       render(<FormatQuiz />);
 
       await user.click(screen.getByText(uploadEN.quiz.html));
       await user.click(screen.getByText(uploadEN.quiz.fixedIt));
 
-      expect(trackEvent).toHaveBeenCalledWith('format_quiz_fixed_it');
+      expect(analytics.formatQuizFixedIt).toHaveBeenCalled();
     });
   });
 

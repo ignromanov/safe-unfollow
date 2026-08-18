@@ -1,4 +1,4 @@
-import { trackEvent } from '@/lib/stats/core';
+import { analytics } from '@/lib/stats/events';
 import { CheckCircle2, AlertTriangle, HelpCircle, RefreshCw, X } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -81,7 +81,7 @@ export function FormatQuiz({ onOpenWizard, isProcessing = false }: FormatQuizPro
   const handleAnswer = useCallback((selected: QuizAnswer) => {
     setAnswer(selected);
     storeAnswer(selected);
-    trackEvent('format_quiz_answer', { answer: selected });
+    analytics.formatQuizAnswer(selected);
   }, []);
 
   const handleDismiss = useCallback(() => {
@@ -93,7 +93,7 @@ export function FormatQuiz({ onOpenWizard, isProcessing = false }: FormatQuizPro
     clearQuizStorage();
     setAnswer(null);
     setDismissed(false);
-    trackEvent('format_quiz_fixed_it');
+    analytics.formatQuizFixedIt();
   }, []);
 
   // Hide during upload processing
