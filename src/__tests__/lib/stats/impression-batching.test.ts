@@ -2,8 +2,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const enqueueEvent = vi.fn();
 const trackEvent = vi.fn();
+const trackNavigating = vi.fn();
 vi.mock('@/lib/stats/queue', () => ({
   enqueueEvent: (name: string, data?: unknown) => enqueueEvent(name, data),
+  trackNavigating: (name: string, data?: unknown) => trackNavigating(name, data),
 }));
 vi.mock('@/lib/stats/core', () => ({
   trackEvent: (name: string, data?: unknown) => trackEvent(name, data),
@@ -51,13 +53,69 @@ describe('promo impression batching', () => {
     expect(trackEvent).not.toHaveBeenCalled();
   });
 
-  it('keeps clicks on the immediate path — a click navigates away', () => {
+  it('keeps new-tab clicks on the immediate path — they must not wait for a batch', () => {
     analytics.affiliateBlockClick('nordvpn_global');
 
     expect(trackEvent).toHaveBeenCalledWith('affiliate_block_click', {
       offer_id: 'nordvpn_global',
     });
     expect(enqueueEvent).not.toHaveBeenCalled();
+  });
+
+  it('leaves new-tab clicks on trackEvent — a _blank click never unloads this page', () => {
+    analytics.donationCardClick(1200);
+
+    expect(trackEvent).toHaveBeenCalledWith('donation_card_click', { account_count: 1200 });
+    expect(trackNavigating).not.toHaveBeenCalled();
+  });
+
+  describe('same-tab navigations', () => {
+    it('sends checkout_start over the keepalive path — the redirect would cancel it', () => {
+      analytics.checkoutStart('en', 42);
+
+      expect(trackNavigating).toHaveBeenCalledWith('checkout_start', {
+        locale: 'en',
+        row_count: 42,
+      });
+      expect(trackEvent).not.toHaveBeenCalled();
+    });
+
+    it('sends language_change over the keepalive path — it precedes a full reload', () => {
+      analytics.languageChange('id');
+
+      expect(trackNavigating).toHaveBeenCalledWith('language_change', { language: 'id' });
+      expect(trackEvent).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('paywall funnel dimensions', () => {
+    it('carries locale and row_count on every step of the funnel', () => {
+      analytics.paywallView('id', 8930);
+      analytics.checkoutStart('id', 8930);
+
+      expect(enqueueEvent).toHaveBeenCalledWith('paywall_view', {
+        locale: 'id',
+        row_count: 8930,
+      });
+      expect(trackNavigating).toHaveBeenCalledWith('checkout_start', {
+        locale: 'id',
+        row_count: 8930,
+      });
+    });
+
+    // The view is an impression and precedes no navigation, so it belongs on
+    // the batch path — which also means it is gated on the same thing
+    // checkout_start is gated on, and the ratio between them divides one
+    // population rather than two.
+    it('puts the dismiss on the same path as the view it is divided by', () => {
+      analytics.paywallDismiss('en', 42);
+
+      expect(enqueueEvent).toHaveBeenCalledWith('paywall_dismiss', {
+        locale: 'en',
+        row_count: 42,
+      });
+      expect(trackEvent).not.toHaveBeenCalled();
+    });
   });
 
   it('applies no sampling to impressions', () => {

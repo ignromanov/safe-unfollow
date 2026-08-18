@@ -19,7 +19,12 @@ import { analytics } from '@/lib/stats';
 export interface UseProExportResult {
   isEnabled: boolean;
   isUnlocked: boolean;
-  startCheckout: () => void;
+  /**
+   * Both dimensions are supplied by the caller because this hook holds neither.
+   * They ride on `checkout_start` so the paywall funnel can be split by locale
+   * and by how much the reader was actually about to buy — see events.ts.
+   */
+  startCheckout: (locale: string, rowCount: number) => void;
 }
 
 // Module-level so the store identity stays stable across renders.
@@ -34,11 +39,13 @@ export function useProExport(): UseProExportResult {
     getServerUnlockSnapshot
   );
 
-  const startCheckout = (): void => {
+  const startCheckout = (locale: string, rowCount: number): void => {
     const checkoutUrl = buildCheckoutUrl();
     if (!checkoutUrl) return;
 
-    analytics.checkoutStart();
+    // After the guard, never before: an event reporting a checkout that never
+    // started would inflate the only funnel step we can act on.
+    analytics.checkoutStart(locale, rowCount);
     window.location.href = checkoutUrl;
   };
 

@@ -109,3 +109,26 @@ export function flushEvents(): void {
     // Analytics must never break the app.
   });
 }
+
+/**
+ * Deliver one event immediately, over a request the navigation cannot cancel.
+ *
+ * For the two events that precede a SAME-TAB navigation — `checkout_start`
+ * before `location.href = checkoutUrl`, `language_change` before the full
+ * reload that fetches the new locale's SSG HTML. Both announce the thing that
+ * kills them.
+ *
+ * `trackEvent` is wrong here twice over: `window.umami.track()` sends without
+ * `keepalive`, so a fast redirect cancels the request, and it is gated on the
+ * script having executed rather than on the tag being present. `trackBeacon`
+ * fixes the first but not the second (core.ts). This path is gated only on the
+ * DOM (`resolveUmamiTarget()` above), so it divides the same population as the
+ * batched impressions it will be compared against.
+ *
+ * Not for `target="_blank"` clicks: a new browsing context does not unload this
+ * page, so those keep `trackEvent` and stay out of the queue.
+ */
+export function trackNavigating(name: AnalyticsEventName, data?: EventData): void {
+  enqueueEvent(name, data);
+  flushEvents();
+}

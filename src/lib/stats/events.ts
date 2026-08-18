@@ -5,7 +5,7 @@
 import { AnalyticsEvents, parseDurationBucket } from './constants';
 import type { FilterAction, LinkType, ParseOutcome } from './constants';
 import { trackEvent } from './core';
-import { enqueueEvent } from './queue';
+import { enqueueEvent, trackNavigating } from './queue';
 import { getStoredUTM, getEntryCTA, setEntryCTA } from './utm';
 import type { LabelResolutionMode } from '@/core/types';
 import type { LicenseFailureReason } from '@/lib/export/license';
@@ -165,8 +165,10 @@ export const analytics = {
     trackEvent(AnalyticsEvents.CLEAR_DATA);
   },
 
+  // Same-tab navigation: LanguageSwitcher does a full reload to fetch the new
+  // locale's SSG HTML. Same defect as checkoutStart — see queue.ts.
   languageChange: (language: string) => {
-    trackEvent(AnalyticsEvents.LANGUAGE_CHANGE, { language });
+    trackNavigating(AnalyticsEvents.LANGUAGE_CHANGE, { language });
   },
 
   // Wizard events (V10: 5% sampling, was 25%)
@@ -443,8 +445,13 @@ export const analytics = {
     trackEvent(AnalyticsEvents.FREE_EXPORT_DOWNLOAD, { capped });
   },
 
-  paywallView: () => {
-    trackEvent(AnalyticsEvents.PAYWALL_VIEW);
+  // locale and row_count are the two dimensions the paywall cannot be tuned
+  // without: GH#25 (PAYWALL_MIN_ROWS against real selection sizes) and the
+  // Indonesian share of the audience. Batched, so this divides the same
+  // population as checkout_start — both gate on the analytics tag being in the
+  // DOM, where trackEvent gates on the script having executed.
+  paywallView: (locale: string, rowCount: number) => {
+    enqueueEvent(AnalyticsEvents.PAYWALL_VIEW, { locale, row_count: rowCount });
   },
 
   // Fires only for the three Radix-driven closes (X, Escape, overlay click) —
@@ -453,12 +460,14 @@ export const analytics = {
   // directly, bypassing this handler). Both of those already have their own
   // event, and double-counting them here would corrupt the one ratio this
   // event exists to produce.
-  paywallDismiss: () => {
-    trackEvent(AnalyticsEvents.PAYWALL_DISMISS);
+  paywallDismiss: (locale: string, rowCount: number) => {
+    enqueueEvent(AnalyticsEvents.PAYWALL_DISMISS, { locale, row_count: rowCount });
   },
 
-  checkoutStart: () => {
-    trackEvent(AnalyticsEvents.CHECKOUT_START);
+  // Same-tab navigation: useProExport sets location.href in the next statement,
+  // and window.umami.track() has no keepalive. See queue.ts.
+  checkoutStart: (locale: string, rowCount: number) => {
+    trackNavigating(AnalyticsEvents.CHECKOUT_START, { locale, row_count: rowCount });
   },
 
   purchaseSuccess: () => {

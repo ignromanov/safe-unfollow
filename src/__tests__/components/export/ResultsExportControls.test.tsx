@@ -192,7 +192,7 @@ describe('ResultsExportControls', () => {
       .filter(Boolean);
 
     expect(classes).toContain('text-primary-foreground');
-    expect(classes.filter((c) => c.startsWith('dark:text-'))).toEqual([]);
+    expect(classes.filter(c => c.startsWith('dark:text-'))).toEqual([]);
   });
 
   // WCAG 2.5.3 Label in Name: the old icon button carried an aria-label of
@@ -239,7 +239,10 @@ describe('ResultsExportControls', () => {
       );
       expect(vi.mocked(analytics.freeExportDownload)).toHaveBeenCalledWith(true);
       expect(await screen.findByText(paywallHeadline)).toBeInTheDocument();
-      expect(vi.mocked(analytics.paywallView)).toHaveBeenCalled();
+      // The two dimensions the paywall is tuned against, read from the state
+      // the component already holds — asserted here because tsconfig excludes
+      // src/__tests__, so a stale zero-argument call site type-checks clean.
+      expect(vi.mocked(analytics.paywallView)).toHaveBeenCalledWith('en', defaultProps.totalCount);
       expect(vi.mocked(analytics.exportClick)).toHaveBeenCalledWith(false);
     });
 
@@ -526,7 +529,12 @@ describe('ResultsExportControls', () => {
       const closeButton = document.querySelector('[data-slot="dialog-close"]');
       await user.click(closeButton as Element);
 
-      expect(vi.mocked(analytics.paywallDismiss)).toHaveBeenCalledTimes(1);
+      // Same dimensions as the view it will be divided by — a dismiss rate
+      // split by locale is only meaningful if both halves carry the locale.
+      expect(vi.mocked(analytics.paywallDismiss)).toHaveBeenCalledWith(
+        'en',
+        defaultProps.totalCount
+      );
       expect(screen.queryByText(paywallHeadline)).not.toBeInTheDocument();
     });
 
@@ -545,7 +553,9 @@ describe('ResultsExportControls', () => {
       await screen.findByText(paywallHeadline);
       await user.click(screen.getByRole('button', { name: resultsEN.export.paywall.cta }));
 
-      expect(startCheckout).toHaveBeenCalledTimes(1);
+      // The count handed to checkout is the one the headline showed, not a
+      // freshly recomputed selection: what is recorded must be what was seen.
+      expect(startCheckout).toHaveBeenCalledWith('en', defaultProps.totalCount);
       expect(vi.mocked(analytics.paywallDismiss)).not.toHaveBeenCalled();
     });
 

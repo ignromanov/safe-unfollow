@@ -340,12 +340,35 @@ describe('Analytics', () => {
         expect(call[1].file_size_mb).toBe(5.12);
       });
 
-      it('should track language change', () => {
+      // The switcher reloads the page to fetch the new locale's SSG HTML, and
+      // window.umami.track() sends without keepalive — so this event used to
+      // announce the navigation that cancelled it. It now takes the batch
+      // transport's fetch, in the same tick.
+      it('should track language change over the keepalive path, not window.umami', () => {
+        const script = document.createElement('script');
+        script.setAttribute('src', 'https://umami.example/script.js');
+        script.setAttribute('data-website-id', 'test-website-id');
+        document.head.appendChild(script);
+        const fetchMock = vi.fn(() => Promise.resolve(new Response(null, { status: 200 })));
+        vi.stubGlobal('fetch', fetchMock);
+
         analytics.languageChange('es');
 
-        expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.LANGUAGE_CHANGE, {
-          language: 'es',
+        expect(windowSpy.umami.track).not.toHaveBeenCalled();
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+
+        const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+        expect(url).toBe('https://umami.example/api/batch');
+        expect(init.keepalive).toBe(true);
+        const body = JSON.parse(init.body as string) as Array<{
+          payload: { name: string; data?: Record<string, unknown> };
+        }>;
+        expect(body[0]?.payload).toMatchObject({
+          name: AnalyticsEvents.LANGUAGE_CHANGE,
+          data: { language: 'es' },
         });
+
+        script.remove();
       });
 
       it('should track page view only once per session with UTM params', () => {
