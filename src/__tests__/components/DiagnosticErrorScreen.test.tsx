@@ -218,7 +218,15 @@ describe('DiagnosticErrorScreen', () => {
         />
       );
 
-      expect(screen.getByRole('button', { name: /try again/i })).toBeInTheDocument();
+      // The wizard control is the secondary here — a real link, not a button —
+      // and retry keeps the primary, filled style.
+      const actions = screen.getByRole('group', { name: /actions/i });
+      const secondary = within(actions).getByRole('link', {
+        name: uploadEN.diagnostic.showMistakes,
+      });
+
+      expect(secondary).toHaveAttribute('href', expect.stringContaining('/wizard/step/6'));
+      expect(within(actions).getByRole('button', { name: /try again/i })).toBeInTheDocument();
     });
   });
 
