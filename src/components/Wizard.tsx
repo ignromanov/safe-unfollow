@@ -1,10 +1,10 @@
 import { useCallback, useEffect } from 'react';
-import { ArrowLeft, ArrowRight, X, ExternalLink, AlertTriangle, Calendar } from 'lucide-react';
+import { ArrowLeft, ArrowRight, X, AlertTriangle, Calendar } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import FocusTrap from 'focus-trap-react';
 
 import { analytics } from '@/lib/analytics';
-import { PrefixedLink } from '@/components/PrefixedLink';
+import { GuideEntry } from '@/components/wizard/GuideEntry';
 import { ResponsiveGif } from '@/components/ResponsiveGif';
 import { WIZARD_STEPS } from '@/config/wizard-steps';
 import { useWizardNavigation } from '@/hooks/useWizardNavigation';
@@ -19,8 +19,11 @@ export function Wizard({ initialStep = 1, onComplete, onCancel }: WizardProps) {
   const { t } = useTranslation('wizard');
   const { currentStep, goToStep } = useWizardNavigation(initialStep);
 
-  // Track analytics on step view
+  // Track analytics on step view. Step 1 is GuideEntry, which reports its
+  // own guideEntryView — reporting wizardStepView here too would double the
+  // view event for the same screen (see GuideEntry.tsx).
   useEffect(() => {
+    if (currentStep === 1) return;
     analytics.wizardStepView(currentStep);
   }, [currentStep]);
 
@@ -117,93 +120,71 @@ export function Wizard({ initialStep = 1, onComplete, onCancel }: WizardProps) {
         {/* Scrollable content area */}
         <div className="flex-1 overflow-y-auto">
           <div className="min-h-full flex items-center justify-center p-4">
-            <div
-              className={`max-w-xl w-full rounded-4xl overflow-hidden shadow-2xl border transition-all ${
-                step.isWarning
-                  ? 'border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-900/50'
-                  : 'border-border bg-card'
-              }`}
-            >
-              {/* Image - width-first, height auto, aligned to bottom */}
-              <div className="bg-[oklch(0.5_0_0_/_0.05)] overflow-hidden relative flex items-end">
-                {step.visual ? (
-                  <ResponsiveGif
-                    basePath={step.visual}
-                    alt={t(`steps.${currentStep}.alt` as any)}
-                    className="w-full h-auto block"
-                  />
-                ) : (
-                  <img
-                    src={`https://picsum.photos/seed/${step.id}/800/600`}
-                    alt={t(`steps.${currentStep}.alt` as any)}
-                    width={800}
-                    height={600}
-                    className="w-full h-auto block"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                )}
-                {step.isWarning && (
-                  <div className="absolute top-4 start-4 p-2.5 bg-amber-400 text-black rounded-xl shadow-lg flex items-center gap-2 font-black text-xs animate-bounce">
-                    <AlertTriangle size={18} />
-                    {t('format.warning')}
-                  </div>
-                )}
-              </div>
+            {currentStep === 1 ? (
+              <GuideEntry />
+            ) : (
+              <div
+                className={`max-w-xl w-full rounded-4xl overflow-hidden shadow-2xl border transition-all ${
+                  step.isWarning
+                    ? 'border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-900/50'
+                    : 'border-border bg-card'
+                }`}
+              >
+                {/* Image - width-first, height auto, aligned to bottom */}
+                <div className="bg-[oklch(0.5_0_0_/_0.05)] overflow-hidden relative flex items-end">
+                  {step.visual ? (
+                    <ResponsiveGif
+                      basePath={step.visual}
+                      alt={t(`steps.${currentStep}.alt` as any)}
+                      className="w-full h-auto block"
+                    />
+                  ) : (
+                    <img
+                      src={`https://picsum.photos/seed/${step.id}/800/600`}
+                      alt={t(`steps.${currentStep}.alt` as any)}
+                      width={800}
+                      height={600}
+                      className="w-full h-auto block"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  )}
+                  {step.isWarning && (
+                    <div className="absolute top-4 start-4 p-2.5 bg-amber-400 text-black rounded-xl shadow-lg flex items-center gap-2 font-black text-xs animate-bounce">
+                      <AlertTriangle size={18} />
+                      {t('format.warning')}
+                    </div>
+                  )}
+                </div>
 
-              {/* Step Info */}
-              <div className="p-6 md:p-8">
-                <h2
-                  className={`text-2xl md:text-3xl font-display font-bold mb-5 leading-tight ${
-                    step.isWarning
-                      ? 'text-amber-800 dark:text-amber-500'
-                      : 'text-zinc-900 dark:text-white'
-                  }`}
-                >
-                  {t(`steps.${currentStep}.title` as any)}
-                </h2>
-                <p className="text-zinc-600 dark:text-zinc-400 text-base md:text-xl leading-relaxed mb-10 font-medium">
-                  {t(`steps.${currentStep}.description` as any)}
-                </p>
+                {/* Step Info */}
+                <div className="p-6 md:p-8">
+                  <h2
+                    className={`text-2xl md:text-3xl font-display font-bold mb-5 leading-tight ${
+                      step.isWarning
+                        ? 'text-amber-800 dark:text-amber-500'
+                        : 'text-zinc-900 dark:text-white'
+                    }`}
+                  >
+                    {t(`steps.${currentStep}.title` as any)}
+                  </h2>
+                  <p className="text-zinc-600 dark:text-zinc-400 text-base md:text-xl leading-relaxed mb-10 font-medium">
+                    {t(`steps.${currentStep}.description` as any)}
+                  </p>
 
-                {/* External Link Button (step 1) */}
-                {step.externalLink && (
-                  <div className="flex flex-col items-center sm:items-start gap-4">
-                    <a
-                      href={step.externalLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                  {/* Last step: Calendar reminder button */}
+                  {isLastStep && (
+                    <button
+                      onClick={handleCalendarReminder}
                       className="cursor-pointer inline-flex items-center justify-center gap-3 px-8 py-4 bg-primary text-primary-foreground rounded-2xl font-black shadow-xl hover:scale-105 active:scale-95 transition-all text-sm md:text-base w-full sm:w-auto"
                     >
-                      {t('buttons.openInstagram')} <ExternalLink size={20} />
-                    </a>
-
-                    {/* Already have file shortcut */}
-                    <PrefixedLink
-                      to="/upload"
-                      className="cursor-pointer inline-flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400 hover:text-primary dark:hover:text-primary transition-colors group"
-                    >
-                      {t('buttons.alreadyHaveFile')}
-                      <ArrowRight
-                        size={14}
-                        className="opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all"
-                      />
-                    </PrefixedLink>
-                  </div>
-                )}
-
-                {/* Last step: Calendar reminder button */}
-                {isLastStep && (
-                  <button
-                    onClick={handleCalendarReminder}
-                    className="cursor-pointer inline-flex items-center justify-center gap-3 px-8 py-4 bg-primary text-primary-foreground rounded-2xl font-black shadow-xl hover:scale-105 active:scale-95 transition-all text-sm md:text-base w-full sm:w-auto"
-                  >
-                    <Calendar size={20} />
-                    {t('calendar.addReminder')}
-                  </button>
-                )}
+                      <Calendar size={20} />
+                      {t('calendar.addReminder')}
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 

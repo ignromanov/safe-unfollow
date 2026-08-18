@@ -11,7 +11,6 @@
     "back": "Retour",
     "next": "Étape suivante",
     "done": "C'est fait, allons-y !",
-    "openInstagram": "Ouvrir la page d'exportation",
     "close": "Fermer le guide",
     "uploadFile": "Téléverser mon fichier",
     "alreadyHaveFile": "J'ai déjà mon fichier ZIP"
@@ -20,6 +19,16 @@
     "warning": "ÉTAPE CRITIQUE"
   },
   "entry": {
+    "title": "D'abord, demandez votre fichier à Instagram.",
+    "timeCost": {
+      "ours": "La demande prend environ 2 minutes.",
+      "theirs": "Instagram vous envoie ensuite le fichier par e-mail — l'attente est la leur, pas la nôtre."
+    },
+    "cta": "Ouvrir le Centre de comptes",
+    "trust": {
+      "noLogin": "Aucune connexion. Aucun mot de passe. Rien à relier.",
+      "local": "Votre export est lu dans ce navigateur et jamais téléversé."
+    },
     "recipe": {
       "title": "Que choisir dans la boîte de dialogue Instagram",
       "rows": {
@@ -36,11 +45,6 @@
     }
   },
   "steps": {
-    "1": {
-      "title": "Ouvrez la page d'exportation Instagram",
-      "description": "Cliquez sur le bouton ci-dessous pour ouvrir le Centre de comptes Meta. Ensuite, cliquez sur « Créer une exportation ».",
-      "alt": "Étape 1 : Ouvrez la page d'exportation et cliquez sur Créer une exportation"
-    },
     "2": {
       "title": "Choisissez votre profil Instagram",
       "description": "Sélectionnez votre compte Instagram dans la liste des profils connectés.",

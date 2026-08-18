@@ -11,7 +11,6 @@
     "back": "Back",
     "next": "Next Step",
     "done": "Done, let's go!",
-    "openInstagram": "Open Instagram Export Page",
     "close": "Close guide",
     "uploadFile": "Upload My File",
     "alreadyHaveFile": "I already have my ZIP file"
@@ -20,6 +19,16 @@
     "warning": "CRITICAL STEP"
   },
   "entry": {
+    "title": "First, ask Instagram for your file.",
+    "timeCost": {
+      "ours": "Asking takes about 2 minutes.",
+      "theirs": "Instagram then emails the file — the wait is theirs, not ours."
+    },
+    "cta": "Open Accounts Center",
+    "trust": {
+      "noLogin": "No login. No password. Nothing to connect.",
+      "local": "Your export is read in this browser and never uploaded."
+    },
     "recipe": {
       "title": "What to pick in Instagram's dialog",
       "rows": {
@@ -36,11 +45,6 @@
     }
   },
   "steps": {
-    "1": {
-      "title": "Open Instagram Export Page",
-      "description": "Click the button below to open Meta Accounts Center. Then click \"Create export\" to begin.",
-      "alt": "Step 1: Open Instagram Export Page and click Create export"
-    },
     "2": {
       "title": "Choose Your Instagram Profile",
       "description": "Select your Instagram account from the list of connected profiles.",

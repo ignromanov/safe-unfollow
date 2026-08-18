@@ -11,7 +11,6 @@
     "back": "Kembali",
     "next": "Langkah Berikutnya",
     "done": "Selesai, ayo mulai!",
-    "openInstagram": "Buka halaman ekspor",
     "close": "Tutup panduan",
     "uploadFile": "Unggah File Saya",
     "alreadyHaveFile": "Saya sudah punya file ZIP"
@@ -20,6 +19,16 @@
     "warning": "LANGKAH PENTING"
   },
   "entry": {
+    "title": "Pertama, minta filemu ke Instagram.",
+    "timeCost": {
+      "ours": "Memintanya butuh sekitar 2 menit.",
+      "theirs": "Instagram lalu mengirim file lewat email — itu waktu tunggu mereka, bukan kami."
+    },
+    "cta": "Buka Pusat Akun",
+    "trust": {
+      "noLogin": "Tanpa login. Tanpa kata sandi. Tidak ada yang perlu dihubungkan.",
+      "local": "Ekspormu dibaca di browser ini dan tidak pernah diunggah."
+    },
     "recipe": {
       "title": "Yang harus dipilih di dialog Instagram",
       "rows": {
@@ -36,11 +45,6 @@
     }
   },
   "steps": {
-    "1": {
-      "title": "Buka Halaman Ekspor Instagram",
-      "description": "Klik tombol di bawah untuk membuka Pusat Akun Meta. Lalu klik \"Buat ekspor\".",
-      "alt": "Langkah 1: Buka halaman ekspor dan klik Buat ekspor"
-    },
     "2": {
       "title": "Pilih Profil Instagram Anda",
       "description": "Pilih akun Instagram Anda dari daftar profil yang terhubung.",

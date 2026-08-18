@@ -34,10 +34,12 @@ vi.mock('@/hooks/useLanguagePrefix', () => ({
 vi.mock('react-i18next', () => createI18nMock(wizardEN));
 
 import { Wizard } from '@/components/Wizard';
+import { analytics } from '@/lib/analytics';
 
 // Mock analytics module
 vi.mock('@/lib/analytics', () => ({
   analytics: {
+    guideEntryView: vi.fn(),
     wizardStepView: vi.fn(),
     wizardNextClick: vi.fn(),
     wizardBackClick: vi.fn(),
@@ -69,15 +71,10 @@ describe('Wizard', () => {
     expect(screen.getByText('Step 1 of 8')).toBeInTheDocument();
   });
 
-  it('should render first step title and description', () => {
+  it('should render the GuideEntry headline on step 1', () => {
     render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
 
-    // Title appears twice (heading + button), check heading specifically
-    expect(screen.getByRole('heading', { name: wizardEN.steps['1'].title })).toBeInTheDocument();
-    // Use partial match for description (contains quotes that may render differently)
-    expect(
-      screen.getByText(/Click the button below to open Meta Accounts Center/)
-    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: wizardEN.entry.title })).toBeInTheDocument();
   });
 
   it('should render navigation buttons', () => {
@@ -87,14 +84,12 @@ describe('Wizard', () => {
     expect(screen.getByText('buttons.cancel')).toBeInTheDocument();
   });
 
-  it('should render external link button on step 1', () => {
+  it('should render the GuideEntry CTA linking to Accounts Center on step 1', () => {
     render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
 
-    const externalLink = screen.getByRole('link', {
-      name: new RegExp(wizardEN.buttons.openInstagram),
-    });
-    expect(externalLink).toBeInTheDocument();
-    expect(externalLink).toHaveAttribute(
+    const cta = screen.getByRole('link', { name: new RegExp(wizardEN.entry.cta) });
+    expect(cta).toBeInTheDocument();
+    expect(cta).toHaveAttribute(
       'href',
       'https://accountscenter.instagram.com/info_and_permissions/dyi/?entry_point=app_settings'
     );
@@ -152,9 +147,12 @@ describe('Wizard', () => {
   });
 
   it('should render step video with alt text as aria-label', () => {
+    // Step 1 is GuideEntry now, which carries no video — step 2 still uses
+    // the generic step card this behavior belongs to.
+    mockPathname = '/wizard/step/2';
     render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
 
-    const video = screen.getByLabelText(wizardEN.steps['1'].alt);
+    const video = screen.getByLabelText(wizardEN.steps['2'].alt);
     expect(video).toBeInTheDocument();
   });
 
@@ -239,5 +237,18 @@ describe('Wizard', () => {
       name: wizardEN.buttons.alreadyHaveFile,
     });
     expect(alreadyHaveFileLink).not.toBeInTheDocument();
+  });
+
+  it('should not report wizardStepView for step 1 — GuideEntry owns its own view event', () => {
+    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+
+    expect(analytics.wizardStepView).not.toHaveBeenCalled();
+  });
+
+  it('should report wizardStepView for step 2', () => {
+    mockPathname = '/wizard/step/2';
+    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+
+    expect(analytics.wizardStepView).toHaveBeenCalledWith(2);
   });
 });

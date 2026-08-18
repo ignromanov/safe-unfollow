@@ -11,7 +11,6 @@
     "back": "Zurück",
     "next": "Nächster Schritt",
     "done": "Fertig, los geht's!",
-    "openInstagram": "Export-Seite öffnen",
     "close": "Anleitung schließen",
     "uploadFile": "Meine Datei hochladen",
     "alreadyHaveFile": "Ich habe bereits meine ZIP-Datei"
@@ -20,6 +19,16 @@
     "warning": "KRITISCHER SCHRITT"
   },
   "entry": {
+    "title": "Frag zuerst Instagram nach deiner Datei.",
+    "timeCost": {
+      "ours": "Das Anfragen dauert etwa 2 Minuten.",
+      "theirs": "Instagram schickt die Datei dann per E-Mail — das Warten liegt bei ihnen, nicht bei uns."
+    },
+    "cta": "Konten-Center öffnen",
+    "trust": {
+      "noLogin": "Keine Anmeldung. Kein Passwort. Nichts zu verbinden.",
+      "local": "Dein Export wird in diesem Browser gelesen und nie hochgeladen."
+    },
     "recipe": {
       "title": "Was du im Instagram-Dialog auswählen musst",
       "rows": {
@@ -36,11 +45,6 @@
     }
   },
   "steps": {
-    "1": {
-      "title": "Instagram Export-Seite öffnen",
-      "description": "Klicke auf den Button unten, um das Meta-Kontencenter zu öffnen. Klicke dann auf \"Export erstellen\".",
-      "alt": "Schritt 1: Export-Seite öffnen und auf Export erstellen klicken"
-    },
     "2": {
       "title": "Wähle dein Instagram-Profil",
       "description": "Wähle dein Instagram-Konto aus der Liste der verbundenen Profile.",

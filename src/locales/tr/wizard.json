@@ -11,7 +11,6 @@
     "back": "Geri",
     "next": "Sonraki Adım",
     "done": "Tamam, başlayalım!",
-    "openInstagram": "Dışa aktarma sayfasını aç",
     "close": "Rehberi kapat",
     "uploadFile": "Dosyamı Yükle",
     "alreadyHaveFile": "ZIP dosyam zaten var"
@@ -20,6 +19,16 @@
     "warning": "KRİTİK ADIM"
   },
   "entry": {
+    "title": "Önce dosyanı Instagram'dan iste.",
+    "timeCost": {
+      "ours": "İstemek yaklaşık 2 dakika sürer.",
+      "theirs": "Instagram dosyayı sonra e-postayla gönderir — bekleyen onlar, biz değil."
+    },
+    "cta": "Hesap Merkezi'ni aç",
+    "trust": {
+      "noLogin": "Giriş yok. Şifre yok. Bağlanacak hiçbir şey yok.",
+      "local": "Dışa aktarımın bu tarayıcıda okunur ve asla yüklenmez."
+    },
     "recipe": {
       "title": "Instagram iletişim kutusunda ne seçilmeli",
       "rows": {
@@ -36,11 +45,6 @@
     }
   },
   "steps": {
-    "1": {
-      "title": "Instagram Dışa Aktarma Sayfasını Aç",
-      "description": "Meta Hesap Merkezi'ni açmak için aşağıdaki butona tıkla. Ardından \"Dışa aktarma oluştur\" seçeneğine tıkla.",
-      "alt": "Adım 1: Dışa aktarma sayfasını aç ve Dışa aktarma oluştur'a tıkla"
-    },
     "2": {
       "title": "Instagram Profilini Seç",
       "description": "Bağlı profiller listesinden Instagram hesabını seç.",
