@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@tests/utils/testUtils';
+import { fireEvent, renderWithRouter, screen } from '@/__tests__/test-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import uploadEN from '@/locales/en/upload.json';
 import { createI18nMock } from '@/__tests__/utils/mockI18n';
@@ -26,13 +26,13 @@ describe('UploadZone', () => {
   });
 
   it('should render without crashing', () => {
-    render(<UploadZone onUploadStart={mockOnUploadStart} />);
+    renderWithRouter(<UploadZone onUploadStart={mockOnUploadStart} />);
 
     expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
   });
 
   it('should display upload title and description', () => {
-    render(<UploadZone onUploadStart={mockOnUploadStart} />);
+    renderWithRouter(<UploadZone onUploadStart={mockOnUploadStart} />);
 
     // Title from translations: zone.title
     expect(screen.getByText(uploadEN.zone.title)).toBeInTheDocument();
@@ -41,7 +41,7 @@ describe('UploadZone', () => {
   });
 
   it('should have drag and drop area with file input', () => {
-    render(<UploadZone onUploadStart={mockOnUploadStart} />);
+    renderWithRouter(<UploadZone onUploadStart={mockOnUploadStart} />);
 
     // File input should exist and accept .zip files
     const fileInput = document.querySelector('input[type="file"]');
@@ -50,7 +50,7 @@ describe('UploadZone', () => {
   });
 
   it('should display drop here prompt', () => {
-    render(<UploadZone onUploadStart={mockOnUploadStart} />);
+    renderWithRouter(<UploadZone onUploadStart={mockOnUploadStart} />);
 
     // zone.dropHere translation
     expect(screen.getByText(uploadEN.zone.dropHere)).toBeInTheDocument();
@@ -59,14 +59,14 @@ describe('UploadZone', () => {
   });
 
   it('should display JSON format reminder inline text', () => {
-    render(<UploadZone onUploadStart={mockOnUploadStart} />);
+    renderWithRouter(<UploadZone onUploadStart={mockOnUploadStart} />);
 
     // zone.jsonReminder is now shown as inline muted text (not a badge)
     expect(screen.getByText(uploadEN.zone.jsonReminder)).toBeInTheDocument();
   });
 
   it('should display pre-upload checklist', () => {
-    render(<UploadZone onUploadStart={mockOnUploadStart} />);
+    renderWithRouter(<UploadZone onUploadStart={mockOnUploadStart} />);
 
     // checklist.title translation
     expect(screen.getByText(uploadEN.checklist.title)).toBeInTheDocument();
@@ -76,14 +76,16 @@ describe('UploadZone', () => {
   });
 
   it('should display common error hint section', () => {
-    render(<UploadZone onUploadStart={mockOnUploadStart} onOpenWizard={mockOnOpenWizard} />);
+    renderWithRouter(
+      <UploadZone onUploadStart={mockOnUploadStart} onOpenWizard={mockOnOpenWizard} />
+    );
 
     // errors.commonTitle translation
     expect(screen.getByText(uploadEN.errors.commonTitle)).toBeInTheDocument();
   });
 
   it('should show processing state when isProcessing is true', () => {
-    render(<UploadZone onUploadStart={mockOnUploadStart} isProcessing={true} />);
+    renderWithRouter(<UploadZone onUploadStart={mockOnUploadStart} isProcessing={true} />);
 
     // zone.processing translation
     expect(screen.getByText(uploadEN.zone.processing)).toBeInTheDocument();
@@ -92,14 +94,14 @@ describe('UploadZone', () => {
   });
 
   it('should disable file input when processing', () => {
-    render(<UploadZone onUploadStart={mockOnUploadStart} isProcessing={true} />);
+    renderWithRouter(<UploadZone onUploadStart={mockOnUploadStart} isProcessing={true} />);
 
     const fileInput = document.querySelector('input[type="file"]');
     expect(fileInput).toBeDisabled();
   });
 
   it('should call onUploadStart and track analytics when file is selected via input', () => {
-    render(<UploadZone onUploadStart={mockOnUploadStart} />);
+    renderWithRouter(<UploadZone onUploadStart={mockOnUploadStart} />);
 
     const file = new File(['test'], 'test.zip', { type: 'application/zip' });
     const fileInput = document.querySelector('input[type="file"]');
@@ -111,7 +113,7 @@ describe('UploadZone', () => {
   });
 
   it('should call onUploadStart when zip file is dropped', () => {
-    render(<UploadZone onUploadStart={mockOnUploadStart} />);
+    renderWithRouter(<UploadZone onUploadStart={mockOnUploadStart} />);
 
     const file = new File(['test'], 'data.zip', { type: 'application/zip' });
     const dropZone = document.querySelector('[class*="border-dashed"]');
@@ -124,7 +126,7 @@ describe('UploadZone', () => {
   });
 
   it('should not call onUploadStart when non-zip file is dropped', () => {
-    render(<UploadZone onUploadStart={mockOnUploadStart} />);
+    renderWithRouter(<UploadZone onUploadStart={mockOnUploadStart} />);
 
     const file = new File(['test'], 'data.txt', { type: 'text/plain' });
     const dropZone = document.querySelector('[class*="border-dashed"]');
@@ -137,7 +139,9 @@ describe('UploadZone', () => {
   });
 
   it('should render learn fix button when onOpenWizard is provided', () => {
-    render(<UploadZone onUploadStart={mockOnUploadStart} onOpenWizard={mockOnOpenWizard} />);
+    renderWithRouter(
+      <UploadZone onUploadStart={mockOnUploadStart} onOpenWizard={mockOnOpenWizard} />
+    );
 
     // errors.learnFix translation
     const learnButton = screen.getByText(uploadEN.errors.learnFix);
@@ -148,7 +152,7 @@ describe('UploadZone', () => {
   });
 
   it('should have accessible file input with aria-label', () => {
-    render(<UploadZone onUploadStart={mockOnUploadStart} />);
+    renderWithRouter(<UploadZone onUploadStart={mockOnUploadStart} />);
 
     const fileInput = document.querySelector('input[type="file"]');
     // zone.ariaLabel translation
@@ -158,7 +162,7 @@ describe('UploadZone', () => {
   // V8: drag enter/leave analytics tests removed - events no longer tracked
 
   it('should show screen reader announcement when processing', () => {
-    render(<UploadZone onUploadStart={mockOnUploadStart} isProcessing={true} />);
+    renderWithRouter(<UploadZone onUploadStart={mockOnUploadStart} isProcessing={true} />);
 
     const srAnnouncement = screen.getByRole('status');
     expect(srAnnouncement).toBeInTheDocument();
@@ -170,7 +174,7 @@ describe('UploadZone', () => {
       { severity: 'error' as const, code: 'TEST_ERROR', message: 'Test error' },
     ];
 
-    render(
+    renderWithRouter(
       <UploadZone
         onUploadStart={mockOnUploadStart}
         parseWarnings={parseWarnings}
@@ -187,7 +191,7 @@ describe('UploadZone', () => {
   });
 
   it('places the affiliate block after the drop zone, not against it', () => {
-    const { container } = render(<UploadZone onUploadStart={vi.fn()} />);
+    const { container } = renderWithRouter(<UploadZone onUploadStart={vi.fn()} />);
 
     const block = container.querySelector('aside') as HTMLElement;
     const input = container.querySelector('input[type="file"]') as HTMLElement;
@@ -198,7 +202,7 @@ describe('UploadZone', () => {
   });
 
   it('shows no affiliate block on the diagnostic error screen', () => {
-    const { container } = render(
+    const { container } = renderWithRouter(
       <UploadZone
         onUploadStart={vi.fn()}
         parseWarnings={[{ code: 'NOT_ZIP', message: 'nope', severity: 'error', fix: 'x' }]}

@@ -3,6 +3,7 @@ import { createDiagnosticError, mapWarningToDiagnosticCode } from '@/core/types'
 import { AlertTriangle, Check, Copy, ExternalLink, RefreshCw } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { PrefixedLink } from '@/components/PrefixedLink';
 import { analytics } from '@/lib/analytics';
 import {
   shouldShowReportIssue,
@@ -10,7 +11,9 @@ import {
   generateErrorDetails,
   getErrorIcon,
   getColorScheme,
+  isRecoverable,
 } from '@/lib/errors/diagnostic-utils';
+import { wizardStepForError } from '@/lib/errors/wizard-routing';
 
 export interface DiagnosticErrorScreenProps {
   /** Error code for direct error display */
@@ -22,7 +25,16 @@ export interface DiagnosticErrorScreenProps {
   /** Callback when user wants to try again */
   onTryAgain?: () => void;
   /** Callback to open wizard/guide */
-  onOpenWizard?: () => void;
+  onOpenWizard?: (code?: DiagnosticErrorCode) => void;
+}
+
+/** Primary action: filled background, the control that can actually work. */
+const PRIMARY_ACTION_CLASS =
+  'flex cursor-pointer items-center justify-center gap-2 rounded-2xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-lg';
+
+/** Secondary action: bordered, colour-matched to the error's scheme. */
+function SECONDARY_ACTION_CLASS(colors: ReturnType<typeof getColorScheme>): string {
+  return `flex cursor-pointer items-center justify-center gap-2 rounded-2xl border-2 ${colors.border} px-6 py-3 text-sm font-bold ${colors.title} transition-all hover:bg-white/50 dark:hover:bg-black/20`;
 }
 
 export function DiagnosticErrorScreen({
@@ -55,6 +67,7 @@ export function DiagnosticErrorScreen({
   }, [errorCode, errorMessage, parseWarnings]);
 
   const colors = getColorScheme(diagnosticError);
+  const recoverable = isRecoverable(diagnosticError.code);
   const Icon = getErrorIcon(diagnosticError.icon);
   const [copied, setCopied] = useState(false);
 
@@ -76,10 +89,11 @@ export function DiagnosticErrorScreen({
     onTryAgain?.();
   }, [diagnosticError.code, onTryAgain]);
 
+  // Analytics only: the anchor's href does the navigating (PrefixedLink),
+  // and calling onOpenWizard here as well would push the same location twice.
   const handleOpenWizard = useCallback(() => {
     analytics.diagnosticErrorHelp(diagnosticError.code);
-    onOpenWizard?.();
-  }, [diagnosticError.code, onOpenWizard]);
+  }, [diagnosticError.code]);
 
   const handleReportIssue = useCallback(() => {
     analytics.diagnosticErrorReportIssue(diagnosticError.code);
@@ -138,24 +152,32 @@ export function DiagnosticErrorScreen({
           </p>
         </div>
 
-        {/* Actions */}
-        <div className="flex flex-col gap-3 sm:flex-row">
+        {/* Actions. For a recoverable failure the wizard leads, because retrying
+            the same file cannot work by construction — retry is pressed by 57.8%
+            against 31.8% eventual success. It is a real link, not a button, so it
+            supports cmd/middle-click and "copy link address". */}
+        <div
+          className="flex flex-col gap-3 sm:flex-row"
+          role="group"
+          aria-label={t('diagnostic.actionsLabel')}
+        >
+          {onOpenWizard && (
+            <PrefixedLink
+              to={`/wizard/step/${wizardStepForError(diagnosticError.code)}`}
+              onClick={handleOpenWizard}
+              className={recoverable ? PRIMARY_ACTION_CLASS : SECONDARY_ACTION_CLASS(colors)}
+            >
+              {recoverable ? t('diagnostic.reExportJson') : t('diagnostic.showMistakes')}
+            </PrefixedLink>
+          )}
+
           {onTryAgain && (
             <button
               onClick={handleTryAgain}
-              className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-lg"
+              className={recoverable ? SECONDARY_ACTION_CLASS(colors) : PRIMARY_ACTION_CLASS}
             >
-              <RefreshCw size={18} />
-              {t('diagnostic.tryAgain')}
-            </button>
-          )}
-
-          {onOpenWizard && (
-            <button
-              onClick={handleOpenWizard}
-              className={`flex cursor-pointer items-center justify-center gap-2 rounded-2xl border-2 ${colors.border} px-6 py-3 text-sm font-bold ${colors.title} transition-all hover:bg-white/50 dark:hover:bg-black/20`}
-            >
-              {t('diagnostic.showMistakes')}
+              {!recoverable && <RefreshCw size={18} />}
+              {recoverable ? t('diagnostic.chooseDifferentFile') : t('diagnostic.tryAgain')}
             </button>
           )}
         </div>

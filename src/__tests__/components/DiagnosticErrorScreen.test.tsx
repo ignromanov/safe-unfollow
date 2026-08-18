@@ -1,5 +1,5 @@
 import { vi, beforeEach, describe, expect, it } from 'vitest';
-import { render, screen, fireEvent } from '@tests/utils/testUtils';
+import { fireEvent, renderWithRouter, screen, within } from '@/__tests__/test-utils';
 import uploadEN from '@/locales/en/upload.json';
 import { createI18nMock } from '@/__tests__/utils/mockI18n';
 
@@ -7,6 +7,7 @@ vi.mock('react-i18next', () => createI18nMock(uploadEN));
 
 import { DiagnosticErrorScreen } from '@/components/DiagnosticErrorScreen';
 import type { DiagnosticErrorCode, ParseWarning } from '@/core/types';
+import { analytics } from '@/lib/analytics';
 
 // Mock analytics
 vi.mock('@/lib/analytics', () => ({
@@ -30,7 +31,7 @@ describe('DiagnosticErrorScreen', () => {
 
   describe('rendering with different error codes', () => {
     it('should render NOT_ZIP error', () => {
-      render(<DiagnosticErrorScreen errorCode="NOT_ZIP" />);
+      renderWithRouter(<DiagnosticErrorScreen errorCode="NOT_ZIP" />);
 
       expect(screen.getByText('Not a ZIP File')).toBeInTheDocument();
       expect(
@@ -41,7 +42,7 @@ describe('DiagnosticErrorScreen', () => {
     });
 
     it('should render HTML_FORMAT error', () => {
-      render(<DiagnosticErrorScreen errorCode="HTML_FORMAT" />);
+      renderWithRouter(<DiagnosticErrorScreen errorCode="HTML_FORMAT" />);
 
       expect(screen.getByText('Wrong Format: HTML')).toBeInTheDocument();
       expect(
@@ -52,7 +53,7 @@ describe('DiagnosticErrorScreen', () => {
     });
 
     it('should render NOT_INSTAGRAM_EXPORT error', () => {
-      render(<DiagnosticErrorScreen errorCode="NOT_INSTAGRAM_EXPORT" />);
+      renderWithRouter(<DiagnosticErrorScreen errorCode="NOT_INSTAGRAM_EXPORT" />);
 
       expect(screen.getByText('Not an Instagram Export')).toBeInTheDocument();
       expect(
@@ -61,7 +62,7 @@ describe('DiagnosticErrorScreen', () => {
     });
 
     it('should render INCOMPLETE_EXPORT error', () => {
-      render(<DiagnosticErrorScreen errorCode="INCOMPLETE_EXPORT" />);
+      renderWithRouter(<DiagnosticErrorScreen errorCode="INCOMPLETE_EXPORT" />);
 
       expect(screen.getByText('Incomplete Export')).toBeInTheDocument();
       expect(
@@ -70,7 +71,7 @@ describe('DiagnosticErrorScreen', () => {
     });
 
     it('should render NO_DATA_FILES error', () => {
-      render(<DiagnosticErrorScreen errorCode="NO_DATA_FILES" />);
+      renderWithRouter(<DiagnosticErrorScreen errorCode="NO_DATA_FILES" />);
 
       expect(screen.getByText('No Follower Data Found')).toBeInTheDocument();
       expect(
@@ -81,7 +82,7 @@ describe('DiagnosticErrorScreen', () => {
     });
 
     it('should render MISSING_FOLLOWING error', () => {
-      render(<DiagnosticErrorScreen errorCode="MISSING_FOLLOWING" />);
+      renderWithRouter(<DiagnosticErrorScreen errorCode="MISSING_FOLLOWING" />);
 
       expect(screen.getByText('Missing Following Data')).toBeInTheDocument();
       expect(
@@ -90,7 +91,7 @@ describe('DiagnosticErrorScreen', () => {
     });
 
     it('should render MISSING_FOLLOWERS error', () => {
-      render(<DiagnosticErrorScreen errorCode="MISSING_FOLLOWERS" />);
+      renderWithRouter(<DiagnosticErrorScreen errorCode="MISSING_FOLLOWERS" />);
 
       expect(screen.getByText('Missing Followers Data')).toBeInTheDocument();
       expect(
@@ -99,7 +100,7 @@ describe('DiagnosticErrorScreen', () => {
     });
 
     it('should render UNKNOWN error', () => {
-      render(<DiagnosticErrorScreen errorCode="UNKNOWN" />);
+      renderWithRouter(<DiagnosticErrorScreen errorCode="UNKNOWN" />);
 
       expect(screen.getByText('Upload Error')).toBeInTheDocument();
       expect(
@@ -108,7 +109,9 @@ describe('DiagnosticErrorScreen', () => {
     });
 
     it('should render UNKNOWN error with custom message', () => {
-      render(<DiagnosticErrorScreen errorCode="UNKNOWN" errorMessage="Custom error message" />);
+      renderWithRouter(
+        <DiagnosticErrorScreen errorCode="UNKNOWN" errorMessage="Custom error message" />
+      );
 
       expect(screen.getByText('Upload Error')).toBeInTheDocument();
       expect(screen.getByText('Custom error message')).toBeInTheDocument();
@@ -117,14 +120,14 @@ describe('DiagnosticErrorScreen', () => {
 
   describe('error title and description', () => {
     it('should display error title in heading', () => {
-      render(<DiagnosticErrorScreen errorCode="HTML_FORMAT" />);
+      renderWithRouter(<DiagnosticErrorScreen errorCode="HTML_FORMAT" />);
 
       const heading = screen.getByRole('heading', { level: 2 });
       expect(heading).toHaveTextContent('Wrong Format: HTML');
     });
 
     it('should display "How to fix this" section', () => {
-      render(<DiagnosticErrorScreen errorCode="NOT_ZIP" />);
+      renderWithRouter(<DiagnosticErrorScreen errorCode="NOT_ZIP" />);
 
       // diagnostic.howToFix translation
       expect(screen.getByText(uploadEN.diagnostic.howToFix)).toBeInTheDocument();
@@ -137,7 +140,7 @@ describe('DiagnosticErrorScreen', () => {
 
   describe('action buttons', () => {
     it('should render "Try Again" button when onTryAgain is provided', () => {
-      render(<DiagnosticErrorScreen errorCode="NOT_ZIP" onTryAgain={mockOnTryAgain} />);
+      renderWithRouter(<DiagnosticErrorScreen errorCode="NOT_ZIP" onTryAgain={mockOnTryAgain} />);
 
       // diagnostic.tryAgain translation
       const tryAgainButton = screen.getByText(uploadEN.diagnostic.tryAgain);
@@ -148,26 +151,74 @@ describe('DiagnosticErrorScreen', () => {
     });
 
     it('should not render "Try Again" button when onTryAgain is not provided', () => {
-      render(<DiagnosticErrorScreen errorCode="NOT_ZIP" />);
+      renderWithRouter(<DiagnosticErrorScreen errorCode="NOT_ZIP" />);
 
       expect(screen.queryByText(uploadEN.diagnostic.tryAgain)).not.toBeInTheDocument();
     });
 
-    it('should render "Show Where I Went Wrong" button when onOpenWizard is provided', () => {
-      render(<DiagnosticErrorScreen errorCode="NOT_ZIP" onOpenWizard={mockOnOpenWizard} />);
+    it('should render "Show Where I Went Wrong" link when onOpenWizard is provided', () => {
+      // NOT_ZIP is not recoverable, so the wizard control keeps its original
+      // label and is the secondary action. It is a real link now — navigation
+      // comes from its href (PrefixedLink), not from calling onOpenWizard.
+      renderWithRouter(
+        <DiagnosticErrorScreen errorCode="NOT_ZIP" onOpenWizard={mockOnOpenWizard} />
+      );
 
       // diagnostic.showMistakes translation
-      const showMistakesButton = screen.getByText(uploadEN.diagnostic.showMistakes);
-      expect(showMistakesButton).toBeInTheDocument();
+      const showMistakesLink = screen.getByRole('link', { name: uploadEN.diagnostic.showMistakes });
+      expect(showMistakesLink).toHaveAttribute('href', expect.stringContaining('/wizard/step/4'));
 
-      fireEvent.click(showMistakesButton);
-      expect(mockOnOpenWizard).toHaveBeenCalledTimes(1);
+      fireEvent.click(showMistakesLink);
+      expect(analytics.diagnosticErrorHelp).toHaveBeenCalledWith('NOT_ZIP');
     });
 
-    it('should not render wizard button when onOpenWizard is not provided', () => {
-      render(<DiagnosticErrorScreen errorCode="NOT_ZIP" />);
+    it('should not render wizard link when onOpenWizard is not provided', () => {
+      renderWithRouter(<DiagnosticErrorScreen errorCode="NOT_ZIP" />);
 
       expect(screen.queryByText(uploadEN.diagnostic.showMistakes)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('action hierarchy', () => {
+    it('leads a recoverable failure with the wizard, as a real link', () => {
+      renderWithRouter(
+        <DiagnosticErrorScreen
+          errorCode="HTML_FORMAT"
+          onTryAgain={mockOnTryAgain}
+          onOpenWizard={mockOnOpenWizard}
+        />
+      );
+
+      const actions = screen.getByRole('group', { name: /actions/i });
+      const primary = within(actions).getByRole('link');
+
+      expect(primary).toHaveAccessibleName(/re-export as json/i);
+      expect(primary).toHaveAttribute('href', expect.stringContaining('/wizard/step/6'));
+    });
+
+    it('offers a different file as the secondary, never as a retry', () => {
+      renderWithRouter(
+        <DiagnosticErrorScreen
+          errorCode="HTML_FORMAT"
+          onTryAgain={mockOnTryAgain}
+          onOpenWizard={mockOnOpenWizard}
+        />
+      );
+
+      expect(screen.getByRole('button', { name: /choose a different file/i })).toBeInTheDocument();
+      expect(screen.queryByText(/try again/i)).not.toBeInTheDocument();
+    });
+
+    it('keeps retry as the primary where the failure is genuinely transient', () => {
+      renderWithRouter(
+        <DiagnosticErrorScreen
+          errorCode="WORKER_CRASHED"
+          onTryAgain={mockOnTryAgain}
+          onOpenWizard={mockOnOpenWizard}
+        />
+      );
+
+      expect(screen.getByRole('button', { name: /try again/i })).toBeInTheDocument();
     });
   });
 
@@ -181,7 +232,7 @@ describe('DiagnosticErrorScreen', () => {
         },
       ];
 
-      render(<DiagnosticErrorScreen parseWarnings={parseWarnings} />);
+      renderWithRouter(<DiagnosticErrorScreen parseWarnings={parseWarnings} />);
 
       expect(screen.getByText('Wrong Format: HTML')).toBeInTheDocument();
       // Message is now translated via i18n, so the JSON translation is shown instead of raw parser message
@@ -197,7 +248,7 @@ describe('DiagnosticErrorScreen', () => {
         },
       ];
 
-      render(<DiagnosticErrorScreen errorCode="NOT_ZIP" parseWarnings={parseWarnings} />);
+      renderWithRouter(<DiagnosticErrorScreen errorCode="NOT_ZIP" parseWarnings={parseWarnings} />);
 
       expect(screen.getByText('Not a ZIP File')).toBeInTheDocument();
       expect(screen.queryByText('Wrong Format: HTML')).not.toBeInTheDocument();
@@ -212,13 +263,13 @@ describe('DiagnosticErrorScreen', () => {
         },
       ];
 
-      render(<DiagnosticErrorScreen parseWarnings={parseWarnings} />);
+      renderWithRouter(<DiagnosticErrorScreen parseWarnings={parseWarnings} />);
 
       expect(screen.getByText('Upload Error')).toBeInTheDocument();
     });
 
     it('should fallback to UNKNOWN when no props provided', () => {
-      render(<DiagnosticErrorScreen />);
+      renderWithRouter(<DiagnosticErrorScreen />);
 
       expect(screen.getByText('Upload Error')).toBeInTheDocument();
     });
@@ -237,7 +288,7 @@ describe('DiagnosticErrorScreen', () => {
     ];
 
     it.each(errorCodes)('should render %s error without crashing', errorCode => {
-      const { container } = render(
+      const { container } = renderWithRouter(
         <DiagnosticErrorScreen
           errorCode={errorCode}
           onTryAgain={mockOnTryAgain}
@@ -250,7 +301,13 @@ describe('DiagnosticErrorScreen', () => {
       // Should have error card with proper structure
       expect(screen.getByRole('heading', { level: 2 })).toBeInTheDocument();
       expect(screen.getByText(uploadEN.diagnostic.howToFix)).toBeInTheDocument();
-      expect(screen.getByText(uploadEN.diagnostic.tryAgain)).toBeInTheDocument();
+      // HTML_FORMAT is recoverable: the primary action is "choose a different
+      // file", not "try again" — see the "action hierarchy" describe block.
+      const primaryLabel =
+        errorCode === 'HTML_FORMAT'
+          ? uploadEN.diagnostic.chooseDifferentFile
+          : uploadEN.diagnostic.tryAgain;
+      expect(screen.getByText(primaryLabel)).toBeInTheDocument();
     });
   });
 
@@ -286,19 +343,19 @@ describe('DiagnosticErrorScreen', () => {
     ];
 
     it.each(reportableErrors)('should show Report Issue link for %s', errorCode => {
-      render(<DiagnosticErrorScreen errorCode={errorCode} />);
+      renderWithRouter(<DiagnosticErrorScreen errorCode={errorCode} />);
 
       expect(screen.getByText(uploadEN.diagnostic.reportIssue)).toBeInTheDocument();
     });
 
     it.each(userFixableErrors)('should NOT show Report Issue for %s', errorCode => {
-      render(<DiagnosticErrorScreen errorCode={errorCode} />);
+      renderWithRouter(<DiagnosticErrorScreen errorCode={errorCode} />);
 
       expect(screen.queryByText(uploadEN.diagnostic.reportIssue)).not.toBeInTheDocument();
     });
 
     it('should generate correct GitHub issue URL', () => {
-      render(<DiagnosticErrorScreen errorCode="UNKNOWN" />);
+      renderWithRouter(<DiagnosticErrorScreen errorCode="UNKNOWN" />);
 
       const link = screen.getByText(uploadEN.diagnostic.reportIssue);
       expect(link).toHaveAttribute('href', expect.stringContaining('github.com'));
@@ -311,14 +368,14 @@ describe('DiagnosticErrorScreen', () => {
 
   describe('Error code display', () => {
     it('should display error code badge', () => {
-      render(<DiagnosticErrorScreen errorCode="CORRUPTED_ZIP" />);
+      renderWithRouter(<DiagnosticErrorScreen errorCode="CORRUPTED_ZIP" />);
 
       expect(screen.getByText('CORRUPTED_ZIP')).toBeInTheDocument();
       expect(screen.getByText(uploadEN.diagnostic.errorCode + ':')).toBeInTheDocument();
     });
 
     it('should display copy button', () => {
-      render(<DiagnosticErrorScreen errorCode="WORKER_TIMEOUT" />);
+      renderWithRouter(<DiagnosticErrorScreen errorCode="WORKER_TIMEOUT" />);
 
       const copyButton = screen.getByLabelText(uploadEN.diagnostic.copyDetails);
       expect(copyButton).toBeInTheDocument();
@@ -328,7 +385,7 @@ describe('DiagnosticErrorScreen', () => {
       const mockClipboard = { writeText: vi.fn().mockResolvedValue(undefined) };
       Object.assign(navigator, { clipboard: mockClipboard });
 
-      render(<DiagnosticErrorScreen errorCode="WORKER_TIMEOUT" />);
+      renderWithRouter(<DiagnosticErrorScreen errorCode="WORKER_TIMEOUT" />);
 
       const copyButton = screen.getByLabelText(uploadEN.diagnostic.copyDetails);
       await fireEvent.click(copyButton);
@@ -363,7 +420,7 @@ describe('DiagnosticErrorScreen', () => {
     ];
 
     it.each(newErrorCodes)('should render %s error with all elements', errorCode => {
-      const { container } = render(
+      const { container } = renderWithRouter(
         <DiagnosticErrorScreen
           errorCode={errorCode}
           onTryAgain={mockOnTryAgain}
