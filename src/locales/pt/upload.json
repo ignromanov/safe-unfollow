@@ -8,7 +8,7 @@
     "processing": "Analisando localmente...",
     "processingHint": "O processamento de grandes conjuntos de dados (até 1M+) pode levar um momento.",
     "ariaLabel": "Enviar arquivo ZIP de dados do Instagram",
-    "jsonReminder": "Certifique-se de ter selecionado o formato JSON ao solicitar sua exportação de dados. Arquivos ZIP em JSON e HTML são idênticos por fora.",
+    "jsonReminder": "A caixa de diálogo do Instagram seleciona HTML por padrão — certifique-se de escolher JSON. Arquivos ZIP em JSON e HTML são idênticos por fora.",
     "seeGuide": "Ver o guia passo a passo",
     "jsonRequired": "Requer exportação em formato JSON",
     "privacyMicro": "Seu arquivo nunca sai do seu dispositivo",
@@ -162,24 +162,6 @@
         "fix": "Tente enviar o arquivo novamente. Se o problema persistir, verifique se o arquivo ZIP não está corrompido."
       }
     }
-  },
-  "quiz": {
-    "title": "Qual formato você escolheu?",
-    "subtitle": "Ao solicitar a exportação dos dados do Instagram, qual formato você selecionou?",
-    "json": "JSON",
-    "jsonHint": "Formato correto para análise",
-    "html": "HTML",
-    "htmlHint": "Não funciona — precisa baixar novamente em JSON",
-    "notSure": "Não tenho certeza",
-    "notSureHint": "Deixe-me verificar",
-    "successMessage": "Tudo pronto! Envie seu ZIP abaixo.",
-    "htmlMessage": "Exportações HTML não podem ser analisadas. Por favor, solicite seus dados no formato JSON.",
-    "htmlCta": "Veja como obter o formato JSON",
-    "comparisonTitle": "Como diferenciar",
-    "comparisonJson": "Se você vê \"Formato: JSON\" na página de download, está tudo certo.",
-    "comparisonHtml": "Se você vê \"Formato: HTML\" ou arquivos .html dentro, precisa re-solicitar.",
-    "dismiss": "Entendi",
-    "fixedIt": "Já solicitei em JSON"
   },
   "formatWarning": "Certifique-se de ter selecionado JSON (não HTML) ao solicitar sua exportação de dados.",
   "waiting": {

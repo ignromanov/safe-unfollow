@@ -11,7 +11,6 @@ import { TouchUploadZone } from './upload/TouchUploadZone';
 import { DesktopDropZone } from './upload/DesktopDropZone';
 import { DevErrorSelector } from './upload/DevErrorSelector';
 import { LoadingTips } from './upload/LoadingTips';
-import { FormatQuiz } from './upload/FormatQuiz';
 import { UploadAffiliateBlock } from './upload/UploadAffiliateBlock';
 
 import type { DragValidation } from './upload/DesktopDropZone';
@@ -151,9 +150,6 @@ export function UploadZone({
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 md:py-24">
-      {/* Format quiz — non-blocking card above upload zone */}
-      <FormatQuiz onOpenWizard={onOpenWizard} isProcessing={isProcessing} />
-
       {/* Screen reader announcement for upload status */}
       <div role="status" aria-live="polite" className="sr-only">
         {isProcessing &&
@@ -178,7 +174,7 @@ export function UploadZone({
             <Info size={14} className="me-1.5 inline shrink-0 text-zinc-400" aria-hidden="true" />
             {t('zone.jsonReminder', {
               defaultValue:
-                'Make sure you selected JSON format when requesting your data export. JSON and HTML ZIP files look identical from the outside.',
+                "Instagram's dialog defaults to HTML — make sure you select JSON. JSON and HTML ZIP files look identical from the outside.",
             })}
             {onOpenWizard && (
               <>

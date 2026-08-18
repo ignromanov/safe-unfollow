@@ -8,7 +8,7 @@
     "processing": "Analyzing locally...",
     "processingHint": "Processing large datasets (up to 1M+) can take a moment.",
     "ariaLabel": "Upload Instagram data ZIP file",
-    "jsonReminder": "Make sure you selected JSON format when requesting your data export. JSON and HTML ZIP files look identical from the outside.",
+    "jsonReminder": "Instagram's dialog defaults to HTML — make sure you select JSON. JSON and HTML ZIP files look identical from the outside.",
     "seeGuide": "See the step-by-step guide",
     "jsonRequired": "Requires JSON format export",
     "privacyMicro": "Your file never leaves your device",
@@ -162,24 +162,6 @@
         "fix": "Try uploading the file again. If the problem persists, make sure the ZIP file is not corrupted."
       }
     }
-  },
-  "quiz": {
-    "title": "What format did you choose?",
-    "subtitle": "When requesting your Instagram data export, which format did you select?",
-    "json": "JSON",
-    "jsonHint": "Correct format for analysis",
-    "html": "HTML",
-    "htmlHint": "Won't work — need to re-download as JSON",
-    "notSure": "Not sure",
-    "notSureHint": "Let me check",
-    "successMessage": "You're all set! Upload your ZIP below.",
-    "htmlMessage": "HTML exports can't be analyzed. Please re-request your data in JSON format.",
-    "htmlCta": "See how to get JSON format",
-    "comparisonTitle": "How to tell the difference",
-    "comparisonJson": "If you see \"Format: JSON\" on the download page, you're good.",
-    "comparisonHtml": "If you see \"Format: HTML\" or files like .html inside, you need to re-request.",
-    "dismiss": "Got it",
-    "fixedIt": "I've re-requested in JSON"
   },
   "formatWarning": "Make sure you selected JSON (not HTML) when requesting your data export.",
   "waiting": {

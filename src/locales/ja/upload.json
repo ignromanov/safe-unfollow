@@ -8,7 +8,7 @@
     "processing": "ローカルで分析中...",
     "processingHint": "大規模データセット（100万件以上）の処理には少し時間がかかることがあります。",
     "ariaLabel": "InstagramデータのZIPファイルをアップロード",
-    "jsonReminder": "データエクスポートをリクエストする際にJSON形式を選択したか確認してください。JSONとHTMLのZIPファイルは外見上同じに見えます。",
+    "jsonReminder": "InstagramのダイアログはデフォルトでHTML形式です — 必ずJSON形式を選択してください。JSONとHTMLのZIPファイルは外見上同じに見えます。",
     "seeGuide": "ステップバイステップガイドを見る",
     "jsonRequired": "JSON形式のエクスポートが必要です",
     "privacyMicro": "ファイルはデバイスから外に出ません",
@@ -162,24 +162,6 @@
         "fix": "ファイルを再度アップロードしてください。問題が続く場合は、ZIPファイルが破損していないか確認してください。"
       }
     }
-  },
-  "quiz": {
-    "title": "どのフォーマットを選びましたか？",
-    "subtitle": "Instagramのデータエクスポートをリクエストした時、どのフォーマットを選びましたか？",
-    "json": "JSON",
-    "jsonHint": "分析に適した正しいフォーマット",
-    "html": "HTML",
-    "htmlHint": "使えません — JSONで再ダウンロードしてください",
-    "notSure": "わからない",
-    "notSureHint": "確認させてください",
-    "successMessage": "準備完了！下にZIPをアップロードしてください。",
-    "htmlMessage": "HTMLエクスポートは分析できません。JSON形式でデータを再リクエストしてください。",
-    "htmlCta": "JSON形式の取得方法を見る",
-    "comparisonTitle": "見分け方",
-    "comparisonJson": "ダウンロードページで「フォーマット：JSON」と表示されていればOKです。",
-    "comparisonHtml": "「フォーマット：HTML」や.htmlファイルが見える場合は再リクエストが必要です。",
-    "dismiss": "わかりました",
-    "fixedIt": "JSONで再リクエストしました"
   },
   "formatWarning": "データエクスポートのリクエスト時にJSON（HTMLではなく）を選択してください。",
   "waiting": {

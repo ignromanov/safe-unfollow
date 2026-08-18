@@ -8,7 +8,7 @@
     "processing": "Yerel olarak analiz ediliyor...",
     "processingHint": "Büyük veri setlerini (1M+'a kadar) işlemek biraz zaman alabilir.",
     "ariaLabel": "Instagram veri ZIP dosyasını yükle",
-    "jsonReminder": "Veri dışa aktarımını talep ederken JSON formatını seçtiğinden emin ol. JSON ve HTML ZIP dosyaları dışarıdan aynı görünür.",
+    "jsonReminder": "Instagram'ın penceresi varsayılan olarak HTML'i seçer — JSON'u seçtiğinden emin ol. JSON ve HTML ZIP dosyaları dışarıdan aynı görünür.",
     "seeGuide": "Adım adım kılavuzu gör",
     "jsonRequired": "JSON formatında dışa aktarım gerektirir",
     "privacyMicro": "Dosyanız cihazınızdan asla ayrılmaz",
@@ -162,24 +162,6 @@
         "fix": "Dosyayı tekrar yüklemeyi dene. Sorun devam ederse ZIP dosyasının bozuk olmadığından emin ol."
       }
     }
-  },
-  "quiz": {
-    "title": "Hangi formatı seçtiniz?",
-    "subtitle": "Instagram veri dışa aktarımını talep ederken hangi formatı seçtiniz?",
-    "json": "JSON",
-    "jsonHint": "Analiz için doğru format",
-    "html": "HTML",
-    "htmlHint": "Çalışmaz — JSON olarak yeniden indirin",
-    "notSure": "Emin değilim",
-    "notSureHint": "Kontrol edeyim",
-    "successMessage": "Hazır! ZIP dosyanızı aşağıya yükleyin.",
-    "htmlMessage": "HTML dışa aktarımları analiz edilemez. Lütfen verilerinizi JSON formatında yeniden talep edin.",
-    "htmlCta": "JSON formatını nasıl alacağınızı görün",
-    "comparisonTitle": "Farkı nasıl anlarsınız",
-    "comparisonJson": "İndirme sayfasında \"Format: JSON\" görüyorsanız doğru.",
-    "comparisonHtml": "\"Format: HTML\" veya .html dosyaları görüyorsanız yeniden talep etmeniz gerekiyor.",
-    "dismiss": "Anladım",
-    "fixedIt": "JSON olarak yeniden talep ettim"
   },
   "formatWarning": "Veri dışa aktarımı talep ederken JSON (HTML değil) seçtiğinizden emin olun.",
   "waiting": {

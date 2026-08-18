@@ -65,6 +65,19 @@ describe('UploadZone', () => {
     expect(screen.getByText(uploadEN.zone.jsonReminder)).toBeInTheDocument();
   });
 
+  it('asks nothing before the file is chosen', () => {
+    renderWithRouter(<UploadZone onUploadStart={mockOnUploadStart} />);
+
+    expect(screen.queryByRole('radiogroup')).not.toBeInTheDocument();
+  });
+
+  it('warns about the default format where the file is chosen, not before it', () => {
+    renderWithRouter(<UploadZone onUploadStart={mockOnUploadStart} />);
+
+    // zone.jsonReminder carries the "defaults to HTML" warning inline, next to the drop zone.
+    expect(screen.getByText(/defaults to HTML/i)).toBeInTheDocument();
+  });
+
   it('should display pre-upload checklist', () => {
     renderWithRouter(<UploadZone onUploadStart={mockOnUploadStart} />);
 
