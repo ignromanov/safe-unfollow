@@ -17,7 +17,7 @@ import type { DragValidation } from './upload/DesktopDropZone';
 
 export interface UploadZoneProps {
   onUploadStart: (file: File) => void;
-  onOpenWizard?: (code?: DiagnosticErrorCode) => void;
+  onOpenWizard?: () => void;
   isProcessing?: boolean;
   parseWarnings?: ParseWarning[];
 }

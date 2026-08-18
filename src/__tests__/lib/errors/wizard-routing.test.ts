@@ -13,6 +13,10 @@ describe('wizardStepForError', () => {
   it('falls back to the format step when there is no code', () => {
     expect(wizardStepForError(undefined)).toBe(6);
   });
+
+  it('sends an undiagnosed failure to the guide start, not the format step', () => {
+    expect(wizardStepForError('UNKNOWN')).toBe(1);
+  });
 });
 
 describe('wizardHrefForError', () => {

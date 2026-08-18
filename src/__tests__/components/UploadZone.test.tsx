@@ -71,7 +71,7 @@ describe('UploadZone', () => {
     expect(screen.queryByRole('radiogroup')).not.toBeInTheDocument();
   });
 
-  it('warns about the default format where the file is chosen, not before it', () => {
+  it('warns that Instagram defaults to HTML format', () => {
     renderWithRouter(<UploadZone onUploadStart={mockOnUploadStart} />);
 
     // zone.jsonReminder carries the "defaults to HTML" warning inline, next to the drop zone.

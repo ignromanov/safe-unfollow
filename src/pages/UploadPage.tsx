@@ -1,6 +1,5 @@
 import { PageLoader } from '@/components/PageLoader';
 import { UploadZone } from '@/components/UploadZone';
-import type { DiagnosticErrorCode } from '@/core/types';
 import { useInstagramData } from '@/hooks/useInstagramData';
 import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
 import { wizardHrefForError } from '@/lib/errors/wizard-routing';
@@ -36,8 +35,8 @@ export function Component() {
     handleZipUpload(file).catch(() => {});
   };
 
-  const handleOpenWizard = (code?: DiagnosticErrorCode) => {
-    navigate(wizardHrefForError(prefix, code));
+  const handleOpenWizard = () => {
+    navigate(wizardHrefForError(prefix));
   };
 
   return (

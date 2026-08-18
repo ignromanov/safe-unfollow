@@ -230,6 +230,27 @@ describe('DiagnosticErrorScreen', () => {
     });
   });
 
+  describe('locale-prefixed navigation', () => {
+    it('carries the locale prefix into the primary action link', () => {
+      // Every href assertion above renders at initialEntries: ['/'] (the
+      // renderWithRouter default), so none of them exercise the prefix a
+      // real locale route adds.
+      renderWithRouter(
+        <DiagnosticErrorScreen
+          errorCode="HTML_FORMAT"
+          onTryAgain={mockOnTryAgain}
+          onOpenWizard={mockOnOpenWizard}
+        />,
+        { initialEntries: ['/ar/upload'] }
+      );
+
+      const actions = screen.getByRole('group', { name: /actions/i });
+      const primary = within(actions).getByRole('link');
+
+      expect(primary).toHaveAttribute('href', '/ar/wizard/step/6');
+    });
+  });
+
   describe('parseWarnings integration', () => {
     it('should extract error from parseWarnings', () => {
       const parseWarnings: ParseWarning[] = [

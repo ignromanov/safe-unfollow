@@ -8,12 +8,21 @@ import type { DiagnosticErrorCode } from '@/core/types';
  * Steps are numeric ids (config/wizard-steps.ts) and the URL is the source of
  * truth (useWizardNavigation.ts:14) — the destination varies, the routing does
  * not.
+ *
+ * `undefined` and `'UNKNOWN'` are not the same input. `undefined` means no code
+ * was ever produced (a caller that never diagnosed the failure) and keeps the
+ * long-standing fallback to the format step. `'UNKNOWN'` means a diagnosis ran
+ * and concluded it could not tell what went wrong — sending that to the format
+ * step claims a certainty the diagnosis explicitly does not have, so it goes to
+ * the guide's start instead.
  */
 export function wizardStepForError(code?: DiagnosticErrorCode): number {
   switch (code) {
     case 'NOT_INSTAGRAM_EXPORT':
     case 'NOT_ZIP':
       return 4;
+    case 'UNKNOWN':
+      return 1;
     default:
       return 6;
   }
