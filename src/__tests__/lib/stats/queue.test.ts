@@ -7,6 +7,7 @@ import {
   flushEvents,
   getQueuedCount,
   MAX_BATCH_SIZE,
+  trackNavigating,
 } from '@/lib/stats/queue';
 
 const WEBSITE_ID = 'f204b58f-a5bb-4231-b02b-4cc05f472d02';
@@ -157,5 +158,32 @@ describe('event queue', () => {
     enqueueEvent(AnalyticsEvents.AD_SLOT_VIEWABLE, { slot: 'results' });
 
     expect(() => flushEvents()).not.toThrow();
+  });
+
+  describe('trackNavigating', () => {
+    it('delivers in the same tick instead of waiting for a batch', () => {
+      trackNavigating(AnalyticsEvents.CHECKOUT_START, { locale: 'id' });
+
+      expect(getQueuedCount()).toBe(0);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('sends with keepalive, so the navigation cannot cancel it', () => {
+      trackNavigating(AnalyticsEvents.CHECKOUT_START);
+
+      const init = fetchMock.mock.calls[0]?.[1] as RequestInit;
+      expect(init.keepalive).toBe(true);
+      expect(init.credentials).toBe('omit');
+    });
+
+    it('carries anything already queued along with it', () => {
+      enqueueEvent(AnalyticsEvents.DONATION_CARD_IMPRESSION, { account_count: 7 });
+
+      trackNavigating(AnalyticsEvents.CHECKOUT_START);
+
+      const body = lastFetchBody() as Array<{ payload: { name: string } }>;
+      expect(body).toHaveLength(2);
+      expect(body[1]?.payload.name).toBe('checkout_start');
+    });
   });
 });
