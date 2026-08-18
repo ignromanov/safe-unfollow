@@ -3,9 +3,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const enqueueEvent = vi.fn();
 const trackEvent = vi.fn();
 const trackNavigating = vi.fn();
+const flushEvents = vi.fn();
 vi.mock('@/lib/stats/queue', () => ({
   enqueueEvent: (name: string, data?: unknown) => enqueueEvent(name, data),
   trackNavigating: (name: string, data?: unknown) => trackNavigating(name, data),
+  flushEvents: () => flushEvents(),
 }));
 vi.mock('@/lib/stats/core', () => ({
   trackEvent: (name: string, data?: unknown) => trackEvent(name, data),
@@ -115,6 +117,146 @@ describe('promo impression batching', () => {
         row_count: 42,
       });
       expect(trackEvent).not.toHaveBeenCalled();
+    });
+  });
+
+  // Edge Requests are billed per request that reaches the CDN, and a cache HIT
+  // is billed like a MISS. These events unload nothing and are divided by
+  // nothing that sits on another path, so one request for the page's set is as
+  // good as one request each. New-tab clicks, same-tab navigations and rare
+  // diagnostics deliberately stay where they are — see the cases above.
+  describe('in-page telemetry that costs one request per event', () => {
+    it('queues the install prompt and its outcome on one path, so the ratio divides one population', () => {
+      analytics.pwaInstallPrompt();
+      analytics.pwaInstalled();
+
+      expect(enqueueEvent).toHaveBeenNthCalledWith(1, 'pwa_install_prompt', undefined);
+      expect(enqueueEvent).toHaveBeenNthCalledWith(2, 'pwa_installed', undefined);
+      expect(trackEvent).not.toHaveBeenCalled();
+    });
+
+    it('queues the wizard step view — it is an impression, and the step change unloads nothing', () => {
+      const random = vi.spyOn(Math, 'random').mockReturnValue(0);
+
+      analytics.wizardStepView(3);
+
+      expect(enqueueEvent).toHaveBeenCalledWith('wizard_step_view', { step_id: 3 });
+      expect(trackEvent).not.toHaveBeenCalled();
+      random.mockRestore();
+    });
+
+    it('queues in-page interactions, which fire repeatedly inside one page life', () => {
+      const random = vi.spyOn(Math, 'random').mockReturnValue(0);
+
+      analytics.filterToggle('mutuals', 'enable', 1);
+      analytics.filterClearAll(3);
+      analytics.searchPerform(4, 10, 100, false);
+      analytics.faqExpand(2);
+      analytics.themeToggle('dark');
+
+      expect(enqueueEvent).toHaveBeenNthCalledWith(1, 'filter_toggle', {
+        filter_name: 'mutuals',
+        filter_action: 'enable',
+        active_filter_count: 1,
+      });
+      expect(enqueueEvent).toHaveBeenNthCalledWith(2, 'filter_clear_all', {
+        previous_count: 3,
+      });
+      expect(enqueueEvent).toHaveBeenNthCalledWith(3, 'search_perform', {
+        query_length: 4,
+        result_count: 10,
+        total_count: 100,
+        has_filters_active: false,
+      });
+      expect(enqueueEvent).toHaveBeenNthCalledWith(4, 'faq_expand', { question_id: 2 });
+      expect(enqueueEvent).toHaveBeenNthCalledWith(5, 'theme_toggle', { mode: 'dark' });
+      expect(trackEvent).not.toHaveBeenCalled();
+      random.mockRestore();
+    });
+
+    // The four hero CTAs are PrefixedLink, i.e. react-router Link: the click is
+    // preventDefault + pushState, so the document never unloads and there is no
+    // in-flight request to cancel. The route change that follows drains the
+    // queue on the next tick (useEventQueueFlush), so nothing waits either.
+    // Contrast with checkout_start, which precedes a real `location.href`.
+    it('queues the hero CTAs — an SPA link unloads nothing, and the route change drains the queue', () => {
+      analytics.heroCTAGuide();
+      analytics.heroCTASample();
+      analytics.heroCTAUploadDirect();
+      analytics.heroCTAContinue();
+
+      expect(enqueueEvent).toHaveBeenNthCalledWith(1, 'hero_cta_guide', undefined);
+      expect(enqueueEvent).toHaveBeenNthCalledWith(2, 'hero_cta_sample', undefined);
+      expect(enqueueEvent).toHaveBeenNthCalledWith(3, 'hero_cta_upload_direct', undefined);
+      expect(enqueueEvent).toHaveBeenNthCalledWith(4, 'hero_cta_continue', undefined);
+      expect(trackEvent).not.toHaveBeenCalled();
+      expect(trackNavigating).not.toHaveBeenCalled();
+    });
+
+    it('drops the wizard step title, as the immediate path did — it is page copy, not a dimension', () => {
+      const random = vi.spyOn(Math, 'random').mockReturnValue(0);
+
+      analytics.wizardStepView(2, 'Choose Your Instagram Profile');
+
+      expect(enqueueEvent).toHaveBeenCalledWith('wizard_step_view', { step_id: 2 });
+      random.mockRestore();
+    });
+
+    it('keeps the sampling gate in front of the queue, not behind it', () => {
+      const random = vi.spyOn(Math, 'random').mockReturnValue(0.99);
+
+      analytics.filterToggle('mutuals', 'enable', 1);
+      analytics.searchPerform(4, 10, 100, false);
+      analytics.wizardStepView(3);
+
+      expect(enqueueEvent).not.toHaveBeenCalled();
+      random.mockRestore();
+    });
+  });
+
+  // The upload funnel moves as one unit or not at all. `file_upload_success`
+  // is divided by `file_upload_start`, and every `upload_error_<code>` is
+  // reported against that same denominator, so a split gate would divide the
+  // 70.5% success rate across two populations — the defect c026b6a closed.
+  // Moving all of them keeps one gate, and correlated loss leaves the ratio
+  // unbiased where independent loss of a success would understate it.
+  describe('upload funnel', () => {
+    it('queues every step of one upload attempt on one gate', () => {
+      analytics.uploadClick();
+      analytics.fileUploadStart(12.5);
+      analytics.fileUploadSuccess(4200, false);
+      analytics.uploadParseDuration(900, 'success');
+
+      const queued = enqueueEvent.mock.calls.map(([name]) => name);
+      expect(queued).toEqual([
+        'upload_click',
+        'file_upload_start',
+        'file_upload_success',
+        'upload_parse_duration',
+      ]);
+      expect(trackEvent).not.toHaveBeenCalled();
+    });
+
+    it('queues the error code on the same gate as the start it is divided by', () => {
+      analytics.uploadErrorByCode('abcdef0123456789', 'HTML_FORMAT', 'not a json export');
+
+      expect(enqueueEvent).toHaveBeenCalledWith('upload_error_html_format', {
+        file_hash: 'abcdef012345',
+        error_message: 'not a json export',
+      });
+      expect(trackEvent).not.toHaveBeenCalled();
+    });
+
+    it('flushes on the error, because the error path navigates nowhere to trigger one', () => {
+      analytics.uploadErrorByCode('abcdef0123456789', 'HTML_FORMAT');
+
+      expect(flushEvents).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not flush on the success path — the route change to /results already does', () => {
+      analytics.fileUploadSuccess(4200, false);
+
+      expect(flushEvents).not.toHaveBeenCalled();
     });
   });
 
