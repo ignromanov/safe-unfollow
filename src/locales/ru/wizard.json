@@ -19,6 +19,18 @@
   "format": {
     "warning": "КРИТИЧЕСКИЙ ШАГ"
   },
+  "entry": {
+    "recipe": {
+      "title": "Что выбрать в диалоге Instagram",
+      "rows": {
+        "destination": "Экспорт на устройство",
+        "range": "За всё время",
+        "format": "JSON — не HTML",
+        "quality": "Любое качество медиа",
+        "content": "Подписчики и подписки"
+      }
+    }
+  },
   "steps": {
     "1": {
       "title": "Открой страницу экспорта Instagram",

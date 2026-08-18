@@ -19,6 +19,18 @@
   "format": {
     "warning": "KRİTİK ADIM"
   },
+  "entry": {
+    "recipe": {
+      "title": "Instagram iletişim kutusunda ne seçilmeli",
+      "rows": {
+        "destination": "Cihaza dışa aktar",
+        "range": "Tüm zamanlar",
+        "format": "JSON — HTML değil",
+        "quality": "Herhangi bir medya kalitesi",
+        "content": "Takipçiler ve takip edilenler"
+      }
+    }
+  },
   "steps": {
     "1": {
       "title": "Instagram Dışa Aktarma Sayfasını Aç",

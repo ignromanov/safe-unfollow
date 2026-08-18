@@ -19,6 +19,18 @@
   "format": {
     "warning": "重要なステップ"
   },
+  "entry": {
+    "recipe": {
+      "title": "Instagramのダイアログで選ぶべき項目",
+      "rows": {
+        "destination": "デバイスにエクスポート",
+        "range": "全期間",
+        "format": "JSON — HTMLではない",
+        "quality": "メディア品質は任意",
+        "content": "フォロワーとフォロー中"
+      }
+    }
+  },
   "steps": {
     "1": {
       "title": "Instagramエクスポートページを開く",

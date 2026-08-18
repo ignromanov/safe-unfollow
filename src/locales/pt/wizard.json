@@ -19,6 +19,18 @@
   "format": {
     "warning": "PASSO CRÍTICO"
   },
+  "entry": {
+    "recipe": {
+      "title": "O que escolher na caixa de diálogo do Instagram",
+      "rows": {
+        "destination": "Exportar para dispositivo",
+        "range": "Todo o período",
+        "format": "JSON — não HTML",
+        "quality": "Qualquer qualidade de mídia",
+        "content": "Seguidores e seguindo"
+      }
+    }
+  },
   "steps": {
     "1": {
       "title": "Abra a página de exportação do Instagram",

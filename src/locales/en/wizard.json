@@ -19,6 +19,18 @@
   "format": {
     "warning": "CRITICAL STEP"
   },
+  "entry": {
+    "recipe": {
+      "title": "What to pick in Instagram's dialog",
+      "rows": {
+        "destination": "Export to device",
+        "range": "All time",
+        "format": "JSON — not HTML",
+        "quality": "Any media quality",
+        "content": "Followers and following"
+      }
+    }
+  },
   "steps": {
     "1": {
       "title": "Open Instagram Export Page",

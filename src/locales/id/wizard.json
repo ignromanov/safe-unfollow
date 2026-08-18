@@ -19,6 +19,18 @@
   "format": {
     "warning": "LANGKAH PENTING"
   },
+  "entry": {
+    "recipe": {
+      "title": "Yang harus dipilih di dialog Instagram",
+      "rows": {
+        "destination": "Ekspor ke perangkat",
+        "range": "Sepanjang waktu",
+        "format": "JSON — bukan HTML",
+        "quality": "Kualitas media apa pun",
+        "content": "Pengikut dan mengikuti"
+      }
+    }
+  },
   "steps": {
     "1": {
       "title": "Buka Halaman Ekspor Instagram",

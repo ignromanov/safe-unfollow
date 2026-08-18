@@ -19,6 +19,18 @@
   "format": {
     "warning": "ÉTAPE CRITIQUE"
   },
+  "entry": {
+    "recipe": {
+      "title": "Que choisir dans la boîte de dialogue Instagram",
+      "rows": {
+        "destination": "Exporter vers l'appareil",
+        "range": "Tout",
+        "format": "JSON — pas HTML",
+        "quality": "Toute qualité de média",
+        "content": "Abonnés et abonnements"
+      }
+    }
+  },
   "steps": {
     "1": {
       "title": "Ouvrez la page d'exportation Instagram",

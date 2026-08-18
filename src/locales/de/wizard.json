@@ -19,6 +19,18 @@
   "format": {
     "warning": "KRITISCHER SCHRITT"
   },
+  "entry": {
+    "recipe": {
+      "title": "Was du im Instagram-Dialog auswählen musst",
+      "rows": {
+        "destination": "Auf Gerät exportieren",
+        "range": "Gesamter Zeitraum",
+        "format": "JSON — nicht HTML",
+        "quality": "Beliebige Medienqualität",
+        "content": "Follower und Gefolgte"
+      }
+    }
+  },
   "steps": {
     "1": {
       "title": "Instagram Export-Seite öffnen",
