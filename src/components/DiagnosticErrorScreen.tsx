@@ -54,7 +54,7 @@ export function DiagnosticErrorScreen({
     return createDiagnosticError('UNKNOWN', errorMessage);
   }, [errorCode, errorMessage, parseWarnings]);
 
-  const colors = getColorScheme(diagnosticError.severity);
+  const colors = getColorScheme(diagnosticError);
   const Icon = getErrorIcon(diagnosticError.icon);
   const [copied, setCopied] = useState(false);
 
