@@ -4,6 +4,9 @@
     "stepNavigation": "Adım gezinmesi",
     "stepLabel": "Adım {{step}}"
   },
+  "footer": {
+    "navigation": "Sihirbaz eylemleri"
+  },
   "calendar": {
     "addReminder": "Takvime hatırlatıcı ekle",
     "title": "Instagram dışa aktarma e-postasını kontrol et",
@@ -14,6 +17,8 @@
     "next": "Sonraki Adım",
     "done": "Tamam, başlayalım!",
     "close": "Rehberi kapat",
+    "cancel": "İptal",
+    "trySample": "Örnek verilerle deneyin",
     "uploadFile": "Dosyamı Yükle",
     "alreadyHaveFile": "ZIP dosyam zaten var"
   },

@@ -4,6 +4,9 @@
     "stepNavigation": "التنقل بين الخطوات",
     "stepLabel": "الخطوة {{step}}"
   },
+  "footer": {
+    "navigation": "إجراءات المعالج"
+  },
   "calendar": {
     "addReminder": "إضافة تذكير للتقويم",
     "title": "تحقق من بريد تصدير انستغرام",
@@ -14,6 +17,8 @@
     "next": "الخطوة التالية",
     "done": "انتهيت، هيا بنا!",
     "close": "إغلاق الدليل",
+    "cancel": "إلغاء",
+    "trySample": "جرّب مع بيانات العينة",
     "uploadFile": "رفع ملفي",
     "alreadyHaveFile": "لدي بالفعل ملف ZIP"
   },

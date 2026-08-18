@@ -4,6 +4,9 @@
     "stepNavigation": "ステップナビゲーション",
     "stepLabel": "ステップ {{step}}"
   },
+  "footer": {
+    "navigation": "ウィザードの操作"
+  },
   "calendar": {
     "addReminder": "カレンダーにリマインダーを追加",
     "title": "Instagramエクスポートメールを確認",
@@ -14,6 +17,8 @@
     "next": "次のステップ",
     "done": "完了、始めましょう！",
     "close": "ガイドを閉じる",
+    "cancel": "キャンセル",
+    "trySample": "サンプルデータで試す",
     "uploadFile": "ファイルをアップロード",
     "alreadyHaveFile": "ZIPファイルを持っています"
   },

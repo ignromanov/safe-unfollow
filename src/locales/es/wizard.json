@@ -4,6 +4,9 @@
     "stepNavigation": "Navegación de pasos",
     "stepLabel": "Paso {{step}}"
   },
+  "footer": {
+    "navigation": "Acciones del asistente"
+  },
   "calendar": {
     "addReminder": "Añadir recordatorio al calendario",
     "title": "Revisar email de exportación de Instagram",
@@ -14,6 +17,8 @@
     "next": "Siguiente paso",
     "done": "¡Listo, vamos!",
     "close": "Cerrar guía",
+    "cancel": "Cancelar",
+    "trySample": "Prueba con datos de ejemplo",
     "uploadFile": "Subir mi archivo",
     "alreadyHaveFile": "Ya tengo mi archivo ZIP"
   },

@@ -4,6 +4,9 @@
     "stepNavigation": "Schrittnavigation",
     "stepLabel": "Schritt {{step}}"
   },
+  "footer": {
+    "navigation": "Wizard-Aktionen"
+  },
   "calendar": {
     "addReminder": "Erinnerung zum Kalender hinzufügen",
     "title": "Instagram Export-E-Mail prüfen",
@@ -14,6 +17,8 @@
     "next": "Nächster Schritt",
     "done": "Fertig, los geht's!",
     "close": "Anleitung schließen",
+    "cancel": "Abbrechen",
+    "trySample": "Mit Beispieldaten ausprobieren",
     "uploadFile": "Meine Datei hochladen",
     "alreadyHaveFile": "Ich habe bereits meine ZIP-Datei"
   },

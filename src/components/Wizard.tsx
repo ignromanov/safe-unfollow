@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { ArrowLeft, ArrowRight, X, AlertTriangle, Calendar } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import FocusTrap from 'focus-trap-react';
@@ -8,15 +8,25 @@ import { GuideEntry } from '@/components/wizard/GuideEntry';
 import { PrefixedLink } from '@/components/PrefixedLink';
 import { ResponsiveGif } from '@/components/ResponsiveGif';
 import { WIZARD_STEPS } from '@/config/wizard-steps';
+import { useIsElementInView } from '@/hooks/useIsElementInView';
 import { useWizardNavigation } from '@/hooks/useWizardNavigation';
 
 interface WizardProps {
   initialStep?: number;
 }
 
+// The Accounts Center address lives in exactly one place: WIZARD_STEPS. Read
+// by id, not array index — see GuideEntry.tsx, which reads it the same way
+// for the in-flow CTA this bar CTA duplicates once that one scrolls away.
+const ACCOUNTS_CENTER_URL = WIZARD_STEPS.find(s => s.id === 1)?.externalLink;
+
 export function Wizard({ initialStep = 1 }: WizardProps) {
   const { t } = useTranslation('wizard');
   const { currentStep, goToStep, goHome } = useWizardNavigation(initialStep);
+  const ctaRef = useRef<HTMLAnchorElement>(null);
+  // Only meaningful on step 1 — ctaRef.current is null on every other step,
+  // so the hook has nothing to observe there and its default (true) is inert.
+  const ctaInView = useIsElementInView(ctaRef);
 
   // Track analytics on step view. Step 1 is GuideEntry, which reports its
   // own guideEntryView — reporting wizardStepView here too would double the
@@ -33,6 +43,10 @@ export function Wizard({ initialStep = 1 }: WizardProps) {
 
   const isFirstStep = currentStep === 1;
   const isLastStep = currentStep === WIZARD_STEPS.length;
+  // Step 1 only: once the in-flow CTA scrolls out of view, the bottom bar
+  // takes over as the primary action so there is always exactly one on
+  // screen. Every other step keeps its normal Back/Next bar.
+  const showBarPrimary = isFirstStep && !ctaInView;
 
   // Back/Next/Done/the step dots/Close guide are now plain PrefixedLinks — each
   // computes its own destination, so the browser can follow it before hydration.
@@ -106,7 +120,7 @@ export function Wizard({ initialStep = 1 }: WizardProps) {
         <div className="flex-1 overflow-y-auto">
           <div className="min-h-full flex items-center justify-center p-4">
             {currentStep === 1 ? (
-              <GuideEntry />
+              <GuideEntry ctaRef={ctaRef} />
             ) : (
               <div
                 className={`max-w-xl w-full rounded-4xl overflow-hidden shadow-2xl border transition-all ${
@@ -173,27 +187,59 @@ export function Wizard({ initialStep = 1 }: WizardProps) {
           </div>
         </div>
 
-        {/* Pinned navigation bar — outside scrollable content */}
-        <div className="shrink-0 border-t border-border bg-card px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+        {/* Pinned navigation bar — outside scrollable content. On step 1, once
+            the in-flow CTA (GuideEntry's own Accounts Center link) scrolls
+            out of view, this bar's two slots swap label and destination to
+            take over as the primary action — see showBarPrimary above. Both
+            slots keep their element identity: nothing else about the bar
+            changes, so its height never does either. */}
+        <nav
+          className="shrink-0 border-t border-border bg-card px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+          aria-label={t('footer.navigation')}
+        >
           <div className="max-w-xl mx-auto flex items-center justify-between">
             <PrefixedLink
-              to={isFirstStep ? '/' : `/wizard/step/${currentStep - 1}`}
+              to={
+                showBarPrimary
+                  ? '/sample'
+                  : isFirstStep
+                    ? '/'
+                    : `/wizard/step/${currentStep - 1}`
+              }
               className="cursor-pointer flex items-center gap-2 px-4 py-3 rounded-xl font-bold text-sm transition-all hover:bg-muted text-muted-foreground"
             >
               <ArrowLeft size={18} />
               <span>
-                {isFirstStep ? t('buttons.cancel', { defaultValue: 'Cancel' }) : t('buttons.back')}
+                {showBarPrimary
+                  ? t('buttons.trySample')
+                  : isFirstStep
+                    ? t('buttons.cancel')
+                    : t('buttons.back')}
               </span>
             </PrefixedLink>
-            <PrefixedLink
-              to={isLastStep ? '/upload' : `/wizard/step/${currentStep + 1}`}
-              className="cursor-pointer flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-xl font-bold text-sm shadow-lg hover:scale-105 active:scale-95 transition-all"
-            >
-              {isLastStep ? t('buttons.done') : t('buttons.next')}
-              <ArrowRight size={18} />
-            </PrefixedLink>
+            {showBarPrimary ? (
+              // Same action as the in-flow CTA (GuideEntry.tsx) — external,
+              // opens in a new tab — not an in-app PrefixedLink.
+              <a
+                href={ACCOUNTS_CENTER_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="cursor-pointer flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-xl font-bold text-sm shadow-lg hover:scale-105 active:scale-95 transition-all"
+              >
+                {t('entry.cta')}
+                <ArrowRight size={18} />
+              </a>
+            ) : (
+              <PrefixedLink
+                to={isLastStep ? '/upload' : `/wizard/step/${currentStep + 1}`}
+                className="cursor-pointer flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-xl font-bold text-sm shadow-lg hover:scale-105 active:scale-95 transition-all"
+              >
+                {isLastStep ? t('buttons.done') : t('buttons.next')}
+                <ArrowRight size={18} />
+              </PrefixedLink>
+            )}
           </div>
-        </div>
+        </nav>
       </div>
     </WizardFocusTrap>
   );

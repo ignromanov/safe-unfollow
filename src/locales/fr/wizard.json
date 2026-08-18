@@ -4,6 +4,9 @@
     "stepNavigation": "Navigation des étapes",
     "stepLabel": "Étape {{step}}"
   },
+  "footer": {
+    "navigation": "Actions de l'assistant"
+  },
   "calendar": {
     "addReminder": "Ajouter un rappel au calendrier",
     "title": "Vérifier l'e-mail d'exportation Instagram",
@@ -14,6 +17,8 @@
     "next": "Étape suivante",
     "done": "C'est fait, allons-y !",
     "close": "Fermer le guide",
+    "cancel": "Annuler",
+    "trySample": "Essayer avec des données exemple",
     "uploadFile": "Téléverser mon fichier",
     "alreadyHaveFile": "J'ai déjà mon fichier ZIP"
   },

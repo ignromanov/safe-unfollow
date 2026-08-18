@@ -1,5 +1,5 @@
-import { vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { vi, beforeEach, afterEach } from 'vitest';
+import { act, render, screen, fireEvent, within } from '@testing-library/react';
 import wizardEN from '@/locales/en/wizard.json';
 import { createI18nMock } from '@/__tests__/utils/mockI18n';
 
@@ -50,11 +50,44 @@ function renderWizardAtStep(step: number) {
   return render(<Wizard />);
 }
 
+// Double for the one IntersectionObserver the wizard's bottom bar depends on
+// (via useIsElementInView) — the seam that lets these tests move the in-flow
+// CTA in and out of view without a real layout. Mirrors the double in
+// useAdViewability.test.tsx: capture observe() calls, drive them by hand.
+let observedEntries: Array<{ element: Element; callback: IntersectionObserverCallback }>;
+
+function setCtaIntersecting(isIntersecting: boolean) {
+  act(() => {
+    for (const { element, callback } of observedEntries) {
+      callback(
+        [{ isIntersecting, target: element } as IntersectionObserverEntry],
+        {} as IntersectionObserver
+      );
+    }
+  });
+}
+
 describe('Wizard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockPathname = '/wizard';
     mockUseLanguagePrefix.mockReturnValue('');
+    observedEntries = [];
+    vi.stubGlobal(
+      'IntersectionObserver',
+      class {
+        constructor(private callback: IntersectionObserverCallback) {}
+        observe(element: Element): void {
+          observedEntries.push({ element, callback: this.callback });
+        }
+        unobserve(): void {}
+        disconnect(): void {}
+      }
+    );
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it('should render without crashing', () => {
@@ -80,7 +113,7 @@ describe('Wizard', () => {
     render(<Wizard />);
 
     expect(screen.getByText('Next Step')).toBeInTheDocument();
-    expect(screen.getByText('buttons.cancel')).toBeInTheDocument();
+    expect(screen.getByText(wizardEN.buttons.cancel)).toBeInTheDocument();
   });
 
   it('should render the GuideEntry CTA linking to Accounts Center on step 1', () => {
@@ -241,5 +274,91 @@ describe('Wizard', () => {
     renderWizardAtStep(2);
 
     expect(analytics.wizardStepView).toHaveBeenCalledWith(2);
+  });
+
+  describe('bottom bar on step 1', () => {
+    it('names the bar navigation region separately from the step-dot navigation', () => {
+      renderWizardAtStep(1);
+
+      expect(
+        screen.getByRole('navigation', { name: wizardEN.footer.navigation })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('navigation', { name: wizardEN.header.stepNavigation })
+      ).toBeInTheDocument();
+    });
+
+    it('shows the normal step nav, and only one primary, while the in-flow CTA is visible', () => {
+      renderWizardAtStep(1);
+
+      const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
+      expect(within(bar).getByText('Next Step')).toBeInTheDocument();
+      expect(within(bar).queryByText(wizardEN.entry.cta)).not.toBeInTheDocument();
+      // The in-flow CTA itself is the only "Accounts Center" link on screen.
+      expect(screen.getAllByRole('link', { name: /accounts center/i })).toHaveLength(1);
+    });
+
+    it('swaps both bar slots — without changing which two controls are present, or the bar height — when the in-flow CTA scrolls out', () => {
+      renderWizardAtStep(1);
+      const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
+      const heightBefore = bar.getBoundingClientRect().height;
+      const linksBefore = within(bar).getAllByRole('link');
+      expect(linksBefore).toHaveLength(2);
+
+      setCtaIntersecting(false);
+
+      const linksAfter = within(bar).getAllByRole('link');
+      expect(linksAfter).toHaveLength(2);
+      expect(within(bar).getByText(wizardEN.entry.cta)).toBeInTheDocument();
+      expect(within(bar).getByText(wizardEN.buttons.trySample)).toBeInTheDocument();
+      expect(within(bar).queryByText('Next Step')).not.toBeInTheDocument();
+      expect(within(bar).queryByText(wizardEN.buttons.cancel)).not.toBeInTheDocument();
+      expect(bar.getBoundingClientRect().height).toBe(heightBefore);
+    });
+
+    it('links the swapped bar primary to the same Accounts Center destination as the in-flow CTA', () => {
+      renderWizardAtStep(1);
+      const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
+
+      setCtaIntersecting(false);
+
+      const barCta = within(bar).getByRole('link', { name: wizardEN.entry.cta });
+      expect(barCta).toHaveAttribute(
+        'href',
+        'https://accountscenter.instagram.com/info_and_permissions/dyi/?entry_point=app_settings'
+      );
+    });
+
+    it('links the swapped bar secondary to /sample', () => {
+      renderWizardAtStep(1);
+      const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
+
+      setCtaIntersecting(false);
+
+      const trySample = within(bar).getByRole('link', { name: wizardEN.buttons.trySample });
+      expect(trySample).toHaveAttribute('href', '/sample');
+    });
+
+    it('swaps back to the normal step nav when the in-flow CTA re-enters view', () => {
+      renderWizardAtStep(1);
+      const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
+
+      setCtaIntersecting(false);
+      setCtaIntersecting(true);
+
+      expect(within(bar).getByText('Next Step')).toBeInTheDocument();
+      expect(within(bar).queryByText(wizardEN.entry.cta)).not.toBeInTheDocument();
+    });
+
+    it('does not swap the bar on other steps', () => {
+      renderWizardAtStep(2);
+
+      const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
+      // No in-flow CTA is observed on this step, so nothing can toggle it —
+      // the bar stays in its normal Back/Next state regardless.
+      setCtaIntersecting(false);
+
+      expect(within(bar).queryByText(wizardEN.entry.cta)).not.toBeInTheDocument();
+    });
   });
 });

@@ -4,6 +4,9 @@
     "stepNavigation": "Navigasi langkah",
     "stepLabel": "Langkah {{step}}"
   },
+  "footer": {
+    "navigation": "Aksi wizard"
+  },
   "calendar": {
     "addReminder": "Tambah pengingat ke kalender",
     "title": "Cek email ekspor Instagram",
@@ -14,6 +17,8 @@
     "next": "Langkah Berikutnya",
     "done": "Selesai, ayo mulai!",
     "close": "Tutup panduan",
+    "cancel": "Batal",
+    "trySample": "Coba dengan data sampel",
     "uploadFile": "Unggah File Saya",
     "alreadyHaveFile": "Saya sudah punya file ZIP"
   },

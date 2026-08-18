@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import type { RefObject } from 'react';
 import { ExternalLink } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -24,7 +25,7 @@ const ACCOUNTS_CENTER_URL = WIZARD_STEPS.find(step => step.id === 1)?.externalLi
  * "Try with sample" is deliberately absent — it lives in the bottom bar's
  * secondary slot (a separate task), not on this screen.
  */
-export function GuideEntry() {
+export function GuideEntry({ ctaRef }: { ctaRef?: RefObject<HTMLAnchorElement> }) {
   const { t } = useTranslation('wizard');
 
   // Owns its own view event so step 1 emits guide_entry_view, not
@@ -50,6 +51,7 @@ export function GuideEntry() {
 
         <div className="flex flex-col items-stretch sm:items-start gap-3">
           <a
+            ref={ctaRef}
             href={ACCOUNTS_CENTER_URL}
             target="_blank"
             rel="noopener noreferrer"
