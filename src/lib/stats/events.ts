@@ -5,7 +5,7 @@
 import { AnalyticsEvents, parseDurationBucket } from './constants';
 import type { FilterAction, LinkType, ParseOutcome } from './constants';
 import { trackEvent } from './core';
-import { enqueueEvent } from './queue';
+import { enqueueEvent, trackNavigating } from './queue';
 import { getStoredUTM, getEntryCTA, setEntryCTA } from './utm';
 import type { LabelResolutionMode } from '@/core/types';
 import type { LicenseFailureReason } from '@/lib/export/license';
@@ -165,8 +165,10 @@ export const analytics = {
     trackEvent(AnalyticsEvents.CLEAR_DATA);
   },
 
+  // Same-tab navigation: LanguageSwitcher does a full reload to fetch the new
+  // locale's SSG HTML. Same defect as checkoutStart — see queue.ts.
   languageChange: (language: string) => {
-    trackEvent(AnalyticsEvents.LANGUAGE_CHANGE, { language });
+    trackNavigating(AnalyticsEvents.LANGUAGE_CHANGE, { language });
   },
 
   // Wizard events (V10: 5% sampling, was 25%)
@@ -457,8 +459,10 @@ export const analytics = {
     trackEvent(AnalyticsEvents.PAYWALL_DISMISS);
   },
 
+  // Same-tab navigation: useProExport sets location.href in the next statement,
+  // and window.umami.track() has no keepalive. See queue.ts.
   checkoutStart: () => {
-    trackEvent(AnalyticsEvents.CHECKOUT_START);
+    trackNavigating(AnalyticsEvents.CHECKOUT_START);
   },
 
   purchaseSuccess: () => {

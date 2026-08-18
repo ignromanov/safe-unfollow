@@ -2,8 +2,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const enqueueEvent = vi.fn();
 const trackEvent = vi.fn();
+const trackNavigating = vi.fn();
 vi.mock('@/lib/stats/queue', () => ({
   enqueueEvent: (name: string, data?: unknown) => enqueueEvent(name, data),
+  trackNavigating: (name: string, data?: unknown) => trackNavigating(name, data),
 }));
 vi.mock('@/lib/stats/core', () => ({
   trackEvent: (name: string, data?: unknown) => trackEvent(name, data),
@@ -51,13 +53,36 @@ describe('promo impression batching', () => {
     expect(trackEvent).not.toHaveBeenCalled();
   });
 
-  it('keeps clicks on the immediate path — a click navigates away', () => {
+  it('keeps new-tab clicks on the immediate path — they must not wait for a batch', () => {
     analytics.affiliateBlockClick('nordvpn_global');
 
     expect(trackEvent).toHaveBeenCalledWith('affiliate_block_click', {
       offer_id: 'nordvpn_global',
     });
     expect(enqueueEvent).not.toHaveBeenCalled();
+  });
+
+  it('leaves new-tab clicks on trackEvent — a _blank click never unloads this page', () => {
+    analytics.donationCardClick(1200);
+
+    expect(trackEvent).toHaveBeenCalledWith('donation_card_click', { account_count: 1200 });
+    expect(trackNavigating).not.toHaveBeenCalled();
+  });
+
+  describe('same-tab navigations', () => {
+    it('sends checkout_start over the keepalive path — the redirect would cancel it', () => {
+      analytics.checkoutStart();
+
+      expect(trackNavigating).toHaveBeenCalledWith('checkout_start', undefined);
+      expect(trackEvent).not.toHaveBeenCalled();
+    });
+
+    it('sends language_change over the keepalive path — it precedes a full reload', () => {
+      analytics.languageChange('id');
+
+      expect(trackNavigating).toHaveBeenCalledWith('language_change', { language: 'id' });
+      expect(trackEvent).not.toHaveBeenCalled();
+    });
   });
 
   it('applies no sampling to impressions', () => {
