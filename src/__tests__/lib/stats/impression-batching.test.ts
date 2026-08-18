@@ -18,6 +18,7 @@ import { analytics } from '@/lib/stats/events';
 describe('promo impression batching', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    sessionStorage.clear();
   });
 
   it('queues the ad viewable impression instead of sending it immediately', () => {
@@ -140,7 +141,10 @@ describe('promo impression batching', () => {
 
       analytics.wizardStepView(3);
 
-      expect(enqueueEvent).toHaveBeenCalledWith('wizard_step_view', { step_id: 3 });
+      expect(enqueueEvent).toHaveBeenCalledWith('wizard_step_view', {
+        step_id: 3,
+        first_view: true,
+      });
       expect(trackEvent).not.toHaveBeenCalled();
       random.mockRestore();
     });
@@ -193,21 +197,56 @@ describe('promo impression batching', () => {
       expect(trackNavigating).not.toHaveBeenCalled();
     });
 
-    it('drops the wizard step title, as the immediate path did — it is page copy, not a dimension', () => {
-      const random = vi.spyOn(Math, 'random').mockReturnValue(0);
-
-      analytics.wizardStepView(2, 'Choose Your Instagram Profile');
-
-      expect(enqueueEvent).toHaveBeenCalledWith('wizard_step_view', { step_id: 2 });
-      random.mockRestore();
-    });
-
     it('keeps the sampling gate in front of the queue, not behind it', () => {
       const random = vi.spyOn(Math, 'random').mockReturnValue(0.99);
 
       analytics.filterToggle('mutuals', 'enable', 1);
       analytics.searchPerform(4, 10, 100, false);
       analytics.wizardStepView(3);
+
+      expect(enqueueEvent).not.toHaveBeenCalled();
+      random.mockRestore();
+    });
+  });
+
+  // guide_entry_view and wizard_step_view's first_view — a ratio between two
+  // events needs a matching definition of "first" on both ends, or 1→2→1→2
+  // stops being a funnel. See analytics.guideEntryView for the full rationale.
+  describe('guide entry / first instruction pair', () => {
+    it('marks the first view of the entry screen and only the first', () => {
+      const random = vi.spyOn(Math, 'random').mockReturnValue(0);
+
+      analytics.guideEntryView();
+      analytics.guideEntryView();
+
+      expect(enqueueEvent).toHaveBeenNthCalledWith(1, 'guide_entry_view', { first_view: true });
+      expect(enqueueEvent).toHaveBeenNthCalledWith(2, 'guide_entry_view', { first_view: false });
+      random.mockRestore();
+    });
+
+    it('marks first views per step, so 1→2→1→2 is not two funnels', () => {
+      const random = vi.spyOn(Math, 'random').mockReturnValue(0);
+
+      analytics.wizardStepView(2);
+      analytics.wizardStepView(3);
+      analytics.wizardStepView(2);
+
+      expect(enqueueEvent).toHaveBeenNthCalledWith(1, 'wizard_step_view', {
+        step_id: 2,
+        first_view: true,
+      });
+      expect(enqueueEvent).toHaveBeenNthCalledWith(3, 'wizard_step_view', {
+        step_id: 2,
+        first_view: false,
+      });
+      random.mockRestore();
+    });
+
+    it('keeps the 5% gate on both, so the ratio between them stays unbiased', () => {
+      const random = vi.spyOn(Math, 'random').mockReturnValue(0.06);
+
+      analytics.guideEntryView();
+      analytics.wizardStepView(2);
 
       expect(enqueueEvent).not.toHaveBeenCalled();
       random.mockRestore();

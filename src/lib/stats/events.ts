@@ -11,6 +11,22 @@ import type { LabelResolutionMode } from '@/core/types';
 import type { LicenseFailureReason } from '@/lib/export/license';
 
 /**
+ * True the first time this key is seen in the session, false afterwards.
+ *
+ * Both ends of the entry→instruction pair carry it. Without it the pair
+ * inherits wizard_step_view's back-navigation non-monotonicity — 1→2→1→2 counts
+ * twice on both ends and the ratio stops being a funnel. Mechanism follows the
+ * `analytics_first_pv` precedent below (`pageView`).
+ */
+function firstViewInSession(key: string): boolean {
+  if (typeof window === 'undefined') return false;
+  const storageKey = `analytics_first_${key}`;
+  if (sessionStorage.getItem(storageKey)) return false;
+  sessionStorage.setItem(storageKey, '1');
+  return true;
+}
+
+/**
  * Analytics helper object with typed methods
  */
 export const analytics = {
@@ -186,11 +202,33 @@ export const analytics = {
     trackNavigating(AnalyticsEvents.LANGUAGE_CHANGE, { language });
   },
 
+  /**
+   * The single-action entry screen that replaced wizard step 1.
+   *
+   * A NEW NAME rather than a `variant` on wizard_step_view: a variant field
+   * would leave step_id:1 meaning two different screens depending on the date,
+   * and every historical query silently wrong.
+   *
+   * Same 5% gate as wizardStepView — a ratio between two events sampled at the
+   * same rate is unbiased, and 5% already gives ±3% at this volume.
+   *
+   * NOT comparable across its own release: the old pair measured
+   * "slide 1 → slide 2", this one measures "entry → first instruction".
+   * Different denominators by construction.
+   */
+  guideEntryView: () => {
+    if (Math.random() > 0.05) return;
+    enqueueEvent(AnalyticsEvents.GUIDE_ENTRY_VIEW, {
+      first_view: firstViewInSession('guide_entry'),
+    });
+  },
+
   // Wizard events (V10: 5% sampling, was 25%)
-  wizardStepView: (stepId: number, _stepTitle?: string) => {
+  wizardStepView: (stepId: number) => {
     if (Math.random() > 0.05) return;
     enqueueEvent(AnalyticsEvents.WIZARD_STEP_VIEW, {
       step_id: stepId,
+      first_view: firstViewInSession(`wizard_step_${stepId}`),
     });
   },
 

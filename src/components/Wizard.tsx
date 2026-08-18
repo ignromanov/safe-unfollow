@@ -21,9 +21,8 @@ export function Wizard({ initialStep = 1, onComplete, onCancel }: WizardProps) {
 
   // Track analytics on step view
   useEffect(() => {
-    const stepTitle = t(`steps.${currentStep}.title` as any);
-    analytics.wizardStepView(currentStep, String(stepTitle));
-  }, [currentStep, t]);
+    analytics.wizardStepView(currentStep);
+  }, [currentStep]);
 
   const step = WIZARD_STEPS.find(s => s.id === currentStep);
   if (!step) {

@@ -49,6 +49,10 @@ export const AnalyticsEvents = {
   SAMPLE_DATA_LOAD: 'sample_data_load',
   LANGUAGE_CHANGE: 'language_change',
 
+  // Guide entry screen (replaces wizard step 1) — see analytics.guideEntryView
+  // for why this is a separate event name rather than a `variant` field.
+  GUIDE_ENTRY_VIEW: 'guide_entry_view',
+
   // Wizard (V10: 5% sampling, removed back_click and cancel)
   WIZARD_STEP_VIEW: 'wizard_step_view',
 
