@@ -8,7 +8,7 @@
     "processing": "Analyse locale en cours...",
     "processingHint": "Le traitement de grands ensembles de données (jusqu'à 1M+) peut prendre un moment.",
     "ariaLabel": "Téléverser le fichier ZIP de données Instagram",
-    "jsonReminder": "Assurez-vous d'avoir sélectionné le format JSON lors de la demande de votre exportation de données. Les fichiers ZIP en JSON et HTML sont identiques vus de l'extérieur.",
+    "jsonReminder": "La boîte de dialogue d'Instagram sélectionne HTML par défaut — assurez-vous de choisir JSON. Les fichiers ZIP en JSON et HTML sont identiques vus de l'extérieur.",
     "seeGuide": "Voir le guide étape par étape",
     "jsonRequired": "Nécessite une exportation au format JSON",
     "privacyMicro": "Votre fichier ne quitte jamais votre appareil",
@@ -33,6 +33,9 @@
     "howToFix": "Comment corriger cela",
     "tryAgain": "Réessayer",
     "showMistakes": "Montrer où je me suis trompé",
+    "reExportJson": "Réexporter en JSON — ouvrir l'étape des paramètres",
+    "chooseDifferentFile": "Choisir un autre fichier",
+    "actionsLabel": "Actions de récupération",
     "reportIssue": "Signaler ce problème sur GitHub",
     "copyDetails": "Copier les détails de l'erreur",
     "copied": "Copié !",
@@ -159,24 +162,6 @@
         "fix": "Essayez de téléverser le fichier à nouveau. Si le problème persiste, assurez-vous que le fichier ZIP n'est pas corrompu."
       }
     }
-  },
-  "quiz": {
-    "title": "Quel format avez-vous choisi ?",
-    "subtitle": "Lors de la demande d'export de vos données Instagram, quel format avez-vous sélectionné ?",
-    "json": "JSON",
-    "jsonHint": "Format correct pour l'analyse",
-    "html": "HTML",
-    "htmlHint": "Ne fonctionne pas — retéléchargez en JSON",
-    "notSure": "Pas sûr",
-    "notSureHint": "Laissez-moi vérifier",
-    "successMessage": "C'est bon ! Téléversez votre ZIP ci-dessous.",
-    "htmlMessage": "Les exports HTML ne peuvent pas être analysés. Veuillez re-demander vos données au format JSON.",
-    "htmlCta": "Comment obtenir le format JSON",
-    "comparisonTitle": "Comment faire la différence",
-    "comparisonJson": "Si vous voyez « Format : JSON » sur la page de téléchargement, c'est bon.",
-    "comparisonHtml": "Si vous voyez « Format : HTML » ou des fichiers .html, il faut re-demander.",
-    "dismiss": "Compris",
-    "fixedIt": "J'ai redemandé en JSON"
   },
   "formatWarning": "Assurez-vous d'avoir sélectionné JSON (pas HTML) lors de la demande d'export.",
   "waiting": {

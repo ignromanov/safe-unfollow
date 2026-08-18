@@ -387,22 +387,6 @@ export const analytics = {
     flushEvents();
   },
 
-  /**
-   * Which format the visitor believes they exported.
-   *
-   * Batched with the rest of `/upload`: it fires from a quiz on that page and
-   * navigates nowhere. Reached through this object rather than a raw
-   * `trackEvent` in the component, so its transport is decided in one place
-   * alongside the funnel it is read against.
-   */
-  formatQuizAnswer: (answer: string) => {
-    enqueueEvent(AnalyticsEvents.FORMAT_QUIZ_ANSWER, { answer });
-  },
-
-  formatQuizFixedIt: () => {
-    enqueueEvent(AnalyticsEvents.FORMAT_QUIZ_FIXED_IT);
-  },
-
   // Session & Engagement
   returnUpload: (fileHashPrefix: string, daysSinceLastUpload: number) => {
     trackEvent(AnalyticsEvents.RETURN_UPLOAD, {

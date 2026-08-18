@@ -176,13 +176,34 @@ describe('ResultsPage', () => {
       expect(mockNavigate).toHaveBeenCalledWith('/upload');
     });
 
-    it('should navigate to wizard when Open Wizard is clicked', async () => {
-      const user = userEvent.setup();
-      render(<ResultsPage />);
+    it('sends an undiagnosed failure to the guide start, not the format step', async () => {
+      // The stub above only proves a click fires a prop — it says nothing about
+      // where the real link goes. `/results` only ever supplies `errorMessage`
+      // (no errorCode), so the real DiagnosticErrorScreen resolves this to
+      // 'UNKNOWN'. Unmock it — and the router it needs for its real <Link> — to
+      // check the actual destination.
+      vi.doUnmock('@/components/DiagnosticErrorScreen');
+      vi.doUnmock('react-router-dom');
+      vi.resetModules();
 
-      await user.click(screen.getByText(heroEN.buttons.getGuide));
+      const { renderWithRouter } = await import('@/__tests__/test-utils');
+      const { Component: RealResultsPage } = await import('@/pages/ResultsPage');
+      const { useAppStore: freshStore } = await import('@/lib/store');
 
-      expect(mockNavigate).toHaveBeenCalledWith('/wizard');
+      freshStore.setState({ uploadStatus: 'error', uploadError: 'Upload failed' });
+
+      renderWithRouter(<RealResultsPage />);
+
+      const wizardLink = screen
+        .getAllByRole('link')
+        .find(link => link.getAttribute('href')?.includes('/wizard/step/'));
+
+      expect(wizardLink).toBeDefined();
+      expect(wizardLink!).toHaveAttribute('href', expect.stringMatching(/\/wizard\/step\/1$/));
+
+      vi.doUnmock('@/components/DiagnosticErrorScreen');
+      vi.doUnmock('react-router-dom');
+      vi.resetModules();
     });
 
     it('should use language prefix in error navigation', async () => {

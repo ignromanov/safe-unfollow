@@ -8,7 +8,7 @@
     "processing": "Menganalisis secara lokal...",
     "processingHint": "Memproses dataset besar (hingga 1 juta+) bisa memakan waktu sebentar.",
     "ariaLabel": "Unggah file ZIP data Instagram",
-    "jsonReminder": "Pastikan Anda memilih format JSON saat meminta ekspor data. File ZIP JSON dan HTML terlihat identik dari luar.",
+    "jsonReminder": "Dialog Instagram secara default memilih HTML — pastikan Anda memilih JSON. File ZIP JSON dan HTML terlihat identik dari luar.",
     "seeGuide": "Lihat panduan langkah demi langkah",
     "jsonRequired": "Memerlukan ekspor format JSON",
     "privacyMicro": "File Anda tidak pernah meninggalkan perangkat Anda",
@@ -33,6 +33,9 @@
     "howToFix": "Cara memperbaiki ini",
     "tryAgain": "Coba Lagi",
     "showMistakes": "Tunjukkan Kesalahan Saya",
+    "reExportJson": "Ekspor ulang sebagai JSON — buka langkah pengaturan",
+    "chooseDifferentFile": "Pilih file lain",
+    "actionsLabel": "Tindakan pemulihan",
     "reportIssue": "Laporkan masalah ini di GitHub",
     "copyDetails": "Salin detail error",
     "copied": "Tersalin!",
@@ -159,24 +162,6 @@
         "fix": "Coba unggah file lagi. Jika masalah berlanjut, pastikan file ZIP tidak rusak."
       }
     }
-  },
-  "quiz": {
-    "title": "Format apa yang Anda pilih?",
-    "subtitle": "Saat meminta ekspor data Instagram, format apa yang Anda pilih?",
-    "json": "JSON",
-    "jsonHint": "Format yang benar untuk analisis",
-    "html": "HTML",
-    "htmlHint": "Tidak berfungsi — perlu unduh ulang sebagai JSON",
-    "notSure": "Tidak yakin",
-    "notSureHint": "Biarkan saya periksa",
-    "successMessage": "Siap! Upload ZIP Anda di bawah.",
-    "htmlMessage": "Ekspor HTML tidak bisa dianalisis. Silakan minta ulang data dalam format JSON.",
-    "htmlCta": "Lihat cara mendapatkan format JSON",
-    "comparisonTitle": "Cara membedakannya",
-    "comparisonJson": "Jika Anda melihat \"Format: JSON\" di halaman unduhan, berarti sudah benar.",
-    "comparisonHtml": "Jika Anda melihat \"Format: HTML\" atau file .html di dalamnya, perlu minta ulang.",
-    "dismiss": "Mengerti",
-    "fixedIt": "Saya sudah meminta ulang dalam JSON"
   },
   "formatWarning": "Pastikan Anda memilih JSON (bukan HTML) saat meminta ekspor data.",
   "waiting": {

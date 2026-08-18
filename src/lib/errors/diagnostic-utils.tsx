@@ -95,15 +95,36 @@ export function getErrorIcon(icon: DiagnosticError['icon']): React.ReactElement 
   }
 }
 
-/** Get color scheme for error severity */
-export function getColorScheme(severity: DiagnosticError['severity']): {
+/**
+ * Failures the reader can fix themselves, in under five minutes, with an action
+ * we can name. These paint amber: nothing broke, the file is intact, and the
+ * next step is one radio button in someone else's dialog.
+ *
+ * This is a SEPARATE axis from `severity`, deliberately. Lowering HTML_FORMAT to
+ * severity 'warning' would paint it amber and also stop the screen rendering at
+ * all: UploadZone.tsx:44-47 gates DiagnosticErrorScreen on
+ * `parseWarnings.some(w => w.severity === 'error')`, which is 18.7% of uploads.
+ * Nothing tests that combination, so the regression would be silent.
+ *
+ * Keep this set small. Amber stops carrying information the moment a code that
+ * the reader cannot act on is added to it.
+ */
+const RECOVERABLE: ReadonlySet<DiagnosticErrorCode> = new Set(['HTML_FORMAT']);
+
+/** Whether the reader can fix this error themselves. See `RECOVERABLE` above. */
+export function isRecoverable(code: DiagnosticErrorCode): boolean {
+  return RECOVERABLE.has(code);
+}
+
+/** Colour scheme: amber for what the reader can fix, rose for what they cannot. */
+export function getColorScheme(error: Pick<DiagnosticError, 'code' | 'severity'>): {
   bg: string;
   border: string;
   icon: string;
   title: string;
   text: string;
 } {
-  if (severity === 'warning') {
+  if (error.severity === 'warning' || RECOVERABLE.has(error.code)) {
     return {
       bg: 'bg-amber-50 dark:bg-amber-950/20',
       border: 'border-amber-200 dark:border-amber-900/50',

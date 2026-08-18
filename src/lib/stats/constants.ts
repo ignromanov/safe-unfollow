@@ -145,10 +145,6 @@ export const AnalyticsEvents = {
   RESCUE_PLAN_TOOL_CLICK: 'rescue_plan_tool_click',
   RESCUE_PLAN_DISMISS: 'rescue_plan_dismiss',
 
-  // Format Quiz
-  FORMAT_QUIZ_ANSWER: 'format_quiz_answer',
-  FORMAT_QUIZ_FIXED_IT: 'format_quiz_fixed_it',
-
   // Error tracking
   ERROR_BOUNDARY: 'error_boundary',
   ROUTE_ERROR: 'route_error',

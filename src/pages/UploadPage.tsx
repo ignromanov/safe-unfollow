@@ -2,6 +2,7 @@ import { PageLoader } from '@/components/PageLoader';
 import { UploadZone } from '@/components/UploadZone';
 import { useInstagramData } from '@/hooks/useInstagramData';
 import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
+import { wizardHrefForError } from '@/lib/errors/wizard-routing';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -35,7 +36,7 @@ export function Component() {
   };
 
   const handleOpenWizard = () => {
-    navigate(`${prefix}/wizard/step/6`);
+    navigate(wizardHrefForError(prefix));
   };
 
   return (
