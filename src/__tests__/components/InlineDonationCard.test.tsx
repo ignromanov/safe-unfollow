@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import resultsEN from '@/locales/en/results.json';
@@ -15,6 +16,7 @@ vi.mock('@/lib/analytics', () => ({
 }));
 
 import { InlineDonationCard } from '@/components/InlineDonationCard';
+import { analytics } from '@/lib/analytics';
 
 /** Class tokens, split so a substring never passes for a whole utility. */
 function classesOf(element: Element): string[] {
@@ -24,6 +26,7 @@ function classesOf(element: Element): string[] {
 describe('InlineDonationCard', () => {
   beforeEach(() => {
     localStorage.clear();
+    vi.clearAllMocks();
   });
 
   it('should render the donate link', () => {
@@ -66,5 +69,33 @@ describe('InlineDonationCard', () => {
     const classes = classesOf(screen.getByRole('link', { name: /coffee|support/i }));
 
     expect(classes.some(c => c.startsWith('focus-visible:ring'))).toBe(true);
+  });
+
+  /**
+   * A regression guard, not a bug report.
+   *
+   * `donation_card_click` reads 12 against 4 087 impressions. That is a real
+   * 0.29% rather than a transport artefact — the link is `target="_blank"`, and
+   * a new browsing context never unloads this page, so the immediate path is
+   * the right one and nothing is being cancelled. What was missing is anything
+   * that keeps the two handlers wired to the two controls.
+   */
+  it('should report the click, with the account count that was on screen', async () => {
+    const user = userEvent.setup();
+    render(<InlineDonationCard accountCount={1200} />);
+
+    await user.click(screen.getByRole('link', { name: /coffee|support/i }));
+
+    expect(analytics.donationCardClick).toHaveBeenCalledWith(1200);
+  });
+
+  it('should report the dismiss separately from the click', async () => {
+    const user = userEvent.setup();
+    render(<InlineDonationCard accountCount={1200} />);
+
+    await user.click(screen.getByRole('button', { name: resultsEN.donation.dismiss }));
+
+    expect(analytics.donationCardDismiss).toHaveBeenCalledWith(1200);
+    expect(analytics.donationCardClick).not.toHaveBeenCalled();
   });
 });
