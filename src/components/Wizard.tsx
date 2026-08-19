@@ -102,7 +102,13 @@ export function Wizard({ initialStep = 1 }: WizardProps) {
         {/* Header - Compact */}
         <div className="shrink-0 container mx-auto px-4 py-2 flex items-center justify-between border-b border-border bg-card">
           <div className="flex items-center gap-4 flex-1 min-w-0">
-            <span className="hidden md:block font-bold text-sm text-zinc-500 uppercase tracking-widest whitespace-nowrap">
+            {/* `sr-only`, not `hidden`, below md: the step dots' own labels say
+                "Step 3" and carry no total — the implicit aria-posinset /
+                aria-setsize went away with role="tablist". This span is the
+                only element that holds one, and `display:none` would keep it
+                out of the accessibility tree for the 85% of readers who are on
+                mobile. Nothing changes visually at any width. */}
+            <span className="sr-only md:not-sr-only md:block font-bold text-sm text-zinc-500 uppercase tracking-widest whitespace-nowrap">
               {t('header.stepOf', { current: currentStep, total: WIZARD_STEPS.length })}
             </span>
             {/* Step indicator dots — flex-1 to fill available space */}
