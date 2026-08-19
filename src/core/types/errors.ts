@@ -16,7 +16,7 @@ export type DiagnosticErrorCode =
   | 'CORRUPTED_ZIP' // the ZIP reader failed to open it
   | 'ZIP_ENCRYPTED' // ZIP is password-protected
   | 'EMPTY_FILE' // File is empty (0 bytes)
-  | 'FILE_TOO_LARGE' // File exceeds 500MB
+  | 'FILE_TOO_LARGE' // The browser refused the allocation; no ceiling of ours
   // New - Parsing errors
   | 'JSON_PARSE_ERROR' // Invalid JSON
   | 'INVALID_DATA_STRUCTURE' // JSON exists but wrong structure
@@ -201,8 +201,8 @@ export function createDiagnosticError(
     },
     FILE_TOO_LARGE: {
       title: 'File Too Large',
-      message: 'The file exceeds the maximum supported size of 500MB.',
-      fix: 'Try requesting a smaller data export from Instagram, or use a desktop browser with more memory.',
+      message: 'Your browser could not open this export — it is too large for this device.',
+      fix: 'Ask Instagram for just the part this tool needs: Download your information → Some of your information → Followers and Following → JSON.',
       icon: 'file',
       severity: 'error',
     },

@@ -93,8 +93,8 @@
       },
       "FILE_TOO_LARGE": {
         "title": "File Terlalu Besar",
-        "message": "Ukuran file {{sizeMb}}MB melebihi batas 500MB.",
-        "fix": "Coba minta ekspor data yang lebih kecil dari Instagram, atau gunakan browser desktop dengan memori lebih besar."
+        "message": "Browser Anda tidak dapat membuka ekspor ini — terlalu besar untuk perangkat ini.",
+        "fix": "Minta ekspor yang lebih kecil: Meta Accounts Center → Buat ekspor → pilih hanya \"Pengikut dan mengikuti\" → format JSON. Ekspor itu berukuran beberapa MB, bukan ratusan."
       },
       "JSON_PARSE_ERROR": {
         "title": "Format Data Tidak Valid",

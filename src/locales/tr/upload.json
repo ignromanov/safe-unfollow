@@ -93,8 +93,8 @@
       },
       "FILE_TOO_LARGE": {
         "title": "Dosya Çok Büyük",
-        "message": "Dosya boyutu {{sizeMb}}MB, 500MB sınırını aşıyor.",
-        "fix": "Instagram'dan daha küçük bir veri dışa aktarımı talep etmeyi dene ya da daha fazla belleğe sahip bir masaüstü tarayıcı kullan."
+        "message": "Tarayıcınız bu dışa aktarmayı açamadı — bu cihaz için çok büyük.",
+        "fix": "Daha küçük bir dışa aktarma isteyin: Meta Accounts Center → Dışa aktarma oluştur → yalnızca \"Takipçiler ve takip edilenler\" seçin → JSON formatı. Bu dışa aktarma yüzlerce yerine birkaç MB olur."
       },
       "JSON_PARSE_ERROR": {
         "title": "Geçersiz Veri Formatı",

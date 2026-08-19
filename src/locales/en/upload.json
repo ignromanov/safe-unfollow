@@ -93,8 +93,8 @@
       },
       "FILE_TOO_LARGE": {
         "title": "File Too Large",
-        "message": "File is {{sizeMb}}MB, which exceeds the 500MB limit.",
-        "fix": "Try requesting a smaller data export from Instagram, or use a desktop browser with more memory."
+        "message": "Your browser could not open this export — it is too large for this device.",
+        "fix": "Ask Instagram for a smaller export: Meta Accounts Center → Create export → select only \"Followers and following\" → format JSON. That export is a few MB instead of hundreds."
       },
       "JSON_PARSE_ERROR": {
         "title": "Invalid Data Format",
