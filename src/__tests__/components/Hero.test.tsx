@@ -1,25 +1,12 @@
 import { vi, beforeEach } from 'vitest';
 import { screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 
 // Import translation before mocking
 import heroEN from '@/locales/en/hero.json';
 import { createI18nMock } from '@/__tests__/utils/mockI18n';
 import { renderWithRouter as render } from '@/__tests__/test-utils';
-import * as analytics from '@/lib/analytics';
 
 vi.mock('react-i18next', () => createI18nMock(heroEN));
-
-// Mock analytics module — a <Link>'s onClick fires synchronously before
-// navigation, so a real click event exercises it the same way a browser does.
-vi.mock('@/lib/analytics', () => ({
-  analytics: {
-    heroCTAGuide: vi.fn(),
-    heroCTASample: vi.fn(),
-    heroCTAUploadDirect: vi.fn(),
-    heroCTAContinue: vi.fn(),
-  },
-}));
 
 import { Hero } from '@/components/Hero';
 
@@ -175,55 +162,42 @@ describe('Hero Component', () => {
   });
 
   describe('CTA analytics', () => {
-    // Link renders a real anchor AND still fires the caller's onClick
-    // synchronously before it navigates — none of these handlers call
-    // preventDefault(), so nothing here suppresses the anchor's own href
-    // navigation. Losing the onClick (accidentally, or in a future refactor
-    // away from Link) would make hero_cta_* silently stop counting clicks
-    // without breaking navigation, which is exactly the failure mode this
-    // guards against.
-    it('fires heroCTAGuide when the primary CTA is clicked', async () => {
-      const user = userEvent.setup();
+    // The recorder is the capture-phase listener in index.html, not onClick: a click in
+    // the hydration window follows the href with no React handler running, and used to
+    // lose both the event and the session's entry_cta (GH#99). The listener can only see
+    // what the prerendered markup says, so the attribute IS the instrumentation — losing
+    // it makes hero_cta_* stop counting without breaking navigation, which is the failure
+    // this guards against.
+    it('marks the guide CTA', () => {
       render(<Hero hasData={false} />);
 
-      await user.click(
+      expect(
         screen.getByRole('link', { name: new RegExp(heroEN.buttons.getGuide, 'i') })
-      );
-
-      expect(analytics.analytics.heroCTAGuide).toHaveBeenCalledTimes(1);
+      ).toHaveAttribute('data-cta', 'guide');
     });
 
-    it('fires heroCTASample when the sample CTA is clicked', async () => {
-      const user = userEvent.setup();
+    it('marks the sample CTA', () => {
       render(<Hero hasData={false} />);
 
-      await user.click(
+      expect(
         screen.getByRole('link', { name: new RegExp(heroEN.buttons.trySample, 'i') })
-      );
-
-      expect(analytics.analytics.heroCTASample).toHaveBeenCalledTimes(1);
+      ).toHaveAttribute('data-cta', 'sample');
     });
 
-    it('fires heroCTAUploadDirect when the direct-upload CTA is clicked', async () => {
-      const user = userEvent.setup();
+    it('marks the direct-upload CTA', () => {
       render(<Hero hasData={false} />);
 
-      await user.click(
+      expect(
         screen.getByRole('link', { name: new RegExp(heroEN.buttons.haveFile, 'i') })
-      );
-
-      expect(analytics.analytics.heroCTAUploadDirect).toHaveBeenCalledTimes(1);
+      ).toHaveAttribute('data-cta', 'upload_direct');
     });
 
-    it('fires heroCTAContinue when the results CTA is clicked', async () => {
-      const user = userEvent.setup();
+    it('marks the results CTA', () => {
       render(<Hero hasData={true} />);
 
-      await user.click(
+      expect(
         screen.getByRole('link', { name: new RegExp(heroEN.buttons.viewResults, 'i') })
-      );
-
-      expect(analytics.analytics.heroCTAContinue).toHaveBeenCalledTimes(1);
+      ).toHaveAttribute('data-cta', 'continue');
     });
   });
 });

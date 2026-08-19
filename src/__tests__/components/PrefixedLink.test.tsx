@@ -46,6 +46,28 @@ describe('PrefixedLink', () => {
     expect(screen.getByRole('link', { name: 'Home' })).toHaveAttribute('href', '/');
   });
 
+  it('publishes the CTA slug as an attribute the pre-hydration listener can read', () => {
+    // The listener in index.html runs before React exists, so it can only see what the
+    // prerendered markup already says. A prop rather than a hand-written data-cta
+    // because the slug is checked against the four the drain knows.
+    renderWithRouter(
+      <PrefixedLink to="/upload" cta="upload_direct">
+        Upload
+      </PrefixedLink>
+    );
+
+    expect(screen.getByRole('link', { name: 'Upload' })).toHaveAttribute(
+      'data-cta',
+      'upload_direct'
+    );
+  });
+
+  it('leaves the attribute off a link that is not a CTA', () => {
+    renderWithRouter(<PrefixedLink to="/docs">Docs</PrefixedLink>);
+
+    expect(screen.getByRole('link', { name: 'Docs' })).not.toHaveAttribute('data-cta');
+  });
+
   it('passes through className, aria-label and onClick', () => {
     const clicks: string[] = [];
     renderWithRouter(
