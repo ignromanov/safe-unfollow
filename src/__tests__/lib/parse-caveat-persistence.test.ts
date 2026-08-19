@@ -7,13 +7,19 @@ vi.mock('@/lib/indexeddb/indexeddb-cache');
 vi.mock('@/lib/search-index');
 
 /**
- * GH#41. `followRequestsUnreadable` is optional on `FileMetadataRecord`, so a
- * writer that forgets it still compiles and still saves — it just saves a
- * record that says "no caveat" about an upload that has one. There are exactly
- * two writers, the worker and the main-thread fallback, and nothing but these
- * tests notices when one of them drops the field.
+ * Both caveat flags are optional on `FileMetadataRecord`, so a writer that
+ * forgets one still compiles and still saves — it just saves a record that says
+ * "no caveat" about an upload that has one. There are exactly two writers, the
+ * worker and the main-thread fallback, and nothing but these tests notices when
+ * one of them drops a field.
+ *
+ * `truncatedRelationshipFile` joined `followRequestsUnreadable` here for exactly
+ * that reason. `src/__tests__` is excluded from tsconfig (GH#70), so the
+ * hand-built `ParseResult` below is not type-checked: adding the field to the
+ * interface left this fixture silently short of it, and both writers silently
+ * uncovered, with the suite green throughout.
  */
-describe('the follow-requests caveat reaches IndexedDB (GH#41)', () => {
+describe('both upload caveats reach IndexedDB', () => {
   const parseResultWithCaveat = {
     data: {
       following: new Set(['sample_user_a']),
@@ -32,6 +38,7 @@ describe('the follow-requests caveat reaches IndexedDB (GH#41)', () => {
     hasMinimalData: true,
     labelResolutionMode: 'fast-path' as const,
     followRequestsUnreadable: true,
+    truncatedRelationshipFile: 'followers' as const,
   };
 
   let saveFileMetadata: ReturnType<typeof vi.fn>;
@@ -59,17 +66,20 @@ describe('the follow-requests caveat reaches IndexedDB (GH#41)', () => {
 
   const zipFile = () => new File(['mock zip'], 'export.zip', { type: 'application/zip' });
 
-  it('the main-thread fallback persists it', async () => {
+  it('the main-thread fallback persists them', async () => {
     const { parseOnMainThread } = await import('@/lib/parse-orchestration');
 
     await parseOnMainThread(zipFile(), 'caveat-hash');
 
     expect(saveFileMetadata).toHaveBeenCalledWith(
-      expect.objectContaining({ followRequestsUnreadable: true })
+      expect.objectContaining({
+        followRequestsUnreadable: true,
+        truncatedRelationshipFile: 'followers',
+      })
     );
   });
 
-  it('the worker persists it', async () => {
+  it('the worker persists them', async () => {
     // The worker module installs its handler on `self` at import time; in jsdom
     // `self` is the window, so the handler can be invoked directly. Importing
     // the module IS the setup here — there is no exported entry point.
@@ -87,7 +97,10 @@ describe('the follow-requests caveat reaches IndexedDB (GH#41)', () => {
     } as MessageEvent);
 
     expect(saveFileMetadata).toHaveBeenCalledWith(
-      expect.objectContaining({ followRequestsUnreadable: true })
+      expect.objectContaining({
+        followRequestsUnreadable: true,
+        truncatedRelationshipFile: 'followers',
+      })
     );
   });
 });
