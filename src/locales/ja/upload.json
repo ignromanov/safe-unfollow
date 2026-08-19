@@ -49,12 +49,12 @@
       "HTML_FORMAT": {
         "title": "形式が違います: HTML",
         "message": "データをHTML形式でダウンロードしましたが、このツールはJSON形式が必要です。",
-        "fix": "Instagramの設定 → 情報をダウンロード → 形式を「JSON」に選択（HTMLではない）→ 再度ダウンロードをリクエストしてください。"
+        "fix": "Instagramの設定 → あなたの情報をエクスポート → 形式を「JSON」に選択（HTMLではない）→ 再度ダウンロードをリクエストしてください。"
       },
       "NOT_INSTAGRAM_EXPORT": {
         "title": "Instagramのエクスポートではありません",
         "message": "このZIPファイルはInstagramのデータエクスポートではないようです。",
-        "fix": "Instagramの「情報をダウンロード」機能から取得したZIPファイルをアップロードしているか確認してください。"
+        "fix": "Instagramの「あなたの情報をエクスポート」機能から取得したZIPファイルをアップロードしているか確認してください。"
       },
       "INCOMPLETE_EXPORT": {
         "title": "エクスポートが不完全です",

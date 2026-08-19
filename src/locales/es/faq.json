@@ -63,7 +63,7 @@
     },
     "scale": {
       "question": "¿Qué tamaño de exportación de cuenta de Instagram puedes analizar?",
-      "answer": "Este rastreador maneja exportaciones de hasta 1,000,000+ cuentas. Usamos almacenamiento columnar e indexación bitset para que el filtrado siga siendo rápido a medida que crece la lista. Ya tengas 100 seguidores o 1M+, la herramienta se mantiene responsiva.",
+      "answer": "Este rastreador maneja exportaciones de hasta 1.000.000+ cuentas. Usamos almacenamiento columnar e indexación bitset para que el filtrado siga siendo rápido a medida que crece la lista. Ya tengas 100 seguidores o 1M+, la herramienta se mantiene responsiva.",
       "relatedLink": {
         "text": "Prueba con datos de ejemplo",
         "href": "/sample"

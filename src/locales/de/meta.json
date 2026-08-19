@@ -12,7 +12,7 @@
     },
     "/wizard": {
       "title": "Instagram-Daten als JSON herunterladen: Anleitung",
-      "description": "Schritt-für-Schritt-Anleitung zum Herunterladen deiner Instagram-Daten als JSON. So forderst du im Meta-Kontenübersicht „Deine Informationen herunterladen“ an.",
+      "description": "Schritt-für-Schritt-Anleitung zum Export deiner Instagram-Daten als JSON. So forderst du in der Meta-Kontenübersicht „Deine Informationen exportieren“ an.",
       "ogTitle": "Instagram-Daten als JSON herunterladen: Anleitung"
     },
     "/sample": {
@@ -22,7 +22,7 @@
     },
     "/privacy": {
       "title": "Datenschutz: dein Export verlässt dein Gerät nicht",
-      "description": "SafeUnfollow Datenschutzerklärung: was uns erreicht und was nicht. Dein Instagram-Export wird im Browser gelesen und bleibt auf deinem Gerät. DSGVO-konform.",
+      "description": "SafeUnfollow Datenschutzerklärung: was uns erreicht und was nicht. Dein Instagram-Export wird im Browser gelesen und bleibt auf deinem Gerät.",
       "ogTitle": "Datenschutz: dein Export verlässt dein Gerät nicht"
     },
     "/results": {
