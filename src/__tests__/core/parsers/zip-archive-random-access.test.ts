@@ -112,23 +112,34 @@ describe('the entry list this backend produces', () => {
 
 describe('ZIP64', () => {
   it('reads an archive carrying ZIP64 end-of-central-directory structures', async () => {
-    const { BlobWriter, TextReader, ZipWriter } = await import(
+    const { TextReader, Uint8ArrayWriter, ZipWriter } = await import(
       '@zip.js/zip.js/lib/zip-core-native.js'
     );
     // Forced rather than provoked: the natural triggers are an entry, an
     // archive or an offset above 4 GiB, or more than 65 535 entries. The entry
     // count is the only affordable one, and JSZip cannot write it — see the
     // limitation test below — so the option is what a fixture can use.
-    const writer = new ZipWriter(new BlobWriter('application/zip'), { zip64: true });
+    //
+    // Uint8ArrayWriter, not BlobWriter, and the reason is a silent corruption
+    // rather than a preference. BlobWriter finishes through
+    // `new Blob([await new Response(stream).blob()])` (compatible-streams.js:63).
+    // The inner Blob is undici's; the outer constructor is jsdom's. On Node 24
+    // the inner one passes `instanceof Blob` and the bytes survive; on Node 20
+    // and 22 it does not, so jsdom's BlobPart conversion stringifies it and the
+    // whole archive becomes the 13 bytes of "[object Blob]" - no error, no
+    // warning, a 388-byte fixture silently replaced by junk. Measured on this
+    // machine (Node 24, green) against CI (Node 20 and 22, red) for the same
+    // commit. Bytes never leave one realm this way.
+    const writer = new ZipWriter(new Uint8ArrayWriter(), { zip64: true });
     await writer.add(
       'connections/followers_and_following/following.json',
       new TextReader('{"relationships_following":[]}')
     );
-    const blob = await writer.close();
+    const raw = await writer.close();
+    const blob = new Blob([raw]);
 
     // Prove the fixture is what it claims before trusting what it demonstrates:
     // PK\x06\x06 is the ZIP64 end-of-central-directory record signature.
-    const raw = new Uint8Array(await blob.arrayBuffer());
     const hasZip64Eocd = raw.some(
       (_, i) =>
         raw[i] === 0x50 && raw[i + 1] === 0x4b && raw[i + 2] === 0x06 && raw[i + 3] === 0x06
