@@ -33,7 +33,7 @@
     "howToFix": "So behebst du das",
     "tryAgain": "Erneut versuchen",
     "showMistakes": "Zeig mir, was schiefging",
-    "reExportJson": "Erneut als JSON exportieren — Einstellungsschritt öffnen",
+    "reExportJson": "Erneut als JSON exportieren: Einstellungsschritt öffnen",
     "chooseDifferentFile": "Andere Datei auswählen",
     "actionsLabel": "Wiederherstellungsaktionen",
     "reportIssue": "Problem auf GitHub melden",
@@ -49,12 +49,12 @@
       "HTML_FORMAT": {
         "title": "Falsches Format: HTML",
         "message": "Du hast deine Daten im HTML-Format heruntergeladen, dieses Tool benötigt jedoch das JSON-Format.",
-        "fix": "Gehe zurück zu Instagram-Einstellungen → Deine Daten herunterladen → wähle \"JSON\"-Format (nicht HTML) → erneut anfordern."
+        "fix": "Gehe zurück zur Meta-Kontenübersicht → Export erstellen → Zu Gerät exportieren → wähle das Format \"JSON\" (nicht HTML) → starte den Export erneut."
       },
       "NOT_INSTAGRAM_EXPORT": {
         "title": "Kein Instagram-Export",
         "message": "Diese ZIP-Datei scheint kein Instagram-Datenexport zu sein.",
-        "fix": "Stelle sicher, dass du die ZIP-Datei aus Instagrams Funktion \"Deine Daten herunterladen\" hochlädst und keine beliebige ZIP-Datei."
+        "fix": "Stelle sicher, dass du die ZIP-Datei aus \"Export erstellen\" in der Meta-Kontenübersicht hochlädst und keine beliebige ZIP-Datei."
       },
       "INCOMPLETE_EXPORT": {
         "title": "Unvollständiger Export",
@@ -84,7 +84,7 @@
       "ZIP_ENCRYPTED": {
         "title": "Passwortgeschützte ZIP-Datei",
         "message": "Die ZIP-Datei ist passwortgeschützt, Instagram-Exporte sind jedoch nicht verschlüsselt.",
-        "fix": "Hierbei handelt es sich möglicherweise nicht um einen gültigen Instagram-Datenexport. Fordere einen neuen Export über die Instagram-Einstellungen an."
+        "fix": "Hierbei handelt es sich möglicherweise nicht um einen gültigen Instagram-Datenexport. Fordere einen neuen über die Meta-Kontenübersicht an."
       },
       "EMPTY_FILE": {
         "title": "Leere Datei",
@@ -166,7 +166,7 @@
   "formatWarning": "Stelle sicher, dass du JSON (nicht HTML) beim Datenexport ausgewählt hast.",
   "waiting": {
     "title": "Warten auf Instagram...",
-    "description": "Instagram bereitet deinen Datenexport vor. Du erhältst innerhalb von 48 Stunden eine E-Mail (normalerweise viel schneller!).",
+    "description": "Instagram bereitet deinen Datenexport vor. Die meisten kommen in 5–30 Minuten per E-Mail; bei großen Konten kann es einige Stunden dauern.",
     "addReminder": "Erinnerung zum Kalender hinzufügen",
     "reminderHint": "Erinnere mich in 2 Tagen",
     "calendarTitle": "Instagram-Export-E-Mail prüfen",

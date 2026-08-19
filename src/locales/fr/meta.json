@@ -1,34 +1,34 @@
 {
-  "title": "Désabonnements Instagram — Gratuit sans connexion | SafeUnfollow",
-  "description": "Découvrez qui s'est désabonné sur Instagram sans connexion. Téléversez votre ZIP, voyez les résultats instantanément. 100% gratuit, privé, 1M+ comptes.",
-  "ogTitle": "Désabonnements Instagram — Gratuit sans connexion",
-  "twitterDescription": "Découvrez qui s'est désabonné de vous sur Instagram sans connexion. Téléversez ZIP, voyez les désabonnements instantanément. 100% gratuit, 1M+ de comptes. Fonctionne hors ligne.",
-  "keywords": "désabonnements instagram, qui s'est désabonné instagram, suivi désabonnements, voir désabonnements sans connexion, analyseur zip instagram",
+  "title": "Désabonnements Instagram : gratuit, sans compte",
+  "description": "Découvrez qui s'est désabonné de vous sur Instagram sans mot de passe. Téléversez votre export Instagram : l'analyse se fait dans votre navigateur. Gratuit.",
+  "ogTitle": "Désabonnements Instagram : gratuit, sans compte",
+  "twitterDescription": "Découvrez qui s'est désabonné de vous sur Instagram, sans mot de passe. Téléversez votre ZIP : l'analyse se fait dans le navigateur, le fichier n'en sort pas.",
+  "keywords": "désabonnements instagram, qui s'est désabonné instagram, suivi désabonnements, voir les désabonnements sans compte, analyseur zip instagram",
   "routes": {
     "/upload": {
-      "title": "Téléverser ZIP Instagram — Analyse Gratuite | SafeUnfollow",
-      "description": "Téléversez votre export Instagram (ZIP) pour une analyse gratuite. Traitement 100% local, sans connexion, gère 1M+ comptes.",
-      "ogTitle": "Téléverser ZIP Instagram — Analyse Gratuite"
+      "title": "Téléverser un ZIP Instagram : analyse des désabonnements",
+      "description": "Téléversez votre export Instagram (ZIP) pour une analyse gratuite des désabonnements. Sans identifiants ni mot de passe : le fichier est lu dans le navigateur.",
+      "ogTitle": "Téléverser un ZIP Instagram : analyse des désabonnements"
     },
     "/wizard": {
-      "title": "Télécharger vos Données Instagram (JSON) — Guide | SafeUnfollow",
-      "description": "Guide étape par étape pour télécharger vos données Instagram en JSON. Comment demander votre export de données à Meta.",
-      "ogTitle": "Comment Télécharger vos Données Instagram (JSON) — Guide"
+      "title": "Comment télécharger vos données Instagram en JSON",
+      "description": "Guide étape par étape pour télécharger vos données Instagram au format JSON. Comment demander votre export de données à Meta et le recevoir par e-mail.",
+      "ogTitle": "Comment télécharger vos données Instagram en JSON"
     },
     "/sample": {
-      "title": "Essayer Instagram Unfollow Tracker — Démo Gratuite | SafeUnfollow",
-      "description": "Essayez Instagram Unfollow Tracker avec des données d'exemple. Voyez les badges, filtres et la recherche en action.",
-      "ogTitle": "Essayer Instagram Unfollow Tracker — Démo Gratuite"
+      "title": "Essayer Instagram Unfollow Tracker : démo gratuite",
+      "description": "Essayez Instagram Unfollow Tracker avec des données d'exemple. Voyez les badges, les filtres et la recherche en action, sans rien téléverser ni créer de compte.",
+      "ogTitle": "Essayer Instagram Unfollow Tracker : démo gratuite"
     },
     "/privacy": {
-      "title": "Politique de Confidentialité — 100% Local | SafeUnfollow",
-      "description": "Politique de confidentialité SafeUnfollow. Traitement 100% local, aucune collecte de données, aucun pistage.",
-      "ogTitle": "Politique de Confidentialité — Données Jamais Transmises"
+      "title": "Confidentialité : votre export ne quitte pas l'appareil",
+      "description": "Politique de confidentialité SafeUnfollow : ce qui nous parvient et ce qui ne nous parvient pas. Votre export Instagram est lu dans votre navigateur et y reste.",
+      "ogTitle": "Confidentialité : votre export ne quitte pas l'appareil"
     },
     "/results": {
-      "title": "Vos résultats Instagram | SafeUnfollow",
-      "description": "Consultez les résultats de votre analyse Instagram. Filtrez par badges et recherchez des comptes.",
-      "ogTitle": "Vos résultats Instagram"
+      "title": "Vos résultats de désabonnements Instagram",
+      "description": "Consultez les résultats de votre analyse Instagram : filtrez par badges, recherchez des comptes et voyez qui s'est désabonné de vous.",
+      "ogTitle": "Vos résultats de désabonnements Instagram"
     },
     "/terms": {
       "title": "Conditions d'utilisation | SafeUnfollow",

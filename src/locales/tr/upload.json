@@ -8,7 +8,7 @@
     "processing": "Yerel olarak analiz ediliyor...",
     "processingHint": "Büyük veri setlerini (1M+'a kadar) işlemek biraz zaman alabilir.",
     "ariaLabel": "Instagram veri ZIP dosyasını yükle",
-    "jsonReminder": "Instagram'ın penceresi varsayılan olarak HTML'i seçer — JSON'u seçtiğinden emin ol. JSON ve HTML ZIP dosyaları dışarıdan aynı görünür.",
+    "jsonReminder": "Instagram'ın penceresi varsayılan olarak HTML'yi seçer — JSON'u seçtiğinden emin ol. JSON ve HTML ZIP dosyaları dışarıdan aynı görünür.",
     "seeGuide": "Adım adım kılavuzu gör",
     "jsonRequired": "JSON formatında dışa aktarım gerektirir",
     "privacyMicro": "Dosyanız cihazınızdan asla ayrılmaz",
@@ -33,7 +33,7 @@
     "howToFix": "Bunu nasıl düzeltirsin",
     "tryAgain": "Tekrar Dene",
     "showMistakes": "Nerede Yanlış Yaptığımı Göster",
-    "reExportJson": "JSON olarak yeniden dışa aktar — ayarlar adımını aç",
+    "reExportJson": "JSON olarak yeniden dışa aktar: ayarlar adımını aç",
     "chooseDifferentFile": "Başka bir dosya seç",
     "actionsLabel": "Kurtarma eylemleri",
     "reportIssue": "Bu sorunu GitHub'da bildir",
@@ -49,12 +49,12 @@
       "HTML_FORMAT": {
         "title": "Yanlış Format: HTML",
         "message": "Verilerini HTML formatında indirdin, ancak bu araç çalışmak için JSON formatı gerektiriyor.",
-        "fix": "Instagram Ayarlar → Verilerini İndir → \"JSON\" formatını seç (HTML değil) → Tekrar indirme talep et."
+        "fix": "Meta Hesaplar Merkezi’ne dön → Dışa aktarma oluştur → Cihaza dışa aktar → formatı \"JSON\" seç (HTML değil) → dışa aktarmayı tekrar başlat."
       },
       "NOT_INSTAGRAM_EXPORT": {
         "title": "Instagram Dışa Aktarımı Değil",
         "message": "Bu ZIP dosyası bir Instagram veri dışa aktarımı gibi görünmüyor.",
-        "fix": "Instagram'ın \"Verilerini İndir\" özelliğinden gelen ZIP dosyasını yüklediğinden emin ol, rastgele bir ZIP dosyası değil."
+        "fix": "Meta Hesaplar Merkezi’ndeki \"Dışa aktarma oluştur\" özelliğinden gelen ZIP dosyasını yüklediğinden emin ol, rastgele bir ZIP dosyası değil."
       },
       "INCOMPLETE_EXPORT": {
         "title": "Eksik Dışa Aktarım",
@@ -84,7 +84,7 @@
       "ZIP_ENCRYPTED": {
         "title": "Şifreli ZIP",
         "message": "ZIP dosyası parola korumalı, ancak Instagram dışa aktarımları şifrelenmez.",
-        "fix": "Bu geçerli bir Instagram veri dışa aktarımı olmayabilir. Instagram Ayarlar'dan yeni bir dışa aktarım talep et."
+        "fix": "Bu geçerli bir Instagram veri dışa aktarımı olmayabilir. Meta Hesaplar Merkezi’nden yeni bir dışa aktarım talep et."
       },
       "EMPTY_FILE": {
         "title": "Boş Dosya",
@@ -166,7 +166,7 @@
   "formatWarning": "Veri dışa aktarımı talep ederken JSON (HTML değil) seçtiğinizden emin olun.",
   "waiting": {
     "title": "Instagram bekleniyor...",
-    "description": "Instagram veri dışa aktarımını hazırlıyor. 48 saat içinde bir e-posta alacaksın (genellikle çok daha hızlı!).",
+    "description": "Instagram veri dışa aktarımını hazırlıyor. Çoğu 5–30 dakika içinde e-postayla gelir; büyük hesaplarda birkaç saat sürebilir.",
     "addReminder": "Takvime Hatırlatıcı Ekle",
     "reminderHint": "2 gün sonra kontrol etmem için hatırlat",
     "calendarTitle": "Instagram Dışa Aktarım E-postasını Kontrol Et",
