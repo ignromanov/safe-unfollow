@@ -38,7 +38,7 @@ export function GuideEntry({ ctaRef }: { ctaRef?: (node: HTMLAnchorElement | nul
         {/* Two keys, never a joined line — they stack on mobile and sit
             inline from `sm:` up, so the layout never has to break a
             combined sentence for languages that run longer. */}
-        <p className="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:gap-x-1.5 text-base text-zinc-600 dark:text-zinc-400 font-medium">
+        <p className="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:gap-x-1.5 text-sm text-zinc-600 dark:text-zinc-400">
           <span>{t('entry.timeCost.ours')}</span>
           <span>{t('entry.timeCost.theirs')}</span>
         </p>
