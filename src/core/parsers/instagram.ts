@@ -1,4 +1,3 @@
-import JSZip from 'jszip';
 import type {
   FileDiscovery,
   FileExpectation,
@@ -13,6 +12,7 @@ import { parseFollowersFromZip } from './instagram-followers';
 import { parseFollowingPayload } from './instagram-following';
 import { parseOptionalFiles } from './instagram-optional';
 import { createEmptyParsedAll } from './instagram-validation';
+import { openZipArchive, type ZipArchive } from './zip-archive';
 
 // Re-export for backward compatibility
 export { parseFollowersJson } from './instagram-followers';
@@ -36,9 +36,9 @@ export async function parseFollowingJson(jsonText: string): Promise<string[]> {
 
 export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
   // Try to load ZIP with error handling for corrupted files
-  let zip: JSZip;
+  let archive: ZipArchive;
   try {
-    zip = await JSZip.loadAsync(file);
+    archive = await openZipArchive(file);
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : String(err);
     let code = 'CORRUPTED_ZIP';
@@ -68,7 +68,7 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
     };
   }
 
-  const allFiles = Object.keys(zip.files ?? {});
+  const allFiles = archive.names;
 
   // Zip bomb protection: limit entry count
   const MAX_ZIP_ENTRIES = 10_000;
@@ -141,10 +141,10 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
     patterns: string[]
   ): Promise<{ data: unknown; path: string } | null> => {
     for (const p of patterns) {
-      const f = zip.file(new RegExp('^' + escapeRegExp(p) + '$', 'i'))[0];
+      const f = archive.find(new RegExp('^' + escapeRegExp(p) + '$', 'i'))[0];
       if (f) {
         try {
-          const text = await f.async('text');
+          const text = await f.text();
           return { data: JSON.parse(text), path: f.name };
         } catch (error) {
           warnings.push({
@@ -169,7 +169,7 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
   fileExpectations.push(followingParsed.fileExpectation);
 
   // === Parse Followers (delegated) ===
-  const followersParsed = await parseFollowersFromZip(zip, baseCandidates);
+  const followersParsed = await parseFollowersFromZip(archive, baseCandidates);
   warnings.push(...followersParsed.warnings);
   fileExpectations.push(followersParsed.fileExpectation);
 

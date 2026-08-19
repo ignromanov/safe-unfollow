@@ -3,7 +3,6 @@
  * Handles multi-file followers_*.json parsing with dedup
  */
 
-import type JSZip from 'jszip';
 import type { FileExpectation, InstagramExportEntry, ParseWarning, RawItem } from '@/core/types';
 import { FILE_SPECS } from './instagram-file-specs';
 import {
@@ -13,6 +12,7 @@ import {
   resolveEntries,
   resolveEntryList,
 } from './instagram-utils';
+import type { ZipArchive, ZipEntry } from './zip-archive';
 
 export interface FollowersParsed {
   followersRaw: RawItem[];
@@ -148,7 +148,7 @@ function describeFollowersOutcome(outcome: {
 
 /** Parse followers_*.json files from ZIP with dedup and multi-file merge */
 export async function parseFollowersFromZip(
-  zip: JSZip,
+  archive: ZipArchive,
   baseCandidates: string[]
 ): Promise<FollowersParsed> {
   const followersGlobs = baseCandidates
@@ -156,7 +156,7 @@ export async function parseFollowersFromZip(
     .concat(['followers_.*\\.json']);
   const followersRaw: RawItem[] = [];
   const followersSeen = new Set<string>();
-  const followersFilesByName = new Map<string, JSZip.JSZipObject>();
+  const followersFilesByName = new Map<string, ZipEntry>();
   const foundFollowerPaths: string[] = [];
   const warnings: ParseWarning[] = [];
   // Names of shards whose top-level shape didn't resolve via `resolveEntryList`
@@ -171,7 +171,7 @@ export async function parseFollowersFromZip(
 
   for (const g of followersGlobs) {
     const regex = new RegExp('^' + g + '$', 'i');
-    for (const f of zip.file(regex)) {
+    for (const f of archive.find(regex)) {
       if (!followersFilesByName.has(f.name)) {
         followersFilesByName.set(f.name, f);
         foundFollowerPaths.push(f.name);
@@ -180,7 +180,7 @@ export async function parseFollowersFromZip(
   }
 
   if (followersFilesByName.size === 0) {
-    for (const f of zip.file(/followers_\d+\.json$/i)) {
+    for (const f of archive.find(/followers_\d+\.json$/i)) {
       if (!followersFilesByName.has(f.name)) {
         followersFilesByName.set(f.name, f);
         foundFollowerPaths.push(f.name);
@@ -190,7 +190,7 @@ export async function parseFollowersFromZip(
 
   for (const f of followersFilesByName.values()) {
     if (!f) continue;
-    const text = await f.async('text');
+    const text = await f.text();
     let json: unknown;
     try {
       json = JSON.parse(text);
