@@ -18,8 +18,16 @@ import type { DiagnosticErrorCode } from '@/core/types';
  */
 export function wizardStepForError(code?: DiagnosticErrorCode): number {
   switch (code) {
+    // Four failures with one answer: request the export again, selecting only
+    // "Followers and following". The first two because the file is not an
+    // export at all; the second two because it is one, and too big to hold —
+    // and their `fix` copy already says exactly that, in ten locales. Left to
+    // the default those two pointed at the format step, so the button
+    // contradicted the paragraph directly above it.
     case 'NOT_INSTAGRAM_EXPORT':
     case 'NOT_ZIP':
+    case 'TOO_MANY_ENTRIES':
+    case 'FILE_TOO_LARGE':
       return 4;
     case 'UNKNOWN':
       return 1;

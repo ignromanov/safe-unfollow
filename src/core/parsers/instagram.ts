@@ -1,4 +1,3 @@
-import JSZip from 'jszip';
 import type {
   FileDiscovery,
   FileExpectation,
@@ -6,7 +5,7 @@ import type {
   ParseResult,
   ParseWarning,
 } from '@/core/types';
-import { BASE_PATH_CANDIDATES, FILE_SPECS } from './instagram-file-specs';
+import { BASE_PATH_CANDIDATES, FILE_SPECS, RELEVANT_FILE_PATTERN } from './instagram-file-specs';
 import { escapeRegExp, extractUsernames } from './instagram-utils';
 import { analyzeZipStructure, createCriticalError } from './instagram-zip-analysis';
 import { parseFollowersFromZip } from './instagram-followers';
@@ -14,6 +13,12 @@ import { parseFollowingPayload } from './instagram-following';
 import { parseOptionalFiles } from './instagram-optional';
 import { createEmptyParsedAll } from './instagram-validation';
 import { detectRelationshipSkew } from './relationship-skew';
+import {
+  classifyZipFailure,
+  describeUnreadableZipEntry,
+  openZipArchive,
+  type ZipArchive,
+} from './zip-archive';
 
 // Re-export for backward compatibility
 export { parseFollowersJson } from './instagram-followers';
@@ -33,22 +38,40 @@ export async function parseFollowingJson(jsonText: string): Promise<string[]> {
   return extractUsernames(data.relationships_following);
 }
 
+// Zip-bomb protection. 200k, not 10k: an "All of your information" export
+// from a decade-old account carries tens of thousands of media files, one
+// entry each, and the old limit told those exports they were fake. It was
+// unreachable while the 500MB ceiling fired first, and deleting the ceiling
+// routed them straight into it.
+//
+// The number is a sanity bound on our own walk of the central directory, not
+// a statement about what a real export looks like — so the message says so.
+//
+// Above 65,535 entries a non-ZIP64 archive reports its count modulo 65,536,
+// and this reader trusts that field (zip-reader.js:276), so such an archive is
+// read short. Compliant writers do not produce one, no mitigation is free —
+// zip.js's checkAmbiguity rejects the truncation but also rejects benign
+// quirks in valid archives — and the failure is loud rather than silent. The
+// signal to watch instead is upload_error_not_instagram arriving at multi-GB
+// file_size_mb, which the failure event now carries.
+//
+// Passed to openZipArchive as its retention bound too, so the walk holds at
+// most what an accepted archive needs. One number, because two that must agree
+// eventually will not.
+const MAX_ZIP_ENTRIES = 200_000;
+
 // === Main Parser ===
 
 export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
   // Try to load ZIP with error handling for corrupted files
-  let zip: JSZip;
+  let archive: ZipArchive;
   try {
-    zip = await JSZip.loadAsync(file);
+    archive = await openZipArchive(file, RELEVANT_FILE_PATTERN, MAX_ZIP_ENTRIES);
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : String(err);
-    let code = 'CORRUPTED_ZIP';
-    let message = 'Failed to read ZIP file';
-
-    if (errorMessage.toLowerCase().includes('encrypted')) {
-      code = 'ZIP_ENCRYPTED';
-      message = 'ZIP file is password-protected';
-    }
+    const code = classifyZipFailure(err);
+    const message =
+      code === 'ZIP_ENCRYPTED' ? 'ZIP file is password-protected' : 'Failed to read ZIP file';
 
     return {
       data: createEmptyParsedAll(),
@@ -71,19 +94,17 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
     };
   }
 
-  const allFiles = Object.keys(zip.files ?? {});
+  const allFiles = archive.names;
 
-  // Zip bomb protection: limit entry count
-  const MAX_ZIP_ENTRIES = 10_000;
-  if (allFiles.length > MAX_ZIP_ENTRIES) {
+  if (archive.count > MAX_ZIP_ENTRIES) {
     return {
       data: createEmptyParsedAll(),
       warnings: [
         {
-          code: 'CORRUPTED_ZIP',
-          message: `ZIP contains ${allFiles.length.toLocaleString()} entries (limit: ${MAX_ZIP_ENTRIES.toLocaleString()}). This does not look like a valid Instagram export.`,
+          code: 'TOO_MANY_ENTRIES',
+          message: `This ZIP contains ${archive.count.toLocaleString()} files, more than this tool can index (${MAX_ZIP_ENTRIES.toLocaleString()}).`,
           severity: 'error',
-          fix: 'Make sure you are uploading the correct ZIP file from Instagram. A normal export typically contains fewer than 1,000 files.',
+          fix: 'Ask Instagram for a smaller export: Meta Accounts Center → Create export → select only "Followers and following" → format JSON.',
         },
       ],
       discovery: { format: 'unknown', isInstagramExport: false, files: [] },
@@ -144,23 +165,50 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
 
   const baseCandidates = BASE_PATH_CANDIDATES;
 
+  // Set when a *required* file was found in the index and then could not be
+  // read. Not the same failure as a file that is absent, and the two must not
+  // share an exit — the whole of GH#21 is that distinction.
+  //
+  // It needs saying here because the backend swap moved a class of errors onto
+  // this path. JSZip's loadAsync walked every local file header, so encryption,
+  // an unsupported compression method and a damaged local header all threw
+  // while the archive was being opened, inside the guarded call at the top of
+  // this function. zip.js reads the central directory alone, so those same
+  // conditions now throw when the entry is read — here, where the old code
+  // caught them, called them JSON_PARSE_ERROR at severity 'warning', and
+  // returned the same null it returns for "no such file". The reader was then
+  // shown a successful analysis over an empty `following` set, with every
+  // follower badged notFollowedBack and no error anywhere.
+  let unreadableRequiredPath: string | undefined;
+
   const readJsonFromZip = async (
-    patterns: string[]
+    patterns: string[],
+    required = false
   ): Promise<{ data: unknown; path: string } | null> => {
     for (const p of patterns) {
-      const f = zip.file(new RegExp('^' + escapeRegExp(p) + '$', 'i'))[0];
-      if (f) {
-        try {
-          const text = await f.async('text');
-          return { data: JSON.parse(text), path: f.name };
-        } catch (error) {
-          warnings.push({
-            code: 'JSON_PARSE_ERROR',
-            message: `Failed to parse ${f.name}: ${error instanceof Error ? error.message : 'Invalid JSON'}`,
-            severity: 'warning',
-          });
-          return null;
-        }
+      const f = archive.find(new RegExp('^' + escapeRegExp(p) + '$', 'i'))[0];
+      if (!f) continue;
+
+      let text: string;
+      try {
+        text = await f.text();
+      } catch (error) {
+        if (required) unreadableRequiredPath = f.name;
+        // An optional file we cannot read costs a badge, not the answer, and
+        // severity 'error' would take over the whole screen for it.
+        warnings.push(describeUnreadableZipEntry(f.name, error, required ? 'error' : 'warning'));
+        return null;
+      }
+
+      try {
+        return { data: JSON.parse(text), path: f.name };
+      } catch (error) {
+        warnings.push({
+          code: 'JSON_PARSE_ERROR',
+          message: `Failed to parse ${f.name}: ${error instanceof Error ? error.message : 'Invalid JSON'}`,
+          severity: 'warning',
+        });
+        return null;
       }
     }
     return null;
@@ -170,13 +218,16 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
   const followingFilePatterns = baseCandidates
     .map(b => `${b}/following.json`)
     .concat(['following.json']);
-  const followingParsed = parseFollowingPayload(await readJsonFromZip(followingFilePatterns));
+  const followingParsed = parseFollowingPayload(
+    await readJsonFromZip(followingFilePatterns, true),
+    unreadableRequiredPath
+  );
   const followingUsers = followingParsed.followingUsers;
   warnings.push(...followingParsed.warnings);
   fileExpectations.push(followingParsed.fileExpectation);
 
   // === Parse Followers (delegated) ===
-  const followersParsed = await parseFollowersFromZip(zip, baseCandidates);
+  const followersParsed = await parseFollowersFromZip(archive, baseCandidates);
   warnings.push(...followersParsed.warnings);
   fileExpectations.push(followersParsed.fileExpectation);
 

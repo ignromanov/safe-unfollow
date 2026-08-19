@@ -15,17 +15,15 @@ import {
 import type { BadgeKey } from '@/core/types';
 
 // Hoisted mock setup
-const { MockJSZip } = vi.hoisted(() => {
-  const { MockJSZip } = require('../__mocks__/jszip.cjs');
-  return { MockJSZip };
+const { MockZipArchive } = vi.hoisted(() => {
+  const { MockZipArchive } = require('../__mocks__/zip-archive.cjs');
+  return { MockZipArchive };
 });
 
 // Mock JSZip
 let mockZipInstance: any;
-vi.mock('jszip', () => ({
-  default: {
-    loadAsync: vi.fn().mockImplementation(() => Promise.resolve(mockZipInstance)),
-  },
+vi.mock('@/core/parsers/zip-archive', () => ({
+  openZipArchive: vi.fn().mockImplementation(() => Promise.resolve(mockZipInstance)),
 }));
 
 describe('Full Process Integration Tests', () => {
@@ -36,7 +34,7 @@ describe('Full Process Integration Tests', () => {
   describe('Complete data processing pipeline', () => {
     it('should process ZIP file and generate correct badge counts', async () => {
       // Create mock JSZip instance
-      mockZipInstance = new MockJSZip();
+      mockZipInstance = new MockZipArchive();
 
       // Add mock files to the ZIP
       mockZipInstance._addFile(
@@ -110,7 +108,7 @@ describe('Full Process Integration Tests', () => {
 
     it('should handle filtering workflow correctly', async () => {
       // Create mock JSZip instance
-      mockZipInstance = new MockJSZip();
+      mockZipInstance = new MockZipArchive();
 
       // Add mock files to the ZIP
       mockZipInstance._addFile(
@@ -191,7 +189,7 @@ describe('Full Process Integration Tests', () => {
 
     it('should handle edge cases in the pipeline', async () => {
       // Create mock JSZip instance
-      mockZipInstance = new MockJSZip();
+      mockZipInstance = new MockZipArchive();
 
       // Add minimal mock files to the ZIP
       mockZipInstance._addFile(

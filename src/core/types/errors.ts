@@ -13,10 +13,11 @@ export type DiagnosticErrorCode =
   | 'INVALID_FOLLOWING_FORMAT' // following.json found, but shape unrecognized (GH#21)
   | 'INVALID_FOLLOWERS_FORMAT' // followers_*.json found, but shape unrecognized (GH#21)
   // New - ZIP/File errors
-  | 'CORRUPTED_ZIP' // JSZip failed to open
+  | 'CORRUPTED_ZIP' // the ZIP reader failed to open it
   | 'ZIP_ENCRYPTED' // ZIP is password-protected
   | 'EMPTY_FILE' // File is empty (0 bytes)
-  | 'FILE_TOO_LARGE' // File exceeds 500MB
+  | 'FILE_TOO_LARGE' // The browser refused the allocation; no ceiling of ours
+  | 'TOO_MANY_ENTRIES' // More ZIP entries than we will walk
   // New - Parsing errors
   | 'JSON_PARSE_ERROR' // Invalid JSON
   | 'INVALID_DATA_STRUCTURE' // JSON exists but wrong structure
@@ -84,6 +85,7 @@ export function mapWarningToDiagnosticCode(code: string): DiagnosticErrorCode {
     ZIP_ENCRYPTED: 'ZIP_ENCRYPTED',
     EMPTY_FILE: 'EMPTY_FILE',
     FILE_TOO_LARGE: 'FILE_TOO_LARGE',
+    TOO_MANY_ENTRIES: 'TOO_MANY_ENTRIES',
     // New - Parsing
     JSON_PARSE_ERROR: 'JSON_PARSE_ERROR',
     INVALID_DATA_STRUCTURE: 'INVALID_DATA_STRUCTURE',
@@ -199,10 +201,17 @@ export function createDiagnosticError(
       icon: 'file',
       severity: 'error',
     },
+    TOO_MANY_ENTRIES: {
+      title: 'Too Many Files',
+      message: 'This ZIP contains more files than this tool can index.',
+      fix: 'Ask Instagram for a smaller export: Meta Accounts Center → Create export → select only "Followers and following" → format JSON.',
+      icon: 'file',
+      severity: 'error',
+    },
     FILE_TOO_LARGE: {
       title: 'File Too Large',
-      message: 'The file exceeds the maximum supported size of 500MB.',
-      fix: 'Try requesting a smaller data export from Instagram, or use a desktop browser with more memory.',
+      message: 'Your browser could not open this export — it is too large for this device.',
+      fix: 'Ask Instagram for just the part this tool needs: Download your information → Some of your information → Followers and Following → JSON.',
       icon: 'file',
       severity: 'error',
     },
@@ -327,6 +336,7 @@ export const ALL_DIAGNOSTIC_ERROR_CODES: DiagnosticErrorCode[] = [
   'ZIP_ENCRYPTED',
   'EMPTY_FILE',
   'FILE_TOO_LARGE',
+  'TOO_MANY_ENTRIES',
   'JSON_PARSE_ERROR',
   'INVALID_DATA_STRUCTURE',
   'WORKER_TIMEOUT',

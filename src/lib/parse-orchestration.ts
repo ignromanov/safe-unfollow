@@ -119,10 +119,14 @@ export async function parseOnMainThread(
   logger.warn('[Upload] Worker not available, falling back to main thread parsing');
   logger.warn('[Upload] This will be slower for large files!');
 
-  // Static at module scope, this dragged JSZip (~96 KB) into the entry bundle of all 80
-  // prerendered pages, because parseWithWorker lives in this same module and IS statically
-  // reachable from Layout. Dynamic-importing the *call site* in useFileUpload would not
-  // have helped, for exactly that reason.
+  // Static at module scope, this dragged the parser and its ZIP reader into the entry
+  // bundle of every prerendered page, because parseWithWorker lives in this same module
+  // and IS statically reachable from Layout. Dynamic-importing the *call site* in
+  // useFileUpload would not have helped, for exactly that reason.
+  //
+  // The chunk it keeps out is dist/assets/instagram-*.js — measure it rather than trust
+  // this sentence; it was 96 KB when the reader was JSZip and moved when it became
+  // @zip.js/zip.js.
   const { parseInstagramZipFile } = await import('@/core/parsers/instagram');
 
   const parseResult = await parseInstagramZipFile(file);
