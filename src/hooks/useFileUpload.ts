@@ -15,9 +15,6 @@ import { useParseWorker } from './useParseWorker';
 // Upload rate limiting (ms)
 const UPLOAD_DEBOUNCE_MS = 1000;
 
-// Maximum file size: 500MB
-const MAX_FILE_SIZE = 500 * 1024 * 1024;
-
 // localStorage key for tracking return uploads
 const LAST_UPLOAD_KEY = 'analytics_last_upload';
 
@@ -194,19 +191,6 @@ export function useFileUpload() {
           };
 
           throw guardFailure(notZipWarning);
-        }
-
-        // File size guard: reject files over 500MB
-        if (file.size > MAX_FILE_SIZE) {
-          const sizeMb = Math.round(file.size / (1024 * 1024));
-          const tooLargeWarning: ParseWarning = {
-            code: 'FILE_TOO_LARGE',
-            message: t('diagnostic.errors.FILE_TOO_LARGE.message', { sizeMb }),
-            severity: 'error',
-            fix: t('diagnostic.errors.FILE_TOO_LARGE.fix'),
-          };
-
-          throw guardFailure(tooLargeWarning);
         }
 
         // Generate file hash for cache lookup and analytics correlation
