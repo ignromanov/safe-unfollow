@@ -47,8 +47,7 @@
       }
     },
     "accordion": {
-      "trigger_one": "Adım adım rehber — {{count}} adım",
-      "trigger_other": "Adım adım rehber — {{count}} adım"
+      "trigger": "Adım adım rehber — {{count}} adım"
     }
   },
   "steps": {

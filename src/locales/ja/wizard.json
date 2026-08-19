@@ -47,8 +47,7 @@
       }
     },
     "accordion": {
-      "trigger_one": "手順ガイド — {{count}}ステップ",
-      "trigger_other": "手順ガイド — {{count}}ステップ"
+      "trigger": "手順ガイド — {{count}}ステップ"
     }
   },
   "steps": {

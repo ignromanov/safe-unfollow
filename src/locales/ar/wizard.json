@@ -47,8 +47,7 @@
       }
     },
     "accordion": {
-      "trigger_one": "دليل خطوة بخطوة — {{count}} خطوة",
-      "trigger_other": "دليل خطوة بخطوة — {{count}} خطوات"
+      "trigger": "دليل خطوة بخطوة — {{count}} خطوات"
     }
   },
   "steps": {

@@ -34,11 +34,16 @@ export function StepAccordion() {
   const listId = useId();
 
   // Derived from the row list itself, not hardcoded — stays correct if a
-  // step is ever added or removed. `_one`/`_other` are the two plural
-  // forms every locale's `entry.accordion.trigger` key defines; i18next
-  // falls back to `_other` for the mid-range categories some languages
-  // add (Russian "few", Arabic "few"/"many"), which is correct at the
-  // guide's actual length (7) and only imprecise for a hypothetical 2-4.
+  // step is ever added or removed. `entry.accordion.trigger` is a single,
+  // un-suffixed key in every locale — not `_one`/`_other`. i18next only
+  // consults CLDR plural categories (`_one`, `_few`, `_many`, `_other`, ...)
+  // when a suffixed form exists for the resolved category; with none
+  // defined, it falls through to the bare key and interpolates `{{count}}`
+  // as plain text. That fallback is the point here: the guide's length is
+  // always ≥2 in practice, so a single generic-plural string is correct at
+  // every real count, and — unlike a `_one`/`_other` split — it can never
+  // land on a CLDR category (Russian "few"/"many", Arabic "few"/"many", ...)
+  // that has no matching key.
   const stepCount = REMAINING_STEPS.length;
 
   return (
@@ -57,9 +62,13 @@ export function StepAccordion() {
         aria-expanded={isOpen}
         aria-controls={listId}
         onClick={() => setIsOpen(open => !open)}
-        className="flex h-14 w-full items-center justify-between gap-2 px-4 text-sm font-semibold text-zinc-900 dark:text-white"
+        className="flex min-h-14 w-full items-center justify-between gap-2 px-4 py-2 text-sm font-semibold text-zinc-900 dark:text-white"
       >
-        <span className="truncate">{t('entry.accordion.trigger', { count: stepCount })}</span>
+        {/* No `truncate`: German and Russian, plus the step count, are the
+            long cases at 360px, and clipping would risk cutting the count
+            itself. The row wraps instead — `min-h-14` (not `h-14`) lets it
+            grow past one line rather than clip. */}
+        <span>{t('entry.accordion.trigger', { count: stepCount })}</span>
         <ChevronDown
           size={18}
           aria-hidden="true"

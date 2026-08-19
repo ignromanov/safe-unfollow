@@ -47,8 +47,7 @@
       }
     },
     "accordion": {
-      "trigger_one": "Schritt-für-Schritt-Anleitung — {{count}} Schritt",
-      "trigger_other": "Schritt-für-Schritt-Anleitung — {{count}} Schritte"
+      "trigger": "Schritt-für-Schritt-Anleitung — {{count}} Schritte"
     }
   },
   "steps": {

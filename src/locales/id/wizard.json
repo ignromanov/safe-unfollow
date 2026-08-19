@@ -47,8 +47,7 @@
       }
     },
     "accordion": {
-      "trigger_one": "Panduan langkah demi langkah — {{count}} langkah",
-      "trigger_other": "Panduan langkah demi langkah — {{count}} langkah"
+      "trigger": "Panduan langkah demi langkah — {{count}} langkah"
     }
   },
   "steps": {
