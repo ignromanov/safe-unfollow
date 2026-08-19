@@ -251,7 +251,7 @@ describe('FilterChips Component', () => {
    * GH#41. The page-level notice explains the problem; the chip is where the
    * wrong number is actually read, and on a phone the two are a scroll apart.
    */
-  describe('overstated notFollowingBack chip', () => {
+  describe('marks on counts that cannot be trusted', () => {
     const chipName = (fragment: string) =>
       screen.getByRole('button', { name: new RegExp(fragment, 'i') });
 
@@ -285,6 +285,63 @@ describe('FilterChips Component', () => {
       render(<FilterChips {...defaultProps} />);
 
       expect(chipName('Add Not following back filter')).not.toHaveAccessibleName(hintPattern);
+    });
+
+    const truncatedHint = resultsEN.caveat.truncated.followers.chipHint;
+    const truncatedPattern = new RegExp(truncatedHint.slice(0, 20), 'i');
+
+    /**
+     * Four chips, not one, and not the same four in both directions. A short
+     * followers file drives notFollowingBack UP while driving followers,
+     * mutuals and notFollowedBack DOWN, so the mark cannot mean "overstated"
+     * and cannot be a single badge.
+     */
+    it('marks every chip a short followers file corrupts', () => {
+      render(<FilterChips {...defaultProps} truncatedRelationshipFile="followers" />);
+
+      for (const label of [
+        'Add Not following back filter',
+        'Add Not followed back filter',
+        'Add Followers filter',
+        'Add Mutuals filter',
+      ]) {
+        expect(chipName(label)).toHaveAccessibleName(truncatedPattern);
+      }
+    });
+
+    it('marks the other set when the other file is the short one', () => {
+      render(<FilterChips {...defaultProps} truncatedRelationshipFile="following" />);
+
+      expect(chipName('Add Following filter')).toHaveAccessibleName(
+        new RegExp(resultsEN.caveat.truncated.following.chipHint.slice(0, 20), 'i')
+      );
+      expect(chipName('Add Followers filter')).not.toHaveAccessibleName(truncatedPattern);
+    });
+
+    it('marks nothing when neither file looks short', () => {
+      render(<FilterChips {...defaultProps} />);
+
+      expect(chipName('Add Mutuals filter')).not.toHaveAccessibleName(truncatedPattern);
+    });
+
+    /**
+     * Both causes can hit notFollowingBack at once. The chip carries one hint,
+     * because its job is "this number cannot be trusted, read the notice", and
+     * both notices are on the page — reciting two causes inside an aria-label
+     * costs more than it explains.
+     */
+    it('gives one hint, not two, when both causes apply to the same chip', () => {
+      render(
+        <FilterChips
+          {...defaultProps}
+          followRequestsUnreadable
+          truncatedRelationshipFile="followers"
+        />
+      );
+
+      const name = chipName('Add Not following back filter');
+      expect(name).toHaveAccessibleName(truncatedPattern);
+      expect(name).not.toHaveAccessibleName(hintPattern);
     });
   });
 
@@ -336,7 +393,7 @@ describe('FilterChips Component', () => {
     // all of them stayed green. `toHaveClass`, not the class sweep: an SVG's
     // `className` is an SVGAnimatedString, so the regex above reads
     // "[object SVGAnimatedString]" and matches nothing on any icon.
-    it('colours the overstated marker with the token', () => {
+    it('colours the unreliable-count marker with the token', () => {
       render(
         <FilterChips
           {...defaultProps}
