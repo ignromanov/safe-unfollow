@@ -22,16 +22,28 @@ describe('resolveUmamiTarget', () => {
     expect(resolveUmamiTarget()).toBeNull();
   });
 
-  it('reads the origin and website id back off the injected tag', () => {
+  it('reads the base url and website id back off the injected tag', () => {
     injectScript({
       src: 'https://umami-coral-xi.vercel.app/script.js',
       'data-website-id': WEBSITE_ID,
     });
 
     expect(resolveUmamiTarget()).toEqual({
-      origin: 'https://umami-coral-xi.vercel.app',
+      baseUrl: 'https://umami-coral-xi.vercel.app',
       websiteId: WEBSITE_ID,
     });
+  });
+
+  it('resolves the script directory, not the origin, behind the same-origin proxy', () => {
+    // The whole point of the proxy: the tag is served from `/v/script.js` on our
+    // own origin and rewritten to the analytics host. Umami's own tracker derives
+    // its collect endpoint as dirname(script.src), so ours must too. Returning the
+    // origin here would post custom events to `/api/send` — outside the `/v/`
+    // rewrite, where nothing serves them — while Umami's pageviews kept working,
+    // making the dashboard look healthy while every custom event 404'd.
+    injectScript({ src: '/v/script.js', 'data-website-id': WEBSITE_ID });
+
+    expect(resolveUmamiTarget()?.baseUrl).toBe(`${window.location.origin}/v`);
   });
 
   it('returns null when the tag carries no src', () => {
@@ -45,6 +57,6 @@ describe('resolveUmamiTarget', () => {
     // and was swallowed by a bare catch.
     injectScript({ src: '/script.js', 'data-website-id': WEBSITE_ID });
 
-    expect(resolveUmamiTarget()?.origin).toBe(window.location.origin);
+    expect(resolveUmamiTarget()?.baseUrl).toBe(window.location.origin);
   });
 });
