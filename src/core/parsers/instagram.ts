@@ -5,7 +5,7 @@ import type {
   ParseResult,
   ParseWarning,
 } from '@/core/types';
-import { BASE_PATH_CANDIDATES, FILE_SPECS } from './instagram-file-specs';
+import { BASE_PATH_CANDIDATES, FILE_SPECS, RELEVANT_FILE_PATTERN } from './instagram-file-specs';
 import { escapeRegExp, extractUsernames } from './instagram-utils';
 import { analyzeZipStructure, createCriticalError } from './instagram-zip-analysis';
 import { parseFollowersFromZip } from './instagram-followers';
@@ -38,7 +38,7 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
   // Try to load ZIP with error handling for corrupted files
   let archive: ZipArchive;
   try {
-    archive = await openZipArchive(file);
+    archive = await openZipArchive(file, RELEVANT_FILE_PATTERN);
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : String(err);
     let code = 'CORRUPTED_ZIP';

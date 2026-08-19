@@ -2,6 +2,10 @@ import JSZip from 'jszip';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { openZipArchive } from '@/core/parsers/zip-archive';
 
+// These characterise the adapter itself, so they keep every entry. Production
+// passes RELEVANT_FILE_PATTERN — see openZipArchive's docblock for why.
+const KEEP_EVERYTHING = /./;
+
 /**
  * Every byte that changes hands, whoever asks for it.
  *
@@ -62,7 +66,7 @@ describe('random access', () => {
   const total = () => instrument.sizes.reduce((sum, n) => sum + n, 0);
 
   it('never reads a range covering the whole archive', async () => {
-    const archive = await openZipArchive(blob);
+    const archive = await openZipArchive(blob, KEEP_EVERYTHING);
     const [entry] = archive.find(/following\.json$/);
     await entry.text();
 
@@ -73,7 +77,7 @@ describe('random access', () => {
   });
 
   it('reads far less than the archive to get one small entry', async () => {
-    const archive = await openZipArchive(blob);
+    const archive = await openZipArchive(blob, KEEP_EVERYTHING);
     await archive.find(/following\.json$/)[0].text();
 
     expect(instrument.sizes.length).toBeGreaterThan(0);
@@ -82,7 +86,7 @@ describe('random access', () => {
   });
 
   it('listing names decompresses nothing', async () => {
-    const archive = await openZipArchive(blob);
+    const archive = await openZipArchive(blob, KEEP_EVERYTHING);
     expect(archive.names.filter(name => !name.endsWith('/'))).toHaveLength(41);
 
     expect(instrument.sizes.length).toBeGreaterThan(0);
@@ -95,7 +99,7 @@ describe('the entry list this backend produces', () => {
     const blob = await buildBulkyZip();
 
     const viaJSZip = Object.keys((await JSZip.loadAsync(blob)).files);
-    const viaAdapter = (await openZipArchive(blob)).names;
+    const viaAdapter = (await openZipArchive(blob, KEEP_EVERYTHING)).names;
 
     // Worth testing rather than assuming: the two libraries build this list
     // differently. JSZip synthesises a folder object for every path segment;
@@ -146,7 +150,7 @@ describe('ZIP64', () => {
     );
     expect(hasZip64Eocd).toBe(true);
 
-    const archive = await openZipArchive(blob);
+    const archive = await openZipArchive(blob, KEEP_EVERYTHING);
     expect(archive.names).toEqual(['connections/followers_and_following/following.json']);
     expect(await archive.find(/following\.json$/)[0].text()).toContain('relationships_following');
   });
@@ -183,7 +187,61 @@ describe('ZIP64', () => {
     new DataView(raw.buffer).setUint16(eocd + 8, 1, true);
     new DataView(raw.buffer).setUint16(eocd + 10, 1, true);
 
-    const archive = await openZipArchive(new Blob([raw]));
+    const archive = await openZipArchive(new Blob([raw]), KEEP_EVERYTHING);
     expect(archive.names).toEqual(['a.json']);
+  });
+});
+
+describe('bounded retention', () => {
+  // The reason this contract exists, measured on this branch's own reader
+  // (Node 24, --expose-gc, retained heap after collection):
+  //
+  //   getEntries(), 50 000 entries from an 8 MB archive -> 364 MB retained,
+  //   7 628 bytes per entry, independent of the archive's size.
+  //
+  // A zip.js entry is a 56-property object carrying two Uint8Array subarrays,
+  // a Date, a Map for the extra field and two bound closures. The parser ever
+  // asks for about a dozen of them; an "All of your information" export from a
+  // decade-old account carries tens of thousands of media files, and the
+  // 200 000-entry guard in instagram.ts ran *after* the whole index was built,
+  // so it could not prevent the allocation it exists to prevent.
+  //
+  // Streaming the central directory and keeping only the entries the caller
+  // declared it might read brings that to nothing measurable. Names are still
+  // collected in full - a string costs about 140 bytes, so the guard's own
+  // ceiling is tens of megabytes rather than gigabytes.
+  async function buildMediaHeavyZip(): Promise<Blob> {
+    const zip = new JSZip();
+    zip.file(
+      'connections/followers_and_following/following.json',
+      '{"relationships_following":[]}'
+    );
+    for (let i = 0; i < 30; i++) zip.file(`media/posts/photo_${i}.json`, '{}');
+    return zip.generateAsync({ type: 'blob' });
+  }
+
+  it('lists every name while retaining only the entries it was told it may read', async () => {
+    const blob = await buildMediaHeavyZip();
+    const archive = await openZipArchive(blob, /(^|\/)following\.json$/i);
+
+    // The index is complete: analyzeZipStructure decides format, base path and
+    // whether this is an Instagram export from names alone, so nothing there
+    // may be lost by retaining less.
+    expect(archive.names.filter(name => !name.endsWith('/'))).toHaveLength(31);
+    expect(archive.names).toContain('media/posts/photo_17.json');
+
+    // ...and yet an entry outside the declared set cannot be read, because its
+    // object was never kept. This is the assertion that fails against a reader
+    // that materialises the whole index.
+    expect(archive.find(/photo_17\.json$/)).toHaveLength(0);
+  });
+
+  it('still reads a kept entry after streaming past thirty it discarded', async () => {
+    const blob = await buildMediaHeavyZip();
+    const archive = await openZipArchive(blob, /(^|\/)following\.json$/i);
+
+    const found = archive.find(/following\.json$/);
+    expect(found).toHaveLength(1);
+    expect(await found[0].text()).toContain('relationships_following');
   });
 });

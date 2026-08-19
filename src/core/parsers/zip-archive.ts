@@ -43,22 +43,40 @@ export interface ZipArchive {
   find(pattern: RegExp): ZipEntry[];
 }
 
-export async function openZipArchive(file: Blob): Promise<ZipArchive> {
+/**
+ * @param keep Which entries this archive may later be asked to read. Names are
+ *   always listed in full; only matching entries keep an object, and `find`
+ *   can therefore only ever return one of those. Callers pass
+ *   `RELEVANT_FILE_PATTERN`, derived from the file specs.
+ *
+ *   Not an optimisation with a threshold — a correctness bound. `getEntries()`
+ *   materialises the whole central directory, and a zip.js entry costs about
+ *   7.6 KB of retained heap; 50 000 entries from an 8 MB archive held 364 MB,
+ *   measured on Node 24 with --expose-gc after collection. The cost tracks the
+ *   entry count, not the archive's size, so a media-heavy export OOMs a mobile
+ *   tab with no error to show for it — the worker is killed, nothing is posted
+ *   back, and the reader waits out the 60-second timeout.
+ */
+export async function openZipArchive(file: Blob, keep: RegExp): Promise<ZipArchive> {
   const reader = new ZipReader(new BlobReader(file));
-  // Reads the end-of-central-directory record and the central directory only:
-  // tail slices, no entry data.
-  const entries = await reader.getEntries();
-  const files = entries.filter(e => !e.directory);
+  // getEntriesGenerator, not getEntries: the same tail slices and the same
+  // central-directory walk, but each entry is discardable as it goes.
+  const names: string[] = [];
+  const files: ZipEntry[] = [];
+  for await (const entry of reader.getEntriesGenerator()) {
+    names.push(entry.filename);
+    // Directory entries are listed and never returned by find — the semantics
+    // JSZip had at `!file.dir && regexp.test(relativePath)`
+    // (`jszip/lib/object.js:225`), pinned by the characterisation tests.
+    if (entry.directory || !keep.test(entry.filename)) continue;
+    files.push({
+      name: entry.filename,
+      text: () => entry.getData!(new TextWriter()),
+    });
+  }
 
   return {
-    names: entries.map(e => e.filename),
-    find(pattern: RegExp): ZipEntry[] {
-      return files
-        .filter(e => pattern.test(e.filename))
-        .map(e => ({
-          name: e.filename,
-          text: () => e.getData!(new TextWriter()),
-        }));
-    },
+    names,
+    find: (pattern: RegExp): ZipEntry[] => files.filter(f => pattern.test(f.name)),
   };
 }
