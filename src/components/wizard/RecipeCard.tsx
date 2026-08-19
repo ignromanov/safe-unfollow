@@ -45,10 +45,17 @@ export function RecipeCard() {
 }
 
 /**
- * "JSON" is the one Latin token every translation keeps verbatim inside an
- * otherwise-translated sentence. Isolate it in its own `dir="ltr"` span so it
- * doesn't get mirrored inside RTL rows (same reasoning as the error-code
- * badge at DiagnosticErrorScreen.tsx:192-195).
+ * Every one of the ten `entry.recipe.rows.format` values keeps two Latin
+ * tokens verbatim — `JSON` and `HTML` — and only the first is isolated in a
+ * `dir="ltr"` span. That is a precaution rather than a fix for a live defect:
+ * `ar` is the only RTL locale here and it opens the row with `JSON`, where
+ * the bidi algorithm resolves it correctly unaided. The span is what keeps
+ * that true if a future RTL locale places the token mid-sentence (same
+ * reasoning as the error-code badge at DiagnosticErrorScreen.tsx:192-195).
+ *
+ * `HTML` is left unwrapped for the same reason inverted: it is string-final
+ * in `ar`, and the two locales that place it mid-string (`ja`, `tr`) are LTR,
+ * where isolation would be a no-op.
  */
 function renderFormatRow(text: string) {
   const index = text.indexOf('JSON');

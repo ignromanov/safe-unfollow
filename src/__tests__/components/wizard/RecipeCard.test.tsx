@@ -27,4 +27,22 @@ describe('RecipeCard', () => {
 
     expect(screen.getByText('JSON')).toHaveAttribute('dir', 'ltr');
   });
+
+  // The isolation is a search-and-wrap, so a translation that drops the token
+  // silently stops being isolated. The row must still say what the
+  // translation says — losing the wrapper must not lose the sentence.
+  it('renders the row whole when a translation carries no JSON token', () => {
+    const original = wizardEN.entry.recipe.rows.format;
+    wizardEN.entry.recipe.rows.format = 'Format: the token went missing';
+
+    try {
+      render(<RecipeCard />);
+
+      const card = screen.getByRole('group', { name: /instagram's dialog/i });
+      expect(within(card).getByText('Format: the token went missing')).toBeInTheDocument();
+      expect(card.querySelector('[dir="ltr"]')).toBeNull();
+    } finally {
+      wizardEN.entry.recipe.rows.format = original;
+    }
+  });
 });
