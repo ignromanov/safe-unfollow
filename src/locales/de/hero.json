@@ -5,7 +5,7 @@
     "highlight": "Instagram Entfolger",
     "suffix": "Ohne Login"
   },
-  "subheadline": "Finde heraus wer dir auf Instagram entfolgt hat — kostenlos, ohne Login. ZIP hochladen, lokal analysieren. 100% privat. Funktioniert offline.",
+  "subheadline": "Finde heraus, wer dir auf Instagram entfolgt hat: kostenlos, ohne Login. ZIP hochladen, lokal analysieren. 100% privat. Funktioniert offline.",
   "buttons": {
     "getGuide": "Entfolger Kostenlos Prüfen",
     "trySample": "Mit Demo testen",
@@ -29,7 +29,7 @@
     },
     "scale": {
       "title": "Hohe Skalierung",
-      "description": "Verarbeitet 1M+ Accounts blitzschnell"
+      "description": "Für Exporte mit 1.000.000+ Accounts gebaut"
     },
     "openSource": {
       "title": "Open Source",

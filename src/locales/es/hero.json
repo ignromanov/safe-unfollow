@@ -3,9 +3,9 @@
   "headline": {
     "prefix": "Descubre Quién",
     "highlight": "Dejó de Seguirte en Instagram",
-    "suffix": "Sin Login"
+    "suffix": "Sin Iniciar Sesión"
   },
-  "subheadline": "Descubre quién dejó de seguirte en Instagram gratis, sin login. Sube tu ZIP, análisis local. 100% privado. Funciona offline.",
+  "subheadline": "Descubre quién dejó de seguirte en Instagram gratis, sin iniciar sesión. Sube tu ZIP, análisis local. 100% privado. Funciona offline.",
   "buttons": {
     "getGuide": "Ver Quién Dejó de Seguirme",
     "trySample": "Probar con datos de ejemplo",
@@ -29,7 +29,7 @@
     },
     "scale": {
       "title": "Alta escala",
-      "description": "Maneja más de 1M de cuentas a toda velocidad"
+      "description": "Creado para exportaciones de más de un millón de cuentas"
     },
     "openSource": {
       "title": "Código abierto",

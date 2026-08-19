@@ -8,11 +8,11 @@
   "steps": {
     "1": {
       "title": "Abre la página de exportación de Instagram",
-      "description": "Haz clic en el botón para abrir el Centro de Cuentas de Meta. Luego haz clic en \"Crear exportación\"."
+      "description": "Haz clic en el botón para abrir el Centro de cuentas de Meta. Luego haz clic en \"Crear exportación\"."
     },
     "2": {
       "title": "Elige tu perfil de Instagram",
-      "description": "Selecciona tu cuenta de Instagram de la lista de perfiles conectados en el Centro de Cuentas."
+      "description": "Selecciona tu cuenta de Instagram de la lista de perfiles conectados en el Centro de cuentas."
     },
     "3": {
       "title": "Selecciona \"Exportar al dispositivo\"",

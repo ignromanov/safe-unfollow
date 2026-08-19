@@ -1,38 +1,38 @@
 {
-  "title": "Unfollowers Instagram — Gratis Sin Login | SafeUnfollow",
-  "description": "Descubre quién dejó de seguirte en Instagram sin login. Sube tu archivo ZIP, ve unfollowers al instante. 100% gratis, privado, 1M+ cuentas. Funciona offline.",
-  "ogTitle": "Instagram Unfollowers — Gratis Sin Login",
-  "twitterDescription": "Descubre quién dejó de seguirte en Instagram sin login. Sube ZIP, ve unfollowers al instante. 100% gratis, 1M+ cuentas. Funciona offline.",
-  "keywords": "instagram unfollowers, quién dejó de seguirme instagram, rastreador de unfollows, ver unfollowers sin login, analizador zip instagram",
+  "title": "Quién dejó de seguirte en Instagram: gratis, sin contraseña",
+  "description": "Descubre quién dejó de seguirte en Instagram sin iniciar sesión. Sube tu exportación oficial de datos: el análisis ocurre dentro de tu navegador. Gratis.",
+  "ogTitle": "Quién dejó de seguirte en Instagram: gratis, sin contraseña",
+  "twitterDescription": "Descubre quién dejó de seguirte en Instagram sin iniciar sesión. Sube tu ZIP: el análisis ocurre en tu navegador y la exportación nunca sale de ahí. Gratis.",
+  "keywords": "quién dejó de seguirte instagram, quién no te sigue instagram, rastreador de unfollowers, ver unfollowers sin iniciar sesión, analizador de zip de instagram",
   "routes": {
     "/upload": {
-      "title": "Sube tu ZIP de Instagram — Análisis Gratis | SafeUnfollow",
-      "description": "Sube tu exportación de datos de Instagram (ZIP) para análisis gratis. Procesamiento 100% local, sin login, maneja 1M+ cuentas.",
-      "ogTitle": "Sube tu ZIP de Instagram — Análisis Gratis"
+      "title": "Sube tu ZIP de Instagram: quién dejó de seguirte, gratis",
+      "description": "Sube tu exportación de datos de Instagram (ZIP) y ve gratis quién dejó de seguirte. Sin iniciar sesión y sin contraseña: el archivo se lee en tu navegador.",
+      "ogTitle": "Sube tu ZIP de Instagram: quién dejó de seguirte, gratis"
     },
     "/wizard": {
-      "title": "Cómo Descargar tus Datos de Instagram (JSON) — Guía | SafeUnfollow",
-      "description": "Guía paso a paso para descargar tus datos de Instagram como JSON. Aprende a solicitar tu exportación de datos de Meta.",
-      "ogTitle": "Cómo Descargar Datos de Instagram (JSON) — Guía"
+      "title": "Cómo descargar tus datos de Instagram en formato JSON",
+      "description": "Guía paso a paso para pedirle a Meta la exportación de tus datos de Instagram en formato JSON, descargar el ZIP y dejarlo listo para analizar. Sin contraseña.",
+      "ogTitle": "Cómo descargar tus datos de Instagram en formato JSON"
     },
     "/sample": {
-      "title": "Prueba Instagram Unfollow Tracker — Demo Gratis | SafeUnfollow",
-      "description": "Prueba Instagram Unfollow Tracker con datos de ejemplo. Ve cómo funcionan las insignias, filtros y búsqueda — sin subir archivos.",
-      "ogTitle": "Prueba Instagram Unfollow Tracker — Demo Gratis"
+      "title": "Prueba la demo gratis del rastreador de unfollowers",
+      "description": "Mira con datos de ejemplo cómo funcionan las insignias, los filtros y la búsqueda. No hace falta subir nada tuyo. La demo es gratis y no pide iniciar sesión.",
+      "ogTitle": "Prueba la demo gratis del rastreador de unfollowers"
     },
     "/privacy": {
-      "title": "Política de Privacidad — Tus Datos No Salen de tu Dispositivo | SafeUnfollow",
-      "description": "Política de privacidad de SafeUnfollow. Procesamiento 100% local, sin recopilación de datos, sin rastreo.",
-      "ogTitle": "Política de Privacidad — Tus Datos No Salen de tu Dispositivo"
+      "title": "Privacidad: tu exportación nunca sale de tu dispositivo",
+      "description": "Política de privacidad de SafeUnfollow: qué nos llega y qué no. Tu exportación de Instagram se lee dentro de tu navegador y se queda en tu dispositivo.",
+      "ogTitle": "Privacidad: tu exportación nunca sale de tu dispositivo"
     },
     "/results": {
-      "title": "Tus resultados de Instagram | SafeUnfollow",
-      "description": "Ve los resultados de tu análisis de Instagram. Filtra por insignias y busca cuentas.",
-      "ogTitle": "Tus Resultados de Unfollowers"
+      "title": "Tus resultados: quién dejó de seguirte en Instagram",
+      "description": "Consulta el resultado de tu análisis: quién dejó de seguirte, quién no te sigue y quiénes son mutuos. Filtra por insignias y busca cuentas dentro de la lista.",
+      "ogTitle": "Tus resultados: quién dejó de seguirte en Instagram"
     },
     "/terms": {
-      "title": "Términos de servicio | SafeUnfollow",
-      "description": "Términos de servicio de SafeUnfollow. Rastreador gratuito y de código abierto con procesamiento 100% local.",
+      "title": "Términos de servicio",
+      "description": "Términos de servicio de SafeUnfollow: un rastreador gratuito y de código abierto que lee tu exportación de Instagram en tu propio navegador, sin contraseña.",
       "ogTitle": "Términos de servicio"
     }
   }

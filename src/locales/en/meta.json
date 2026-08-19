@@ -1,37 +1,37 @@
 {
-  "title": "Instagram Unfollowers — Free ZIP Upload, No Login | SafeUnfollow",
-  "description": "Check who unfollowed you on Instagram without login. Upload your ZIP file, see unfollowers instantly. 100% free, privacy-first, handles 1M+ accounts. Works offline.",
-  "ogTitle": "Instagram Unfollowers — Free ZIP Upload, No Login",
-  "twitterDescription": "Check who unfollowed you on Instagram without login. Upload ZIP, see unfollowers instantly. 100% free, 1M+ accounts. Works offline.",
+  "title": "Instagram Unfollowers: Free ZIP Upload, No Login",
+  "description": "Check who unfollowed you on Instagram without logging in. Upload your official Instagram data export: the analysis runs inside your browser. Free to use.",
+  "ogTitle": "Instagram Unfollowers: Free ZIP Upload, No Login",
+  "twitterDescription": "Check who unfollowed you on Instagram without logging in. Upload your ZIP: the analysis runs in your browser and the export never leaves it. Free to use.",
   "keywords": "instagram unfollowers, who unfollowed me instagram, instagram unfollow tracker, check unfollowers without login, instagram zip file analyzer",
   "routes": {
     "/upload": {
-      "title": "Upload Instagram ZIP — Free Unfollow Analysis | SafeUnfollow",
-      "description": "Upload your Instagram data export (ZIP) for free unfollow analysis. 100% local processing, no login required, handles 1M+ accounts. Your data never leaves your device.",
-      "ogTitle": "Upload Instagram ZIP — Free Unfollow Analysis"
+      "title": "Upload Instagram ZIP: Free Unfollower Analysis",
+      "description": "Upload your Instagram data export (ZIP) for a free unfollower analysis. No login and no password: the file is parsed in your browser and stays on your device.",
+      "ogTitle": "Upload Instagram ZIP: Free Unfollower Analysis"
     },
     "/wizard": {
-      "title": "How to Download Instagram Data (JSON) — Step-by-Step Guide | SafeUnfollow",
+      "title": "How to Download Your Instagram Data as JSON",
       "description": "Step-by-step guide to download your Instagram data as JSON. Learn how to request your data export from Meta for free unfollow analysis.",
-      "ogTitle": "How to Download Instagram Data (JSON) — Guide"
+      "ogTitle": "How to Download Your Instagram Data as JSON"
     },
     "/sample": {
-      "title": "Try Instagram Unfollow Tracker — Free Demo | SafeUnfollow",
+      "title": "Try the Instagram Unfollow Tracker: Free Demo",
       "description": "Try Instagram Unfollow Tracker with sample data. See how badges, filters, and search work — no upload needed. Free demo, no login required.",
-      "ogTitle": "Try Instagram Unfollow Tracker — Free Demo"
+      "ogTitle": "Try the Instagram Unfollow Tracker: Free Demo"
     },
     "/privacy": {
-      "title": "Privacy Policy — Data Never Leaves Your Device | SafeUnfollow",
-      "description": "SafeUnfollow privacy policy. 100% local processing, no data collection, no tracking. Your Instagram data never leaves your browser.",
-      "ogTitle": "Privacy Policy — Data Never Leaves Your Device"
+      "title": "Privacy Policy: Your Export Never Leaves Your Device",
+      "description": "SafeUnfollow privacy policy: what reaches us and what does not. Your Instagram export is read inside your browser and stays on your device.",
+      "ogTitle": "Privacy Policy: Your Export Never Leaves Your Device"
     },
     "/results": {
-      "title": "Your Instagram Unfollow Results | SafeUnfollow",
+      "title": "Your Instagram Unfollow Results",
       "description": "View your Instagram unfollower analysis results. Filter by badges, search accounts, and see who unfollowed you.",
       "ogTitle": "Your Instagram Unfollow Results"
     },
     "/terms": {
-      "title": "Terms of Service | SafeUnfollow",
+      "title": "Terms of Service",
       "description": "SafeUnfollow terms of service. Free, open-source Instagram unfollow tracker with 100% local processing.",
       "ogTitle": "Terms of Service"
     }

@@ -3,7 +3,7 @@
   "items": {
     "howToFind": {
       "question": "How to check who unfollowed you on Instagram without app?",
-      "answer": "Open Meta Accounts Center → Create export → Select your profile → Choose \"Export to device\" → Select only \"Followers and following\" → Set format to JSON. Download the ZIP when ready (usually 5-30 minutes), then upload it here. The tool analyzes followers locally—see unfollowers instantly. No login needed.",
+      "answer": "Open Meta Accounts Center → Create export → Select your profile → Choose \"Export to device\" → Select only \"Followers and following\" → Set format to JSON. Download the ZIP when ready (usually 5-30 minutes), then upload it here. The tool compares your lists in the browser, so the export is never uploaded anywhere. No login needed.",
       "relatedLink": {
         "text": "Start the export guide",
         "href": "/wizard"
@@ -55,7 +55,7 @@
     },
     "downloadTime": {
       "question": "How long does it take to receive my Instagram data download?",
-      "answer": "Meta typically sends your data within 5-30 minutes via email. Larger accounts or high server load may take up to a few hours. After you download the ZIP, uploading it to this tracker for analysis is instant—processing takes seconds even for million-account exports thanks to local browser processing.",
+      "answer": "Meta typically sends your data within 5-30 minutes via email. Larger accounts or high server load may take up to a few hours. Once you have the ZIP, the analysis runs in your own browser rather than on a server, so there is no queue and no upload wait. Bigger exports naturally take longer to read than small ones.",
       "relatedLink": {
         "text": "Set a calendar reminder",
         "href": "/wizard/step/8"
@@ -75,7 +75,7 @@
     },
     "analyzeData": {
       "question": "How do I analyze my Instagram data download to find unfollowers?",
-      "answer": "Upload your Instagram ZIP file to this tracker. The tool unpacks your follower/following lists locally in your browser, compares them, and highlights who unfollowed you. Results show unfollowers, non-mutuals, mutual followers, and more — the comparison runs on your device rather than on a server. Takes under 30 seconds for typical exports.",
+      "answer": "Upload your Instagram ZIP file to this tracker. The tool unpacks your follower and following lists locally in your browser, compares them, and highlights who unfollowed you. Results show unfollowers, non-mutuals, mutual followers, and more, and the comparison runs on your device rather than on a server.",
       "relatedLink": {
         "text": "Upload your file now",
         "href": "/upload"
@@ -103,7 +103,7 @@
     },
     "mobileUse": {
       "question": "Can I use SafeUnfollow on iPhone or Android?",
-      "answer": "Yes! SafeUnfollow works in any modern mobile browser (Safari, Chrome, Firefox). Visit safeunfollow.app, upload your ZIP file, and see results instantly. You can also install it as a PWA (Progressive Web App) for quick access from your home screen. The app is optimized for mobile—81% of our users are on phones. Request your data export from the Instagram app, download the ZIP from your email, then upload it here."
+      "answer": "Yes. SafeUnfollow works in any modern mobile browser (Safari, Chrome, Firefox). Visit safeunfollow.app, upload your ZIP file, and read your results on the phone. You can also install it as a PWA for quick access from your home screen. Most people who use it are on a phone, and the layout is built for that first. Request your data export from the Instagram app, download the ZIP from your email, then upload it here."
     }
   }
 }

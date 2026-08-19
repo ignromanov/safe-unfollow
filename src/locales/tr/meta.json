@@ -1,38 +1,38 @@
 {
-  "title": "Instagram Takipten Çıkanlar — Ücretsiz Giriş Yok | SafeUnfollow",
-  "description": "Instagram'da takipten çıkanları öğren, giriş yapmadan. ZIP yükle, hemen gör. %100 ücretsiz, gizli, 1M+ hesap. Çevrimdışı çalışır.",
-  "ogTitle": "Instagram Takipten Çıkanlar — Ücretsiz Giriş Yok",
-  "twitterDescription": "Instagram'da takipten çıkanları öğren, giriş yapmadan. ZIP yükle, hemen gör. %100 ücretsiz, 1M+ hesap. Çevrimdışı çalışır.",
-  "keywords": "instagram takipten çıkanlar, kim takibi bıraktı, takip analiz aracı, instagram zip analiz, giriş yapmadan takipçi kontrol, takipten çıkan izleyici",
+  "title": "Instagram takipten çıkanlar: ücretsiz, programsız, şifresiz",
+  "description": "Instagram'da takipten çıkanları şifresiz öğren. Resmi Instagram veri dışa aktarımını yükle: analiz tarayıcının içinde çalışır, dosya cihazdan çıkmaz. Ücretsiz.",
+  "ogTitle": "Instagram takipten çıkanlar: ücretsiz, programsız, şifresiz",
+  "twitterDescription": "Instagram'da takipten çıkanları şifresiz öğren. ZIP'ini yükle: analiz tarayıcının içinde çalışır ve dışa aktarım oradan hiç çıkmaz. Ücretsiz ve programsız.",
+  "keywords": "instagram takipten çıkanlar, kim takipten çıktı, takipten çıkanları görme, instagram zip analiz, şifresiz takipçi kontrol, programsız takip analizi",
   "routes": {
     "/upload": {
-      "title": "Instagram ZIP Yükle — Ücretsiz Analiz | SafeUnfollow",
-      "description": "Instagram veri dışa aktarımını (ZIP) yükle, ücretsiz analiz. %100 yerel işlem, giriş yok, 1M+ hesap.",
-      "ogTitle": "Instagram ZIP Yükle — Ücretsiz Analiz"
+      "title": "Instagram ZIP yükle: takipten çıkanları ücretsiz gör",
+      "description": "Instagram veri dışa aktarımını (ZIP) yükle, takipten çıkanları ücretsiz gör. Giriş yok, şifre yok: dosya tarayıcında okunur ve cihazından hiç çıkmaz.",
+      "ogTitle": "Instagram ZIP yükle: takipten çıkanları ücretsiz gör"
     },
     "/wizard": {
-      "title": "Instagram Verilerini JSON Olarak İndirme — Rehber | SafeUnfollow",
-      "description": "Instagram verilerinizi JSON formatında indirmek için adım adım rehber. Meta Hesap Merkezi'nden veri dışa aktarımını talep edin, güvenli analiz yapın.",
-      "ogTitle": "Instagram Verilerini JSON Olarak İndirme — Rehber"
+      "title": "Instagram verilerini JSON olarak indirme rehberi",
+      "description": "Instagram verilerini JSON formatında indirmek için adım adım rehber. Meta Hesaplar Merkezi'nden veri dışa aktarımını talep et, e-postana gelsin, buraya yükle.",
+      "ogTitle": "Instagram verilerini JSON olarak indirme rehberi"
     },
     "/sample": {
-      "title": "Instagram Unfollow Tracker'ı Dene — Ücretsiz Demo | SafeUnfollow",
-      "description": "Örnek verilerle Instagram Unfollow Tracker'ı dene. Rozetleri, filtreleri ve aramayı gör.",
-      "ogTitle": "Instagram Unfollow Tracker'ı Dene — Ücretsiz Demo"
+      "title": "Instagram Unfollow Tracker'ı dene: ücretsiz demo",
+      "description": "Örnek verilerle Instagram Unfollow Tracker'ı dene. Rozetlerin, filtrelerin ve aramanın nasıl çalıştığını gör, hiçbir dosya yüklemeden ve hesap açmadan.",
+      "ogTitle": "Instagram Unfollow Tracker'ı dene: ücretsiz demo"
     },
     "/privacy": {
-      "title": "Gizlilik Politikası — Verilerin Cihazından Çıkmaz | SafeUnfollow",
-      "description": "SafeUnfollow gizlilik politikası. %100 yerel işlem, veri toplama yok, izleme yok.",
-      "ogTitle": "Gizlilik Politikası — Verilerin Cihazından Çıkmaz"
+      "title": "Gizlilik Politikası: dışa aktarımın cihazından çıkmaz",
+      "description": "SafeUnfollow gizlilik politikası: bize ne ulaşıyor, ne ulaşmıyor. Instagram dışa aktarımın tarayıcının içinde okunur ve cihazından hiç çıkmaz.",
+      "ogTitle": "Gizlilik Politikası: dışa aktarımın cihazından çıkmaz"
     },
     "/results": {
-      "title": "Instagram Sonuçlarınız | SafeUnfollow",
-      "description": "Instagram takipten çıkma analiz sonuçlarınızı görüntüleyin. Rozetlere göre filtreleyin ve hesapları arayın.",
-      "ogTitle": "Instagram Takipten Çıkma Sonuçlarınız"
+      "title": "Instagram'da takipten çıkanlar: sonuçların",
+      "description": "Instagram takipten çıkanlar analizinin sonuçlarını incele. Rozetlere göre filtrele, hesaplarda ara ve seni kimin takipten çıkardığını gör.",
+      "ogTitle": "Instagram'da takipten çıkanlar: sonuçların"
     },
     "/terms": {
-      "title": "Hizmet Şartları | SafeUnfollow",
-      "description": "SafeUnfollow hizmet şartları. %100 yerel işleme ile ücretsiz, açık kaynaklı Instagram takip bırakma izleyicisi.",
+      "title": "Hizmet Şartları",
+      "description": "SafeUnfollow hizmet şartları. %100 yerel işleme ile ücretsiz, açık kaynaklı Instagram takipten çıkanlar izleyicisi.",
       "ogTitle": "Hizmet Şartları"
     }
   }

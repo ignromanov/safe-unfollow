@@ -29,7 +29,7 @@
     },
     "scale": {
       "title": "High Scale",
-      "description": "Handles 1M+ accounts at light speed"
+      "description": "Built for exports of 1,000,000+ accounts"
     },
     "openSource": {
       "title": "Open Source",
