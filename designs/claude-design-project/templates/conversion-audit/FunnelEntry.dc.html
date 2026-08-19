@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><style>body{margin:0;background:oklch(0.96 0.005 264)}a{color:oklch(0.6 0.18 264)}a:hover{color:oklch(0.5 0.18 264)}</style></helmet>
+<div class="max-w-5xl mx-auto px-6 py-12" style="font-family:'Inter',ui-sans-serif,system-ui;color:oklch(0.2 0.01 264)">
+<p class="text-xs font-black uppercase tracking-widest" style="color:oklch(0.6 0.18 264)"><a href="./ConversionAudit.dc.html">← Аудит</a> · Мокап 1</p>
+<h1 class="font-display font-extrabold tracking-tight text-3xl md:text-4xl mt-2 mb-3">Вход в воронку: первый шаг теряет 63,4%</h1>
+<p class="text-sm mb-10 rounded-2xl border p-4" style="border-color:oklch(0.92 0.01 264);background:white;max-width:44rem;line-height:1.6">Измерено 17.08 по Umami (21 д, 5% сэмпл): <span style="font-family:ui-monospace,monospace">wizard_step_view</span> шаг 1 → шаг 2 = 1 018 → 373, продолжают <b>36,6%</b>. Q1 подтверждён: меняем содержимое <b>первого шага /wizard</b>, шаги 2–8 сохраняем, таймлайн <span style="font-family:ui-monospace,monospace">HowToSection</span> на «/» не трогаем (schema.org/HowTo в каждом маршруте). Q13: <span style="font-family:ui-monospace,monospace">FormatQuiz</span> удаляется, ничего на его место не встаёт — drop-зона поднимается вверх.</p>
+
+<section id="hero" class="mb-14">
+<p class="text-sm font-bold mb-1">1A · Hero: второй путь становится кнопкой</p>
+<p class="text-sm mb-4" style="color:oklch(0.45 0.01 264);max-width:44rem;line-height:1.6">Часть тех, кто не продолжает, — люди, у которых ZIP уже есть: сейчас их путь — микро-ссылка капсом под CTA. Поднять до равноправной secondary-кнопки. Остальной hero не трогать.</p>
+<div class="rounded-3xl border bg-card p-8 text-center" style="border-color:oklch(0.92 0.01 264);width:100%;max-width:390px">
+<div class="flex flex-col gap-3">
+<button class="w-full px-8 py-4 rounded-3xl text-white font-bold text-base shadow-2xl shadow-primary/30" style="background:oklch(0.6 0.18 264)">Check Unfollowers Free →</button>
+<button class="w-full px-8 py-4 rounded-3xl border bg-card font-bold text-base" style="border-color:oklch(0.92 0.01 264)">⤒ I already have my ZIP file</button>
+<button class="w-full px-8 py-3 rounded-3xl font-bold text-sm bg-transparent border-0" style="color:oklch(0.55 0.01 264)">Try with Sample</button>
+</div></div>
+</section>
+
+<section id="guide" class="mb-14">
+<p class="text-sm font-bold mb-1">1B · Вход в гайд: одно действие вместо стены из 9 карточек</p>
+<p class="text-sm mb-4" style="color:oklch(0.45 0.01 264);max-width:44rem;line-height:1.6">Шаги 2 → 8: 373 → 299, шесть шагов вместе сохраняют 80% — то есть теряют меньше, чем один первый. Гайд работает, вход нет. Честная цена времени сверху, один CTA, рецепт-карта настроек, drop-зона для вернувшихся с письмом. Шаги с постерами открываются по одному, навигация свободная (данные показывают возвраты).</p>
+<div class="rounded-3xl border bg-card p-6" style="border-color:oklch(0.92 0.01 264);width:100%;max-width:390px">
+<h3 class="font-display font-extrabold tracking-tight text-2xl mb-2" style="line-height:1.15">Get your export from Instagram</h3>
+<p class="text-sm mb-1" style="color:oklch(0.45 0.01 264);line-height:1.55">Asking takes about 2 minutes. Instagram then emails the file — the wait is theirs, not ours.</p>
+<p class="text-xs mb-4" style="color:oklch(0.6 0.18 264);font-family:ui-monospace,monospace;line-height:1.45">Q6: без обещания потолка (5–30 мин было бы 4-й и самой оптимистичной копией факта) · два ключа timeCost.ours / .theirs, не «·»-строка</p>
+<button class="w-full px-6 rounded-3xl text-white font-bold text-base shadow-2xl shadow-primary/30" style="background:oklch(0.6 0.18 264);min-height:48px;touch-action:manipulation">Open Accounts Center →</button>
+<div class="mt-2 mb-4 space-y-1" style="font-size:13px;color:oklch(0.45 0.01 264);line-height:1.45">
+<p>No login. No password. Nothing to connect.</p>
+<p>Your export is read in this browser and never uploaded.</p>
+<p class="text-xs" style="color:oklch(0.6 0.18 264);font-family:ui-monospace,monospace">Q5: две реплики с CTR 50–100% из 9 карточек живут здесь · Q11: строка сокращена (без «Meta») — de/id влезают в 2 строки на 360px</p></div>
+<div class="rounded-2xl border p-4 mb-4 text-sm" style="border-color:oklch(0.92 0.01 264);background:oklch(0.98 0.005 264)">
+<p class="text-xs font-black uppercase tracking-widest mb-2" style="color:oklch(0.55 0.01 264)">Pick these 5 settings</p>
+<div class="space-y-1.5" style="line-height:1.5">
+<div>✓ Export to device</div><div>✓ Only «Followers and following»</div><div>✓ Date range: All time</div>
+<div class="rounded-lg px-2 py-1 font-bold" style="background:oklch(0.75 0.15 80 / 0.15);color:oklch(0.5 0.12 80);border:1px solid oklch(0.75 0.15 80 / 0.3)">⚠ Format: JSON — not HTML</div>
+<div>✓ Start export</div></div></div>
+<div class="rounded-2xl border mb-4" style="border-color:oklch(0.92 0.01 264)">
+<div class="flex items-center justify-between px-4" style="min-height:56px"><span class="text-xs font-black uppercase tracking-widest" style="color:oklch(0.6 0.18 264)">Step-by-step with screenshots (8)</span><span style="color:oklch(0.6 0.18 264)">›</span></div>
+<div class="px-4 pb-4"><div class="rounded-xl flex items-center justify-center text-xs" style="height:246px;background:oklch(0.96 0.005 264);color:oklch(0.55 0.01 264);font-family:ui-monospace,monospace">poster 4:3 · 328×246 (не 270) · img loading=lazy</div>
+<p class="text-xs mt-2" style="color:oklch(0.6 0.18 264);font-family:ui-monospace,monospace;line-height:1.45">Q16: аккордеон (один открыт), максимум один &lt;video&gt; в DOM — монтируется на открытие; закрытый = 56px, без video · Q3: заголовки шагов называют только действие, без значений настроек</p></div></div>
+<div class="rounded-2xl border-2 border-dashed p-5 text-center mb-3" style="border-color:oklch(0.85 0.03 264);min-height:88px">
+<p class="font-bold text-sm">Already got the email? Tap to choose your ZIP</p>
+<p class="text-xs mt-1" style="color:oklch(0.55 0.01 264);line-height:1.5">Check Downloads or your Files app. Read in your browser — never uploaded.</p></div>
+<button class="w-full rounded-2xl font-bold text-xs bg-transparent border-0" style="color:oklch(0.55 0.01 264);min-height:44px">Try with sample while you wait</button>
+<div class="mt-4 rounded-2xl px-4 py-3 text-xs" style="background:oklch(0.6 0.18 264 / 0.08);color:oklch(0.5 0.15 264);font-family:ui-monospace,monospace;line-height:1.5"><b>Q4 · одна панель, не две.</b> Bottom-nav визарда (<span style="font-family:ui-monospace,monospace">Wizard.tsx:212</span>) — <b>не</b> fixed и не sticky: это <span style="font-family:ui-monospace,monospace">shrink-0</span>-сосед скроллера в flex-колонке, высота интринсик ≈66px + safe-area. Пока in-flow CTA в вьюпорте — обычная навигация шага; когда CTA ушёл за экран — primary-слот меняет подпись на «Open Accounts Center», secondary = «Try with sample». Никогда два primary. Подпись меняется на одном контроле, поэтому раскладка не двигается. Нижний паддинг скроллеру <b>не нужен</b> (04-* C1: под панелью ничего не скроллится).<br><b>Q2:</b> это «cut»-версия (5 блоков ≈588px); отдельная кнопка sample убрана в secondary-слот панели. Фолд на 604px попадает внутрь рецепт-карты — режется справочный блок, первая строка видна.</div>
+</div>
+</section>
+
+<section id="error">
+<p class="text-sm font-bold mb-1">1C · Ошибка формата: парсер говорит, а не спрашивает</p>
+<p class="text-sm mb-4" style="color:oklch(0.45 0.01 264);max-width:44rem;line-height:1.6"><span style="font-family:ui-monospace,monospace">upload_error_html_format</span> — 879 событий за 14 д (≈63/день). Квиз решает 2,2%: 79,8% отвечают «json», держа HTML. Парсер знает, что получил, — экран называет причину и один следующий шаг. Янтарная система, не destructive.</p>
+<div class="rounded-3xl border bg-card p-6" style="border-color:oklch(0.92 0.01 264);width:100%;max-width:390px">
+<div class="rounded-2xl border p-4 mb-4" style="border-color:oklch(0.75 0.15 80 / 0.35);background:oklch(0.75 0.15 80 / 0.1)">
+<p class="font-bold text-sm" style="color:oklch(0.45 0.1 80)">Your file is the <span dir="ltr">HTML</span> export</p>
+<p class="text-sm mt-1" style="color:oklch(0.45 0.08 80);line-height:1.5">Instagram's dialog defaults to <span dir="ltr">HTML</span> — it's one radio button. Re-run the export with the format set to <span dir="ltr">JSON</span> and it will work.</p></div>
+<button class="w-full px-6 rounded-3xl text-white font-bold text-sm shadow-xl mb-2" style="background:oklch(0.6 0.18 264);min-height:48px">Re-export as <span dir="ltr">JSON</span> — open the settings step</button>
+<button class="w-full px-6 rounded-3xl border bg-card font-bold text-sm" style="border-color:oklch(0.92 0.01 264);min-height:44px">Choose a different file</button>
+<p class="text-xs mt-3" style="color:oklch(0.5 0.15 264);font-family:ui-monospace,monospace;line-height:1.5">оба контрола уже существуют (<span style="font-family:ui-monospace,monospace">DiagnosticErrorScreen.tsx:141-161</span>): это <b>переименование и обмен весами</b> — <span style="font-family:ui-monospace,monospace">showMistakes</span> становится primary, <span style="font-family:ui-monospace,monospace">tryAgain</span> → «Choose a different file». Новых кнопок нет · tone — <b>Set кодов</b> в <span style="font-family:ui-monospace,monospace">diagnostic-utils.tsx</span>, не поле на DiagnosticError (единственное место чтения severity — getColorScheme; поле стоило бы копии в 10 локалях) · HTML_FORMAT остаётся severity:'error', иначе экран перестанет рендериться для 18,7% загрузок · named anchors отозваны: id шагов численные (URL — источник истины, 80 пререндеренных страниц), меняется <b>назначение по коду ошибки</b>, а не схема URL · latin-токены в dir="ltr" для ar</p>
+<div class="rounded-2xl border p-4 mt-4" style="border-color:oklch(0.6 0.2 20 / 0.35);background:oklch(0.6 0.2 20 / 0.08)">
+<p class="font-bold text-sm" style="color:oklch(0.48 0.18 20)">This isn't an Instagram export</p>
+<p class="text-sm mt-1" style="color:oklch(0.48 0.15 20);line-height:1.5">The <span dir="ltr">ZIP</span> has no followers data in it. Nothing here can be fixed — request a new export.</p>
+<p class="text-xs mt-2" style="color:oklch(0.48 0.15 20);font-family:ui-monospace,monospace">tone: 'fatal' (rose) — Q12: пара amber/rose, чтобы цвет нёс информацию</p></div>
+</div>
+</section>
+</div>
+</x-dc>
+</body>
+</html>

@@ -116,8 +116,10 @@ src/__tests__/**/*.js
 # Local development data (keep raw/ for development)
 raw/
 
-# Design folders (experimental designs)
-designs/
+# Design folders (experimental designs) — ignore contents, not the dir, so the
+# Claude Design backup can be tracked without -f (it was force-added before).
+designs/*
+!designs/claude-design-project/
 
 # Scripts folders (ignore contents, not the dir — so specific files can be un-ignored)
 scripts/*
