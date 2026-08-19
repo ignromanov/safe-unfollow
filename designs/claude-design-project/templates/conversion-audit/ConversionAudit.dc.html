@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="Conversion Audit — 2026-08" description="UX/CRO аудит SafeUnfollow по измеренной воронке + мокапы изменений" -->
+<helmet><script src="./ds-base.js"></script><style>body{margin:0;background:oklch(0.99 0.005 264)}a{color:oklch(0.6 0.18 264)}a:hover{color:oklch(0.5 0.18 264)}</style></helmet>
+<div class="max-w-3xl mx-auto px-6 py-14" style="font-family:'Inter',ui-sans-serif,system-ui;color:oklch(0.2 0.01 264)">
+<p class="text-xs font-black uppercase tracking-widest" style="color:oklch(0.6 0.18 264)">SafeUnfollow · UX/CRO аудит · 17.08.2026</p>
+<h1 class="font-display font-extrabold tracking-tight text-4xl md:text-5xl mt-3 mb-4" style="line-height:1.1">Куда уходит воронка — и что менять в дизайне</h1>
+<p class="text-lg font-medium" style="color:oklch(0.45 0.01 264);line-height:1.6">По данным <em>design-conversion-brief</em> и <em>conversion-funnel-measurement</em> (219 370 событий, 24.07–17.08, ~1 060 сессий/день, 87,5% mobile, en 80,3% / id 16,2%). Приоритет — по измеренным потерям, а не по заметности экрана. Режим: максимум конверсии в рамках конституции продукта.</p>
+<div class="mt-6 rounded-3xl border p-5 text-sm" style="border-color:oklch(0.92 0.01 264);background:white;line-height:1.6">
+<span class="font-bold">Мокапы:</span> <a href="./FunnelEntry.dc.html">1 · Вход в воронку</a> · <a href="./ResultsMockup.dc.html">2 · Results</a> · <a href="./PaywallCheckout.dc.html">3 · Paywall и checkout</a>
+</div>
+
+<h2 class="font-display font-extrabold tracking-tight text-2xl mt-12 mb-4">Резюме</h2>
+<ul class="space-y-2 text-base" style="line-height:1.6;padding-inline-start:1.2rem">
+<li>Воронка стабильна месяц: landing → успешная загрузка <b>23,95%</b>. Ничего не «сломалось недавно» — потери структурные.</li>
+<li>Весь измеренный доход — реклама, <b>~$4,9/мес</b>. Продаж $7-экспорта у реальных людей — <b>ноль</b> (единственная покупка — тест владельца).</li>
+<li>Потеря одна, и она на первом шаге: <span style="font-family:ui-monospace,monospace">wizard_step_view</span> 1→2 = <b>1 018 → 373</b> (продолжают 36,6%). Шесть последующих шагов вместе — 373 → 299 (<b>80%</b>), то есть теряют меньше, чем один первый. Измерено 17.08, 21 д, 5% сэмпл.</li>
+<li>Индонезия — <b>~22% сессий и 26,8% pageviews</b>, коммерческий центр (3 из 6 попыток оплаты) и хуже всех обслуживаемый рынок (upload success 80,9% против 90,4% у США). Цифра «2,6× runtime-ошибок» <b>не имеет источника в наших данных</b> — проект не эмитит события runtime-ошибок; работу по id нельзя обосновывать ей, пока источник не назван.</li>
+</ul>
+
+<h2 class="font-display font-extrabold tracking-tight text-2xl mt-12 mb-4">Приоритеты по измеренной потере</h2>
+<div class="rounded-3xl border overflow-hidden" style="border-color:oklch(0.92 0.01 264);background:white">
+<table class="w-full text-sm" style="border-collapse:collapse">
+<thead><tr class="text-xs font-black uppercase tracking-widest text-start" style="color:oklch(0.55 0.01 264)"><th class="p-4 text-start">#</th><th class="p-4 text-start">Потеря</th><th class="p-4 text-start">Величина</th><th class="p-4 text-start">Мокап</th></tr></thead>
+<tbody style="line-height:1.5">
+<tr style="border-top:1px solid oklch(0.94 0.005 264)"><td class="p-4 font-black">1</td><td class="p-4">Первый шаг гайда: стена из 9 карточек, люди уходят до старта</td><td class="p-4 font-bold" style="color:oklch(0.55 0.22 25)">−63,4%<br><span class="text-xs font-normal" style="color:oklch(0.55 0.01 264)">1 018 → 373</span></td><td class="p-4"><a href="./FunnelEntry.dc.html#guide">1B</a></td></tr>
+<tr style="border-top:1px solid oklch(0.94 0.005 264)"><td class="p-4 font-black">2</td><td class="p-4">Hero CTA → клик по загрузке: 6 из 10 выразивших намерение не доходят до файла</td><td class="p-4 font-bold" style="color:oklch(0.55 0.22 25)">39,7%<br><span class="text-xs font-normal" style="color:oklch(0.55 0.01 264)">измерено до починки транспорта навигационных кликов — не сравнивать с «после»</span></td><td class="p-4"><a href="./FunnelEntry.dc.html#hero">1A</a></td></tr>
+<tr style="border-top:1px solid oklch(0.94 0.005 264)"><td class="p-4 font-black">3</td><td class="p-4">HTML вместо JSON: квиз спрашивает — надо детектировать</td><td class="p-4 font-bold" style="color:oklch(0.55 0.22 25)">18,7% попыток<br><span class="text-xs font-normal" style="color:oklch(0.55 0.01 264)">879 за 14 д ≈ 63/день</span></td><td class="p-4"><a href="./FunnelEntry.dc.html#error">1C</a></td></tr>
+<tr style="border-top:1px solid oklch(0.94 0.005 264)"><td class="p-4 font-black">4</td><td class="p-4">CLS 1,00 (p75) на /results — единственной странице, куда попадает каждый успешный пользователь</td><td class="p-4 font-bold" style="color:oklch(0.55 0.22 25)">10× порога</td><td class="p-4"><a href="./ResultsMockup.dc.html">2A</a></td></tr>
+<tr style="border-top:1px solid oklch(0.94 0.005 264)"><td class="p-4 font-black">5</td><td class="p-4">Кнопка checkout не подтверждает нажатие (2 из 6 жмут повторно через 1,0–1,3 с)</td><td class="p-4 font-bold" style="color:oklch(0.55 0.22 25)">189 → 20 → 1<br><span class="text-xs font-normal" style="color:oklch(0.55 0.01 264)">paywall_view → checkout_start → purchase_success, 14 д</span></td><td class="p-4"><a href="./PaywallCheckout.dc.html">3A</a></td></tr>
+<tr style="border-top:1px solid oklch(0.94 0.005 264)"><td class="p-4 font-black">6</td><td class="p-4">Индонезия без паритета качества при максимальной коммерческой вовлечённости</td><td class="p-4 font-bold" style="color:oklch(0.55 0.22 25)">−10 п.п. upload</td><td class="p-4">сквозное</td></tr>
+</tbody></table></div>
+
+<h2 class="font-display font-extrabold tracking-tight text-2xl mt-12 mb-3">1 · Вход в воронку — самая дорогая правка</h2>
+<p class="text-base mb-3" style="line-height:1.65"><b>Данные.</b> Landing→CTA — 70% (здорово). Дальше двойной обрыв: CTA→upload 39,7%, а внутри гайда шаг 1→2 оставляет 36,6% (1 018 → 373), при том что шаги 2 → 8 сохраняют 80% (373 → 299) на шести шагах. Диагноз тот же с двух сторон: <b>вход в гайд, а не гайд</b>. Индонезийцы проходят гайд лучше англоязычных (36,1% vs 28,0%) — дело не в понимании текста. Счётчик шагов немонотонен: люди ходят назад.</p>
+<p class="text-base mb-2" style="line-height:1.65"><b>Изменения</b> (<a href="./FunnelEntry.dc.html">мокап 1</a>):</p>
+<ul class="space-y-2 text-base" style="line-height:1.6;padding-inline-start:1.2rem">
+<li><b>1A.</b> В hero поднять путь «файл уже есть» из микро-ссылки до равноправной secondary-кнопки с иконкой загрузки. Остальной above-the-fold не трогать — его поисковая эффективность измерена и работает.</li>
+<li><b>1B.</b> Заменить стену из 9 карточек экраном одного действия: честная цена времени («~2 минуты на запрос, письмо от Instagram через 5–30 минут»), один primary CTA «Open Meta Accounts Center», компактная рецепт-карта из 5 настроек (JSON выделен янтарным), постоянная drop-зона «письмо уже пришло?» и «Try with sample» на время ожидания. Шаги с постерами — по одному, со свободной навигацией назад/вперёд (данные показывают возвраты).</li>
+<li><b>1C.</b> Ошибку формата ключевать от парсера, а не от опроса: квиз решает 2,2%, потому что 79,8% отвечают «json», держа в руках HTML (879 ошибок формата за 14 дней, ≈63/день). Парсер точно знает, что получил, — экран говорит «ваш файл — HTML-экспорт» и ведёт на шаг настроек. Реализация — <b>переименование двух существующих кнопок и обмен весами</b>: «Show Where I Went Wrong» становится primary, «Try Again» → «Choose a different file»; новых контролов нет, а назначение deep link варьируется по коду ошибки (номера шагов в URL остаются).</li>
+</ul>
+<p class="text-sm mt-3 rounded-2xl border p-4" style="border-color:oklch(0.92 0.01 264);background:white;line-height:1.6"><b>Как проверить:</b> шаг 1→2 гайда (5% сэмпл — сравнивать только шаг-к-шагу), CTA→upload, доля ошибок формата от попыток парсинга, доля «fixed» после ошибки (сейчас 2,2%).</p>
+
+<h2 class="font-display font-extrabold tracking-tight text-2xl mt-12 mb-3">2 · Results: стабильность, две категории, поиск</h2>
+<p class="text-base mb-2" style="line-height:1.65"><b>Данные.</b> CLS p75 = 1,00 на обеих платформах; про фикс 6–7.08 доказуемо лишь то, что он <b>не подтверждён</b> (n=30 против n=11). Реальное поведение: Following 94,4% и Not following back 87,9% — две категории несут всю вовлечённость. Медианный установившийся поисковый запрос возвращает <b>ноль совпадений</b>. Медиана времени на странице — 23 секунды (mobile).</p>
+<ul class="space-y-2 text-base" style="line-height:1.6;padding-inline-start:1.2rem">
+<li><b>2A.</b> Дизайн-правило «каждый асинхронный блок резервирует свой бокс»: фиксированные высоты стат-карт; строки списка уже дают ноль CLS — 92px это <b>навязанный</b> бокс (<span style="font-family:ui-monospace,monospace">estimateSize: 92</span> без <span style="font-family:ui-monospace,monospace">measureElement</span>), поэтому менять его в рамках CLS-работы не нужно; скелет обязан совпадать с рядом на обоих брейкпоинтах (px-5 md:px-8 py-4 md:py-6, w-11 h-11 md:w-16 md:h-16). Рекламный слот с постоянной рамкой и подписью Advertisement независимо от заполнения, скелет той же геометрии, что данные. Это дизайн-спека для инженерного фикса CLS.</li>
+<li><b>2B.</b> Две рабочие категории — на первый план (быстрые табы над списком), остальные девять — во «все фильтры». Осторожно: filter_toggle сэмплирован на 3%, наблюдаемые 9,4% — пол, реальное использование может быть почти всеобщим. <b>Сначала поднять sampling, потом перестраивать сайдбар.</b></li>
+<li><b>2C.</b> Поиск: нормализовать «@», пробелы и точки, показывать частичные совпадения; пустой результат объясняет, по чему ищем, и предлагает сброс. Половина поисков по собственному списку не должна кончаться ничем.</li>
+</ul>
+<p class="text-sm mt-3 rounded-2xl border p-4" style="border-color:oklch(0.92 0.01 264);background:white;line-height:1.6"><b>Как проверить:</b> web-vitals CLS на /results до/после; доля пустых settled-запросов; time-on-results (после 15.08 транспорт починен — сравнивать только новые окна).</p>
+
+<h2 class="font-display font-extrabold tracking-tight text-2xl mt-12 mb-3">3 · Paywall и checkout: сначала отклик, потом копирайт</h2>
+<p class="text-base mb-2" style="line-height:1.65"><b>Данные.</b> За 14 дней: 189 показов пейволла → 20 <span style="font-family:ui-monospace,monospace">checkout_start</span> → 1 покупка (тест владельца). Ноль из шести — это не 0% (верхняя граница ~39%), но 2 из 6 жмут повторно через 1,0–1,3 с — подпись кнопки, не подтверждающей нажатие. У пейволл-событий нет ни одного измерения (локаль, число строк) — тюнинг вслепую невозможен.</p>
+<ul class="space-y-2 text-base" style="line-height:1.6;padding-inline-start:1.2rem">
+<li><b>3A.</b> Состояния кнопки: мгновенный переход в «Opening checkout…» со спиннером и блокировкой (без слова «secure»), затем явное «вы переходите на страницу оплаты» и восстановление по таймауту 8 с. Дешевле всего в документе — и пока не сделано, всё нижестоящее неизмеримо.</li>
+<li><b>3B.</b> Пейволл — ценность первой строкой («Your selection is ready to export — 8 930 rows»; «full list is ready» было неправдой — файл генерируется после оплаты), напоминание о уже выданном бесплатном образце, сравнение «$5–10/мес у трекеров — здесь $7 один раз за файл» (один раз, фактами). Цена — на пейволле, не на кнопке (закрытый вопрос).</li>
+<li><b>3C.</b> Индонезия — 3 из 6 попыток оплаты, но <b>рупий в интерфейсе нет</b>: хардкод курса при CSP-запрете рантайм-запроса и уже отгруженном втором курсе в <span style="font-family:ui-monospace,monospace">id/faq.json</span> — ложь с датой поставки. Локальная цена приходит только с локализованного экрана процессора. Проверка 17.08: сессии создаются, потеря — брошенная корзина на стороне процессора, поэтому последний наш экран перед редиректом (мокап 3) — единственная управляемая поверхность.</li>
+</ul>
+<p class="text-sm mt-3 rounded-2xl border p-4" style="border-color:oklch(0.92 0.01 264);background:white;line-height:1.6"><b>Перед любой правкой пейволла:</b> один логин в дашборд процессора — сколько checkout-сессий создано с 8.08. Если 0 — кнопка никого не отправляла и разговор о цене преждевременен. Плюс: добавить измерения к пейволл-событиям.</p>
+
+<h2 class="font-display font-extrabold tracking-tight text-2xl mt-12 mb-3">4 · Монетизация: чинить измерение, не множить поверхности</h2>
+<ul class="space-y-2 text-base" style="line-height:1.6;padding-inline-start:1.2rem">
+<li><b>Донат-карта:</b> 4 087 показов → 12 кликов (0,29%) за 14 дней — обработчики живы, так что перед любым редизайном вопрос один: терпима ли эта цифра. Текущая тихая подача соответствует trust-бюджету — не усиливать.</li>
+<li><b>Реклама:</b> viewable-показы есть только на /results; юниты лендинга и гайда мертвы по viewability — убрать их (меньше DOM, чище CLS), плотность на /results уже 26,4% при пороге 30% — третьего юнита не будет. Клики/доход живут только в консоли Google — из продуктовых данных это не оценить.</li>
+<li><b>Аффилиаты:</b> 22 клика за всё время, все на странице загрузки — место выбрано верно (момент ожидания письма). Нет события показа → CTR неизмерим; добавить impression-событие до любых редизайнов блока.</li>
+<li><b>Rescue-план:</b> отключён, счётчик мёртв с 7.08 — не проектировать вслепую (закрытый вопрос).</li>
+</ul>
+
+<h2 class="font-display font-extrabold tracking-tight text-2xl mt-12 mb-3">5 · Индонезия — сквозной аудит, не отдельный экран</h2>
+<ul class="space-y-2 text-base" style="line-height:1.6;padding-inline-start:1.2rem">
+<li>Визуальный аудит id-локали никогда не проводился — начать с него. Но <b>заблокировано на предпосылке</b>: «2,6× runtime-ошибок» не выводится из наших событий (их нет), так что источник надо назвать или снять пункт. Отдельно от предпосылки живёт реальный дефект: <span style="font-family:ui-monospace,monospace">ErrorBoundary.tsx:113</span> уходит на <span style="font-family:ui-monospace,monospace">/</span> и теряет префикс локали — индонезийский читатель после ошибки попадает на английскую главную.</li>
+<li>Гайд-контент проверить на индонезийском UI Meta: скриншоты шагов сняты с английского интерфейса — у половины аудитории диалог выглядит иначе.</li>
+<li>Upload success 80,9% против 90,4% — проверить гипотезу «телефонные файловые менеджеры»: iOS/Android-подсказки где лежит скачанный ZIP уже в роадмапе v1.6, для id-рынка это приоритет №1.</li>
+</ul>
+
+<h2 class="font-display font-extrabold tracking-tight text-2xl mt-12 mb-3">6 · Мобильный разрез: 85% сессий — телефон</h2>
+<p class="text-base mb-2" style="line-height:1.65">Мобильный контракт продукта (44px цели и ≥8px между ними, 48px инпуты и primary-кнопки `w-full`, инпуты ≥16px против iOS-зума, `dvh` вместо `vh`, строки списка 92px, `hidden sm:inline` вместо усечения, safe-area снизу; проектируем на 360×640) действует для всех правок ниже. Мобайл-специфичные находки поверх него:</p>
+<ul class="space-y-2 text-base" style="line-height:1.6;padding-inline-start:1.2rem">
+<li><b>Drag-and-drop — десктопная метафора.</b> На телефоне зона «Drop your ZIP here» — это кнопка выбора файла. Подпись должна вести к файлу: «Tap to choose — check Downloads / Files». Подсказки, где лежит скачанный ZIP (iOS Files, Android Downloads), уже в роадмапе v1.6 — для Индонезии и Индии (−10 п.п. upload success) это правка №1.</li>
+<li><b>Гайд-стена хуже всего на телефоне:</b> 9 карточек = 6–7 экранов скролла до кнопки действия. Вход одним экраном (мокап 1B) с primary CTA в зоне большого пальца — sticky-низ с safe-area.</li>
+<li><b>Пейволл на мобиле — bottom sheet,</b> не центрированный диалог: закрытие свайпом/«Not now» в зоне пальца, кнопка оплаты — нижняя, `w-full`, 48px (мокап 3).</li>
+<li><b>CLS 1,00 измерен на мобиле</b> (n=41): прыжки layout при 23 секундах медианного визита — пользователь промахивается по фильтрам. Резервирование боксов (мокап 2A) — прежде всего мобильная правка.</li>
+<li><b>Поиск с клавиатурой:</b> инпут 48px, sticky над списком (есть), пустой результат не должен прятаться под клавиатурой — совпадения показывать над ней.</li>
+</ul>
+<h2 class="font-display font-extrabold tracking-tight text-2xl mt-12 mb-3">Что сознательно не трогаем</h2>
+<p class="text-base" style="line-height:1.65">Закрытые измерением вопросы (§8 брифа): rescue-баннер, второй рекламный юнит на лендинге, гео-блок рекламы в Европе, укорачивание тайтлов, charm-pricing $6,99, цена на кнопке экспорта. Плюс лендинг above-the-fold: его поисковая конверсия измерена (8,44%), правки несут реальный даунсайд. Контраст primary/accent — уже исправлен и смержен 10.08.</p>
+
+<h2 class="font-display font-extrabold tracking-tight text-2xl mt-12 mb-3">Предпосылки измеримости (до/вместе с редизайном)</h2>
+<ul class="space-y-2 text-base" style="line-height:1.6;padding-inline-start:1.2rem">
+<li>Дашборд платёжного процессора: создавались ли checkout-сессии с 8.08.</li>
+<li>Мёртвые с 7.08 счётчики <span style="font-family:ui-monospace,monospace;font-size:0.9em">ad_slot_rendered</span> и <span style="font-family:ui-monospace,monospace;font-size:0.9em">rescue_plan_impression</span>.</li>
+<li>Поднять sampling <span style="font-family:ui-monospace,monospace;font-size:0.9em">filter_toggle</span> (3%) до правок фильтров.</li>
+<li>Проверить обработчики <span style="font-family:ui-monospace,monospace;font-size:0.9em">donation_card_click</span>.</li>
+<li>Измерения (локаль, число строк) на пейволл-событиях.</li>
+<li>Шесть событий с починенным 14.08 транспортом сравнивать только по окнам после 15.08 (потеря была 45–50%).</li>
+</ul>
+<p class="mt-10 text-xs font-bold uppercase tracking-widest" style="color:oklch(0.55 0.01 264)">Мокапы: <a href="./FunnelEntry.dc.html">1 · Вход в воронку</a> · <a href="./ResultsMockup.dc.html">2 · Results</a> · <a href="./PaywallCheckout.dc.html">3 · Paywall</a></p>
+</div>
+</x-dc>
+</body>
+</html>

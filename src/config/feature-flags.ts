@@ -9,7 +9,11 @@
 /**
  * The rescue-plan banner.
  *
- * Off since 2026-07-29. It was the third promo surface between the visitor's
+ * Off since 2026-08-06 (commit `031b2be`, which moved the flag into
+ * `AccountListSection`). This said 2026-07-29 until 2026-08-17; analytics recorded
+ * 173-341 `rescue_plan_impression` events a day right up to and including 6 Aug,
+ * so the earlier date attributed a week of live traffic to a surface it claimed
+ * was already dark. It was the third promo surface between the visitor's
  * stats and the account list they came for, and AdSense is now the primary
  * surface — so it yields its grid slot to the ad. Component, hooks, i18n and its
  * four affiliate links are all retained: flip this back to `true` to restore it.

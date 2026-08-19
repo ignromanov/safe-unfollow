@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><style>body{margin:0;background:oklch(0.96 0.005 264)}a{color:oklch(0.6 0.18 264)}a:hover{color:oklch(0.5 0.18 264)}</style></helmet>
+<div class="max-w-5xl mx-auto px-6 py-12" style="font-family:'Inter',ui-sans-serif,system-ui;color:oklch(0.2 0.01 264)">
+<p class="text-xs font-black uppercase tracking-widest" style="color:oklch(0.6 0.18 264)"><a href="./ConversionAudit.dc.html">← Аудит</a> · Мокап 2</p>
+<h1 class="font-display font-extrabold tracking-tight text-3xl md:text-4xl mt-2 mb-10">Results: CLS 1,00 → каждый блок резервирует бокс</h1>
+
+<section class="mb-14">
+<p class="text-sm font-bold mb-1">2A · Правило резервирования (спека для CLS-фикса)</p>
+<p class="text-sm mb-4" style="color:oklch(0.45 0.01 264);max-width:44rem;line-height:1.6">Уточнено по аудиту премисс: «фикс не сработал» недоказуемо (n=30 vs n=11) — известно лишь, что доля poor 48,8% (CI 34,3–63,5%, n=41). Целимся не в сдвиг распределения, а в <b>гонку, срабатывающую иногда</b>. Строки списка дают ноль CLS уже сейчас (<span style="font-family:ui-monospace,monospace">estimateSize: 92</span> — фиксированная, не оценка). Реальная гонка — <span style="font-family:ui-monospace,monospace">FollowRequestsCaveat</span> (IndexedDB после первой краски, только у части файлов): резервировать её бокс всегда. Постоянная рамка рекламы — <b>визуальное</b> решение, не критерий CLS (высота уже зарезервирована через minHeight).</p>
+<div class="rounded-3xl border bg-card p-5" style="border-color:oklch(0.92 0.01 264);width:100%;max-width:390px">
+<div class="grid grid-cols-2 gap-3 mb-3">
+<div class="rounded-3xl border p-4" style="border-color:oklch(0.92 0.01 264);height:104px"><div class="font-display font-black text-2xl">4,820</div><div class="text-xs font-black uppercase tracking-widest" style="color:oklch(0.65 0.01 264)">Followers</div><div class="text-xs mt-1" style="color:oklch(0.6 0.18 264);font-family:ui-monospace,monospace">h:104 fixed</div></div>
+<div class="rounded-3xl border p-4" style="border-color:oklch(0.92 0.01 264);height:104px;background:oklch(0.98 0.005 264)"><div class="rounded-lg mb-2" style="height:24px;width:60%;background:oklch(0.93 0.005 264)"></div><div class="rounded-lg" style="height:10px;width:80%;background:oklch(0.93 0.005 264)"></div><div class="text-xs mt-2" style="color:oklch(0.6 0.18 264);font-family:ui-monospace,monospace">skeleton = same box</div></div>
+</div>
+<div class="rounded-2xl border flex flex-col items-center justify-center mb-3" style="border-color:oklch(0.92 0.01 264);height:120px;background:oklch(0.98 0.005 264)">
+<p class="text-xs font-black uppercase tracking-widest" style="color:oklch(0.7 0.01 264)">Advertisement</p>
+<p class="text-xs mt-1" style="color:oklch(0.6 0.18 264);font-family:ui-monospace,monospace">ветка «слот не заполнился»: высота + подпись остаются, больше ничего</p></div>
+<div class="rounded-2xl border overflow-hidden" style="border-color:oklch(0.92 0.01 264)">
+<div class="flex items-center gap-3 px-5 py-4" style="height:92px;border-bottom:1px solid oklch(0.94 0.005 264)"><div class="rounded-2xl" style="width:44px;height:44px;background:oklch(0.94 0.005 264)"></div><div><div class="font-display font-bold">@traveler_anna</div><div class="text-xs mt-1" style="color:oklch(0.55 0.01 264)">Not following back</div></div></div>
+<div class="flex items-center gap-3 px-5 py-4" style="height:92px"><div class="rounded-2xl" style="width:44px;height:44px;background:oklch(0.94 0.005 264)"></div><div class="text-xs" style="color:oklch(0.6 0.18 264);font-family:ui-monospace,monospace">92px — <b>навязанный</b> бокс (estimateSize: 92 без measureElement), не измеренная высота → нулевой CLS уже сейчас · скелет — геометрический двойник на обоих брейкпоинтах: px-5 md:px-8 py-4 md:py-6, w-11 h-11 md:w-16 md:h-16 · отдельный дефект: контент AccountItem на desktop выходит из бокса на ~20px (перекрытие, не CLS) — своя задача</div></div>
+</div></div>
+</section>
+
+<section class="mb-14">
+<p class="text-sm font-bold mb-1">2B · Две категории несут всё — быстрые табы</p>
+<p class="text-sm mb-4" style="color:oklch(0.45 0.01 264);max-width:44rem;line-height:1.6">Following 94,4% и Not following back 87,9% кликов; остальные девять — <b>после</b> поднятия sampling filter_toggle (сейчас 3%, наблюдаемое — только пол).</p>
+<div class="rounded-3xl border bg-card p-5" style="border-color:oklch(0.92 0.01 264);width:100%;max-width:390px">
+<div class="flex gap-2 mb-3">
+<button class="flex-1 px-3 py-3 rounded-2xl text-white font-bold text-xs" style="background:oklch(0.6 0.18 264)">Following · 3,110</button>
+<button class="flex-1 px-3 py-3 rounded-2xl border font-bold text-xs" style="border-color:oklch(0.92 0.01 264)">Not following back · 612</button>
+</div>
+<button class="w-full px-3 rounded-2xl border font-bold text-xs" style="border-color:oklch(0.92 0.01 264);color:oklch(0.55 0.01 264);min-height:44px">All filters (9) ▾</button>
+<p class="text-xs mt-3" style="color:oklch(0.5 0.15 264);font-family:ui-monospace,monospace">mobile (85% аудитории, проектируем на 360×640): табы ≥44px и ≥8px между целями, весь ряд в зоне пальца над списком; сайдбар остаётся на md+ · motion-reduce не добавляем — reduced motion уже глобален (styles.css:221), а touch снимает hover:scale (:229)</p>
+</div>
+</section>
+
+<section>
+<p class="text-sm font-bold mb-1">2C · Поиск: медианный запрос сейчас находит ноль</p>
+<p class="text-sm mb-4" style="color:oklch(0.45 0.01 264);max-width:44rem;line-height:1.6">Нормализовать «@», точки и пробелы; показывать частичные совпадения; пустой результат объясняет и предлагает выход.</p>
+<div class="rounded-3xl border bg-card p-5" style="border-color:oklch(0.92 0.01 264);width:100%;max-width:390px">
+<div class="rounded-2xl border px-4 py-3 font-semibold text-sm mb-3" style="border-color:oklch(0.92 0.01 264)">🔍 @Traveler Anna</div>
+<p class="text-xs mb-2" style="color:oklch(0.6 0.18 264);font-family:ui-monospace,monospace">normalize → "traveleranna" → partial match</p>
+<div class="rounded-2xl border p-4 text-center" style="border-color:oklch(0.92 0.01 264);background:oklch(0.98 0.005 264)">
+<p class="font-bold text-sm">Closest match: @traveler_anna</p>
+<p class="text-xs mt-1" style="color:oklch(0.55 0.01 264);line-height:1.5">Search matches usernames only — not display names. <a href="#">Reset search</a></p></div>
+<p class="text-xs mt-3" style="color:oklch(0.5 0.15 264);font-family:ui-monospace,monospace;line-height:1.5">input ≥16px (iOS zoom) · 48px высота · list card max-h-[65dvh] (dvh, не vh) · совпадения над клавиатурой</p>
+</div>
+</section>
+</div>
+</x-dc>
+</body>
+</html>
