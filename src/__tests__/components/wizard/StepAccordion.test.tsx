@@ -34,11 +34,13 @@ describe('StepAccordion', () => {
 
   it('reserves each poster box before the image loads', async () => {
     const user = userEvent.setup();
-    render(<StepAccordion />);
+    const { container } = render(<StepAccordion />);
 
     await user.click(screen.getByRole('button', { name: /step-by-step/i }));
 
-    const poster = screen.getAllByRole('img')[0];
+    // Queried by tag, not by role: the posters are decorative (alt=""), which
+    // is exactly what takes them out of the accessibility tree.
+    const poster = container.querySelectorAll('img')[0]!;
     expect(poster).toHaveAttribute('loading', 'lazy');
     expect(poster).toHaveAttribute('width');
     expect(poster).toHaveAttribute('height');
@@ -46,11 +48,11 @@ describe('StepAccordion', () => {
 
   it("reserves step 2's poster box from its own 5:3 intrinsic size, not the 4:3 default", async () => {
     const user = userEvent.setup();
-    render(<StepAccordion />);
+    const { container } = render(<StepAccordion />);
 
     await user.click(screen.getByRole('button', { name: /step-by-step/i }));
 
-    const [step2Poster, step3Poster] = screen.getAllByRole('img');
+    const [step2Poster, step3Poster] = container.querySelectorAll('img');
     expect(step2Poster).toHaveAttribute('width', '600');
     expect(step2Poster).toHaveAttribute('height', '360');
     expect(step3Poster).toHaveAttribute('width', '600');
@@ -103,5 +105,9 @@ describe('StepAccordion', () => {
 
     const firstRow = screen.getAllByRole('link')[0];
     expect(within(firstRow).getByText(wizardEN.steps['2'].title)).toBeInTheDocument();
+    // And names it once: the poster is decorative, so the row's accessible
+    // name is the visible label alone, not that label preceded by a near
+    // paraphrase of itself from the poster's alt.
+    expect(firstRow).toHaveAccessibleName(wizardEN.steps['2'].title);
   });
 });

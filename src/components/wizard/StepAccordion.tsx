@@ -90,9 +90,15 @@ export function StepAccordion() {
                   to={`/wizard/step/${step.id}`}
                   className="flex items-center gap-3 p-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
                 >
+                  {/* Decorative here, hence the empty alt: the row's whole
+                      content is the link's accessible name, so a described
+                      poster ("Step 2: Choose your Instagram profile") would
+                      be announced back to back with the visible label that
+                      already names the row. `steps.N.alt` stays in the
+                      bundles — the step pages themselves still use it. */}
                   <img
                     src={`${step.visual}-600w-poster.jpg`}
-                    alt={t(`steps.${step.id}.alt` as any)}
+                    alt=""
                     width={size.width}
                     height={size.height}
                     loading="lazy"
