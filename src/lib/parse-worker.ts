@@ -58,6 +58,7 @@ self.onmessage = async (
         warnings: parseResult.warnings,
         discovery: parseResult.discovery,
         labelResolutionMode: parseResult.labelResolutionMode,
+        truncatedRelationshipFile: parseResult.truncatedRelationshipFile,
       });
       return;
     }
@@ -78,6 +79,7 @@ self.onmessage = async (
         // GH#41: the caveat has to survive the parse — /results reads this
         // record, not the ParseResult that is about to go out of scope.
         followRequestsUnreadable: parseResult.followRequestsUnreadable,
+        truncatedRelationshipFile: parseResult.truncatedRelationshipFile,
       });
 
       // Store all accounts at once (optimized bulk mode)
@@ -127,6 +129,7 @@ self.onmessage = async (
       warnings: parseResult.warnings,
       discovery: parseResult.discovery,
       labelResolutionMode: parseResult.labelResolutionMode,
+      truncatedRelationshipFile: parseResult.truncatedRelationshipFile,
     });
   } catch (error) {
     // Send error result with classified code

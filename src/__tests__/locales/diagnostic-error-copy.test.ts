@@ -8,7 +8,9 @@ const BUNDLES = import.meta.glob<Record<string, unknown>>('../../locales/*/uploa
   import: 'default',
 });
 
-function errorsFor(language: string): Record<string, { title: string; message: string; fix: string }> {
+function errorsFor(
+  language: string
+): Record<string, { title: string; message: string; fix: string }> {
   const entry = Object.entries(BUNDLES).find(([path]) => path.includes(`/${language}/`));
   if (!entry) throw new Error(`no upload.json for ${language}`);
   return (entry[1] as any).diagnostic.errors;

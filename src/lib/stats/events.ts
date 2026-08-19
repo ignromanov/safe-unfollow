@@ -7,7 +7,7 @@ import type { FilterAction, LinkType, ParseOutcome } from './constants';
 import { trackEvent } from './core';
 import { enqueueEvent, flushEvents, trackNavigating } from './queue';
 import { getStoredUTM, getEntryCTA, setEntryCTA } from './utm';
-import type { LabelResolutionMode } from '@/core/types';
+import type { LabelResolutionMode, TruncatedRelationshipFile } from '@/core/types';
 import type { LicenseFailureReason } from '@/lib/export/license';
 
 /**
@@ -465,6 +465,19 @@ export const analytics = {
   // change, not a high-volume impression.
   usernameLabelResolution: (mode: LabelResolutionMode) => {
     trackEvent(AnalyticsEvents.USERNAME_LABEL_RESOLUTION, { mode });
+  },
+
+  // Fires only when one of the two required relationship files looks cut short,
+  // so unlike `usernameLabelResolution` a clean parse emits nothing. Immediate
+  // rather than batched for the same reason as its two neighbours: a rare
+  // diagnostic about the shape of an upstream export, not a high-volume
+  // impression.
+  //
+  // The field is which of the two lists is short — a fact about the export's
+  // shape, never about its contents. Same line the label event draws: no
+  // username, no count, nothing derived from the file's bytes.
+  relationshipFileTruncated: (file: NonNullable<TruncatedRelationshipFile>) => {
+    trackEvent(AnalyticsEvents.RELATIONSHIP_FILE_TRUNCATED, { file });
   },
 
   // Pro Export
