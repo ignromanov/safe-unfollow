@@ -166,7 +166,7 @@
   "formatWarning": "Assurez-vous d'avoir sélectionné JSON (pas HTML) lors de la demande d'export.",
   "waiting": {
     "title": "En attente d'Instagram...",
-    "description": "Instagram prépare votre exportation de données. Vous recevrez un e-mail dans les 48 heures (généralement beaucoup plus vite !).",
+    "description": "Instagram prépare votre exportation de données. La plupart arrivent par e-mail en 5 à 30 minutes ; les grands comptes peuvent prendre quelques heures.",
     "addReminder": "Ajouter un rappel au calendrier",
     "reminderHint": "Me rappeler de vérifier dans 2 jours",
     "calendarTitle": "Vérifier l'e-mail d'exportation Instagram",

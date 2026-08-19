@@ -166,7 +166,7 @@
   "formatWarning": "Veri dışa aktarımı talep ederken JSON (HTML değil) seçtiğinizden emin olun.",
   "waiting": {
     "title": "Instagram bekleniyor...",
-    "description": "Instagram veri dışa aktarımını hazırlıyor. 48 saat içinde bir e-posta alacaksın (genellikle çok daha hızlı!).",
+    "description": "Instagram veri dışa aktarımını hazırlıyor. Çoğu 5–30 dakika içinde e-postayla gelir; büyük hesaplarda birkaç saat sürebilir.",
     "addReminder": "Takvime Hatırlatıcı Ekle",
     "reminderHint": "2 gün sonra kontrol etmem için hatırlat",
     "calendarTitle": "Instagram Dışa Aktarım E-postasını Kontrol Et",

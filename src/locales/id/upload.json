@@ -166,7 +166,7 @@
   "formatWarning": "Pastikan Anda memilih JSON (bukan HTML) saat meminta ekspor data.",
   "waiting": {
     "title": "Menunggu Instagram...",
-    "description": "Instagram sedang menyiapkan ekspor data Anda. Anda akan menerima email dalam 48 jam (biasanya lebih cepat!).",
+    "description": "Instagram sedang menyiapkan ekspor data Anda. Sebagian besar tiba lewat email dalam 5–30 menit; akun besar bisa memakan waktu beberapa jam.",
     "addReminder": "Tambah Pengingat ke Kalender",
     "reminderHint": "Ingatkan saya untuk cek dalam 2 hari",
     "calendarTitle": "Cek Email Ekspor Instagram",

@@ -166,7 +166,7 @@
   "formatWarning": "データエクスポートのリクエスト時にJSON（HTMLではなく）を選択してください。",
   "waiting": {
     "title": "Instagramを待っています...",
-    "description": "Instagramがデータエクスポートを準備中です。48時間以内にメールが届きます（通常はもっと早いです！）。",
+    "description": "Instagramがデータエクスポートを準備中です。多くは5〜30分でメールが届きます。大きなアカウントでは数時間かかることがあります。",
     "addReminder": "カレンダーにリマインダーを追加",
     "reminderHint": "2日後にチェックするリマインド",
     "calendarTitle": "Instagramエクスポートのメールを確認",
