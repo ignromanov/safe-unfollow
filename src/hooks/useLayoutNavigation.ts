@@ -20,7 +20,6 @@ function getActiveScreen(pathname: string): AppState {
 interface LayoutNavigationResult {
   pathname: string;
   activeScreen: AppState;
-  isResultsPage: boolean;
   handleClear: (clearData: () => void) => void;
 }
 
@@ -40,7 +39,6 @@ export function useLayoutNavigation(): LayoutNavigationResult {
 
   const { pathname } = location;
   const activeScreen = getActiveScreen(pathname);
-  const isResultsPage = pathname.endsWith('/results') || pathname.endsWith('/sample');
 
   const handleClear = useCallback(
     (clearData: () => void) => {
@@ -50,5 +48,5 @@ export function useLayoutNavigation(): LayoutNavigationResult {
     [navigate, prefix]
   );
 
-  return { pathname, activeScreen, isResultsPage, handleClear };
+  return { pathname, activeScreen, handleClear };
 }

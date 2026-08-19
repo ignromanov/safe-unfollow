@@ -55,27 +55,6 @@ vi.mock('@/components/Footer', () => ({
   Footer: () => <footer data-testid="footer">Footer</footer>,
 }));
 
-vi.mock('@/components/BuyMeCoffeeWidget', () => ({
-  BuyMeCoffeeWidget: ({
-    show,
-    expandDelay,
-    autoCollapseAfter,
-    skipStorageCheck,
-  }: {
-    show?: boolean;
-    expandDelay?: number;
-    autoCollapseAfter?: number;
-    skipStorageCheck?: boolean;
-  }) => (
-    <div data-testid="bmc-widget">
-      <div>show: {String(show)}</div>
-      <div>expandDelay: {expandDelay}</div>
-      <div>autoCollapseAfter: {autoCollapseAfter}</div>
-      <div>skipStorageCheck: {String(skipStorageCheck)}</div>
-    </div>
-  ),
-}));
-
 vi.mock('@/components/BreadcrumbSchema', () => ({
   BreadcrumbSchema: () => <script data-testid="breadcrumb-schema" />,
 }));
@@ -209,7 +188,6 @@ describe('Layout', () => {
       expect(screen.getByTestId('header')).toBeInTheDocument();
       expect(screen.getByRole('main')).toBeInTheDocument();
       expect(screen.getByTestId('footer')).toBeInTheDocument();
-      expect(screen.getByTestId('bmc-widget')).toBeInTheDocument();
     });
 
     it('should render structured data schemas', () => {
@@ -384,57 +362,6 @@ describe('Layout', () => {
       renderLayout();
 
       expect(screen.getByText('Header - hasData: false')).toBeInTheDocument();
-    });
-  });
-
-  describe('BMC widget visibility', () => {
-    it('should show BMC widget on /results page', () => {
-      renderLayout('/results');
-
-      expect(screen.getByText('show: true')).toBeInTheDocument();
-    });
-
-    it('should show BMC widget on /sample page', () => {
-      renderLayout('/sample');
-
-      expect(screen.getByText('show: true')).toBeInTheDocument();
-    });
-
-    it('should hide BMC widget on home page', () => {
-      renderLayout('/');
-
-      expect(screen.getByText('show: false')).toBeInTheDocument();
-    });
-
-    it('should hide BMC widget on /wizard page', () => {
-      renderLayout('/wizard');
-
-      expect(screen.getByText('show: false')).toBeInTheDocument();
-    });
-
-    it('should hide BMC widget on /upload page', () => {
-      renderLayout('/upload');
-
-      expect(screen.getByText('show: false')).toBeInTheDocument();
-    });
-
-    it('should configure BMC widget with correct props', () => {
-      renderLayout('/results');
-
-      expect(screen.getByText('expandDelay: 60000')).toBeInTheDocument();
-      expect(screen.getByText('autoCollapseAfter: 10000')).toBeInTheDocument();
-    });
-
-    it('should skip storage check on /sample page', () => {
-      renderLayout('/sample');
-
-      expect(screen.getByText('skipStorageCheck: true')).toBeInTheDocument();
-    });
-
-    it('should not skip storage check on /results page', () => {
-      renderLayout('/results');
-
-      expect(screen.getByText('skipStorageCheck: false')).toBeInTheDocument();
     });
   });
 
