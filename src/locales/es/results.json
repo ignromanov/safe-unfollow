@@ -66,8 +66,8 @@
   },
   "donation": {
     "headline": "Acabas de analizar {{count}} cuentas — gratis.",
-    "body": "Sin login. Tu exportación de Instagram nunca salió de este navegador. Si te ahorró tiempo, un café lo mantiene vivo.",
-    "headlineMobile": "Análisis gratis. Privado. Sin login.",
+    "body": "Sin contraseña. Tu exportación de Instagram nunca salió de este navegador. Si te ahorró tiempo, un café lo mantiene vivo.",
+    "headlineMobile": "Análisis gratis. Privado. Sin contraseña.",
     "bodyMobile": "Tu exportación nunca salió del navegador. Si fue útil, considera un café.",
     "cta": "Invitar un Café",
     "ctaMobile": "Apoyar",

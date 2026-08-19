@@ -49,12 +49,12 @@
       "HTML_FORMAT": {
         "title": "Format Salah: HTML",
         "message": "Anda mengunduh data dalam format HTML, namun alat ini memerlukan format JSON.",
-        "fix": "Buka Instagram Pengaturan → Unduh Data Anda → Pilih format \"JSON\" (bukan HTML) → Minta unduhan lagi."
+        "fix": "Buka Pusat Akun Meta → Buat ekspor → Ekspor ke perangkat → pilih format \"JSON\" (bukan HTML) → mulai ekspor lagi."
       },
       "NOT_INSTAGRAM_EXPORT": {
         "title": "Bukan Ekspor Instagram",
         "message": "File ZIP ini tampaknya bukan ekspor data Instagram.",
-        "fix": "Pastikan Anda mengunggah file ZIP dari fitur \"Unduh Data Anda\" milik Instagram, bukan file ZIP sembarang."
+        "fix": "Pastikan Anda mengunggah file ZIP dari \"Buat ekspor\" di Pusat Akun Meta, bukan file ZIP sembarang."
       },
       "INCOMPLETE_EXPORT": {
         "title": "Ekspor Tidak Lengkap",
@@ -84,7 +84,7 @@
       "ZIP_ENCRYPTED": {
         "title": "ZIP Berpassword",
         "message": "File ZIP ini dilindungi kata sandi, padahal ekspor Instagram tidak dienkripsi.",
-        "fix": "Ini mungkin bukan ekspor data Instagram yang valid. Minta ekspor baru dari Pengaturan Instagram."
+        "fix": "Ini mungkin bukan ekspor data Instagram yang valid. Minta ekspor baru dari Pusat Akun Meta."
       },
       "EMPTY_FILE": {
         "title": "File Kosong",

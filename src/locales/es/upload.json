@@ -49,12 +49,12 @@
       "HTML_FORMAT": {
         "title": "Formato incorrecto: HTML",
         "message": "Descargaste tus datos en formato HTML, pero esta herramienta requiere formato JSON para funcionar.",
-        "fix": "Ve a Configuración de Instagram → Descargar tus datos → Selecciona el formato \"JSON\" (no HTML) → Solicita la descarga de nuevo."
+        "fix": "Ve al Centro de cuentas de Meta → Crear exportación → Exportar al dispositivo → elige el formato \"JSON\" (no HTML) → inicia la exportación de nuevo."
       },
       "NOT_INSTAGRAM_EXPORT": {
         "title": "No es una exportación de Instagram",
         "message": "Este archivo ZIP no parece ser una exportación de datos de Instagram.",
-        "fix": "Asegúrate de subir el archivo ZIP de la función \"Descargar tus datos\" de Instagram, no un archivo ZIP cualquiera."
+        "fix": "Asegúrate de subir el archivo ZIP de \"Crear exportación\" en el Centro de cuentas de Meta, no un archivo ZIP cualquiera."
       },
       "INCOMPLETE_EXPORT": {
         "title": "Exportación incompleta",
@@ -84,7 +84,7 @@
       "ZIP_ENCRYPTED": {
         "title": "ZIP protegido con contraseña",
         "message": "El archivo ZIP está protegido con contraseña, pero las exportaciones de Instagram no están cifradas.",
-        "fix": "Es posible que no sea una exportación válida de Instagram. Solicita una nueva exportación en la Configuración de Instagram."
+        "fix": "Es posible que no sea una exportación válida de Instagram. Solicita una nueva en el Centro de cuentas de Meta."
       },
       "EMPTY_FILE": {
         "title": "Archivo vacío",

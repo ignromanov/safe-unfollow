@@ -11,7 +11,7 @@
     },
     "withoutDownload": {
       "question": "¿Puedo ver unfollowers de Instagram sin descargar datos o apps?",
-      "answer": "No. Instagram no proporciona una lista nativa de unfollowers. Los únicos métodos seguros son: (1) Revisar manualmente cuentas seguidas vs seguidores, o (2) Usar tu descarga oficial de datos con esta herramienta. Este rastreador hace el método 2 rápido y gratuito: sin contraseña, sin iniciar sesión, sin riesgo para tu cuenta.",
+      "answer": "No. Instagram no proporciona una lista nativa de unfollowers. Los únicos métodos seguros son: (1) Revisar manualmente cuentas seguidas vs seguidores, o (2) Usar tu descarga oficial de datos con esta herramienta. Este rastreador hace el método 2 rápido y gratis: sin contraseña, sin iniciar sesión, sin riesgo para tu cuenta.",
       "relatedLink": {
         "text": "Aprende cómo obtener tus datos",
         "href": "/wizard"
@@ -70,8 +70,8 @@
       }
     },
     "free": {
-      "question": "¿Existen rastreadores de unfollowers de Instagram gratuitos?",
-      "answer": "Sí. El análisis es 100% gratuito: todas las insignias, filtros y cualquier número de cuentas, sin registro ni límite. La mayoría de alternativas por suscripción cobran $5-10/mes. Un pago único de $7 solo es necesario si quieres exportar tu lista filtrada como archivo; verla aquí siempre es gratis. Código abierto (licencia MIT), y tu exportación de Instagram se procesa localmente en tu navegador."
+      "question": "¿Existen rastreadores de unfollowers de Instagram gratis?",
+      "answer": "Sí. El análisis es 100% gratis: todas las insignias, filtros y cualquier número de cuentas, sin registro ni límite. La mayoría de alternativas por suscripción cobran $5-10/mes. Un pago único de $7 solo es necesario si quieres exportar tu lista filtrada como archivo; verla aquí siempre es gratis. Código abierto (licencia MIT), y tu exportación de Instagram se procesa localmente en tu navegador."
     },
     "analyzeData": {
       "question": "¿Cómo analizo mi descarga de datos de Instagram para encontrar unfollowers?",
