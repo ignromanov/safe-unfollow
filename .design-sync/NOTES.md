@@ -705,3 +705,55 @@ default fallback is the key itself, so the card rendered a literal `rescue.desc.
 every other string on it translated correctly, which is exactly what makes this class hard to
 spot. Fixed to `rescue.tools.*`. When a preview supplies key names as props, they are not
 type-checked against the locale files by anything.
+
+## 2026-08-19 re-sync: where the sync actually lives, and two previews that outlived their components
+
+**The working state and the config had drifted into different working trees.** `config.json`
+(with the `projectId` pin) is tracked, so it existed only in `.worktrees/design-sync`; the
+converter, the bundle and the caches — `.ds-sync/`, `ds-bundle/`, `.design-sync/.cache/`, and
+the `node_modules` symlink — are gitignored and had been left in the **main checkout**, which
+is on `main`. Consequences, in order of how bad they are:
+
+1. Running the sync from the main checkout finds **no** `config.json`, so the skill treats it as
+   a first-time import and creates a **second** Claude Design project, orphaning
+   `5e633d36-…`. The pin is also what carries this file's ⛔ never-reconcile-delete rule, so the
+   41 hand-authored files lose their guard at the same moment.
+2. Running it from the worktree finds the config but no converter, no bundle and no anchor.
+
+Both directories were consolidated into `.worktrees/design-sync` on 2026-08-19. **Run every
+future sync from the branch worktree**, and if `ds-bundle/` is missing there, look in the main
+checkout before rebuilding from scratch — it is 47 MB of `.ds-sync/` plus a 13 MB bundle.
+
+**`.design-sync/overrides` is now in `.prettierignore`.** PR #90 made `format:check` a CI gate
+(`code-quality.yml`), and `dts.mjs` — a deliberate fork kept line-comparable against the
+skill's own `lib/dts.mjs` — failed it. Reformatting would have changed 321 lines and destroyed
+the diff the fork exists to preserve. The exclusion is the fix; do not "format" that directory.
+
+**A preview whose component disappears is not cleaned up by anything.** The build prints
+`(stale preview: <Name> — component no longer exported)` and moves on. `ResultsSection.tsx`
+survived two syncs that way (GH#44 renamed it on 2026-08-17) and `FormatQuiz.tsx` outlived its
+component by a day (PR #73 deleted `FormatQuiz` on 2026-08-18). Both removed by hand here.
+**Treat that log line as a to-do, not as information.**
+
+**`delete_files` rejected `_preview/FormatQuiz.css` as not-found.** The diff derives both
+`_preview/<Name>.js` and `.css` for a removed component, but a preview with no own CSS never had
+the `.css` remotely. 5 of 6 deleted is the correct outcome, and it is the one rejection class
+the skill allows continuing past.
+
+**Two components added, both authored rather than left on the floor card:** `CaveatAlert` (the
+shared amber shell, `role="status"` overriding Alert's `role="alert"`) and `TruncatedFileCaveat`
+(GH#83's date-range detector). Neither needed a `viewport` override — their sibling
+`FollowRequestsCaveat`, same shape and already graded, uses the default, and matching the
+family matters more than the whitespace. `FollowRequestsCaveat` itself was refactored onto the
+shell in the same PR: its render is unchanged, only its source moved.
+
+**Two known warns did NOT fire this run** — `[RENDER_THIN] Logo` and `[RENDER_THIN]
+ThemeProvider` are both absent from a full 103-component render check. They stay in the known
+list; a warn going away is not a regression, and it will likely return.
+
+**The `dts.mjs` fork is still exactly two hunks from upstream** (header comment + the
+`.d.ts`-scanning fallback), checked against skill build 2.1.235. Upstream has not fixed the
+barrel-only lookup, so the fork stays.
+
+**Chrome 151.0.7922.138 against Playwright 1.62.1** (bundles Chromium 151) — still an exact
+major match, `DS_CHROMIUM_PATH` route works. NOTES recorded 151.0.7922.77 previously.

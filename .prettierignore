@@ -37,3 +37,7 @@ scripts/**/*.js
 # repo explains its format and no reader here can, so it is left byte-for-byte
 # as the vendor issued it rather than reformatted for a benefit of zero.
 public/fo-verify.html
+
+# design-sync lib forks — vendored copies of the skill's own lib/*.mjs, kept
+# byte-comparable against upstream so re-syncs can diff and merge changes.
+.design-sync/overrides
