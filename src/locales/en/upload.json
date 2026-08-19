@@ -33,7 +33,7 @@
     "howToFix": "How to fix this",
     "tryAgain": "Try Again",
     "showMistakes": "Show Where I Went Wrong",
-    "reExportJson": "Re-export as JSON — open the settings step",
+    "reExportJson": "Re-export as JSON: open the settings step",
     "chooseDifferentFile": "Choose a different file",
     "actionsLabel": "Recovery actions",
     "reportIssue": "Report this issue on GitHub",

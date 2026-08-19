@@ -24,7 +24,7 @@
     },
     "5": {
       "title": "Définissez la plage de dates sur « Tout »",
-      "description": "Cliquez sur « Plage de dates » → Sélectionnez « Tout » → Enregistrer. Cela garantit l'historique complet."
+      "description": "Cliquez sur « Plage de dates » → Sélectionnez « Tout » → Enregistrer. Cela permet d'obtenir l'historique complet."
     },
     "6": {
       "title": "Changez le format en JSON",

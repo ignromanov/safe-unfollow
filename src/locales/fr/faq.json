@@ -91,7 +91,7 @@
     },
     "withoutPassword": {
       "question": "Comment SafeUnfollow fonctionne sans mon mot de passe Instagram ?",
-      "answer": "SafeUnfollow utilise la fonction officielle d'export de données Instagram (dans le Centre des comptes Meta) au lieu de votre mot de passe. Vous téléchargez vos données sous forme de fichier ZIP directement depuis Instagram et les téléversez ici. L'app lit les fichiers JSON du ZIP pour comparer les abonnés. Tout est traité dans votre navigateur.",
+      "answer": "SafeUnfollow utilise la fonction officielle d'export de données Instagram (dans l'Espace Comptes Meta) au lieu de votre mot de passe. Vous téléchargez vos données sous forme de fichier ZIP directement depuis Instagram et les téléversez ici. L'app lit les fichiers JSON du ZIP pour comparer les abonnés. Tout est traité dans votre navigateur.",
       "relatedLink": {
         "text": "Voir le guide d'export",
         "href": "/wizard"

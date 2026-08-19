@@ -24,7 +24,7 @@
     },
     "5": {
       "title": "Defina o período para \"Todo o período\"",
-      "description": "Clique em \"Período\" → Selecione \"Todo o período\" → Salvar. Isso garante o histórico completo."
+      "description": "Clique em \"Período\" → Selecione \"Todo o período\" → Salvar. Isso permite obter o histórico completo."
     },
     "6": {
       "title": "Mude o formato para JSON",

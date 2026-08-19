@@ -33,7 +33,7 @@
     "howToFix": "修正方法",
     "tryAgain": "もう一度試す",
     "showMistakes": "間違いを確認",
-    "reExportJson": "JSON形式で再エクスポート — 設定手順を開く",
+    "reExportJson": "JSON形式で再エクスポート：設定手順を開く",
     "chooseDifferentFile": "別のファイルを選ぶ",
     "actionsLabel": "復旧アクション",
     "reportIssue": "GitHubでこの問題を報告",
