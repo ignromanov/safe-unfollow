@@ -568,6 +568,57 @@ describe('Instagram Parser', () => {
   // "not following back". These tests go through parseInstagramZipFile, the
   // actual production entry point — not the deprecated parseFollowingJson
   // standalone helper.
+  describe('entry count', () => {
+    beforeEach(() => {
+      mockZipInstance = new MockZipArchive();
+    });
+
+    // A plain resolved-promise thunk, not vi.fn(): the filler entries are never
+    // read, and 200,000 spies with call tracking cost seconds and gigabytes.
+    const unreadFiller = () => Promise.resolve('');
+
+    const addRequiredFiles = () => {
+      mockZipInstance._addFile(
+        'connections/followers_and_following/following.json',
+        vi.fn().mockResolvedValue('{"relationships_following":[]}')
+      );
+      mockZipInstance._addFile(
+        'connections/followers_and_following/followers_1.json',
+        vi.fn().mockResolvedValue('[]')
+      );
+    };
+
+    it('accepts a real export with more entries than the old zip-bomb limit', async () => {
+      addRequiredFiles();
+      // 30,000 media files, one ZIP entry each — an "All of your information"
+      // export from a decade-old account. The old 10,000 limit called that fake.
+      for (let i = 0; i < 30_000; i++) {
+        mockZipInstance._addFile(`media/posts/photo_${i}.jpg`, unreadFiller);
+      }
+
+      const file = new File(['test'], 'test.zip', { type: 'application/zip' });
+      const result = await parseInstagramZipFile(file);
+
+      expect(result.warnings.map(w => w.code)).not.toContain('CORRUPTED_ZIP');
+      expect(result.warnings.map(w => w.code)).not.toContain('TOO_MANY_ENTRIES');
+      expect(result.discovery.isInstagramExport).toBe(true);
+    });
+
+    it('still refuses an absurd count, and blames our limit rather than the file', async () => {
+      addRequiredFiles();
+      for (let i = 0; i < 200_001; i++) {
+        mockZipInstance._addFile(`f_${i}`, unreadFiller);
+      }
+
+      const file = new File(['test'], 'test.zip', { type: 'application/zip' });
+      const result = await parseInstagramZipFile(file);
+      const warning = result.warnings.find(w => w.code === 'TOO_MANY_ENTRIES');
+
+      expect(warning).toBeDefined();
+      expect(warning!.message).not.toMatch(/does not look like a valid/i);
+    });
+  });
+
   describe('following.json format drift (GH#21)', () => {
     beforeEach(() => {
       mockZipInstance = new MockZipArchive();

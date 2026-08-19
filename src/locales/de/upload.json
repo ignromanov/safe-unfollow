@@ -91,6 +91,11 @@
         "message": "Die hochgeladene Datei ist leer (0 Bytes).",
         "fix": "Der Download wurde möglicherweise unterbrochen. Versuche, deine Daten erneut von Instagram herunterzuladen."
       },
+      "TOO_MANY_ENTRIES": {
+        "title": "Zu viele Dateien",
+        "message": "Diese ZIP enthält mehr Dateien, als dieses Tool indexieren kann.",
+        "fix": "Fordere einen kleineren Export an: Meta Accounts Center → Export erstellen → nur \"Follower und Folge ich\" auswählen → Format JSON."
+      },
       "FILE_TOO_LARGE": {
         "title": "Datei zu groß",
         "message": "Dein Browser konnte diesen Export nicht öffnen — er ist zu groß für dieses Gerät.",

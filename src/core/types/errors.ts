@@ -17,6 +17,7 @@ export type DiagnosticErrorCode =
   | 'ZIP_ENCRYPTED' // ZIP is password-protected
   | 'EMPTY_FILE' // File is empty (0 bytes)
   | 'FILE_TOO_LARGE' // The browser refused the allocation; no ceiling of ours
+  | 'TOO_MANY_ENTRIES' // More ZIP entries than we will walk
   // New - Parsing errors
   | 'JSON_PARSE_ERROR' // Invalid JSON
   | 'INVALID_DATA_STRUCTURE' // JSON exists but wrong structure
@@ -84,6 +85,7 @@ export function mapWarningToDiagnosticCode(code: string): DiagnosticErrorCode {
     ZIP_ENCRYPTED: 'ZIP_ENCRYPTED',
     EMPTY_FILE: 'EMPTY_FILE',
     FILE_TOO_LARGE: 'FILE_TOO_LARGE',
+    TOO_MANY_ENTRIES: 'TOO_MANY_ENTRIES',
     // New - Parsing
     JSON_PARSE_ERROR: 'JSON_PARSE_ERROR',
     INVALID_DATA_STRUCTURE: 'INVALID_DATA_STRUCTURE',
@@ -196,6 +198,13 @@ export function createDiagnosticError(
       title: 'Empty File',
       message: 'The uploaded file is empty (0 bytes).',
       fix: 'The download may have been interrupted. Try downloading your data again from Instagram.',
+      icon: 'file',
+      severity: 'error',
+    },
+    TOO_MANY_ENTRIES: {
+      title: 'Too Many Files',
+      message: 'This ZIP contains more files than this tool can index.',
+      fix: 'Ask Instagram for a smaller export: Meta Accounts Center → Create export → select only "Followers and following" → format JSON.',
       icon: 'file',
       severity: 'error',
     },
@@ -327,6 +336,7 @@ export const ALL_DIAGNOSTIC_ERROR_CODES: DiagnosticErrorCode[] = [
   'ZIP_ENCRYPTED',
   'EMPTY_FILE',
   'FILE_TOO_LARGE',
+  'TOO_MANY_ENTRIES',
   'JSON_PARSE_ERROR',
   'INVALID_DATA_STRUCTURE',
   'WORKER_TIMEOUT',

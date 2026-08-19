@@ -91,6 +91,11 @@
         "message": "Yüklenen dosya boş (0 bayt).",
         "fix": "İndirme kesintiye uğramış olabilir. Instagram'dan verilerini tekrar indirmeyi dene."
       },
+      "TOO_MANY_ENTRIES": {
+        "title": "Çok Fazla Dosya",
+        "message": "Bu ZIP, bu aracın dizinleyebileceğinden daha fazla dosya içeriyor.",
+        "fix": "Daha küçük bir dışa aktarma isteyin: Meta Accounts Center → Dışa aktarma oluştur → yalnızca \"Takipçiler ve takip edilenler\" seçin → JSON formatı. Bu dışa aktarma yüzlerce yerine birkaç MB olur."
+      },
       "FILE_TOO_LARGE": {
         "title": "Dosya Çok Büyük",
         "message": "Tarayıcınız bu dışa aktarmayı açamadı — bu cihaz için çok büyük.",

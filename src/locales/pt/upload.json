@@ -91,6 +91,11 @@
         "message": "O arquivo enviado está vazio (0 bytes).",
         "fix": "O download pode ter sido interrompido. Tente baixar seus dados novamente pelo Instagram."
       },
+      "TOO_MANY_ENTRIES": {
+        "title": "Arquivos demais",
+        "message": "Este ZIP contém mais arquivos do que esta ferramenta consegue indexar.",
+        "fix": "Peça uma exportação menor: Meta Accounts Center → Criar exportação → selecione apenas \"Seguidores e seguindo\" → formato JSON."
+      },
       "FILE_TOO_LARGE": {
         "title": "Arquivo muito grande",
         "message": "Seu navegador não conseguiu abrir esta exportação — ela é grande demais para este dispositivo.",

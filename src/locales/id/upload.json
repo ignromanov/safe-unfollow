@@ -91,6 +91,11 @@
         "message": "File yang diunggah kosong (0 byte).",
         "fix": "Unduhan mungkin terputus. Coba unduh ulang data Anda dari Instagram."
       },
+      "TOO_MANY_ENTRIES": {
+        "title": "Terlalu Banyak File",
+        "message": "ZIP ini berisi lebih banyak file daripada yang dapat diindeks alat ini.",
+        "fix": "Minta ekspor yang lebih kecil: Meta Accounts Center → Buat ekspor → pilih hanya \"Pengikut dan mengikuti\" → format JSON."
+      },
       "FILE_TOO_LARGE": {
         "title": "File Terlalu Besar",
         "message": "Browser Anda tidak dapat membuka ekspor ini — terlalu besar untuk perangkat ini.",

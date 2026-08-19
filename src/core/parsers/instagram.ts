@@ -70,17 +70,32 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
 
   const allFiles = archive.names;
 
-  // Zip bomb protection: limit entry count
-  const MAX_ZIP_ENTRIES = 10_000;
+  // Zip-bomb protection. 200k, not 10k: an "All of your information" export
+  // from a decade-old account carries tens of thousands of media files, one
+  // entry each, and the old limit told those exports they were fake. It was
+  // unreachable while the 500MB ceiling fired first, and deleting the ceiling
+  // routed them straight into it.
+  //
+  // The number is a sanity bound on our own walk of the central directory, not
+  // a statement about what a real export looks like — so the message says so.
+  //
+  // Above 65,535 entries a non-ZIP64 archive reports its count modulo 65,536,
+  // and this reader trusts that field (zip-reader.js:276), so such an archive is
+  // read short. Compliant writers do not produce one, no mitigation is free —
+  // zip.js's checkAmbiguity rejects the truncation but also rejects benign
+  // quirks in valid archives — and the failure is loud rather than silent. The
+  // signal to watch instead is upload_error_not_instagram arriving at multi-GB
+  // file_size_mb, which the failure event now carries.
+  const MAX_ZIP_ENTRIES = 200_000;
   if (allFiles.length > MAX_ZIP_ENTRIES) {
     return {
       data: createEmptyParsedAll(),
       warnings: [
         {
-          code: 'CORRUPTED_ZIP',
-          message: `ZIP contains ${allFiles.length.toLocaleString()} entries (limit: ${MAX_ZIP_ENTRIES.toLocaleString()}). This does not look like a valid Instagram export.`,
+          code: 'TOO_MANY_ENTRIES',
+          message: `This ZIP contains ${allFiles.length.toLocaleString()} files, more than this tool can index (${MAX_ZIP_ENTRIES.toLocaleString()}).`,
           severity: 'error',
-          fix: 'Make sure you are uploading the correct ZIP file from Instagram. A normal export typically contains fewer than 1,000 files.',
+          fix: 'Ask Instagram for a smaller export: Meta Accounts Center → Create export → select only "Followers and following" → format JSON.',
         },
       ],
       discovery: { format: 'unknown', isInstagramExport: false, files: [] },

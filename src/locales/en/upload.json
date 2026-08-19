@@ -91,6 +91,11 @@
         "message": "The uploaded file is empty (0 bytes).",
         "fix": "The download may have been interrupted. Try downloading your data again from Instagram."
       },
+      "TOO_MANY_ENTRIES": {
+        "title": "Too Many Files",
+        "message": "This ZIP contains more files than this tool can index.",
+        "fix": "Ask Instagram for a smaller export: Meta Accounts Center → Create export → select only \"Followers and following\" → format JSON."
+      },
       "FILE_TOO_LARGE": {
         "title": "File Too Large",
         "message": "Your browser could not open this export — it is too large for this device.",
