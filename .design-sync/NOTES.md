@@ -390,6 +390,25 @@ The fix is harness-level (a min-height on `.ds-single`, or exempting stories tha
 positioning). Do **not** try a taller viewport, and do not fake a wrapper height in the preview —
 that would misrepresent the shipped component's actual layout.
 
+**2a. What to sync instead, and why this cost real work (2026-08-19).** The parking above is
+correct and stays. Its consequence was not recorded and should have been: with `Wizard` absent,
+the Claude Design project has **no representation of the guide at all**, so the conversion-redesign
+mockup for it (`templates/conversion-audit/FunnelEntry.dc.html` §1B, now copied to
+`designs/claude-design-project/`) was drawn as a bare 390px card — no stepper, no close control, no
+bottom nav. It was then confirmed as "replace the content of /wizard step 1" in prose. The screen
+was designed for one frame and shipped inside another; see the commit that added those mockups.
+
+Do **not** attempt `cardMode: "single"` as a workaround — `.ds-single` **is** the single-story
+wrapper whose `translateZ(0)` causes the collapse, so that mode is the failure, not the fix. And
+`emit.mjs` may not be forked (`storybook/SKILL.md:259`: app-contract surface). Two real routes:
+
+1. **Upstream**: the harness fix named above — a `min-height` on `.ds-single`, or an opt-out for
+   stories that need genuine fixed positioning.
+2. **Here, once `feat/guide-entry` lands**: author `previews/GuideEntry.tsx` (plus `RecipeCard`,
+   `StepAccordion`). These are ordinary in-flow cards, not `fixed inset-0` — the collapse cause
+   does not apply to them, and they are what a designer actually needs to see. This gives the
+   guide a representation without faking the wizard shell or touching the harness.
+
 **3. `RouteErrorPage` cannot mount — cross-bundle React Context identity, not a missing data router.**
 `PARKED as previews/RouteErrorPage.tsx.blocked`. `useRouteError()` does **not** return `undefined`
 outside a data router — it throws, so the bare mount crashes before painting. Wrapping the story in
