@@ -207,14 +207,26 @@ export function Wizard({ initialStep = 1 }: WizardProps) {
         {/* Pinned navigation bar — outside scrollable content. On step 1, once
             the in-flow CTA (GuideEntry's own Accounts Center link) scrolls
             out of view, this bar's two slots swap label and destination to
-            take over as the primary action — see showBarPrimary above. Both
-            slots keep their element identity: nothing else about the bar
-            changes, so its height never does either. */}
+            take over as the primary action — see showBarPrimary above.
+
+            Only the secondary slot keeps its element identity across that
+            swap (one PrefixedLink with a ternary `to`). The primary slot
+            renders an <a> in one branch and a PrefixedLink in the other —
+            two component types at the same position, so React unmounts one
+            and mounts the other, and focus on that control is lost to
+            <body> when the swap fires.
+
+            The bar's height is held by `min-h-16` below, not by identity:
+            neither label carries `truncate` or `whitespace-nowrap`, the row
+            does not wrap, and the swapped pair is far wider than the ~196px
+            an inner row gets at 360px — so the labels wrap to two lines.
+            16 = the two-line case: 2 × 20px (text-sm leading) + 24px (the
+            controls' py-3). */}
         <nav
           className="shrink-0 border-t border-border bg-card px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
           aria-label={t('footer.navigation')}
         >
-          <div className="max-w-xl mx-auto flex items-center justify-between">
+          <div className="max-w-xl mx-auto flex min-h-16 items-center justify-between">
             <PrefixedLink
               to={
                 showBarPrimary
