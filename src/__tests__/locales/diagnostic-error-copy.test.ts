@@ -24,9 +24,7 @@ function errorsFor(language: string): Record<string, { title: string; message: s
 const NO_LOCALISED_COPY = ['INVALID_FOLLOWING_FORMAT', 'INVALID_FOLLOWERS_FORMAT'];
 
 function copyFor(language: string): { title: string; message: string; fix: string } {
-  const entry = Object.entries(BUNDLES).find(([path]) => path.includes(`/${language}/`));
-  if (!entry) throw new Error(`no upload.json for ${language}`);
-  return (entry[1] as any).diagnostic.errors.FILE_TOO_LARGE;
+  return errorsFor(language).FILE_TOO_LARGE;
 }
 
 /**

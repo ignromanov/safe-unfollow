@@ -12,7 +12,7 @@ import {
   resolveEntries,
   resolveEntryList,
 } from './instagram-utils';
-import { classifyZipFailure, type ZipArchive, type ZipEntry } from './zip-archive';
+import { describeUnreadableZipEntry, type ZipArchive, type ZipEntry } from './zip-archive';
 
 export interface FollowersParsed {
   followersRaw: RawItem[];
@@ -201,16 +201,11 @@ export async function parseFollowersFromZip(
     try {
       text = await f.text();
     } catch (error) {
-      warnings.push({
-        code: classifyZipFailure(error),
-        message: `Found ${f.name} but could not read it: ${error instanceof Error ? error.message : String(error)}`,
-        // Error severity, so `unreadable` below picks it up: one bad shard
-        // among good ones already marks the whole followers set unreadable
-        // (see the rationale above this loop), and a shard we cannot open is
-        // no better known than one whose shape we cannot recognise.
-        severity: 'error',
-        fix: 'Try re-downloading your data from Instagram Settings.',
-      });
+      // Error severity, so `unreadable` below picks it up: one bad shard
+      // among good ones already marks the whole followers set unreadable
+      // (see the rationale above this loop), and a shard we cannot open is
+      // no better known than one whose shape we cannot recognise.
+      warnings.push(describeUnreadableZipEntry(f.name, error, 'error'));
       continue;
     }
     let json: unknown;

@@ -3,6 +3,8 @@
  * Describes all files we look for in Instagram data export
  */
 
+import { escapeRegExp } from './instagram-utils';
+
 export interface FileSpec {
   name: string;
   description: string;
@@ -197,14 +199,11 @@ export const BASE_PATH_CANDIDATES = [
  * unfindable, and the parser would report it missing — a silent wrong answer,
  * not a crash. Deriving it means the two cannot disagree.
  *
- * Why it exists at all is a measurement. `ZipReader.getEntries()` materialises
- * every entry in the central directory, and a zip.js entry costs about 7.6 KB
- * of retained heap — a 56-property object with two Uint8Array subarrays, a
- * Date, a Map and two bound closures. Measured on Node 24 with --expose-gc,
- * retained after collection: 50 000 entries from an 8 MB archive held 364 MB,
- * and the cost tracks the entry count, not the archive's size. An "All of your
- * information" export from a decade-old account carries tens of thousands of
- * media files; the parser reads about a dozen of them.
+ * Why it exists at all is a measurement, owned by `openZipArchive`'s `keep`
+ * param doc in `zip-archive.ts` — link there rather than restate the numbers.
+ * In short: an "All of your information" export from a decade-old account
+ * carries tens of thousands of media files; the parser reads about a dozen of
+ * them, and keeping a zip.js entry object per discarded file is not free.
  *
  * Followers is a regex rather than its `fileNames`, and deliberately wider than
  * that list: `instagram-followers.ts` looks up `followers_.*\.json`, so an
@@ -214,7 +213,7 @@ export const BASE_PATH_CANDIDATES = [
 const KEPT_FILE_NAMES = [...FILE_SPECS, PERMANENT_REQUESTS_SPEC]
   .filter(spec => spec.name !== 'followers_*.json')
   .flatMap(spec => spec.fileNames)
-  .map(name => name.replace(/\./g, '\\.'));
+  .map(escapeRegExp);
 
 export const RELEVANT_FILE_PATTERN = new RegExp(
   `(^|/)(followers_[^/]*\\.json|${KEPT_FILE_NAMES.join('|')})$`,

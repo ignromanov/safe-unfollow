@@ -11,6 +11,15 @@ import type { LabelResolutionMode } from '@/core/types';
 import type { LicenseFailureReason } from '@/lib/export/license';
 
 /**
+ * Round a file size to two decimal places for the `file_size_mb` analytics
+ * property. Shared so `file_upload_start` and `upload_error_*` report the
+ * same file at the same precision.
+ */
+function roundMb(sizeMb: number): number {
+  return Math.round(sizeMb * 100) / 100;
+}
+
+/**
  * Analytics helper object with typed methods
  */
 export const analytics = {
@@ -26,7 +35,7 @@ export const analytics = {
   // unbiased; losing a success while its start survived would understate it.
   fileUploadStart: (fileSizeMb: number) => {
     enqueueEvent(AnalyticsEvents.FILE_UPLOAD_START, {
-      file_size_mb: Math.round(fileSizeMb * 100) / 100,
+      file_size_mb: roundMb(fileSizeMb),
     });
   },
 
@@ -389,7 +398,7 @@ export const analytics = {
       // Spread rather than defaulted: absent and zero must not be the same
       // thing in a column decisions get made from. Rounded the way
       // fileUploadStart rounds it, so two events about one file agree.
-      ...(fileSizeMb === undefined ? {} : { file_size_mb: Math.round(fileSizeMb * 100) / 100 }),
+      ...(fileSizeMb === undefined ? {} : { file_size_mb: roundMb(fileSizeMb) }),
     });
     // Drained here rather than left to `pagehide`: unlike the success path, a
     // failed upload navigates nowhere, so nothing else would trigger a flush
