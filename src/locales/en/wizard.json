@@ -1,5 +1,6 @@
 {
   "header": {
+    "ariaLabel": "Instagram data export wizard",
     "stepOf": "Step {{current}} of {{total}}",
     "stepNavigation": "Step navigation",
     "stepLabel": "Step {{step}}"

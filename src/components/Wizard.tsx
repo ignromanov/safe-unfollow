@@ -97,7 +97,7 @@ export function Wizard({ initialStep = 1 }: WizardProps) {
         className="fixed inset-0 z-[100] bg-background flex flex-col overflow-hidden"
         role="dialog"
         aria-modal="true"
-        aria-label={t('header.ariaLabel', { defaultValue: 'Instagram data export wizard' })}
+        aria-label={t('header.ariaLabel')}
       >
         {/* Header - Compact */}
         <div className="shrink-0 container mx-auto px-4 py-2 flex items-center justify-between border-b border-border bg-card">

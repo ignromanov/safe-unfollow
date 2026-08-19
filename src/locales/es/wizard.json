@@ -1,5 +1,6 @@
 {
   "header": {
+    "ariaLabel": "Asistente de exportación de datos de Instagram",
     "stepOf": "Paso {{current}} de {{total}}",
     "stepNavigation": "Navegación de pasos",
     "stepLabel": "Paso {{step}}"

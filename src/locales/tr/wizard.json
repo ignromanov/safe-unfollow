@@ -1,5 +1,6 @@
 {
   "header": {
+    "ariaLabel": "Instagram veri dışa aktarma sihirbazı",
     "stepOf": "Adım {{current}} / {{total}}",
     "stepNavigation": "Adım gezinmesi",
     "stepLabel": "Adım {{step}}"

@@ -1,5 +1,6 @@
 {
   "header": {
+    "ariaLabel": "Wizard ekspor data Instagram",
     "stepOf": "Langkah {{current}} dari {{total}}",
     "stepNavigation": "Navigasi langkah",
     "stepLabel": "Langkah {{step}}"
