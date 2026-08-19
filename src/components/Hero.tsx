@@ -3,7 +3,7 @@ import {
   Ban,
   Infinity as InfinityIcon,
   Code,
-  Database,
+  Upload,
   ArrowRight,
   CheckCircle2,
 } from 'lucide-react';
@@ -63,16 +63,38 @@ export function Hero({ hasData }: HeroProps) {
             </PrefixedLink>
           )}
 
-          {/* Secondary CTA */}
-          <PrefixedLink
-            to="/sample"
-            cta="sample"
-            className="cursor-pointer w-full sm:w-auto px-8 md:px-10 py-4 md:py-5 rounded-3xl border border-border bg-card font-bold text-base md:text-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all flex items-center justify-center gap-2"
-          >
-            <Database size={20} className="text-accent" />
-            {t('buttons.trySample')}
-          </PrefixedLink>
+          {/* The second path, not a footnote. Readers who already hold the
+              ZIP are a measured population — 714 identifiable in four days —
+              and 9.4% of them found this control while it was a 12px
+              uppercase link below the trust row. The rest walked a guide for
+              a file they already had (GH#86). Hidden when `hasData`: the
+              primary is then "view results" and there is nothing to upload.
+              Promoting it into the first viewport also moves it into the
+              hydration window, which is why #101 (the pre-hydration recorder)
+              had to land first — `cta`, not `onClick`, is the instrumentation. */}
+          {!hasData && (
+            <PrefixedLink
+              to="/upload"
+              cta="upload_direct"
+              className="cursor-pointer w-full sm:w-auto px-8 md:px-10 py-4 md:py-5 rounded-3xl border border-border bg-card font-bold text-base md:text-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all flex items-center justify-center gap-2"
+            >
+              <Upload size={20} aria-hidden="true" />
+              {t('buttons.haveFile')}
+            </PrefixedLink>
+          )}
         </div>
+
+        {/* Demoted from a bordered peer to a ghost control, which is what
+            freed the slot above. It is the weakest of the four hero CTAs
+            (177 sessions, 26.0% reaching an upload) so the demotion is cheap.
+            Same route, same event — only the weight changed. */}
+        <PrefixedLink
+          to="/sample"
+          cta="sample"
+          className="cursor-pointer w-full sm:w-auto px-8 py-3 rounded-3xl font-bold text-sm text-zinc-500 dark:text-zinc-400 hover:text-primary transition-all flex items-center justify-center gap-2"
+        >
+          {t('buttons.trySample')}
+        </PrefixedLink>
 
         {/* Trust Badges */}
         <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs md:text-sm text-zinc-500 font-semibold">
@@ -86,17 +108,6 @@ export function Hero({ hasData }: HeroProps) {
             <CheckCircle2 size={16} className="text-emerald-500" /> {t('trust.privacy')}
           </div>
         </div>
-
-        {/* Tertiary Link */}
-        {!hasData && (
-          <PrefixedLink
-            to="/upload"
-            cta="upload_direct"
-            className="cursor-pointer text-zinc-400 hover:text-primary font-bold text-xs uppercase tracking-widest transition-all underline underline-offset-4 decoration-zinc-200"
-          >
-            {t('buttons.haveFile')}
-          </PrefixedLink>
-        )}
       </div>
 
       {/* Feature Cards */}

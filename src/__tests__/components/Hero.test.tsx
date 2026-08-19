@@ -77,6 +77,24 @@ describe('Hero Component', () => {
       ).toBeInTheDocument();
     });
 
+    // The whole of GH#86 is an ordering claim, and ordering is the part a
+    // restyle can silently undo: the ZIP-holder path must reach the reader —
+    // and the keyboard — before the sample link, not after the trust row.
+    // Asserting the presence of both links, which the two tests above already
+    // do, passes just as well when this control is a footnote again.
+    it('puts the ZIP-holder path ahead of the sample link', () => {
+      render(<Hero hasData={false} />);
+
+      const haveFile = screen.getByRole('link', {
+        name: new RegExp(heroEN.buttons.haveFile, 'i'),
+      });
+      const sample = screen.getByRole('link', {
+        name: new RegExp(heroEN.buttons.trySample, 'i'),
+      });
+
+      expect(haveFile.compareDocumentPosition(sample)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    });
+
     it('should not render "I already have my ZIP file" link when hasData is true', () => {
       render(<Hero hasData={true} />);
 
