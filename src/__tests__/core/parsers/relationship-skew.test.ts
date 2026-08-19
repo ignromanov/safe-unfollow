@@ -37,23 +37,72 @@ describe('detectRelationshipSkew', () => {
    * to the second, and +4071 in the truncated one.
    */
   const REAL_EXPORTS = [
-    { label: '2025-08-31', following: 328, followers: 294, fgOldest: 1403384748, frOldest: 1398234904, expected: null },
-    { label: '2025-09-04', following: 313, followers: 284, fgOldest: 1403384748, frOldest: 1398234904, expected: null },
-    { label: '2025-09-18', following: 315, followers: 290, fgOldest: 1403384748, frOldest: 1398234904, expected: null },
-    { label: '2026-01-08', following: 353, followers: 324, fgOldest: 1403384748, frOldest: 1398234904, expected: null },
-    { label: '2026-08-11-en', following: 413, followers: 364, fgOldest: 1403384748, frOldest: 1398234904, expected: null },
-    { label: '2026-08-11-ru', following: 393, followers: 364, fgOldest: 1403384748, frOldest: 1398234904, expected: null },
-    { label: '2026-08-13-ru', following: 393, followers: 118, fgOldest: 1403384748, frOldest: 1755143739, expected: 'followers' },
+    {
+      label: '2025-08-31',
+      following: 328,
+      followers: 294,
+      fgOldest: 1403384748,
+      frOldest: 1398234904,
+      expected: null,
+    },
+    {
+      label: '2025-09-04',
+      following: 313,
+      followers: 284,
+      fgOldest: 1403384748,
+      frOldest: 1398234904,
+      expected: null,
+    },
+    {
+      label: '2025-09-18',
+      following: 315,
+      followers: 290,
+      fgOldest: 1403384748,
+      frOldest: 1398234904,
+      expected: null,
+    },
+    {
+      label: '2026-01-08',
+      following: 353,
+      followers: 324,
+      fgOldest: 1403384748,
+      frOldest: 1398234904,
+      expected: null,
+    },
+    {
+      label: '2026-08-11-en',
+      following: 413,
+      followers: 364,
+      fgOldest: 1403384748,
+      frOldest: 1398234904,
+      expected: null,
+    },
+    {
+      label: '2026-08-11-ru',
+      following: 393,
+      followers: 364,
+      fgOldest: 1403384748,
+      frOldest: 1398234904,
+      expected: null,
+    },
+    {
+      label: '2026-08-13-ru',
+      following: 393,
+      followers: 118,
+      fgOldest: 1403384748,
+      frOldest: 1755143739,
+      expected: 'followers',
+    },
   ] as const;
 
   it.each(REAL_EXPORTS)(
     'reads $label as $expected',
     ({ following, followers, fgOldest, frOldest, expected }) => {
       expect(
-        detectRelationshipSkew(
-          mapWithOldest(fgOldest, following, 'fg'),
-          mapWithOldest(frOldest, followers, 'fr')
-        )
+        detectRelationshipSkew({
+          following: mapWithOldest(fgOldest, following, 'fg'),
+          followers: mapWithOldest(frOldest, followers, 'fr'),
+        })
       ).toBe(expected);
     }
   );
@@ -61,10 +110,10 @@ describe('detectRelationshipSkew', () => {
   describe('threshold', () => {
     const base = 1_600_000_000;
     const at = (skewDays: number) =>
-      detectRelationshipSkew(
-        mapWithOldest(base, 50, 'fg'),
-        mapWithOldest(base + skewDays * DAY, 50, 'fr')
-      );
+      detectRelationshipSkew({
+        following: mapWithOldest(base, 50, 'fg'),
+        followers: mapWithOldest(base + skewDays * DAY, 50, 'fr'),
+      });
 
     it('does not fire one day below the threshold', () => {
       expect(at(SKEW_THRESHOLD_DAYS - 1)).toBeNull();
@@ -94,25 +143,29 @@ describe('detectRelationshipSkew', () => {
 
     it('fires at exactly the minimum sample size', () => {
       expect(
-        detectRelationshipSkew(
-          mapWithOldest(base, MIN_TIMESTAMPS_FOR_SKEW, 'fg'),
-          mapWithOldest(far, MIN_TIMESTAMPS_FOR_SKEW, 'fr')
-        )
+        detectRelationshipSkew({
+          following: mapWithOldest(base, MIN_TIMESTAMPS_FOR_SKEW, 'fg'),
+          followers: mapWithOldest(far, MIN_TIMESTAMPS_FOR_SKEW, 'fr'),
+        })
       ).toBe('followers');
     });
 
     it('stays silent one entry below the minimum sample size', () => {
       expect(
-        detectRelationshipSkew(
-          mapWithOldest(base, MIN_TIMESTAMPS_FOR_SKEW - 1, 'fg'),
-          mapWithOldest(far, MIN_TIMESTAMPS_FOR_SKEW, 'fr')
-        )
+        detectRelationshipSkew({
+          following: mapWithOldest(base, MIN_TIMESTAMPS_FOR_SKEW - 1, 'fg'),
+          followers: mapWithOldest(far, MIN_TIMESTAMPS_FOR_SKEW, 'fr'),
+        })
       ).toBeNull();
     });
 
     it('stays silent when either map is empty', () => {
-      expect(detectRelationshipSkew(new Map(), mapWithOldest(far, 50, 'fr'))).toBeNull();
-      expect(detectRelationshipSkew(mapWithOldest(base, 50, 'fg'), new Map())).toBeNull();
+      expect(
+        detectRelationshipSkew({ following: new Map(), followers: mapWithOldest(far, 50, 'fr') })
+      ).toBeNull();
+      expect(
+        detectRelationshipSkew({ following: mapWithOldest(base, 50, 'fg'), followers: new Map() })
+      ).toBeNull();
     });
 
     /**
@@ -124,18 +177,24 @@ describe('detectRelationshipSkew', () => {
     it('ignores zero timestamps rather than treating them as 1970', () => {
       const zeroed = new Map<string, number>();
       for (let i = 0; i < 40; i++) zeroed.set(`z${i}`, 0);
-      expect(detectRelationshipSkew(zeroed, mapWithOldest(far, 50, 'fr'))).toBeNull();
+      expect(
+        detectRelationshipSkew({ following: zeroed, followers: mapWithOldest(far, 50, 'fr') })
+      ).toBeNull();
 
       const mixed = new Map(zeroed);
       for (let i = 0; i < MIN_TIMESTAMPS_FOR_SKEW; i++) mixed.set(`m${i}`, base + i * DAY);
-      expect(detectRelationshipSkew(mixed, mapWithOldest(far, 50, 'fr'))).toBe('followers');
+      expect(
+        detectRelationshipSkew({ following: mixed, followers: mapWithOldest(far, 50, 'fr') })
+      ).toBe('followers');
     });
 
     it('stays silent when the readable entries are too few to judge', () => {
       const mostlyZero = new Map<string, number>();
       for (let i = 0; i < 400; i++) mostlyZero.set(`z${i}`, 0);
       for (let i = 0; i < MIN_TIMESTAMPS_FOR_SKEW - 1; i++) mostlyZero.set(`m${i}`, base + i * DAY);
-      expect(detectRelationshipSkew(mostlyZero, mapWithOldest(far, 50, 'fr'))).toBeNull();
+      expect(
+        detectRelationshipSkew({ following: mostlyZero, followers: mapWithOldest(far, 50, 'fr') })
+      ).toBeNull();
     });
   });
 });

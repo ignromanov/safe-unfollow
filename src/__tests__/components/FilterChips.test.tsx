@@ -248,8 +248,8 @@ describe('FilterChips Component', () => {
   });
 
   /**
-   * GH#41. The page-level notice explains the problem; the chip is where the
-   * wrong number is actually read, and on a phone the two are a scroll apart.
+   * The page-level notice explains the problem; the chip is where the wrong
+   * number is actually read, and on a phone the two are a scroll apart.
    */
   describe('marks on counts that cannot be trusted', () => {
     const chipName = (fragment: string) =>
@@ -257,6 +257,8 @@ describe('FilterChips Component', () => {
 
     const hint = resultsEN.caveat.followRequests.chipHint;
     const hintPattern = new RegExp(hint.slice(0, 20), 'i');
+    const truncatedHint = resultsEN.caveat.truncated.followers.chipHint;
+    const truncatedPattern = new RegExp(truncatedHint.slice(0, 20), 'i');
 
     it('marks the notFollowingBack chip when a follow-requests file was unreadable', () => {
       render(<FilterChips {...defaultProps} followRequestsUnreadable />);
@@ -286,9 +288,6 @@ describe('FilterChips Component', () => {
 
       expect(chipName('Add Not following back filter')).not.toHaveAccessibleName(hintPattern);
     });
-
-    const truncatedHint = resultsEN.caveat.truncated.followers.chipHint;
-    const truncatedPattern = new RegExp(truncatedHint.slice(0, 20), 'i');
 
     /**
      * Four chips, not one, and not the same four in both directions. A short

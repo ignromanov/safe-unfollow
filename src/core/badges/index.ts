@@ -1,9 +1,4 @@
-import type {
-  ParsedAll,
-  AccountBadges,
-  BadgeKey,
-  TruncatedRelationshipFile,
-} from '@/core/types';
+import type { ParsedAll, AccountBadges, BadgeKey, TruncatedRelationshipFile } from '@/core/types';
 
 // Helper function to collect all unique usernames
 function collectAllUsernames(parsed: ParsedAll): Set<string> {
@@ -40,7 +35,9 @@ export const BADGES_OVERSTATED_BY_UNREADABLE_REQUESTS: ReadonlySet<BadgeKey> = n
  * entry timestamp and leaves `following.json` whole.
  *
  * A function rather than a constant, because unlike GH#41 the damage depends on
- * *which* file is short, and the two cases corrupt disjoint badges.
+ * *which* file is short. The two cases are not disjoint and mostly overlap:
+ * each names its own file's badge, plus the same three derived badges, which
+ * are all read from both lists and so move whichever one lost people.
  *
  * Wrong in both directions, which is why this is not named "overstated" like
  * its GH#41 sibling. A short followers list inflates `notFollowingBack` — the
@@ -60,16 +57,21 @@ export const BADGES_OVERSTATED_BY_UNREADABLE_REQUESTS: ReadonlySet<BadgeKey> = n
  * `pending`, `permanent` and the other optional-file badges are untouched:
  * they are read from their own files, which the date range does not filter.
  */
+const NO_BADGES: ReadonlySet<BadgeKey> = new Set<BadgeKey>();
+
 export function badgesAffectedByTruncation(
   truncated: TruncatedRelationshipFile
 ): ReadonlySet<BadgeKey> {
-  if (truncated === 'followers') {
-    return new Set<BadgeKey>(['followers', 'notFollowingBack', 'notFollowedBack', 'mutuals']);
-  }
-  if (truncated === 'following') {
-    return new Set<BadgeKey>(['following', 'notFollowedBack', 'notFollowingBack', 'mutuals']);
-  }
-  return new Set<BadgeKey>();
+  // A shared constant, not a fresh empty Set: `FilterChips` calls this on every
+  // render and almost every export is untruncated, so this is the hot answer.
+  if (truncated === null) return NO_BADGES;
+
+  // The short file's own badge, plus the three derived from both lists. Written
+  // as one expression rather than a literal per case: the two cases used to be
+  // spelled out separately, with the three shared badges in a different order
+  // each time, so telling them apart meant diffing two four-element lists to
+  // find the single element that differs.
+  return new Set<BadgeKey>([truncated, 'notFollowingBack', 'notFollowedBack', 'mutuals']);
 }
 
 // Helper function to compute derived relationship categories

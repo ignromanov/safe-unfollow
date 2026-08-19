@@ -12,7 +12,10 @@ import {
   AlertTriangle,
   Ghost,
 } from 'lucide-react';
-import { BADGES_OVERSTATED_BY_UNREADABLE_REQUESTS, badgesAffectedByTruncation } from '@/core/badges';
+import {
+  BADGES_OVERSTATED_BY_UNREADABLE_REQUESTS,
+  badgesAffectedByTruncation,
+} from '@/core/badges';
 import type { BadgeKey, TruncatedRelationshipFile } from '@/core/types';
 interface FilterChipsProps {
   selectedFilters: Set<BadgeKey>;
@@ -35,7 +38,7 @@ interface FilterChipsProps {
 }
 import { analytics } from '@/lib/analytics';
 import type { ReactNode } from 'react';
-import { memo, useMemo, useState } from 'react';
+import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // Module-level icon map (outside component, never re-created)
@@ -97,10 +100,7 @@ export const FilterChips = memo(function FilterChips({
   // Derived, never listed here: which counts a short file corrupts is a fact
   // about the badge arithmetic, and a component naming badge keys by hand would
   // be a second copy of it that drifts (`core/badges/index.ts`).
-  const affectedByTruncation = useMemo(
-    () => badgesAffectedByTruncation(truncatedRelationshipFile),
-    [truncatedRelationshipFile]
-  );
+  const affectedByTruncation = badgesAffectedByTruncation(truncatedRelationshipFile);
 
   // Resolved once, outside the chip loop, and behind the null check the typed
   // key union requires: `caveat.truncated.null.chipHint` is not a key.
@@ -162,9 +162,10 @@ export const FilterChips = memo(function FilterChips({
           // `mutuals` and one of the two not-following counts DOWN, and calling
           // that overstatement would be a second wrong answer on top of the
           // first.
+          const truncationAffectsChip = affectedByTruncation.has(cfg.type);
           const isUnreliable =
-            (followRequestsUnreadable && BADGES_OVERSTATED_BY_UNREADABLE_REQUESTS.has(cfg.type)) ||
-            affectedByTruncation.has(cfg.type);
+            truncationAffectsChip ||
+            (followRequestsUnreadable && BADGES_OVERSTATED_BY_UNREADABLE_REQUESTS.has(cfg.type));
           const chipLabel = isActive
             ? t('filters.removeFilter', { label, count })
             : t('filters.addFilter', { label, count });
@@ -193,7 +194,7 @@ export const FilterChips = memo(function FilterChips({
                       // page; reciting two causes inside an aria-label the
                       // reader cannot skim would cost more than it explains.
                       // Truncation wins because it is the wider damage.
-                      hint: affectedByTruncation.has(cfg.type)
+                      hint: truncationAffectsChip
                         ? truncationHint
                         : t('caveat.followRequests.chipHint'),
                     })

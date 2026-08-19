@@ -7,7 +7,7 @@ import type { FilterAction, LinkType, ParseOutcome } from './constants';
 import { trackEvent } from './core';
 import { enqueueEvent, flushEvents, trackNavigating } from './queue';
 import { getStoredUTM, getEntryCTA, setEntryCTA } from './utm';
-import type { LabelResolutionMode } from '@/core/types';
+import type { LabelResolutionMode, TruncatedRelationshipFile } from '@/core/types';
 import type { LicenseFailureReason } from '@/lib/export/license';
 
 /**
@@ -456,7 +456,7 @@ export const analytics = {
   // The field is which of the two lists is short — a fact about the export's
   // shape, never about its contents. Same line the label event draws: no
   // username, no count, nothing derived from the file's bytes.
-  relationshipFileTruncated: (file: 'followers' | 'following') => {
+  relationshipFileTruncated: (file: NonNullable<TruncatedRelationshipFile>) => {
     trackEvent(AnalyticsEvents.RELATIONSHIP_FILE_TRUNCATED, { file });
   },
 

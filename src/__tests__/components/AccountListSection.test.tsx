@@ -14,8 +14,8 @@ import { useUploadCaveats } from '@/hooks/useUploadCaveats';
 // Mock the useAccountFiltering hook
 vi.mock('@/hooks/useAccountFiltering');
 
-// GH#41 — reads IndexedDB, which jsdom does not provide. Mocked so every other
-// test in this file renders the clean page, and the caveat tests below opt in.
+// Reads IndexedDB, which jsdom does not provide. Mocked so every other test in
+// this file renders the clean page, and the caveat tests below opt in.
 vi.mock('@/hooks/useUploadCaveats');
 
 // Mock useLanguagePrefix
@@ -256,9 +256,7 @@ describe('AccountListSection', () => {
       mockUseUploadCaveats.mockReturnValue(caveats({ truncatedRelationshipFile: 'followers' }));
       renderWithRouter(<AccountListSection {...defaultProps} />);
 
-      const notice = screen
-        .getByText(resultsEN.caveat.truncated.followers.title)
-        .closest('[role]');
+      const notice = screen.getByText(resultsEN.caveat.truncated.followers.title).closest('[role]');
       expect(notice).toHaveAttribute('role', 'status');
     });
 

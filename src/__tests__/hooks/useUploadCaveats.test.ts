@@ -27,6 +27,9 @@ describe('useUploadCaveats', () => {
       ...overrides,
     }) as never;
 
+  /** What the hook reports when there is nothing to warn about — its own NO_CAVEATS. */
+  const QUIET = { followRequestsUnreadable: false, truncatedRelationshipFile: null };
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -46,10 +49,7 @@ describe('useUploadCaveats', () => {
     const { result } = renderHook(() => useUploadCaveats('hash'));
 
     await waitFor(() => expect(getFileMetadata).toHaveBeenCalled());
-    expect(result.current).toEqual({
-      followRequestsUnreadable: false,
-      truncatedRelationshipFile: null,
-    });
+    expect(result.current).toEqual(QUIET);
   });
 
   it('stays quiet when the record is gone', async () => {
@@ -58,10 +58,7 @@ describe('useUploadCaveats', () => {
     const { result } = renderHook(() => useUploadCaveats('hash'));
 
     await waitFor(() => expect(getFileMetadata).toHaveBeenCalled());
-    expect(result.current).toEqual({
-      followRequestsUnreadable: false,
-      truncatedRelationshipFile: null,
-    });
+    expect(result.current).toEqual(QUIET);
   });
 
   it('stays quiet when IndexedDB is unavailable rather than surfacing the failure', async () => {
@@ -70,10 +67,7 @@ describe('useUploadCaveats', () => {
     const { result } = renderHook(() => useUploadCaveats('hash'));
 
     await waitFor(() => expect(getFileMetadata).toHaveBeenCalled());
-    expect(result.current).toEqual({
-      followRequestsUnreadable: false,
-      truncatedRelationshipFile: null,
-    });
+    expect(result.current).toEqual(QUIET);
   });
 
   it('reports which file was truncated', async () => {
@@ -104,9 +98,6 @@ describe('useUploadCaveats', () => {
     const { result } = renderHook(() => useUploadCaveats(null));
 
     expect(getFileMetadata).not.toHaveBeenCalled();
-    expect(result.current).toEqual({
-      followRequestsUnreadable: false,
-      truncatedRelationshipFile: null,
-    });
+    expect(result.current).toEqual(QUIET);
   });
 });

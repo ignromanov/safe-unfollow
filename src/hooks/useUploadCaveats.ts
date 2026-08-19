@@ -65,10 +65,18 @@ export function useUploadCaveats(fileHash: string | null): UploadCaveats {
       .getFileMetadata(fileHash)
       .then(record => {
         if (cancelled) return;
-        setCaveats({
-          followRequestsUnreadable: record?.followRequestsUnreadable === true,
-          truncatedRelationshipFile: record?.truncatedRelationshipFile ?? null,
-        });
+        const followRequestsUnreadable = record?.followRequestsUnreadable === true;
+        const truncatedRelationshipFile = record?.truncatedRelationshipFile ?? null;
+        // The quiet case returns the shared constant rather than an equal-looking
+        // literal. `useState` bails out on `Object.is`, so a fresh object here
+        // would re-render `/results` on every visit, including the overwhelming
+        // majority that have no caveat at all — a cost the boolean hook this
+        // replaced did not have.
+        setCaveats(
+          !followRequestsUnreadable && truncatedRelationshipFile === null
+            ? NO_CAVEATS
+            : { followRequestsUnreadable, truncatedRelationshipFile }
+        );
       })
       .catch(() => {
         if (!cancelled) setCaveats(NO_CAVEATS);

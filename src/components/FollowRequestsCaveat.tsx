@@ -1,6 +1,5 @@
-import { AlertTriangle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import { CaveatAlert } from './CaveatAlert';
 
 /**
  * Says out loud that `Not Following Back` may be overstated (GH#41).
@@ -19,26 +18,15 @@ import { Alert, AlertDescription, AlertTitle } from './ui/alert';
  * it. `followers`, `following` and `mutuals` are derived without those maps and
  * are the only counts named.
  *
- * `role="status"` overrides the primitive's `role="alert"`: the caveat is
- * inserted into the page after paint, once the stored flag resolves, and an
- * assertive live region interrupts a screen reader mid-announcement to say
- * something that is advisory rather than urgent.
+ * The amber shell, the warning icon and the `role="status"` override live in
+ * `CaveatAlert`, shared with the truncation caveat — that override is an
+ * accessibility decision rather than styling, and it was previously held, and
+ * explained, in two files at once.
  */
 export function FollowRequestsCaveat() {
   const { t } = useTranslation('results');
 
   return (
-    <Alert
-      role="status"
-      className="border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/50"
-    >
-      <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-      <AlertTitle className="text-amber-800 dark:text-amber-200 line-clamp-none">
-        {t('caveat.followRequests.title')}
-      </AlertTitle>
-      <AlertDescription className="block text-amber-700 dark:text-amber-300">
-        {t('caveat.followRequests.body')}
-      </AlertDescription>
-    </Alert>
+    <CaveatAlert title={t('caveat.followRequests.title')} body={t('caveat.followRequests.body')} />
   );
 }

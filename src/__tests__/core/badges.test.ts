@@ -307,15 +307,21 @@ describe('Badge Logic', () => {
     });
 
     it('names the badges a short followers file corrupts', () => {
-      expect([...badgesAffectedByTruncation('followers')].sort()).toEqual(
-        ['followers', 'mutuals', 'notFollowingBack', 'notFollowedBack'].sort()
-      );
+      expect([...badgesAffectedByTruncation('followers')].sort()).toEqual([
+        'followers',
+        'mutuals',
+        'notFollowedBack',
+        'notFollowingBack',
+      ]);
     });
 
     it('names the badges a short following file corrupts', () => {
-      expect([...badgesAffectedByTruncation('following')].sort()).toEqual(
-        ['following', 'mutuals', 'notFollowedBack', 'notFollowingBack'].sort()
-      );
+      expect([...badgesAffectedByTruncation('following')].sort()).toEqual([
+        'following',
+        'mutuals',
+        'notFollowedBack',
+        'notFollowingBack',
+      ]);
     });
 
     /**
@@ -360,7 +366,9 @@ describe('Badge Logic', () => {
       // Direction matters as much as membership: the caveat tells the reader
       // that "not following back" is too high and mutuals too low, and saying
       // it backwards would be its own wrong answer.
-      expect(after.get('notFollowingBack') ?? 0).toBeGreaterThan(before.get('notFollowingBack') ?? 0);
+      expect(after.get('notFollowingBack') ?? 0).toBeGreaterThan(
+        before.get('notFollowingBack') ?? 0
+      );
       expect(after.get('mutuals') ?? 0).toBeLessThan(before.get('mutuals') ?? 0);
       expect(after.get('notFollowedBack') ?? 0).toBeLessThan(before.get('notFollowedBack') ?? 0);
     });

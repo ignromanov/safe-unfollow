@@ -85,15 +85,24 @@ function oldestTimestamp(timestamps: ReadonlyMap<string, number>): number | null
  * every one of them. The oldest entry is a fixed point of the account's history
  * instead, and stayed at -60 days across all six.
  *
+ * Named fields rather than two positional arguments, because the two maps have
+ * the same type and the entire output of this function is the sign of a
+ * subtraction between them: swapping them at the call site type-checks cleanly
+ * and reports the wrong file, which is precisely the wrong answer this module
+ * exists to prevent.
+ *
  * @returns which list is short, or null when the two begin close enough
  *   together, or when either is too small to judge.
  */
-export function detectRelationshipSkew(
-  followingTimestamps: ReadonlyMap<string, number>,
-  followersTimestamps: ReadonlyMap<string, number>
-): TruncatedRelationshipFile {
-  const followingOldest = oldestTimestamp(followingTimestamps);
-  const followersOldest = oldestTimestamp(followersTimestamps);
+export function detectRelationshipSkew({
+  following,
+  followers,
+}: {
+  following: ReadonlyMap<string, number>;
+  followers: ReadonlyMap<string, number>;
+}): TruncatedRelationshipFile {
+  const followingOldest = oldestTimestamp(following);
+  const followersOldest = oldestTimestamp(followers);
 
   if (followingOldest === null || followersOldest === null) return null;
 

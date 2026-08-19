@@ -1,10 +1,5 @@
 import { OPTIONAL_FILE_DRIFT_CODES } from '@/core/parsers/instagram-file-specs';
-import type {
-  FileDiscovery,
-  LabelResolutionMode,
-  ParseWarning,
-  TruncatedRelationshipFile,
-} from '@/core/types';
+import type { FileDiscovery, ParseWarning } from '@/core/types';
 import { analytics } from '@/lib/analytics';
 import type { ParseOutcome } from '@/lib/analytics';
 import { extractErrorCode } from '@/lib/error-classifier';
@@ -55,12 +50,19 @@ const LAST_UPLOAD_KEY = 'analytics_last_upload';
  * on `typeof window === 'undefined'` (`lib/stats/queue.ts`, `lib/stats/core.ts`),
  * and a Web Worker's global is `self`, so emitting from the parser itself would
  * be a silent no-op. Both signals already cross the boundary inside the result.
+ *
+ * Takes the whole `ParseErrorData` rather than one parameter per signal. The
+ * success paths already hold a structurally compatible result, and the failure
+ * path already throws this exact shape (`guardFailure` below, and both throwers
+ * in `parse-orchestration.ts`), so a new parse fact costs one destructured name
+ * here instead of a fourth positional argument at three call sites and a fourth
+ * hand-written `error as { field?: T }` cast on the failure path.
  */
-function reportParseDiagnostics(
-  warnings: ParseWarning[] | undefined,
-  labelResolutionMode: LabelResolutionMode | undefined,
-  truncatedRelationshipFile: TruncatedRelationshipFile | undefined
-): void {
+function reportParseDiagnostics({
+  warnings,
+  labelResolutionMode,
+  truncatedRelationshipFile,
+}: ParseErrorData): void {
   for (const warning of warnings ?? []) {
     if (OPTIONAL_FILE_DRIFT_CODES.has(warning.code)) {
       analytics.optionalFileFormatDrift(warning.code);
@@ -285,26 +287,16 @@ export function useFileUpload() {
                 fileDiscovery: result.discovery,
               });
             }
-            reportParseDiagnostics(
-              result.warnings,
-              result.labelResolutionMode,
-              result.truncatedRelationshipFile
-            );
+            reportParseDiagnostics(result);
           } catch (error) {
             // Extract warnings/discovery from error if available
             if (error instanceof Error && 'warnings' in error) {
-              const failureWarnings = (error as { warnings?: ParseWarning[] }).warnings;
+              const failure = error as Error & ParseErrorData;
               setUploadInfo({
-                parseWarnings: failureWarnings ?? [],
-                fileDiscovery: (error as { discovery?: import('@/core/types').FileDiscovery })
-                  .discovery,
+                parseWarnings: failure.warnings ?? [],
+                fileDiscovery: failure.discovery,
               });
-              reportParseDiagnostics(
-                failureWarnings,
-                (error as { labelResolutionMode?: LabelResolutionMode }).labelResolutionMode,
-                (error as { truncatedRelationshipFile?: TruncatedRelationshipFile })
-                  .truncatedRelationshipFile
-              );
+              reportParseDiagnostics(failure);
             }
             throw error;
           }
@@ -324,11 +316,7 @@ export function useFileUpload() {
             parseWarnings: result.warnings ?? [],
             fileDiscovery: result.discovery,
           });
-          reportParseDiagnostics(
-              result.warnings,
-              result.labelResolutionMode,
-              result.truncatedRelationshipFile
-            );
+          reportParseDiagnostics(result);
         }
 
         // Data already cached in IndexedDB by worker during chunked processing

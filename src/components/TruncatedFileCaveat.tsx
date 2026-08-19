@@ -1,7 +1,6 @@
-import { AlertTriangle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { TruncatedRelationshipFile } from '@/core/types';
-import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import { CaveatAlert } from './CaveatAlert';
 
 /**
  * Says out loud that four counts on this page are wrong, because one of the two
@@ -27,10 +26,9 @@ import { Alert, AlertDescription, AlertTitle } from './ui/alert';
  * shape, so the text states what was observed and names the one action that
  * settles it, rather than telling the reader what Instagram did.
  *
- * `role="status"` overrides the primitive's `role="alert"`, for the reason its
- * GH#41 sibling documents: this is inserted after paint once the stored flag
- * resolves, and an assertive live region would interrupt a screen reader
- * mid-announcement to say something advisory.
+ * Self-guarding on `null` rather than being conditioned by its caller, so that
+ * "is there anything to say" and "what to say" stay in one place — `/results`
+ * renders it unconditionally and the detector's verdict is the only input.
  */
 export function TruncatedFileCaveat({ truncated }: { truncated: TruncatedRelationshipFile }) {
   const { t } = useTranslation('results');
@@ -38,17 +36,9 @@ export function TruncatedFileCaveat({ truncated }: { truncated: TruncatedRelatio
   if (truncated === null) return null;
 
   return (
-    <Alert
-      role="status"
-      className="border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/50"
-    >
-      <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-      <AlertTitle className="text-amber-800 dark:text-amber-200 line-clamp-none">
-        {t(`caveat.truncated.${truncated}.title`)}
-      </AlertTitle>
-      <AlertDescription className="block text-amber-700 dark:text-amber-300">
-        {t(`caveat.truncated.${truncated}.body`)}
-      </AlertDescription>
-    </Alert>
+    <CaveatAlert
+      title={t(`caveat.truncated.${truncated}.title`)}
+      body={t(`caveat.truncated.${truncated}.body`)}
+    />
   );
 }

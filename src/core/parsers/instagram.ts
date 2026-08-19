@@ -238,10 +238,10 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
   // detector's own sample-size guard returns null for the empty maps that an
   // unreadable file leaves behind, so no branch is needed to keep the two
   // diagnoses from talking over each other.
-  const truncatedRelationshipFile = detectRelationshipSkew(
-    followingParsed.followingTimestamps,
-    followersParsed.followersTimestamps
-  );
+  const truncatedRelationshipFile = detectRelationshipSkew({
+    following: followingParsed.followingTimestamps,
+    followers: followersParsed.followersTimestamps,
+  });
 
   return {
     data: {

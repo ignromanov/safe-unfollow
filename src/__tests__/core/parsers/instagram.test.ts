@@ -11,6 +11,7 @@ import {
   NULL_PAYLOAD,
   UNKNOWN_TOP_LEVEL_KEY,
   VALID_ARRAY_OF_ONE,
+  makeEntry,
   objectInsteadOfArray,
 } from '../../fixtures/instagram-format-drift';
 
@@ -802,17 +803,14 @@ describe('Instagram Parser', () => {
       ['followers wrapper unrecognised', VALID_ARRAY_OF_ONE, UNKNOWN_TOP_LEVEL_KEY],
       ['followers records unreadable', VALID_ARRAY_OF_ONE, [{ media_list_data: [] }]],
       ['both genuinely empty', EMPTY_ARRAY, EMPTY_ARRAY],
-    ])(
-      'never refuses an upload without saying why (%s)',
-      async (_label, following, followers) => {
-        const result = await parseInstagramZipFile(zipWith(following, followers));
+    ])('never refuses an upload without saying why (%s)', async (_label, following, followers) => {
+      const result = await parseInstagramZipFile(zipWith(following, followers));
 
-        expect(result.hasMinimalData).toBe(false);
-        const firstError = result.warnings.find(w => w.severity === 'error');
-        expect(firstError).toBeDefined();
-        expect(firstError?.message).toBeTruthy();
-      }
-    );
+      expect(result.hasMinimalData).toBe(false);
+      const firstError = result.warnings.find(w => w.severity === 'error');
+      expect(firstError).toBeDefined();
+      expect(firstError?.message).toBeTruthy();
+    });
 
     it('leaves an absent required file alone', async () => {
       // "Absent" and "present but unreadable" are different answers and this
@@ -970,19 +968,12 @@ describe('Instagram Parser', () => {
   describe('a required file cut short by a date range', () => {
     const DAY = 86_400;
 
+    // `makeEntry` rather than a hand-built literal: the legacy entry shape is
+    // already declared once in the drift fixtures, and a second copy here would
+    // keep this test passing against a shape the parser no longer meets.
     const entries = (prefix: string, count: number, oldest: number) =>
       JSON.stringify(
-        Array.from({ length: count }, (_, i) => ({
-          title: `${prefix}${i}`,
-          string_list_data: [
-            {
-              href: `https://www.instagram.com/${prefix}${i}/`,
-              value: `${prefix}${i}`,
-              timestamp: oldest + i * DAY,
-            },
-          ],
-          media_list_data: [],
-        }))
+        Array.from({ length: count }, (_, i) => makeEntry(`${prefix}${i}`, oldest + i * DAY))
       );
 
     const parseWith = async (followingOldest: number, followersOldest: number) => {
