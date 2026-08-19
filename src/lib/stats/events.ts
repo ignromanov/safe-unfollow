@@ -17,6 +17,17 @@ import type { LicenseFailureReason } from '@/lib/export/license';
  * inherits wizard_step_view's back-navigation non-monotonicity — 1→2→1→2 counts
  * twice on both ends and the ratio stops being a funnel. Mechanism follows the
  * `analytics_first_pv` precedent below (`pageView`).
+ *
+ * Callers must evaluate this *before* the sampling gate, not after. The flag
+ * describes the reader's history ("has this screen been seen before"), not
+ * whether this particular view got sampled — an unreported view still
+ * happened, and the marker still needs writing so the next view (sampled or
+ * not) reads `false`. Gating first would make the marker's write conditional
+ * on the sample roll, so `first_view: true` would mean "the first view that
+ * happened to be sampled", not "the reader's first view" — expected
+ * true-count per session becomes `1 - 0.95^n`, which is n-dependent, and the
+ * entry→step-2 ratio this flag exists to unbias stays skewed by
+ * back-navigation.
  */
 function firstViewInSession(key: string): boolean {
   if (typeof window === 'undefined') return false;
@@ -217,19 +228,19 @@ export const analytics = {
    * Different denominators by construction.
    */
   guideEntryView: () => {
+    // Order matters — see firstViewInSession's doc comment. The marker must
+    // be written regardless of whether this view is sampled.
+    const isFirstView = firstViewInSession('guide_entry');
     if (Math.random() > 0.05) return;
-    enqueueEvent(AnalyticsEvents.GUIDE_ENTRY_VIEW, {
-      first_view: firstViewInSession('guide_entry'),
-    });
+    enqueueEvent(AnalyticsEvents.GUIDE_ENTRY_VIEW, { first_view: isFirstView });
   },
 
   // Wizard events (V10: 5% sampling, was 25%)
   wizardStepView: (stepId: number) => {
+    // Order matters — see firstViewInSession's doc comment.
+    const isFirstView = firstViewInSession(`wizard_step_${stepId}`);
     if (Math.random() > 0.05) return;
-    enqueueEvent(AnalyticsEvents.WIZARD_STEP_VIEW, {
-      step_id: stepId,
-      first_view: firstViewInSession(`wizard_step_${stepId}`),
-    });
+    enqueueEvent(AnalyticsEvents.WIZARD_STEP_VIEW, { step_id: stepId, first_view: isFirstView });
   },
 
   // Page Views (V10: first-in-session UTM attribution only, Umami built-in handles pageviews)

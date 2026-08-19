@@ -251,6 +251,47 @@ describe('promo impression batching', () => {
       expect(enqueueEvent).not.toHaveBeenCalled();
       random.mockRestore();
     });
+
+    // Every test above pins Math.random to a single value, which makes
+    // "compute first_view before the gate" and "compute it after" produce
+    // identical output — both orders are indistinguishable when every call
+    // is sampled the same way. This is the case that actually tells them
+    // apart: the first call is dropped by the gate but must still consume
+    // the "seen before" marker, so the later, sampled call reports
+    // first_view: false — not true, which is what gate-before-marker would
+    // report instead.
+    it('marks a later sampled view as not-first when an earlier, unsampled view already happened', () => {
+      const random = vi.spyOn(Math, 'random');
+
+      random.mockReturnValueOnce(0.9); // dropped by the gate — never enqueued
+      analytics.guideEntryView();
+      expect(enqueueEvent).not.toHaveBeenCalled();
+
+      random.mockReturnValueOnce(0); // inside the gate
+      analytics.guideEntryView();
+
+      expect(enqueueEvent).toHaveBeenCalledExactlyOnceWith('guide_entry_view', {
+        first_view: false,
+      });
+      random.mockRestore();
+    });
+
+    it('does the same for wizardStepView', () => {
+      const random = vi.spyOn(Math, 'random');
+
+      random.mockReturnValueOnce(0.9);
+      analytics.wizardStepView(4);
+      expect(enqueueEvent).not.toHaveBeenCalled();
+
+      random.mockReturnValueOnce(0);
+      analytics.wizardStepView(4);
+
+      expect(enqueueEvent).toHaveBeenCalledExactlyOnceWith('wizard_step_view', {
+        step_id: 4,
+        first_view: false,
+      });
+      random.mockRestore();
+    });
   });
 
   // The upload funnel moves as one unit or not at all. `file_upload_success`
