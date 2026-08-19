@@ -67,6 +67,16 @@ function setCtaIntersecting(isIntersecting: boolean) {
   });
 }
 
+// The swap is gated on a scroll delivered after the listener attached, i.e.
+// after hydration (Wizard.tsx). Every test that wants the swapped bar has to
+// scroll the wizard's own container first, exactly as a reader does — the
+// observer's own first callback is not enough on its own.
+function scrollContent() {
+  const container = screen.getByRole('dialog').querySelector('.overflow-y-auto');
+  if (!container) throw new Error('wizard scroll container not found');
+  fireEvent.scroll(container);
+}
+
 describe('Wizard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -305,6 +315,7 @@ describe('Wizard', () => {
       const linksBefore = within(bar).getAllByRole('link');
       expect(linksBefore).toHaveLength(2);
 
+      scrollContent();
       setCtaIntersecting(false);
 
       const linksAfter = within(bar).getAllByRole('link');
@@ -316,10 +327,40 @@ describe('Wizard', () => {
       expect(bar.getBoundingClientRect().height).toBe(heightBefore);
     });
 
+    // Critical 1 (extra review of PR-2): the invariant is that a prerendered
+    // anchor's destination must not change in the same frame the page becomes
+    // interactive. IntersectionObserver fires its first callback on observe(),
+    // so for a reader who scrolled past the in-flow CTA while JS was still
+    // loading, that callback lands at hydration — and the right slot would go
+    // from an in-app route to a cross-origin target="_blank" link under a
+    // thumb already resting on it.
+    it('leaves the bar alone when the observer reports out-of-view with no scroll since hydration', () => {
+      renderWizardAtStep(1);
+      const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
+
+      setCtaIntersecting(false);
+
+      expect(within(bar).getByText('Next Step')).toBeInTheDocument();
+      expect(within(bar).getByText(wizardEN.buttons.cancel)).toBeInTheDocument();
+      expect(within(bar).queryByText(wizardEN.entry.cta)).not.toBeInTheDocument();
+    });
+
+    it('swaps once that same out-of-view report is followed by a scroll', () => {
+      renderWizardAtStep(1);
+      const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
+
+      setCtaIntersecting(false);
+      scrollContent();
+
+      expect(within(bar).getByText(wizardEN.entry.cta)).toBeInTheDocument();
+      expect(within(bar).queryByText('Next Step')).not.toBeInTheDocument();
+    });
+
     it('links the swapped bar primary to the same Accounts Center destination as the in-flow CTA', () => {
       renderWizardAtStep(1);
       const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
 
+      scrollContent();
       setCtaIntersecting(false);
 
       const barCta = within(bar).getByRole('link', { name: wizardEN.entry.cta });
@@ -333,6 +374,7 @@ describe('Wizard', () => {
       renderWizardAtStep(1);
       const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
 
+      scrollContent();
       setCtaIntersecting(false);
 
       const trySample = within(bar).getByRole('link', { name: wizardEN.buttons.trySample });
@@ -343,6 +385,7 @@ describe('Wizard', () => {
       renderWizardAtStep(1);
       const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
 
+      scrollContent();
       setCtaIntersecting(false);
       setCtaIntersecting(true);
 
@@ -380,6 +423,7 @@ describe('Wizard', () => {
       expect(observedEntries.length).toBeGreaterThan(0);
 
       const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
+      scrollContent();
       setCtaIntersecting(false);
 
       expect(within(bar).getByText(wizardEN.entry.cta)).toBeInTheDocument();
@@ -391,6 +435,7 @@ describe('Wizard', () => {
       const { rerender } = render(<Wizard />);
 
       // The in-flow CTA scrolls out before the reader leaves the step.
+      scrollContent();
       setCtaIntersecting(false);
 
       mockPathname = '/wizard/step/2';

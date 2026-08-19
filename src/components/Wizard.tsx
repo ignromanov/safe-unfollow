@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, X, AlertTriangle, Calendar } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import FocusTrap from 'focus-trap-react';
@@ -22,6 +22,27 @@ export function Wizard({ initialStep = 1 }: WizardProps) {
   // unmounted on every other step, so the hook has nothing attached there
   // and its default (true) is inert.
   const [ctaInView, ctaRef] = useIsElementInView<HTMLAnchorElement>();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [hasScrolled, setHasScrolled] = useState(false);
+
+  // A prerendered anchor's destination must not change in the same frame the
+  // page becomes interactive. IntersectionObserver delivers its first callback
+  // on observe(), so a reader who scrolled past the in-flow CTA while JS was
+  // still loading would otherwise have the bar's two slots swap the instant
+  // hydration completes — including the right slot, from an in-app route to a
+  // cross-origin target="_blank" link — under a thumb already on it. This flag
+  // is set by a scroll that happens *after* the listener attached, i.e. after
+  // hydration, so such a reader keeps the bar the static HTML showed them
+  // until they scroll again. The wizard scrolls in the inner container below,
+  // never the window, so that is where the listener goes.
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const markScrolled = () => setHasScrolled(true);
+    container.addEventListener('scroll', markScrolled, { passive: true });
+    return () => container.removeEventListener('scroll', markScrolled);
+  }, []);
 
   // Track analytics on step view. Step 1 is GuideEntry, which reports its
   // own guideEntryView — reporting wizardStepView here too would double the
@@ -40,8 +61,9 @@ export function Wizard({ initialStep = 1 }: WizardProps) {
   const isLastStep = currentStep === WIZARD_STEPS.length;
   // Step 1 only: once the in-flow CTA scrolls out of view, the bottom bar
   // takes over as the primary action so there is always exactly one on
-  // screen. Every other step keeps its normal Back/Next bar.
-  const showBarPrimary = isFirstStep && !ctaInView;
+  // screen. Every other step keeps its normal Back/Next bar. `hasScrolled`
+  // gates the swap on a post-hydration scroll — see the effect above.
+  const showBarPrimary = isFirstStep && hasScrolled && !ctaInView;
 
   // Back/Next/Done/the step dots/Close guide are now plain PrefixedLinks — each
   // computes its own destination, so the browser can follow it before hydration.
@@ -112,7 +134,7 @@ export function Wizard({ initialStep = 1 }: WizardProps) {
         </div>
 
         {/* Scrollable content area */}
-        <div className="flex-1 overflow-y-auto">
+        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
           <div className="min-h-full flex items-center justify-center p-4">
             {currentStep === 1 ? (
               <GuideEntry ctaRef={ctaRef} />
