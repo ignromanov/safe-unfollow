@@ -44,7 +44,10 @@ describe('useIsElementInView', () => {
     vi.stubGlobal(
       'IntersectionObserver',
       class {
-        constructor(private callback: IntersectionObserverCallback, options?: IntersectionObserverInit) {
+        constructor(
+          private callback: IntersectionObserverCallback,
+          options?: IntersectionObserverInit
+        ) {
           observerOptions = options;
         }
         observe(element: Element): void {

@@ -270,11 +270,7 @@ export function Wizard({ initialStep = 1 }: WizardProps) {
           >
             <PrefixedLink
               to={
-                showBarPrimary
-                  ? '/sample'
-                  : isFirstStep
-                    ? '/'
-                    : `/wizard/step/${currentStep - 1}`
+                showBarPrimary ? '/sample' : isFirstStep ? '/' : `/wizard/step/${currentStep - 1}`
               }
               className="cursor-pointer flex items-center gap-2 px-4 py-3 rounded-xl font-bold text-sm transition-all hover:bg-muted text-muted-foreground"
             >

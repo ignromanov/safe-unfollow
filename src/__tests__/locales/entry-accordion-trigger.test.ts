@@ -61,7 +61,10 @@ describe('wizard entry accordion trigger — plural resolution', () => {
         REAL_STEP_COUNT
       );
 
-      expect(resolved, `${language} entry.accordion.trigger at count=${REAL_STEP_COUNT}`).toBeTruthy();
+      expect(
+        resolved,
+        `${language} entry.accordion.trigger at count=${REAL_STEP_COUNT}`
+      ).toBeTruthy();
       expect(resolved, language).toContain('{{count}}');
     }
   });
