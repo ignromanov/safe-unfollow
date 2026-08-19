@@ -1,10 +1,17 @@
 import { Link, type LinkProps } from 'react-router-dom';
 
 import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
+import type { HeroCta } from '@/lib/stats/cta-capture';
 
 export interface PrefixedLinkProps extends Omit<LinkProps, 'to'> {
   /** Path without the language prefix, always leading-slash — e.g. `/upload`. */
   to: string;
+  /**
+   * Marks this link as a tracked CTA. Rendered as `data-cta`, which is all the
+   * pre-hydration listener in index.html can see. A prop rather than a hand-written
+   * attribute so the slug is checked against the four the drain knows.
+   */
+  cta?: HeroCta;
 }
 
 /**
@@ -25,12 +32,15 @@ export interface PrefixedLinkProps extends Omit<LinkProps, 'to'> {
  * make work, on the slow mobile connections that are 85% of traffic. Client-side
  * navigation normalised that away and hid it; an `href` does not.
  *
- * Analytics goes on `onClick` as usual, with one consequence worth knowing: during the
- * dead window the browser follows the href and no handler runs, so click counts for a
- * converted CTA fall while the navigation itself starts working.
+ * Analytics does **not** go on `onClick` here, and that is the whole reason `cta` exists:
+ * during the dead window the browser follows the href and no React handler runs, so a
+ * click on a converted CTA used to lose both its event and — `setEntryCTA` being
+ * first-wins — the session's attribution, which then fell to whatever was clicked next.
+ * `cta` renders into the prerendered HTML, where a listener that runs at parse time can
+ * still see it. See `lib/stats/cta-capture.ts` (GH#99).
  */
-export function PrefixedLink({ to, ...props }: PrefixedLinkProps) {
+export function PrefixedLink({ to, cta, ...props }: PrefixedLinkProps) {
   const prefix = useLanguagePrefix();
   const href = to === '/' ? prefix || '/' : `${prefix}${to}`;
-  return <Link to={href} {...props} />;
+  return <Link to={href} data-cta={cta} {...props} />;
 }

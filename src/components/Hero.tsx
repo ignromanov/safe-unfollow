@@ -8,7 +8,6 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { analytics } from '@/lib/analytics';
 import { PrefixedLink } from '@/components/PrefixedLink';
 
 interface HeroProps {
@@ -47,7 +46,7 @@ export function Hero({ hasData }: HeroProps) {
           {hasData ? (
             <PrefixedLink
               to="/results"
-              onClick={() => analytics.heroCTAContinue?.()}
+              cta="continue"
               className="cursor-pointer w-full sm:w-auto px-10 md:px-12 py-4 md:py-5 rounded-3xl bg-primary text-primary-foreground font-bold text-base md:text-lg shadow-2xl shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 group"
             >
               {t('buttons.viewResults')}
@@ -56,7 +55,7 @@ export function Hero({ hasData }: HeroProps) {
           ) : (
             <PrefixedLink
               to="/wizard/step/1"
-              onClick={() => analytics.heroCTAGuide?.()}
+              cta="guide"
               className="cursor-pointer w-full sm:w-auto px-10 md:px-12 py-4 md:py-5 rounded-3xl bg-primary text-primary-foreground font-bold text-base md:text-lg shadow-2xl shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 group"
             >
               {t('buttons.getGuide')}
@@ -67,7 +66,7 @@ export function Hero({ hasData }: HeroProps) {
           {/* Secondary CTA */}
           <PrefixedLink
             to="/sample"
-            onClick={() => analytics.heroCTASample?.()}
+            cta="sample"
             className="cursor-pointer w-full sm:w-auto px-8 md:px-10 py-4 md:py-5 rounded-3xl border border-border bg-card font-bold text-base md:text-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all flex items-center justify-center gap-2"
           >
             <Database size={20} className="text-accent" />
@@ -92,7 +91,7 @@ export function Hero({ hasData }: HeroProps) {
         {!hasData && (
           <PrefixedLink
             to="/upload"
-            onClick={() => analytics.heroCTAUploadDirect?.()}
+            cta="upload_direct"
             className="cursor-pointer text-zinc-400 hover:text-primary font-bold text-xs uppercase tracking-widest transition-all underline underline-offset-4 decoration-zinc-200"
           >
             {t('buttons.haveFile')}
