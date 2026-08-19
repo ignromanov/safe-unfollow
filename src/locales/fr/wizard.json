@@ -31,7 +31,7 @@
       "ours": "La demande prend environ 2 minutes.",
       "theirs": "Instagram vous envoie ensuite le fichier par e-mail — l'attente est la leur, pas la nôtre."
     },
-    "cta": "Ouvrir le Centre de comptes",
+    "cta": "Ouvrir l'Espace Comptes",
     "trust": {
       "noLogin": "Aucune connexion. Aucun mot de passe. Rien à relier.",
       "local": "Votre export est lu dans ce navigateur et jamais téléversé."
@@ -39,7 +39,7 @@
     "recipe": {
       "title": "Que choisir dans la boîte de dialogue Instagram",
       "rows": {
-        "destination": "Exporter vers l'appareil",
+        "destination": "Exporter sur mon appareil",
         "range": "Tout",
         "format": "JSON — pas HTML",
         "quality": "Toute qualité de média",

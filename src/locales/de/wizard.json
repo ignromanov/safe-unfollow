@@ -31,7 +31,7 @@
       "ours": "Das Anfragen dauert etwa 2 Minuten.",
       "theirs": "Instagram schickt die Datei dann per E-Mail — das Warten liegt bei ihnen, nicht bei uns."
     },
-    "cta": "Konten-Center öffnen",
+    "cta": "Kontenübersicht öffnen",
     "trust": {
       "noLogin": "Keine Anmeldung. Kein Passwort. Nichts zu verbinden.",
       "local": "Dein Export wird in diesem Browser gelesen und nie hochgeladen."
@@ -39,7 +39,7 @@
     "recipe": {
       "title": "Was du im Instagram-Dialog auswählen musst",
       "rows": {
-        "destination": "Auf Gerät exportieren",
+        "destination": "Zu Gerät exportieren",
         "range": "Gesamter Zeitraum",
         "format": "JSON — nicht HTML",
         "quality": "Beliebige Medienqualität",

@@ -31,7 +31,7 @@
       "ours": "İstemek yaklaşık 2 dakika sürer.",
       "theirs": "Instagram dosyayı sonra e-postayla gönderir — bekleyen onlar, biz değil."
     },
-    "cta": "Hesap Merkezi'ni aç",
+    "cta": "Hesaplar Merkezi'ni aç",
     "trust": {
       "noLogin": "Giriş yok. Şifre yok. Bağlanacak hiçbir şey yok.",
       "local": "Dışa aktarımın bu tarayıcıda okunur ve asla yüklenmez."
@@ -39,7 +39,7 @@
     "recipe": {
       "title": "Instagram iletişim kutusunda ne seçilmeli",
       "rows": {
-        "destination": "Cihaza dışa aktar",
+        "destination": "Cihaza aktar",
         "range": "Tüm zamanlar",
         "format": "JSON — HTML değil",
         "quality": "Herhangi bir medya kalitesi",
