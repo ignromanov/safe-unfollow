@@ -3,7 +3,12 @@
  * Handles ZIP parsing via Web Worker or fallback to main thread
  */
 
-import type { FileDiscovery, LabelResolutionMode, ParseWarning } from '@/core/types';
+import type {
+  FileDiscovery,
+  LabelResolutionMode,
+  ParseWarning,
+  TruncatedRelationshipFile,
+} from '@/core/types';
 import { buildAccountBadgeIndex } from '@/core/badges';
 import { indexedDBService } from './indexeddb/indexeddb-service';
 import { logger } from './logger';
@@ -14,6 +19,7 @@ export interface ParseErrorData {
   warnings?: ParseWarning[];
   discovery?: FileDiscovery;
   labelResolutionMode?: LabelResolutionMode;
+  truncatedRelationshipFile?: TruncatedRelationshipFile;
 }
 
 // Worker timeout constant (ms)
@@ -25,6 +31,7 @@ export interface ParseResult {
   warnings?: ParseWarning[];
   discovery?: FileDiscovery;
   labelResolutionMode?: LabelResolutionMode;
+  truncatedRelationshipFile?: TruncatedRelationshipFile;
 }
 
 export interface ProgressCallback {
@@ -70,6 +77,7 @@ export async function parseWithWorker(
           warnings,
           discovery,
           labelResolutionMode,
+          truncatedRelationshipFile,
         } = e.data;
         worker.removeEventListener('message', handleMessage);
         resolve({
@@ -78,6 +86,7 @@ export async function parseWithWorker(
           warnings,
           discovery,
           labelResolutionMode,
+          truncatedRelationshipFile,
         });
       } else if (e.data?.type === 'error') {
         clearTimeout(timeoutId);
@@ -88,6 +97,7 @@ export async function parseWithWorker(
         error.warnings = e.data.warnings;
         error.discovery = e.data.discovery;
         error.labelResolutionMode = e.data.labelResolutionMode;
+        error.truncatedRelationshipFile = e.data.truncatedRelationshipFile;
 
         reject(error);
       }
@@ -134,6 +144,7 @@ export async function parseOnMainThread(
     error.warnings = parseResult.warnings;
     error.discovery = parseResult.discovery;
     error.labelResolutionMode = parseResult.labelResolutionMode;
+    error.truncatedRelationshipFile = parseResult.truncatedRelationshipFile;
     throw error;
   }
 
@@ -155,6 +166,7 @@ export async function parseOnMainThread(
       version: 2,
       // GH#41 — see parse-worker.ts; the fallback path must persist it too.
       followRequestsUnreadable: parseResult.followRequestsUnreadable,
+      truncatedRelationshipFile: parseResult.truncatedRelationshipFile,
     });
 
     await indexedDBService.storeAllAccounts(fileHash, unified);
@@ -181,5 +193,6 @@ export async function parseOnMainThread(
     warnings: parseResult.warnings,
     discovery: parseResult.discovery,
     labelResolutionMode: parseResult.labelResolutionMode,
+    truncatedRelationshipFile: parseResult.truncatedRelationshipFile,
   };
 }

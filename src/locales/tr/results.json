@@ -54,6 +54,18 @@
       "title": "“Geri takip etmeyenler” olduğundan fazla görünüyor olabilir.",
       "body": "Takip istekleri dosyanı okuyamadık, bu yüzden istek gönderdiğin hesaplar bu listede çıkabilir ve bekleyen istek sayıların boş görünür. Takipçiler, Takip edilenler ve Karşılıklı takip bundan etkilenmedi.",
       "chipHint": "Olduğundan fazla görünüyor olabilir — takip istekleri dosyanı okuyamadık."
+    },
+    "truncated": {
+      "followers": {
+        "title": "Takipçi listen eksik görünüyor.",
+        "body": "Takip ettiklerin listesinden çok daha geç başlıyor; bu da dışa aktarma sınırlı bir tarih aralığı için istendiğinde olur. Bir aralık seçtiysen verilerini Instagram'dan yeniden iste ve tarih aralığını \"Tüm zamanlar\" olarak ayarla. Aşağıda işaretlenen sayılar etkilenmiş durumda: bazıları fazla yüksek, bazıları fazla düşük.",
+        "chipHint": "Eksik görünen bir takipçi listesinden hesaplandı."
+      },
+      "following": {
+        "title": "Takip ettiklerin listesi eksik görünüyor.",
+        "body": "Takipçi listenden çok daha geç başlıyor; bu da dışa aktarma sınırlı bir tarih aralığı için istendiğinde olur. Bir aralık seçtiysen verilerini Instagram'dan yeniden iste ve tarih aralığını \"Tüm zamanlar\" olarak ayarla. Aşağıda işaretlenen sayılar etkilenmiş durumda: bazıları fazla yüksek, bazıları fazla düşük.",
+        "chipHint": "Eksik görünen bir takip listesinden hesaplandı."
+      }
     }
   },
   "empty": {

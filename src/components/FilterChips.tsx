@@ -12,8 +12,11 @@ import {
   AlertTriangle,
   Ghost,
 } from 'lucide-react';
-import { BADGES_OVERSTATED_BY_UNREADABLE_REQUESTS } from '@/core/badges';
-import type { BadgeKey } from '@/core/types';
+import {
+  BADGES_OVERSTATED_BY_UNREADABLE_REQUESTS,
+  badgesAffectedByTruncation,
+} from '@/core/badges';
+import type { BadgeKey, TruncatedRelationshipFile } from '@/core/types';
 interface FilterChipsProps {
   selectedFilters: Set<BadgeKey>;
   onFiltersChange: (filters: Set<BadgeKey>) => void;
@@ -25,6 +28,13 @@ interface FilterChipsProps {
    * since the two are far apart on a phone.
    */
   followRequestsUnreadable?: boolean;
+  /**
+   * Marks every chip whose count a truncated relationship file corrupts. Unlike
+   * the flag above this one is not a single badge: which counts are wrong
+   * depends on which file arrived short, so the set comes from
+   * `badgesAffectedByTruncation` rather than being named here.
+   */
+  truncatedRelationshipFile?: TruncatedRelationshipFile;
 }
 import { analytics } from '@/lib/analytics';
 import type { ReactNode } from 'react';
@@ -82,9 +92,21 @@ export const FilterChips = memo(function FilterChips({
   filterCounts,
   isFiltering: _isFiltering = false,
   followRequestsUnreadable = false,
+  truncatedRelationshipFile = null,
 }: FilterChipsProps) {
   const { t } = useTranslation('results');
   const [showEmptyFilters, setShowEmptyFilters] = useState(false);
+
+  // Derived, never listed here: which counts a short file corrupts is a fact
+  // about the badge arithmetic, and a component naming badge keys by hand would
+  // be a second copy of it that drifts (`core/badges/index.ts`).
+  const affectedByTruncation = badgesAffectedByTruncation(truncatedRelationshipFile);
+
+  // Resolved once, outside the chip loop, and behind the null check the typed
+  // key union requires: `caveat.truncated.null.chipHint` is not a key.
+  const truncationHint = truncatedRelationshipFile
+    ? t(`caveat.truncated.${truncatedRelationshipFile}.chipHint`)
+    : '';
 
   const handleFilterToggle = (filter: BadgeKey) => {
     const newFilters = new Set(selectedFilters);
@@ -133,10 +155,17 @@ export const FilterChips = memo(function FilterChips({
           const isActive = selectedFilters.has(cfg.type);
           const count = getBadgeCount(cfg.type);
           const label = t(`badges.${cfg.type}`);
-          // GH#41. The count itself is the thing that is wrong, so the mark
-          // goes on the chip, not only in the notice above the list.
-          const isOverstated =
-            followRequestsUnreadable && BADGES_OVERSTATED_BY_UNREADABLE_REQUESTS.has(cfg.type);
+          // The count itself is the thing that is wrong, so the mark goes on
+          // the chip, not only in the notice above the list (GH#41).
+          //
+          // "Unreliable" rather than "overstated": a truncated file drives
+          // `mutuals` and one of the two not-following counts DOWN, and calling
+          // that overstatement would be a second wrong answer on top of the
+          // first.
+          const truncationAffectsChip = affectedByTruncation.has(cfg.type);
+          const isUnreliable =
+            truncationAffectsChip ||
+            (followRequestsUnreadable && BADGES_OVERSTATED_BY_UNREADABLE_REQUESTS.has(cfg.type));
           const chipLabel = isActive
             ? t('filters.removeFilter', { label, count })
             : t('filters.addFilter', { label, count });
@@ -156,10 +185,18 @@ export const FilterChips = memo(function FilterChips({
               // copy and would otherwise get one injected between two non-Latin
               // runs.
               aria-label={
-                isOverstated
+                isUnreliable
                   ? t('filters.chipWithHint', {
                       label: chipLabel,
-                      hint: t('caveat.followRequests.chipHint'),
+                      // One hint, not both, when both causes apply to the same
+                      // chip. The mark's job is "this number cannot be trusted,
+                      // read the notice above", and both notices are on the
+                      // page; reciting two causes inside an aria-label the
+                      // reader cannot skim would cost more than it explains.
+                      // Truncation wins because it is the wider damage.
+                      hint: truncationAffectsChip
+                        ? truncationHint
+                        : t('caveat.followRequests.chipHint'),
                     })
                   : chipLabel
               }
@@ -179,7 +216,7 @@ export const FilterChips = memo(function FilterChips({
               </div>
               <span className="mt-3 flex items-center gap-1.5 leading-snug text-start text-xs">
                 {label}
-                {isOverstated && (
+                {isUnreliable && (
                   <AlertTriangle
                     size={13}
                     aria-hidden="true"

@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { FilterChips } from './FilterChips';
 import { FollowRequestsCaveat } from './FollowRequestsCaveat';
+import { TruncatedFileCaveat } from './TruncatedFileCaveat';
 import { AccountList } from './AccountList';
 import { StatCard } from './StatCard';
 import { InlineDonationCard } from './InlineDonationCard';
@@ -21,7 +22,7 @@ import { ResultsExportControls } from './export/ResultsExportControls';
 import type { BadgeKey } from '@/core/types';
 import { RESCUE_PLAN_BANNER_ENABLED } from '@/config/feature-flags';
 import { useAccountFiltering } from '@/hooks/useAccountFiltering';
-import { useFollowRequestsCaveat } from '@/hooks/useFollowRequestsCaveat';
+import { useUploadCaveats } from '@/hooks/useUploadCaveats';
 import { useTimeOnResults } from '@/hooks/useTimeOnResults';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -60,8 +61,11 @@ export function AccountListSection({
     hasLoadedData,
   } = useAccountFiltering({ fileHash, accountCount });
 
-  // GH#41: a follow-requests file we could not read inflates notFollowingBack.
-  const followRequestsUnreadable = useFollowRequestsCaveat(fileHash);
+  // Two independent reasons a count on this page can be wrong: a
+  // follow-requests file we could not read (GH#41), and a required file that
+  // arrived short because a date range was chosen when the export was
+  // requested. One read answers both.
+  const { followRequestsUnreadable, truncatedRelationshipFile } = useUploadCaveats(fileHash);
 
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
@@ -215,6 +219,7 @@ export function AccountListSection({
           places the overstated number is read — and full width in both layouts,
           because the sidebar it would otherwise sit in is 20rem on desktop. */}
       {followRequestsUnreadable && <FollowRequestsCaveat />}
+      <TruncatedFileCaveat truncated={truncatedRelationshipFile} />
 
       {/* Main Content Layout - grid for flexible banner positioning */}
       <div className="grid grid-cols-1 lg:grid-cols-[20rem_1fr] gap-6 md:gap-12">
@@ -234,6 +239,7 @@ export function AccountListSection({
             filterCounts={filterCounts}
             isFiltering={isFiltering}
             followRequestsUnreadable={followRequestsUnreadable}
+            truncatedRelationshipFile={truncatedRelationshipFile}
           />
         </div>
 

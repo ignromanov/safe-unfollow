@@ -54,6 +54,18 @@
       "title": "« Ne vous suivent pas » est peut-être surestimé.",
       "body": "Nous n’avons pas pu lire votre fichier de demandes d’abonnement : les comptes à qui vous avez envoyé une demande peuvent apparaître dans cette liste, et vos compteurs de demandes en attente sont vides. Abonnés, Abonnements et Mutuels ne sont pas affectés.",
       "chipHint": "Peut-être surestimé — nous n’avons pas pu lire votre fichier de demandes d’abonnement."
+    },
+    "truncated": {
+      "followers": {
+        "title": "Votre liste d'abonnés semble incomplète.",
+        "body": "Elle commence bien après votre liste d'abonnements, ce qui arrive lorsqu'un export est demandé sur une plage de dates limitée. Si vous en avez choisi une, redemandez vos données à Instagram en réglant la plage de dates sur « Tout ». Les compteurs signalés ci-dessous sont affectés : certains sont trop élevés, d'autres trop bas.",
+        "chipHint": "Calculé à partir d'une liste d'abonnés qui semble incomplète."
+      },
+      "following": {
+        "title": "Votre liste d'abonnements semble incomplète.",
+        "body": "Elle commence bien après votre liste d'abonnés, ce qui arrive lorsqu'un export est demandé sur une plage de dates limitée. Si vous en avez choisi une, redemandez vos données à Instagram en réglant la plage de dates sur « Tout ». Les compteurs signalés ci-dessous sont affectés : certains sont trop élevés, d'autres trop bas.",
+        "chipHint": "Calculé à partir d'une liste d'abonnements qui semble incomplète."
+      }
     }
   },
   "empty": {

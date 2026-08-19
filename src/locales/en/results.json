@@ -54,6 +54,18 @@
       "title": "“Not following back” may be overstated.",
       "body": "We could not read your follow-requests file, so accounts you have requested may appear in this list, and your pending-request counts show as empty. Your Followers, Following and Mutuals are unaffected.",
       "chipHint": "May be overstated — we could not read your follow-requests file."
+    },
+    "truncated": {
+      "followers": {
+        "title": "Your followers list looks incomplete.",
+        "body": "It begins long after your following list does, which is what happens when an export is requested for a limited date range. If you chose one, ask Instagram for your data again with the date range set to “All time”. The counts marked below are affected: some are too high, some too low.",
+        "chipHint": "Counted from a followers list that looks incomplete."
+      },
+      "following": {
+        "title": "Your following list looks incomplete.",
+        "body": "It begins long after your followers list does, which is what happens when an export is requested for a limited date range. If you chose one, ask Instagram for your data again with the date range set to “All time”. The counts marked below are affected: some are too high, some too low.",
+        "chipHint": "Counted from a following list that looks incomplete."
+      }
     }
   },
   "empty": {

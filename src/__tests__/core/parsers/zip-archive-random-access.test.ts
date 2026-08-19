@@ -120,9 +120,8 @@ describe('the entry list this backend produces', () => {
 
 describe('ZIP64', () => {
   it('reads an archive carrying ZIP64 end-of-central-directory structures', async () => {
-    const { TextReader, Uint8ArrayWriter, ZipWriter } = await import(
-      '@zip.js/zip.js/lib/zip-core-native.js'
-    );
+    const { TextReader, Uint8ArrayWriter, ZipWriter } =
+      await import('@zip.js/zip.js/lib/zip-core-native.js');
     // Forced rather than provoked: the natural triggers are an entry, an
     // archive or an offset above 4 GiB, or more than 65 535 entries. The entry
     // count is the only affordable one, and JSZip cannot write it — see the
@@ -149,8 +148,7 @@ describe('ZIP64', () => {
     // Prove the fixture is what it claims before trusting what it demonstrates:
     // PK\x06\x06 is the ZIP64 end-of-central-directory record signature.
     const hasZip64Eocd = raw.some(
-      (_, i) =>
-        raw[i] === 0x50 && raw[i + 1] === 0x4b && raw[i + 2] === 0x06 && raw[i + 3] === 0x06
+      (_, i) => raw[i] === 0x50 && raw[i + 1] === 0x4b && raw[i + 2] === 0x06 && raw[i + 3] === 0x06
     );
     expect(hasZip64Eocd).toBe(true);
 

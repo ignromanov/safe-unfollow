@@ -46,9 +46,8 @@ const followersPayload = JSON.stringify({
 });
 
 async function buildEncryptedZip(): Promise<Blob> {
-  const { TextReader, Uint8ArrayWriter, ZipWriter } = await import(
-    '@zip.js/zip.js/lib/zip-core-native.js'
-  );
+  const { TextReader, Uint8ArrayWriter, ZipWriter } =
+    await import('@zip.js/zip.js/lib/zip-core-native.js');
   // Uint8ArrayWriter rather than BlobWriter — the latter finishes through a
   // cross-realm `new Blob([undiciBlob])` that jsdom stringifies on Node 20/22.
   // See the ZIP64 fixture in zip-archive-random-access.test.ts.
