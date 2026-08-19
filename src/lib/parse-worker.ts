@@ -58,6 +58,7 @@ self.onmessage = async (
         warnings: parseResult.warnings,
         discovery: parseResult.discovery,
         labelResolutionMode: parseResult.labelResolutionMode,
+        truncatedRelationshipFile: parseResult.truncatedRelationshipFile,
       });
       return;
     }
@@ -128,6 +129,7 @@ self.onmessage = async (
       warnings: parseResult.warnings,
       discovery: parseResult.discovery,
       labelResolutionMode: parseResult.labelResolutionMode,
+      truncatedRelationshipFile: parseResult.truncatedRelationshipFile,
     });
   } catch (error) {
     // Send error result with classified code

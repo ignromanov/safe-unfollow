@@ -1,5 +1,10 @@
 import { OPTIONAL_FILE_DRIFT_CODES } from '@/core/parsers/instagram-file-specs';
-import type { FileDiscovery, LabelResolutionMode, ParseWarning } from '@/core/types';
+import type {
+  FileDiscovery,
+  LabelResolutionMode,
+  ParseWarning,
+  TruncatedRelationshipFile,
+} from '@/core/types';
 import { analytics } from '@/lib/analytics';
 import type { ParseOutcome } from '@/lib/analytics';
 import { extractErrorCode } from '@/lib/error-classifier';
@@ -53,7 +58,8 @@ const LAST_UPLOAD_KEY = 'analytics_last_upload';
  */
 function reportParseDiagnostics(
   warnings: ParseWarning[] | undefined,
-  labelResolutionMode: LabelResolutionMode | undefined
+  labelResolutionMode: LabelResolutionMode | undefined,
+  truncatedRelationshipFile: TruncatedRelationshipFile | undefined
 ): void {
   for (const warning of warnings ?? []) {
     if (OPTIONAL_FILE_DRIFT_CODES.has(warning.code)) {
@@ -63,6 +69,15 @@ function reportParseDiagnostics(
 
   if (labelResolutionMode) {
     analytics.usernameLabelResolution(labelResolutionMode);
+  }
+
+  // Reported here rather than on `fileUploadSuccess` for the reason the drift
+  // event above is: this is a fact about the export, not about whether the
+  // upload finished, and a truncated export finishes — that is the defect. It
+  // also keeps the cache path silent, which is right, because a returning
+  // reader re-opening the same file has not measured anything new.
+  if (truncatedRelationshipFile) {
+    analytics.relationshipFileTruncated(truncatedRelationshipFile);
   }
 }
 
@@ -270,7 +285,11 @@ export function useFileUpload() {
                 fileDiscovery: result.discovery,
               });
             }
-            reportParseDiagnostics(result.warnings, result.labelResolutionMode);
+            reportParseDiagnostics(
+              result.warnings,
+              result.labelResolutionMode,
+              result.truncatedRelationshipFile
+            );
           } catch (error) {
             // Extract warnings/discovery from error if available
             if (error instanceof Error && 'warnings' in error) {
@@ -282,7 +301,9 @@ export function useFileUpload() {
               });
               reportParseDiagnostics(
                 failureWarnings,
-                (error as { labelResolutionMode?: LabelResolutionMode }).labelResolutionMode
+                (error as { labelResolutionMode?: LabelResolutionMode }).labelResolutionMode,
+                (error as { truncatedRelationshipFile?: TruncatedRelationshipFile })
+                  .truncatedRelationshipFile
               );
             }
             throw error;
@@ -303,7 +324,11 @@ export function useFileUpload() {
             parseWarnings: result.warnings ?? [],
             fileDiscovery: result.discovery,
           });
-          reportParseDiagnostics(result.warnings, result.labelResolutionMode);
+          reportParseDiagnostics(
+              result.warnings,
+              result.labelResolutionMode,
+              result.truncatedRelationshipFile
+            );
         }
 
         // Data already cached in IndexedDB by worker during chunked processing

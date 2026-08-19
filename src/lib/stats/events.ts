@@ -447,6 +447,19 @@ export const analytics = {
     trackEvent(AnalyticsEvents.USERNAME_LABEL_RESOLUTION, { mode });
   },
 
+  // Fires only when one of the two required relationship files looks cut short,
+  // so unlike `usernameLabelResolution` a clean parse emits nothing. Immediate
+  // rather than batched for the same reason as its two neighbours: a rare
+  // diagnostic about the shape of an upstream export, not a high-volume
+  // impression.
+  //
+  // The field is which of the two lists is short — a fact about the export's
+  // shape, never about its contents. Same line the label event draws: no
+  // username, no count, nothing derived from the file's bytes.
+  relationshipFileTruncated: (file: 'followers' | 'following') => {
+    trackEvent(AnalyticsEvents.RELATIONSHIP_FILE_TRUNCATED, { file });
+  },
+
   // Pro Export
   //
   // Batched like the ad impressions it shares a gate with: an impression is

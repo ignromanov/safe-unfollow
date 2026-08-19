@@ -192,6 +192,87 @@ describe('AccountListSection', () => {
     });
   });
 
+  /**
+   * The other reason a count here can be wrong, and the one the reader cannot
+   * detect at all: Meta's export dialog offers a date range, and picking one
+   * filters followers_*.json by entry timestamp while leaving following.json
+   * whole. Measured on a real export, notFollowingBack went 95 -> 294 and
+   * mutuals 298 -> 99, with no warning anywhere.
+   */
+  describe('truncated relationship file caveat', () => {
+    it('says nothing when both files start around the same time', () => {
+      renderWithRouter(<AccountListSection {...defaultProps} />);
+
+      expect(
+        screen.queryByText(resultsEN.caveat.truncated.followers.title)
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(resultsEN.caveat.truncated.following.title)
+      ).not.toBeInTheDocument();
+    });
+
+    it('names the short list and the one action that settles it', () => {
+      mockUseUploadCaveats.mockReturnValue(caveats({ truncatedRelationshipFile: 'followers' }));
+      renderWithRouter(<AccountListSection {...defaultProps} />);
+
+      expect(screen.getByText(resultsEN.caveat.truncated.followers.title)).toBeInTheDocument();
+      expect(screen.getByText(resultsEN.caveat.truncated.followers.body)).toBeInTheDocument();
+    });
+
+    it('names the other list when the other list is the short one', () => {
+      mockUseUploadCaveats.mockReturnValue(caveats({ truncatedRelationshipFile: 'following' }));
+      renderWithRouter(<AccountListSection {...defaultProps} />);
+
+      expect(screen.getByText(resultsEN.caveat.truncated.following.title)).toBeInTheDocument();
+      expect(
+        screen.queryByText(resultsEN.caveat.truncated.followers.title)
+      ).not.toBeInTheDocument();
+    });
+
+    it('does not tell the reader what Instagram did, only what was observed', () => {
+      // A genuinely late-blooming account produces the same shape, so the copy
+      // states the observation and the remedy. Asserting the absence of a
+      // diagnosis is the only way this stays true through a copy edit.
+      const body = resultsEN.caveat.truncated.followers.body;
+
+      expect(body).toMatch(/date range/i);
+      expect(body).toMatch(/All time/i);
+      expect(body).not.toMatch(/instagram (removed|deleted|hid|truncated)/i);
+    });
+
+    it('carries no interpolation, because ten locales would each need a date formatter', () => {
+      const block = resultsEN.caveat.truncated;
+      const strings = [
+        ...Object.values(block.followers),
+        ...Object.values(block.following),
+      ] as string[];
+
+      for (const value of strings) {
+        expect(value).not.toMatch(/\{\{/);
+      }
+    });
+
+    it('announces politely, for the same reason its sibling does', () => {
+      mockUseUploadCaveats.mockReturnValue(caveats({ truncatedRelationshipFile: 'followers' }));
+      renderWithRouter(<AccountListSection {...defaultProps} />);
+
+      const notice = screen
+        .getByText(resultsEN.caveat.truncated.followers.title)
+        .closest('[role]');
+      expect(notice).toHaveAttribute('role', 'status');
+    });
+
+    it('shows both notices at once, because they are not alternatives', () => {
+      mockUseUploadCaveats.mockReturnValue(
+        caveats({ followRequestsUnreadable: true, truncatedRelationshipFile: 'followers' })
+      );
+      renderWithRouter(<AccountListSection {...defaultProps} />);
+
+      expect(screen.getByText(resultsEN.caveat.followRequests.title)).toBeInTheDocument();
+      expect(screen.getByText(resultsEN.caveat.truncated.followers.title)).toBeInTheDocument();
+    });
+  });
+
   it('should render all main components', () => {
     renderWithRouter(<AccountListSection {...defaultProps} />);
 
