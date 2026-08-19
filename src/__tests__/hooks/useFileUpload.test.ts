@@ -23,6 +23,7 @@ vi.mock('@/lib/analytics', () => ({
     uploadParseDuration: vi.fn(),
     optionalFileFormatDrift: vi.fn(),
     usernameLabelResolution: vi.fn(),
+    relationshipFileTruncated: vi.fn(),
   },
 }));
 
@@ -242,7 +243,7 @@ describe('useFileUpload', () => {
    * changed the record shape again, and that comparison needs a value from
    * every parse, not just the drifted ones.
    */
-  describe('usernameLabelResolution reporting (GH#21 Task 5)', () => {
+  describe('parse diagnostics reporting', () => {
     it('reports fast-path for a clean parse and emits no drift event', async () => {
       const { result } = renderHook(() => useFileUpload());
 
@@ -283,6 +284,55 @@ describe('useFileUpload', () => {
       });
 
       expect(analytics.usernameLabelResolution).toHaveBeenCalledWith('not-applicable');
+    });
+
+    /**
+     * The date-range defect's telemetry. It rides reportParseDiagnostics rather
+     * than fileUploadSuccess because it is a fact about the export, not about
+     * whether the upload finished — and a truncated export finishes.
+     */
+    it('reports which relationship file arrived short', async () => {
+      const { parseInstagramZipFile } = await import('@/core/parsers/instagram');
+      vi.mocked(parseInstagramZipFile).mockResolvedValue({
+        data: {
+          following: new Set(['user1']),
+          followers: new Set(['user2']),
+          pendingSent: new Map(),
+          permanentRequests: new Map(),
+          restricted: new Map(),
+          closeFriends: new Map(),
+          unfollowed: new Map(),
+          dismissedSuggestions: new Map(),
+          followingTimestamps: new Map(),
+          followersTimestamps: new Map(),
+        },
+        warnings: [],
+        discovery: { format: 'json', isInstagramExport: true, basePath: '', files: [] },
+        hasMinimalData: true,
+        labelResolutionMode: 'fast-path',
+        truncatedRelationshipFile: 'followers',
+      } as any);
+
+      const { result } = renderHook(() => useFileUpload());
+
+      await act(async () => {
+        await result.current.handleZipUpload(mockFile);
+      });
+
+      expect(analytics.relationshipFileTruncated).toHaveBeenCalledWith('followers');
+      expect(analytics.relationshipFileTruncated).toHaveBeenCalledTimes(1);
+    });
+
+    it('stays silent when neither file looks short', async () => {
+      const { result } = renderHook(() => useFileUpload());
+
+      await act(async () => {
+        await result.current.handleZipUpload(mockFile);
+      });
+
+      // Unlike usernameLabelResolution, a clean parse emits nothing here — the
+      // event has no denominator of its own by design.
+      expect(analytics.relationshipFileTruncated).not.toHaveBeenCalled();
     });
 
     it('does not report a resolution mode on the cached path — nothing was parsed', async () => {
