@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect } from 'react';
 import { ArrowLeft, ArrowRight, X, AlertTriangle, Calendar } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import FocusTrap from 'focus-trap-react';
@@ -7,7 +7,7 @@ import { analytics } from '@/lib/analytics';
 import { GuideEntry } from '@/components/wizard/GuideEntry';
 import { PrefixedLink } from '@/components/PrefixedLink';
 import { ResponsiveGif } from '@/components/ResponsiveGif';
-import { WIZARD_STEPS } from '@/config/wizard-steps';
+import { ACCOUNTS_CENTER_URL, WIZARD_STEPS } from '@/config/wizard-steps';
 import { useIsElementInView } from '@/hooks/useIsElementInView';
 import { useWizardNavigation } from '@/hooks/useWizardNavigation';
 
@@ -15,18 +15,13 @@ interface WizardProps {
   initialStep?: number;
 }
 
-// The Accounts Center address lives in exactly one place: WIZARD_STEPS. Read
-// by id, not array index — see GuideEntry.tsx, which reads it the same way
-// for the in-flow CTA this bar CTA duplicates once that one scrolls away.
-const ACCOUNTS_CENTER_URL = WIZARD_STEPS.find(s => s.id === 1)?.externalLink;
-
 export function Wizard({ initialStep = 1 }: WizardProps) {
   const { t } = useTranslation('wizard');
   const { currentStep, goToStep, goHome } = useWizardNavigation(initialStep);
-  const ctaRef = useRef<HTMLAnchorElement>(null);
-  // Only meaningful on step 1 — ctaRef.current is null on every other step,
-  // so the hook has nothing to observe there and its default (true) is inert.
-  const ctaInView = useIsElementInView(ctaRef);
+  // Only meaningful on step 1 — GuideEntry (and its <a ref={ctaRef}>) is
+  // unmounted on every other step, so the hook has nothing attached there
+  // and its default (true) is inert.
+  const [ctaInView, ctaRef] = useIsElementInView<HTMLAnchorElement>();
 
   // Track analytics on step view. Step 1 is GuideEntry, which reports its
   // own guideEntryView — reporting wizardStepView here too would double the

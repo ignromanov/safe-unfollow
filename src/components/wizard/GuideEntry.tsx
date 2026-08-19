@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import type { RefObject } from 'react';
 import { ExternalLink } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -7,12 +6,7 @@ import { analytics } from '@/lib/analytics';
 import { PrefixedLink } from '@/components/PrefixedLink';
 import { RecipeCard } from '@/components/wizard/RecipeCard';
 import { StepAccordion } from '@/components/wizard/StepAccordion';
-import { WIZARD_STEPS } from '@/config/wizard-steps';
-
-// The Accounts Center address lives in exactly one place: WIZARD_STEPS.
-// Read by id, not by array index, so it stays correct if the step order
-// ever changes.
-const ACCOUNTS_CENTER_URL = WIZARD_STEPS.find(step => step.id === 1)?.externalLink;
+import { ACCOUNTS_CENTER_URL } from '@/config/wizard-steps';
 
 /**
  * Replaces wizard step 1. 63.4% of readers left at the old step-1 card, which
@@ -25,7 +19,7 @@ const ACCOUNTS_CENTER_URL = WIZARD_STEPS.find(step => step.id === 1)?.externalLi
  * "Try with sample" is deliberately absent — it lives in the bottom bar's
  * secondary slot (a separate task), not on this screen.
  */
-export function GuideEntry({ ctaRef }: { ctaRef?: RefObject<HTMLAnchorElement> }) {
+export function GuideEntry({ ctaRef }: { ctaRef?: (node: HTMLAnchorElement | null) => void }) {
   const { t } = useTranslation('wizard');
 
   // Owns its own view event so step 1 emits guide_entry_view, not

@@ -354,11 +354,56 @@ describe('Wizard', () => {
       renderWizardAtStep(2);
 
       const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
-      // No in-flow CTA is observed on this step, so nothing can toggle it —
-      // the bar stays in its normal Back/Next state regardless.
+      // No in-flow CTA is mounted on this step, so there is nothing for
+      // setCtaIntersecting to drive here — the assertion below is the point:
+      // the bar stays in its normal Back/Next state on a step that never
+      // observes anything.
+      expect(within(bar).queryByText(wizardEN.entry.cta)).not.toBeInTheDocument();
+    });
+
+    // Critical 2 (final whole-branch review of PR-2): Wizard never remounts
+    // across step changes (routes.tsx reuses one element for every
+    // `:stepId`), only `currentStep` does. The bar's swap must therefore
+    // survive re-renders that mount and unmount GuideEntry's in-flow CTA —
+    // not just the initial mount these `renderWizardAtStep` tests exercise.
+    it('starts observing the in-flow CTA once step 1 is reached by navigation, not only on mount', () => {
+      mockPathname = '/wizard/step/3';
+      const { rerender } = render(<Wizard />);
+      expect(observedEntries).toHaveLength(0);
+
+      mockPathname = '/wizard/step/1';
+      rerender(<Wizard />);
+
+      // The deep-link path used to leave observedEntries empty forever,
+      // because the effect that creates the observer only ever ran once, at
+      // the step-3 mount, when there was nothing to attach it to.
+      expect(observedEntries.length).toBeGreaterThan(0);
+
+      const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
       setCtaIntersecting(false);
 
+      expect(within(bar).getByText(wizardEN.entry.cta)).toBeInTheDocument();
+      expect(within(bar).queryByText('Next Step')).not.toBeInTheDocument();
+    });
+
+    it('does not leave two Accounts Center primaries on screen after navigating step 1 → 2 → 1', () => {
+      mockPathname = '/wizard/step/1';
+      const { rerender } = render(<Wizard />);
+
+      // The in-flow CTA scrolls out before the reader leaves the step.
+      setCtaIntersecting(false);
+
+      mockPathname = '/wizard/step/2';
+      rerender(<Wizard />);
+      mockPathname = '/wizard/step/1';
+      rerender(<Wizard />);
+
+      // GuideEntry remounted a brand-new anchor; the stale, disconnected one
+      // from the first visit must not keep the bar permanently swapped.
+      const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
+      expect(within(bar).getByText('Next Step')).toBeInTheDocument();
       expect(within(bar).queryByText(wizardEN.entry.cta)).not.toBeInTheDocument();
+      expect(screen.getAllByRole('link', { name: /accounts center/i })).toHaveLength(1);
     });
   });
 });
