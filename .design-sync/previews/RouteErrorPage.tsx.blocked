@@ -1,0 +1,18 @@
+import { RouteErrorPage } from 'safe-unfollow';
+
+// Cannot be previewed with real content — verified, not just assumed. RouteErrorPage calls
+// useRouteError(), which throws (does not return undefined) unless it finds a DATA router
+// ancestor created by react-router-dom's OWN createMemoryRouter/RouterProvider — a plain
+// <MemoryRouter> (which the harness's shared provider wrap already supplies) is not enough,
+// and neither is a data router built from THIS preview file's own react-router-dom import:
+// react/react-dom are externalized to window.React/ReactDOM (bundle.mjs) so every compiled
+// unit shares one instance, but react-router-dom is not on that list, so _ds_bundle.js (which
+// closes over RouteErrorPage's own useRouteError call) and this preview's compiled output
+// each bundle their OWN copy of react-router-dom with their OWN RouteErrorContext object.
+// A <RouterProvider> built here can never satisfy a useRouteError() read over there — tried it
+// (createMemoryRouter + errorElement, three loaders throwing a Response / Error / string) and
+// it reproduces the identical crash, just with more code. No fix is reachable from this file;
+// same class of case as the three components in NOTES.md's "cannot be previewed at all".
+export function Default() {
+  return <RouteErrorPage />;
+}

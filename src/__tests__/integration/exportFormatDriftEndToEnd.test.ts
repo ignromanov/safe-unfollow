@@ -14,36 +14,36 @@ import {
 } from '../fixtures/instagram-format-drift';
 
 /**
- * GH#33 / GH#21 Task 4: a real ZIP, built with the real `jszip` package (not
- * the `__mocks__/jszip.cjs` double the rest of this suite uses), walked
- * through the actual `parseInstagramZipFile` entry point. Every other test in
- * this codebase exercises the parser through a mock or a unit under test —
- * this file is the one place that proves the pieces still fit together once
- * `JSZip.loadAsync()` has round-tripped the bytes.
+ * GH#33 / GH#21 Task 4: a real ZIP, built with the real `jszip` package (used
+ * here only as a writer — reading is `openZipArchive`'s job), walked through
+ * the actual `parseInstagramZipFile` entry point. Every other test in this
+ * codebase exercises the parser through a mock or a unit under test — this
+ * file is the one place that proves the pieces still fit together once a real
+ * archive has been round-tripped.
  *
- * `parseInstagramZipFile` is typed to take a `File`. jsdom's `File`/`Blob`
- * does not round-trip through JSZip and produces a false `CORRUPTED_ZIP` —
- * measured while writing this file, matching the note left in
- * `04-fixtures-and-regression.md`. Passing the raw `Uint8Array` sidesteps that;
- * everything after `JSZip.loadAsync()` is identical either way, so the cast
- * below is the point, not a workaround around it.
+ * It used to hand the parser a raw `Uint8Array` behind an
+ * `as unknown as File` cast, because jsdom's Blob produced a false
+ * `CORRUPTED_ZIP`. That is fixed rather than worked around: jsdom's Blob was
+ * missing `arrayBuffer()`, which `vitest/blob-polyfill` now supplies, so the
+ * fixture is a real Blob and the test exercises the input type production
+ * actually passes.
  */
 
 const BASE_PATH = 'connections/followers_and_following';
 
-async function buildZip(files: Record<string, unknown>): Promise<Uint8Array> {
+async function buildZip(files: Record<string, unknown>): Promise<Blob> {
   const zip = new JSZip();
   for (const [name, payload] of Object.entries(files)) {
     zip.file(`${BASE_PATH}/${name}`, JSON.stringify(payload));
   }
-  return zip.generateAsync({ type: 'uint8array' });
+  return zip.generateAsync({ type: 'blob' });
 }
 
 async function parseZip(files: Record<string, unknown>) {
-  const bytes = await buildZip(files);
-  // See file-level docblock: File/Blob round-tripping through JSZip is what
-  // jsdom cannot do, so the Uint8Array is passed straight through.
-  return parseInstagramZipFile(bytes as unknown as File);
+  const archive = await buildZip(files);
+  // A real Blob, which is what production hands over; File extends Blob and the
+  // parser only ever passes it to the ZIP reader.
+  return parseInstagramZipFile(archive as File);
 }
 
 /**

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><style>body{margin:0;background:oklch(0.96 0.005 264)}a{color:oklch(0.6 0.18 264)}a:hover{color:oklch(0.5 0.18 264)}@keyframes spin{to{transform:rotate(360deg)}}</style></helmet>
+<div class="max-w-5xl mx-auto px-6 py-12" style="font-family:'Inter',ui-sans-serif,system-ui;color:oklch(0.2 0.01 264)">
+<p class="text-xs font-black uppercase tracking-widest" style="color:oklch(0.6 0.18 264)"><a href="./ConversionAudit.dc.html">← Аудит</a> · Мокап 3</p>
+<h1 class="font-display font-extrabold tracking-tight text-3xl md:text-4xl mt-2 mb-10">Paywall: сначала отклик кнопки, потом копирайт</h1>
+
+<section class="mb-14">
+<p class="text-sm font-bold mb-1">3A + 3B · Пейволл как bottom sheet (mobile-first) и три состояния кнопки</p>
+<p class="text-sm mb-4" style="color:oklch(0.45 0.01 264);max-width:44rem;line-height:1.6">Дно воронки за 14 д: <span style="font-family:ui-monospace,monospace">paywall_view</span> 189 → <span style="font-family:ui-monospace,monospace">checkout_start</span> 20 → <span style="font-family:ui-monospace,monospace">purchase_success</span> 1; 2 из 6 попыток жмут повторно через 1,0–1,3 с — кнопка не подтверждает нажатие. Мгновенный переход в loading + явное «переходите на страницу оплаты». Цена — один раз, на пейволле. Сравнение с $5–10/мес — фактом, без прилагательных.</p>
+<div class="border bg-card p-6 shadow-xl" style="border-color:oklch(0.92 0.01 264);width:100%;max-width:390px;border-radius:1.5rem 1.5rem 0 0;border-bottom:0">
+
+<p class="text-xs mb-2" style="color:oklch(0.55 0.01 264);line-height:1.5">Saved 10 of 8,930 rows — the free sample is already in your downloads. <span style="color:oklch(0.6 0.18 264);font-family:ui-monospace,monospace">↑ existing export.saved.capped — unchanged</span></p>
+<h3 class="font-display font-extrabold tracking-tight text-2xl" style="line-height:1.15">Your selection is ready to export — 8,930 rows</h3>
+<p class="text-xs mt-1" style="color:oklch(0.6 0.18 264);font-family:ui-monospace,monospace">replaces export.paywall.headline · «full list is ready» was false — the file is generated after payment</p>
+<div class="rounded-2xl border p-4 my-4 text-sm" style="border-color:oklch(0.92 0.01 264);background:oklch(0.98 0.005 264);line-height:1.6">Similar trackers charge $5–10 a month <b>to keep watching your followers</b>. This is $7, once, <b>for the file itself</b>.</div>
+<button class="w-full px-6 rounded-3xl text-white font-bold text-base shadow-2xl shadow-primary/30" style="background:oklch(0.6 0.18 264);min-height:48px;touch-action:manipulation">Unlock export — $7</button>
+<button class="w-full mt-1 rounded-2xl font-bold text-sm bg-transparent border-0" style="color:oklch(0.55 0.01 264);min-height:48px">Not now</button>
+<div style="height:12px"></div>
+<p class="text-xs" style="color:oklch(0.5 0.15 264);font-family:ui-monospace,monospace;line-height:1.5">mobile: нижнее прикрепление без ручки (§4: ручка — сигнификатор жеста, которого нет; dismiss 56,7% и это желаемый выход) · Radix DialogContent + inset-x-0 bottom-0 rounded-t-3xl, на sm+ возврат к центрированной геометрии · кнопка 48px w-full + safe-area</p>
+</div>
+<div class="mt-5 flex flex-wrap gap-4">
+<div><p class="text-xs font-black uppercase tracking-widest mb-2" style="color:oklch(0.55 0.01 264)">2 · Pressed (instant)</p>
+<button class="px-6 rounded-3xl text-white font-bold text-base flex items-center gap-2" style="background:oklch(0.6 0.18 264 / 0.75);cursor:wait;min-height:48px" disabled="" aria-busy="true"><span style="display:inline-block;width:16px;height:16px;border:2px solid white;border-top-color:transparent;border-radius:50%;animation:spin 0.8s linear infinite"></span>Opening checkout…</button></div>
+<div><p class="text-xs font-black uppercase tracking-widest mb-2" style="color:oklch(0.55 0.01 264)">3 · Timeout (8s) → recovery</p>
+<button class="px-6 rounded-3xl border font-bold text-base" style="border-color:oklch(0.92 0.01 264);min-height:48px">Checkout didn't open — try again</button>
+<p class="text-xs mt-1" style="color:oklch(0.55 0.01 264)">Your browser may have blocked the popup.</p></div>
+</div>
+<p class="text-sm font-bold mt-10 mb-1">Q9 · Последний экран перед редиректом — полностью</p>
+<div class="border bg-card p-6 shadow-xl" style="border-color:oklch(0.92 0.01 264);width:100%;max-width:390px;border-radius:1.5rem 1.5rem 0 0;border-bottom:0">
+
+<div class="flex items-center gap-2 mb-3"><span style="display:inline-block;width:16px;height:16px;border:2px solid oklch(0.6 0.18 264);border-top-color:transparent;border-radius:50%;animation:spin 0.8s linear infinite"></span><h3 class="font-display font-extrabold tracking-tight text-xl">Opening checkout…</h3></div>
+<div class="space-y-3 text-sm" style="line-height:1.5">
+<p>Your Instagram export stays in this browser. The payment page never sees your data.</p>
+<div class="rounded-2xl border p-3" style="border-color:oklch(0.92 0.01 264);background:oklch(0.98 0.005 264)"><b>8,930 rows · CSV + JSON · $7, once</b></div>
+<p>Your key works on up to 3 devices.</p>
+<a href="#" class="flex items-center font-bold" style="min-height:44px">Didn't work? Email for a refund.</a>
+<p style="color:oklch(0.55 0.01 264)">Cards and local methods are shown on the next page.</p>
+</div>
+<p class="text-xs mt-3" style="color:oklch(0.6 0.18 264);font-family:ui-monospace,monospace;line-height:1.5">no «secure» · refund promoted out of text-xs footer to 44px row · payment icons deliberately absent (see Q9) · CTA остаётся &lt;button&gt; по необходимости, не по недосмотру: <span style="font-family:ui-monospace,monospace">unlock.ts:102-114</span> подставляет redirect_url из window.location в момент клика · <span style="font-family:ui-monospace,monospace">/results</span> не пререндерится (vite.config.ts:46-47), поэтому мёртвых окон у модалки нет</p>
+</div>
+</section>
+
+<section>
+<p class="text-sm font-bold mb-1">3C · Индонезия и предпосылки</p>
+<ul class="text-sm space-y-2" style="color:oklch(0.45 0.01 264);max-width:44rem;line-height:1.6;padding-inline-start:1.2rem">
+<li><b>Никаких рупий в мокапе (Q10).</b> Хардкод курса в строке о деньгах при CSP-запрете рантайм-запроса и уже отгруженном втором курсе в <span style="font-family:ui-monospace,monospace">id/faq.json</span> — ложь с датой поставки. Локальная цена — только из локализованного экрана процессора.</li>
+<li>Проверка процессора выполнена 17.08: сессии создаются, потеря — брошенная корзина <b>на странице процессора</b>. Значит последний наш экран (выше) — единственная поверхность, которой мы управляем.</li>
+<li>Работа по пейволлу ветвится от PR #26 (<span style="font-family:ui-monospace,monospace">feat/paywall-gap-hero</span>) либо ждёт его — он переписывает <span style="font-family:ui-monospace,monospace">export.paywall.*</span> во всех 10 локалях.</li>
+</ul>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+
+</script>
+</body>
+</html>

@@ -465,6 +465,18 @@ describe('Analytics', () => {
         );
       });
 
+      // The payload is one enum value naming which of the two lists arrived
+      // short. Never a count, a date, a username or anything derived from the
+      // file's bytes — the same line `usernameLabelResolution` above draws.
+      it('should track which relationship file arrived truncated', () => {
+        analytics.relationshipFileTruncated('followers');
+
+        expect(windowSpy.umami.track).toHaveBeenCalledWith(
+          AnalyticsEvents.RELATIONSHIP_FILE_TRUNCATED,
+          { file: 'followers' }
+        );
+      });
+
       describe('license events', () => {
         it('should track a restored license', () => {
           analytics.licenseRestored();

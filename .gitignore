@@ -116,8 +116,10 @@ src/__tests__/**/*.js
 # Local development data (keep raw/ for development)
 raw/
 
-# Design folders (experimental designs)
-designs/
+# Design folders (experimental designs) — ignore contents, not the dir, so the
+# Claude Design backup can be tracked without -f (it was force-added before).
+designs/*
+!designs/claude-design-project/
 
 # Scripts folders (ignore contents, not the dir — so specific files can be un-ignored)
 scripts/*
@@ -139,6 +141,9 @@ umami-backup-*.sql.gz
 
 # Entry-bundle budget guard must ship despite the scripts/ ignore above (npm run perf:budget)
 !scripts/assert-entry-budget.mjs
+
+# Large-archive fixture generator must ship despite the scripts/ ignore above (PR #80)
+!scripts/generate-large-archive.ts
 
 # design-sync working state — the converter, the generated bundle and the machine
 # caches a resync leaves behind. ~60 MB at repo root, untracked on every branch but

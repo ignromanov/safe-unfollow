@@ -17,11 +17,19 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "npm"
+          node-version: '20'
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
+
+      # First because it is the cheapest gate. Until 2026-08-19 nothing here ran
+      # `format:check`, so formatting was enforced only by lint-staged at commit
+      # time — which globs *.{ts,tsx,json,md} and so can never reach .html, .css,
+      # .yml or .mjs, and which does not run at all in a fresh `git worktree`,
+      # because husky installs its hooks from `prepare` on npm install.
+      - name: Check formatting
+        run: npm run format:check
 
       - name: Run ESLint
         run: npm run lint:strict

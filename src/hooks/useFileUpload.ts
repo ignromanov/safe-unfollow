@@ -1,5 +1,5 @@
 import { OPTIONAL_FILE_DRIFT_CODES } from '@/core/parsers/instagram-file-specs';
-import type { FileDiscovery, LabelResolutionMode, ParseWarning } from '@/core/types';
+import type { FileDiscovery, ParseWarning } from '@/core/types';
 import { analytics } from '@/lib/analytics';
 import type { ParseOutcome } from '@/lib/analytics';
 import { extractErrorCode } from '@/lib/error-classifier';
@@ -14,9 +14,6 @@ import { useParseWorker } from './useParseWorker';
 
 // Upload rate limiting (ms)
 const UPLOAD_DEBOUNCE_MS = 1000;
-
-// Maximum file size: 500MB
-const MAX_FILE_SIZE = 500 * 1024 * 1024;
 
 // localStorage key for tracking return uploads
 const LAST_UPLOAD_KEY = 'analytics_last_upload';
@@ -50,11 +47,19 @@ const LAST_UPLOAD_KEY = 'analytics_last_upload';
  * on `typeof window === 'undefined'` (`lib/stats/queue.ts`, `lib/stats/core.ts`),
  * and a Web Worker's global is `self`, so emitting from the parser itself would
  * be a silent no-op. Both signals already cross the boundary inside the result.
+ *
+ * Takes the whole `ParseErrorData` rather than one parameter per signal. The
+ * success paths already hold a structurally compatible result, and the failure
+ * path already throws this exact shape (`guardFailure` below, and both throwers
+ * in `parse-orchestration.ts`), so a new parse fact costs one destructured name
+ * here instead of a fourth positional argument at three call sites and a fourth
+ * hand-written `error as { field?: T }` cast on the failure path.
  */
-function reportParseDiagnostics(
-  warnings: ParseWarning[] | undefined,
-  labelResolutionMode: LabelResolutionMode | undefined
-): void {
+function reportParseDiagnostics({
+  warnings,
+  labelResolutionMode,
+  truncatedRelationshipFile,
+}: ParseErrorData): void {
   for (const warning of warnings ?? []) {
     if (OPTIONAL_FILE_DRIFT_CODES.has(warning.code)) {
       analytics.optionalFileFormatDrift(warning.code);
@@ -63,6 +68,15 @@ function reportParseDiagnostics(
 
   if (labelResolutionMode) {
     analytics.usernameLabelResolution(labelResolutionMode);
+  }
+
+  // Reported here rather than on `fileUploadSuccess` for the reason the drift
+  // event above is: this is a fact about the export, not about whether the
+  // upload finished, and a truncated export finishes — that is the defect. It
+  // also keeps the cache path silent, which is right, because a returning
+  // reader re-opening the same file has not measured anything new.
+  if (truncatedRelationshipFile) {
+    analytics.relationshipFileTruncated(truncatedRelationshipFile);
   }
 }
 
@@ -196,19 +210,6 @@ export function useFileUpload() {
           throw guardFailure(notZipWarning);
         }
 
-        // File size guard: reject files over 500MB
-        if (file.size > MAX_FILE_SIZE) {
-          const sizeMb = Math.round(file.size / (1024 * 1024));
-          const tooLargeWarning: ParseWarning = {
-            code: 'FILE_TOO_LARGE',
-            message: t('diagnostic.errors.FILE_TOO_LARGE.message', { sizeMb }),
-            severity: 'error',
-            fix: t('diagnostic.errors.FILE_TOO_LARGE.fix'),
-          };
-
-          throw guardFailure(tooLargeWarning);
-        }
-
         // Generate file hash for cache lookup and analytics correlation
         fileHash = await generateFileHash(file);
 
@@ -270,20 +271,16 @@ export function useFileUpload() {
                 fileDiscovery: result.discovery,
               });
             }
-            reportParseDiagnostics(result.warnings, result.labelResolutionMode);
+            reportParseDiagnostics(result);
           } catch (error) {
             // Extract warnings/discovery from error if available
             if (error instanceof Error && 'warnings' in error) {
-              const failureWarnings = (error as { warnings?: ParseWarning[] }).warnings;
+              const failure = error as Error & ParseErrorData;
               setUploadInfo({
-                parseWarnings: failureWarnings ?? [],
-                fileDiscovery: (error as { discovery?: import('@/core/types').FileDiscovery })
-                  .discovery,
+                parseWarnings: failure.warnings ?? [],
+                fileDiscovery: failure.discovery,
               });
-              reportParseDiagnostics(
-                failureWarnings,
-                (error as { labelResolutionMode?: LabelResolutionMode }).labelResolutionMode
-              );
+              reportParseDiagnostics(failure);
             }
             throw error;
           }
@@ -303,7 +300,7 @@ export function useFileUpload() {
             parseWarnings: result.warnings ?? [],
             fileDiscovery: result.discovery,
           });
-          reportParseDiagnostics(result.warnings, result.labelResolutionMode);
+          reportParseDiagnostics(result);
         }
 
         // Data already cached in IndexedDB by worker during chunked processing
@@ -328,7 +325,7 @@ export function useFileUpload() {
       } catch (err) {
         // Track cancelled uploads but don't show error
         if (abortControllerRef.current?.signal.aborted) {
-          analytics.uploadErrorByCode(fileHash, 'UPLOAD_CANCELLED');
+          analytics.uploadErrorByCode(fileHash, 'UPLOAD_CANCELLED', undefined, fileSizeMb);
           outcome = 'cancelled';
           return;
         }
@@ -342,7 +339,7 @@ export function useFileUpload() {
         const warnings = (err as { warnings?: ParseWarning[] }).warnings;
         const discovery = (err as { discovery?: FileDiscovery }).discovery;
 
-        analytics.uploadErrorByCode(fileHash, errorCode, errorMessage);
+        analytics.uploadErrorByCode(fileHash, errorCode, errorMessage, fileSizeMb);
 
         setUploadInfo({
           currentFileName: file.name,

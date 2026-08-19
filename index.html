@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content, viewport-fit=cover" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content, viewport-fit=cover"
+    />
 
     <!-- Resource hint for the BMC widget. DNS only, deliberately not a
          preconnect: this head is shared by all 88 prerendered pages, but the
@@ -19,10 +22,10 @@
 
     <!-- CRITICAL: Language redirect MUST be first script - before any other resources load -->
     <script>
-      (function() {
+      (function () {
         var STORE_KEY = 'unfollow-radar-store';
         // SYNC with src/config/languages.ts NON_ENGLISH_LANGUAGES
-        var NON_EN_LANGS = ['ar','de','es','fr','id','ja','pt','ru','tr'];
+        var NON_EN_LANGS = ['ar', 'de', 'es', 'fr', 'id', 'ja', 'pt', 'ru', 'tr'];
 
         // Skip if path already has language prefix
         var path = location.pathname;
@@ -71,12 +74,30 @@
     </script>
 
     <!-- Preload critical fonts to reduce LCP -->
-    <link rel="preload" href="/node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/node_modules/@fontsource-variable/plus-jakarta-sans/files/plus-jakarta-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link
+      rel="preload"
+      href="/node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/node_modules/@fontsource-variable/plus-jakarta-sans/files/plus-jakarta-sans-latin-wght-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
 
     <!-- Meta tags below are replaced by vite.config.ts onPageRendered for each language -->
-    <meta name="description" content="Check who unfollowed you on Instagram without login. Upload your ZIP file, see unfollowers instantly. 100% free, privacy-first, handles 1M+ accounts." />
-    <meta name="keywords" content="instagram unfollow tracker, who unfollowed me instagram, instagram followers analysis, instagram unfollow app, instagram mutual followers" />
+    <meta
+      name="description"
+      content="Check who unfollowed you on Instagram without login. Upload your ZIP file, see unfollowers instantly. 100% free, privacy-first, handles 1M+ accounts."
+    />
+    <meta
+      name="keywords"
+      content="instagram unfollow tracker, who unfollowed me instagram, instagram followers analysis, instagram unfollow app, instagram mutual followers"
+    />
     <meta name="theme-color" content="#4E7EF5" />
 
     <!-- Favicon -->
@@ -93,7 +114,10 @@
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://safeunfollow.app/" />
     <meta property="og:title" content="Instagram Unfollowers — Free ZIP Upload, No Login" />
-    <meta property="og:description" content="Find who unfollowed you on Instagram. 100% free, 100% private, handles 1M+ accounts." />
+    <meta
+      property="og:description"
+      content="Find who unfollowed you on Instagram. 100% free, 100% private, handles 1M+ accounts."
+    />
     <meta property="og:site_name" content="Safe Unfollow" />
     <meta property="og:image" content="https://safeunfollow.app/og-image.png" />
     <meta property="og:image:width" content="1200" />
@@ -104,7 +128,10 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:url" content="https://safeunfollow.app/" />
     <meta name="twitter:title" content="Instagram Unfollowers — Free ZIP Upload, No Login" />
-    <meta name="twitter:description" content="Find Instagram unfollowers in your browser. No login, nothing uploaded, handles millions." />
+    <meta
+      name="twitter:description"
+      content="Find Instagram unfollowers in your browser. No login, nothing uploaded, handles millions."
+    />
     <meta name="twitter:image" content="https://safeunfollow.app/og-image.png" />
 
     <!-- Additional SEO -->

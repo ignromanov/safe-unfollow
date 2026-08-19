@@ -54,6 +54,18 @@
       "title": "“Não te seguem de volta” pode estar inflado.",
       "body": "Não conseguimos ler o seu arquivo de solicitações de seguir, então contas para as quais você enviou uma solicitação podem aparecer nesta lista, e seus contadores de solicitações pendentes aparecem vazios. Seguidores, Seguindo e Mútuos não são afetados.",
       "chipHint": "Pode estar inflado — não conseguimos ler o seu arquivo de solicitações de seguir."
+    },
+    "truncated": {
+      "followers": {
+        "title": "A sua lista de seguidores parece incompleta.",
+        "body": "Ela começa muito depois da sua lista de seguindo, que é o que acontece quando uma exportação é pedida para um período limitado. Se você escolheu um período, peça os seus dados ao Instagram de novo com o período definido como \"Todo o período\". As contagens marcadas abaixo estão afetadas: algumas estão altas demais e outras baixas demais.",
+        "chipHint": "Calculado a partir de uma lista de seguidores que parece incompleta."
+      },
+      "following": {
+        "title": "A sua lista de seguindo parece incompleta.",
+        "body": "Ela começa muito depois da sua lista de seguidores, que é o que acontece quando uma exportação é pedida para um período limitado. Se você escolheu um período, peça os seus dados ao Instagram de novo com o período definido como \"Todo o período\". As contagens marcadas abaixo estão afetadas: algumas estão altas demais e outras baixas demais.",
+        "chipHint": "Calculado a partir de uma lista de seguindo que parece incompleta."
+      }
     }
   },
   "empty": {

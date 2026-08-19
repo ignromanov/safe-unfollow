@@ -91,10 +91,15 @@
         "message": "Le fichier téléversé est vide (0 octet).",
         "fix": "Le téléchargement a peut-être été interrompu. Essayez de retélécharger vos données depuis Instagram."
       },
+      "TOO_MANY_ENTRIES": {
+        "title": "Trop de fichiers",
+        "message": "Cette archive contient plus de fichiers que cet outil ne peut indexer.",
+        "fix": "Demandez une exportation plus petite : Centre de comptes Meta → Créer une exportation → sélectionnez uniquement « Abonnés et abonnements » → format JSON."
+      },
       "FILE_TOO_LARGE": {
         "title": "Fichier trop volumineux",
-        "message": "Le fichier fait {{sizeMb}} Mo, ce qui dépasse la limite de 500 Mo.",
-        "fix": "Essayez de demander une exportation de données plus petite depuis Instagram, ou utilisez un navigateur sur ordinateur avec plus de mémoire."
+        "message": "Votre navigateur n'a pas pu ouvrir cette exportation : elle est trop volumineuse pour cet appareil.",
+        "fix": "Demandez une exportation plus petite : Centre de comptes Meta → Créer une exportation → sélectionnez uniquement « Abonnés et abonnements » → format JSON. Cette exportation pèse quelques Mo au lieu de centaines."
       },
       "JSON_PARSE_ERROR": {
         "title": "Format de données invalide",

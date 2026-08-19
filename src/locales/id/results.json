@@ -54,6 +54,18 @@
       "title": "“Tidak mengikuti balik” mungkin terlalu tinggi.",
       "body": "Kami tidak dapat membaca file permintaan mengikuti Anda, jadi akun yang sudah Anda kirimi permintaan bisa muncul di daftar ini, dan hitungan permintaan tertunda Anda tampil kosong. Pengikut, Mengikuti, dan Saling mengikuti tidak terpengaruh.",
       "chipHint": "Mungkin terlalu tinggi — kami tidak dapat membaca file permintaan mengikuti Anda."
+    },
+    "truncated": {
+      "followers": {
+        "title": "Daftar pengikut Anda tampak tidak lengkap.",
+        "body": "Daftar ini dimulai jauh setelah daftar yang Anda ikuti, dan itulah yang terjadi ketika ekspor diminta untuk rentang tanggal terbatas. Jika Anda memilih rentang tanggal, minta data Anda lagi ke Instagram dengan rentang tanggal diatur ke \"Sepanjang waktu\". Jumlah yang ditandai di bawah ini terpengaruh: sebagian terlalu tinggi, sebagian terlalu rendah.",
+        "chipHint": "Dihitung dari daftar pengikut yang tampak tidak lengkap."
+      },
+      "following": {
+        "title": "Daftar yang Anda ikuti tampak tidak lengkap.",
+        "body": "Daftar ini dimulai jauh setelah daftar pengikut Anda, dan itulah yang terjadi ketika ekspor diminta untuk rentang tanggal terbatas. Jika Anda memilih rentang tanggal, minta data Anda lagi ke Instagram dengan rentang tanggal diatur ke \"Sepanjang waktu\". Jumlah yang ditandai di bawah ini terpengaruh: sebagian terlalu tinggi, sebagian terlalu rendah.",
+        "chipHint": "Dihitung dari daftar yang Anda ikuti yang tampak tidak lengkap."
+      }
     }
   },
   "empty": {
