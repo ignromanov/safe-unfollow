@@ -5,6 +5,10 @@ import { openZipArchive } from '@/core/parsers/zip-archive';
 // These characterise the adapter itself, so they keep every entry. Production
 // passes RELEVANT_FILE_PATTERN — see openZipArchive's docblock for why.
 const KEEP_EVERYTHING = /./;
+// These characterise the adapter, not the ceiling: retaining every name keeps
+// them reading as they did before openZipArchive gained a bound. The bound
+// itself is exercised in zip-archive.test.ts's "entry bound" block.
+const NO_NAME_BOUND = Number.MAX_SAFE_INTEGER;
 
 /**
  * Every byte that changes hands, whoever asks for it.
@@ -66,7 +70,7 @@ describe('random access', () => {
   const total = () => instrument.sizes.reduce((sum, n) => sum + n, 0);
 
   it('never reads a range covering the whole archive', async () => {
-    const archive = await openZipArchive(blob, KEEP_EVERYTHING);
+    const archive = await openZipArchive(blob, KEEP_EVERYTHING, NO_NAME_BOUND);
     const [entry] = archive.find(/following\.json$/);
     await entry.text();
 
@@ -77,7 +81,7 @@ describe('random access', () => {
   });
 
   it('reads far less than the archive to get one small entry', async () => {
-    const archive = await openZipArchive(blob, KEEP_EVERYTHING);
+    const archive = await openZipArchive(blob, KEEP_EVERYTHING, NO_NAME_BOUND);
     await archive.find(/following\.json$/)[0].text();
 
     expect(instrument.sizes.length).toBeGreaterThan(0);
@@ -86,7 +90,7 @@ describe('random access', () => {
   });
 
   it('listing names decompresses nothing', async () => {
-    const archive = await openZipArchive(blob, KEEP_EVERYTHING);
+    const archive = await openZipArchive(blob, KEEP_EVERYTHING, NO_NAME_BOUND);
     expect(archive.names.filter(name => !name.endsWith('/'))).toHaveLength(41);
 
     expect(instrument.sizes.length).toBeGreaterThan(0);
@@ -99,7 +103,7 @@ describe('the entry list this backend produces', () => {
     const blob = await buildBulkyZip();
 
     const viaJSZip = Object.keys((await JSZip.loadAsync(blob)).files);
-    const viaAdapter = (await openZipArchive(blob, KEEP_EVERYTHING)).names;
+    const viaAdapter = (await openZipArchive(blob, KEEP_EVERYTHING, NO_NAME_BOUND)).names;
 
     // Worth testing rather than assuming: the two libraries build this list
     // differently. JSZip synthesises a folder object for every path segment;
@@ -150,7 +154,7 @@ describe('ZIP64', () => {
     );
     expect(hasZip64Eocd).toBe(true);
 
-    const archive = await openZipArchive(blob, KEEP_EVERYTHING);
+    const archive = await openZipArchive(blob, KEEP_EVERYTHING, NO_NAME_BOUND);
     expect(archive.names).toEqual(['connections/followers_and_following/following.json']);
     expect(await archive.find(/following\.json$/)[0].text()).toContain('relationships_following');
   });
@@ -187,7 +191,7 @@ describe('ZIP64', () => {
     new DataView(raw.buffer).setUint16(eocd + 8, 1, true);
     new DataView(raw.buffer).setUint16(eocd + 10, 1, true);
 
-    const archive = await openZipArchive(new Blob([raw]), KEEP_EVERYTHING);
+    const archive = await openZipArchive(new Blob([raw]), KEEP_EVERYTHING, NO_NAME_BOUND);
     expect(archive.names).toEqual(['a.json']);
   });
 });
@@ -222,7 +226,7 @@ describe('bounded retention', () => {
 
   it('lists every name while retaining only the entries it was told it may read', async () => {
     const blob = await buildMediaHeavyZip();
-    const archive = await openZipArchive(blob, /(^|\/)following\.json$/i);
+    const archive = await openZipArchive(blob, /(^|\/)following\.json$/i, NO_NAME_BOUND);
 
     // The index is complete: analyzeZipStructure decides format, base path and
     // whether this is an Instagram export from names alone, so nothing there
@@ -238,7 +242,7 @@ describe('bounded retention', () => {
 
   it('still reads a kept entry after streaming past thirty it discarded', async () => {
     const blob = await buildMediaHeavyZip();
-    const archive = await openZipArchive(blob, /(^|\/)following\.json$/i);
+    const archive = await openZipArchive(blob, /(^|\/)following\.json$/i, NO_NAME_BOUND);
 
     const found = archive.find(/following\.json$/);
     expect(found).toHaveLength(1);

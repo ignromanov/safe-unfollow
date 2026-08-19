@@ -1,4 +1,4 @@
-// A ZipArchive double: three members, the same three the interface declares.
+// A ZipArchive double: the same members the interface declares.
 //
 // It replaces __mocks__/jszip.cjs, which reimplemented JSZip's `files` /
 // `file(regex)` / `async()` — the surface the parser used, and now the surface
@@ -14,6 +14,12 @@ const MockZipArchive = function () {
   return {
     get names() {
       return [...filesMap.keys()];
+    },
+
+    // The real adapter counts every entry and retains names only up to its
+    // bound; nothing here is large enough for the two to differ.
+    get count() {
+      return filesMap.size;
     },
 
     find: function (pattern) {

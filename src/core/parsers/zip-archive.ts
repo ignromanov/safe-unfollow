@@ -14,6 +14,7 @@ import {
   ZipReader,
   configure,
 } from '@zip.js/zip.js/lib/zip-core-native.js';
+import type { ParseWarning } from '@/core/types';
 
 // Also required by the CSP, not merely advisable: no worker-src or child-src is
 // declared, so it inherits default-src 'self', which has no blob:. zip.js builds
@@ -37,8 +38,20 @@ export interface ZipEntry {
  * which is what makes the backend replaceable.
  */
 export interface ZipArchive {
-  /** Every entry name, from the archive's index. Decompresses nothing. */
+  /**
+   * Entry names from the archive's index, capped at the caller's `maxNames`.
+   * Decompresses nothing. Complete whenever `count <= maxNames`, which is the
+   * only case a caller may read it in — see `count`.
+   */
   readonly names: string[];
+  /**
+   * How many entries the index actually holds, counted rather than measured
+   * off `names`, which stops growing at `maxNames`.
+   *
+   * Separate because the two answer different questions: a caller decides
+   * whether to go on from `count`, and only then looks at `names`.
+   */
+  readonly count: number;
   /**
    * Entries whose full path matches. Directory entries are excluded — the
    * semantics JSZip had at `!file.dir && regexp.test(relativePath)`
@@ -47,20 +60,6 @@ export interface ZipArchive {
   find(pattern: RegExp): ZipEntry[];
 }
 
-/**
- * @param keep Which entries this archive may later be asked to read. Names are
- *   always listed in full; only matching entries keep an object, and `find`
- *   can therefore only ever return one of those. Callers pass
- *   `RELEVANT_FILE_PATTERN`, derived from the file specs.
- *
- *   Not an optimisation with a threshold — a correctness bound. `getEntries()`
- *   materialises the whole central directory, and a zip.js entry costs about
- *   7.6 KB of retained heap; 50 000 entries from an 8 MB archive held 364 MB,
- *   measured on Node 24 with --expose-gc after collection. The cost tracks the
- *   entry count, not the archive's size, so a media-heavy export OOMs a mobile
- *   tab with no error to show for it — the worker is killed, nothing is posted
- *   back, and the reader waits out the 60-second timeout.
- */
 /**
  * Which of the reader's two diagnostic codes a thrown zip.js error means.
  *
@@ -90,7 +89,55 @@ export function classifyZipFailure(error: unknown): 'ZIP_ENCRYPTED' | 'CORRUPTED
   return ENCRYPTION_ERRORS.has(message) ? 'ZIP_ENCRYPTED' : 'CORRUPTED_ZIP';
 }
 
-export async function openZipArchive(file: Blob, keep: RegExp): Promise<ZipArchive> {
+/**
+ * The warning for an entry that was in the archive's index and threw when
+ * read — encrypted, damaged, or an unsupported compression method. Shared by
+ * every caller of `ZipEntry.text()` (`instagram.ts`, `instagram-followers.ts`)
+ * so the phrasing and fix cannot drift between them; only the severity, which
+ * depends on whether the entry was required, is theirs to decide.
+ */
+export function describeUnreadableZipEntry(
+  name: string,
+  error: unknown,
+  severity: ParseWarning['severity']
+): ParseWarning {
+  return {
+    code: classifyZipFailure(error),
+    message: `Found ${name} but could not read it: ${error instanceof Error ? error.message : String(error)}`,
+    severity,
+    fix: 'Try re-downloading your data from Instagram Settings.',
+  };
+}
+
+/**
+ * @param keep Which entries this archive may later be asked to read. Names are
+ *   always listed in full; only matching entries keep an object, and `find`
+ *   can therefore only ever return one of those. Callers pass
+ *   `RELEVANT_FILE_PATTERN`, derived from the file specs.
+ *
+ *   Not an optimisation with a threshold — a correctness bound. `getEntries()`
+ *   materialises the whole central directory, and a zip.js entry costs about
+ *   7.6 KB of retained heap; 50 000 entries from an 8 MB archive held 364 MB,
+ *   measured on Node 24 with --expose-gc after collection. The cost tracks the
+ *   entry count, not the archive's size, so a media-heavy export OOMs a mobile
+ *   tab with no error to show for it — the worker is killed, nothing is posted
+ *   back, and the reader waits out the 60-second timeout.
+ *
+ * @param maxNames How many entry names to retain. `keep` bounds the entry
+ *   objects; this bounds the strings, which are not free either: 5 000 000
+ *   names of 41 characters held 406.6 MB, measured on Node 24 with --expose-gc
+ *   after collection, and real media paths are longer than 41 characters.
+ *
+ *   A ceiling checked after the walk is not a ceiling. Pass the same number the
+ *   caller will compare `count` against, so the walk retains at most what an
+ *   accepted archive needs and an archive above the ceiling is rejected without
+ *   ever having held its own claim.
+ */
+export async function openZipArchive(
+  file: Blob,
+  keep: RegExp,
+  maxNames: number
+): Promise<ZipArchive> {
   // filenameValidation 'tolerant', against zip.js's 'balanced' default: one
   // entry named `../x`, `/x` or `C:\x` otherwise makes getEntries() throw for
   // the whole archive (zip-reader.js:448), and JSZip read those.
@@ -105,8 +152,13 @@ export async function openZipArchive(file: Blob, keep: RegExp): Promise<ZipArchi
   // central-directory walk, but each entry is discardable as it goes.
   const names: string[] = [];
   const files: ZipEntry[] = [];
+  let count = 0;
   for await (const entry of reader.getEntriesGenerator()) {
-    names.push(entry.filename);
+    count++;
+    // Counted always, retained up to maxNames. The caller's ceiling is checked
+    // against `count` after this returns, so an archive above it is rejected
+    // having retained a bounded prefix instead of every name it claimed.
+    if (names.length < maxNames) names.push(entry.filename);
     // Directory entries are listed and never returned by find — the semantics
     // JSZip had at `!file.dir && regexp.test(relativePath)`
     // (`jszip/lib/object.js:225`), pinned by the characterisation tests.
@@ -119,6 +171,7 @@ export async function openZipArchive(file: Blob, keep: RegExp): Promise<ZipArchi
 
   return {
     names,
+    count,
     find: (pattern: RegExp): ZipEntry[] => files.filter(f => pattern.test(f.name)),
   };
 }

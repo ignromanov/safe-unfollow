@@ -12,7 +12,12 @@ import { parseFollowersFromZip } from './instagram-followers';
 import { parseFollowingPayload } from './instagram-following';
 import { parseOptionalFiles } from './instagram-optional';
 import { createEmptyParsedAll } from './instagram-validation';
-import { classifyZipFailure, openZipArchive, type ZipArchive } from './zip-archive';
+import {
+  classifyZipFailure,
+  describeUnreadableZipEntry,
+  openZipArchive,
+  type ZipArchive,
+} from './zip-archive';
 
 // Re-export for backward compatibility
 export { parseFollowersJson } from './instagram-followers';
@@ -32,13 +37,35 @@ export async function parseFollowingJson(jsonText: string): Promise<string[]> {
   return extractUsernames(data.relationships_following);
 }
 
+// Zip-bomb protection. 200k, not 10k: an "All of your information" export
+// from a decade-old account carries tens of thousands of media files, one
+// entry each, and the old limit told those exports they were fake. It was
+// unreachable while the 500MB ceiling fired first, and deleting the ceiling
+// routed them straight into it.
+//
+// The number is a sanity bound on our own walk of the central directory, not
+// a statement about what a real export looks like — so the message says so.
+//
+// Above 65,535 entries a non-ZIP64 archive reports its count modulo 65,536,
+// and this reader trusts that field (zip-reader.js:276), so such an archive is
+// read short. Compliant writers do not produce one, no mitigation is free —
+// zip.js's checkAmbiguity rejects the truncation but also rejects benign
+// quirks in valid archives — and the failure is loud rather than silent. The
+// signal to watch instead is upload_error_not_instagram arriving at multi-GB
+// file_size_mb, which the failure event now carries.
+//
+// Passed to openZipArchive as its retention bound too, so the walk holds at
+// most what an accepted archive needs. One number, because two that must agree
+// eventually will not.
+const MAX_ZIP_ENTRIES = 200_000;
+
 // === Main Parser ===
 
 export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
   // Try to load ZIP with error handling for corrupted files
   let archive: ZipArchive;
   try {
-    archive = await openZipArchive(file, RELEVANT_FILE_PATTERN);
+    archive = await openZipArchive(file, RELEVANT_FILE_PATTERN, MAX_ZIP_ENTRIES);
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : String(err);
     const code = classifyZipFailure(err);
@@ -66,30 +93,13 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
 
   const allFiles = archive.names;
 
-  // Zip-bomb protection. 200k, not 10k: an "All of your information" export
-  // from a decade-old account carries tens of thousands of media files, one
-  // entry each, and the old limit told those exports they were fake. It was
-  // unreachable while the 500MB ceiling fired first, and deleting the ceiling
-  // routed them straight into it.
-  //
-  // The number is a sanity bound on our own walk of the central directory, not
-  // a statement about what a real export looks like — so the message says so.
-  //
-  // Above 65,535 entries a non-ZIP64 archive reports its count modulo 65,536,
-  // and this reader trusts that field (zip-reader.js:276), so such an archive is
-  // read short. Compliant writers do not produce one, no mitigation is free —
-  // zip.js's checkAmbiguity rejects the truncation but also rejects benign
-  // quirks in valid archives — and the failure is loud rather than silent. The
-  // signal to watch instead is upload_error_not_instagram arriving at multi-GB
-  // file_size_mb, which the failure event now carries.
-  const MAX_ZIP_ENTRIES = 200_000;
-  if (allFiles.length > MAX_ZIP_ENTRIES) {
+  if (archive.count > MAX_ZIP_ENTRIES) {
     return {
       data: createEmptyParsedAll(),
       warnings: [
         {
           code: 'TOO_MANY_ENTRIES',
-          message: `This ZIP contains ${allFiles.length.toLocaleString()} files, more than this tool can index (${MAX_ZIP_ENTRIES.toLocaleString()}).`,
+          message: `This ZIP contains ${archive.count.toLocaleString()} files, more than this tool can index (${MAX_ZIP_ENTRIES.toLocaleString()}).`,
           severity: 'error',
           fix: 'Ask Instagram for a smaller export: Meta Accounts Center → Create export → select only "Followers and following" → format JSON.',
         },
@@ -177,16 +187,9 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
         text = await f.text();
       } catch (error) {
         if (required) unreadableRequiredPath = f.name;
-        warnings.push({
-          // The reader's two answers are "it is locked" and "it is damaged",
-          // and both are actionable. Which one is the library's to say.
-          code: classifyZipFailure(error),
-          message: `Found ${f.name} but could not read it: ${error instanceof Error ? error.message : String(error)}`,
-          // An optional file we cannot read costs a badge, not the answer, and
-          // severity 'error' would take over the whole screen for it.
-          severity: required ? 'error' : 'warning',
-          fix: 'Try re-downloading your data from Instagram Settings.',
-        });
+        // An optional file we cannot read costs a badge, not the answer, and
+        // severity 'error' would take over the whole screen for it.
+        warnings.push(describeUnreadableZipEntry(f.name, error, required ? 'error' : 'warning'));
         return null;
       }
 
