@@ -44,6 +44,26 @@ export function Wizard({ initialStep = 1 }: WizardProps) {
     return () => container.removeEventListener('scroll', markScrolled);
   }, []);
 
+  // The wizard scrolls in the container below, and WizardPage never remounts
+  // across wizard URLs (routes.tsx reuses one element for every :stepId), so
+  // its scrollTop survives every step change — useLayoutState resets the
+  // window, which is a no-op behind this `fixed inset-0` overlay. Step 1 is
+  // now much taller than a step card and its accordion rows are step links,
+  // so without this a reader navigates from deep in one step and arrives
+  // partway down the next.
+  //
+  // The first run is skipped on purpose: on mount a non-zero scrollTop is the
+  // position a reader reached before hydration, and yanking them to the top
+  // there is the same class of defect the swap gate above prevents.
+  const hasRenderedStep = useRef(false);
+  useEffect(() => {
+    if (!hasRenderedStep.current) {
+      hasRenderedStep.current = true;
+      return;
+    }
+    scrollContainerRef.current?.scrollTo({ top: 0 });
+  }, [currentStep]);
+
   // Track analytics on step view. Step 1 is GuideEntry, which reports its
   // own guideEntryView — reporting wizardStepView here too would double the
   // view event for the same screen (see GuideEntry.tsx).

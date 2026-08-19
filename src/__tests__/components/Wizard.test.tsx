@@ -286,6 +286,35 @@ describe('Wizard', () => {
     expect(analytics.wizardStepView).toHaveBeenCalledWith(2);
   });
 
+  // WizardPage never remounts across wizard URLs — one element serves every
+  // :stepId (routes.tsx) — and the scroll lives in an inner container, so
+  // useLayoutState's window reset cannot reach it.
+  describe('scroll position across step changes', () => {
+    it('sends the scroll container back to the top when the step changes', () => {
+      mockPathname = '/wizard/step/1';
+      const { rerender } = render(<Wizard />);
+      const container = screen.getByRole('dialog').querySelector('.overflow-y-auto')!;
+      const scrollTo = vi.fn();
+      container.scrollTo = scrollTo;
+
+      mockPathname = '/wizard/step/2';
+      rerender(<Wizard />);
+
+      expect(scrollTo).toHaveBeenCalledWith({ top: 0 });
+    });
+
+    it('leaves the reader where they are on the first render', () => {
+      const scrollTo = vi.spyOn(Element.prototype, 'scrollTo');
+
+      renderWizardAtStep(1);
+
+      // A non-zero scrollTop on mount is a position reached before hydration.
+      // Resetting it there is the defect the bar's swap gate also guards.
+      expect(scrollTo).not.toHaveBeenCalled();
+      scrollTo.mockRestore();
+    });
+  });
+
   describe('bottom bar on step 1', () => {
     it('names the bar navigation region separately from the step-dot navigation', () => {
       renderWizardAtStep(1);
