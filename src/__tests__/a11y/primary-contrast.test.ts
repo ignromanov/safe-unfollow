@@ -35,7 +35,10 @@ describe('text on --primary meets WCAG AA', () => {
   for (const theme of ['light', 'dark'] as const) {
     describe(theme, () => {
       it('pairs --primary-foreground with --primary at 4.5:1 or better', () => {
-        const ratio = contrastRatio(token(theme, '--primary-foreground'), token(theme, '--primary'));
+        const ratio = contrastRatio(
+          token(theme, '--primary-foreground'),
+          token(theme, '--primary')
+        );
         expect(ratio).toBeGreaterThanOrEqual(WCAG_AA_NORMAL);
       });
 

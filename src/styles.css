@@ -134,20 +134,32 @@
     text-rendering: optimizeLegibility;
     line-height: 1.625;
   }
-  h1, h2, h3, .font-display {
+  h1,
+  h2,
+  h3,
+  .font-display {
     letter-spacing: -0.04em;
     line-height: 1.15;
   }
   /* RTL: Arabic text needs different letter-spacing */
-  [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, [dir="rtl"] .font-display {
+  [dir='rtl'] h1,
+  [dir='rtl'] h2,
+  [dir='rtl'] h3,
+  [dir='rtl'] .font-display {
     letter-spacing: 0;
   }
   /* Interactive elements should always show pointer cursor */
-  button, [role="button"], a[href], input[type="button"], input[type="submit"] {
+  button,
+  [role='button'],
+  a[href],
+  input[type='button'],
+  input[type='submit'] {
     cursor: pointer;
   }
   /* Remove tap highlight on mobile for interactive elements */
-  [role="button"], button, a {
+  [role='button'],
+  button,
+  a {
     -webkit-tap-highlight-color: transparent;
   }
 }
@@ -161,12 +173,22 @@
   /* V3 Gradient Text - OKLCH */
   .text-gradient {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(to right, oklch(0.6 0.18 264), oklch(0.65 0.22 285), oklch(0.65 0.2 340));
+    background-image: linear-gradient(
+      to right,
+      oklch(0.6 0.18 264),
+      oklch(0.65 0.22 285),
+      oklch(0.65 0.2 340)
+    );
   }
 
   /* V3 Gradient Background (for logo icon) - OKLCH */
   .bg-gradient-brand {
-    background: linear-gradient(135deg, oklch(0.6 0.18 264) 0%, oklch(0.65 0.22 285) 50%, oklch(0.65 0.2 340) 100%);
+    background: linear-gradient(
+      135deg,
+      oklch(0.6 0.18 264) 0%,
+      oklch(0.65 0.22 285) 50%,
+      oklch(0.65 0.2 340) 100%
+    );
   }
 
   /* Custom scrollbar for virtual lists - V3 style */
@@ -219,7 +241,9 @@
 
 /* P0.4: Accessibility — respect user motion preferences */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
