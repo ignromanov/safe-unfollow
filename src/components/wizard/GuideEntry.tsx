@@ -44,11 +44,20 @@ export function GuideEntry({ ctaRef }: { ctaRef?: (node: HTMLAnchorElement | nul
         </p>
 
         <div className="flex flex-col items-stretch sm:items-start gap-3">
+          {/* The screen's one action, so it is also the only thing that
+              distinguishes "clicked the CTA" from "scrolled past it and hit
+              Next". `linkClick` is trackEvent-class on purpose: a _blank
+              click unloads nothing, so there is no in-flight request for a
+              navigation to cancel. It inherits the pre-hydration bypass of
+              GH#50 — a click before hydration follows the href and fires no
+              onClick — which is tolerable here because this count is a
+              numerator, never a funnel denominator. */}
           <a
             ref={ctaRef}
             href={ACCOUNTS_CENTER_URL}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => analytics.linkClick('meta_accounts')}
             className="cursor-pointer inline-flex min-h-[48px] items-center justify-center gap-3 whitespace-normal px-8 py-3 bg-primary text-primary-foreground rounded-2xl font-black shadow-xl hover:scale-105 active:scale-95 transition-all text-sm md:text-base text-center w-full sm:w-auto"
           >
             {t('entry.cta')} <ExternalLink size={20} className="shrink-0" aria-hidden="true" />

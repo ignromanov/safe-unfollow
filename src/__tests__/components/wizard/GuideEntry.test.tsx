@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import wizardEN from '@/locales/en/wizard.json';
 import { createI18nMock } from '@/__tests__/utils/mockI18n';
@@ -12,6 +13,7 @@ vi.mock('@/lib/analytics', () => ({
   analytics: {
     guideEntryView: vi.fn(),
     wizardStepView: vi.fn(),
+    linkClick: vi.fn(),
   },
 }));
 
@@ -51,6 +53,15 @@ describe('GuideEntry', () => {
 
     expect(analytics.guideEntryView).toHaveBeenCalledTimes(1);
     expect(analytics.wizardStepView).not.toHaveBeenCalled();
+  });
+
+  it('reports the click on its one action, so the CTA is distinguishable from a scroll-past', async () => {
+    const user = userEvent.setup();
+    render(<GuideEntry />);
+
+    await user.click(screen.getByRole('link', { name: /accounts center/i }));
+
+    expect(analytics.linkClick).toHaveBeenCalledExactlyOnceWith('meta_accounts');
   });
 
   it("never claims a ceiling on Instagram's clock", () => {
