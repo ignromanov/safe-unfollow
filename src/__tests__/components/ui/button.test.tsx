@@ -16,13 +16,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Button, buttonVariants } from '@/components/ui/button';
-import {
-  contrastRatio,
-  over,
-  readThemeTokens,
-  token,
-  WCAG_AA_NORMAL,
-} from '@tests/utils/contrast';
+import { contrastRatio, over, readThemeTokens, token, WCAG_AA_NORMAL } from '@tests/utils/contrast';
 
 const outline = buttonVariants({ variant: 'outline' });
 const ghost = buttonVariants({ variant: 'ghost' });
@@ -61,9 +55,7 @@ describe('button outline variant', () => {
   describe('light hover', () => {
     it('keeps the label legible on --accent', () => {
       const fg = token('light', hoverForegroundToken(outline));
-      expect(contrastRatio(fg, token('light', '--accent'))).toBeGreaterThanOrEqual(
-        WCAG_AA_NORMAL
-      );
+      expect(contrastRatio(fg, token('light', '--accent'))).toBeGreaterThanOrEqual(WCAG_AA_NORMAL);
     });
   });
 

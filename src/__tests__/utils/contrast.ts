@@ -21,8 +21,7 @@ export type Rgb = readonly [number, number, number];
 const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
 const encodeGamma = (c: number) =>
   c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1 / 2.4) - 0.055;
-const decodeGamma = (c: number) =>
-  c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+const decodeGamma = (c: number) => (c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
 
 /** `oklch(L C H)` -> displayed sRGB, each channel 0..1. */
 export function oklchToRgb(L: number, C: number, H: number): Rgb {
@@ -45,9 +44,7 @@ export function oklchToRgb(L: number, C: number, H: number): Rgb {
 
 /** Parses an `oklch(L C H)` / `oklch(L C H / A)` declaration value. */
 export function parseOklch(value: string): Rgb {
-  const match = value.match(
-    /oklch\(\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)/i
-  );
+  const match = value.match(/oklch\(\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)/i);
   if (!match) throw new Error(`not an oklch() value: ${value}`);
   return oklchToRgb(Number(match[1]), Number(match[2]), Number(match[3]));
 }
