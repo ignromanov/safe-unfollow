@@ -78,6 +78,7 @@ self.onmessage = async (
         // GH#41: the caveat has to survive the parse — /results reads this
         // record, not the ParseResult that is about to go out of scope.
         followRequestsUnreadable: parseResult.followRequestsUnreadable,
+        truncatedRelationshipFile: parseResult.truncatedRelationshipFile,
       });
 
       // Store all accounts at once (optimized bulk mode)

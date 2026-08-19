@@ -151,6 +151,7 @@ export async function parseOnMainThread(
       version: 2,
       // GH#41 — see parse-worker.ts; the fallback path must persist it too.
       followRequestsUnreadable: parseResult.followRequestsUnreadable,
+      truncatedRelationshipFile: parseResult.truncatedRelationshipFile,
     });
 
     await indexedDBService.storeAllAccounts(fileHash, unified);

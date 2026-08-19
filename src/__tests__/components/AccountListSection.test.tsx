@@ -9,14 +9,14 @@ vi.mock('react-i18next', () => createI18nMock(resultsEN));
 import { AccountListSection } from '@/components/AccountListSection';
 import type { BadgeKey } from '@/core/types';
 import { useAccountFiltering } from '@/hooks/useAccountFiltering';
-import { useFollowRequestsCaveat } from '@/hooks/useFollowRequestsCaveat';
+import { useUploadCaveats } from '@/hooks/useUploadCaveats';
 
 // Mock the useAccountFiltering hook
 vi.mock('@/hooks/useAccountFiltering');
 
 // GH#41 — reads IndexedDB, which jsdom does not provide. Mocked so every other
 // test in this file renders the clean page, and the caveat tests below opt in.
-vi.mock('@/hooks/useFollowRequestsCaveat');
+vi.mock('@/hooks/useUploadCaveats');
 
 // Mock useLanguagePrefix
 vi.mock('@/hooks/useLanguagePrefix', () => ({
@@ -75,7 +75,14 @@ vi.mock('@/components/RescuePlanBanner', () => ({
 }));
 
 const mockUseAccountFiltering = vi.mocked(useAccountFiltering);
-const mockUseFollowRequestsCaveat = vi.mocked(useFollowRequestsCaveat);
+const mockUseUploadCaveats = vi.mocked(useUploadCaveats);
+
+/** Both caveats quiet unless a test says otherwise. */
+const caveats = (overrides: Partial<ReturnType<typeof useUploadCaveats>> = {}) => ({
+  followRequestsUnreadable: false,
+  truncatedRelationshipFile: null,
+  ...overrides,
+});
 
 describe('AccountListSection', () => {
   const mockSetQuery = vi.fn();
@@ -121,7 +128,7 @@ describe('AccountListSection', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseAccountFiltering.mockReturnValue(createMockReturnValue());
-    mockUseFollowRequestsCaveat.mockReturnValue(false);
+    mockUseUploadCaveats.mockReturnValue(caveats());
   });
 
   /**
@@ -138,7 +145,7 @@ describe('AccountListSection', () => {
     });
 
     it('names the badge, the cause, and what is still trustworthy', () => {
-      mockUseFollowRequestsCaveat.mockReturnValue(true);
+      mockUseUploadCaveats.mockReturnValue(caveats({ followRequestsUnreadable: true }));
       renderWithRouter(<AccountListSection {...defaultProps} />);
 
       expect(screen.getByText(resultsEN.caveat.followRequests.title)).toBeInTheDocument();
@@ -165,7 +172,7 @@ describe('AccountListSection', () => {
     });
 
     it('announces politely — the notice arrives after paint, and is advisory', () => {
-      mockUseFollowRequestsCaveat.mockReturnValue(true);
+      mockUseUploadCaveats.mockReturnValue(caveats({ followRequestsUnreadable: true }));
       renderWithRouter(<AccountListSection {...defaultProps} />);
 
       // role="alert" (the Alert primitive's default) is assertive, and this is
@@ -176,7 +183,7 @@ describe('AccountListSection', () => {
     });
 
     it('keeps the notFollowingBack list rather than suppressing it', () => {
-      mockUseFollowRequestsCaveat.mockReturnValue(true);
+      mockUseUploadCaveats.mockReturnValue(caveats({ followRequestsUnreadable: true }));
       renderWithRouter(<AccountListSection {...defaultProps} />);
 
       // Suppressing the badge would render "0 Not Following Back", which reads
