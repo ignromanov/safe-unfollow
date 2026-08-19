@@ -143,7 +143,7 @@ describe('promo impression batching', () => {
 
       expect(enqueueEvent).toHaveBeenCalledWith('wizard_step_view', {
         step_id: 3,
-        first_view: true,
+        first_view_in_tab: true,
       });
       expect(trackEvent).not.toHaveBeenCalled();
       random.mockRestore();
@@ -209,7 +209,7 @@ describe('promo impression batching', () => {
     });
   });
 
-  // guide_entry_view and wizard_step_view's first_view — a ratio between two
+  // guide_entry_view and wizard_step_view's first_view_in_tab — a ratio between two
   // events needs a matching definition of "first" on both ends, or 1→2→1→2
   // stops being a funnel. See analytics.guideEntryView for the full rationale.
   describe('guide entry / first instruction pair', () => {
@@ -219,8 +219,12 @@ describe('promo impression batching', () => {
       analytics.guideEntryView();
       analytics.guideEntryView();
 
-      expect(enqueueEvent).toHaveBeenNthCalledWith(1, 'guide_entry_view', { first_view: true });
-      expect(enqueueEvent).toHaveBeenNthCalledWith(2, 'guide_entry_view', { first_view: false });
+      expect(enqueueEvent).toHaveBeenNthCalledWith(1, 'guide_entry_view', {
+        first_view_in_tab: true,
+      });
+      expect(enqueueEvent).toHaveBeenNthCalledWith(2, 'guide_entry_view', {
+        first_view_in_tab: false,
+      });
       random.mockRestore();
     });
 
@@ -233,11 +237,11 @@ describe('promo impression batching', () => {
 
       expect(enqueueEvent).toHaveBeenNthCalledWith(1, 'wizard_step_view', {
         step_id: 2,
-        first_view: true,
+        first_view_in_tab: true,
       });
       expect(enqueueEvent).toHaveBeenNthCalledWith(3, 'wizard_step_view', {
         step_id: 2,
-        first_view: false,
+        first_view_in_tab: false,
       });
       random.mockRestore();
     });
@@ -253,12 +257,12 @@ describe('promo impression batching', () => {
     });
 
     // Every test above pins Math.random to a single value, which makes
-    // "compute first_view before the gate" and "compute it after" produce
+    // "compute first_view_in_tab before the gate" and "compute it after" produce
     // identical output — both orders are indistinguishable when every call
     // is sampled the same way. This is the case that actually tells them
     // apart: the first call is dropped by the gate but must still consume
     // the "seen before" marker, so the later, sampled call reports
-    // first_view: false — not true, which is what gate-before-marker would
+    // first_view_in_tab: false — not true, which is what gate-before-marker would
     // report instead.
     it('marks a later sampled view as not-first when an earlier, unsampled view already happened', () => {
       const random = vi.spyOn(Math, 'random');
@@ -271,7 +275,7 @@ describe('promo impression batching', () => {
       analytics.guideEntryView();
 
       expect(enqueueEvent).toHaveBeenCalledExactlyOnceWith('guide_entry_view', {
-        first_view: false,
+        first_view_in_tab: false,
       });
       random.mockRestore();
     });
@@ -288,7 +292,7 @@ describe('promo impression batching', () => {
 
       expect(enqueueEvent).toHaveBeenCalledExactlyOnceWith('wizard_step_view', {
         step_id: 4,
-        first_view: false,
+        first_view_in_tab: false,
       });
       random.mockRestore();
     });

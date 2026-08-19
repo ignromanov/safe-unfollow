@@ -11,7 +11,14 @@ import type { LabelResolutionMode } from '@/core/types';
 import type { LicenseFailureReason } from '@/lib/export/license';
 
 /**
- * True the first time this key is seen in the session, false afterwards.
+ * True the first time this key is seen in this browser tab, false afterwards.
+ *
+ * The name says "tab" because `sessionStorage` is scoped to one tab and dies
+ * with it, while Umami's `session_id` is scoped to a visitor and can span
+ * days. The two disagree in the same direction every time: two tabs, or a
+ * reopen an hour later, give two `true` rows against one Umami session. A
+ * property called `first_view` would read as "first view this session" —
+ * false against the only notion of session the dashboard has.
  *
  * Both ends of the entry→instruction pair carry it. Without it the pair
  * inherits wizard_step_view's back-navigation non-monotonicity — 1→2→1→2 counts
@@ -23,15 +30,15 @@ import type { LicenseFailureReason } from '@/lib/export/license';
  * whether this particular view got sampled — an unreported view still
  * happened, and the marker still needs writing so the next view (sampled or
  * not) reads `false`. Gating first would make the marker's write conditional
- * on the sample roll, so `first_view: true` would mean "the first view that
+ * on the sample roll, so `first_view_in_tab: true` would mean "the first view that
  * happened to be sampled", not "the reader's first view" — expected
  * true-count per session becomes `1 - 0.95^n`, which is n-dependent, and the
  * entry→step-2 ratio this flag exists to unbias stays skewed by
  * back-navigation.
  */
-function firstViewInSession(key: string): boolean {
+function firstViewInTab(key: string): boolean {
   if (typeof window === 'undefined') return false;
-  const storageKey = `analytics_first_${key}`;
+  const storageKey = `analytics_first_in_tab_${key}`;
   if (sessionStorage.getItem(storageKey)) return false;
   sessionStorage.setItem(storageKey, '1');
   return true;
@@ -228,19 +235,22 @@ export const analytics = {
    * Different denominators by construction.
    */
   guideEntryView: () => {
-    // Order matters — see firstViewInSession's doc comment. The marker must
+    // Order matters — see firstViewInTab's doc comment. The marker must
     // be written regardless of whether this view is sampled.
-    const isFirstView = firstViewInSession('guide_entry');
+    const isFirstView = firstViewInTab('guide_entry');
     if (Math.random() > 0.05) return;
-    enqueueEvent(AnalyticsEvents.GUIDE_ENTRY_VIEW, { first_view: isFirstView });
+    enqueueEvent(AnalyticsEvents.GUIDE_ENTRY_VIEW, { first_view_in_tab: isFirstView });
   },
 
   // Wizard events (V10: 5% sampling, was 25%)
   wizardStepView: (stepId: number) => {
-    // Order matters — see firstViewInSession's doc comment.
-    const isFirstView = firstViewInSession(`wizard_step_${stepId}`);
+    // Order matters — see firstViewInTab's doc comment.
+    const isFirstView = firstViewInTab(`wizard_step_${stepId}`);
     if (Math.random() > 0.05) return;
-    enqueueEvent(AnalyticsEvents.WIZARD_STEP_VIEW, { step_id: stepId, first_view: isFirstView });
+    enqueueEvent(AnalyticsEvents.WIZARD_STEP_VIEW, {
+      step_id: stepId,
+      first_view_in_tab: isFirstView,
+    });
   },
 
   // Page Views (V10: first-in-session UTM attribution only, Umami built-in handles pageviews)
