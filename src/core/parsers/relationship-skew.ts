@@ -22,8 +22,7 @@
  * costs 199 wrong accusations the reader has no way to notice.
  */
 
-/** Which of the two required lists starts materially later than the other. */
-export type TruncatedRelationshipFile = 'followers' | 'following' | null;
+import type { TruncatedRelationshipFile } from '@/core/types';
 
 /**
  * How far apart the two lists may start before it is worth saying so.

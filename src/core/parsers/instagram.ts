@@ -13,6 +13,7 @@ import { parseFollowersFromZip } from './instagram-followers';
 import { parseFollowingPayload } from './instagram-following';
 import { parseOptionalFiles } from './instagram-optional';
 import { createEmptyParsedAll } from './instagram-validation';
+import { detectRelationshipSkew } from './relationship-skew';
 
 // Re-export for backward compatibility
 export { parseFollowersJson } from './instagram-followers';
@@ -65,6 +66,8 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
       // nothing to overstate (GH#41).
       labelResolutionMode: 'not-applicable',
       followRequestsUnreadable: false,
+      // Nothing was compared, so nothing is known to be short.
+      truncatedRelationshipFile: null,
     };
   }
 
@@ -87,6 +90,8 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
       hasMinimalData: false,
       labelResolutionMode: 'not-applicable',
       followRequestsUnreadable: false,
+      // Nothing was compared, so nothing is known to be short.
+      truncatedRelationshipFile: null,
     };
   }
 
@@ -132,6 +137,8 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
       hasMinimalData: false,
       labelResolutionMode: 'not-applicable',
       followRequestsUnreadable: false,
+      // Nothing was compared, so nothing is known to be short.
+      truncatedRelationshipFile: null,
     };
   }
 
@@ -227,6 +234,15 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
     files: fileExpectations,
   };
 
+  // Run unconditionally, including when the parse is already failing: the
+  // detector's own sample-size guard returns null for the empty maps that an
+  // unreadable file leaves behind, so no branch is needed to keep the two
+  // diagnoses from talking over each other.
+  const truncatedRelationshipFile = detectRelationshipSkew(
+    followingParsed.followingTimestamps,
+    followersParsed.followersTimestamps
+  );
+
   return {
     data: {
       following: new Set(followingUsers),
@@ -245,6 +261,7 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
     hasMinimalData,
     labelResolutionMode: optionalParsed.labelResolutionMode,
     followRequestsUnreadable: optionalParsed.followRequestsUnreadable,
+    truncatedRelationshipFile,
   };
 }
 
