@@ -247,12 +247,27 @@ export function Wizard({ initialStep = 1 }: WizardProps) {
             does not wrap, and the swapped pair is far wider than the ~196px
             an inner row gets at 360px — so the labels wrap to two lines.
             16 = the two-line case: 2 × 20px (text-sm leading) + 24px (the
-            controls' py-3). */}
+            controls' py-3).
+
+            Reserved on step 1 only, because only step 1 can swap; the other
+            seven steps would otherwise carry ~20px of chrome for an event
+            that cannot reach them, on the phones that are 85% of readers.
+
+            The two-line figure is derived from English and is NOT measured.
+            `buttons.trySample` runs to 30-32 characters in de, fr, pt and ru
+            against 20 in English, which is plausibly three lines at 360px and
+            would put the height back in play for exactly those locales. jsdom
+            performs no layout, so no test here can settle it — it is on the
+            operator's device-check list in progress.md as fr/pt at 360px. */}
         <nav
           className="shrink-0 border-t border-border bg-card px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
           aria-label={t('footer.navigation')}
         >
-          <div className="max-w-xl mx-auto flex min-h-16 items-center justify-between">
+          <div
+            className={`max-w-xl mx-auto flex items-center justify-between ${
+              isFirstStep ? 'min-h-16' : ''
+            }`}
+          >
             <PrefixedLink
               to={
                 showBarPrimary
