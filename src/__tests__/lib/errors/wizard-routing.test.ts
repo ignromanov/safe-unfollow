@@ -28,3 +28,19 @@ describe('wizardHrefForError', () => {
     expect(wizardHrefForError('', 'HTML_FORMAT')).toBe('/wizard/step/6');
   });
 });
+
+describe('the two size failures point where their own copy points', () => {
+  // Both codes' `fix` text, in all ten locales, tells the reader to ask
+  // Instagram for a smaller export by selecting only "Followers and
+  // following". That is wizard step 4. Falling through to the default sent
+  // them to step 6, "Change format to JSON" — so the button under the
+  // paragraph contradicted the paragraph. This file exists to remove exactly
+  // that class of mismatch (see its docblock); the two codes were simply added
+  // to the union and not to the switch.
+  it.each(['TOO_MANY_ENTRIES', 'FILE_TOO_LARGE'] as const)(
+    '%s routes to the step that selects only Followers and following',
+    code => {
+      expect(wizardStepForError(code)).toBe(4);
+    }
+  );
+});

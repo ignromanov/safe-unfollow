@@ -47,12 +47,38 @@ const CLASSIFICATION_RULES: ClassificationRule[] = [
       'corrupted',
       'bad local file header',
       "can't find end of central directory",
+      // zip.js's own wording, which shares not one keyword with JSZip's above.
+      // Until these were listed, a damaged local header or an unsupported
+      // compression method fell through every rule to UNKNOWN — a code that
+      // is in REPORTABLE_ERROR_CODES, so the reader was pointed at the issue
+      // tracker for a file they should simply download again.
+      'end of central directory not found',
+      'file format is not recognized',
+      'split zip file',
+      'local file header not found',
+      'compression method not supported',
+      'invalid compressed data',
     ],
     code: 'CORRUPTED_ZIP',
   },
   { anyOf: ['encrypted', 'password'], code: 'ZIP_ENCRYPTED' },
   { anyOf: ['file is empty', '0 byte'], code: 'EMPTY_FILE' },
-  { anyOf: ['too large', 'exceeds', 'maximum size'], code: 'FILE_TOO_LARGE' },
+  {
+    // The first three are ours, and stopped being produced when the 500 MB
+    // ceiling was deleted. The rest are what an engine says when it cannot
+    // hold the file, which is what this code now describes in ten locales.
+    // Only the allocation that *throws* is covered — a tab the OS kills
+    // outright reaches no catch block anywhere, and nothing here claims it.
+    anyOf: [
+      'too large',
+      'exceeds',
+      'maximum size',
+      'allocation failed',
+      'out of memory',
+      'invalid string length',
+    ],
+    code: 'FILE_TOO_LARGE',
+  },
 
   // JSON errors
   { anyOf: ['unexpected token', 'syntax error', 'parse error', 'json'], code: 'JSON_PARSE_ERROR' },

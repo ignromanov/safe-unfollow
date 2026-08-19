@@ -3,6 +3,8 @@
  * Describes all files we look for in Instagram data export
  */
 
+import { escapeRegExp } from './instagram-utils';
+
 export interface FileSpec {
   name: string;
   description: string;
@@ -187,3 +189,33 @@ export const BASE_PATH_CANDIDATES = [
   'connections/followers_and_following',
   'followers_and_following',
 ];
+
+/**
+ * The entry names `openZipArchive` must keep an object for. Everything else is
+ * listed by name and then discarded.
+ *
+ * Derived, for the same reason `OPTIONAL_FILE_DRIFT_CODES` is: a spec gaining a
+ * `fileNames` alternative that this pattern did not cover would make that file
+ * unfindable, and the parser would report it missing — a silent wrong answer,
+ * not a crash. Deriving it means the two cannot disagree.
+ *
+ * Why it exists at all is a measurement, owned by `openZipArchive`'s `keep`
+ * param doc in `zip-archive.ts` — link there rather than restate the numbers.
+ * In short: an "All of your information" export from a decade-old account
+ * carries tens of thousands of media files; the parser reads about a dozen of
+ * them, and keeping a zip.js entry object per discarded file is not free.
+ *
+ * Followers is a regex rather than its `fileNames`, and deliberately wider than
+ * that list: `instagram-followers.ts` looks up `followers_.*\.json`, so an
+ * export sharded into `followers_4.json` and beyond is read today and must
+ * keep being read.
+ */
+const KEPT_FILE_NAMES = [...FILE_SPECS, PERMANENT_REQUESTS_SPEC]
+  .filter(spec => spec.name !== 'followers_*.json')
+  .flatMap(spec => spec.fileNames)
+  .map(escapeRegExp);
+
+export const RELEVANT_FILE_PATTERN = new RegExp(
+  `(^|/)(followers_[^/]*\\.json|${KEPT_FILE_NAMES.join('|')})$`,
+  'i'
+);

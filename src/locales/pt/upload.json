@@ -91,10 +91,15 @@
         "message": "O arquivo enviado está vazio (0 bytes).",
         "fix": "O download pode ter sido interrompido. Tente baixar seus dados novamente pelo Instagram."
       },
+      "TOO_MANY_ENTRIES": {
+        "title": "Arquivos demais",
+        "message": "Este ZIP contém mais arquivos do que esta ferramenta consegue indexar.",
+        "fix": "Peça uma exportação menor: Meta Accounts Center → Criar exportação → selecione apenas \"Seguidores e seguindo\" → formato JSON."
+      },
       "FILE_TOO_LARGE": {
         "title": "Arquivo muito grande",
-        "message": "O arquivo tem {{sizeMb}}MB, o que excede o limite de 500MB.",
-        "fix": "Tente solicitar uma exportação menor ao Instagram, ou use um navegador no computador com mais memória disponível."
+        "message": "Seu navegador não conseguiu abrir esta exportação — ela é grande demais para este dispositivo.",
+        "fix": "Peça uma exportação menor: Meta Accounts Center → Criar exportação → selecione apenas \"Seguidores e seguindo\" → formato JSON. Essa exportação tem alguns MB em vez de centenas."
       },
       "JSON_PARSE_ERROR": {
         "title": "Formato de dados inválido",

@@ -11,6 +11,15 @@ import type { LabelResolutionMode } from '@/core/types';
 import type { LicenseFailureReason } from '@/lib/export/license';
 
 /**
+ * Round a file size to two decimal places for the `file_size_mb` analytics
+ * property. Shared so `file_upload_start` and `upload_error_*` report the
+ * same file at the same precision.
+ */
+function roundMb(sizeMb: number): number {
+  return Math.round(sizeMb * 100) / 100;
+}
+
+/**
  * Analytics helper object with typed methods
  */
 export const analytics = {
@@ -26,7 +35,7 @@ export const analytics = {
   // unbiased; losing a success while its start survived would understate it.
   fileUploadStart: (fileSizeMb: number) => {
     enqueueEvent(AnalyticsEvents.FILE_UPLOAD_START, {
-      file_size_mb: Math.round(fileSizeMb * 100) / 100,
+      file_size_mb: roundMb(fileSizeMb),
     });
   },
 
@@ -343,7 +352,8 @@ export const analytics = {
   uploadErrorByCode: (
     fileHash: string,
     code: import('@/core/types').DiagnosticErrorCode,
-    errorMessage?: string
+    errorMessage?: string,
+    fileSizeMb?: number
   ) => {
     const eventMap: Record<
       import('@/core/types').DiagnosticErrorCode,
@@ -362,6 +372,7 @@ export const analytics = {
       ZIP_ENCRYPTED: AnalyticsEvents.UPLOAD_ERROR_ZIP_ENCRYPTED,
       EMPTY_FILE: AnalyticsEvents.UPLOAD_ERROR_EMPTY_FILE,
       FILE_TOO_LARGE: AnalyticsEvents.UPLOAD_ERROR_FILE_TOO_LARGE,
+      TOO_MANY_ENTRIES: AnalyticsEvents.UPLOAD_ERROR_TOO_MANY_ENTRIES,
       JSON_PARSE_ERROR: AnalyticsEvents.UPLOAD_ERROR_JSON_PARSE,
       INVALID_DATA_STRUCTURE: AnalyticsEvents.UPLOAD_ERROR_INVALID_STRUCTURE,
       WORKER_TIMEOUT: AnalyticsEvents.UPLOAD_ERROR_TIMEOUT,
@@ -379,6 +390,15 @@ export const analytics = {
     enqueueEvent(eventMap[code], {
       file_hash: fileHash.slice(0, 12),
       error_message: errorMessage?.slice(0, 50) ?? '',
+      // The size used to reach the database only inside error_message, i18n'd
+      // into ten languages and truncated at 50 characters — German writes
+      // "1176 MB", Russian "956МБ" in Cyrillic with no space. All 437 records
+      // were recoverable by regex over translated prose. That worked once.
+      //
+      // Spread rather than defaulted: absent and zero must not be the same
+      // thing in a column decisions get made from. Rounded the way
+      // fileUploadStart rounds it, so two events about one file agree.
+      ...(fileSizeMb === undefined ? {} : { file_size_mb: roundMb(fileSizeMb) }),
     });
     // Drained here rather than left to `pagehide`: unlike the success path, a
     // failed upload navigates nowhere, so nothing else would trigger a flush

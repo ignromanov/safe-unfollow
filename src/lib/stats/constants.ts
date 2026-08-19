@@ -112,6 +112,7 @@ export const AnalyticsEvents = {
 
   // Extended Upload Errors
   UPLOAD_ERROR_CORRUPTED_ZIP: 'upload_error_corrupted_zip',
+  UPLOAD_ERROR_TOO_MANY_ENTRIES: 'upload_error_too_many_entries',
   UPLOAD_ERROR_ZIP_ENCRYPTED: 'upload_error_zip_encrypted',
   UPLOAD_ERROR_EMPTY_FILE: 'upload_error_empty_file',
   UPLOAD_ERROR_FILE_TOO_LARGE: 'upload_error_file_too_large',

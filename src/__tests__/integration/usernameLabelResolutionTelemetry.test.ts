@@ -11,8 +11,8 @@ import { INVENTED_LABELS, labelValuesEntry } from '../fixtures/instagram-format-
  * language and would leak that language. This is the test that proves it at
  * the boundary that matters: what `window.umami.track` actually receives,
  * not the in-memory object. See `exportFormatDriftEndToEnd.test.ts`'s
- * file-level docblock for why a real `jszip` (not the `__mocks__/jszip.cjs`
- * double) and a `Uint8Array` cast are used here too.
+ * file-level docblock for why a real `jszip` writer (not the
+ * `__mocks__/zip-archive.cjs` double) is used here too.
  *
  * The analytics module is deliberately NOT mocked in this file — everywhere
  * else that touches `usernameLabelResolution` (`useFileUpload.test.ts`)
@@ -31,12 +31,12 @@ const ARCHIVE_USERNAME = 'sample_user_zz9x';
 // docblock on `usernameLabelResolution`).
 const RESOLVED_LABEL = INVENTED_LABELS.username;
 
-async function buildZip(files: Record<string, unknown>): Promise<Uint8Array> {
+async function buildZip(files: Record<string, unknown>): Promise<Blob> {
   const zip = new JSZip();
   for (const [name, payload] of Object.entries(files)) {
     zip.file(`${BASE_PATH}/${name}`, JSON.stringify(payload));
   }
-  return zip.generateAsync({ type: 'uint8array' });
+  return zip.generateAsync({ type: 'blob' });
 }
 
 describe('usernameLabelResolution telemetry does not leak archive contents', () => {
@@ -55,7 +55,7 @@ describe('usernameLabelResolution telemetry does not leak archive contents', () 
   });
 
   it('never puts the resolved username or label string on the wire', async () => {
-    const bytes = await buildZip({
+    const archive = await buildZip({
       // A single label_values entry with no other close-friends record to
       // pool against — the archive-wide scorer still resolves it (unlike the
       // ambiguous two-label case in instagram-labels.test.ts) because the
@@ -63,7 +63,7 @@ describe('usernameLabelResolution telemetry does not leak archive contents', () 
       // this exercises the ordinary `inferred` path, not `fast-path`.
       'close_friends.json': [labelValuesEntry(ARCHIVE_USERNAME, { labels: INVENTED_LABELS })],
     });
-    const result = await parseInstagramZipFile(bytes as unknown as File);
+    const result = await parseInstagramZipFile(archive as File);
 
     expect(result.labelResolutionMode).toBe('inferred');
     expect(result.data.closeFriends.has(ARCHIVE_USERNAME)).toBe(true);
