@@ -280,6 +280,28 @@ describe('promo impression batching', () => {
       random.mockRestore();
     });
 
+    // Safari's "Block all cookies" and Firefox's "Block cookies and site
+    // data" make the getter itself throw, and both callers run inside a mount
+    // effect — an unguarded throw would take the screen down to report a view.
+    it('reports a view rather than throwing when sessionStorage is blocked', () => {
+      const random = vi.spyOn(Math, 'random').mockReturnValue(0);
+      vi.stubGlobal('sessionStorage', {
+        getItem: () => {
+          throw new DOMException('The operation is insecure.', 'SecurityError');
+        },
+        setItem: () => {},
+        clear: () => {},
+      });
+
+      expect(() => analytics.guideEntryView()).not.toThrow();
+
+      expect(enqueueEvent).toHaveBeenCalledExactlyOnceWith('guide_entry_view', {
+        first_view_in_tab: false,
+      });
+      vi.unstubAllGlobals();
+      random.mockRestore();
+    });
+
     it('does the same for wizardStepView', () => {
       const random = vi.spyOn(Math, 'random');
 
