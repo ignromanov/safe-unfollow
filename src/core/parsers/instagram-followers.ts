@@ -12,7 +12,7 @@ import {
   resolveEntries,
   resolveEntryList,
 } from './instagram-utils';
-import type { ZipArchive, ZipEntry } from './zip-archive';
+import { classifyZipFailure, type ZipArchive, type ZipEntry } from './zip-archive';
 
 export interface FollowersParsed {
   followersRaw: RawItem[];
@@ -190,7 +190,29 @@ export async function parseFollowersFromZip(
 
   for (const f of followersFilesByName.values()) {
     if (!f) continue;
-    const text = await f.text();
+    // Guarded, where the sibling call in instagram.ts:162 always was. The
+    // asymmetry was invisible while JSZip threw read failures at open time; the
+    // random-access reader raises them here, and an unguarded rejection escapes
+    // parseInstagramZipFile entirely — past every warning, past the discovery
+    // record, into the worker's catch, where classifyErrorMessage matches none
+    // of zip.js's phrasings and answers UNKNOWN. The reader is told an
+    // unexpected error occurred and pointed at the issue tracker.
+    let text: string;
+    try {
+      text = await f.text();
+    } catch (error) {
+      warnings.push({
+        code: classifyZipFailure(error),
+        message: `Found ${f.name} but could not read it: ${error instanceof Error ? error.message : String(error)}`,
+        // Error severity, so `unreadable` below picks it up: one bad shard
+        // among good ones already marks the whole followers set unreadable
+        // (see the rationale above this loop), and a shard we cannot open is
+        // no better known than one whose shape we cannot recognise.
+        severity: 'error',
+        fix: 'Try re-downloading your data from Instagram Settings.',
+      });
+      continue;
+    }
     let json: unknown;
     try {
       json = JSON.parse(text);

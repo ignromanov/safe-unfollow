@@ -12,7 +12,7 @@ import { parseFollowersFromZip } from './instagram-followers';
 import { parseFollowingPayload } from './instagram-following';
 import { parseOptionalFiles } from './instagram-optional';
 import { createEmptyParsedAll } from './instagram-validation';
-import { openZipArchive, type ZipArchive } from './zip-archive';
+import { classifyZipFailure, openZipArchive, type ZipArchive } from './zip-archive';
 
 // Re-export for backward compatibility
 export { parseFollowersJson } from './instagram-followers';
@@ -41,13 +41,9 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
     archive = await openZipArchive(file, RELEVANT_FILE_PATTERN);
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : String(err);
-    let code = 'CORRUPTED_ZIP';
-    let message = 'Failed to read ZIP file';
-
-    if (errorMessage.toLowerCase().includes('encrypted')) {
-      code = 'ZIP_ENCRYPTED';
-      message = 'ZIP file is password-protected';
-    }
+    const code = classifyZipFailure(err);
+    const message =
+      code === 'ZIP_ENCRYPTED' ? 'ZIP file is password-protected' : 'Failed to read ZIP file';
 
     return {
       data: createEmptyParsedAll(),
@@ -152,23 +148,57 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
 
   const baseCandidates = BASE_PATH_CANDIDATES;
 
+  // Set when a *required* file was found in the index and then could not be
+  // read. Not the same failure as a file that is absent, and the two must not
+  // share an exit — the whole of GH#21 is that distinction.
+  //
+  // It needs saying here because the backend swap moved a class of errors onto
+  // this path. JSZip's loadAsync walked every local file header, so encryption,
+  // an unsupported compression method and a damaged local header all threw
+  // while the archive was being opened, inside the guarded call at the top of
+  // this function. zip.js reads the central directory alone, so those same
+  // conditions now throw when the entry is read — here, where the old code
+  // caught them, called them JSON_PARSE_ERROR at severity 'warning', and
+  // returned the same null it returns for "no such file". The reader was then
+  // shown a successful analysis over an empty `following` set, with every
+  // follower badged notFollowedBack and no error anywhere.
+  let unreadableRequiredPath: string | undefined;
+
   const readJsonFromZip = async (
-    patterns: string[]
+    patterns: string[],
+    required = false
   ): Promise<{ data: unknown; path: string } | null> => {
     for (const p of patterns) {
       const f = archive.find(new RegExp('^' + escapeRegExp(p) + '$', 'i'))[0];
-      if (f) {
-        try {
-          const text = await f.text();
-          return { data: JSON.parse(text), path: f.name };
-        } catch (error) {
-          warnings.push({
-            code: 'JSON_PARSE_ERROR',
-            message: `Failed to parse ${f.name}: ${error instanceof Error ? error.message : 'Invalid JSON'}`,
-            severity: 'warning',
-          });
-          return null;
-        }
+      if (!f) continue;
+
+      let text: string;
+      try {
+        text = await f.text();
+      } catch (error) {
+        if (required) unreadableRequiredPath = f.name;
+        warnings.push({
+          // The reader's two answers are "it is locked" and "it is damaged",
+          // and both are actionable. Which one is the library's to say.
+          code: classifyZipFailure(error),
+          message: `Found ${f.name} but could not read it: ${error instanceof Error ? error.message : String(error)}`,
+          // An optional file we cannot read costs a badge, not the answer, and
+          // severity 'error' would take over the whole screen for it.
+          severity: required ? 'error' : 'warning',
+          fix: 'Try re-downloading your data from Instagram Settings.',
+        });
+        return null;
+      }
+
+      try {
+        return { data: JSON.parse(text), path: f.name };
+      } catch (error) {
+        warnings.push({
+          code: 'JSON_PARSE_ERROR',
+          message: `Failed to parse ${f.name}: ${error instanceof Error ? error.message : 'Invalid JSON'}`,
+          severity: 'warning',
+        });
+        return null;
       }
     }
     return null;
@@ -178,7 +208,10 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
   const followingFilePatterns = baseCandidates
     .map(b => `${b}/following.json`)
     .concat(['following.json']);
-  const followingParsed = parseFollowingPayload(await readJsonFromZip(followingFilePatterns));
+  const followingParsed = parseFollowingPayload(
+    await readJsonFromZip(followingFilePatterns, true),
+    unreadableRequiredPath
+  );
   const followingUsers = followingParsed.followingUsers;
   warnings.push(...followingParsed.warnings);
   fileExpectations.push(followingParsed.fileExpectation);

@@ -88,12 +88,19 @@ function interpretFollowingPayload(payload: unknown): {
  * `parseInstagramZipFile`'s `readJsonFromZip` closure — that closure also
  * records JSON_PARSE_ERROR warnings, and duplicating it here would duplicate
  * that reporting too.
+ *
+ * @param unreadablePath Set when the file was in the archive's index and the
+ *   read of it threw — an encrypted, damaged or unsupported entry. The caller
+ *   has already recorded the error-severity warning naming the cause, so this
+ *   only has to stop the file being called missing as well: the reader must not
+ *   be told both "we could not read it" and "we did not find it".
  */
 export function parseFollowingPayload(
-  readResult: { data: unknown; path: string } | null
+  readResult: { data: unknown; path: string } | null,
+  unreadablePath?: string
 ): FollowingParsed {
   const { raw, formatInvalid, unresolved } = interpretFollowingPayload(readResult?.data);
-  const followingFound = readResult !== null;
+  const followingFound = readResult !== null || unreadablePath !== undefined;
   const followingUsers = raw.map(r => r.username);
   const nothingRead = followingUsers.length === 0;
 
@@ -103,7 +110,7 @@ export function parseFollowingPayload(
     required: true,
     found: followingFound,
     itemCount: followingUsers.length,
-    foundPath: readResult?.path,
+    foundPath: readResult?.path ?? unreadablePath,
     unreadableItemCount: unresolved,
     formatUnreadable: followingFound && formatInvalid,
   };
@@ -139,7 +146,9 @@ export function parseFollowingPayload(
       severity: nothingRead ? 'error' : 'warning',
       fix: UNREADABLE_ENTRIES_FIX,
     });
-  } else if (followingUsers.length === 0) {
+  } else if (followingUsers.length === 0 && unreadablePath === undefined) {
+    // Guarded: a file we could not open is not a file that is empty, and
+    // saying both would let the reader pick the reassuring one.
     warnings.push({
       code: 'EMPTY_FOLLOWING',
       message: 'following.json is empty or contains no valid accounts.',
@@ -155,6 +164,8 @@ export function parseFollowingPayload(
     // Derived, so it cannot disagree with what we told the reader. An absent
     // file yields MISSING_FOLLOWING at severity 'warning' and so is not
     // unreadable — "missing" and "present but unintelligible" stay apart.
-    unreadable: warnings.some(w => w.severity === 'error'),
+    // ...and a read that threw, whose warning the caller holds rather than
+    // this array, so deriving from `warnings` alone would miss it.
+    unreadable: unreadablePath !== undefined || warnings.some(w => w.severity === 'error'),
   };
 }

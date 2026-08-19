@@ -6,6 +6,10 @@
 // lib/zip-module-native.js sets wasmURI: null and supplies the zlib-js fallback.
 import {
   BlobReader,
+  ERR_ENCRYPTED,
+  ERR_ENCRYPTED_CENTRAL_DIRECTORY,
+  ERR_INVALID_PASSWORD,
+  ERR_UNSUPPORTED_ENCRYPTION,
   TextWriter,
   ZipReader,
   configure,
@@ -57,8 +61,46 @@ export interface ZipArchive {
  *   tab with no error to show for it — the worker is killed, nothing is posted
  *   back, and the reader waits out the 60-second timeout.
  */
+/**
+ * Which of the reader's two diagnostic codes a thrown zip.js error means.
+ *
+ * Compared against the library's own exported constants rather than searched
+ * for as prose: the previous version tested the message for the substring
+ * "encrypted", and the string it was written against — JSZip's "Encrypted zip
+ * are not supported" — no longer exists anywhere in the program.
+ *
+ * It lives here because this is the one file that names the ZIP library. A
+ * caller that had to know which phrases mean encryption would know which
+ * library is underneath, which is the thing this module exists to hide.
+ *
+ * Encryption is not detectable when the archive is opened. Filenames are not
+ * encrypted, so the central directory reads normally and only `getData` throws
+ * (`zip-reader.js:738`) — which is why an encrypted export used to reach the
+ * reader as a missing file rather than a locked one.
+ */
+const ENCRYPTION_ERRORS: ReadonlySet<string> = new Set([
+  ERR_ENCRYPTED,
+  ERR_ENCRYPTED_CENTRAL_DIRECTORY,
+  ERR_INVALID_PASSWORD,
+  ERR_UNSUPPORTED_ENCRYPTION,
+]);
+
+export function classifyZipFailure(error: unknown): 'ZIP_ENCRYPTED' | 'CORRUPTED_ZIP' {
+  const message = error instanceof Error ? error.message : String(error);
+  return ENCRYPTION_ERRORS.has(message) ? 'ZIP_ENCRYPTED' : 'CORRUPTED_ZIP';
+}
+
 export async function openZipArchive(file: Blob, keep: RegExp): Promise<ZipArchive> {
-  const reader = new ZipReader(new BlobReader(file));
+  // filenameValidation 'tolerant', against zip.js's 'balanced' default: one
+  // entry named `../x`, `/x` or `C:\x` otherwise makes getEntries() throw for
+  // the whole archive (zip-reader.js:448), and JSZip read those.
+  //
+  // The check protects extractors that write to disk. This reader writes
+  // nothing — it lists names and matches them against anchored patterns — so
+  // there is no traversal here to protect against. What the default does catch
+  // is an export somebody unzipped and re-zipped, which it rejects as a corrupt
+  // file with advice to re-download that cannot help.
+  const reader = new ZipReader(new BlobReader(file), { filenameValidation: 'tolerant' });
   // getEntriesGenerator, not getEntries: the same tail slices and the same
   // central-directory walk, but each entry is discardable as it goes.
   const names: string[] = [];
