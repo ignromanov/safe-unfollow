@@ -74,7 +74,7 @@ export function flushEvents(): void {
   const batch = queue;
   queue = [];
 
-  const endpoint = `${target.origin}/api/batch`;
+  const endpoint = `${target.baseUrl}/api/batch`;
   const body = JSON.stringify(
     batch.map(event => ({
       type: 'event',

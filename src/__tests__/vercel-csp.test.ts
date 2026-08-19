@@ -38,11 +38,11 @@ function readCspDirectives(): Map<string, string[]> {
   );
 }
 
-/** The origin the analytics tag is actually served from, read from its loader. */
-function umamiOrigin(): string {
+/** The default path the analytics tag is served from, read from its loader. */
+function umamiSrc(): string {
   const loader = readFileSync(resolve(ROOT, 'src/lib/umami-loader.ts'), 'utf8');
-  const match = /script\.src\s*=\s*'(https:\/\/[^/']+)/.exec(loader);
-  if (!match?.[1]) throw new Error('umami-loader.ts no longer assigns a literal script.src');
+  const match = /VITE_UMAMI_SRC\s*\|\|\s*'([^']+)'/.exec(loader);
+  if (!match?.[1]) throw new Error('umami-loader.ts no longer declares a default UMAMI_SRC');
   return match[1];
 }
 
@@ -99,13 +99,25 @@ describe('vercel.json Content-Security-Policy', () => {
     expect(missing).toEqual([]);
   });
 
-  it('allows the analytics origin its own loader points at', () => {
-    const origin = umamiOrigin();
+  it('serves analytics same-origin, so the CSP needs no analytics host at all', () => {
+    const src = umamiSrc();
 
-    // Derived rather than restated: GH#63 tracks making this host configurable,
-    // and a CSP that still names the old one fails silently in production.
-    expect(directives.get('script-src')).toContain(origin);
-    expect(directives.get('connect-src')).toContain(origin);
+    // Derived rather than restated. The tag is loaded from our own origin and
+    // rewritten to the analytics instance by vercel.json, so `'self'` already
+    // covers both the script and its POSTs — naming a host here would be dead
+    // config that silently rots, which is exactly the 2026-08-14 failure.
+    expect(src.startsWith('/')).toBe(true);
+
+    const config = JSON.parse(readFileSync(resolve(ROOT, 'vercel.json'), 'utf8')) as {
+      rewrites?: { source: string; destination: string }[];
+    };
+    const prefix = `/${src.split('/')[1]}`;
+    const proxy = config.rewrites?.find(r => r.source.startsWith(`${prefix}/`));
+
+    // Without this rewrite the tag 404s against our own static build, and the
+    // failure is invisible: no CSP violation, no console error, just no data.
+    expect(proxy, `no vercel.json rewrite serves ${prefix}/`).toBeDefined();
+    expect(proxy?.destination).toMatch(/^https:\/\//);
   });
 
   /**

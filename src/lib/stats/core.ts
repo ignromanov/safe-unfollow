@@ -78,7 +78,7 @@ export function trackBeacon(
   // answers cross-origin with `Access-Control-Allow-Origin: *` — invalid for a
   // credentialed request, so the browser drops the delivery while sendBeacon
   // reports success. See flushEvents() in ./queue.ts.
-  void fetch(`${target.origin}/api/send`, {
+  void fetch(`${target.baseUrl}/api/send`, {
     method: 'POST',
     body: JSON.stringify({
       type: 'event',

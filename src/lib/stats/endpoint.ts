@@ -8,8 +8,21 @@
  * the opt-out path never injects the tag at all.
  */
 export interface UmamiTarget {
-  /** Origin of the Umami instance the script tag was served from. */
-  origin: string;
+  /**
+   * Base URL the instance is served from: the script tag's **directory**, not
+   * its origin.
+   *
+   * This mirrors Umami's own tracker, which derives its collect endpoint as
+   * `currentScript.src.split('/').slice(0, -1).join('/')`. The two agreed only
+   * by accident while the script sat at an origin root, where directory and
+   * origin are the same string. Behind the same-origin proxy they differ —
+   * `/v/script.js` has origin `https://safeunfollow.app` but base
+   * `https://safeunfollow.app/v` — and using the origin would post every custom
+   * event outside the proxied path, where nothing serves it. Umami's own
+   * pageviews would keep working, so the dashboard would look healthy while
+   * every custom event 404'd.
+   */
+  baseUrl: string;
   websiteId: string;
 }
 
@@ -22,7 +35,8 @@ export function resolveUmamiTarget(): UmamiTarget | null {
   if (!websiteId || !src) return null;
 
   try {
-    return { origin: new URL(src, window.location.href).origin, websiteId };
+    const { href } = new URL(src, window.location.href);
+    return { baseUrl: href.slice(0, href.lastIndexOf('/')), websiteId };
   } catch {
     return null;
   }
