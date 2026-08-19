@@ -106,7 +106,88 @@ interface EntriesPreset {
   readonly proves: string;
 }
 
-type Preset = SizePreset | EntriesPreset;
+/**
+ * A valid ZIP the parser must refuse, one per branch of `createCriticalError`
+ * (`instagram-zip-analysis.ts:51`). All four are reachable, via two call sites:
+ * `instagram.ts:131` takes HTML_FORMAT and NOT_INSTAGRAM_EXPORT before any file
+ * is read, and `instagram.ts:271` takes the other two after a real export turned
+ * out to hold no usable data.
+ *
+ * These are small. Their value is not size but coverage of the failures real
+ * uploads actually hit: html_format alone is 48% of them (1,002 of 2,100 in a
+ * 15-day window), and nothing in the repository could produce one.
+ */
+interface RejectPreset {
+  readonly kind: 'reject';
+  readonly name: string;
+  /** The code `createCriticalError` must return. Asserted by hand, see the doc. */
+  readonly code: 'HTML_FORMAT' | 'NOT_INSTAGRAM_EXPORT' | 'INCOMPLETE_EXPORT' | 'NO_DATA_FILES';
+  /** Entries written with placeholder content chosen by extension. */
+  readonly filler: readonly string[];
+  /** Real connections files to copy in, by basename. */
+  readonly connections: readonly string[];
+  readonly proves: string;
+}
+
+type Preset = SizePreset | EntriesPreset | RejectPreset;
+
+const REJECT_PRESETS: RejectPreset[] = [
+  {
+    kind: 'reject',
+    name: 'reject-html-format',
+    code: 'HTML_FORMAT',
+    // A real HTML export does carry connections/ — the format check runs first
+    // and wins regardless, which is what makes this the realistic shape.
+    filler: [
+      'connections/followers_and_following/followers_1.html',
+      'connections/followers_and_following/following.html',
+      'personal_information/personal_information.html',
+      'your_instagram_activity/likes/liked_posts.html',
+      'start_here.html',
+    ],
+    connections: [],
+    proves:
+      'the format the user picked in Meta\'s export dialog — 48% of all real upload failures, and untested until now',
+  },
+  {
+    kind: 'reject',
+    name: 'reject-not-instagram-export',
+    code: 'NOT_INSTAGRAM_EXPORT',
+    // JSON present, so this is not the html branch; no connections/ and no
+    // followers_and_following anywhere, so isInstagramExport is false.
+    filler: [
+      'facebook/your_facebook_activity/posts/your_posts_1.json',
+      'facebook/personal_information/profile_information.json',
+      'facebook/preferences/language_and_locale.json',
+    ],
+    connections: [],
+    proves: 'a valid ZIP from the wrong product — the export dialog offers Facebook alongside Instagram',
+  },
+  {
+    kind: 'reject',
+    name: 'reject-incomplete-export',
+    code: 'INCOMPLETE_EXPORT',
+    // connections/ present, followers_and_following absent: the user ticked a
+    // different part of Connections.
+    filler: [
+      'connections/contacts/synced_contacts.json',
+      'connections/blocked_profiles/blocked_profiles.json',
+    ],
+    connections: [],
+    proves: 'Connections selected, but not the "Followers and following" part of it',
+  },
+  {
+    kind: 'reject',
+    name: 'reject-no-data-files',
+    code: 'NO_DATA_FILES',
+    // followers_and_following present but neither required file in it, so the
+    // failure surfaces only after the parse, at instagram.ts:271.
+    filler: [],
+    connections: ['close_friends.json', 'restricted_profiles.json'],
+    proves: 'the right folder holding neither following.json nor followers_1.json',
+  },
+];
+
 
 const SIZE_PRESETS: SizePreset[] = [
   {
@@ -179,13 +260,17 @@ const ENTRIES_PRESETS: EntriesPreset[] = [
   },
 ];
 
-const ALL_PRESETS: Preset[] = [...ENTRIES_PRESETS, ...SIZE_PRESETS];
+const ALL_PRESETS: Preset[] = [...ENTRIES_PRESETS, ...SIZE_PRESETS, ...REJECT_PRESETS];
 
 // The three multi-GB fixtures (~5.7 GB combined) — excluded from the default
 // run and must be named explicitly, or requested with --all.
 const BIG_PRESET_NAMES = new Set(['size-501mb', 'size-2308mb', 'size-2848mb']);
 
-const DEFAULT_PRESET_NAMES = [...ENTRIES_PRESETS.map(p => p.name), 'size-863mb'];
+const DEFAULT_PRESET_NAMES = [
+  ...ENTRIES_PRESETS.map(p => p.name),
+  ...REJECT_PRESETS.map(p => p.name),
+  'size-863mb',
+];
 
 // === CRC-32 (needed for local file / central directory headers) ===
 
@@ -579,6 +664,57 @@ async function buildSizeArchive(
   };
 }
 
+/**
+ * Placeholder content for a filler entry, chosen by extension: the analysis in
+ * `analyzeZipStructure` keys off `.html` / `.json` suffixes, and the parser
+ * never reads any of these — only the required connections files are read.
+ */
+function fillerContent(name: string): Buffer {
+  if (name.endsWith('.html')) {
+    return Buffer.from(
+      `<!DOCTYPE html>\n<html><head><title>${name}</title></head>\n` +
+        '<body><div class="pam _3-95 _2ph- _a6-g uiBoxWhite noborder">' +
+        '<div>Synthetic placeholder. Instagram HTML exports carry markup, not data this tool can read.</div>' +
+        '</div></body></html>\n',
+      'utf-8'
+    );
+  }
+  return Buffer.from(`{"synthetic_placeholder":"${name}"}\n`, 'utf-8');
+}
+
+async function buildRejectArchive(
+  preset: RejectPreset,
+  connections: ConnectionsFile[],
+  outPath: string
+): Promise<BuildResult> {
+  const start = Date.now();
+  const builder = new ZipBuilder(outPath);
+
+  const wanted = new Set(preset.connections);
+  const picked = connections.filter(f => wanted.has(f.name.split('/').pop()!));
+  const missing = preset.connections.filter(
+    n => !picked.some(f => f.name.endsWith(`/${n}`))
+  );
+  if (missing.length > 0) {
+    console.error(`${preset.name}: connections source has no ${missing.join(', ')}`);
+    process.exit(1);
+  }
+
+  for (const f of picked) await builder.addEntry(f.name, f.data);
+  for (const name of preset.filler) await builder.addEntry(name, fillerContent(name));
+
+  const { zip64, declaredEntries } = await builder.finish('auto');
+  const bytes = statSync(outPath).size;
+  return {
+    outPath,
+    declaredEntries,
+    realEntries: picked.length + preset.filler.length,
+    zip64,
+    bytes,
+    ms: Date.now() - start,
+  };
+}
+
 // === Cross-check with a third, independent implementation (Info-ZIP unzip) ===
 
 function unzipList(zipPath: string): string {
@@ -601,6 +737,10 @@ function printPresetsTable(): void {
   for (const p of SIZE_PRESETS) {
     const big = BIG_PRESET_NAMES.has(p.name) ? ' [multi-GB, name explicitly or --all]' : '';
     console.log(`  ${p.name.padEnd(24)} target=${(p.targetBytes / MB).toFixed(0)}MB${big} — ${p.proves}`);
+  }
+  console.log('\nRejection family (tiny — one per branch of createCriticalError):');
+  for (const p of REJECT_PRESETS) {
+    console.log(`  ${p.name.padEnd(30)} expects ${p.code.padEnd(21)} ${p.proves}`);
   }
   console.log(`\nDefault (no args): ${DEFAULT_PRESET_NAMES.join(', ')}`);
 }
@@ -658,6 +798,8 @@ async function main(): Promise<void> {
 
   const estimatedBytes = selected.reduce((sum, p) => {
     if (p.kind === 'size') return sum + p.targetBytes;
+    // A rejection fixture is a handful of placeholder entries; nothing to size.
+    if (p.kind === 'reject') return sum;
     return sum + p.totalEntries * p.entryBytes;
   }, 0);
   console.log(`Presets to generate: ${selected.map(p => p.name).join(', ')}`);
@@ -682,7 +824,9 @@ async function main(): Promise<void> {
     const result =
       preset.kind === 'size'
         ? await buildSizeArchive(preset, connections, outPath)
-        : await buildEntriesArchive(preset, connections, outPath);
+        : preset.kind === 'reject'
+          ? await buildRejectArchive(preset, connections, outPath)
+          : await buildEntriesArchive(preset, connections, outPath);
 
     console.log(
       `  done in ${(result.ms / 1000).toFixed(1)}s — ${formatBytes(result.bytes)}, ` +
