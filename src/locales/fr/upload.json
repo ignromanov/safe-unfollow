@@ -8,7 +8,7 @@
     "processing": "Analyse locale en cours...",
     "processingHint": "Le traitement de grands ensembles de données (jusqu'à 1M+) peut prendre un moment.",
     "ariaLabel": "Téléverser le fichier ZIP de données Instagram",
-    "jsonReminder": "Assurez-vous d'avoir sélectionné le format JSON lors de la demande de votre exportation de données. Les fichiers ZIP en JSON et HTML sont identiques vus de l'extérieur.",
+    "jsonReminder": "La boîte de dialogue d'Instagram sélectionne HTML par défaut — assurez-vous de choisir JSON. Les fichiers ZIP en JSON et HTML sont identiques vus de l'extérieur.",
     "seeGuide": "Voir le guide étape par étape",
     "jsonRequired": "Nécessite une exportation au format JSON",
     "privacyMicro": "Votre fichier ne quitte jamais votre appareil",
@@ -33,6 +33,9 @@
     "howToFix": "Comment corriger cela",
     "tryAgain": "Réessayer",
     "showMistakes": "Montrer où je me suis trompé",
+    "reExportJson": "Réexporter en JSON : ouvrir l'étape des paramètres",
+    "chooseDifferentFile": "Choisir un autre fichier",
+    "actionsLabel": "Actions de récupération",
     "reportIssue": "Signaler ce problème sur GitHub",
     "copyDetails": "Copier les détails de l'erreur",
     "copied": "Copié !",
@@ -46,12 +49,12 @@
       "HTML_FORMAT": {
         "title": "Mauvais format : HTML",
         "message": "Vous avez téléchargé vos données au format HTML, mais cet outil nécessite le format JSON.",
-        "fix": "Retournez dans Paramètres Instagram → Télécharger vos données → Sélectionnez le format « JSON » (pas HTML) → Redemandez le téléchargement."
+        "fix": "Retournez dans l’Espace Comptes Meta → Créer une exportation → Exporter vers l’appareil → choisissez le format « JSON » (pas HTML) → relancez l’exportation."
       },
       "NOT_INSTAGRAM_EXPORT": {
         "title": "Pas une exportation Instagram",
         "message": "Ce fichier ZIP ne semble pas être une exportation de données Instagram.",
-        "fix": "Assurez-vous de téléverser le fichier ZIP provenant de la fonction « Télécharger vos données » d'Instagram, et non un fichier ZIP quelconque."
+        "fix": "Assurez-vous de téléverser le fichier ZIP provenant de « Créer une exportation » dans l’Espace Comptes Meta, et non un fichier ZIP quelconque."
       },
       "INCOMPLETE_EXPORT": {
         "title": "Exportation incomplète",
@@ -81,17 +84,22 @@
       "ZIP_ENCRYPTED": {
         "title": "ZIP protégé par mot de passe",
         "message": "Le fichier ZIP est protégé par un mot de passe, mais les exportations Instagram ne sont pas chiffrées.",
-        "fix": "Il ne s'agit peut-être pas d'une exportation Instagram valide. Demandez une nouvelle exportation depuis les Paramètres Instagram."
+        "fix": "Il ne s’agit peut-être pas d’une exportation Instagram valide. Demandez-en une nouvelle depuis l’Espace Comptes Meta."
       },
       "EMPTY_FILE": {
         "title": "Fichier vide",
         "message": "Le fichier téléversé est vide (0 octet).",
         "fix": "Le téléchargement a peut-être été interrompu. Essayez de retélécharger vos données depuis Instagram."
       },
+      "TOO_MANY_ENTRIES": {
+        "title": "Trop de fichiers",
+        "message": "Cette archive contient plus de fichiers que cet outil ne peut indexer.",
+        "fix": "Demandez une exportation plus petite : Centre de comptes Meta → Créer une exportation → sélectionnez uniquement « Abonnés et abonnements » → format JSON."
+      },
       "FILE_TOO_LARGE": {
         "title": "Fichier trop volumineux",
-        "message": "Le fichier fait {{sizeMb}} Mo, ce qui dépasse la limite de 500 Mo.",
-        "fix": "Essayez de demander une exportation de données plus petite depuis Instagram, ou utilisez un navigateur sur ordinateur avec plus de mémoire."
+        "message": "Votre navigateur n'a pas pu ouvrir cette exportation : elle est trop volumineuse pour cet appareil.",
+        "fix": "Demandez une exportation plus petite : Centre de comptes Meta → Créer une exportation → sélectionnez uniquement « Abonnés et abonnements » → format JSON. Cette exportation pèse quelques Mo au lieu de centaines."
       },
       "JSON_PARSE_ERROR": {
         "title": "Format de données invalide",
@@ -160,28 +168,10 @@
       }
     }
   },
-  "quiz": {
-    "title": "Quel format avez-vous choisi ?",
-    "subtitle": "Lors de la demande d'export de vos données Instagram, quel format avez-vous sélectionné ?",
-    "json": "JSON",
-    "jsonHint": "Format correct pour l'analyse",
-    "html": "HTML",
-    "htmlHint": "Ne fonctionne pas — retéléchargez en JSON",
-    "notSure": "Pas sûr",
-    "notSureHint": "Laissez-moi vérifier",
-    "successMessage": "C'est bon ! Téléversez votre ZIP ci-dessous.",
-    "htmlMessage": "Les exports HTML ne peuvent pas être analysés. Veuillez re-demander vos données au format JSON.",
-    "htmlCta": "Comment obtenir le format JSON",
-    "comparisonTitle": "Comment faire la différence",
-    "comparisonJson": "Si vous voyez « Format : JSON » sur la page de téléchargement, c'est bon.",
-    "comparisonHtml": "Si vous voyez « Format : HTML » ou des fichiers .html, il faut re-demander.",
-    "dismiss": "Compris",
-    "fixedIt": "J'ai redemandé en JSON"
-  },
   "formatWarning": "Assurez-vous d'avoir sélectionné JSON (pas HTML) lors de la demande d'export.",
   "waiting": {
     "title": "En attente d'Instagram...",
-    "description": "Instagram prépare votre exportation de données. Vous recevrez un e-mail dans les 48 heures (généralement beaucoup plus vite !).",
+    "description": "Instagram prépare votre exportation de données. La plupart arrivent par e-mail en 5 à 30 minutes ; les grands comptes peuvent prendre quelques heures.",
     "addReminder": "Ajouter un rappel au calendrier",
     "reminderHint": "Me rappeler de vérifier dans 2 jours",
     "calendarTitle": "Vérifier l'e-mail d'exportation Instagram",

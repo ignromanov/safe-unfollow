@@ -142,6 +142,9 @@ umami-backup-*.sql.gz
 # Entry-bundle budget guard must ship despite the scripts/ ignore above (npm run perf:budget)
 !scripts/assert-entry-budget.mjs
 
+# Large-archive fixture generator must ship despite the scripts/ ignore above (PR #80)
+!scripts/generate-large-archive.ts
+
 # design-sync working state — the converter, the generated bundle and the machine
 # caches a resync leaves behind. ~60 MB at repo root, untracked on every branch but
 # chore/design-sync-main, which is one `git add -A` away from a commit. Matches the

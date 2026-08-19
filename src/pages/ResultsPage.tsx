@@ -33,12 +33,6 @@ export function Component() {
   const uploadStatus = useStoreSSR(s => s.uploadStatus, 'idle');
   const uploadError = useStoreSSR(s => s.uploadError, null);
 
-  // Fallback handler for the DiagnosticErrorScreen's "open wizard" action.
-  // The Hero fallback below navigates on its own via real anchors.
-  const handleStartGuide = () => {
-    navigate(`${prefix}/wizard`);
-  };
-
   const handleTryAgain = () => {
     navigate(`${prefix}/upload`);
   };
@@ -56,7 +50,9 @@ export function Component() {
       <DiagnosticErrorScreen
         errorMessage={uploadError || 'An error occurred while processing your file.'}
         onTryAgain={handleTryAgain}
-        onOpenWizard={handleStartGuide}
+        // Presence-only: DiagnosticErrorScreen uses this to decide whether to
+        // render its wizard link, whose own href — not this callback — navigates.
+        onOpenWizard={() => {}}
       />
     );
   }

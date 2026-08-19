@@ -8,14 +8,14 @@
   "steps": {
     "1": {
       "title": "Instagram Export-Seite öffnen",
-      "description": "Klicke auf den Button, um das Meta-Kontencenter zu öffnen. Klicke dann auf \"Export erstellen\"."
+      "description": "Klicke auf den Button, um die Meta-Kontenübersicht zu öffnen. Klicke dann auf \"Export erstellen\"."
     },
     "2": {
       "title": "Wähle dein Instagram-Profil",
-      "description": "Wähle dein Instagram-Konto aus der Liste der verbundenen Profile im Kontencenter."
+      "description": "Wähle dein Instagram-Konto aus der Liste der verbundenen Profile in der Kontenübersicht."
     },
     "3": {
-      "title": "Wähle \"Auf Gerät exportieren\"",
+      "title": "Wähle \"Zu Gerät exportieren\"",
       "description": "Wähle den direkten Export auf dein Gerät. Das hält deine Daten privat und sicher."
     },
     "4": {
@@ -45,7 +45,7 @@
   },
   "cta": {
     "title": "Bereit loszulegen?",
-    "subtitle": "Analysiere deinen Datenexport privat in Sekunden.",
+    "subtitle": "Analysiere deinen Datenexport privat, komplett in deinem Browser.",
     "button": "Analyse-Anleitung öffnen"
   },
   "schema": {

@@ -598,6 +598,29 @@ describe('useFileUpload', () => {
    * code and still double-fired would satisfy a `toHaveBeenCalledWith` check and
    * leave the bucket exactly as wrong as it is now.
    */
+  describe('file size', () => {
+    it('accepts an export far above the deleted 500MB ceiling', async () => {
+      // 900MB: above the old ceiling, near the median of what it rejected
+      // (863MB — see the plan's 02-measurement.md). The archive's size stopped
+      // bearing on memory when the reader started seeking instead of loading.
+      const huge = createMockFile();
+      Object.defineProperty(huge, 'size', { value: 900 * 1024 * 1024 });
+
+      const { result } = renderHook(() => useFileUpload());
+
+      await act(async () => {
+        try {
+          await result.current.handleZipUpload(huge);
+        } catch {
+          // What the mocked parser does downstream is not this test's subject
+        }
+      });
+
+      const codes = vi.mocked(analytics.uploadErrorByCode).mock.calls.map(call => call[1]);
+      expect(codes).not.toContain('FILE_TOO_LARGE');
+    });
+  });
+
   describe('one upload failure reports exactly one code (GH#35)', () => {
     it('should report NOT_ZIP once, not once as itself and once as UNKNOWN', async () => {
       const notZip = createMockFile();
@@ -614,28 +637,11 @@ describe('useFileUpload', () => {
       });
 
       expect(analytics.uploadErrorByCode).toHaveBeenCalledTimes(1);
-      expect(analytics.uploadErrorByCode).toHaveBeenCalledWith('', 'NOT_ZIP', expect.any(String));
-    });
-
-    it('should report FILE_TOO_LARGE once, not once as itself and once as UNKNOWN', async () => {
-      const tooLarge = createMockFile();
-      Object.defineProperty(tooLarge, 'size', { value: 502 * 1024 * 1024 });
-
-      const { result } = renderHook(() => useFileUpload());
-
-      await act(async () => {
-        try {
-          await result.current.handleZipUpload(tooLarge);
-        } catch {
-          // Expected — the hook rethrows for the caller's error UI
-        }
-      });
-
-      expect(analytics.uploadErrorByCode).toHaveBeenCalledTimes(1);
       expect(analytics.uploadErrorByCode).toHaveBeenCalledWith(
         '',
-        'FILE_TOO_LARGE',
-        expect.any(String)
+        'NOT_ZIP',
+        expect.any(String),
+        expect.any(Number)
       );
     });
 
@@ -694,7 +700,12 @@ describe('useFileUpload', () => {
         []
       );
       expect(analytics.uploadErrorByCode).toHaveBeenCalledTimes(1);
-      expect(analytics.uploadErrorByCode).toHaveBeenCalledWith('', 'UPLOAD_CANCELLED');
+      expect(analytics.uploadErrorByCode).toHaveBeenCalledWith(
+        '',
+        'UPLOAD_CANCELLED',
+        undefined,
+        expect.any(Number)
+      );
     });
   });
 

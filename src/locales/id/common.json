@@ -16,7 +16,7 @@
     "unfollowed": "Baru berhenti mengikuti",
     "notFollowingBack": "Tidak mengikuti balik",
     "mutuals": "Saling mengikuti",
-    "notFollowedBack": "Kamu tidak mengikuti balik",
+    "notFollowedBack": "Anda tidak mengikuti balik",
     "pending": "Permintaan tertunda",
     "permanent": "Tertunda (permanen)",
     "restricted": "Dibatasi",
@@ -67,11 +67,11 @@
     "changeLanguage": "Ganti Bahasa"
   },
   "cta": {
-    "title": "Mulai Analisis Privatmu Hari Ini",
+    "title": "Mulai Analisis Privat Anda Hari Ini",
     "subtitle": "Bergabung dengan ribuan pengguna yang melacak follower tanpa mempertaruhkan akun mereka.",
     "getStarted": "Mulai",
     "trySample": "Coba Demo",
-    "tagline": "Analisis Gratis • Tanpa Login • Privasi Terjamin"
+    "tagline": "Analisis Gratis • Tanpa Login • Privasi Utama"
   },
   "ads": {
     "label": "Iklan"

@@ -5,19 +5,37 @@
 import { AnalyticsEvents, parseDurationBucket } from './constants';
 import type { FilterAction, LinkType, ParseOutcome } from './constants';
 import { trackEvent } from './core';
-import { enqueueEvent } from './queue';
+import { enqueueEvent, flushEvents, trackNavigating } from './queue';
 import { getStoredUTM, getEntryCTA, setEntryCTA } from './utm';
 import type { LabelResolutionMode } from '@/core/types';
 import type { LicenseFailureReason } from '@/lib/export/license';
+
+/**
+ * Round a file size to two decimal places for the `file_size_mb` analytics
+ * property. Shared so `file_upload_start` and `upload_error_*` report the
+ * same file at the same precision.
+ */
+function roundMb(sizeMb: number): number {
+  return Math.round(sizeMb * 100) / 100;
+}
 
 /**
  * Analytics helper object with typed methods
  */
 export const analytics = {
   // File Upload events (V10: removed file_hash — not actionable in dashboard)
+  //
+  // The whole upload funnel is batched, and it moves as one unit on purpose:
+  // `file_upload_success` is divided by `file_upload_start`, and every
+  // `upload_error_<code>` is reported against that same denominator. Splitting
+  // the transports would split the gate — `enqueueEvent` needs only the script
+  // tag, `trackEvent` needs the script to have executed — and the 70.5% success
+  // rate would divide two populations. Nothing here unloads the page, and where
+  // an attempt's events are lost they are lost together, which leaves the ratio
+  // unbiased; losing a success while its start survived would understate it.
   fileUploadStart: (fileSizeMb: number) => {
-    trackEvent(AnalyticsEvents.FILE_UPLOAD_START, {
-      file_size_mb: Math.round(fileSizeMb * 100) / 100,
+    enqueueEvent(AnalyticsEvents.FILE_UPLOAD_START, {
+      file_size_mb: roundMb(fileSizeMb),
     });
   },
 
@@ -25,7 +43,7 @@ export const analytics = {
   fileUploadSuccess: (accountCount: number, fromCache: boolean) => {
     const utm = getStoredUTM();
     const entryCta = getEntryCTA();
-    trackEvent(AnalyticsEvents.FILE_UPLOAD_SUCCESS, {
+    enqueueEvent(AnalyticsEvents.FILE_UPLOAD_SUCCESS, {
       account_count: accountCount,
       from_cache: fromCache,
       ...(utm.utm_source && { utm_source: utm.utm_source }),
@@ -43,7 +61,7 @@ export const analytics = {
    * unappealing one look identical in the dashboard.
    */
   uploadParseDuration: (durationMs: number, outcome: ParseOutcome) => {
-    trackEvent(AnalyticsEvents.UPLOAD_PARSE_DURATION, {
+    enqueueEvent(AnalyticsEvents.UPLOAD_PARSE_DURATION, {
       duration_bucket: parseDurationBucket(durationMs),
       outcome,
     });
@@ -52,7 +70,7 @@ export const analytics = {
   // Filter events (V10: 3% sampling, was 10%)
   filterToggle: (filterName: string, action: FilterAction, activeCount: number) => {
     if (Math.random() > 0.03) return;
-    trackEvent(AnalyticsEvents.FILTER_TOGGLE, {
+    enqueueEvent(AnalyticsEvents.FILTER_TOGGLE, {
       filter_name: filterName,
       filter_action: action,
       active_filter_count: activeCount,
@@ -60,7 +78,7 @@ export const analytics = {
   },
 
   filterClearAll: (previousCount: number) => {
-    trackEvent(AnalyticsEvents.FILTER_CLEAR_ALL, {
+    enqueueEvent(AnalyticsEvents.FILTER_CLEAR_ALL, {
       previous_count: previousCount,
     });
   },
@@ -73,7 +91,7 @@ export const analytics = {
     hasFiltersActive: boolean
   ) => {
     if (Math.random() > 0.05) return;
-    trackEvent(AnalyticsEvents.SEARCH_PERFORM, {
+    enqueueEvent(AnalyticsEvents.SEARCH_PERFORM, {
       query_length: queryLength,
       result_count: resultCount,
       total_count: totalCount,
@@ -136,43 +154,51 @@ export const analytics = {
   },
 
   // Hero CTAs (sets entry CTA for conversion attribution)
+  //
+  // Batched, unlike the new-tab clicks above: these are PrefixedLink, so the
+  // click is preventDefault + pushState and the document never unloads. The
+  // route change that follows drains the queue on the next tick, so the event
+  // leaves as promptly as it did on the immediate path — it just shares a
+  // request with the rest of the landing page's set.
   heroCTAGuide: () => {
     setEntryCTA('guide');
-    trackEvent(AnalyticsEvents.HERO_CTA_GUIDE);
+    enqueueEvent(AnalyticsEvents.HERO_CTA_GUIDE);
   },
 
   heroCTASample: () => {
     setEntryCTA('sample');
-    trackEvent(AnalyticsEvents.HERO_CTA_SAMPLE);
+    enqueueEvent(AnalyticsEvents.HERO_CTA_SAMPLE);
   },
 
   heroCTAUploadDirect: () => {
     setEntryCTA('upload_direct');
-    trackEvent(AnalyticsEvents.HERO_CTA_UPLOAD_DIRECT);
+    enqueueEvent(AnalyticsEvents.HERO_CTA_UPLOAD_DIRECT);
   },
 
   heroCTAContinue: () => {
     setEntryCTA('continue');
-    trackEvent(AnalyticsEvents.HERO_CTA_CONTINUE);
+    enqueueEvent(AnalyticsEvents.HERO_CTA_CONTINUE);
   },
 
   // Navigation
   themeToggle: (mode: 'dark' | 'light' | 'system') => {
-    trackEvent(AnalyticsEvents.THEME_TOGGLE, { mode });
+    enqueueEvent(AnalyticsEvents.THEME_TOGGLE, { mode });
   },
 
   clearData: () => {
     trackEvent(AnalyticsEvents.CLEAR_DATA);
   },
 
+  // Same-tab navigation: LanguageSwitcher does a full reload to fetch the new
+  // locale's SSG HTML. Same defect as checkoutStart — see queue.ts.
   languageChange: (language: string) => {
-    trackEvent(AnalyticsEvents.LANGUAGE_CHANGE, { language });
+    trackNavigating(AnalyticsEvents.LANGUAGE_CHANGE, { language });
   },
 
   // Wizard events (V10: 5% sampling, was 25%)
   wizardStepView: (stepId: number, _stepTitle?: string) => {
     if (Math.random() > 0.05) return;
-    trackEvent(AnalyticsEvents.WIZARD_STEP_VIEW, {
+    enqueueEvent(AnalyticsEvents.WIZARD_STEP_VIEW, {
       step_id: stepId,
     });
   },
@@ -195,7 +221,7 @@ export const analytics = {
 
   // Upload Zone
   uploadClick: () => {
-    trackEvent(AnalyticsEvents.UPLOAD_CLICK);
+    enqueueEvent(AnalyticsEvents.UPLOAD_CLICK);
   },
 
   // Diagnostic Errors
@@ -232,7 +258,7 @@ export const analytics = {
 
   // FAQ
   faqExpand: (questionId: number, _questionText?: string) => {
-    trackEvent(AnalyticsEvents.FAQ_EXPAND, {
+    enqueueEvent(AnalyticsEvents.FAQ_EXPAND, {
       question_id: questionId,
     });
   },
@@ -326,7 +352,8 @@ export const analytics = {
   uploadErrorByCode: (
     fileHash: string,
     code: import('@/core/types').DiagnosticErrorCode,
-    errorMessage?: string
+    errorMessage?: string,
+    fileSizeMb?: number
   ) => {
     const eventMap: Record<
       import('@/core/types').DiagnosticErrorCode,
@@ -345,6 +372,7 @@ export const analytics = {
       ZIP_ENCRYPTED: AnalyticsEvents.UPLOAD_ERROR_ZIP_ENCRYPTED,
       EMPTY_FILE: AnalyticsEvents.UPLOAD_ERROR_EMPTY_FILE,
       FILE_TOO_LARGE: AnalyticsEvents.UPLOAD_ERROR_FILE_TOO_LARGE,
+      TOO_MANY_ENTRIES: AnalyticsEvents.UPLOAD_ERROR_TOO_MANY_ENTRIES,
       JSON_PARSE_ERROR: AnalyticsEvents.UPLOAD_ERROR_JSON_PARSE,
       INVALID_DATA_STRUCTURE: AnalyticsEvents.UPLOAD_ERROR_INVALID_STRUCTURE,
       WORKER_TIMEOUT: AnalyticsEvents.UPLOAD_ERROR_TIMEOUT,
@@ -359,10 +387,24 @@ export const analytics = {
       NETWORK_ERROR: AnalyticsEvents.UPLOAD_ERROR_NETWORK,
       UNKNOWN: AnalyticsEvents.UPLOAD_ERROR_UNKNOWN,
     };
-    trackEvent(eventMap[code], {
+    enqueueEvent(eventMap[code], {
       file_hash: fileHash.slice(0, 12),
       error_message: errorMessage?.slice(0, 50) ?? '',
+      // The size used to reach the database only inside error_message, i18n'd
+      // into ten languages and truncated at 50 characters — German writes
+      // "1176 MB", Russian "956МБ" in Cyrillic with no space. All 437 records
+      // were recoverable by regex over translated prose. That worked once.
+      //
+      // Spread rather than defaulted: absent and zero must not be the same
+      // thing in a column decisions get made from. Rounded the way
+      // fileUploadStart rounds it, so two events about one file agree.
+      ...(fileSizeMb === undefined ? {} : { file_size_mb: roundMb(fileSizeMb) }),
     });
+    // Drained here rather than left to `pagehide`: unlike the success path, a
+    // failed upload navigates nowhere, so nothing else would trigger a flush
+    // while the visitor stares at the error screen. One request per failure is
+    // the price of not stranding the diagnostic the HTML-format work reads.
+    flushEvents();
   },
 
   // Session & Engagement
@@ -384,12 +426,15 @@ export const analytics = {
   },
 
   // PWA Install
+  //
+  // Batched together: the prompt is the denominator the install is divided by,
+  // so both must be gated on the same thing. Neither unloads the page.
   pwaInstallPrompt: () => {
-    trackEvent(AnalyticsEvents.PWA_INSTALL_PROMPT);
+    enqueueEvent(AnalyticsEvents.PWA_INSTALL_PROMPT);
   },
 
   pwaInstalled: () => {
-    trackEvent(AnalyticsEvents.PWA_INSTALLED);
+    enqueueEvent(AnalyticsEvents.PWA_INSTALLED);
   },
 
   // Ads — one viewable impression opportunity, by the MRC display standard.
@@ -443,8 +488,13 @@ export const analytics = {
     trackEvent(AnalyticsEvents.FREE_EXPORT_DOWNLOAD, { capped });
   },
 
-  paywallView: () => {
-    trackEvent(AnalyticsEvents.PAYWALL_VIEW);
+  // locale and row_count are the two dimensions the paywall cannot be tuned
+  // without: GH#25 (PAYWALL_MIN_ROWS against real selection sizes) and the
+  // Indonesian share of the audience. Batched, so this divides the same
+  // population as checkout_start — both gate on the analytics tag being in the
+  // DOM, where trackEvent gates on the script having executed.
+  paywallView: (locale: string, rowCount: number) => {
+    enqueueEvent(AnalyticsEvents.PAYWALL_VIEW, { locale, row_count: rowCount });
   },
 
   // Fires only for the three Radix-driven closes (X, Escape, overlay click) —
@@ -453,12 +503,14 @@ export const analytics = {
   // directly, bypassing this handler). Both of those already have their own
   // event, and double-counting them here would corrupt the one ratio this
   // event exists to produce.
-  paywallDismiss: () => {
-    trackEvent(AnalyticsEvents.PAYWALL_DISMISS);
+  paywallDismiss: (locale: string, rowCount: number) => {
+    enqueueEvent(AnalyticsEvents.PAYWALL_DISMISS, { locale, row_count: rowCount });
   },
 
-  checkoutStart: () => {
-    trackEvent(AnalyticsEvents.CHECKOUT_START);
+  // Same-tab navigation: useProExport sets location.href in the next statement,
+  // and window.umami.track() has no keepalive. See queue.ts.
+  checkoutStart: (locale: string, rowCount: number) => {
+    trackNavigating(AnalyticsEvents.CHECKOUT_START, { locale, row_count: rowCount });
   },
 
   purchaseSuccess: () => {

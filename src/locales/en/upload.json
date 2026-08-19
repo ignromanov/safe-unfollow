@@ -8,7 +8,7 @@
     "processing": "Analyzing locally...",
     "processingHint": "Processing large datasets (up to 1M+) can take a moment.",
     "ariaLabel": "Upload Instagram data ZIP file",
-    "jsonReminder": "Make sure you selected JSON format when requesting your data export. JSON and HTML ZIP files look identical from the outside.",
+    "jsonReminder": "Instagram's dialog defaults to HTML — make sure you select JSON. JSON and HTML ZIP files look identical from the outside.",
     "seeGuide": "See the step-by-step guide",
     "jsonRequired": "Requires JSON format export",
     "privacyMicro": "Your file never leaves your device",
@@ -33,6 +33,9 @@
     "howToFix": "How to fix this",
     "tryAgain": "Try Again",
     "showMistakes": "Show Where I Went Wrong",
+    "reExportJson": "Re-export as JSON: open the settings step",
+    "chooseDifferentFile": "Choose a different file",
+    "actionsLabel": "Recovery actions",
     "reportIssue": "Report this issue on GitHub",
     "copyDetails": "Copy error details",
     "copied": "Copied!",
@@ -46,12 +49,12 @@
       "HTML_FORMAT": {
         "title": "Wrong Format: HTML",
         "message": "You downloaded your data in HTML format, but this tool requires JSON format to work.",
-        "fix": "Go back to Instagram Settings → Download Your Data → Select \"JSON\" format (not HTML) → Request download again."
+        "fix": "Go back to Meta Accounts Center → Create export → Export to device → set the format to \"JSON\" (not HTML) → start the export again."
       },
       "NOT_INSTAGRAM_EXPORT": {
         "title": "Not an Instagram Export",
         "message": "This ZIP file doesn't appear to be an Instagram data export.",
-        "fix": "Make sure you're uploading the ZIP file from Instagram's \"Download Your Data\" feature, not a random ZIP file."
+        "fix": "Make sure you’re uploading the ZIP file from \"Create export\" in Meta Accounts Center, not a random ZIP file."
       },
       "INCOMPLETE_EXPORT": {
         "title": "Incomplete Export",
@@ -81,17 +84,22 @@
       "ZIP_ENCRYPTED": {
         "title": "Password-Protected ZIP",
         "message": "The ZIP file is password-protected, but Instagram exports are not encrypted.",
-        "fix": "This may not be a valid Instagram data export. Request a new export from Instagram Settings."
+        "fix": "This may not be a valid Instagram data export. Request a new one from Meta Accounts Center."
       },
       "EMPTY_FILE": {
         "title": "Empty File",
         "message": "The uploaded file is empty (0 bytes).",
         "fix": "The download may have been interrupted. Try downloading your data again from Instagram."
       },
+      "TOO_MANY_ENTRIES": {
+        "title": "Too Many Files",
+        "message": "This ZIP contains more files than this tool can index.",
+        "fix": "Ask Instagram for a smaller export: Meta Accounts Center → Create export → select only \"Followers and following\" → format JSON."
+      },
       "FILE_TOO_LARGE": {
         "title": "File Too Large",
-        "message": "File is {{sizeMb}}MB, which exceeds the 500MB limit.",
-        "fix": "Try requesting a smaller data export from Instagram, or use a desktop browser with more memory."
+        "message": "Your browser could not open this export — it is too large for this device.",
+        "fix": "Ask Instagram for a smaller export: Meta Accounts Center → Create export → select only \"Followers and following\" → format JSON. That export is a few MB instead of hundreds."
       },
       "JSON_PARSE_ERROR": {
         "title": "Invalid Data Format",
@@ -160,28 +168,10 @@
       }
     }
   },
-  "quiz": {
-    "title": "What format did you choose?",
-    "subtitle": "When requesting your Instagram data export, which format did you select?",
-    "json": "JSON",
-    "jsonHint": "Correct format for analysis",
-    "html": "HTML",
-    "htmlHint": "Won't work — need to re-download as JSON",
-    "notSure": "Not sure",
-    "notSureHint": "Let me check",
-    "successMessage": "You're all set! Upload your ZIP below.",
-    "htmlMessage": "HTML exports can't be analyzed. Please re-request your data in JSON format.",
-    "htmlCta": "See how to get JSON format",
-    "comparisonTitle": "How to tell the difference",
-    "comparisonJson": "If you see \"Format: JSON\" on the download page, you're good.",
-    "comparisonHtml": "If you see \"Format: HTML\" or files like .html inside, you need to re-request.",
-    "dismiss": "Got it",
-    "fixedIt": "I've re-requested in JSON"
-  },
   "formatWarning": "Make sure you selected JSON (not HTML) when requesting your data export.",
   "waiting": {
     "title": "Waiting for Instagram...",
-    "description": "Instagram is preparing your data export. You'll receive an email within 48 hours (usually much faster!).",
+    "description": "Instagram is preparing your data export. Most arrive by email in 5–30 minutes; large accounts can take a few hours.",
     "addReminder": "Add Reminder to Calendar",
     "reminderHint": "Remind me to check in 2 days",
     "calendarTitle": "Check Instagram Export Email",

@@ -280,11 +280,20 @@ describe('Diagnostic Error Mapping', () => {
         expect(error.message).toContain('0 bytes');
       });
 
-      it('should have correct details for FILE_TOO_LARGE', () => {
+      it('does not advise a desktop browser, which never helped', () => {
+        const error = createDiagnosticError('FILE_TOO_LARGE');
+
+        // The ceiling was a constant, so a machine with 64GB was rejected at
+        // 501MB exactly like a phone. The advice never worked for anyone.
+        expect(error.fix.toLowerCase()).not.toContain('desktop');
+        expect(error.fix.toLowerCase()).not.toContain('memory');
+      });
+
+      it('does not quote a limit that no longer exists', () => {
         const error = createDiagnosticError('FILE_TOO_LARGE');
 
         expect(error.title).toBe('File Too Large');
-        expect(error.message).toContain('500MB');
+        expect(error.message).not.toContain('500');
       });
 
       it('should have correct details for JSON_PARSE_ERROR', () => {

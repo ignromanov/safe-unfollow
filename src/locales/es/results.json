@@ -66,8 +66,8 @@
   },
   "donation": {
     "headline": "Acabas de analizar {{count}} cuentas — gratis.",
-    "body": "Sin login. Tu exportación de Instagram nunca salió de este navegador. Si te ahorró tiempo, un café lo mantiene vivo.",
-    "headlineMobile": "Análisis gratis. Privado. Sin login.",
+    "body": "Sin contraseña. Tu exportación de Instagram nunca salió de este navegador. Si te ahorró tiempo, un café lo mantiene vivo.",
+    "headlineMobile": "Análisis gratis. Privado. Sin contraseña.",
     "bodyMobile": "Tu exportación nunca salió del navegador. Si fue útil, considera un café.",
     "cta": "Invitar un Café",
     "ctaMobile": "Apoyar",
@@ -115,7 +115,7 @@
     "dismiss": "Quizás después",
     "disclaimer": "Herramientas seleccionadas que recomendamos. Los enlaces de afiliados financian actualizaciones gratuitas — sin costo para ti.",
     "urgency": {
-      "critical": "Actúa ahora — el engagement cae 40% después de 48 horas",
+      "critical": "Actúa ahora — cuanto más esperes, más cuesta recuperarlo",
       "warning": "Actuar temprano previene pérdidas mayores — optimiza ahora"
     },
     "ariaLabel": "Herramientas recomendadas para mejorar tu presencia en Instagram",

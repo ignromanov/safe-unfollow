@@ -369,3 +369,41 @@ describe('error-classifier', () => {
     });
   });
 });
+
+describe('the strings the readers actually produce', () => {
+  // This suite's fixtures were written against JSZip, whose phrasings the
+  // program no longer contains. zip.js's own exported constants are these, and
+  // not one of them matched any CORRUPTED_ZIP keyword: a damaged local header
+  // or an unsupported compression method classified as UNKNOWN, which is in
+  // REPORTABLE_ERROR_CODES and points the reader at the issue tracker.
+  it.each([
+    'End of central directory not found',
+    'File format is not recognized',
+    'Split zip file',
+    'Local file header not found',
+    'Compression method not supported',
+    'Invalid compressed data',
+  ])('classifies zip.js\'s "%s" as a damaged archive', message => {
+    expect(classifyErrorMessage(message)).toBe('CORRUPTED_ZIP');
+  });
+
+  it('still calls an encrypted entry encrypted', () => {
+    expect(classifyErrorMessage('File contains encrypted entry')).toBe('ZIP_ENCRYPTED');
+  });
+
+  // FILE_TOO_LARGE lost its only producer when the 500 MB ceiling was deleted,
+  // while its copy was rewritten in ten locales to describe a browser that
+  // could not hold the file. No engine says "too large", "exceeds" or
+  // "maximum size" for a failed allocation, so the code was unreachable and
+  // the copy unshowable.
+  //
+  // This covers the allocation that throws. A tab the OS kills outright cannot
+  // be caught by anything and is not claimed here.
+  it.each([
+    'Array buffer allocation failed', // Chrome / V8
+    'Invalid string length', // V8, a string past its maximum
+    'out of memory', // Firefox
+  ])('classifies "%s" as a file this device could not hold', message => {
+    expect(classifyErrorMessage(message)).toBe('FILE_TOO_LARGE');
+  });
+});

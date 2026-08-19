@@ -112,6 +112,7 @@ export const AnalyticsEvents = {
 
   // Extended Upload Errors
   UPLOAD_ERROR_CORRUPTED_ZIP: 'upload_error_corrupted_zip',
+  UPLOAD_ERROR_TOO_MANY_ENTRIES: 'upload_error_too_many_entries',
   UPLOAD_ERROR_ZIP_ENCRYPTED: 'upload_error_zip_encrypted',
   UPLOAD_ERROR_EMPTY_FILE: 'upload_error_empty_file',
   UPLOAD_ERROR_FILE_TOO_LARGE: 'upload_error_file_too_large',
@@ -144,10 +145,6 @@ export const AnalyticsEvents = {
   RESCUE_PLAN_IMPRESSION: 'rescue_plan_impression',
   RESCUE_PLAN_TOOL_CLICK: 'rescue_plan_tool_click',
   RESCUE_PLAN_DISMISS: 'rescue_plan_dismiss',
-
-  // Format Quiz
-  FORMAT_QUIZ_ANSWER: 'format_quiz_answer',
-  FORMAT_QUIZ_FIXED_IT: 'format_quiz_fixed_it',
 
   // Error tracking
   ERROR_BOUNDARY: 'error_boundary',

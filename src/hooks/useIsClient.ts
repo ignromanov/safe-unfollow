@@ -18,8 +18,8 @@ const getServerSnapshot = () => false;
  *
  * NOT for "my data has loaded". A flag raised inside an effect that also reads
  * localStorage means something else, and swapping it for this hook produces a render
- * where hydration is done but the data is still absent — see FormatQuiz, which keeps its
- * own flag for that reason.
+ * where hydration is done but the data is still absent — see useRescuePlanDismiss, which
+ * keeps its own flag for that reason.
  */
 export function useIsClient(): boolean {
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
