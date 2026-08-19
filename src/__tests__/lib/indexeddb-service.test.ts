@@ -173,6 +173,64 @@ describe('IndexedDBService (Integration Tests)', () => {
       expect(retrieved?.followRequestsUnreadable).toBeUndefined();
     });
 
+    it('should round-trip truncatedRelationshipFile, including through a cache hit', async () => {
+      // An enum rather than a boolean, so "survives storage" is a stronger
+      // claim than for its sibling above: a serialiser that coerced it would
+      // turn 'followers' into true and the caveat would name the wrong file.
+      const truncatedHash = 'truncated-relationship-file-hash';
+      usedFileHashes.add(truncatedHash);
+
+      await indexedDBService.saveFileMetadata({
+        fileHash: truncatedHash,
+        fileName: mockFileName,
+        fileSize: mockFileSize,
+        uploadDate: new Date('2024-01-01'),
+        accountCount: 100,
+        lastAccessed: Date.now(),
+        version: 2,
+        accountsComplete: true,
+        truncatedRelationshipFile: 'followers',
+      });
+
+      expect(
+        (await indexedDBService.getFileMetadata(truncatedHash))?.truncatedRelationshipFile
+      ).toBe('followers');
+
+      // Same cache-hit re-save as above: that path runs on every return visit,
+      // and this caveat is aimed squarely at the returning reader who never
+      // re-parses.
+      const stored = await indexedDBService.getFileMetadata(truncatedHash);
+      await indexedDBService.saveFileMetadata({
+        ...(stored as NonNullable<typeof stored>),
+        lastAccessed: Date.now(),
+      });
+
+      expect(
+        (await indexedDBService.getFileMetadata(truncatedHash))?.truncatedRelationshipFile
+      ).toBe('followers');
+    });
+
+    it('should leave truncatedRelationshipFile absent when neither file was short', async () => {
+      const cleanHash = 'no-truncation-hash';
+      usedFileHashes.add(cleanHash);
+
+      await indexedDBService.saveFileMetadata({
+        fileHash: cleanHash,
+        fileName: mockFileName,
+        fileSize: mockFileSize,
+        uploadDate: new Date('2024-01-01'),
+        accountCount: 100,
+        lastAccessed: Date.now(),
+        version: 2,
+        accountsComplete: true,
+      });
+
+      // Absent, not null: records written before this field existed must not
+      // start accusing an export that was never truncated.
+      const retrieved = await indexedDBService.getFileMetadata(cleanHash);
+      expect(retrieved?.truncatedRelationshipFile).toBeUndefined();
+    });
+
     it('should handle Date conversion correctly', async () => {
       const uploadDate = new Date('2024-06-15T10:30:00Z');
 

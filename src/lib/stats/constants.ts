@@ -178,6 +178,17 @@ export const AnalyticsEvents = {
   // having changed the record shape again. One archive reporting
   // `not-applicable` (it carries none of the six optional files) is not.
   USERNAME_LABEL_RESOLUTION: 'username_label_resolution',
+
+  // Which required relationship file arrived short because a date range was
+  // chosen in Meta's export dialog (TruncatedRelationshipFile in
+  // core/types/upload.ts). Fires only when one did, so it has no denominator of
+  // its own: divide by `username_label_resolution`, which fires once per parse
+  // whatever the outcome. Dividing by `file_upload_success` would understate it,
+  // because a truncated export still succeeds — that is the entire defect.
+  // ALARM: any sustained rate at all. Every event here is a reader who was told
+  // that people unfollowed them when the export simply never mentioned those
+  // people.
+  RELATIONSHIP_FILE_TRUNCATED: 'relationship_file_truncated',
 } as const;
 
 export type AnalyticsEventName = (typeof AnalyticsEvents)[keyof typeof AnalyticsEvents];

@@ -11,6 +11,7 @@ import {
   NULL_PAYLOAD,
   UNKNOWN_TOP_LEVEL_KEY,
   VALID_ARRAY_OF_ONE,
+  makeEntry,
   objectInsteadOfArray,
 } from '../../fixtures/instagram-format-drift';
 
@@ -851,17 +852,14 @@ describe('Instagram Parser', () => {
       ['followers wrapper unrecognised', VALID_ARRAY_OF_ONE, UNKNOWN_TOP_LEVEL_KEY],
       ['followers records unreadable', VALID_ARRAY_OF_ONE, [{ media_list_data: [] }]],
       ['both genuinely empty', EMPTY_ARRAY, EMPTY_ARRAY],
-    ])(
-      'never refuses an upload without saying why (%s)',
-      async (_label, following, followers) => {
-        const result = await parseInstagramZipFile(zipWith(following, followers));
+    ])('never refuses an upload without saying why (%s)', async (_label, following, followers) => {
+      const result = await parseInstagramZipFile(zipWith(following, followers));
 
-        expect(result.hasMinimalData).toBe(false);
-        const firstError = result.warnings.find(w => w.severity === 'error');
-        expect(firstError).toBeDefined();
-        expect(firstError?.message).toBeTruthy();
-      }
-    );
+      expect(result.hasMinimalData).toBe(false);
+      const firstError = result.warnings.find(w => w.severity === 'error');
+      expect(firstError).toBeDefined();
+      expect(firstError?.message).toBeTruthy();
+    });
 
     it('leaves an absent required file alone', async () => {
       // "Absent" and "present but unreadable" are different answers and this
@@ -1000,6 +998,72 @@ describe('Instagram Parser', () => {
 
       expect(result.warnings.find(w => w.code === 'INVALID_FOLLOWERS_FORMAT')).toBeUndefined();
       expect(result.data.followers.has('validuser')).toBe(true);
+    });
+  });
+
+  /**
+   * The date-range defect, end to end.
+   *
+   * Meta's export dialog offers a date range. Choosing one filters
+   * `followers_*.json` by entry timestamp and leaves `following.json` whole,
+   * so the archive is complete, well-formed and wrong. Measured on one
+   * account's own exports two days apart: followers 364 -> 118 and
+   * `notFollowingBack` 95 -> 294, with `hasMinimalData` true and no warning.
+   *
+   * The unit tests in `relationship-skew.test.ts` pin the arithmetic. This pins
+   * that the arithmetic is actually reached from a parse — the seam where a
+   * detector that works can still be wired to nothing.
+   */
+  describe('a required file cut short by a date range', () => {
+    const DAY = 86_400;
+
+    // `makeEntry` rather than a hand-built literal: the legacy entry shape is
+    // already declared once in the drift fixtures, and a second copy here would
+    // keep this test passing against a shape the parser no longer meets.
+    const entries = (prefix: string, count: number, oldest: number) =>
+      JSON.stringify(
+        Array.from({ length: count }, (_, i) => makeEntry(`${prefix}${i}`, oldest + i * DAY))
+      );
+
+    const parseWith = async (followingOldest: number, followersOldest: number) => {
+      mockZipInstance = new MockZipArchive();
+      mockZipInstance._addFile(
+        'connections/followers_and_following/following.json',
+        vi.fn().mockResolvedValue(entries('fg', 40, followingOldest))
+      );
+      mockZipInstance._addFile(
+        'connections/followers_and_following/followers_1.json',
+        vi.fn().mockResolvedValue(entries('fr', 40, followersOldest))
+      );
+      return parseInstagramZipFile(new File([''], 'export.zip'));
+    };
+
+    // The two numbers are the real ones: 2014-06-21 and 2025-08-14, the oldest
+    // entry of each file in the measured pair of exports.
+    const FOLLOWING_OLDEST = 1_403_384_748;
+    const FOLLOWERS_OLDEST_TRUNCATED = 1_755_143_739;
+    const FOLLOWERS_OLDEST_WHOLE = 1_398_234_904;
+
+    it('names the short file after a real parse', async () => {
+      const result = await parseWith(FOLLOWING_OLDEST, FOLLOWERS_OLDEST_TRUNCATED);
+
+      expect(result.truncatedRelationshipFile).toBe('followers');
+    });
+
+    it('still succeeds, which is exactly why the caveat has to exist', async () => {
+      const result = await parseWith(FOLLOWING_OLDEST, FOLLOWERS_OLDEST_TRUNCATED);
+
+      // No warning fires and the upload is recorded as a success. Nothing else
+      // in this result tells the reader anything is wrong — the badge counts
+      // are simply computed from a list that is missing people.
+      expect(result.hasMinimalData).toBe(true);
+      expect(result.warnings.filter(w => w.severity === 'error')).toHaveLength(0);
+    });
+
+    it('stays silent on the untruncated export from the same account', async () => {
+      const result = await parseWith(FOLLOWING_OLDEST, FOLLOWERS_OLDEST_WHOLE);
+
+      expect(result.truncatedRelationshipFile).toBeNull();
     });
   });
 });

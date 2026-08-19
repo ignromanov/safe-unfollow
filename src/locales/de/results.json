@@ -54,6 +54,18 @@
       "title": "„Folgt dir nicht zurück“ ist möglicherweise zu hoch.",
       "body": "Wir konnten deine Datei mit den Follow-Anfragen nicht lesen. Konten, denen du eine Anfrage geschickt hast, können deshalb in dieser Liste auftauchen, und deine Zähler für ausstehende Anfragen stehen auf null. Follower, „Folge ich“ und „Gegenseitig“ sind davon nicht betroffen.",
       "chipHint": "Möglicherweise zu hoch — wir konnten deine Datei mit den Follow-Anfragen nicht lesen."
+    },
+    "truncated": {
+      "followers": {
+        "title": "Deine Follower-Liste wirkt unvollständig.",
+        "body": "Sie beginnt deutlich später als deine Gefolgt-Liste, und genau das passiert, wenn ein Export für einen begrenzten Zeitraum angefordert wird. Falls du einen Zeitraum gewählt hast, fordere deine Daten bei Instagram erneut an und setze den Zeitraum auf \"Gesamter Zeitraum\". Die unten markierten Zahlen sind betroffen: manche sind zu hoch, manche zu niedrig.",
+        "chipHint": "Aus einer Follower-Liste berechnet, die unvollständig wirkt."
+      },
+      "following": {
+        "title": "Deine Gefolgt-Liste wirkt unvollständig.",
+        "body": "Sie beginnt deutlich später als deine Follower-Liste, und genau das passiert, wenn ein Export für einen begrenzten Zeitraum angefordert wird. Falls du einen Zeitraum gewählt hast, fordere deine Daten bei Instagram erneut an und setze den Zeitraum auf \"Gesamter Zeitraum\". Die unten markierten Zahlen sind betroffen: manche sind zu hoch, manche zu niedrig.",
+        "chipHint": "Aus einer Gefolgt-Liste berechnet, die unvollständig wirkt."
+      }
     }
   },
   "empty": {

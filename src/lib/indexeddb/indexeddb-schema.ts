@@ -9,7 +9,7 @@
  * - indexes: Search index cache (prefix/trigram bitsets)
  */
 
-import type { BadgeKey, FileMetadata } from '@/core/types';
+import type { BadgeKey, FileMetadata, TruncatedRelationshipFile } from '@/core/types';
 
 export const DB_CONFIG = {
   name: 'instagram-tracker-v2',
@@ -112,6 +112,21 @@ export interface FileMetadataRecord {
    * schemaless (GH#23).
    */
   followRequestsUnreadable?: boolean;
+  /**
+   * Which required relationship file this upload appears to have been missing
+   * part of, because a date range was chosen when the export was requested.
+   * See `ParseResult.truncatedRelationshipFile`.
+   *
+   * Stored for the same reason as the field above and with the same defaults:
+   * `/results` outlives the parse, a returning visitor never re-parses, and an
+   * absent value means no caveat. Records written before this field existed
+   * therefore show nothing, which is the safe direction — the alternative is
+   * accusing an untruncated export.
+   *
+   * No DB version bump, for the reason documented above: these object stores
+   * are schemaless (GH#23).
+   */
+  truncatedRelationshipFile?: TruncatedRelationshipFile;
 }
 
 // ===== Conversion Utilities =====

@@ -39,6 +39,16 @@ export type ParseWarningSeverity = 'info' | 'warning' | 'error';
  */
 export type LabelResolutionMode = 'fast-path' | 'inferred' | 'unresolved' | 'not-applicable';
 
+/**
+ * Which of the two required relationship files starts materially later than
+ * the other, and so appears to have been cut short before it was exported.
+ *
+ * `null` is the ordinary case: the two lists begin close enough together, or
+ * one of them is too small to judge. The detector and its thresholds live in
+ * `core/parsers/relationship-skew.ts`.
+ */
+export type TruncatedRelationshipFile = 'followers' | 'following' | null;
+
 /** Warning about missing or malformed data during parsing */
 export interface ParseWarning {
   /** Warning code for programmatic handling */
@@ -137,6 +147,34 @@ export interface ParseResult {
    * requests, and a caveat shown to everyone is a caveat nobody reads.
    */
   followRequestsUnreadable: boolean;
+  /**
+   * Which required relationship file appears to have been cut short, if either.
+   *
+   * Meta's export dialog offers a date range, and choosing one filters
+   * `followers_*.json` by entry timestamp while leaving `following.json` whole.
+   * The truncated file is present, well-formed and parses cleanly — it simply
+   * holds fewer people — so nothing else in this result records it. Every
+   * follower removed that way is reported as an account that does not follow
+   * back, which is the worst answer this tool can give and the one it gives
+   * with the most confidence.
+   *
+   * Measured on one account's own exports two days apart, same following list
+   * both times: followers 364 -> 118, `notFollowingBack` 95 -> 294.
+   *
+   * Sibling to `followRequestsUnreadable` and overstates the same badge, but
+   * for the opposite reason: that flag means data we could not read, this one
+   * means data Instagram never put in the archive. They can fire together, and
+   * the UI reads both.
+   *
+   * Required, not optional, for the same reason as its sibling: every exit in
+   * `parseInstagramZipFile` knows the answer, including the early ones that
+   * read no relationship file at all — nothing was compared, so nothing is
+   * known to be short, and the value is `null`.
+   *
+   * See `core/parsers/relationship-skew.ts` for what "cut short" is measured
+   * against and why a false positive is the cheaper mistake here.
+   */
+  truncatedRelationshipFile: TruncatedRelationshipFile;
 }
 
 /**
