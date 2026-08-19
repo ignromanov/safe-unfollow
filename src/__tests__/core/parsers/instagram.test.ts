@@ -14,18 +14,16 @@ import {
   objectInsteadOfArray,
 } from '../../fixtures/instagram-format-drift';
 
-// Mock JSZip
+// Mock the ZIP reader, not whichever library is behind it
 let mockZipInstance: any;
-vi.mock('jszip', () => ({
-  default: {
-    loadAsync: vi.fn().mockImplementation(() => Promise.resolve(mockZipInstance)),
-  },
+vi.mock('@/core/parsers/zip-archive', () => ({
+  openZipArchive: vi.fn().mockImplementation(() => Promise.resolve(mockZipInstance)),
 }));
 
 // Hoisted mock setup
-const { MockJSZip } = vi.hoisted(() => {
-  const { MockJSZip } = require('../../__mocks__/jszip.cjs');
-  return { MockJSZip };
+const { MockZipArchive } = vi.hoisted(() => {
+  const { MockZipArchive } = require('../../__mocks__/zip-archive.cjs');
+  return { MockZipArchive };
 });
 
 describe('Instagram Parser', () => {
@@ -200,7 +198,7 @@ describe('Instagram Parser', () => {
 
   describe('parseInstagramZipFile', () => {
     beforeEach(() => {
-      mockZipInstance = new MockJSZip();
+      mockZipInstance = new MockZipArchive();
     });
 
     it('should parse complete ZIP file with all data types', async () => {
@@ -572,7 +570,7 @@ describe('Instagram Parser', () => {
   // standalone helper.
   describe('following.json format drift (GH#21)', () => {
     beforeEach(() => {
-      mockZipInstance = new MockJSZip();
+      mockZipInstance = new MockZipArchive();
       // A valid, non-empty followers file so hasMinimalData stays true and we
       // can observe the following-specific warning in isolation.
       mockZipInstance._addFile(
@@ -666,7 +664,7 @@ describe('Instagram Parser', () => {
     const unreadableRecords = [{ media_list_data: [] }, { media_list_data: [] }];
 
     function zipWith(following: unknown, followers: unknown) {
-      mockZipInstance = new MockJSZip();
+      mockZipInstance = new MockZipArchive();
       mockZipInstance._addFile(
         'connections/followers_and_following/following.json',
         vi.fn().mockResolvedValue(JSON.stringify(following))
@@ -819,7 +817,7 @@ describe('Instagram Parser', () => {
       // whole task exists to keep them apart. interpretFollowingPayload
       // (undefined) reports formatInvalid: false, and the gate must not read
       // that as a failure to parse.
-      mockZipInstance = new MockJSZip();
+      mockZipInstance = new MockZipArchive();
       mockZipInstance._addFile(
         'connections/followers_and_following/followers_1.json',
         vi.fn().mockResolvedValue(JSON.stringify(VALID_ARRAY_OF_ONE))
@@ -839,7 +837,7 @@ describe('Instagram Parser', () => {
   // when at least one shard has a recognized shape.
   describe('followers_*.json format drift (GH#21)', () => {
     beforeEach(() => {
-      mockZipInstance = new MockJSZip();
+      mockZipInstance = new MockZipArchive();
       // A valid, non-empty following file so hasMinimalData stays true and we
       // can observe the followers-specific warning in isolation.
       mockZipInstance._addFile(

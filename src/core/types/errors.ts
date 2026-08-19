@@ -13,7 +13,7 @@ export type DiagnosticErrorCode =
   | 'INVALID_FOLLOWING_FORMAT' // following.json found, but shape unrecognized (GH#21)
   | 'INVALID_FOLLOWERS_FORMAT' // followers_*.json found, but shape unrecognized (GH#21)
   // New - ZIP/File errors
-  | 'CORRUPTED_ZIP' // JSZip failed to open
+  | 'CORRUPTED_ZIP' // the ZIP reader failed to open it
   | 'ZIP_ENCRYPTED' // ZIP is password-protected
   | 'EMPTY_FILE' // File is empty (0 bytes)
   | 'FILE_TOO_LARGE' // File exceeds 500MB
