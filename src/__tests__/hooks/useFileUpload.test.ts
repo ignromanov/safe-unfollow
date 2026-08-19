@@ -637,7 +637,12 @@ describe('useFileUpload', () => {
       });
 
       expect(analytics.uploadErrorByCode).toHaveBeenCalledTimes(1);
-      expect(analytics.uploadErrorByCode).toHaveBeenCalledWith('', 'NOT_ZIP', expect.any(String));
+      expect(analytics.uploadErrorByCode).toHaveBeenCalledWith(
+        '',
+        'NOT_ZIP',
+        expect.any(String),
+        expect.any(Number)
+      );
     });
 
     /**
@@ -695,7 +700,12 @@ describe('useFileUpload', () => {
         []
       );
       expect(analytics.uploadErrorByCode).toHaveBeenCalledTimes(1);
-      expect(analytics.uploadErrorByCode).toHaveBeenCalledWith('', 'UPLOAD_CANCELLED');
+      expect(analytics.uploadErrorByCode).toHaveBeenCalledWith(
+        '',
+        'UPLOAD_CANCELLED',
+        undefined,
+        expect.any(Number)
+      );
     });
   });
 

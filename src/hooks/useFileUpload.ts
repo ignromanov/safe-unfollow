@@ -312,7 +312,7 @@ export function useFileUpload() {
       } catch (err) {
         // Track cancelled uploads but don't show error
         if (abortControllerRef.current?.signal.aborted) {
-          analytics.uploadErrorByCode(fileHash, 'UPLOAD_CANCELLED');
+          analytics.uploadErrorByCode(fileHash, 'UPLOAD_CANCELLED', undefined, fileSizeMb);
           outcome = 'cancelled';
           return;
         }
@@ -326,7 +326,7 @@ export function useFileUpload() {
         const warnings = (err as { warnings?: ParseWarning[] }).warnings;
         const discovery = (err as { discovery?: FileDiscovery }).discovery;
 
-        analytics.uploadErrorByCode(fileHash, errorCode, errorMessage);
+        analytics.uploadErrorByCode(fileHash, errorCode, errorMessage, fileSizeMb);
 
         setUploadInfo({
           currentFileName: file.name,

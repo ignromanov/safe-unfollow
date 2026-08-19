@@ -343,7 +343,8 @@ export const analytics = {
   uploadErrorByCode: (
     fileHash: string,
     code: import('@/core/types').DiagnosticErrorCode,
-    errorMessage?: string
+    errorMessage?: string,
+    fileSizeMb?: number
   ) => {
     const eventMap: Record<
       import('@/core/types').DiagnosticErrorCode,
@@ -379,6 +380,15 @@ export const analytics = {
     enqueueEvent(eventMap[code], {
       file_hash: fileHash.slice(0, 12),
       error_message: errorMessage?.slice(0, 50) ?? '',
+      // The size used to reach the database only inside error_message, i18n'd
+      // into ten languages and truncated at 50 characters — German writes
+      // "1176 MB", Russian "956МБ" in Cyrillic with no space. All 437 records
+      // were recoverable by regex over translated prose. That worked once.
+      //
+      // Spread rather than defaulted: absent and zero must not be the same
+      // thing in a column decisions get made from. Rounded the way
+      // fileUploadStart rounds it, so two events about one file agree.
+      ...(fileSizeMb === undefined ? {} : { file_size_mb: Math.round(fileSizeMb * 100) / 100 }),
     });
     // Drained here rather than left to `pagehide`: unlike the success path, a
     // failed upload navigates nowhere, so nothing else would trigger a flush
