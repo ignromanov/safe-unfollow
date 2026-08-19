@@ -1,13 +1,13 @@
 {
   "version": "V1.6 1.000.000+ Hesap İçin Optimize Edildi",
   "headline": {
-    "prefix": "Gör",
-    "highlight": "Instagram Takipten Çıkanları",
-    "suffix": "— Giriş Yok"
+    "prefix": "Instagram'da",
+    "highlight": "takipten çıkanları",
+    "suffix": "şifresiz gör"
   },
-  "subheadline": "Instagram'da seni kimin takipten çıkardığını öğren — ücretsiz, giriş yok. ZIP yükle, yerel analiz. %100 gizli. Çevrimdışı çalışır.",
+  "subheadline": "Instagram'da seni kimin takipten çıkardığını öğren: ücretsiz, şifresiz, programsız. ZIP yükle, analiz tarayıcının içinde kalır. Çevrimdışı çalışır.",
   "buttons": {
-    "getGuide": "Takibi Bırakanları Ücretsiz Gör",
+    "getGuide": "Takipten Çıkanları Ücretsiz Gör",
     "trySample": "Örnek Veriyle Dene",
     "haveFile": "ZIP dosyam zaten var",
     "viewResults": "Analiz Sonuçlarını Gör"
@@ -15,7 +15,7 @@
   "trust": {
     "free": "Analiz Ücretsiz",
     "noPassword": "Şifre Gerekmez",
-    "privacy": "Gizlilik Garantili"
+    "privacy": "%100 Gizli • Yerel Analiz"
   },
   "features": {
     "heading": "Temel Özellikler",
@@ -29,7 +29,7 @@
     },
     "scale": {
       "title": "Yüksek Ölçek",
-      "description": "1M+ hesabı ışık hızında işler"
+      "description": "1.000.000+ hesaplık dışa aktarımlar için tasarlandı"
     },
     "openSource": {
       "title": "Açık Kaynak",

@@ -1,13 +1,13 @@
 {
   "version": "V1.6 100万件以上のアカウントに最適化",
   "headline": {
-    "prefix": "確認",
-    "highlight": "Instagramのフォロー解除者",
-    "suffix": "— ログイン不要"
+    "prefix": "Instagramで",
+    "highlight": "フォローを外された人は誰？",
+    "suffix": "ログイン不要で確認"
   },
-  "subheadline": "誰があなたをフォロー解除したか確認 — 無料、ログイン不要。ZIPをアップロード、ローカル分析。100%プライベート。オフラインで動作。",
+  "subheadline": "誰にフォローを外されたかを確認できます。無料、ログイン不要。ZIPをアップロードすると、解析はブラウザの中だけで動きます。オフラインでも使えます。",
   "buttons": {
-    "getGuide": "アンフォロワーを無料でチェック",
+    "getGuide": "フォローを外された人を無料で確認",
     "trySample": "サンプルで試す",
     "haveFile": "ZIPファイルを持っています",
     "viewResults": "分析結果を見る"
@@ -15,7 +15,7 @@
   "trust": {
     "free": "分析は無料",
     "noPassword": "パスワード不要",
-    "privacy": "プライバシー保証"
+    "privacy": "解析はブラウザ内で完結"
   },
   "features": {
     "heading": "主な機能",
@@ -29,7 +29,7 @@
     },
     "scale": {
       "title": "大規模対応",
-      "description": "100万件以上のアカウントを高速処理"
+      "description": "100万件以上のアカウントのエクスポート向けに設計"
     },
     "openSource": {
       "title": "オープンソース",

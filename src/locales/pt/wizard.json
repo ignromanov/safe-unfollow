@@ -40,7 +40,7 @@
     "recipe": {
       "title": "O que escolher na caixa de diálogo do Instagram",
       "rows": {
-        "destination": "Exportar para dispositivo",
+        "destination": "Exportar para o dispositivo",
         "range": "Todo o período",
         "format": "JSON — não HTML",
         "quality": "Qualquer qualidade de mídia",
@@ -58,9 +58,9 @@
       "alt": "Passo 2: Escolha seu perfil do Instagram"
     },
     "3": {
-      "title": "Selecione \"Exportar para dispositivo\"",
+      "title": "Selecione \"Exportar para o dispositivo\"",
       "description": "Escolha exportar diretamente para seu dispositivo para máxima privacidade. Seus dados ficam com você.",
-      "alt": "Passo 3: Selecione a opção Exportar para dispositivo"
+      "alt": "Passo 3: Selecione a opção Exportar para o dispositivo"
     },
     "4": {
       "title": "⚠️ Selecione apenas \"Seguidores e seguindo\"",
@@ -69,7 +69,7 @@
     },
     "5": {
       "title": "Defina o período para \"Todo o período\"",
-      "description": "Clique em \"Período\" → Selecione \"Todo o período\" → Salvar. Isso garante seu histórico completo de seguidores.",
+      "description": "Clique em \"Período\" → Selecione \"Todo o período\" → Salvar. Isso permite obter seu histórico completo de seguidores.",
       "alt": "Passo 5: Defina o período para Todo o período"
     },
     "6": {

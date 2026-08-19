@@ -115,7 +115,7 @@
     "dismiss": "Mungkin nanti",
     "disclaimer": "Tools pilihan yang kami rekomendasikan. Tautan afiliasi mendanai pembaruan gratis — tanpa biaya tambahan untuk Anda.",
     "urgency": {
-      "critical": "Bertindak sekarang — engagement turun 40% setelah 48 jam",
+      "critical": "Bertindak sekarang — makin lama menunggu, makin sulit membangunnya kembali",
       "warning": "Tindakan dini mencegah kerugian lebih besar — optimalkan sekarang"
     },
     "ariaLabel": "Tools yang direkomendasikan untuk meningkatkan kehadiran Instagram Anda",
@@ -151,30 +151,30 @@
     },
     "paywall": {
       "headline": "{{rows}} baris pertama sudah diunduh — sekarang semua {{total}}",
-      "subtitle": "Pelacak sejenis menagih $5–10 per bulan selama kamu ingin terus memantau pengikutmu. Yang ini $7 sekali bayar, untuk filenya.",
+      "subtitle": "Pelacak sejenis menagih $5–10 per bulan selama Anda ingin terus memantau pengikut Anda. Yang ini $7 sekali bayar, untuk filenya.",
       "bullet1": "Berfungsi di Excel dan Google Sheets",
-      "bullet2": "Mengikuti filter aktifmu",
+      "bullet2": "Mengikuti filter aktif Anda",
       "bullet3": "Sekali bayar $7 — bukan langganan. Berlaku di maksimal 3 perangkat.",
-      "bullet4": "Tetap 100% privat: file dibuat langsung di browsermu",
+      "bullet4": "Tetap 100% privat: file dibuat langsung di browser Anda",
       "teaserPdf": "Laporan PDF",
       "teaserCompare": "Bandingkan dua ekspor",
       "comingSoon": "Segera hadir",
       "cta": "Buka ekspor — $7",
       "instantNote": "Langsung terbuka setelah pembayaran",
-      "refund": "Tidak sesuai harapan? Kirim email ke {{email}} dalam 30 hari dan kami kembalikan uangmu."
+      "refund": "Tidak sesuai harapan? Kirim email ke {{email}} dalam 30 hari dan kami kembalikan uang Anda."
     },
     "license": {
-      "title": "Aktifkan ekspormu",
+      "title": "Aktifkan ekspor Anda",
       "activating": "Mengaktifkan…",
-      "manualDescription": "Masukkan kunci lisensi dari email pembelianmu untuk membuka ekspor di perangkat ini.",
+      "manualDescription": "Masukkan kunci lisensi dari email pembelian Anda untuk membuka ekspor di perangkat ini.",
       "placeholder": "38b1460a-5104-4067-a91d-77b872934d51",
       "submit": "Aktifkan",
       "retry": "Coba lagi",
-      "havePurchase": "Sudah membeli? Masukkan kuncimu",
-      "errorFormat": "Itu bukan kunci lisensi yang valid. Periksa kunci di email pembelianmu.",
-      "errorNotFound": "Kami tidak menemukan kunci lisensi ini. Periksa kunci di email pembelianmu.",
+      "havePurchase": "Sudah membeli? Masukkan kunci Anda",
+      "errorFormat": "Itu bukan kunci lisensi yang valid. Periksa kunci di email pembelian Anda.",
+      "errorNotFound": "Kami tidak menemukan kunci lisensi ini. Periksa kunci di email pembelian Anda.",
       "errorLimit": "Kunci ini sudah dipakai di 3 perangkat yang diizinkan. Bebaskan salah satu atau hubungi dukungan.",
-      "errorGeneric": "Aktivasi gagal. Periksa koneksimu dan coba lagi.",
+      "errorGeneric": "Aktivasi gagal. Periksa koneksi Anda dan coba lagi.",
       "revoked": "Lisensi ini sudah tidak aktif. Jika ini tidak terduga, hubungi dukungan."
     },
     "dialog": {

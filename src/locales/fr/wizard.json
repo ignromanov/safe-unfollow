@@ -58,9 +58,9 @@
       "alt": "Étape 2 : Choisissez votre profil Instagram"
     },
     "3": {
-      "title": "Sélectionnez « Exporter vers l'appareil »",
+      "title": "Sélectionnez « Exporter sur mon appareil »",
       "description": "Choisissez d'exporter directement vers votre appareil pour une confidentialité maximale. Vos données restent avec vous.",
-      "alt": "Étape 3 : Sélectionnez l'option Exporter vers l'appareil"
+      "alt": "Étape 3 : Sélectionnez l'option Exporter sur mon appareil"
     },
     "4": {
       "title": "⚠️ Sélectionnez uniquement « Abonnés et abonnements »",
@@ -69,7 +69,7 @@
     },
     "5": {
       "title": "Définissez la plage de dates sur « Tout »",
-      "description": "Cliquez sur « Plage de dates » → Sélectionnez « Tout » → Enregistrer. Cela garantit votre historique complet d'abonnés.",
+      "description": "Cliquez sur « Plage de dates » → Sélectionnez « Tout » → Enregistrer. Cela permet d'obtenir l'historique complet de vos abonnés.",
       "alt": "Étape 5 : Définissez la plage de dates sur Tout"
     },
     "6": {

@@ -33,7 +33,7 @@
     "howToFix": "How to fix this",
     "tryAgain": "Try Again",
     "showMistakes": "Show Where I Went Wrong",
-    "reExportJson": "Re-export as JSON — open the settings step",
+    "reExportJson": "Re-export as JSON: open the settings step",
     "chooseDifferentFile": "Choose a different file",
     "actionsLabel": "Recovery actions",
     "reportIssue": "Report this issue on GitHub",
@@ -49,12 +49,12 @@
       "HTML_FORMAT": {
         "title": "Wrong Format: HTML",
         "message": "You downloaded your data in HTML format, but this tool requires JSON format to work.",
-        "fix": "Go back to Instagram Settings → Download Your Data → Select \"JSON\" format (not HTML) → Request download again."
+        "fix": "Go back to Meta Accounts Center → Create export → Export to device → set the format to \"JSON\" (not HTML) → start the export again."
       },
       "NOT_INSTAGRAM_EXPORT": {
         "title": "Not an Instagram Export",
         "message": "This ZIP file doesn't appear to be an Instagram data export.",
-        "fix": "Make sure you're uploading the ZIP file from Instagram's \"Download Your Data\" feature, not a random ZIP file."
+        "fix": "Make sure you’re uploading the ZIP file from \"Create export\" in Meta Accounts Center, not a random ZIP file."
       },
       "INCOMPLETE_EXPORT": {
         "title": "Incomplete Export",
@@ -84,7 +84,7 @@
       "ZIP_ENCRYPTED": {
         "title": "Password-Protected ZIP",
         "message": "The ZIP file is password-protected, but Instagram exports are not encrypted.",
-        "fix": "This may not be a valid Instagram data export. Request a new export from Instagram Settings."
+        "fix": "This may not be a valid Instagram data export. Request a new one from Meta Accounts Center."
       },
       "EMPTY_FILE": {
         "title": "Empty File",
@@ -166,7 +166,7 @@
   "formatWarning": "Make sure you selected JSON (not HTML) when requesting your data export.",
   "waiting": {
     "title": "Waiting for Instagram...",
-    "description": "Instagram is preparing your data export. You'll receive an email within 48 hours (usually much faster!).",
+    "description": "Instagram is preparing your data export. Most arrive by email in 5–30 minutes; large accounts can take a few hours.",
     "addReminder": "Add Reminder to Calendar",
     "reminderHint": "Remind me to check in 2 days",
     "calendarTitle": "Check Instagram Export Email",

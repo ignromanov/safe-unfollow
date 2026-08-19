@@ -8,11 +8,11 @@
   "steps": {
     "1": {
       "title": "Instagram Dışa Aktarma Sayfasını Aç",
-      "description": "Meta Hesap Merkezi'ni açmak için butona tıkla. Ardından \"Dışa aktarma oluştur\" seçeneğine tıkla."
+      "description": "Meta Hesaplar Merkezi'ni açmak için butona tıkla. Ardından \"Dışa aktarma oluştur\" seçeneğine tıkla."
     },
     "2": {
       "title": "Instagram Profilini Seç",
-      "description": "Hesap Merkezi'ndeki bağlı profiller listesinden Instagram hesabını seç."
+      "description": "Hesaplar Merkezi'ndeki bağlı profiller listesinden Instagram hesabını seç."
     },
     "3": {
       "title": "\"Cihaza dışa aktar\" Seç",
@@ -45,7 +45,7 @@
   },
   "cta": {
     "title": "Başlamaya hazır mısın?",
-    "subtitle": "Veri dışa aktarımını saniyeler içinde gizlice analiz et.",
+    "subtitle": "Veri dışa aktarımını tarayıcından çıkmadan, gizlilik içinde analiz et.",
     "button": "Analiz Rehberini Aç"
   },
   "schema": {
