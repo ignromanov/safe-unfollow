@@ -37,7 +37,7 @@
     "deleteData": "データを削除"
   },
   "footer": {
-    "description": "100%ブラウザ内で動作する唯一の分析ツール。サーバーなし、ログなし、あなたのデータとデバイスだけ。",
+    "description": "100%ブラウザ内で動作する唯一の分析ツール。Instagramのエクスポートは端末上で読み込まれ、そのまま端末に留まります。",
     "privacyPolicy": "プライバシーポリシー",
     "termsOfService": "利用規約",
     "contact": "お問い合わせ",
@@ -56,7 +56,7 @@
     "license": "MITライセンス",
     "viewSource": "ソースコード",
     "analyzedCount": "{{count}}アカウントを分析しました。無料でした。",
-    "noAdsNoInvestors": "このツールには広告も投資家もいません。",
+    "exportNeverLeavesBrowser": "Instagramのエクスポートはこのブラウザから出ません。",
     "buyACoffee": "コーヒーを贈る"
   },
   "nav": {
@@ -71,7 +71,7 @@
     "subtitle": "アカウントを危険にさらさずにフォロワーを追跡する何千人ものユーザーに参加しましょう。",
     "getStarted": "始める",
     "trySample": "デモを試す",
-    "tagline": "100%無料 • ログイン不要 • プライバシー保証"
+    "tagline": "分析は無料 • ログイン不要 • プライバシー優先"
   },
   "ads": {
     "label": "広告"

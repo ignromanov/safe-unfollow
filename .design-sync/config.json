@@ -1,0 +1,185 @@
+{
+  "pkg": "safe-unfollow",
+  "globalName": "SafeUnfollow",
+  "projectId": "5e633d36-642a-4605-8000-3ecc1eecb00c",
+  "shape": "package",
+  "srcDir": "src/components",
+  "tsconfig": "tsconfig.json",
+  "cssEntry": ".design-sync/.cache/app-compiled.css",
+  "extraFonts": [".design-sync/.cache/fonts-alias.css"],
+  "extraEntries": ["./.design-sync/ds-providers.tsx"],
+  "provider": {
+    "component": "DsPreviewProvider"
+  },
+  "libOverrides": {
+    "dts.mjs": "no barrel index.d.ts in this app repo — propsBodyFor's fallback found no exports, emptying all 63 shadcn/ui primitive contracts"
+  },
+  "overrides": {
+    "AlertDialog": {
+      "cardMode": "single"
+    },
+    "AlertDialogAction": {
+      "cardMode": "single"
+    },
+    "AlertDialogCancel": {
+      "cardMode": "single"
+    },
+    "AlertDialogContent": {
+      "cardMode": "single"
+    },
+    "AlertDialogDescription": {
+      "cardMode": "single"
+    },
+    "AlertDialogFooter": {
+      "cardMode": "single"
+    },
+    "AlertDialogHeader": {
+      "cardMode": "single"
+    },
+    "AlertDialogOverlay": {
+      "cardMode": "single"
+    },
+    "AlertDialogPortal": {
+      "cardMode": "single"
+    },
+    "AlertDialogTitle": {
+      "cardMode": "single"
+    },
+    "AlertDialogTrigger": {
+      "viewport": "900x260"
+    },
+    "Dialog": {
+      "cardMode": "single"
+    },
+    "DialogClose": {
+      "cardMode": "single"
+    },
+    "DialogContent": {
+      "cardMode": "single"
+    },
+    "DialogDescription": {
+      "cardMode": "single"
+    },
+    "DialogFooter": {
+      "cardMode": "single"
+    },
+    "DialogHeader": {
+      "cardMode": "single"
+    },
+    "DialogOverlay": {
+      "cardMode": "single"
+    },
+    "DialogPortal": {
+      "cardMode": "single"
+    },
+    "DialogTitle": {
+      "cardMode": "single"
+    },
+    "DropdownMenu": {
+      "cardMode": "single"
+    },
+    "DropdownMenuCheckboxItem": {
+      "cardMode": "single"
+    },
+    "DropdownMenuContent": {
+      "cardMode": "single"
+    },
+    "DropdownMenuGroup": {
+      "cardMode": "single"
+    },
+    "DropdownMenuItem": {
+      "cardMode": "single"
+    },
+    "DropdownMenuLabel": {
+      "cardMode": "single"
+    },
+    "DropdownMenuPortal": {
+      "cardMode": "single"
+    },
+    "DropdownMenuRadioGroup": {
+      "cardMode": "single"
+    },
+    "DropdownMenuRadioItem": {
+      "cardMode": "single"
+    },
+    "DropdownMenuSeparator": {
+      "cardMode": "single"
+    },
+    "DropdownMenuShortcut": {
+      "cardMode": "single"
+    },
+    "DropdownMenuSub": {
+      "cardMode": "single"
+    },
+    "DropdownMenuSubContent": {
+      "cardMode": "single"
+    },
+    "DropdownMenuSubTrigger": {
+      "cardMode": "single"
+    },
+    "DropdownMenuTrigger": {
+      "cardMode": "single"
+    },
+    "ErrorBoundary": {
+      "viewport": "900x950"
+    },
+    "FAQSection": {
+      "cardMode": "column"
+    },
+    "FooterCTA": {
+      "viewport": "900x900"
+    },
+    "Hero": {
+      "cardMode": "column"
+    },
+    "HowToSection": {
+      "cardMode": "column"
+    },
+    "PrivacyPolicy": {
+      "cardMode": "column"
+    },
+    "StatCard": {
+      "cardMode": "column"
+    },
+    "TabsList": {
+      "cardMode": "column"
+    },
+    "TermsOfService": {
+      "cardMode": "column"
+    },
+    "UploadZone": {
+      "cardMode": "single",
+      "primaryStory": "Default"
+    },
+    "ExportDialog": {
+      "cardMode": "single",
+      "primaryStory": "Default"
+    },
+    "LicenseDialog": {
+      "cardMode": "single",
+      "primaryStory": "ManualEntry"
+    },
+    "PaywallModal": {
+      "cardMode": "single",
+      "primaryStory": "Default"
+    },
+    "Footer": {
+      "cardMode": "column"
+    },
+    "Header": {
+      "cardMode": "column"
+    },
+    "ExpandedBanner": {
+      "cardMode": "column"
+    },
+    "ResultsSkeleton": {
+      "viewport": "900x1060",
+      "cardMode": "column"
+    },
+    "LicenseDialogMount": {
+      "cardMode": "single",
+      "primaryStory": "Default"
+    }
+  },
+  "readmeHeader": ".design-sync/conventions.md"
+}

@@ -6,7 +6,7 @@
 
 ## Overview
 
-This document describes the filter optimization architecture implemented to handle massive datasets (1M+ accounts) with **sub-5ms filter latency**. The v1.0 architecture is built on IndexedDB with columnar storage and eliminates in-memory constraints.
+This document describes the filter optimization architecture implemented to handle massive datasets (1M+ accounts). Sub-5ms filter latency is the **design target** it was built against — see "Performance Results → Provenance" below for what is actually measured, which is less than this document used to imply. The v1.0 architecture is built on IndexedDB with columnar storage and eliminates in-memory constraints.
 
 ## Key Technologies
 
@@ -47,7 +47,7 @@ The previous implementation had significant limitations:
 │ Parse Worker (background)                                    │
 │   ├─→ Parse ZIP file                                        │
 │   ├─→ Build AccountBadges                                   │
-│   └─→ Chunked Ingestion (10k/chunk)                         │
+│   └─→ storeAllAccounts() — one bulk write                   │
 │       ↓                                                      │
 │ IndexedDB v2                                                 │
 │   ├─→ files: metadata (hash, count, date)                   │
@@ -349,6 +349,23 @@ const virtualizer = useVirtualizer({
 
 ## Performance Results (v1.0)
 
+> **Provenance — read before quoting any number below.** Audited 2026-08-14 against commit
+> `8380b0d`. These figures are a **historical record of the v0.3 → v1.0 migration**, not a
+> live measurement of current code, and the repository contains no artifact that reproduces
+> them. Specifically:
+>
+> | Number                                              | What backs it                                                                                                                                                                                                                                           |
+> | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+> | The `Real-World Benchmarks` table (M1 / Chrome 120) | A manual measurement taken once. No script, CI job or committed report reproduces it. It may well be accurate; it is not re-runnable.                                                                                                                   |
+> | `32x`                                               | `src/__tests__/performance/filter-optimization.test.ts` — asserts `n / ceil(n/32) > 30`. An arithmetic identity. That file imports only vitest and a type and never calls the filter engine, so it proves the complexity class, not the implementation. |
+> | `40x`, `75x`, `25x`, `3000x`                        | No derivation exists anywhere in the repository, in source or in tests.                                                                                                                                                                                 |
+> | "filter <5ms at 1M"                                 | The only 1M-scale test (`src/__tests__/lib/filtering/IndexedDBFilterEngine.test.ts`) mocks the entire IndexedDB layer and asserts `duration < 500ms`. It measures in-memory bitset iteration, not storage.                                              |
+>
+> There is no benchmark harness: no perf step in `.github/workflows/`, and `npm run test:performance`
+> is a plain `vitest run`. **Treat every figure here as a design target or a historical note.**
+> Do not restate one as "achieved" or "measured" in another document, and do not put one in
+> user-facing copy without measuring it first.
+
 ### Storage (1M accounts)
 
 | Component        | Legacy v0.3 | IndexedDB v1.0 | Improvement     |
@@ -389,28 +406,24 @@ const virtualizer = useVirtualizer({
 
 ## Implementation Details
 
-### Chunked Ingestion
+### Ingestion — one bulk write, not chunks
+
+This section used to show a `CHUNK_SIZE = 10000` loop calling `appendAccountsChunk`.
+**That loop does not exist and never ran.** Corrected 2026-08-14 against commit `8380b0d`.
 
 ```typescript
-// Parse worker
-const CHUNK_SIZE = 10000; // Optimized for 1M+ datasets
-
-for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
-  const startIndex = chunkIndex * CHUNK_SIZE;
-  const endIndex = Math.min(startIndex + CHUNK_SIZE, unified.length);
-  const chunk = unified.slice(startIndex, endIndex);
-
-  await indexedDBService.appendAccountsChunk(fileHash, chunk, startIndex);
-
-  // Report progress
-  self.postMessage({
-    type: 'progress',
-    progress: ((chunkIndex + 1) / totalChunks) * 100,
-    processedCount: endIndex,
-    totalCount: unified.length,
-  });
-}
+// src/lib/parse-worker.ts — also parse-orchestration.ts and sample-data.ts
+await indexedDBService.storeAllAccounts(fileHash, unified);
 ```
+
+`storeAllAccounts` builds every column in a single pass and commits one transaction.
+`appendAccountsChunk` still exists on `IndexedDBService`, but it has **zero production
+callers on any branch**: the only thing naming it is `indexeddb-cache.ts`'s deprecated
+`set()`, whose body prints a warning telling you to use it and then returns without
+calling it. Do not wire new code into it expecting the flow described here.
+
+There is no account-batching constant anywhere. The only `10_000` in the parse pipeline
+is `MAX_ZIP_ENTRIES` (`src/core/parsers/instagram.ts`), a cap on ZIP entry count.
 
 ### Filter Engine
 

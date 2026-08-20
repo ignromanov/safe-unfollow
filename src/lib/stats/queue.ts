@@ -74,7 +74,7 @@ export function flushEvents(): void {
   const batch = queue;
   queue = [];
 
-  const endpoint = `${target.origin}/api/batch`;
+  const endpoint = `${target.baseUrl}/api/batch`;
   const body = JSON.stringify(
     batch.map(event => ({
       type: 'event',
@@ -89,22 +89,46 @@ export function flushEvents(): void {
     }))
   );
 
-  try {
-    // Returns false synchronously when the user-agent queue is full. It neither
-    // throws nor retries, so the boolean is the only failure signal there is.
-    if (navigator.sendBeacon?.(endpoint, new Blob([body], { type: 'application/json' }))) {
-      return;
-    }
-  } catch {
-    // Fall through to fetch.
-  }
-
+  // sendBeacon is not used here: the Beacon spec forces credentials mode
+  // 'include' with no way to opt out, and the Umami endpoint answers
+  // cross-origin requests with `Access-Control-Allow-Origin: *` — invalid for
+  // a credentialed request, so the browser silently drops the delivery while
+  // sendBeacon still reports success.
+  //
+  // `credentials: 'omit'` is stated rather than left to fetch's 'same-origin'
+  // default, which only behaves as omitted while the instance stays on another
+  // origin (GH#63 tracks making that host configurable). `keepalive` keeps the
+  // request alive across unload. This is what Umami's own tracker sends.
   void fetch(endpoint, {
     method: 'POST',
     body,
     keepalive: true,
+    credentials: 'omit',
     headers: { 'Content-Type': 'application/json' },
   }).catch(() => {
     // Analytics must never break the app.
   });
+}
+
+/**
+ * Deliver one event immediately, over a request the navigation cannot cancel.
+ *
+ * For the two events that precede a SAME-TAB navigation — `checkout_start`
+ * before `location.href = checkoutUrl`, `language_change` before the full
+ * reload that fetches the new locale's SSG HTML. Both announce the thing that
+ * kills them.
+ *
+ * `trackEvent` is wrong here twice over: `window.umami.track()` sends without
+ * `keepalive`, so a fast redirect cancels the request, and it is gated on the
+ * script having executed rather than on the tag being present. `trackBeacon`
+ * fixes the first but not the second (core.ts). This path is gated only on the
+ * DOM (`resolveUmamiTarget()` above), so it divides the same population as the
+ * batched impressions it will be compared against.
+ *
+ * Not for `target="_blank"` clicks: a new browsing context does not unload this
+ * page, so those keep `trackEvent` and stay out of the queue.
+ */
+export function trackNavigating(name: AnalyticsEventName, data?: EventData): void {
+  enqueueEvent(name, data);
+  flushEvents();
 }

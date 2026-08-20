@@ -1,37 +1,37 @@
 {
-  "title": "Instagram Unfollow — Gratis Tanpa Login | SafeUnfollow",
-  "description": "Cek siapa yang berhenti mengikuti Anda di Instagram tanpa login. Upload ZIP, lihat hasilnya langsung. 100% gratis, privat, mendukung 1 juta+ akun. Berfungsi offline.",
-  "ogTitle": "Instagram Unfollow — Gratis Tanpa Login",
-  "twitterDescription": "Cek siapa yang unfollow di Instagram tanpa login. Upload ZIP, lihat unfollowers. 100% gratis, 1 juta+ akun. Berfungsi offline.",
+  "title": "Cek Unfollowers Instagram Gratis: Upload ZIP, Tanpa Login",
+  "description": "Cek siapa yang unfollow Anda di Instagram tanpa login. Upload ekspor data resmi Instagram: analisisnya berjalan di dalam browser Anda. Gratis, tanpa aplikasi.",
+  "ogTitle": "Cek Unfollowers Instagram Gratis: Upload ZIP, Tanpa Login",
+  "twitterDescription": "Cek siapa yang unfollow Anda di Instagram tanpa login. Upload file ZIP: analisisnya berjalan di browser Anda dan ekspornya tidak pernah keluar. Gratis.",
   "keywords": "instagram unfollow, siapa yang unfollow instagram, unfollow tracker indonesia, instagram zip analyzer, cek unfollow tanpa login",
   "routes": {
     "/upload": {
-      "title": "Upload ZIP Instagram — Analisis Gratis | SafeUnfollow",
-      "description": "Upload ekspor data Instagram (ZIP) untuk analisis gratis. Pemrosesan 100% lokal di perangkat Anda, tanpa login, tanpa password. Mendukung jutaan akun.",
-      "ogTitle": "Upload ZIP Instagram — Analisis Gratis"
+      "title": "Upload File ZIP Instagram: Analisis Unfollowers Gratis",
+      "description": "Upload ekspor data Instagram (ZIP) untuk analisis unfollowers gratis. Tanpa login dan tanpa password: file dibaca di browser Anda dan tetap di perangkat.",
+      "ogTitle": "Upload File ZIP Instagram: Analisis Unfollowers Gratis"
     },
     "/wizard": {
-      "title": "Cara Download Data Instagram (JSON) — Panduan | SafeUnfollow",
-      "description": "Panduan langkah demi langkah untuk download data Instagram sebagai JSON. Pelajari cara meminta ekspor data dari Meta untuk analisis gratis dan aman.",
-      "ogTitle": "Cara Download Data Instagram (JSON) — Panduan"
+      "title": "Cara Download Data Instagram Anda dalam Format JSON",
+      "description": "Panduan langkah demi langkah untuk download data Instagram sebagai JSON. Pelajari cara meminta ekspor data dari Meta, gratis dan tanpa aplikasi tambahan.",
+      "ogTitle": "Cara Download Data Instagram Anda dalam Format JSON"
     },
     "/sample": {
-      "title": "Coba Instagram Unfollow Tracker — Demo Gratis | SafeUnfollow",
-      "description": "Coba Instagram Unfollow Tracker dengan data sampel. Lihat badge, filter, dan pencarian.",
-      "ogTitle": "Coba Instagram Unfollow Tracker — Demo Gratis"
+      "title": "Coba Instagram Unfollow Tracker: Demo Gratis Tanpa Upload",
+      "description": "Coba Instagram Unfollow Tracker dengan data sampel. Lihat cara kerja lencana, filter, dan pencarian tanpa perlu mengunggah apa pun. Demo gratis, tanpa login.",
+      "ogTitle": "Coba Instagram Unfollow Tracker: Demo Gratis Tanpa Upload"
     },
     "/privacy": {
-      "title": "Kebijakan Privasi — Data Tidak Keluar dari Perangkat | SafeUnfollow",
-      "description": "Kebijakan privasi SafeUnfollow. Pemrosesan 100% lokal, tanpa pengumpulan data, tanpa pelacakan. Data Anda tidak pernah meninggalkan browser Anda.",
-      "ogTitle": "Kebijakan Privasi — Data Tidak Keluar dari Perangkat"
+      "title": "Kebijakan Privasi: Ekspor Anda Tidak Keluar dari Perangkat",
+      "description": "Kebijakan privasi SafeUnfollow: apa yang sampai ke kami dan apa yang tidak. Ekspor Instagram Anda dibaca di dalam browser dan tetap di perangkat Anda.",
+      "ogTitle": "Kebijakan Privasi: Ekspor Anda Tidak Keluar dari Perangkat"
     },
     "/results": {
-      "title": "Hasil Instagram Anda | SafeUnfollow",
-      "description": "Lihat hasil analisis unfollow Instagram Anda. Filter berdasarkan lencana dan cari akun.",
+      "title": "Hasil Unfollow Instagram Anda",
+      "description": "Lihat hasil analisis unfollowers Instagram Anda. Filter berdasarkan lencana, cari akun mana pun, dan lihat siapa saja yang tidak follow back atau mutual.",
       "ogTitle": "Hasil Unfollow Instagram Anda"
     },
     "/terms": {
-      "title": "Ketentuan Layanan | SafeUnfollow",
+      "title": "Ketentuan Layanan",
       "description": "Ketentuan layanan SafeUnfollow. Pelacak unfollow Instagram gratis dan open-source dengan pemrosesan lokal 100%.",
       "ogTitle": "Ketentuan Layanan"
     }

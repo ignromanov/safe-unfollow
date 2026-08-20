@@ -1,6 +1,12 @@
 {
   "header": {
-    "stepOf": "Adım {{current}} / {{total}}"
+    "ariaLabel": "Instagram veri dışa aktarma sihirbazı",
+    "stepOf": "Adım {{current}} / {{total}}",
+    "stepNavigation": "Adım gezinmesi",
+    "stepLabel": "Adım {{step}}"
+  },
+  "footer": {
+    "navigation": "Sihirbaz eylemleri"
   },
   "calendar": {
     "addReminder": "Takvime hatırlatıcı ekle",
@@ -11,29 +17,50 @@
     "back": "Geri",
     "next": "Sonraki Adım",
     "done": "Tamam, başlayalım!",
-    "openInstagram": "Dışa aktarma sayfasını aç",
     "close": "Rehberi kapat",
+    "cancel": "İptal",
+    "trySample": "Örnek verilerle deneyin",
     "uploadFile": "Dosyamı Yükle",
     "alreadyHaveFile": "ZIP dosyam zaten var"
   },
   "format": {
     "warning": "KRİTİK ADIM"
   },
-  "steps": {
-    "1": {
-      "title": "Instagram Dışa Aktarma Sayfasını Aç",
-      "description": "Meta Hesap Merkezi'ni açmak için aşağıdaki butona tıkla. Ardından \"Dışa aktarma oluştur\" seçeneğine tıkla.",
-      "alt": "Adım 1: Dışa aktarma sayfasını aç ve Dışa aktarma oluştur'a tıkla"
+  "entry": {
+    "title": "Önce dosyanı Instagram'dan iste.",
+    "timeCost": {
+      "ours": "İstemek yaklaşık 2 dakika sürer.",
+      "theirs": "Instagram dosyayı sonra e-postayla gönderir — bekleyen onlar, biz değil."
     },
+    "cta": "Hesaplar Merkezi'ni aç",
+    "trust": {
+      "noLogin": "Giriş yok. Şifre yok. Bağlanacak hiçbir şey yok.",
+      "local": "Dışa aktarımın bu tarayıcıda okunur ve asla yüklenmez."
+    },
+    "recipe": {
+      "title": "Instagram iletişim kutusunda ne seçilmeli",
+      "rows": {
+        "destination": "Cihaza aktar",
+        "range": "Tüm zamanlar",
+        "format": "JSON — HTML değil",
+        "quality": "Herhangi bir medya kalitesi",
+        "content": "Takipçiler ve takip edilenler"
+      }
+    },
+    "accordion": {
+      "trigger": "Adım adım rehber — {{count}} adım"
+    }
+  },
+  "steps": {
     "2": {
       "title": "Instagram Profilini Seç",
       "description": "Bağlı profiller listesinden Instagram hesabını seç.",
       "alt": "Adım 2: Instagram profilini seç"
     },
     "3": {
-      "title": "\"Cihaza dışa aktar\" Seç",
+      "title": "\"Cihaza aktar\" Seç",
       "description": "Maksimum gizlilik için doğrudan cihazına dışa aktar. Verilerin seninle kalır.",
-      "alt": "Adım 3: Cihaza dışa aktar seçeneğini seç"
+      "alt": "Adım 3: Cihaza aktar seçeneğini seç"
     },
     "4": {
       "title": "⚠️ Sadece \"Takipçiler ve takip edilenler\" Seç",

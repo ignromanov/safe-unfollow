@@ -129,7 +129,7 @@ export function ResultsExportControls({
       analytics.freeExportDownload(capped);
 
       if (capped) {
-        analytics.paywallView();
+        analytics.paywallView(i18n.language, rowCount);
         setIsPaywallOpen(true);
       }
     } catch {
@@ -160,8 +160,10 @@ export function ResultsExportControls({
   // `setIsPaywallOpen` directly rather than through this handler, so neither
   // purchase path is at risk of also counting as a dismiss.
   const handlePaywallOpenChange = (open: boolean): void => {
-    if (!open) {
-      analytics.paywallDismiss();
+    // `saved` is what the modal's headline counts, so it is what the dismiss
+    // reports; no `saved` means no modal, and therefore nothing to dismiss.
+    if (!open && saved) {
+      analytics.paywallDismiss(i18n.language, saved.total);
     }
     setIsPaywallOpen(open);
   };
@@ -246,7 +248,7 @@ export function ResultsExportControls({
           <PaywallModal
             open={isPaywallOpen}
             onOpenChange={handlePaywallOpenChange}
-            onCheckout={startCheckout}
+            onCheckout={() => startCheckout(i18n.language, saved.total)}
             onManualEntry={openLicenseDialog}
             savedFilename={saved.filename}
             totalRows={saved.total}

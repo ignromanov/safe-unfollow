@@ -33,7 +33,8 @@
     "reset": "Réinitialiser",
     "emptyCategories": "Catégories vides ({{count, number}})",
     "addFilter": "Ajouter le filtre {{label}} ({{count, number}} comptes)",
-    "removeFilter": "Retirer le filtre {{label}} ({{count, number}} comptes)"
+    "removeFilter": "Retirer le filtre {{label}} ({{count, number}} comptes)",
+    "chipWithHint": "{{label}} — {{hint}}"
   },
   "badges": {
     "followers": "Abonnés",
@@ -48,6 +49,25 @@
     "close": "Ami proche",
     "dismissed": "Suggestion ignorée"
   },
+  "caveat": {
+    "followRequests": {
+      "title": "« Ne vous suivent pas » est peut-être surestimé.",
+      "body": "Nous n’avons pas pu lire votre fichier de demandes d’abonnement : les comptes à qui vous avez envoyé une demande peuvent apparaître dans cette liste, et vos compteurs de demandes en attente sont vides. Abonnés, Abonnements et Mutuels ne sont pas affectés.",
+      "chipHint": "Peut-être surestimé — nous n’avons pas pu lire votre fichier de demandes d’abonnement."
+    },
+    "truncated": {
+      "followers": {
+        "title": "Votre liste d'abonnés semble incomplète.",
+        "body": "Elle commence bien après votre liste d'abonnements, ce qui arrive lorsqu'un export est demandé sur une plage de dates limitée. Si vous en avez choisi une, redemandez vos données à Instagram en réglant la plage de dates sur « Tout ». Les compteurs signalés ci-dessous sont affectés : certains sont trop élevés, d'autres trop bas.",
+        "chipHint": "Calculé à partir d'une liste d'abonnés qui semble incomplète."
+      },
+      "following": {
+        "title": "Votre liste d'abonnements semble incomplète.",
+        "body": "Elle commence bien après votre liste d'abonnés, ce qui arrive lorsqu'un export est demandé sur une plage de dates limitée. Si vous en avez choisi une, redemandez vos données à Instagram en réglant la plage de dates sur « Tout ». Les compteurs signalés ci-dessous sont affectés : certains sont trop élevés, d'autres trop bas.",
+        "chipHint": "Calculé à partir d'une liste d'abonnements qui semble incomplète."
+      }
+    }
+  },
   "empty": {
     "noUsers": "Aucun utilisateur trouvé",
     "resetFilters": "Réinitialiser les filtres"
@@ -58,9 +78,9 @@
   },
   "donation": {
     "headline": "Vous venez d'analyser {{count}} comptes — gratuitement.",
-    "body": "Pas de connexion. Pas de serveur. Aucune donnée envoyée. Si ça vous a fait gagner du temps, un café maintient le projet.",
-    "headlineMobile": "Gratuit. Privé. Sans connexion.",
-    "bodyMobile": "Si c'était utile, offrez un café.",
+    "body": "Pas de connexion. Votre export Instagram n'a jamais quitté ce navigateur. Si ça vous a fait gagner du temps, un café maintient le projet.",
+    "headlineMobile": "Analyse gratuite. Privé. Sans connexion.",
+    "bodyMobile": "Votre export n'a jamais quitté le navigateur. Si c'était utile, offrez un café.",
     "cta": "Offrir un Café",
     "ctaMobile": "Soutenir",
     "dismiss": "Pas maintenant"
@@ -107,7 +127,7 @@
     "dismiss": "Peut-être plus tard",
     "disclaimer": "Outils sélectionnés que nous recommandons. Les liens d'affiliation financent les mises à jour gratuites — sans coût pour vous.",
     "urgency": {
-      "critical": "Agissez maintenant — l'engagement chute de 40% après 48 heures",
+      "critical": "Agissez maintenant — plus vous attendez, plus la reconstruction est difficile",
       "warning": "Agir tôt prévient de plus grandes pertes — optimisez maintenant"
     },
     "ariaLabel": "Outils recommandés pour améliorer votre présence sur Instagram",
@@ -123,7 +143,7 @@
       "freeTrial14": "Essai gratuit 14 jours",
       "freePlan": "Plan gratuit disponible",
       "freeContacts": "Gratuit jusqu'à 1K contacts",
-      "freeForever": "Gratuit pour toujours"
+      "freeForever": "Gratuit, sans expiration"
     },
     "social": {
       "creators50k": "50K+ créateurs",

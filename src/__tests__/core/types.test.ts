@@ -96,6 +96,18 @@ describe('Diagnostic Error Mapping', () => {
       expect(mapWarningToDiagnosticCode('MISSING_FOLLOWERS')).toBe('MISSING_FOLLOWERS');
     });
 
+    it('never tells a reader with an intact export to re-download it (GH#21 Task 3)', () => {
+      // These two fire when the ZIP is fine and we are the ones who cannot read
+      // it. Left unmapped they fall through to UNKNOWN, whose fix is "Try
+      // uploading the file again... make sure the ZIP file is not corrupted" —
+      // advice that is false here and costs the reader a days-long re-export.
+      for (const code of ['UNRESOLVED_ENTRIES_FOLLOWING', 'UNRESOLVED_ENTRIES_FOLLOWERS']) {
+        const mapped = mapWarningToDiagnosticCode(code);
+        expect(mapped).toBe('INVALID_DATA_STRUCTURE');
+        expect(createDiagnosticError(mapped).fix).not.toMatch(/again|corrupt/i);
+      }
+    });
+
     it('should return UNKNOWN for unmapped codes', () => {
       expect(mapWarningToDiagnosticCode('SOME_RANDOM_CODE')).toBe('UNKNOWN');
       expect(mapWarningToDiagnosticCode('NOT_MAPPED')).toBe('UNKNOWN');
@@ -268,11 +280,20 @@ describe('Diagnostic Error Mapping', () => {
         expect(error.message).toContain('0 bytes');
       });
 
-      it('should have correct details for FILE_TOO_LARGE', () => {
+      it('does not advise a desktop browser, which never helped', () => {
+        const error = createDiagnosticError('FILE_TOO_LARGE');
+
+        // The ceiling was a constant, so a machine with 64GB was rejected at
+        // 501MB exactly like a phone. The advice never worked for anyone.
+        expect(error.fix.toLowerCase()).not.toContain('desktop');
+        expect(error.fix.toLowerCase()).not.toContain('memory');
+      });
+
+      it('does not quote a limit that no longer exists', () => {
         const error = createDiagnosticError('FILE_TOO_LARGE');
 
         expect(error.title).toBe('File Too Large');
-        expect(error.message).toContain('500MB');
+        expect(error.message).not.toContain('500');
       });
 
       it('should have correct details for JSON_PARSE_ERROR', () => {

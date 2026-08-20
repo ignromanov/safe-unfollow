@@ -37,7 +37,7 @@
     "deleteData": "Verileri Sil"
   },
   "footer": {
-    "description": "Tamamen tarayıcında çalışan tek ilişki analizörü. Sunucu yok, kayıt yok, sadece senin verin ve cihazın.",
+    "description": "Tamamen tarayıcında çalışan tek ilişki analizörü. Instagram dışa aktarman cihazında okunur ve orada kalır.",
     "privacyPolicy": "Gizlilik Politikası",
     "termsOfService": "Kullanım Koşulları",
     "contact": "İletişim",
@@ -55,8 +55,8 @@
     "copyright": "© 2026 SafeUnfollow.app",
     "license": "MIT Lisanslı",
     "viewSource": "Kaynak Kodu",
-    "analyzedCount": "{{count}} hesabı analiz ettiniz. Ücretsizdi.",
-    "noAdsNoInvestors": "Bu araçta reklam veya yatırımcı yok.",
+    "analyzedCount": "{{count}} hesabı analiz ettin. Ücretsizdi.",
+    "exportNeverLeavesBrowser": "Instagram dışa aktarman bu tarayıcıdan asla çıkmaz.",
     "buyACoffee": "Kahve Ismarla"
   },
   "nav": {
@@ -71,7 +71,7 @@
     "subtitle": "Hesaplarını riske atmadan takipçilerini izleyen binlerce kullanıcıya katıl.",
     "getStarted": "Başla",
     "trySample": "Demo Dene",
-    "tagline": "100% Ücretsiz • Giriş Yok • Gizlilik Garantili"
+    "tagline": "Analiz Ücretsiz • Giriş Yok • Önce Gizlilik"
   },
   "ads": {
     "label": "Reklam"

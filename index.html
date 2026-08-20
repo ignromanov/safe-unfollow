@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content, viewport-fit=cover" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content, viewport-fit=cover"
+    />
 
     <!-- Resource hint for the BMC widget. DNS only, deliberately not a
          preconnect: this head is shared by all 88 prerendered pages, but the
@@ -10,7 +13,6 @@
          open a TCP+TLS socket on every other page that goes unused and gets
          closed. Google's ad origin gets no hint at all: AdSlot requests a fill
          only once the reader scrolls near it, long after the critical path. -->
-    <link rel="dns-prefetch" href="https://cdnjs.buymeacoffee.com" />
 
     <!-- Font preload: critical latin-normal subsets loaded BEFORE CSS parse.
          Paths reference @fontsource-variable source files; Vite resolves them at build time
@@ -19,10 +21,10 @@
 
     <!-- CRITICAL: Language redirect MUST be first script - before any other resources load -->
     <script>
-      (function() {
+      (function () {
         var STORE_KEY = 'unfollow-radar-store';
         // SYNC with src/config/languages.ts NON_ENGLISH_LANGUAGES
-        var NON_EN_LANGS = ['ar','de','es','fr','id','ja','pt','ru','tr'];
+        var NON_EN_LANGS = ['ar', 'de', 'es', 'fr', 'id', 'ja', 'pt', 'ru', 'tr'];
 
         // Skip if path already has language prefix
         var path = location.pathname;
@@ -32,8 +34,12 @@
         }
 
         try {
-          // Check if user has explicit language preference (from store)
-          // This is set by LanguageSwitcher via persistLanguageSync()
+          // Only an explicit language preference redirects (set by LanguageSwitcher via
+          // persistLanguageSync()). A first visit with no stored choice stays on the
+          // English path it asked for - guessing the browser's language cost a full
+          // second document load (Google also advises against this: "Avoid automatically
+          // redirecting users from one language version of a site to a different language
+          // version of a site").
           var store = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
           var storedLang = store.state && store.state.language;
 
@@ -43,13 +49,6 @@
               location.href = '/' + storedLang + path + location.search + location.hash;
             }
             // storedLang is 'en' - stay on English path
-            return;
-          }
-
-          // No stored preference - first visit, detect browser language
-          var browserLang = (navigator.language || '').split('-')[0].toLowerCase();
-          if (browserLang && browserLang !== 'en' && NON_EN_LANGS.indexOf(browserLang) !== -1) {
-            location.href = '/' + browserLang + path + location.search + location.hash;
           }
         } catch (e) {
           // localStorage unavailable (private mode) - continue with English
@@ -57,13 +56,95 @@
       })();
     </script>
 
+    <!-- GH#99 — records a hero CTA click before React exists.
+         PrefixedLink renders a real <a href> so a prerendered page can be navigated
+         during the hydration window; React's onClick does not exist in that window, so
+         the click was lost twice — the event, and the session's entry_cta, which is
+         first-wins and so fell to whatever the reader clicked next.
+
+         Capture phase, and it must stay there: bubble puts it behind any
+         stopPropagation and behind React's own root listener.
+
+         Pre-hydration the click is a full document navigation, so an in-memory queue
+         would die with this page — sessionStorage is what survives it. Once the app is
+         up it installs __ctaSink and takes the click directly; there is exactly one
+         recorder either way, which is why Hero.tsx carries no onClick.
+
+         Contract pinned by src/__tests__/index-html.test.ts. -->
+    <script>
+      (function () {
+        // SYNC with src/lib/stats/cta-capture.ts PENDING_CTA_KEY
+        var PENDING_KEY = 'analytics_pending_cta';
+        // SYNC with src/lib/stats/constants.ts TRACKING_OPT_OUT_KEY
+        var OPT_OUT_KEY = 'umami-opt-out';
+
+        document.addEventListener(
+          'click',
+          function (event) {
+            var target = event.target;
+            if (!target || typeof target.closest !== 'function') return;
+            var anchor = target.closest('[data-cta]');
+            if (!anchor) return;
+            var cta = anchor.getAttribute('data-cta');
+            if (!cta) return;
+
+            try {
+              if (localStorage.getItem(OPT_OUT_KEY) === 'true') return;
+              if (typeof window.__ctaSink === 'function') {
+                window.__ctaSink(cta);
+                return;
+              }
+              sessionStorage.setItem(PENDING_KEY, JSON.stringify({ c: cta, p: location.pathname }));
+            } catch (error) {
+              // Storage disabled or full. A lost CTA click must not break navigation.
+            }
+          },
+          true
+        );
+      })();
+    </script>
+
+    <!-- GH#36 — hands vite-react-ssg an empty loader-data manifest so it never
+         fetches one. The manifest filename is hashed with Math.random() rather
+         than content, so every deploy orphans the previous one and a page served
+         from the service worker's cache requests a file that is gone; the injected
+         loader calls .json() on the 404's HTML body with no guard, and the
+         rejection lands on errorElement. {} is exact rather than a stub: no route
+         declares a loader, so every value it would have resolved to is null.
+
+         The variable name is load-bearing and moved in 0.9.0. The test derives it
+         from the bundle rather than trusting this line, and names the current one
+         when they disagree — read it before editing:
+         src/__tests__/build/ssg-loader-manifest.test.ts -->
+    <script>
+      window.__VITE_REACT_SSG_STATIC_LOADER_MANIFEST__ = {};
+    </script>
+
     <!-- Preload critical fonts to reduce LCP -->
-    <link rel="preload" href="/node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/node_modules/@fontsource-variable/plus-jakarta-sans/files/plus-jakarta-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link
+      rel="preload"
+      href="/node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/node_modules/@fontsource-variable/plus-jakarta-sans/files/plus-jakarta-sans-latin-wght-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
 
     <!-- Meta tags below are replaced by vite.config.ts onPageRendered for each language -->
-    <meta name="description" content="Check who unfollowed you on Instagram without login. Upload your ZIP file, see unfollowers instantly. 100% free, privacy-first, handles 1M+ accounts." />
-    <meta name="keywords" content="instagram unfollow tracker, who unfollowed me instagram, instagram followers analysis, instagram unfollow app, instagram mutual followers" />
+    <meta
+      name="description"
+      content="Check who unfollowed you on Instagram without login. Upload your ZIP file, see unfollowers instantly. 100% free, privacy-first, handles 1M+ accounts."
+    />
+    <meta
+      name="keywords"
+      content="instagram unfollow tracker, who unfollowed me instagram, instagram followers analysis, instagram unfollow app, instagram mutual followers"
+    />
     <meta name="theme-color" content="#4E7EF5" />
 
     <!-- Favicon -->
@@ -80,7 +161,10 @@
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://safeunfollow.app/" />
     <meta property="og:title" content="Instagram Unfollowers — Free ZIP Upload, No Login" />
-    <meta property="og:description" content="Find who unfollowed you on Instagram. 100% free, 100% private, handles 1M+ accounts." />
+    <meta
+      property="og:description"
+      content="Find who unfollowed you on Instagram. 100% free, 100% private, handles 1M+ accounts."
+    />
     <meta property="og:site_name" content="Safe Unfollow" />
     <meta property="og:image" content="https://safeunfollow.app/og-image.png" />
     <meta property="og:image:width" content="1200" />
@@ -91,7 +175,10 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:url" content="https://safeunfollow.app/" />
     <meta name="twitter:title" content="Instagram Unfollowers — Free ZIP Upload, No Login" />
-    <meta name="twitter:description" content="Find Instagram unfollowers in your browser. Free forever, no login, handles millions." />
+    <meta
+      name="twitter:description"
+      content="Find Instagram unfollowers in your browser. No login, nothing uploaded, handles millions."
+    />
     <meta name="twitter:image" content="https://safeunfollow.app/og-image.png" />
 
     <!-- Additional SEO -->

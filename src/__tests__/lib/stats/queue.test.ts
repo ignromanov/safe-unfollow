@@ -1,5 +1,3 @@
-import { Blob as NodeBlob } from 'node:buffer';
-
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AnalyticsEvents } from '@/lib/stats/constants';
@@ -9,18 +7,18 @@ import {
   flushEvents,
   getQueuedCount,
   MAX_BATCH_SIZE,
+  trackNavigating,
 } from '@/lib/stats/queue';
 
 const WEBSITE_ID = 'f204b58f-a5bb-4231-b02b-4cc05f472d02';
 const ORIGIN = 'https://umami-coral-xi.vercel.app';
 
-let sendBeacon: ReturnType<typeof vi.fn>;
 let fetchMock: ReturnType<typeof vi.fn>;
 
-/** Last body handed to sendBeacon, parsed. */
-async function lastBeaconBody(): Promise<unknown> {
-  const blob = sendBeacon.mock.calls.at(-1)?.[1] as Blob;
-  return JSON.parse(await blob.text());
+/** Last body handed to fetch, parsed. */
+function lastFetchBody(): unknown {
+  const body = fetchMock.mock.calls.at(-1)?.[1]?.body as string;
+  return JSON.parse(body);
 }
 
 describe('event queue', () => {
@@ -35,16 +33,8 @@ describe('event queue', () => {
     script.setAttribute('data-website-id', WEBSITE_ID);
     document.head.appendChild(script);
 
-    sendBeacon = vi.fn(() => true);
-    vi.stubGlobal('navigator', { ...navigator, sendBeacon, language: 'en-US' });
     fetchMock = vi.fn(() => Promise.resolve(new Response(null, { status: 200 })));
     vi.stubGlobal('fetch', fetchMock);
-
-    // jsdom's own Blob implements only slice/size/type — no text()/arrayBuffer() —
-    // and lastBeaconBody() below needs to read the payload back. Stubbed here,
-    // file-local, rather than in shared test setup, so every other test keeps
-    // jsdom's Blob (restored by vi.unstubAllGlobals() in afterEach).
-    vi.stubGlobal('Blob', NodeBlob);
   });
 
   afterEach(() => {
@@ -57,27 +47,39 @@ describe('event queue', () => {
     enqueueEvent(AnalyticsEvents.AD_SLOT_VIEWABLE, { slot: 'results' });
 
     expect(getQueuedCount()).toBe(1);
-    expect(sendBeacon).not.toHaveBeenCalled();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it('sends N events in a single request', async () => {
+  it('sends N events in a single request', () => {
     enqueueEvent(AnalyticsEvents.AD_SLOT_VIEWABLE, { slot: 'results' });
     enqueueEvent(AnalyticsEvents.AD_SLOT_VIEWABLE, { slot: 'results_end' });
     enqueueEvent(AnalyticsEvents.DONATION_CARD_IMPRESSION, { account_count: 42 });
 
     flushEvents();
 
-    expect(sendBeacon).toHaveBeenCalledTimes(1);
-    const body = (await lastBeaconBody()) as Array<{
-      type: string;
-      payload: Record<string, unknown>;
-    }>;
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const body = lastFetchBody() as Array<{ type: string; payload: Record<string, unknown> }>;
     expect(body).toHaveLength(3);
-    expect(sendBeacon.mock.calls[0]?.[0]).toBe(`${ORIGIN}/api/batch`);
+    expect(fetchMock.mock.calls[0]?.[0]).toBe(`${ORIGIN}/api/batch`);
     expect(body[0]).toMatchObject({
       type: 'event',
       payload: { website: WEBSITE_ID, name: 'ad_slot_viewable', data: { slot: 'results' } },
     });
+  });
+
+  it('sends with keepalive so the request survives unload', () => {
+    enqueueEvent(AnalyticsEvents.AD_SLOT_VIEWABLE, { slot: 'results' });
+
+    flushEvents();
+
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(init.keepalive).toBe(true);
+    expect(init.method).toBe('POST');
+    // Umami answers with `Access-Control-Allow-Origin: *`, which the browser
+    // rejects for any credentialed request. 'omit' is asserted rather than the
+    // 'same-origin' default because the default only happens to send no cookies
+    // while the instance lives on another origin (GH#63).
+    expect(init.credentials).toBe('omit');
   });
 
   it('flushes by itself once the size cap is reached', () => {
@@ -85,7 +87,7 @@ describe('event queue', () => {
       enqueueEvent(AnalyticsEvents.AD_SLOT_VIEWABLE, { slot: `s${i}` });
     }
 
-    expect(sendBeacon).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(getQueuedCount()).toBe(0);
   });
 
@@ -95,38 +97,23 @@ describe('event queue', () => {
     flushEvents();
     flushEvents();
 
-    expect(sendBeacon).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it('does nothing when the queue is empty', () => {
     flushEvents();
 
-    expect(sendBeacon).not.toHaveBeenCalled();
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it('falls through to keepalive fetch when sendBeacon refuses the payload', () => {
-    // sendBeacon reports the 64 KiB queue overflow by returning false. It does
-    // not throw, so only the boolean reveals the failure.
-    sendBeacon.mockReturnValue(false);
-    enqueueEvent(AnalyticsEvents.AD_SLOT_VIEWABLE, { slot: 'results' });
-
-    flushEvents();
-
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-    expect(init.keepalive).toBe(true);
-    expect(init.method).toBe('POST');
-  });
-
-  it('records the path at enqueue time, not at flush time', async () => {
+  it('records the path at enqueue time, not at flush time', () => {
     window.history.pushState({}, '', '/upload');
     enqueueEvent(AnalyticsEvents.LOADING_TIP_IMPRESSION, { tip_id: 'nordvpn' });
     window.history.pushState({}, '', '/results');
 
     flushEvents();
 
-    const body = (await lastBeaconBody()) as Array<{ payload: { url: string } }>;
+    const body = lastFetchBody() as Array<{ payload: { url: string } }>;
     expect(body[0]?.payload.url).toBe('/upload');
   });
 
@@ -152,7 +139,7 @@ describe('event queue', () => {
     clearEventQueue();
     flushEvents();
 
-    expect(sendBeacon).not.toHaveBeenCalled();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it('drops pending events when consent is withdrawn, rather than delivering them', async () => {
@@ -163,32 +150,40 @@ describe('event queue', () => {
     optOutOfTracking();
 
     expect(getQueuedCount()).toBe(0);
-    expect(sendBeacon).not.toHaveBeenCalled();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it('falls back to fetch when sendBeacon throws instead of returning false', () => {
-    // Some browsers (and extensions that patch the API) throw rather than
-    // returning false on failure — the try/catch must still route to fetch.
-    sendBeacon.mockImplementation(() => {
-      throw new Error('sendBeacon blocked');
+  it('never breaks the app when the delivery request fails', () => {
+    fetchMock.mockImplementation(() => Promise.reject(new Error('network down')));
+    enqueueEvent(AnalyticsEvents.AD_SLOT_VIEWABLE, { slot: 'results' });
+
+    expect(() => flushEvents()).not.toThrow();
+  });
+
+  describe('trackNavigating', () => {
+    it('delivers in the same tick instead of waiting for a batch', () => {
+      trackNavigating(AnalyticsEvents.CHECKOUT_START, { locale: 'id' });
+
+      expect(getQueuedCount()).toBe(0);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
     });
-    enqueueEvent(AnalyticsEvents.AD_SLOT_VIEWABLE, { slot: 'results' });
 
-    flushEvents();
+    it('sends with keepalive, so the navigation cannot cancel it', () => {
+      trackNavigating(AnalyticsEvents.CHECKOUT_START);
 
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(getQueuedCount()).toBe(0);
-  });
+      const init = fetchMock.mock.calls[0]?.[1] as RequestInit;
+      expect(init.keepalive).toBe(true);
+      expect(init.credentials).toBe('omit');
+    });
 
-  it('falls back to fetch when navigator.sendBeacon does not exist at all', () => {
-    // Older/embedded WebViews lack sendBeacon entirely — the optional chaining
-    // must skip straight to the fetch fallback without throwing.
-    vi.stubGlobal('navigator', { ...navigator, sendBeacon: undefined });
-    enqueueEvent(AnalyticsEvents.AD_SLOT_VIEWABLE, { slot: 'results' });
+    it('carries anything already queued along with it', () => {
+      enqueueEvent(AnalyticsEvents.DONATION_CARD_IMPRESSION, { account_count: 7 });
 
-    flushEvents();
+      trackNavigating(AnalyticsEvents.CHECKOUT_START);
 
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(getQueuedCount()).toBe(0);
+      const body = lastFetchBody() as Array<{ payload: { name: string } }>;
+      expect(body).toHaveLength(2);
+      expect(body[1]?.payload.name).toBe('checkout_start');
+    });
   });
 });

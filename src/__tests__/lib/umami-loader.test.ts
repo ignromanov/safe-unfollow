@@ -62,7 +62,7 @@ describe('umami-loader', () => {
 
       expect(document.createElement).toHaveBeenCalledWith('script');
       expect(mockScript.defer).toBe(true);
-      expect(mockScript.src).toBe('https://umami-coral-xi.vercel.app/script.js');
+      expect(mockScript.src).toBe('/v/script.js');
       expect(mockScript.dataset.websiteId).toBe('f204b58f-a5bb-4231-b02b-4cc05f472d02');
       expect(appendChildSpy).toHaveBeenCalledWith(mockScript);
     });
@@ -136,7 +136,7 @@ describe('umami-loader', () => {
 
       loadUmami();
 
-      expect(mockScript.src).toBe('https://umami-coral-xi.vercel.app/script.js');
+      expect(mockScript.src).toBe('/v/script.js');
     });
 
     it('should use correct website ID', async () => {
@@ -176,6 +176,203 @@ describe('umami-loader', () => {
       // Should load because it's not exactly 'true'
       expect(document.createElement).toHaveBeenCalled();
       expect(appendChildSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('isLandingPath', () => {
+    it.each([
+      ['/', true],
+      ['', true],
+      ['/id', true],
+      ['/id/', true],
+      ['/ru', true],
+      ['/ar', true],
+    ])('treats %s as the landing page: %s', async (pathname, expected) => {
+      const { isLandingPath } = await import('@/lib/umami-loader');
+
+      expect(isLandingPath(pathname)).toBe(expected);
+    });
+
+    it.each([
+      ['/results'],
+      ['/id/results'],
+      ['/upload'],
+      ['/wizard'],
+      ['/ru/wizard/step/1'],
+      ['/privacy'],
+    ])('rejects %s', async pathname => {
+      const { isLandingPath } = await import('@/lib/umami-loader');
+
+      expect(isLandingPath(pathname)).toBe(false);
+    });
+
+    it('rejects /en, which routes.tsx does not generate', async () => {
+      const { isLandingPath } = await import('@/lib/umami-loader');
+
+      expect(isLandingPath('/en')).toBe(false);
+    });
+  });
+
+  describe('loadHeatmapRecorder', () => {
+    const CONFIG_URL = '/v/api/websites/f204b58f-a5bb-4231-b02b-4cc05f472d02/recorder';
+
+    let fetchMock: ReturnType<typeof vi.fn>;
+
+    /** Answer the recorder config endpoint with `body`, or a non-ok response. */
+    function mockConfig(body: unknown, ok = true): void {
+      fetchMock.mockResolvedValue({ ok, json: async () => body });
+    }
+
+    /** Drive the module past its first-interaction gate and let injectRecorder settle. */
+    async function fireFirstInteraction(): Promise<void> {
+      window.dispatchEvent(new Event('pointerdown'));
+      await vi.waitFor(() => {
+        expect(fetchMock).toHaveBeenCalled();
+      });
+      await Promise.resolve();
+      await Promise.resolve();
+    }
+
+    beforeEach(() => {
+      window.history.pushState({}, '', '/');
+      fetchMock = vi.fn();
+      global.fetch = fetchMock as unknown as typeof fetch;
+      mockConfig({ enabled: true, replayEnabled: false, heatmapEnabled: true });
+    });
+
+    it('injects the recorder on the landing page after the first interaction', async () => {
+      const { loadHeatmapRecorder } = await import('@/lib/umami-loader');
+
+      loadHeatmapRecorder();
+
+      // Nothing is requested or injected until the visitor interacts.
+      expect(fetchMock).not.toHaveBeenCalled();
+      expect(appendChildSpy).not.toHaveBeenCalled();
+
+      await fireFirstInteraction();
+
+      expect(fetchMock).toHaveBeenCalledWith(CONFIG_URL, { credentials: 'omit' });
+      expect(mockScript.src).toBe('/v/recorder.js');
+      expect(mockScript.dataset.websiteId).toBe('f204b58f-a5bb-4231-b02b-4cc05f472d02');
+      expect(mockScript.dataset.hostUrl).toBe('/v');
+      expect(appendChildSpy).toHaveBeenCalledWith(mockScript);
+    });
+
+    it('accepts a prefixed locale landing page', async () => {
+      window.history.pushState({}, '', '/id');
+
+      const { loadHeatmapRecorder } = await import('@/lib/umami-loader');
+
+      loadHeatmapRecorder();
+      await fireFirstInteraction();
+
+      expect(appendChildSpy).toHaveBeenCalledWith(mockScript);
+    });
+
+    it.each(['/results', '/id/results', '/upload', '/wizard'])(
+      'never attaches a listener on %s',
+      async pathname => {
+        window.history.pushState({}, '', pathname);
+
+        const { loadHeatmapRecorder } = await import('@/lib/umami-loader');
+
+        loadHeatmapRecorder();
+        window.dispatchEvent(new Event('pointerdown'));
+
+        expect(fetchMock).not.toHaveBeenCalled();
+        expect(appendChildSpy).not.toHaveBeenCalled();
+      }
+    );
+
+    it('does not inject when the visitor left the landing page before the config resolved', async () => {
+      const { loadHeatmapRecorder } = await import('@/lib/umami-loader');
+
+      loadHeatmapRecorder();
+
+      // The first interaction IS the click that navigates away.
+      window.history.pushState({}, '', '/results');
+      window.dispatchEvent(new Event('pointerdown'));
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(fetchMock).not.toHaveBeenCalled();
+      expect(appendChildSpy).not.toHaveBeenCalled();
+    });
+
+    it('refuses to load when the dashboard has replay switched on', async () => {
+      mockConfig({ enabled: true, replayEnabled: true, heatmapEnabled: true });
+
+      const { loadHeatmapRecorder } = await import('@/lib/umami-loader');
+
+      loadHeatmapRecorder();
+      await fireFirstInteraction();
+
+      expect(appendChildSpy).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['replayEnabled missing', { enabled: true, heatmapEnabled: true }],
+      ['heatmap off', { enabled: true, replayEnabled: false, heatmapEnabled: false }],
+      ['recorder off', { enabled: false }],
+      ['empty body', {}],
+    ])('fails closed when the config says %s', async (_label, body) => {
+      mockConfig(body);
+
+      const { loadHeatmapRecorder } = await import('@/lib/umami-loader');
+
+      loadHeatmapRecorder();
+      await fireFirstInteraction();
+
+      expect(appendChildSpy).not.toHaveBeenCalled();
+    });
+
+    it('fails closed when the config endpoint errors', async () => {
+      mockConfig({}, false);
+
+      const { loadHeatmapRecorder } = await import('@/lib/umami-loader');
+
+      loadHeatmapRecorder();
+      await fireFirstInteraction();
+
+      expect(appendChildSpy).not.toHaveBeenCalled();
+    });
+
+    it('fails closed when the config fetch rejects', async () => {
+      fetchMock.mockRejectedValue(new Error('offline'));
+
+      const { loadHeatmapRecorder } = await import('@/lib/umami-loader');
+
+      loadHeatmapRecorder();
+      await fireFirstInteraction();
+
+      expect(appendChildSpy).not.toHaveBeenCalled();
+    });
+
+    it('respects the same opt-out as the tracker', async () => {
+      localStorageMock['umami-opt-out'] = 'true';
+
+      const { loadHeatmapRecorder } = await import('@/lib/umami-loader');
+
+      loadHeatmapRecorder();
+      window.dispatchEvent(new Event('pointerdown'));
+
+      expect(fetchMock).not.toHaveBeenCalled();
+      expect(appendChildSpy).not.toHaveBeenCalled();
+    });
+
+    it('injects at most once across several interactions', async () => {
+      const { loadHeatmapRecorder } = await import('@/lib/umami-loader');
+
+      loadHeatmapRecorder();
+      await fireFirstInteraction();
+
+      window.dispatchEvent(new Event('pointerdown'));
+      window.dispatchEvent(new Event('keydown'));
+      window.dispatchEvent(new Event('scroll'));
+      await Promise.resolve();
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(appendChildSpy).toHaveBeenCalledTimes(1);
     });
   });
 });

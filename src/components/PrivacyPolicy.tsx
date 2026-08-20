@@ -28,9 +28,9 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
       </header>
 
       {/* Content */}
-      <div className="prose prose-zinc dark:prose-invert max-w-none space-y-10">
+      <div className="space-y-10">
         {/* TL;DR */}
-        <section className="bg-primary/5 border border-primary/20 rounded-2xl p-6 md:p-8 not-prose">
+        <section className="bg-primary/5 border border-primary/20 rounded-2xl p-6 md:p-8">
           <h2 className="text-xl font-bold mb-4 flex items-center gap-3">
             <Lock className="w-5 h-5 text-primary" />
             TL;DR — Privacy Summary
@@ -387,7 +387,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
         </section>
 
         {/* Trust Badge */}
-        <section className="not-prose mt-12 p-6 bg-card border border-border rounded-2xl flex items-center gap-4">
+        <section className="mt-12 p-6 bg-card border border-border rounded-2xl flex items-center gap-4">
           <Eye className="w-10 h-10 text-primary flex-shrink-0" />
           <div>
             <p className="font-bold text-lg">Privacy by Design</p>

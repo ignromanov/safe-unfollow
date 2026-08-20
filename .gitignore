@@ -8,6 +8,9 @@ yarn-error.log*
 dist/
 build/
 coverage/
+# The bare "build/" rule above also catches src/__tests__/build/, which is a
+# test suite name, not a build artifact — un-ignore it explicitly.
+!src/__tests__/build/
 
 # Environment variables
 .env
@@ -113,8 +116,10 @@ src/__tests__/**/*.js
 # Local development data (keep raw/ for development)
 raw/
 
-# Design folders (experimental designs)
-designs/
+# Design folders (experimental designs) — ignore contents, not the dir, so the
+# Claude Design backup can be tracked without -f (it was force-added before).
+designs/*
+!designs/claude-design-project/
 
 # Scripts folders (ignore contents, not the dir — so specific files can be un-ignored)
 scripts/*
@@ -133,3 +138,21 @@ umami-backup-*.sql.gz
 
 # Retention script must ship despite the scripts/ ignore above (CI runs it)
 !scripts/umami-retention.sql
+
+# Entry-bundle budget guard must ship despite the scripts/ ignore above (npm run perf:budget)
+!scripts/assert-entry-budget.mjs
+
+# Large-archive fixture generator must ship despite the scripts/ ignore above (PR #80)
+!scripts/generate-large-archive.ts
+
+# design-sync working state — the converter, the generated bundle and the machine
+# caches a resync leaves behind. ~60 MB at repo root, untracked on every branch but
+# chore/design-sync-main, which is one `git add -A` away from a commit. Matches the
+# block that branch already carries, so the two do not disagree.
+.ds-sync/
+ds-bundle/
+.design-sync/.cache/
+.design-sync/learnings/
+# No trailing slash: this one is a symlink to ../.ds-sync/node_modules, and git
+# classifies a symlink as a blob — a directory-only pattern never matches it.
+.design-sync/node_modules

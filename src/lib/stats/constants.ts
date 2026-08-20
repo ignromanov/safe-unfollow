@@ -49,6 +49,10 @@ export const AnalyticsEvents = {
   SAMPLE_DATA_LOAD: 'sample_data_load',
   LANGUAGE_CHANGE: 'language_change',
 
+  // Guide entry screen (replaces wizard step 1) — see analytics.guideEntryView
+  // for why this is a separate event name rather than a `variant` field.
+  GUIDE_ENTRY_VIEW: 'guide_entry_view',
+
   // Wizard (V10: 5% sampling, removed back_click and cancel)
   WIZARD_STEP_VIEW: 'wizard_step_view',
 
@@ -104,10 +108,15 @@ export const AnalyticsEvents = {
   UPLOAD_ERROR_NO_DATA: 'upload_error_no_data',
   UPLOAD_ERROR_MISSING_FOLLOWING: 'upload_error_missing_following',
   UPLOAD_ERROR_MISSING_FOLLOWERS: 'upload_error_missing_followers',
+  // GH#21: following.json/followers_*.json found, but shape unrecognized —
+  // distinct from MISSING_* (file absent) and from a silent empty result.
+  UPLOAD_ERROR_INVALID_FOLLOWING_FORMAT: 'upload_error_invalid_following_format',
+  UPLOAD_ERROR_INVALID_FOLLOWERS_FORMAT: 'upload_error_invalid_followers_format',
   UPLOAD_ERROR_UNKNOWN: 'upload_error_unknown',
 
   // Extended Upload Errors
   UPLOAD_ERROR_CORRUPTED_ZIP: 'upload_error_corrupted_zip',
+  UPLOAD_ERROR_TOO_MANY_ENTRIES: 'upload_error_too_many_entries',
   UPLOAD_ERROR_ZIP_ENCRYPTED: 'upload_error_zip_encrypted',
   UPLOAD_ERROR_EMPTY_FILE: 'upload_error_empty_file',
   UPLOAD_ERROR_FILE_TOO_LARGE: 'upload_error_file_too_large',
@@ -141,10 +150,6 @@ export const AnalyticsEvents = {
   RESCUE_PLAN_TOOL_CLICK: 'rescue_plan_tool_click',
   RESCUE_PLAN_DISMISS: 'rescue_plan_dismiss',
 
-  // Format Quiz
-  FORMAT_QUIZ_ANSWER: 'format_quiz_answer',
-  FORMAT_QUIZ_FIXED_IT: 'format_quiz_fixed_it',
-
   // Error tracking
   ERROR_BOUNDARY: 'error_boundary',
   ROUTE_ERROR: 'route_error',
@@ -159,6 +164,35 @@ export const AnalyticsEvents = {
   // Ads — a viewable impression opportunity by the MRC display standard (50%
   // of pixels for 1 continuous second).
   AD_SLOT_VIEWABLE: 'ad_slot_viewable',
+
+  // GH#21: an OPTIONAL relationship file (pending, restricted, close_friends,
+  // recently_unfollowed, dismissed_suggestions, permanent requests) was found
+  // but its shape didn't match anything known. Severity 'warning' on the
+  // parser side isn't rendered anywhere in the UI, so this is the only signal
+  // that reaches the dashboard when Instagram drifts one of these formats.
+  // Rare/diagnostic, not high-volume — delivered immediately (trackEvent),
+  // not batched like impressions.
+  OPTIONAL_FILE_FORMAT_DRIFT: 'optional_file_format_drift',
+
+  // GH#21 Task 5: how the localised username label was resolved for this
+  // parse (LabelResolutionMode in core/types/upload.ts). One field, fires
+  // once per parse, always — including a clean parse, unlike the drift event
+  // above. ALARM: a rise in `unresolved` across many uploads at once, in the
+  // same window as a rise in the entry-level drift codes above, is Instagram
+  // having changed the record shape again. One archive reporting
+  // `not-applicable` (it carries none of the six optional files) is not.
+  USERNAME_LABEL_RESOLUTION: 'username_label_resolution',
+
+  // Which required relationship file arrived short because a date range was
+  // chosen in Meta's export dialog (TruncatedRelationshipFile in
+  // core/types/upload.ts). Fires only when one did, so it has no denominator of
+  // its own: divide by `username_label_resolution`, which fires once per parse
+  // whatever the outcome. Dividing by `file_upload_success` would understate it,
+  // because a truncated export still succeeds — that is the entire defect.
+  // ALARM: any sustained rate at all. Every event here is a reader who was told
+  // that people unfollowed them when the export simply never mentioned those
+  // people.
+  RELATIONSHIP_FILE_TRUNCATED: 'relationship_file_truncated',
 } as const;
 
 export type AnalyticsEventName = (typeof AnalyticsEvents)[keyof typeof AnalyticsEvents];

@@ -1,5 +1,5 @@
-import { vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { vi, beforeEach, afterEach } from 'vitest';
+import { act, render, screen, fireEvent, within } from '@testing-library/react';
 import wizardEN from '@/locales/en/wizard.json';
 import { createI18nMock } from '@/__tests__/utils/mockI18n';
 
@@ -15,114 +15,174 @@ const mockNavigate = vi.fn((path: string) => {
 vi.mock('react-router-dom', () => ({
   useLocation: () => ({ pathname: mockPathname }),
   useNavigate: () => mockNavigate,
+  // PrefixedLink renders <Link>; a real <a href> stub is enough to assert hrefs and to
+  // let Escape-key navigation (a real navigate() call, not a click) be exercised
+  // separately via mockNavigate above.
+  Link: ({ to, children, ...props }: { to: string; children?: React.ReactNode }) => (
+    <a href={to} {...props}>
+      {children}
+    </a>
+  ),
 }));
 
-// Mock useLanguagePrefix
+// Mock useLanguagePrefix — vi.fn() wrapper so individual tests can vary the
+// locale prefix, matching the pattern in src/__tests__/pages/WizardPage.test.tsx
+const mockUseLanguagePrefix = vi.fn(() => '');
 vi.mock('@/hooks/useLanguagePrefix', () => ({
-  useLanguagePrefix: () => '',
+  useLanguagePrefix: () => mockUseLanguagePrefix(),
 }));
 
 vi.mock('react-i18next', () => createI18nMock(wizardEN));
 
 import { Wizard } from '@/components/Wizard';
+import { analytics } from '@/lib/analytics';
 
 // Mock analytics module
 vi.mock('@/lib/analytics', () => ({
   analytics: {
+    guideEntryView: vi.fn(),
     wizardStepView: vi.fn(),
-    wizardNextClick: vi.fn(),
-    wizardBackClick: vi.fn(),
-    wizardCancel: vi.fn(),
-    wizardExternalLinkClick: vi.fn(),
+    linkClick: vi.fn(),
   },
 }));
 
-describe('Wizard', () => {
-  const mockOnComplete = vi.fn();
-  const mockOnCancel = vi.fn();
+function renderWizardAtStep(step: number) {
+  mockPathname = `/wizard/step/${step}`;
+  return render(<Wizard />);
+}
 
+// Double for the one IntersectionObserver the wizard's bottom bar depends on
+// (via useIsElementInView) — the seam that lets these tests move the in-flow
+// CTA in and out of view without a real layout. Mirrors the double in
+// useAdViewability.test.tsx: capture observe() calls, drive them by hand.
+let observedEntries: Array<{ element: Element; callback: IntersectionObserverCallback }>;
+
+function setCtaIntersecting(isIntersecting: boolean) {
+  act(() => {
+    for (const { element, callback } of observedEntries) {
+      callback(
+        [{ isIntersecting, target: element } as IntersectionObserverEntry],
+        {} as IntersectionObserver
+      );
+    }
+  });
+}
+
+// The swap is gated on a scroll delivered after the listener attached, i.e.
+// after hydration (Wizard.tsx). Every test that wants the swapped bar has to
+// scroll the wizard's own container first, exactly as a reader does — the
+// observer's own first callback is not enough on its own.
+function scrollContent() {
+  const container = screen.getByRole('dialog').querySelector('.overflow-y-auto');
+  if (!container) throw new Error('wizard scroll container not found');
+  fireEvent.scroll(container);
+}
+
+describe('Wizard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockPathname = '/wizard';
+    mockUseLanguagePrefix.mockReturnValue('');
+    observedEntries = [];
+    vi.stubGlobal(
+      'IntersectionObserver',
+      class {
+        constructor(private callback: IntersectionObserverCallback) {}
+        observe(element: Element): void {
+          observedEntries.push({ element, callback: this.callback });
+        }
+        unobserve(): void {}
+        disconnect(): void {}
+      }
+    );
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it('should render without crashing', () => {
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+    render(<Wizard />);
 
     expect(screen.getByText('Step 1 of 8')).toBeInTheDocument();
   });
 
   it('should render step indicator with progress dots', () => {
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+    render(<Wizard />);
 
     // Step counter text
     expect(screen.getByText('Step 1 of 8')).toBeInTheDocument();
   });
 
-  it('should render first step title and description', () => {
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+  it('should render the GuideEntry headline on step 1', () => {
+    render(<Wizard />);
 
-    // Title appears twice (heading + button), check heading specifically
-    expect(screen.getByRole('heading', { name: wizardEN.steps['1'].title })).toBeInTheDocument();
-    // Use partial match for description (contains quotes that may render differently)
-    expect(
-      screen.getByText(/Click the button below to open Meta Accounts Center/)
-    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: wizardEN.entry.title })).toBeInTheDocument();
   });
 
-  it('should render navigation buttons', () => {
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+  it('should render navigation links', () => {
+    render(<Wizard />);
 
     expect(screen.getByText('Next Step')).toBeInTheDocument();
-    expect(screen.getByText('buttons.cancel')).toBeInTheDocument();
+    expect(screen.getByText(wizardEN.buttons.cancel)).toBeInTheDocument();
   });
 
-  it('should render external link button on step 1', () => {
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+  it('should render the GuideEntry CTA linking to Accounts Center on step 1', () => {
+    render(<Wizard />);
 
-    const externalLink = screen.getByRole('link', {
-      name: new RegExp(wizardEN.buttons.openInstagram),
-    });
-    expect(externalLink).toBeInTheDocument();
-    expect(externalLink).toHaveAttribute(
+    const cta = screen.getByRole('link', { name: new RegExp(wizardEN.entry.cta) });
+    expect(cta).toBeInTheDocument();
+    expect(cta).toHaveAttribute(
       'href',
       'https://accountscenter.instagram.com/info_and_permissions/dyi/?entry_point=app_settings'
     );
   });
 
-  it('should call navigate to next step when Next is clicked', () => {
-    mockPathname = '/wizard/step/1';
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+  it('navigates by href, so the control works before hydration', () => {
+    renderWizardAtStep(3);
 
-    fireEvent.click(screen.getByText(wizardEN.buttons.next));
-
-    expect(mockNavigate).toHaveBeenCalledWith('/wizard/step/2');
+    expect(screen.getByRole('link', { name: /next step/i })).toHaveAttribute(
+      'href',
+      expect.stringContaining('/wizard/step/4')
+    );
+    expect(screen.getByRole('link', { name: /back/i })).toHaveAttribute(
+      'href',
+      expect.stringContaining('/wizard/step/2')
+    );
   });
 
-  it('should call navigate to previous step when Back is clicked', () => {
-    mockPathname = '/wizard/step/2';
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+  it('marks the current step without pretending to be a tablist', () => {
+    renderWizardAtStep(3);
 
-    expect(screen.getByText('Step 2 of 8')).toBeInTheDocument();
+    expect(screen.queryByRole('tablist')).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { current: 'step' })).toHaveAccessibleName(/step 3/i);
+  });
 
-    fireEvent.click(screen.getByText('Back'));
+  it('should navigate back one step on Escape', () => {
+    renderWizardAtStep(2);
+
+    fireEvent.keyDown(document, { key: 'Escape' });
 
     expect(mockNavigate).toHaveBeenCalledWith('/wizard/step/1');
   });
 
-  it('should call onCancel when close button is clicked', () => {
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+  it('should navigate home on Escape when on the first step', () => {
+    renderWizardAtStep(1);
 
-    // Find the close button by its aria-label from translations
-    const closeButton = screen.getByRole('button', { name: wizardEN.buttons.close });
-    fireEvent.click(closeButton);
+    fireEvent.keyDown(document, { key: 'Escape' });
 
-    expect(mockOnCancel).toHaveBeenCalled();
+    expect(mockNavigate).toHaveBeenCalledWith('/');
+  });
+
+  it('should link "Close guide" home', () => {
+    render(<Wizard />);
+
+    const closeLink = screen.getByRole('link', { name: wizardEN.buttons.close });
+    expect(closeLink).toHaveAttribute('href', '/');
   });
 
   it('should show warning badge on step 4', () => {
-    mockPathname = '/wizard/step/4';
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+    renderWizardAtStep(4);
 
     expect(screen.getByText(wizardEN.format.warning)).toBeInTheDocument();
     expect(
@@ -130,90 +190,325 @@ describe('Wizard', () => {
     ).toBeInTheDocument();
   });
 
-  it('should call onComplete on last step when Done is clicked', () => {
-    mockPathname = '/wizard/step/8';
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+  it('should link "Done, let\'s go!" to /upload on the last step', () => {
+    renderWizardAtStep(8);
 
-    expect(screen.getByText("Done, let's go!")).toBeInTheDocument();
-
-    fireEvent.click(screen.getByText("Done, let's go!"));
-
-    expect(mockOnComplete).toHaveBeenCalled();
+    const doneLink = screen.getByRole('link', { name: "Done, let's go!" });
+    expect(doneLink).toHaveAttribute('href', '/upload');
   });
 
   it('should render step video with alt text as aria-label', () => {
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+    // Step 1 is GuideEntry now, which carries no video — step 2 still uses
+    // the generic step card this behavior belongs to.
+    renderWizardAtStep(2);
 
-    const video = screen.getByLabelText(wizardEN.steps['1'].alt);
+    const video = screen.getByLabelText(wizardEN.steps['2'].alt);
     expect(video).toBeInTheDocument();
   });
 
-  it('should navigate via goToStep when clicking Next', () => {
-    mockPathname = '/wizard/step/1';
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
-
-    fireEvent.click(screen.getByText('Next Step'));
-
-    // Navigation to step 2
-    expect(mockNavigate).toHaveBeenCalledWith('/wizard/step/2');
-  });
-
   it('should render correct step based on URL pathname', () => {
-    // Test step 5
-    mockPathname = '/wizard/step/5';
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+    renderWizardAtStep(5);
 
     expect(screen.getByText('Step 5 of 8')).toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 2 })).toBeInTheDocument();
   });
 
-  it('should navigate to correct path when Next is clicked', () => {
-    mockPathname = '/wizard/step/3';
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+  it('should prefix step-indicator and Back/Next hrefs with the current locale', () => {
+    mockUseLanguagePrefix.mockReturnValue('/ru');
+    mockPathname = '/ru/wizard/step/3';
+    render(<Wizard />);
 
-    fireEvent.click(screen.getByText(wizardEN.buttons.next));
-
-    expect(mockNavigate).toHaveBeenCalledWith('/wizard/step/4');
+    expect(screen.getByRole('link', { name: /next step/i })).toHaveAttribute(
+      'href',
+      '/ru/wizard/step/4'
+    );
+    expect(screen.getByRole('link', { name: /back/i })).toHaveAttribute(
+      'href',
+      '/ru/wizard/step/2'
+    );
+    expect(screen.getByRole('link', { current: 'step' })).toHaveAttribute(
+      'href',
+      '/ru/wizard/step/3'
+    );
   });
 
-  it('should navigate to correct path when Back is clicked', () => {
-    mockPathname = '/wizard/step/5';
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+  it('should render "I already have my ZIP file" link on step 1', () => {
+    renderWizardAtStep(1);
 
-    fireEvent.click(screen.getByText('Back'));
-
-    expect(mockNavigate).toHaveBeenCalledWith('/wizard/step/4');
-  });
-
-  it('should render "I already have my ZIP file" button on step 1', () => {
-    mockPathname = '/wizard/step/1';
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
-
-    const alreadyHaveFileButton = screen.getByRole('button', {
+    const alreadyHaveFileLink = screen.getByRole('link', {
       name: wizardEN.buttons.alreadyHaveFile,
     });
-    expect(alreadyHaveFileButton).toBeInTheDocument();
+    expect(alreadyHaveFileLink).toBeInTheDocument();
   });
 
-  it('should navigate to /upload when "I already have my ZIP file" is clicked', () => {
-    mockPathname = '/wizard/step/1';
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+  it('should link "I already have my ZIP file" to /upload', () => {
+    // Prerendered wizard step pages are inert until React hydrates, so this
+    // control must be a real <a href> — not a button firing navigate() on
+    // click — or it does nothing during that window. See PrefixedLink.tsx.
+    renderWizardAtStep(1);
 
-    const alreadyHaveFileButton = screen.getByRole('button', {
+    const alreadyHaveFileLink = screen.getByRole('link', {
       name: wizardEN.buttons.alreadyHaveFile,
     });
-    fireEvent.click(alreadyHaveFileButton);
 
-    expect(mockNavigate).toHaveBeenCalledWith('/upload');
+    expect(alreadyHaveFileLink).toHaveAttribute('href', '/upload');
   });
 
-  it('should not render "I already have my ZIP file" button on other steps', () => {
-    mockPathname = '/wizard/step/2';
-    render(<Wizard onComplete={mockOnComplete} onCancel={mockOnCancel} />);
+  it('should prefix the "I already have my ZIP file" href with the current locale', () => {
+    mockPathname = '/ru/wizard/step/1';
+    mockUseLanguagePrefix.mockReturnValue('/ru');
+    render(<Wizard />);
 
-    const alreadyHaveFileButton = screen.queryByRole('button', {
+    const alreadyHaveFileLink = screen.getByRole('link', {
       name: wizardEN.buttons.alreadyHaveFile,
     });
-    expect(alreadyHaveFileButton).not.toBeInTheDocument();
+
+    expect(alreadyHaveFileLink).toHaveAttribute('href', '/ru/upload');
+  });
+
+  it('should not render "I already have my ZIP file" link on other steps', () => {
+    renderWizardAtStep(2);
+
+    const alreadyHaveFileLink = screen.queryByRole('link', {
+      name: wizardEN.buttons.alreadyHaveFile,
+    });
+    expect(alreadyHaveFileLink).not.toBeInTheDocument();
+  });
+
+  it('should not report wizardStepView for step 1 — GuideEntry owns its own view event', () => {
+    render(<Wizard />);
+
+    expect(analytics.wizardStepView).not.toHaveBeenCalled();
+  });
+
+  it('should report wizardStepView for step 2', () => {
+    renderWizardAtStep(2);
+
+    expect(analytics.wizardStepView).toHaveBeenCalledWith(2);
+  });
+
+  // WizardPage never remounts across wizard URLs — one element serves every
+  // :stepId (routes.tsx) — and the scroll lives in an inner container, so
+  // useLayoutState's window reset cannot reach it.
+  describe('scroll position across step changes', () => {
+    it('sends the scroll container back to the top when the step changes', () => {
+      mockPathname = '/wizard/step/1';
+      const { rerender } = render(<Wizard />);
+      const container = screen.getByRole('dialog').querySelector('.overflow-y-auto')!;
+      const scrollTo = vi.fn();
+      container.scrollTo = scrollTo;
+
+      mockPathname = '/wizard/step/2';
+      rerender(<Wizard />);
+
+      expect(scrollTo).toHaveBeenCalledWith({ top: 0 });
+    });
+
+    it('leaves the reader where they are on the first render', () => {
+      const scrollTo = vi.spyOn(Element.prototype, 'scrollTo');
+
+      renderWizardAtStep(1);
+
+      // A non-zero scrollTop on mount is a position reached before hydration.
+      // Resetting it there is the defect the bar's swap gate also guards.
+      expect(scrollTo).not.toHaveBeenCalled();
+      scrollTo.mockRestore();
+    });
+  });
+
+  describe('bottom bar on step 1', () => {
+    it('names the bar navigation region separately from the step-dot navigation', () => {
+      renderWizardAtStep(1);
+
+      expect(
+        screen.getByRole('navigation', { name: wizardEN.footer.navigation })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('navigation', { name: wizardEN.header.stepNavigation })
+      ).toBeInTheDocument();
+    });
+
+    it('shows the normal step nav, and only one primary, while the in-flow CTA is visible', () => {
+      renderWizardAtStep(1);
+
+      const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
+      expect(within(bar).getByText('Next Step')).toBeInTheDocument();
+      expect(within(bar).queryByText(wizardEN.entry.cta)).not.toBeInTheDocument();
+      // The in-flow CTA itself is the only "Accounts Center" link on screen.
+      expect(screen.getAllByRole('link', { name: /accounts center/i })).toHaveLength(1);
+    });
+
+    it('swaps both bar slots — without changing which two controls are present, or the bar height — when the in-flow CTA scrolls out', () => {
+      renderWizardAtStep(1);
+      const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
+      const heightBefore = bar.getBoundingClientRect().height;
+      const linksBefore = within(bar).getAllByRole('link');
+      expect(linksBefore).toHaveLength(2);
+
+      scrollContent();
+      setCtaIntersecting(false);
+
+      const linksAfter = within(bar).getAllByRole('link');
+      expect(linksAfter).toHaveLength(2);
+      expect(within(bar).getByText(wizardEN.entry.cta)).toBeInTheDocument();
+      expect(within(bar).getByText(wizardEN.buttons.trySample)).toBeInTheDocument();
+      expect(within(bar).queryByText('Next Step')).not.toBeInTheDocument();
+      expect(within(bar).queryByText(wizardEN.buttons.cancel)).not.toBeInTheDocument();
+      expect(bar.getBoundingClientRect().height).toBe(heightBefore);
+    });
+
+    // Critical 1 (extra review of PR-2): the invariant is that a prerendered
+    // anchor's destination must not change in the same frame the page becomes
+    // interactive. IntersectionObserver fires its first callback on observe(),
+    // so for a reader who scrolled past the in-flow CTA while JS was still
+    // loading, that callback lands at hydration — and the right slot would go
+    // from an in-app route to a cross-origin target="_blank" link under a
+    // thumb already resting on it.
+    it('leaves the bar alone when the observer reports out-of-view with no scroll since hydration', () => {
+      renderWizardAtStep(1);
+      const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
+
+      setCtaIntersecting(false);
+
+      expect(within(bar).getByText('Next Step')).toBeInTheDocument();
+      expect(within(bar).getByText(wizardEN.buttons.cancel)).toBeInTheDocument();
+      expect(within(bar).queryByText(wizardEN.entry.cta)).not.toBeInTheDocument();
+    });
+
+    it('swaps once that same out-of-view report is followed by a scroll', () => {
+      renderWizardAtStep(1);
+      const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
+
+      setCtaIntersecting(false);
+      scrollContent();
+
+      expect(within(bar).getByText(wizardEN.entry.cta)).toBeInTheDocument();
+      expect(within(bar).queryByText('Next Step')).not.toBeInTheDocument();
+    });
+
+    it('links the swapped bar primary to the same Accounts Center destination as the in-flow CTA', () => {
+      renderWizardAtStep(1);
+      const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
+
+      scrollContent();
+      setCtaIntersecting(false);
+
+      const barCta = within(bar).getByRole('link', { name: wizardEN.entry.cta });
+      expect(barCta).toHaveAttribute(
+        'href',
+        'https://accountscenter.instagram.com/info_and_permissions/dyi/?entry_point=app_settings'
+      );
+    });
+
+    it('links the swapped bar secondary to /sample', () => {
+      renderWizardAtStep(1);
+      const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
+
+      scrollContent();
+      setCtaIntersecting(false);
+
+      const trySample = within(bar).getByRole('link', { name: wizardEN.buttons.trySample });
+      expect(trySample).toHaveAttribute('href', '/sample');
+    });
+
+    it('reports the CTA click from the bar under the same name as the in-flow control', () => {
+      renderWizardAtStep(1);
+      const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
+
+      scrollContent();
+      setCtaIntersecting(false);
+      fireEvent.click(within(bar).getByRole('link', { name: wizardEN.entry.cta }));
+
+      // Without this the count for the screen's one action would depend on
+      // how far the reader had scrolled when they took it.
+      expect(analytics.linkClick).toHaveBeenCalledExactlyOnceWith('meta_accounts');
+    });
+
+    it('drops the back arrow from the secondary slot once that slot stops meaning "back"', () => {
+      renderWizardAtStep(1);
+      const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
+
+      expect(
+        within(bar).getByRole('link', { name: wizardEN.buttons.cancel }).querySelector('svg')
+      ).not.toBeNull();
+
+      scrollContent();
+      setCtaIntersecting(false);
+
+      // The swapped slot goes to /sample — a sideways move, not a retreat.
+      expect(
+        within(bar).getByRole('link', { name: wizardEN.buttons.trySample }).querySelector('svg')
+      ).toBeNull();
+    });
+
+    it('swaps back to the normal step nav when the in-flow CTA re-enters view', () => {
+      renderWizardAtStep(1);
+      const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
+
+      scrollContent();
+      setCtaIntersecting(false);
+      setCtaIntersecting(true);
+
+      expect(within(bar).getByText('Next Step')).toBeInTheDocument();
+      expect(within(bar).queryByText(wizardEN.entry.cta)).not.toBeInTheDocument();
+    });
+
+    it('does not swap the bar on other steps', () => {
+      renderWizardAtStep(2);
+
+      const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
+      // No in-flow CTA is mounted on this step, so there is nothing for
+      // setCtaIntersecting to drive here — the assertion below is the point:
+      // the bar stays in its normal Back/Next state on a step that never
+      // observes anything.
+      expect(within(bar).queryByText(wizardEN.entry.cta)).not.toBeInTheDocument();
+    });
+
+    // Critical 2 (final whole-branch review of PR-2): Wizard never remounts
+    // across step changes (routes.tsx reuses one element for every
+    // `:stepId`), only `currentStep` does. The bar's swap must therefore
+    // survive re-renders that mount and unmount GuideEntry's in-flow CTA —
+    // not just the initial mount these `renderWizardAtStep` tests exercise.
+    it('starts observing the in-flow CTA once step 1 is reached by navigation, not only on mount', () => {
+      mockPathname = '/wizard/step/3';
+      const { rerender } = render(<Wizard />);
+      expect(observedEntries).toHaveLength(0);
+
+      mockPathname = '/wizard/step/1';
+      rerender(<Wizard />);
+
+      // The deep-link path used to leave observedEntries empty forever,
+      // because the effect that creates the observer only ever ran once, at
+      // the step-3 mount, when there was nothing to attach it to.
+      expect(observedEntries.length).toBeGreaterThan(0);
+
+      const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
+      scrollContent();
+      setCtaIntersecting(false);
+
+      expect(within(bar).getByText(wizardEN.entry.cta)).toBeInTheDocument();
+      expect(within(bar).queryByText('Next Step')).not.toBeInTheDocument();
+    });
+
+    it('does not leave two Accounts Center primaries on screen after navigating step 1 → 2 → 1', () => {
+      mockPathname = '/wizard/step/1';
+      const { rerender } = render(<Wizard />);
+
+      // The in-flow CTA scrolls out before the reader leaves the step.
+      scrollContent();
+      setCtaIntersecting(false);
+
+      mockPathname = '/wizard/step/2';
+      rerender(<Wizard />);
+      mockPathname = '/wizard/step/1';
+      rerender(<Wizard />);
+
+      // GuideEntry remounted a brand-new anchor; the stale, disconnected one
+      // from the first visit must not keep the bar permanently swapped.
+      const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
+      expect(within(bar).getByText('Next Step')).toBeInTheDocument();
+      expect(within(bar).queryByText(wizardEN.entry.cta)).not.toBeInTheDocument();
+      expect(screen.getAllByRole('link', { name: /accounts center/i })).toHaveLength(1);
+    });
   });
 });

@@ -75,13 +75,13 @@ describe('useProExport', () => {
     expect(window.location.search).toBe('?license_key=38b1460a-5104-4067-a91d-77b872934d51');
   });
 
-  it('should report checkout start before navigating', () => {
+  it('should report checkout start, with its dimensions, before navigating', () => {
     const { result } = renderHook(() => useProExport());
 
     act(() => {
-      result.current.startCheckout();
+      result.current.startCheckout('id', 8930);
     });
 
-    expect(vi.mocked(analytics.checkoutStart)).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(analytics.checkoutStart)).toHaveBeenCalledWith('id', 8930);
   });
 });

@@ -1,7 +1,6 @@
 import { useTranslation, Trans } from 'react-i18next';
 import { ChevronRight, Play, Upload } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
+import { PrefixedLink } from '@/components/PrefixedLink';
 import { ResponsiveGif } from '@/components/ResponsiveGif';
 
 interface HowToStep {
@@ -26,14 +25,13 @@ const STEP_META: Array<{ isWarning?: boolean; visual?: string }> = [
   {}, // Step 9: no visual, navigates to upload page
 ];
 
-interface HowToSectionProps {
-  onStart?: (step?: number) => void;
+/** Step 9 is the hand-off to upload; the rest open their wizard step. */
+function stepHref(stepIndex: number): string {
+  return stepIndex === 8 ? '/upload' : `/wizard/step/${stepIndex + 1}`;
 }
 
-export function HowToSection({ onStart }: HowToSectionProps) {
+export function HowToSection() {
   const { t } = useTranslation('howto');
-  const navigate = useNavigate();
-  const prefix = useLanguagePrefix();
 
   // Build steps from translations (using 'as any' for dynamic keys)
   const steps: HowToStep[] = Array.from({ length: 9 }, (_, i) => ({
@@ -69,27 +67,6 @@ export function HowToSection({ onStart }: HowToSectionProps) {
     })),
   };
 
-  const handleStepClick = (stepIndex: number) => {
-    // Step 9 (index 8) goes directly to upload page
-    if (stepIndex === 8) {
-      navigate(`${prefix}/upload`);
-      return;
-    }
-    if (onStart) {
-      onStart(stepIndex);
-    } else {
-      navigate(`${prefix}/wizard/step/${stepIndex + 1}`);
-    }
-  };
-
-  const handleStartClick = () => {
-    if (onStart) {
-      onStart(0);
-    } else {
-      navigate(`${prefix}/wizard/step/1`);
-    }
-  };
-
   return (
     <>
       {/* Schema.org HowTo structured data - safe: uses our own translation strings */}
@@ -116,63 +93,52 @@ export function HowToSection({ onStart }: HowToSectionProps) {
 
           <ol className="space-y-16 md:space-y-24 relative before:absolute before:start-6 md:before:start-8 before:top-4 before:bottom-4 before:w-0.5 before:bg-border">
             {steps.map((step, idx) => (
-              <li
-                key={step.id}
-                role="button"
-                tabIndex={0}
-                aria-label={t('openStepAria', { step: step.id, title: step.title })}
-                className="relative ps-16 md:ps-24 group cursor-pointer"
-                onClick={() => handleStepClick(idx)}
-                onKeyDown={e => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    handleStepClick(idx);
-                  }
-                }}
-              >
-                <div className="absolute start-0 top-0 w-12 h-12 md:w-16 md:h-16 rounded-2xl md:rounded-3xl bg-card border-2 border-primary flex items-center justify-center font-black text-lg md:text-2xl text-primary z-10 group-hover:scale-110 group-hover:shadow-2xl transition-all duration-300">
-                  {step.id}
-                </div>
-                <div className="space-y-4">
-                  <h3 className="text-2xl md:text-3xl font-display font-bold flex items-center flex-wrap gap-3 text-zinc-900 dark:text-white group-hover:text-primary transition-colors">
-                    {step.title}
-                    {step.isWarning && (
-                      <span className="text-xs bg-amber-400 text-black px-3 py-1 rounded-full font-black uppercase tracking-widest shadow-sm">
-                        {t('important')}
+              <li key={step.id} className="relative group">
+                <PrefixedLink
+                  to={stepHref(idx)}
+                  aria-label={t('openStepAria', { step: step.id, title: step.title })}
+                  className="block ps-16 md:ps-24 cursor-pointer"
+                >
+                  <div className="absolute start-0 top-0 w-12 h-12 md:w-16 md:h-16 rounded-2xl md:rounded-3xl bg-card border-2 border-primary flex items-center justify-center font-black text-lg md:text-2xl text-primary z-10 group-hover:scale-110 group-hover:shadow-2xl transition-all duration-300">
+                    {step.id}
+                  </div>
+                  <div className="space-y-4">
+                    <h3 className="text-2xl md:text-3xl font-display font-bold flex items-center flex-wrap gap-3 text-zinc-900 dark:text-white group-hover:text-primary transition-colors">
+                      {step.title}
+                      {step.isWarning && (
+                        <span className="text-xs bg-amber-400 text-black px-3 py-1 rounded-full font-black uppercase tracking-widest shadow-sm">
+                          {t('important')}
+                        </span>
+                      )}
+                    </h3>
+                    <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed font-medium text-base md:text-lg">
+                      {step.description}
+                    </p>
+                    {step.visual && (
+                      <div className="rounded-3xl md:rounded-4xl overflow-hidden border border-border shadow-md max-w-xl mt-6 group-hover:border-primary/30 transition-all flex items-end">
+                        <ResponsiveGif
+                          basePath={step.visual}
+                          alt={step.title}
+                          className="w-full h-auto grayscale-[0.2] group-hover:grayscale-0 transition-all duration-700"
+                        />
+                      </div>
+                    )}
+                    {/* Step 9: upload call-to-action instead of a visual. Presentational
+                        only — the whole card is already the link to the same place, and a
+                        nested anchor would be invalid HTML. */}
+                    {idx === 8 && (
+                      <span className="mt-6 inline-flex items-center justify-center gap-3 px-8 py-4 bg-primary text-primary-foreground rounded-2xl font-black shadow-xl group-hover:scale-105 transition-all text-sm md:text-base">
+                        <Upload size={20} />
+                        {t('uploadButton')}
                       </span>
                     )}
-                  </h3>
-                  <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed font-medium text-base md:text-lg">
-                    {step.description}
-                  </p>
-                  {step.visual && (
-                    <div className="rounded-3xl md:rounded-4xl overflow-hidden border border-border shadow-md max-w-xl mt-6 group-hover:border-primary/30 transition-all flex items-end">
-                      <ResponsiveGif
-                        basePath={step.visual}
-                        alt={step.title}
-                        className="w-full h-auto grayscale-[0.2] group-hover:grayscale-0 transition-all duration-700"
-                      />
-                    </div>
-                  )}
-                  {/* Step 9: Upload button instead of visual */}
-                  {idx === 8 && (
-                    <button
-                      onClick={e => {
-                        e.stopPropagation();
-                        navigate(`${prefix}/upload`);
-                      }}
-                      className="cursor-pointer mt-6 inline-flex items-center justify-center gap-3 px-8 py-4 bg-primary text-primary-foreground rounded-2xl font-black shadow-xl hover:scale-105 active:scale-95 transition-all text-sm md:text-base"
-                    >
-                      <Upload size={20} />
-                      {t('uploadButton')}
-                    </button>
-                  )}
-                  {idx !== 8 && (
-                    <div className="flex items-center gap-2 text-primary font-black text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
-                      {t('openStep')} <ChevronRight size={14} />
-                    </div>
-                  )}
-                </div>
+                    {idx !== 8 && (
+                      <div className="flex items-center gap-2 text-primary font-black text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
+                        {t('openStep')} <ChevronRight size={14} />
+                      </div>
+                    )}
+                  </div>
+                </PrefixedLink>
               </li>
             ))}
           </ol>
@@ -186,12 +152,12 @@ export function HowToSection({ onStart }: HowToSectionProps) {
                 {t('cta.subtitle')}
               </p>
             </div>
-            <button
-              onClick={handleStartClick}
+            <PrefixedLink
+              to="/wizard/step/1"
               className="cursor-pointer w-full md:w-auto px-10 py-5 bg-white text-primary font-black rounded-3xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3 text-lg shadow-xl"
             >
               {t('cta.button')} <Play size={22} fill="currentColor" />
-            </button>
+            </PrefixedLink>
           </div>
         </div>
       </section>

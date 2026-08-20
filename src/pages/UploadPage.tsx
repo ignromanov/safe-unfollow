@@ -2,6 +2,7 @@ import { PageLoader } from '@/components/PageLoader';
 import { UploadZone } from '@/components/UploadZone';
 import { useInstagramData } from '@/hooks/useInstagramData';
 import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
+import { wizardHrefForError } from '@/lib/errors/wizard-routing';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -27,11 +28,15 @@ export function Component() {
   }
 
   const handleUploadStart = (file: File) => {
-    handleZipUpload(file);
+    // handleZipUpload already reports failures through uploadState (read
+    // above); it also rejects its promise so callers that await it can react.
+    // This caller is fire-and-forget, so the rejection must be caught here or
+    // it surfaces as an uncaught promise rejection for an already-handled error.
+    handleZipUpload(file).catch(() => {});
   };
 
   const handleOpenWizard = () => {
-    navigate(`${prefix}/wizard/step/6`);
+    navigate(wizardHrefForError(prefix));
   };
 
   return (

@@ -44,7 +44,7 @@ vi.mock('@/hooks/useLanguagePrefix', () => ({
   useLanguagePrefix: () => mockUseLanguagePrefix(),
 }));
 
-const mockHandleZipUpload = vi.fn();
+const mockHandleZipUpload = vi.fn(() => Promise.resolve());
 const mockUseInstagramData = vi.fn(() => ({
   uploadState: { status: 'idle', error: null, fileName: null },
   handleZipUpload: mockHandleZipUpload,
@@ -199,6 +199,37 @@ describe('UploadPage', () => {
 
       expect(mockHandleZipUpload).toHaveBeenCalledTimes(1);
       expect(mockHandleZipUpload).toHaveBeenCalledWith(expect.any(File));
+    });
+
+    it('swallows the rejection handleZipUpload re-throws, which uploadState already reports', async () => {
+      // handleZipUpload writes the failure into uploadState and then re-throws
+      // by contract. This caller is fire-and-forget, so without a .catch() an
+      // already-displayed parse error ALSO reaches the console as an uncaught
+      // rejection — which is what every wrong-format export did in production.
+      //
+      // The rejecting stand-in is a plain function, NOT a vi.fn(): vitest
+      // subscribes to every promise a mock returns in order to record
+      // settledResults, which marks the rejection handled no matter what the
+      // component does. Through a mock this assertion can never fail.
+      const rejectingUpload = () =>
+        Promise.reject(new Error("This doesn't appear to be an Instagram data export."));
+      mockUseInstagramData.mockReturnValue({
+        uploadState: { status: 'idle', error: null, fileName: null },
+        handleZipUpload: rejectingUpload as unknown as typeof mockHandleZipUpload,
+        parseWarnings: [],
+      });
+
+      const unhandled = vi.fn();
+      process.on('unhandledRejection', unhandled);
+
+      const user = userEvent.setup();
+      render(<UploadPage />);
+      await user.click(screen.getByText(commonEN.buttons.uploadFile));
+      // Node reports an unhandled rejection only after microtasks drain.
+      await new Promise(resolve => setImmediate(resolve));
+      process.off('unhandledRejection', unhandled);
+
+      expect(unhandled).not.toHaveBeenCalled();
     });
   });
 

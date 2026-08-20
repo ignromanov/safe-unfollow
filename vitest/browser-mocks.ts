@@ -40,6 +40,14 @@ export function setupBrowserMocks() {
     writable: true,
   });
 
+  // jsdom implements neither window.scrollTo nor the element-level one, and
+  // the wizard scrolls an inner container rather than the window.
+  Object.defineProperty(Element.prototype, 'scrollTo', {
+    value: vi.fn(),
+    writable: true,
+    configurable: true,
+  });
+
   // Fix for setimmediate package in test environment
   if (typeof global.attachEvent === 'undefined') {
     global.attachEvent = () => {};

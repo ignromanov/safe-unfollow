@@ -9,9 +9,12 @@ import {
   Upload,
 } from 'lucide-react';
 import { FilterChips } from './FilterChips';
+import { FollowRequestsCaveat } from './FollowRequestsCaveat';
+import { TruncatedFileCaveat } from './TruncatedFileCaveat';
 import { AccountList } from './AccountList';
 import { StatCard } from './StatCard';
 import { InlineDonationCard } from './InlineDonationCard';
+import { PrefixedLink } from './PrefixedLink';
 import { AdSlot } from './ads/AdSlot';
 import { RescuePlanBanner } from './RescuePlanBanner';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
@@ -19,10 +22,9 @@ import { ResultsExportControls } from './export/ResultsExportControls';
 import type { BadgeKey } from '@/core/types';
 import { RESCUE_PLAN_BANNER_ENABLED } from '@/config/feature-flags';
 import { useAccountFiltering } from '@/hooks/useAccountFiltering';
-import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
+import { useUploadCaveats } from '@/hooks/useUploadCaveats';
 import { useTimeOnResults } from '@/hooks/useTimeOnResults';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 /**
@@ -47,7 +49,6 @@ export function AccountListSection({
   isSample = false,
 }: AccountListSectionProps) {
   const { t, i18n } = useTranslation('results');
-  const prefix = useLanguagePrefix();
   const {
     query,
     setQuery,
@@ -59,6 +60,12 @@ export function AccountListSection({
     totalCount,
     hasLoadedData,
   } = useAccountFiltering({ fileHash, accountCount });
+
+  // Two independent reasons a count on this page can be wrong: a
+  // follow-requests file we could not read (GH#41), and a required file that
+  // arrived short because a date range was chosen when the export was
+  // requested. One read answers both.
+  const { followRequestsUnreadable, truncatedRelationshipFile } = useUploadCaveats(fileHash);
 
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
@@ -109,12 +116,12 @@ export function AccountListSection({
           <AlertTitle className="text-blue-800 dark:text-blue-200">{t('sample.banner')}</AlertTitle>
           <AlertDescription className="block text-blue-700 dark:text-blue-300">
             {t('sample.hint')}{' '}
-            <Link
-              to={`${prefix}/upload`}
+            <PrefixedLink
+              to="/upload"
               className="font-semibold underline underline-offset-2 hover:text-blue-900 dark:hover:text-blue-100"
             >
               <Upload className="h-3 w-3 inline align-text-bottom" /> {t('sample.uploadPrompt')}
-            </Link>{' '}
+            </PrefixedLink>{' '}
             {t('sample.toSeeReal')}
           </AlertDescription>
         </Alert>
@@ -208,6 +215,12 @@ export function AccountListSection({
         />
       </div>
 
+      {/* Between the "Not Following" stat card and the filter chips — the two
+          places the overstated number is read — and full width in both layouts,
+          because the sidebar it would otherwise sit in is 20rem on desktop. */}
+      {followRequestsUnreadable && <FollowRequestsCaveat />}
+      <TruncatedFileCaveat truncated={truncatedRelationshipFile} />
+
       {/* Main Content Layout - grid for flexible banner positioning */}
       <div className="grid grid-cols-1 lg:grid-cols-[20rem_1fr] gap-6 md:gap-12">
         {RESCUE_PLAN_BANNER_ENABLED && !isSample && (
@@ -225,6 +238,8 @@ export function AccountListSection({
             onFiltersChange={setFilters}
             filterCounts={filterCounts}
             isFiltering={isFiltering}
+            followRequestsUnreadable={followRequestsUnreadable}
+            truncatedRelationshipFile={truncatedRelationshipFile}
           />
         </div>
 
@@ -308,9 +323,11 @@ export function AccountListSection({
       )}
 
       {/* Below the list: an ask placed before the value is delivered inverts the
-          reciprocity that makes it work. BuyMeCoffeeWidget already covers the
-          after-the-fact ask, and this card above the list was its badly-timed
-          duplicate. Last of the two below-the-list blocks, behind the paid one:
+          reciprocity that makes it work, which is why this card is not above it.
+          It used to share the after-the-fact ask with a floating BuyMeACoffee
+          widget; that widget was removed 2026-08-19 because its clicks were
+          unattributable by construction, so this card and the footer link are
+          now the whole ask. Last of the two below-the-list blocks, behind the paid one:
           both are past the reciprocity threshold, and of the pair only the ad
           stops earning when it goes unseen. */}
       <InlineDonationCard accountCount={accountCount} isSample={isSample} />

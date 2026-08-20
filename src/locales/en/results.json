@@ -33,7 +33,8 @@
     "reset": "Reset",
     "emptyCategories": "Empty Categories ({{count, number}})",
     "addFilter": "Add {{label}} filter ({{count, number}} accounts)",
-    "removeFilter": "Remove {{label}} filter ({{count, number}} accounts)"
+    "removeFilter": "Remove {{label}} filter ({{count, number}} accounts)",
+    "chipWithHint": "{{label}} — {{hint}}"
   },
   "badges": {
     "followers": "Followers",
@@ -48,6 +49,25 @@
     "close": "Close friend",
     "dismissed": "Dismissed suggestion"
   },
+  "caveat": {
+    "followRequests": {
+      "title": "“Not following back” may be overstated.",
+      "body": "We could not read your follow-requests file, so accounts you have requested may appear in this list, and your pending-request counts show as empty. Your Followers, Following and Mutuals are unaffected.",
+      "chipHint": "May be overstated — we could not read your follow-requests file."
+    },
+    "truncated": {
+      "followers": {
+        "title": "Your followers list looks incomplete.",
+        "body": "It begins long after your following list does, which is what happens when an export is requested for a limited date range. If you chose one, ask Instagram for your data again with the date range set to “All time”. The counts marked below are affected: some are too high, some too low.",
+        "chipHint": "Counted from a followers list that looks incomplete."
+      },
+      "following": {
+        "title": "Your following list looks incomplete.",
+        "body": "It begins long after your followers list does, which is what happens when an export is requested for a limited date range. If you chose one, ask Instagram for your data again with the date range set to “All time”. The counts marked below are affected: some are too high, some too low.",
+        "chipHint": "Counted from a following list that looks incomplete."
+      }
+    }
+  },
   "empty": {
     "noUsers": "No users found",
     "resetFilters": "Reset Filters"
@@ -58,9 +78,9 @@
   },
   "donation": {
     "headline": "You just analyzed {{count}} accounts — for free.",
-    "body": "No login. No server. No data sent anywhere. If this saved you time, a coffee keeps it going.",
-    "headlineMobile": "Free. Private. No login.",
-    "bodyMobile": "If it was useful, consider buying a coffee.",
+    "body": "No login. Your Instagram export never left this browser. If this saved you time, a coffee keeps it going.",
+    "headlineMobile": "Free analysis. Private. No login.",
+    "bodyMobile": "Your export never left this browser. If it was useful, consider buying a coffee.",
     "cta": "Buy a Coffee",
     "ctaMobile": "Support",
     "dismiss": "Not now"
@@ -107,7 +127,7 @@
     "dismiss": "Maybe later",
     "disclaimer": "Hand-picked tools we recommend. Affiliate links fund free updates — no cost to you.",
     "urgency": {
-      "critical": "Act now — engagement drops 40% after 48 hours",
+      "critical": "Act now — the longer you wait, the harder it is to rebuild",
       "warning": "Early action prevents bigger losses — optimize now"
     },
     "ariaLabel": "Recommended tools to improve your Instagram presence",
@@ -123,7 +143,7 @@
       "freeTrial14": "14-day free trial",
       "freePlan": "Free plan available",
       "freeContacts": "Free up to 1K contacts",
-      "freeForever": "Free forever plan"
+      "freeForever": "Free plan, no expiry"
     },
     "social": {
       "creators50k": "50K+ creators",

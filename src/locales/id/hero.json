@@ -1,11 +1,11 @@
 {
   "version": "V1.6 Dioptimalkan untuk 1.000.000+ Akun",
   "headline": {
-    "prefix": "Lihat Siapa yang",
+    "prefix": "Cek Siapa yang",
     "highlight": "Unfollow di Instagram",
     "suffix": "Tanpa Login"
   },
-  "subheadline": "Cek siapa yang unfollow kamu di Instagram — gratis, tanpa login. Upload ZIP, analisis lokal. 100% privat. Berfungsi offline.",
+  "subheadline": "Cek siapa yang unfollow Anda di Instagram: gratis, tanpa login, tanpa aplikasi. Upload file ZIP dan semuanya dianalisis di browser Anda.",
   "buttons": {
     "getGuide": "Cek Unfollowers Gratis",
     "trySample": "Coba dengan Sampel",
@@ -13,15 +13,15 @@
     "viewResults": "Lihat Hasil Analisis"
   },
   "trust": {
-    "free": "Gratis Selamanya",
-    "noPassword": "Tanpa Password",
-    "privacy": "Privasi Terjamin"
+    "free": "Analisis Gratis • Tanpa Daftar",
+    "noPassword": "Tanpa Password • Tanpa Risiko Akun",
+    "privacy": "Analisis Lokal • Data Tetap di Perangkat"
   },
   "features": {
     "heading": "Fitur Utama",
     "local": {
       "title": "100% Lokal",
-      "description": "Data tidak pernah keluar dari perangkat Anda"
+      "description": "Ekspor Instagram Anda tidak pernah keluar dari browser ini"
     },
     "noLogin": {
       "title": "Tanpa Login",
@@ -29,7 +29,7 @@
     },
     "scale": {
       "title": "Skala Besar",
-      "description": "Mampu memproses 1 juta+ akun dengan cepat"
+      "description": "Dirancang untuk ekspor 1.000.000+ akun"
     },
     "openSource": {
       "title": "Open Source",

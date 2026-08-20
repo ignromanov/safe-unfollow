@@ -21,6 +21,9 @@ vi.mock('@/lib/analytics', () => ({
     returnUpload: vi.fn(),
     linkClick: vi.fn(),
     uploadParseDuration: vi.fn(),
+    optionalFileFormatDrift: vi.fn(),
+    usernameLabelResolution: vi.fn(),
+    relationshipFileTruncated: vi.fn(),
   },
 }));
 
@@ -101,6 +104,7 @@ describe('useFileUpload', () => {
         files: [],
       },
       hasMinimalData: true,
+      labelResolutionMode: 'fast-path',
     });
 
     vi.mocked(buildAccountBadgeIndex).mockReturnValue([
@@ -125,6 +129,231 @@ describe('useFileUpload', () => {
         fileHash: mockFileHash,
       })
     );
+  });
+
+  /**
+   * GH#21 — the six optional relationship files parse to an empty map when their
+   * top-level shape drifts, which looks exactly like "this user has none". The
+   * parser now flags that at severity 'warning', but `'warning'` is rendered
+   * NOWHERE (`UploadZone.tsx` and `DiagnosticErrorScreen.tsx` both read only
+   * `'error'`), so this event is the entire detection surface. Without it the
+   * drift is silent to the user AND to us.
+   *
+   * The second assertion carries most of the weight: an implementation that fired
+   * on every warning would satisfy the first one and flood the event with ordinary
+   * empty-file notices, destroying the signal it exists to carry.
+   */
+  it('should report each drifted optional file and stay silent for ordinary warnings', async () => {
+    const { parseInstagramZipFile } = await import('@/core/parsers/instagram');
+    vi.mocked(parseInstagramZipFile).mockResolvedValue({
+      data: {
+        following: new Set(['user1']),
+        followers: new Set(['user2']),
+        pendingSent: new Map(),
+        permanentRequests: new Map(),
+        restricted: new Map(),
+        closeFriends: new Map(),
+        unfollowed: new Map(),
+        dismissedSuggestions: new Map(),
+        followingTimestamps: new Map(),
+        followersTimestamps: new Map(),
+      },
+      warnings: [
+        {
+          code: 'INVALID_UNFOLLOWED_FORMAT',
+          message: 'unfollowed shape not recognised',
+          severity: 'warning',
+        },
+        { code: 'EMPTY_FOLLOWING', message: 'following.json is empty', severity: 'info' },
+        {
+          code: 'INVALID_DISMISSED_FORMAT',
+          message: 'dismissed shape not recognised',
+          severity: 'warning',
+        },
+        { code: 'MISSING_PENDING', message: 'pending file absent', severity: 'warning' },
+      ],
+      discovery: { format: 'json', isInstagramExport: true, basePath: '', files: [] },
+      hasMinimalData: true,
+    } as any);
+
+    const { result } = renderHook(() => useFileUpload());
+
+    await act(async () => {
+      await result.current.handleZipUpload(mockFile);
+    });
+
+    expect(analytics.optionalFileFormatDrift).toHaveBeenCalledWith('INVALID_UNFOLLOWED_FORMAT');
+    expect(analytics.optionalFileFormatDrift).toHaveBeenCalledWith('INVALID_DISMISSED_FORMAT');
+    expect(analytics.optionalFileFormatDrift).toHaveBeenCalledTimes(2);
+  });
+
+  /**
+   * GH#21 Task 5, job 1: `OPTIONAL_FILE_DRIFT_CODES` is derived from
+   * `FileSpec.driftCode` AND `FileSpec.entryDriftCode` in the same flatMap
+   * (`instagram-file-specs.ts`), so task 3's entry-level codes
+   * (`UNRESOLVED_ENTRIES_*`) must reach `optionalFileFormatDrift` with no
+   * change in this hook — verified here rather than assumed. A hand-added
+   * code anywhere would be a regression in that derived-not-hand-listed
+   * design.
+   */
+  it('reports an entry-level drift code the same way as a file-level one, and nothing else', async () => {
+    const { parseInstagramZipFile } = await import('@/core/parsers/instagram');
+    vi.mocked(parseInstagramZipFile).mockResolvedValue({
+      data: {
+        following: new Set(['user1']),
+        followers: new Set(['user2']),
+        pendingSent: new Map(),
+        permanentRequests: new Map(),
+        restricted: new Map(),
+        closeFriends: new Map(),
+        unfollowed: new Map(),
+        dismissedSuggestions: new Map(),
+        followingTimestamps: new Map(),
+        followersTimestamps: new Map(),
+      },
+      warnings: [
+        {
+          code: 'UNRESOLVED_ENTRIES_CLOSE_FRIENDS',
+          message: 'close_friends.json was found, but its records could not be read.',
+          severity: 'warning',
+        },
+        { code: 'EMPTY_FOLLOWING', message: 'following.json is empty', severity: 'info' },
+      ],
+      discovery: { format: 'json', isInstagramExport: true, basePath: '', files: [] },
+      hasMinimalData: true,
+      labelResolutionMode: 'unresolved',
+    } as any);
+
+    const { result } = renderHook(() => useFileUpload());
+
+    await act(async () => {
+      await result.current.handleZipUpload(mockFile);
+    });
+
+    expect(analytics.optionalFileFormatDrift).toHaveBeenCalledWith(
+      'UNRESOLVED_ENTRIES_CLOSE_FRIENDS'
+    );
+    expect(analytics.optionalFileFormatDrift).toHaveBeenCalledTimes(1);
+  });
+
+  /**
+   * GH#21 Task 5, job 2: the new event. A clean parse still emits it —
+   * unlike the drift event, which stays silent — because a rise in
+   * `unresolved` across many uploads is the earliest signal Instagram
+   * changed the record shape again, and that comparison needs a value from
+   * every parse, not just the drifted ones.
+   */
+  describe('parse diagnostics reporting', () => {
+    it('reports fast-path for a clean parse and emits no drift event', async () => {
+      const { result } = renderHook(() => useFileUpload());
+
+      await act(async () => {
+        await result.current.handleZipUpload(mockFile);
+      });
+
+      expect(analytics.usernameLabelResolution).toHaveBeenCalledWith('fast-path');
+      expect(analytics.usernameLabelResolution).toHaveBeenCalledTimes(1);
+      expect(analytics.optionalFileFormatDrift).not.toHaveBeenCalled();
+    });
+
+    it('reports whatever mode the parse resolved, not just fast-path', async () => {
+      const { parseInstagramZipFile } = await import('@/core/parsers/instagram');
+      vi.mocked(parseInstagramZipFile).mockResolvedValue({
+        data: {
+          following: new Set(['user1']),
+          followers: new Set(['user2']),
+          pendingSent: new Map(),
+          permanentRequests: new Map(),
+          restricted: new Map(),
+          closeFriends: new Map(),
+          unfollowed: new Map(),
+          dismissedSuggestions: new Map(),
+          followingTimestamps: new Map(),
+          followersTimestamps: new Map(),
+        },
+        warnings: [],
+        discovery: { format: 'json', isInstagramExport: true, basePath: '', files: [] },
+        hasMinimalData: true,
+        labelResolutionMode: 'not-applicable',
+      } as any);
+
+      const { result } = renderHook(() => useFileUpload());
+
+      await act(async () => {
+        await result.current.handleZipUpload(mockFile);
+      });
+
+      expect(analytics.usernameLabelResolution).toHaveBeenCalledWith('not-applicable');
+    });
+
+    /**
+     * The date-range defect's telemetry. It rides reportParseDiagnostics rather
+     * than fileUploadSuccess because it is a fact about the export, not about
+     * whether the upload finished — and a truncated export finishes.
+     */
+    it('reports which relationship file arrived short', async () => {
+      const { parseInstagramZipFile } = await import('@/core/parsers/instagram');
+      vi.mocked(parseInstagramZipFile).mockResolvedValue({
+        data: {
+          following: new Set(['user1']),
+          followers: new Set(['user2']),
+          pendingSent: new Map(),
+          permanentRequests: new Map(),
+          restricted: new Map(),
+          closeFriends: new Map(),
+          unfollowed: new Map(),
+          dismissedSuggestions: new Map(),
+          followingTimestamps: new Map(),
+          followersTimestamps: new Map(),
+        },
+        warnings: [],
+        discovery: { format: 'json', isInstagramExport: true, basePath: '', files: [] },
+        hasMinimalData: true,
+        labelResolutionMode: 'fast-path',
+        truncatedRelationshipFile: 'followers',
+      } as any);
+
+      const { result } = renderHook(() => useFileUpload());
+
+      await act(async () => {
+        await result.current.handleZipUpload(mockFile);
+      });
+
+      expect(analytics.relationshipFileTruncated).toHaveBeenCalledWith('followers');
+      expect(analytics.relationshipFileTruncated).toHaveBeenCalledTimes(1);
+    });
+
+    it('stays silent when neither file looks short', async () => {
+      const { result } = renderHook(() => useFileUpload());
+
+      await act(async () => {
+        await result.current.handleZipUpload(mockFile);
+      });
+
+      // Unlike usernameLabelResolution, a clean parse emits nothing here — the
+      // event has no denominator of its own by design.
+      expect(analytics.relationshipFileTruncated).not.toHaveBeenCalled();
+    });
+
+    it('does not report a resolution mode on the cached path — nothing was parsed', async () => {
+      mockDbCache.get.mockResolvedValue({
+        metadata: {
+          name: 'test.zip',
+          size: 1024,
+          uploadDate: new Date('2023-01-01'),
+          fileHash: mockFileHash,
+          accountCount: 100,
+        },
+      } as any);
+
+      const { result } = renderHook(() => useFileUpload());
+
+      await act(async () => {
+        await result.current.handleZipUpload(mockFile);
+      });
+
+      expect(analytics.usernameLabelResolution).not.toHaveBeenCalled();
+    });
   });
 
   it('should not override existing filters', async () => {
@@ -399,6 +628,134 @@ describe('useFileUpload', () => {
       });
 
       expect(analytics.uploadParseDuration).toHaveBeenCalledWith(expect.any(Number), 'error');
+    });
+  });
+
+  /**
+   * GH#35 — the two pre-parse guards report the failure themselves and then
+   * `throw new Error(message)` to unwind. That plain Error carries no `code` and
+   * its message has already been through i18n, so the hook's own catch runs
+   * `extractErrorCode` over a translated string, gets `UNKNOWN`, and reports the
+   * same failure a second time.
+   *
+   * Measured 24 Jul – 12 Aug 2026: 296 of the 653 `upload_error_unknown` events
+   * carry a translated NOT_ZIP message against 307 `upload_error_not_zip` — a 1:1
+   * shadow, not a partial loss. It also explains why `UNKNOWN` shows 6 diagnostic
+   * screens against 653 events: the phantom half has no screen behind it because
+   * the user saw the NOT_ZIP one, which counted under NOT_ZIP.
+   *
+   * The count is the whole assertion. An implementation that reported the right
+   * code and still double-fired would satisfy a `toHaveBeenCalledWith` check and
+   * leave the bucket exactly as wrong as it is now.
+   */
+  describe('file size', () => {
+    it('accepts an export far above the deleted 500MB ceiling', async () => {
+      // 900MB: above the old ceiling, near the median of what it rejected
+      // (863MB — see the plan's 02-measurement.md). The archive's size stopped
+      // bearing on memory when the reader started seeking instead of loading.
+      const huge = createMockFile();
+      Object.defineProperty(huge, 'size', { value: 900 * 1024 * 1024 });
+
+      const { result } = renderHook(() => useFileUpload());
+
+      await act(async () => {
+        try {
+          await result.current.handleZipUpload(huge);
+        } catch {
+          // What the mocked parser does downstream is not this test's subject
+        }
+      });
+
+      const codes = vi.mocked(analytics.uploadErrorByCode).mock.calls.map(call => call[1]);
+      expect(codes).not.toContain('FILE_TOO_LARGE');
+    });
+  });
+
+  describe('one upload failure reports exactly one code (GH#35)', () => {
+    it('should report NOT_ZIP once, not once as itself and once as UNKNOWN', async () => {
+      const notZip = createMockFile();
+      Object.defineProperty(notZip, 'name', { value: 'my-instagram-data.rar' });
+
+      const { result } = renderHook(() => useFileUpload());
+
+      await act(async () => {
+        try {
+          await result.current.handleZipUpload(notZip);
+        } catch {
+          // Expected — the hook rethrows for the caller's error UI
+        }
+      });
+
+      expect(analytics.uploadErrorByCode).toHaveBeenCalledTimes(1);
+      expect(analytics.uploadErrorByCode).toHaveBeenCalledWith(
+        '',
+        'NOT_ZIP',
+        expect.any(String),
+        expect.any(Number)
+      );
+    });
+
+    /**
+     * The same one-reporting-point rule applied to the screen, not the event.
+     * The guards no longer call `setUploadInfo`; these two tests are what makes
+     * that safe to have removed — the first proves the reader still gets the
+     * error, the second proves they no longer get one they cancelled.
+     */
+    it('paints the guard failure once, from the catch every failure passes through', async () => {
+      const notZip = createMockFile();
+      Object.defineProperty(notZip, 'name', { value: 'my-instagram-data.rar' });
+
+      const { result } = renderHook(() => useFileUpload());
+
+      await act(async () => {
+        try {
+          await result.current.handleZipUpload(notZip);
+        } catch {
+          // Expected — the hook rethrows for the caller's error UI
+        }
+      });
+
+      const errorCalls = mockSetUploadInfo.mock.calls.filter(
+        call => call[0].uploadStatus === 'error'
+      );
+
+      expect(errorCalls).toHaveLength(1);
+      expect(errorCalls[0][0]).toMatchObject({
+        currentFileName: 'my-instagram-data.rar',
+        parseWarnings: [expect.objectContaining({ code: 'NOT_ZIP', severity: 'error' })],
+      });
+      // The sentence on screen is the warning's own, not a second one written
+      // for the catch — DiagnosticErrorScreen renders both and they must agree.
+      expect(errorCalls[0][0].uploadError).toBe(errorCalls[0][0].parseWarnings[0].message);
+    });
+
+    it('leaves a cancelled upload cancelled, instead of erroring on a file already given up on', async () => {
+      const notZip = createMockFile();
+      Object.defineProperty(notZip, 'name', { value: 'my-instagram-data.rar' });
+
+      const { result } = renderHook(() => useFileUpload());
+
+      // Abort lands while handleZipUpload is suspended on `await isValidZipFile`:
+      // the extension check decides synchronously, but awaiting it still yields
+      // control back here first.
+      await act(async () => {
+        const promise = result.current.handleZipUpload(notZip).catch(() => {
+          // Cancellation is swallowed by design — the catch returns, not rethrows
+        });
+        result.current.abortUpload();
+        return promise;
+      });
+
+      expect(mockSetUploadInfo.mock.calls.filter(call => call[0].uploadStatus === 'error')).toEqual(
+        []
+      );
+      expect(analytics.uploadErrorByCode).toHaveBeenCalledTimes(1);
+      expect(analytics.uploadErrorByCode).toHaveBeenCalledWith(
+        '',
+        'UPLOAD_CANCELLED',
+        undefined,
+        expect.any(Number)
+      );
     });
   });
 
@@ -696,6 +1053,59 @@ describe('useFileUpload', () => {
           uploadError: 'Parse failed',
         })
       );
+    });
+
+    /**
+     * GH#21 Task 5: drift is a fact about the export, not about whether the
+     * upload finished — `reportParseDiagnostics` runs on the worker's failure
+     * path, carrying the resolution mode and the drift warnings alike. This goes
+     * through the real (unmocked) `parseWithWorker`, so it also pins that
+     * `labelResolutionMode` survives the worker message boundary on the
+     * `hasMinimalData: false` branch, not just the success one.
+     */
+    it('reports the resolution mode carried on a failed worker parse', async () => {
+      const messageHandlers: ((e: MessageEvent) => void)[] = [];
+      const mockWorker = {
+        postMessage: vi.fn(),
+        addEventListener: vi.fn((event: string, handler: (e: MessageEvent) => void) => {
+          if (event === 'message') {
+            messageHandlers.push(handler);
+          }
+        }),
+        removeEventListener: vi.fn(),
+        terminate: vi.fn(),
+        onerror: null,
+      };
+
+      (global as any).Worker = vi.fn(() => mockWorker);
+
+      const { result } = renderHook(() => useFileUpload());
+
+      await new Promise(resolve => setTimeout(resolve, 150));
+      messageHandlers.forEach(h => h({ data: { type: 'ready' } } as MessageEvent));
+
+      await act(async () => {
+        const promise = result.current.handleZipUpload(mockFile).catch(() => {
+          // Expected error
+        });
+
+        await new Promise(resolve => setTimeout(resolve, 50));
+        messageHandlers.forEach(h =>
+          h({
+            data: {
+              type: 'error',
+              code: 'NO_DATA_FILES',
+              error: 'Could not parse Instagram data',
+              warnings: [],
+              labelResolutionMode: 'unresolved',
+            },
+          } as MessageEvent)
+        );
+
+        return promise;
+      });
+
+      expect(analytics.usernameLabelResolution).toHaveBeenCalledWith('unresolved');
     });
 
     it('should handle worker timeout', async () => {

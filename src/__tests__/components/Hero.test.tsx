@@ -1,35 +1,29 @@
 import { vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { screen } from '@testing-library/react';
 
 // Import translation before mocking
 import heroEN from '@/locales/en/hero.json';
 import { createI18nMock } from '@/__tests__/utils/mockI18n';
+import { renderWithRouter as render } from '@/__tests__/test-utils';
 
 vi.mock('react-i18next', () => createI18nMock(heroEN));
 
 import { Hero } from '@/components/Hero';
 
 describe('Hero Component', () => {
-  const defaultProps = {
-    onStartGuide: vi.fn(),
-    onLoadSample: vi.fn(),
-    onUploadDirect: vi.fn(),
-  };
-
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   describe('rendering', () => {
     it('should render without crashing', () => {
-      render(<Hero {...defaultProps} />);
+      render(<Hero />);
 
       expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
     });
 
     it('should render main headline with translated text', () => {
-      render(<Hero {...defaultProps} />);
+      render(<Hero />);
 
       const heading = screen.getByRole('heading', { level: 1 });
       expect(heading).toHaveTextContent(heroEN.headline.prefix);
@@ -38,63 +32,81 @@ describe('Hero Component', () => {
     });
 
     it('should render subheadline', () => {
-      render(<Hero {...defaultProps} />);
+      render(<Hero />);
 
       expect(screen.getByText(heroEN.subheadline)).toBeInTheDocument();
     });
 
     it('should render version badge', () => {
-      render(<Hero {...defaultProps} />);
+      render(<Hero />);
 
       expect(screen.getByText(heroEN.version)).toBeInTheDocument();
     });
   });
 
   describe('CTA buttons', () => {
-    it('should render primary CTA button when no data', () => {
-      render(<Hero {...defaultProps} hasData={false} />);
+    it('should render primary CTA link when no data', () => {
+      render(<Hero hasData={false} />);
 
       expect(
-        screen.getByRole('button', { name: new RegExp(heroEN.buttons.getGuide, 'i') })
+        screen.getByRole('link', { name: new RegExp(heroEN.buttons.getGuide, 'i') })
       ).toBeInTheDocument();
     });
 
-    it('should render "View Results" button when hasData is true', () => {
-      render(<Hero {...defaultProps} hasData={true} onContinue={vi.fn()} />);
+    it('should render "View Results" link when hasData is true', () => {
+      render(<Hero hasData={true} />);
 
       expect(
-        screen.getByRole('button', { name: new RegExp(heroEN.buttons.viewResults, 'i') })
+        screen.getByRole('link', { name: new RegExp(heroEN.buttons.viewResults, 'i') })
       ).toBeInTheDocument();
     });
 
-    it('should render sample data button', () => {
-      render(<Hero {...defaultProps} />);
+    it('should render sample data link', () => {
+      render(<Hero />);
 
       expect(
-        screen.getByRole('button', { name: new RegExp(heroEN.buttons.trySample, 'i') })
+        screen.getByRole('link', { name: new RegExp(heroEN.buttons.trySample, 'i') })
       ).toBeInTheDocument();
     });
 
     it('should render "I already have my ZIP file" link when no data', () => {
-      render(<Hero {...defaultProps} hasData={false} />);
+      render(<Hero hasData={false} />);
 
       expect(
-        screen.getByRole('button', { name: new RegExp(heroEN.buttons.haveFile, 'i') })
+        screen.getByRole('link', { name: new RegExp(heroEN.buttons.haveFile, 'i') })
       ).toBeInTheDocument();
     });
 
+    // The whole of GH#86 is an ordering claim, and ordering is the part a
+    // restyle can silently undo: the ZIP-holder path must reach the reader —
+    // and the keyboard — before the sample link, not after the trust row.
+    // Asserting the presence of both links, which the two tests above already
+    // do, passes just as well when this control is a footnote again.
+    it('puts the ZIP-holder path ahead of the sample link', () => {
+      render(<Hero hasData={false} />);
+
+      const haveFile = screen.getByRole('link', {
+        name: new RegExp(heroEN.buttons.haveFile, 'i'),
+      });
+      const sample = screen.getByRole('link', {
+        name: new RegExp(heroEN.buttons.trySample, 'i'),
+      });
+
+      expect(haveFile.compareDocumentPosition(sample)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    });
+
     it('should not render "I already have my ZIP file" link when hasData is true', () => {
-      render(<Hero {...defaultProps} hasData={true} />);
+      render(<Hero hasData={true} />);
 
       expect(
-        screen.queryByRole('button', { name: new RegExp(heroEN.buttons.haveFile, 'i') })
+        screen.queryByRole('link', { name: new RegExp(heroEN.buttons.haveFile, 'i') })
       ).not.toBeInTheDocument();
     });
   });
 
   describe('trust badges', () => {
     it('should render trust badges', () => {
-      render(<Hero {...defaultProps} />);
+      render(<Hero />);
 
       expect(screen.getByText(heroEN.trust.free)).toBeInTheDocument();
       expect(screen.getByText(heroEN.trust.noPassword)).toBeInTheDocument();
@@ -104,7 +116,7 @@ describe('Hero Component', () => {
 
   describe('feature cards', () => {
     it('should render all four feature cards', () => {
-      render(<Hero {...defaultProps} />);
+      render(<Hero />);
 
       expect(screen.getByText(heroEN.features.local.title)).toBeInTheDocument();
       expect(screen.getByText(heroEN.features.noLogin.title)).toBeInTheDocument();
@@ -113,7 +125,7 @@ describe('Hero Component', () => {
     });
 
     it('should render feature descriptions', () => {
-      render(<Hero {...defaultProps} />);
+      render(<Hero />);
 
       expect(screen.getByText(heroEN.features.local.description)).toBeInTheDocument();
       expect(screen.getByText(heroEN.features.noLogin.description)).toBeInTheDocument();
@@ -122,50 +134,88 @@ describe('Hero Component', () => {
     });
   });
 
-  describe('button interactions', () => {
-    it('should call onStartGuide when primary CTA is clicked', async () => {
-      const user = userEvent.setup();
-      render(<Hero {...defaultProps} />);
-
-      await user.click(
-        screen.getByRole('button', { name: new RegExp(heroEN.buttons.getGuide, 'i') })
-      );
-
-      expect(defaultProps.onStartGuide).toHaveBeenCalledTimes(1);
+  describe('CTA hrefs', () => {
+    // A <button> calling useNavigate() is dead until React hydrates — 3.7s on a cold
+    // mobile load. An anchor navigates natively that whole time.
+    it('renders the primary CTA as a real anchor to the wizard', () => {
+      render(<Hero hasData={false} />);
+      expect(
+        screen.getByRole('link', { name: new RegExp(heroEN.buttons.getGuide, 'i') })
+      ).toHaveAttribute('href', '/wizard/step/1');
     });
 
-    it('should call onLoadSample when sample button is clicked', async () => {
-      const user = userEvent.setup();
-      render(<Hero {...defaultProps} />);
-
-      await user.click(
-        screen.getByRole('button', { name: new RegExp(heroEN.buttons.trySample, 'i') })
-      );
-
-      expect(defaultProps.onLoadSample).toHaveBeenCalledTimes(1);
+    it('renders the sample CTA as a real anchor', () => {
+      render(<Hero hasData={false} />);
+      expect(
+        screen.getByRole('link', { name: new RegExp(heroEN.buttons.trySample, 'i') })
+      ).toHaveAttribute('href', '/sample');
     });
 
-    it('should call onUploadDirect when "I already have my ZIP file" is clicked', async () => {
-      const user = userEvent.setup();
-      render(<Hero {...defaultProps} />);
-
-      await user.click(
-        screen.getByRole('button', { name: new RegExp(heroEN.buttons.haveFile, 'i') })
-      );
-
-      expect(defaultProps.onUploadDirect).toHaveBeenCalledTimes(1);
+    it('renders the direct-upload CTA as a real anchor', () => {
+      render(<Hero hasData={false} />);
+      expect(
+        screen.getByRole('link', { name: new RegExp(heroEN.buttons.haveFile, 'i') })
+      ).toHaveAttribute('href', '/upload');
     });
 
-    it('should call onContinue when "View Results" is clicked', async () => {
-      const user = userEvent.setup();
-      const onContinue = vi.fn();
-      render(<Hero {...defaultProps} hasData={true} onContinue={onContinue} />);
+    it('renders the results CTA as a real anchor when data is loaded', () => {
+      render(<Hero hasData={true} />);
+      expect(
+        screen.getByRole('link', { name: new RegExp(heroEN.buttons.viewResults, 'i') })
+      ).toHaveAttribute('href', '/results');
+    });
 
-      await user.click(
-        screen.getByRole('button', { name: new RegExp(heroEN.buttons.viewResults, 'i') })
-      );
+    it('prefixes every CTA href with the current language', () => {
+      render(<Hero hasData={false} />, { initialEntries: ['/ru/'] });
+      expect(
+        screen.getByRole('link', { name: new RegExp(heroEN.buttons.getGuide, 'i') })
+      ).toHaveAttribute('href', '/ru/wizard/step/1');
+      expect(
+        screen.getByRole('link', { name: new RegExp(heroEN.buttons.trySample, 'i') })
+      ).toHaveAttribute('href', '/ru/sample');
+      expect(
+        screen.getByRole('link', { name: new RegExp(heroEN.buttons.haveFile, 'i') })
+      ).toHaveAttribute('href', '/ru/upload');
+    });
+  });
 
-      expect(onContinue).toHaveBeenCalledTimes(1);
+  describe('CTA analytics', () => {
+    // The recorder is the capture-phase listener in index.html, not onClick: a click in
+    // the hydration window follows the href with no React handler running, and used to
+    // lose both the event and the session's entry_cta (GH#99). The listener can only see
+    // what the prerendered markup says, so the attribute IS the instrumentation — losing
+    // it makes hero_cta_* stop counting without breaking navigation, which is the failure
+    // this guards against.
+    it('marks the guide CTA', () => {
+      render(<Hero hasData={false} />);
+
+      expect(
+        screen.getByRole('link', { name: new RegExp(heroEN.buttons.getGuide, 'i') })
+      ).toHaveAttribute('data-cta', 'guide');
+    });
+
+    it('marks the sample CTA', () => {
+      render(<Hero hasData={false} />);
+
+      expect(
+        screen.getByRole('link', { name: new RegExp(heroEN.buttons.trySample, 'i') })
+      ).toHaveAttribute('data-cta', 'sample');
+    });
+
+    it('marks the direct-upload CTA', () => {
+      render(<Hero hasData={false} />);
+
+      expect(
+        screen.getByRole('link', { name: new RegExp(heroEN.buttons.haveFile, 'i') })
+      ).toHaveAttribute('data-cta', 'upload_direct');
+    });
+
+    it('marks the results CTA', () => {
+      render(<Hero hasData={true} />);
+
+      expect(
+        screen.getByRole('link', { name: new RegExp(heroEN.buttons.viewResults, 'i') })
+      ).toHaveAttribute('data-cta', 'continue');
     });
   });
 });

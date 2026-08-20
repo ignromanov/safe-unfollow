@@ -9,9 +9,14 @@ vi.mock('react-i18next', () => createI18nMock(resultsEN));
 import { AccountListSection } from '@/components/AccountListSection';
 import type { BadgeKey } from '@/core/types';
 import { useAccountFiltering } from '@/hooks/useAccountFiltering';
+import { useUploadCaveats } from '@/hooks/useUploadCaveats';
 
 // Mock the useAccountFiltering hook
 vi.mock('@/hooks/useAccountFiltering');
+
+// Reads IndexedDB, which jsdom does not provide. Mocked so every other test in
+// this file renders the clean page, and the caveat tests below opt in.
+vi.mock('@/hooks/useUploadCaveats');
 
 // Mock useLanguagePrefix
 vi.mock('@/hooks/useLanguagePrefix', () => ({
@@ -70,6 +75,14 @@ vi.mock('@/components/RescuePlanBanner', () => ({
 }));
 
 const mockUseAccountFiltering = vi.mocked(useAccountFiltering);
+const mockUseUploadCaveats = vi.mocked(useUploadCaveats);
+
+/** Both caveats quiet unless a test says otherwise. */
+const caveats = (overrides: Partial<ReturnType<typeof useUploadCaveats>> = {}) => ({
+  followRequestsUnreadable: false,
+  truncatedRelationshipFile: null,
+  ...overrides,
+});
 
 describe('AccountListSection', () => {
   const mockSetQuery = vi.fn();
@@ -115,6 +128,147 @@ describe('AccountListSection', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseAccountFiltering.mockReturnValue(createMockReturnValue());
+    mockUseUploadCaveats.mockReturnValue(caveats());
+  });
+
+  /**
+   * GH#41. When a follow-requests file is present and unreadable, both request
+   * maps come back empty and every outstanding request joins notFollowingBack.
+   * The badge still renders — showing 0 instead would read as good news and be
+   * wrong in the other direction — so the page has to say the number may be high.
+   */
+  describe('overstated notFollowingBack caveat', () => {
+    it('says nothing when the follow-requests files read fine', () => {
+      renderWithRouter(<AccountListSection {...defaultProps} />);
+
+      expect(screen.queryByText(resultsEN.caveat.followRequests.title)).not.toBeInTheDocument();
+    });
+
+    it('names the badge, the cause, and what is still trustworthy', () => {
+      mockUseUploadCaveats.mockReturnValue(caveats({ followRequestsUnreadable: true }));
+      renderWithRouter(<AccountListSection {...defaultProps} />);
+
+      expect(screen.getByText(resultsEN.caveat.followRequests.title)).toBeInTheDocument();
+      expect(screen.getByText(resultsEN.caveat.followRequests.body)).toBeInTheDocument();
+    });
+
+    it('reassures only about counts that survive an unreadable requests file', () => {
+      // The body used to end "everything else on this page is unaffected",
+      // which was false about the same file: badges.pending and
+      // badges.permanent read the two maps the caveat is about
+      // (core/badges/index.ts:58-60), so they fall to 0 and FilterChips sweeps
+      // them into "empty categories" — the page says "no pending requests" off
+      // the file it could not read, and the notice vouched for it.
+      const body = resultsEN.caveat.followRequests.body;
+
+      // Followers, Following and Mutuals derive from following.json and
+      // followers_*.json alone. They are the only counts safe to name.
+      expect(body).toMatch(/followers/i);
+      expect(body).toMatch(/following/i);
+      expect(body).toMatch(/mutuals/i);
+      // The understatement is stated, not just the overstatement.
+      expect(body).toMatch(/pending/i);
+      expect(body).not.toMatch(/everything else/i);
+    });
+
+    it('announces politely — the notice arrives after paint, and is advisory', () => {
+      mockUseUploadCaveats.mockReturnValue(caveats({ followRequestsUnreadable: true }));
+      renderWithRouter(<AccountListSection {...defaultProps} />);
+
+      // role="alert" (the Alert primitive's default) is assertive, and this is
+      // inserted into a live region once the stored flag resolves — cutting
+      // across a screen reader mid-announcement for something advisory.
+      const notice = screen.getByText(resultsEN.caveat.followRequests.title).closest('[role]');
+      expect(notice).toHaveAttribute('role', 'status');
+    });
+
+    it('keeps the notFollowingBack list rather than suppressing it', () => {
+      mockUseUploadCaveats.mockReturnValue(caveats({ followRequestsUnreadable: true }));
+      renderWithRouter(<AccountListSection {...defaultProps} />);
+
+      // Suppressing the badge would render "0 Not Following Back", which reads
+      // as good news and lies in the other direction — silently, again.
+      expect(screen.getByTestId('stat-card-not following')).toHaveTextContent('3');
+    });
+  });
+
+  /**
+   * The other reason a count here can be wrong, and the one the reader cannot
+   * detect at all: Meta's export dialog offers a date range, and picking one
+   * filters followers_*.json by entry timestamp while leaving following.json
+   * whole. Measured on a real export, notFollowingBack went 95 -> 294 and
+   * mutuals 298 -> 99, with no warning anywhere.
+   */
+  describe('truncated relationship file caveat', () => {
+    it('says nothing when both files start around the same time', () => {
+      renderWithRouter(<AccountListSection {...defaultProps} />);
+
+      expect(
+        screen.queryByText(resultsEN.caveat.truncated.followers.title)
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(resultsEN.caveat.truncated.following.title)
+      ).not.toBeInTheDocument();
+    });
+
+    it('names the short list and the one action that settles it', () => {
+      mockUseUploadCaveats.mockReturnValue(caveats({ truncatedRelationshipFile: 'followers' }));
+      renderWithRouter(<AccountListSection {...defaultProps} />);
+
+      expect(screen.getByText(resultsEN.caveat.truncated.followers.title)).toBeInTheDocument();
+      expect(screen.getByText(resultsEN.caveat.truncated.followers.body)).toBeInTheDocument();
+    });
+
+    it('names the other list when the other list is the short one', () => {
+      mockUseUploadCaveats.mockReturnValue(caveats({ truncatedRelationshipFile: 'following' }));
+      renderWithRouter(<AccountListSection {...defaultProps} />);
+
+      expect(screen.getByText(resultsEN.caveat.truncated.following.title)).toBeInTheDocument();
+      expect(
+        screen.queryByText(resultsEN.caveat.truncated.followers.title)
+      ).not.toBeInTheDocument();
+    });
+
+    it('does not tell the reader what Instagram did, only what was observed', () => {
+      // A genuinely late-blooming account produces the same shape, so the copy
+      // states the observation and the remedy. Asserting the absence of a
+      // diagnosis is the only way this stays true through a copy edit.
+      const body = resultsEN.caveat.truncated.followers.body;
+
+      expect(body).toMatch(/date range/i);
+      expect(body).toMatch(/All time/i);
+      expect(body).not.toMatch(/instagram (removed|deleted|hid|truncated)/i);
+    });
+
+    it('carries no interpolation, because ten locales would each need a date formatter', () => {
+      const block = resultsEN.caveat.truncated;
+      const strings = [
+        ...Object.values(block.followers),
+        ...Object.values(block.following),
+      ] as string[];
+
+      for (const value of strings) {
+        expect(value).not.toMatch(/\{\{/);
+      }
+    });
+
+    it('announces politely, for the same reason its sibling does', () => {
+      mockUseUploadCaveats.mockReturnValue(caveats({ truncatedRelationshipFile: 'followers' }));
+      renderWithRouter(<AccountListSection {...defaultProps} />);
+
+      const notice = screen.getByText(resultsEN.caveat.truncated.followers.title).closest('[role]');
+      expect(notice).toHaveAttribute('role', 'status');
+    });
+
+    it('shows both notices at once, because they are not alternatives', () => {
+      mockUseUploadCaveats.mockReturnValue(
+        caveats({ followRequestsUnreadable: true, truncatedRelationshipFile: 'followers' })
+      );
+      renderWithRouter(<AccountListSection {...defaultProps} />);
+
+      expect(screen.getByText(resultsEN.caveat.followRequests.title)).toBeInTheDocument();
+      expect(screen.getByText(resultsEN.caveat.truncated.followers.title)).toBeInTheDocument();
+    });
   });
 
   it('should render all main components', () => {

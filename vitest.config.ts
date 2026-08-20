@@ -181,7 +181,24 @@ export default defineConfig({
         // Build artifacts
         "dist/**",
         "node_modules/**",
+        "**/node_modules/**",
         "coverage/**",
+
+        // Sibling checkouts of this same repository. `all: true` walks the project
+        // root, so a developer using the project's own worktree workflow measures
+        // every branch they have checked out: a run on 2026-08-14 counted 3236 files
+        // under .worktrees against 164 under src, and reported 37.24% statements.
+        // CI has no worktrees and no vendor bundle, so these three are no-ops there
+        // — they restore the local number to the one CI computes.
+        ".worktrees/**",
+        "ds-bundle/**",
+        ".ds-sync/**",
+        ".design-sync/**",
+
+        // `.claude` is a symlink into `.ai/`, a separate private repository that CI
+        // does not check out at all. Counting its tooling locally guarantees the
+        // local number can never agree with the one the gate computes.
+        ".ai/**",
 
         // Raw data and assets
         "raw/**",

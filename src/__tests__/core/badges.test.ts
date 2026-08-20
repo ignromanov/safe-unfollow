@@ -1,13 +1,16 @@
 // Global functions from vitest
 import {
   buildAccountBadgeIndex,
+  badgesAffectedByTruncation,
   filterAccountsByBadges,
   BADGE_ORDER,
   BADGE_LABELS,
   BADGE_COLORS,
 } from '@/core/badges';
 import { createTestParsedData, TEST_ACCOUNTS } from '@tests/fixtures/testData';
-import type { BadgeKey } from '@/core/types';
+import type { BadgeKey, ParsedAll } from '@/core/types';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 describe('Badge Logic', () => {
   const testData = createTestParsedData();
@@ -264,6 +267,110 @@ describe('Badge Logic', () => {
 
       expect(badgeKeys).toEqual(labelKeys);
       expect(badgeKeys).toEqual(colorKeys);
+    });
+  });
+
+  /**
+   * GH#41. `followRequestsUnreadable` is derived from exactly two files —
+   * `pending_follow_requests.json` and the permanent-requests file — because
+   * `notFollowingBack` is defined by subtracting exactly those two sets. The
+   * flag and the badge are two halves of one fact held in two files, and
+   * nothing but this test connects them.
+   *
+   * If this fails you have changed which sets `notFollowingBack` excludes.
+   * Decide whether the caveat still covers the badge:
+   *  - a new exclusion from an OPTIONAL file that can be present-but-unreadable
+   *    must carry `feedsNotFollowingBackExclusion` on its spec
+   *    (`instagram-file-specs.ts`) — that flag is what `parseOptionalFiles`
+   *    folds `followRequestsUnreadable` over — or the badge overstates itself
+   *    again with nothing on screen saying so;
+   *  - `followers` needs nothing: it is required, and an unreadable required
+   *    file already fails the upload loudly (`hasMinimalData`).
+   * Then update the list below.
+   */
+  describe('notFollowingBack exclusions stay in sync with the GH#41 caveat flag', () => {
+    it('excludes exactly followers, pendingSent and permanentRequests', () => {
+      const source = readFileSync(join(process.cwd(), 'src/core/badges/index.ts'), 'utf-8');
+
+      const filterBody = source.match(/const notFollowingBack = new Set\(([\s\S]*?)\n {2}\);/)?.[1];
+      expect(filterBody, 'could not locate the notFollowingBack filter').toBeDefined();
+
+      const excluded = [...filterBody!.matchAll(/!parsed\.(\w+)\.has\(u\)/g)].map(m => m[1]);
+
+      expect(excluded).toEqual(['followers', 'pendingSent', 'permanentRequests']);
+    });
+  });
+
+  describe('badgesAffectedByTruncation', () => {
+    it('names nothing when neither file looks short', () => {
+      expect(badgesAffectedByTruncation(null).size).toBe(0);
+    });
+
+    it('names the badges a short followers file corrupts', () => {
+      expect([...badgesAffectedByTruncation('followers')].sort()).toEqual([
+        'followers',
+        'mutuals',
+        'notFollowedBack',
+        'notFollowingBack',
+      ]);
+    });
+
+    it('names the badges a short following file corrupts', () => {
+      expect([...badgesAffectedByTruncation('following')].sort()).toEqual([
+        'following',
+        'mutuals',
+        'notFollowedBack',
+        'notFollowingBack',
+      ]);
+    });
+
+    /**
+     * The sets above are a claim about arithmetic, and a hand-written constant
+     * drifts away from the arithmetic it describes the first time someone
+     * changes `computeDerivedRelationships`. So the claim is exercised rather
+     * than restated: take a whole export, keep a single follower — the crudest
+     * truncation there is — then check that the badges which move are exactly
+     * the ones named, and that they move in the direction the caveat claims.
+     *
+     * It has already earned its place: the first version of
+     * `badgesAffectedByTruncation` listed three badges and this found the
+     * fourth.
+     */
+    it('names every badge that actually moves when followers are truncated', () => {
+      const whole = createTestParsedData();
+      const truncated: ParsedAll = {
+        ...whole,
+        followers: new Set([...whole.followers].slice(-1)),
+      };
+
+      const countsOf = (parsed: ParsedAll) => {
+        const index = buildAccountBadgeIndex(parsed);
+        const counts = new Map<BadgeKey, number>();
+        for (const account of index) {
+          for (const key of Object.keys(account.badges) as BadgeKey[]) {
+            counts.set(key, (counts.get(key) ?? 0) + 1);
+          }
+        }
+        return counts;
+      };
+
+      const before = countsOf(whole);
+      const after = countsOf(truncated);
+      const moved = new Set<BadgeKey>();
+      for (const key of new Set([...before.keys(), ...after.keys()])) {
+        if ((before.get(key) ?? 0) !== (after.get(key) ?? 0)) moved.add(key);
+      }
+
+      expect([...moved].sort()).toEqual([...badgesAffectedByTruncation('followers')].sort());
+
+      // Direction matters as much as membership: the caveat tells the reader
+      // that "not following back" is too high and mutuals too low, and saying
+      // it backwards would be its own wrong answer.
+      expect(after.get('notFollowingBack') ?? 0).toBeGreaterThan(
+        before.get('notFollowingBack') ?? 0
+      );
+      expect(after.get('mutuals') ?? 0).toBeLessThan(before.get('mutuals') ?? 0);
+      expect(after.get('notFollowedBack') ?? 0).toBeLessThan(before.get('notFollowedBack') ?? 0);
     });
   });
 });

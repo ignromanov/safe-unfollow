@@ -3,7 +3,7 @@
   "items": {
     "howToFind": {
       "question": "¿Cómo ver quién dejó de seguirte en Instagram sin app?",
-      "answer": "Abre Meta Accounts Center → Crear exportación → Selecciona tu perfil → \"Exportar al dispositivo\" → Solo \"Seguidores y seguidos\" → Formato JSON. Descarga el ZIP cuando esté listo (normalmente 5-30 minutos), y súbelo aquí. La herramienta analiza tus seguidores localmente—ve unfollowers al instante. Sin inicio de sesión.",
+      "answer": "Abre el Centro de cuentas de Meta → Crear exportación → selecciona tu perfil → \"Exportar al dispositivo\" → marca solo \"Seguidores y seguidos\" → formato JSON. Descarga el ZIP cuando esté listo (normalmente 5-30 minutos) y súbelo aquí. La herramienta compara tus listas en el navegador, así que la exportación no se sube a ningún sitio. Sin iniciar sesión.",
       "relatedLink": {
         "text": "Iniciar la guía de exportación",
         "href": "/wizard"
@@ -11,15 +11,15 @@
     },
     "withoutDownload": {
       "question": "¿Puedo ver unfollowers de Instagram sin descargar datos o apps?",
-      "answer": "No. Instagram no proporciona una lista nativa de unfollowers. Los únicos métodos seguros son: (1) Revisar manualmente cuentas seguidas vs seguidores, o (2) Usar tu descarga oficial de datos con esta herramienta. Este rastreador hace el método 2 instantáneo y gratuito—sin contraseña, sin inicio de sesión, sin riesgo para tu cuenta.",
+      "answer": "No. Instagram no proporciona una lista nativa de unfollowers. Los únicos métodos seguros son: (1) Revisar manualmente cuentas seguidas vs seguidores, o (2) Usar tu descarga oficial de datos con esta herramienta. Este rastreador hace el método 2 rápido y gratis: sin contraseña, sin iniciar sesión, sin riesgo para tu cuenta.",
       "relatedLink": {
         "text": "Aprende cómo obtener tus datos",
         "href": "/wizard"
       }
     },
     "privacy": {
-      "question": "¿Cómo funciona el rastreador de unfollowers sin inicio de sesión?",
-      "answer": "Este rastreador usa tu exportación oficial de datos de Instagram (archivo ZIP) para analizar seguidores localmente en tu navegador. No requiere inicio de sesión. Todo el procesamiento ocurre en tu dispositivo—tus datos nunca llegan a nuestros servidores. Este método es seguro porque usa la herramienta oficial de exportación de Instagram.",
+      "question": "¿Cómo funciona el rastreador de unfollowers sin iniciar sesión?",
+      "answer": "Este rastreador usa tu exportación oficial de datos de Instagram (archivo ZIP) para analizar seguidores localmente en tu navegador. No hace falta iniciar sesión. El análisis, el filtrado y la búsqueda ocurren en tu dispositivo, y tu exportación de Instagram se queda en este navegador. Solo recibimos estadísticas de visita anónimas, que puedes desactivar en el pie de página. Este método es seguro porque usa la herramienta oficial de exportación de Instagram.",
       "relatedLink": {
         "text": "Lee nuestra política de privacidad",
         "href": "/privacy"
@@ -27,7 +27,7 @@
     },
     "safety": {
       "question": "¿Es seguro usar apps de rastreo de unfollowers de Instagram?",
-      "answer": "Sí, si usan tu exportación oficial de datos de Instagram. Las apps que piden tu contraseña de Instagram violan los Términos de Servicio y presentan riesgos de seguridad. Los rastreadores seguros solo usan el archivo ZIP de la herramienta de Descarga de Datos de Instagram—sin inicio de sesión, sin contraseña. Esta herramienta usa ese método exclusivamente.",
+      "answer": "Sí, si usan tu exportación oficial de datos de Instagram. Las apps que piden tu contraseña de Instagram violan los Términos de Servicio y presentan riesgos de seguridad. Los rastreadores seguros solo usan el archivo ZIP de la herramienta de Descarga de Datos de Instagram: sin iniciar sesión, sin contraseña. Esta herramienta usa ese método exclusivamente.",
       "relatedLink": {
         "text": "Lee nuestra política de privacidad",
         "href": "/privacy"
@@ -35,11 +35,11 @@
     },
     "dataIncluded": {
       "question": "¿Qué datos incluye Instagram en mi archivo de descarga?",
-      "answer": "El archivo ZIP contiene tu información de perfil, lista de seguidores, lista de seguidos, comentarios, publicaciones, mensajes, elementos guardados y más. Para rastrear unfollowers, los archivos clave son followers_1.json (tus seguidores) y following.json (a quién sigues). El rastreador usa estos dos archivos para identificar unfollowers y no mutuos."
+      "answer": "El archivo ZIP contiene tu información de perfil, lista de seguidores, lista de seguidos, comentarios, publicaciones, mensajes, elementos guardados y más. Para rastrear unfollowers, los archivos clave son followers_1.json (tus seguidores) y following.json (a quién sigues). El rastreador usa estos dos archivos para identificar unfollowers y a quién no te sigue de vuelta."
     },
     "zipFile": {
       "question": "¿Qué es la descarga de datos de Instagram y por qué usarla?",
-      "answer": "La Descarga de Datos de Instagram (vía Meta Accounts Center) es la herramienta oficial para exportar la información de tu cuenta incluyendo listas de seguidores y seguidos. Es la única forma segura y autorizada de acceder a estos datos sin arriesgar tu cuenta. Las apps que piden tu contraseña violan los Términos de Servicio de Instagram.",
+      "answer": "La Descarga de Datos de Instagram (vía el Centro de cuentas de Meta) es la herramienta oficial para exportar la información de tu cuenta incluyendo listas de seguidores y seguidos. Es la única forma segura y autorizada de acceder a estos datos sin arriesgar tu cuenta. Las apps que piden tu contraseña violan los Términos de Servicio de Instagram.",
       "relatedLink": {
         "text": "Sigue nuestra guía paso a paso",
         "href": "/wizard"
@@ -47,7 +47,7 @@
     },
     "accountSafety": {
       "question": "¿Mi cuenta de Instagram estará segura usando este rastreador?",
-      "answer": "Sí, 100% seguro. A diferencia de las apps que piden tu contraseña y 'extraen' datos (lo cual viola los Términos de Servicio), esta herramienta usa tu exportación oficial de datos. No requiere inicio de sesión—descargas el ZIP directamente de Instagram, y lo subes localmente a tu navegador. Nunca accedemos a tu cuenta.",
+      "answer": "Sí, 100% seguro. A diferencia de las apps que piden tu contraseña y 'extraen' datos (lo cual viola los Términos de Servicio), esta herramienta usa tu exportación oficial de datos. No hace falta iniciar sesión: descargas el ZIP directamente de Instagram, y lo subes localmente a tu navegador. Nunca accedemos a tu cuenta.",
       "relatedLink": {
         "text": "Ver nuestros términos",
         "href": "/terms"
@@ -55,7 +55,7 @@
     },
     "downloadTime": {
       "question": "¿Cuánto tiempo tarda en llegar mi descarga de datos de Instagram?",
-      "answer": "Meta normalmente envía tus datos en 5-30 minutos por email. Cuentas grandes o alta carga del servidor pueden tardar hasta unas horas. Después de descargar el ZIP, subirlo a este rastreador para análisis es instantáneo—el procesamiento toma segundos incluso para exportaciones de un millón de cuentas.",
+      "answer": "Meta normalmente envía tus datos en 5-30 minutos por email. Las cuentas grandes o una carga alta del servidor pueden tardar hasta unas horas. Cuando ya tienes el ZIP, el análisis ocurre en tu propio navegador y no en un servidor, así que no hay cola ni espera de subida. Una exportación grande tarda más en leerse que una pequeña.",
       "relatedLink": {
         "text": "Añadir recordatorio al calendario",
         "href": "/wizard/step/8"
@@ -63,19 +63,19 @@
     },
     "scale": {
       "question": "¿Qué tamaño de exportación de cuenta de Instagram puedes analizar?",
-      "answer": "Este rastreador maneja exportaciones de hasta 1,000,000+ cuentas. Usamos almacenamiento columnar e indexación bitset para filtrado ultrarrápido—procesando conjuntos de datos masivos en menos de 5ms. Ya tengas 100 seguidores o 1M+, la herramienta se mantiene rápida y responsiva. Probado y verificado con exportaciones reales.",
+      "answer": "Este rastreador maneja exportaciones de hasta 1.000.000+ cuentas. Usamos almacenamiento columnar e indexación bitset para que el filtrado siga siendo rápido a medida que crece la lista. Ya tengas 100 seguidores o 1M+, la herramienta se mantiene responsiva.",
       "relatedLink": {
         "text": "Prueba con datos de ejemplo",
         "href": "/sample"
       }
     },
     "free": {
-      "question": "¿Existen rastreadores de unfollowers de Instagram gratuitos?",
-      "answer": "Sí. Esta herramienta es 100% gratuita, de código abierto (licencia MIT), y no incluye suscripciones, muros de pago ni límites ocultos. La mayoría de alternativas cobran $5-10/mes. Este rastreador usa tu exportación oficial de datos de Instagram procesada localmente, eliminando costos de servidor por completo."
+      "question": "¿Existen rastreadores de unfollowers de Instagram gratis?",
+      "answer": "Sí. El análisis es 100% gratis: todas las insignias, filtros y cualquier número de cuentas, sin registro ni límite. La mayoría de alternativas por suscripción cobran $5-10/mes. Un pago único de $7 solo es necesario si quieres exportar tu lista filtrada como archivo; verla aquí siempre es gratis. Código abierto (licencia MIT), y tu exportación de Instagram se procesa localmente en tu navegador."
     },
     "analyzeData": {
       "question": "¿Cómo analizo mi descarga de datos de Instagram para encontrar unfollowers?",
-      "answer": "Sube tu archivo ZIP de Instagram a este rastreador. La herramienta desempaqueta tus listas de seguidores/seguidos localmente en tu navegador, las compara, y resalta quién dejó de seguirte. Los resultados muestran unfollowers, no mutuos, seguidores mutuos y más—todo procesado offline sin servidores. Toma menos de 30 segundos para exportaciones típicas.",
+      "answer": "Sube tu archivo ZIP de Instagram a este rastreador. La herramienta desempaqueta tus listas de seguidores y seguidos localmente en tu navegador, las compara y resalta quién dejó de seguirte. Los resultados muestran unfollowers, quién no te sigue, seguidores mutuos y más, y la comparación se ejecuta en tu dispositivo en lugar de en un servidor.",
       "relatedLink": {
         "text": "Sube tu archivo ahora",
         "href": "/upload"
@@ -83,7 +83,7 @@
     },
     "shareDataSafely": {
       "question": "¿Es seguro subir mi descarga de datos de Instagram a herramientas de terceros?",
-      "answer": "Sí, si la app procesa datos localmente en tu navegador sin subir a servidores. Este rastreador procesa tu archivo ZIP completamente en tu dispositivo—ningún servidor almacena o accede a tus datos. Nunca subas tu ZIP a rastreadores de unfollowers basados en la nube. Siempre verifica que la app procese datos localmente.",
+      "answer": "Sí, si la app procesa tu archivo localmente en tu navegador y lo mantiene ahí. Este rastreador lee tu archivo ZIP completamente en tu dispositivo: el archivo en sí se queda en este navegador, y lo único que sale son estadísticas de visita anónimas. Desconfía de los rastreadores de unfollowers basados en la nube que te piden entregar tu ZIP o tu contraseña de Instagram, porque esos envían tu archivo a la máquina de otro. Verifica siempre que la app funcione a partir de la exportación oficial y no pida iniciar sesión.",
       "relatedLink": {
         "text": "Lee nuestro compromiso de privacidad",
         "href": "/privacy"
@@ -91,7 +91,7 @@
     },
     "withoutPassword": {
       "question": "¿Cómo funciona SafeUnfollow sin mi contraseña de Instagram?",
-      "answer": "SafeUnfollow usa la función oficial de exportación de datos de Instagram (disponible en el Centro de cuentas de Meta) en lugar de tu contraseña. Descargas tus datos como un archivo ZIP directamente desde Instagram y lo subes aquí. La app lee los archivos JSON dentro del ZIP para comparar seguidores vs seguidos — todo se procesa en tu navegador.",
+      "answer": "SafeUnfollow usa la función oficial de exportación de datos de Instagram (disponible en el Centro de cuentas de Meta) en lugar de tu contraseña. Descargas tus datos como un archivo ZIP directamente desde Instagram y lo subes aquí. La app lee los archivos JSON dentro del ZIP para comparar seguidores vs seguidos, y todo se procesa en tu navegador.",
       "relatedLink": {
         "text": "Ver guía de exportación",
         "href": "/wizard"
@@ -99,11 +99,11 @@
     },
     "betterThanPaid": {
       "question": "¿SafeUnfollow es mejor que las apps de pago?",
-      "answer": "Para la mayoría de usuarios, sí. SafeUnfollow es 100% gratis, no requiere login (eliminando riesgo de baneo), procesa datos localmente (máxima privacidad), maneja 1M+ cuentas y es open source. Las apps de pago ofrecen monitoreo en tiempo real pero eso viola los Términos de Servicio de Instagram."
+      "answer": "Para la mayoría de usuarios, sí. El análisis es gratis: sin registro, sin suscripción, cualquier número de cuentas de tu exportación. No hace falta iniciar sesión (eliminando riesgo de baneo), procesa tu exportación localmente en tu navegador (máxima privacidad), maneja 1M+ cuentas y es open source. Solo exportar tu lista filtrada como archivo cuesta un pago único de $7; todo lo que ves en pantalla sigue siendo gratis. Las apps de pago ofrecen monitoreo en tiempo real pero eso viola los Términos de Servicio de Instagram."
     },
     "mobileUse": {
       "question": "¿Puedo usar SafeUnfollow en iPhone o Android?",
-      "answer": "Sí. SafeUnfollow funciona en cualquier navegador móvil moderno (Safari, Chrome, Firefox). Visita safeunfollow.app, sube tu ZIP y ve los resultados al instante. También puedes instalarlo como PWA desde tu pantalla de inicio. El 81% de nuestros usuarios están en móvil."
+      "answer": "Sí. SafeUnfollow funciona en cualquier navegador móvil moderno (Safari, Chrome, Firefox). Entra en safeunfollow.app, sube tu ZIP y lee los resultados en el teléfono. También puedes instalarlo como PWA para abrirlo desde la pantalla de inicio. La mayoría de quienes lo usan están en el teléfono, y el diseño está pensado para eso primero. Pide tu exportación de datos desde la app de Instagram, descarga el ZIP de tu correo y súbelo aquí."
     }
   }
 }

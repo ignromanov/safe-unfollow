@@ -10,11 +10,14 @@ export type DiagnosticErrorCode =
   | 'NO_DATA_FILES' // No following.json or followers files
   | 'MISSING_FOLLOWING' // following.json not found
   | 'MISSING_FOLLOWERS' // followers_*.json not found
+  | 'INVALID_FOLLOWING_FORMAT' // following.json found, but shape unrecognized (GH#21)
+  | 'INVALID_FOLLOWERS_FORMAT' // followers_*.json found, but shape unrecognized (GH#21)
   // New - ZIP/File errors
-  | 'CORRUPTED_ZIP' // JSZip failed to open
+  | 'CORRUPTED_ZIP' // the ZIP reader failed to open it
   | 'ZIP_ENCRYPTED' // ZIP is password-protected
   | 'EMPTY_FILE' // File is empty (0 bytes)
-  | 'FILE_TOO_LARGE' // File exceeds 500MB
+  | 'FILE_TOO_LARGE' // The browser refused the allocation; no ceiling of ours
+  | 'TOO_MANY_ENTRIES' // More ZIP entries than we will walk
   // New - Parsing errors
   | 'JSON_PARSE_ERROR' // Invalid JSON
   | 'INVALID_DATA_STRUCTURE' // JSON exists but wrong structure
@@ -54,11 +57,35 @@ export function mapWarningToDiagnosticCode(code: string): DiagnosticErrorCode {
     NO_DATA_FILES: 'NO_DATA_FILES',
     MISSING_FOLLOWING: 'MISSING_FOLLOWING',
     MISSING_FOLLOWERS: 'MISSING_FOLLOWERS',
+    INVALID_FOLLOWING_FORMAT: 'INVALID_FOLLOWING_FORMAT',
+    INVALID_FOLLOWERS_FORMAT: 'INVALID_FOLLOWERS_FORMAT',
+    // Entry-level drift (GH#21): the file was found, its wrapper parsed, and
+    // the records inside were unreadable. Mapped onto INVALID_DATA_STRUCTURE
+    // rather than earning entries of their own, weighed as follows.
+    //
+    // What is gained: `createDiagnosticError` overrides `message` with the
+    // warning's own, so the reader still sees which file drifted and how many
+    // records were lost. And the fix here — "Instagram may have changed their
+    // export format. Please report this issue." — at least does not send
+    // someone whose export is perfectly good back to Instagram for another
+    // one, which is exactly what the UNKNOWN fallback would have done.
+    //
+    // What it costs, so nobody concludes this was overlooked: the warnings
+    // carry a `fix` saying the export is fine and re-requesting will not help,
+    // and the screen renders the DIAGNOSTIC's fix, not the warning's — so that
+    // sentence reaches telemetry and any future diagnostics UI, but not this
+    // screen. Buying it back means a new code with new copy in errors.ts and
+    // ten locales, and errors.ts is already over the 300-line ceiling. Do not
+    // reword INVALID_DATA_STRUCTURE in place to recover it: that copy is shared
+    // with unrelated failures where "your export is fine" would be false.
+    UNRESOLVED_ENTRIES_FOLLOWING: 'INVALID_DATA_STRUCTURE',
+    UNRESOLVED_ENTRIES_FOLLOWERS: 'INVALID_DATA_STRUCTURE',
     // New - ZIP/File
     CORRUPTED_ZIP: 'CORRUPTED_ZIP',
     ZIP_ENCRYPTED: 'ZIP_ENCRYPTED',
     EMPTY_FILE: 'EMPTY_FILE',
     FILE_TOO_LARGE: 'FILE_TOO_LARGE',
+    TOO_MANY_ENTRIES: 'TOO_MANY_ENTRIES',
     // New - Parsing
     JSON_PARSE_ERROR: 'JSON_PARSE_ERROR',
     INVALID_DATA_STRUCTURE: 'INVALID_DATA_STRUCTURE',
@@ -136,6 +163,22 @@ export function createDiagnosticError(
       icon: 'file',
       severity: 'warning',
     },
+    INVALID_FOLLOWING_FORMAT: {
+      title: 'Unrecognized Following Data',
+      message:
+        'following.json was found, but its structure does not match any known Instagram export format.',
+      fix: 'Instagram may have changed their export format. Please report this issue on GitHub so we can add support.',
+      icon: 'file',
+      severity: 'error',
+    },
+    INVALID_FOLLOWERS_FORMAT: {
+      title: 'Unrecognized Followers Data',
+      message:
+        'followers_*.json was found, but its structure does not match any known Instagram export format.',
+      fix: 'Instagram may have changed their export format. Please report this issue on GitHub so we can add support.',
+      icon: 'file',
+      severity: 'error',
+    },
     // New - ZIP/File errors
     CORRUPTED_ZIP: {
       title: 'Corrupted ZIP File',
@@ -158,10 +201,17 @@ export function createDiagnosticError(
       icon: 'file',
       severity: 'error',
     },
+    TOO_MANY_ENTRIES: {
+      title: 'Too Many Files',
+      message: 'This ZIP contains more files than this tool can index.',
+      fix: 'Ask Instagram for a smaller export: Meta Accounts Center → Create export → select only "Followers and following" → format JSON.',
+      icon: 'file',
+      severity: 'error',
+    },
     FILE_TOO_LARGE: {
       title: 'File Too Large',
-      message: 'The file exceeds the maximum supported size of 500MB.',
-      fix: 'Try requesting a smaller data export from Instagram, or use a desktop browser with more memory.',
+      message: 'Your browser could not open this export — it is too large for this device.',
+      fix: 'Ask Instagram for just the part this tool needs: Download your information → Some of your information → Followers and Following → JSON.',
       icon: 'file',
       severity: 'error',
     },
@@ -280,10 +330,13 @@ export const ALL_DIAGNOSTIC_ERROR_CODES: DiagnosticErrorCode[] = [
   'NO_DATA_FILES',
   'MISSING_FOLLOWING',
   'MISSING_FOLLOWERS',
+  'INVALID_FOLLOWING_FORMAT',
+  'INVALID_FOLLOWERS_FORMAT',
   'CORRUPTED_ZIP',
   'ZIP_ENCRYPTED',
   'EMPTY_FILE',
   'FILE_TOO_LARGE',
+  'TOO_MANY_ENTRIES',
   'JSON_PARSE_ERROR',
   'INVALID_DATA_STRUCTURE',
   'WORKER_TIMEOUT',

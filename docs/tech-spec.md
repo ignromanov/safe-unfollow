@@ -316,9 +316,10 @@ connections/followers_and_following/
 - **Subresource Integrity**: For CDN resources
 
 ### Data Privacy
-- **No data transmission**: All processing local
+- **The export is never transmitted**: parsing and filtering run entirely in the browser
 - **Anonymous analytics**: Umami (no personal data)
-- **No cookies**: No tracking cookies
+- **Cookies**: theme preference, and — once the visitor consents — Google's advertising and
+  consent cookies. None of them can reach the Instagram export, which never leaves the device
 - **Secure defaults**: Privacy-first configuration
 
 ---

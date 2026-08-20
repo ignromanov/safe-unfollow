@@ -2,8 +2,8 @@
   "title": "Sıkça Sorulan Sorular",
   "items": {
     "howToFind": {
-      "question": "Uygulama olmadan Instagram'da kimin takibi bıraktığını nasıl kontrol ederim?",
-      "answer": "Meta Accounts Center'ı açın → Dışa aktarma oluştur → Profilinizi seçin → \"Cihaza aktar\" → Yalnızca \"Takipçiler ve takip edilenler\" → JSON formatı. ZIP'i indirin (genellikle 5-30 dakika) ve buraya yükleyin. Araç takipçilerinizi yerel olarak analiz eder—takipten çıkanları anında görün. Giriş yok.",
+      "question": "Uygulama olmadan Instagram'da kimin takipten çıktığını nasıl kontrol ederim?",
+      "answer": "Meta Hesaplar Merkezi'ni açın → Dışa aktarma oluştur → Profilinizi seçin → \"Cihaza aktar\" → Yalnızca \"Takipçiler ve takip edilenler\" → JSON formatı. ZIP'i indirin (genellikle 5-30 dakika) ve buraya yükleyin. Araç listelerinizi tarayıcıda karşılaştırır, yani dışa aktarım hiçbir yere yüklenmez. Giriş yok.",
       "relatedLink": {
         "text": "Dışa aktarma kılavuzunu başlat",
         "href": "/wizard"
@@ -11,7 +11,7 @@
     },
     "withoutDownload": {
       "question": "Veri indirmeden veya uygulama olmadan Instagram takipten çıkanları kontrol edebilir miyim?",
-      "answer": "Hayır. Instagram yerel bir takipten çıkan listesi sağlamaz. Tek güvenli yöntemler: (1) Takip edilen hesapları takipçilerle manuel olarak karşılaştırmak, veya (2) Bu araçla resmi veri indirmenizi kullanmak. Bu izleyici yöntem 2'yi anında ve ücretsiz yapar—şifre yok, giriş yok, hesap riski yok.",
+      "answer": "Hayır. Instagram yerel bir takipten çıkan listesi sağlamaz. Tek güvenli yöntemler: (1) Takip edilen hesapları takipçilerle manuel olarak karşılaştırmak, veya (2) Bu araçla resmi veri indirmenizi kullanmak. Bu izleyici yöntem 2'yi senin için ücretsiz yapar: şifre yok, giriş yok, hesap riski yok.",
       "relatedLink": {
         "text": "Verilerinizi nasıl alacağınızı öğrenin",
         "href": "/wizard"
@@ -19,7 +19,7 @@
     },
     "privacy": {
       "question": "Instagram takipten çıkan izleyici giriş yapmadan nasıl çalışır?",
-      "answer": "Bu izleyici, tarayıcınızda yerel olarak takipçileri analiz etmek için resmi Instagram veri dışa aktarımınızı (ZIP dosyası) kullanır. Giriş gerekmez. Tüm işleme cihazınızda gerçekleşir—verileriniz sunucularımıza asla ulaşmaz. Bu yöntem güvenlidir çünkü Instagram'ın resmi dışa aktarma aracını kullanır.",
+      "answer": "Bu izleyici, tarayıcınızda yerel olarak takipçileri analiz etmek için resmi Instagram veri dışa aktarımınızı (ZIP dosyası) kullanır. Giriş gerekmez. Ayrıştırma, filtreleme ve arama tamamen cihazınızda gerçekleşir ve Instagram dışa aktarımınız bu tarayıcıda kalır. Yalnızca anonim ziyaret istatistikleri alırız; bunları alt bilgiden kapatabilirsiniz. Bu yöntem güvenlidir çünkü Instagram'ın resmi dışa aktarma aracını kullanır.",
       "relatedLink": {
         "text": "Gizlilik politikamızı okuyun",
         "href": "/privacy"
@@ -27,7 +27,7 @@
     },
     "safety": {
       "question": "Instagram takipten çıkan izleyici uygulamaları güvenli mi?",
-      "answer": "Evet, resmi Instagram veri dışa aktarımınızı kullananlar güvenlidir. Instagram şifrenizi isteyen uygulamalar Hizmet Koşullarını ihlal eder ve güvenlik riskleri oluşturur. Güvenli izleyiciler yalnızca Instagram'ın Veri İndirme aracından ZIP dosyası kullanır—giriş yok, şifre yok. Bu araç yalnızca bu yöntemi kullanır.",
+      "answer": "Evet, resmi Instagram veri dışa aktarımınızı kullananlar güvenlidir. Instagram şifrenizi isteyen uygulamalar Hizmet Koşullarını ihlal eder ve güvenlik riskleri oluşturur. Güvenli izleyiciler yalnızca Instagram'ın Veri İndirme aracından ZIP dosyası kullanır: giriş yok, şifre yok. Bu araç yalnızca bu yöntemi kullanır.",
       "relatedLink": {
         "text": "Gizlilik politikamızı okuyun",
         "href": "/privacy"
@@ -39,7 +39,7 @@
     },
     "zipFile": {
       "question": "Instagram veri indirme nedir ve neden kullanmalıyım?",
-      "answer": "Instagram Veri İndirme (Meta Accounts Center üzerinden) takipçi ve takip listeleri dahil hesap bilgilerinizi dışa aktarmak için resmi araçtır. Hesabınızı riske atmadan bu verilere erişmenin tek güvenli, yetkili yoludur. Şifrenizi isteyen uygulamalar Instagram'ın Hizmet Koşullarını ihlal eder.",
+      "answer": "Instagram Veri İndirme (Meta Hesaplar Merkezi üzerinden) takipçi ve takip listeleri dahil hesap bilgilerinizi dışa aktarmak için resmi araçtır. Hesabınızı riske atmadan bu verilere erişmenin tek güvenli, yetkili yoludur. Şifrenizi isteyen uygulamalar Instagram'ın Hizmet Koşullarını ihlal eder.",
       "relatedLink": {
         "text": "Adım adım kılavuzumuzu takip edin",
         "href": "/wizard"
@@ -47,7 +47,7 @@
     },
     "accountSafety": {
       "question": "Bu izleyiciyi kullanırken Instagram hesabım güvende olacak mı?",
-      "answer": "Evet, %100 güvenli. Şifrenizi isteyen ve veri 'kazıyan' uygulamaların aksine (Hizmet Koşullarını ihlal eder), bu araç resmi veri dışa aktarımınızı kullanır. Giriş gerekmez—ZIP'i doğrudan Instagram'dan indirirsiniz, ardından tarayıcınıza yerel olarak yüklersiniz. Hesabınıza asla erişmiyoruz.",
+      "answer": "Evet, %100 güvenli. Şifrenizi isteyen ve veri 'kazıyan' uygulamaların aksine (Hizmet Koşullarını ihlal eder), bu araç resmi veri dışa aktarımınızı kullanır. Giriş gerekmez: ZIP'i doğrudan Instagram'dan indirirsiniz, ardından tarayıcınıza yerel olarak yüklersiniz. Hesabınıza asla erişmiyoruz.",
       "relatedLink": {
         "text": "Koşullarımızı görüntüle",
         "href": "/terms"
@@ -55,7 +55,7 @@
     },
     "downloadTime": {
       "question": "Instagram veri indirmemi almam ne kadar sürer?",
-      "answer": "Meta genellikle 5-30 dakika içinde e-posta ile verilerinizi gönderir. Büyük hesaplar veya yüksek sunucu yükü birkaç saat sürebilir. ZIP'i indirdikten sonra, bu izleyiciye analiz için yüklemek anındadır—yerel tarayıcı işleme sayesinde milyon hesaplık dışa aktarımlarda bile saniyeler içinde işlenir.",
+      "answer": "Meta genellikle 5-30 dakika içinde e-posta ile verilerinizi gönderir. Büyük hesaplar veya yüksek sunucu yükü birkaç saat sürebilir. ZIP elinize geçtiğinde analiz bir sunucuda değil, kendi tarayıcınızda çalışır: ne sıra beklersiniz ne de yükleme. Büyük dışa aktarımların okunması doğal olarak küçüklerden daha uzun sürer.",
       "relatedLink": {
         "text": "Takvim hatırlatıcısı ekle",
         "href": "/wizard/step/8"
@@ -63,7 +63,7 @@
     },
     "scale": {
       "question": "Ne büyüklükte Instagram hesap dışa aktarımı analiz edebilirsiniz?",
-      "answer": "Bu izleyici 1.000.000+ hesaba kadar dışa aktarımları işleyebilir. Yıldırım hızında filtreleme için sütunlu depolama ve bitset indeksleme kullanıyoruz—devasa veri setlerini 5ms'den az sürede işliyoruz. 100 takipçiniz veya 1M+ olsun, araç hızlı ve duyarlı kalır. Gerçek dışa aktarımlarla test edildi ve doğrulandı.",
+      "answer": "Bu izleyici 1.000.000+ hesaba kadar dışa aktarımları işleyebilir. Sütunlu depolama ve bitset indeksleme kullanıyoruz, böylece liste büyüdükçe filtreleme hızlı kalır. 100 takipçiniz veya 1M+ olsun, araç duyarlı kalır.",
       "relatedLink": {
         "text": "Örnek verilerle deneyin",
         "href": "/sample"
@@ -71,11 +71,11 @@
     },
     "free": {
       "question": "Ücretsiz Instagram takipten çıkan izleyicileri var mı?",
-      "answer": "Evet. Bu araç %100 ücretsiz, açık kaynaklı (MIT lisansı) ve abonelik, ödeme duvarı veya gizli limit içermez. Çoğu alternatif aylık 5-10$ alır. Bu izleyici, yerel olarak işlenen resmi Instagram veri dışa aktarımınızı kullanarak sunucu maliyetlerini tamamen ortadan kaldırır."
+      "answer": "Evet. Analiz %100 ücretsiz: tüm rozetler, filtreler ve istediğiniz kadar hesap, kayıt ve sınır olmadan. Çoğu abonelik tabanlı alternatif aylık 5-10$ ücret alır. Tek seferlik $7 ödeme, yalnızca filtrelenmiş listenizi dosya olarak dışa aktarmak istediğinizde gereklidir; burada görüntülemek her zaman ücretsizdir. Açık kaynak (MIT lisansı) ve Instagram dışa aktarımınız tarayıcınızda yerel olarak işlenir."
     },
     "analyzeData": {
       "question": "Takipten çıkanları bulmak için Instagram veri indirmemi nasıl analiz ederim?",
-      "answer": "Instagram ZIP dosyanızı bu izleyiciye yükleyin. Araç, tarayıcınızda yerel olarak takipçi/takip listellerinizi açar, karşılaştırır ve kimin takibi bıraktığını vurgular. Sonuçlar takipten çıkanları, karşılıksızları, karşılıklı takipçileri ve daha fazlasını gösterir—hepsi sunucu katılımı olmadan çevrimdışı işlenir. Tipik dışa aktarımlar için 30 saniyenin altında.",
+      "answer": "Instagram ZIP dosyanızı bu izleyiciye yükleyin. Araç, tarayıcınızda yerel olarak takipçi ve takip listelerinizi açar, karşılaştırır ve kimin takipten çıktığını vurgular. Sonuçlar takipten çıkanları, karşılıksızları, karşılıklı takipçileri ve daha fazlasını gösterir ve karşılaştırma bir sunucuda değil, cihazınızda çalışır.",
       "relatedLink": {
         "text": "Dosyanızı şimdi yükleyin",
         "href": "/upload"
@@ -83,7 +83,7 @@
     },
     "shareDataSafely": {
       "question": "Instagram veri indirmesini üçüncü taraf araçlara yüklemek güvenli mi?",
-      "answer": "Evet, uygulama verileri sunuculara yüklemeden tarayıcınızda yerel olarak işliyorsa güvenlidir. Bu izleyici ZIP dosyanızı tamamen cihazınızda işler—hiçbir sunucu verilerinizi depolamaz veya erişmez. ZIP'inizi bulut tabanlı takipten çıkan izleyicilere asla yüklemeyin. Uygulamanın verileri yerel olarak işlediğini her zaman doğrulayın.",
+      "answer": "Evet, uygulama dosyanızı tarayıcınızda yerel olarak işliyor ve orada tutuyorsa güvenlidir. Bu izleyici ZIP dosyanızı tamamen cihazınızda okur: dosyanın kendisi bu tarayıcıda kalır ve dışarı yalnızca anonim ziyaret istatistikleri çıkar. ZIP'inizi veya Instagram parolanızı teslim etmenizi isteyen bulut tabanlı takipten çıkan izleyicilerine karşı dikkatli olun: onlar dosyanızı başkasının makinesine gönderir. Uygulamanın resmi dışa aktarımdan çalıştığını ve giriş istemediğini her zaman doğrulayın.",
       "relatedLink": {
         "text": "Gizlilik taahhüdümüzü okuyun",
         "href": "/privacy"
@@ -91,7 +91,7 @@
     },
     "withoutPassword": {
       "question": "SafeUnfollow Instagram şifrem olmadan nasıl çalışır?",
-      "answer": "SafeUnfollow, şifreniz yerine Instagram'ın resmi veri dışa aktarma özelliğini (Meta Hesap Merkezi'nde) kullanır. Verilerinizi doğrudan Instagram'dan ZIP dosyası olarak indirip buraya yüklersiniz. Uygulama, takipçi ve takip listelerini karşılaştırmak için ZIP içindeki JSON dosyalarını okur — tüm işlem tarayıcınızda gerçekleşir. API erişimi yok, veri kazıma yok, giriş bilgisi gerekmiyor.",
+      "answer": "SafeUnfollow, şifreniz yerine Instagram'ın resmi veri dışa aktarma özelliğini (Meta Hesaplar Merkezi'nde) kullanır. Verilerinizi doğrudan Instagram'dan ZIP dosyası olarak indirip buraya yüklersiniz. Uygulama, takipçi ve takip listelerini karşılaştırmak için ZIP içindeki JSON dosyalarını okur. Tüm işlem tarayıcınızda gerçekleşir. API erişimi yok, veri kazıma yok, giriş bilgisi gerekmiyor.",
       "relatedLink": {
         "text": "Dışa aktarma rehberini görün",
         "href": "/wizard"
@@ -99,11 +99,11 @@
     },
     "betterThanPaid": {
       "question": "SafeUnfollow ücretli uygulamalardan daha mı iyi?",
-      "answer": "Çoğu kullanıcı için evet. SafeUnfollow %100 ücretsiz, giriş gerektirmez (hesap engelleme riski yok), verileri yerel olarak işler (maksimum gizlilik), 1M+ hesabı destekler (çoğu ücretli uygulama 100K ile sınırlıdır) ve açık kaynaklıdır. Ücretli uygulamalar API erişimi gerektiren gerçek zamanlı izleme sunar — ancak bu Instagram'ın Kullanım Koşulları'nı ihlal eder ve hesabınızı riske atar. SafeUnfollow resmi ve güvenli veri dışa aktarma yöntemini kullanır."
+      "answer": "Çoğu kullanıcı için evet. Analiz ücretsizdir: kayıt yok, abonelik yok, dışa aktarımınızdaki hesap sayısında sınır yok. Giriş gerektirmez (hesap engelleme riski yok), verileri tarayıcınızda yerel olarak işler (maksimum gizlilik), 1M+ hesabı destekler (çoğu ücretli uygulama 100K ile sınırlıdır) ve açık kaynaklıdır. Filtrelenmiş listenizi dosya olarak dışa aktarmak tek seferlik $7 ödeme gerektirir; ekranda gördüğünüz her şey ücretsiz kalır. Ücretli uygulamalar API erişimi gerektiren gerçek zamanlı izleme sunar, ancak bu Instagram'ın Kullanım Koşulları'nı ihlal eder ve hesabınızı riske atar. SafeUnfollow resmi ve güvenli veri dışa aktarma yöntemini kullanır."
     },
     "mobileUse": {
       "question": "SafeUnfollow'u iPhone veya Android'da kullanabilir miyim?",
-      "answer": "Evet! SafeUnfollow herhangi bir modern mobil tarayıcıda çalışır (Safari, Chrome, Firefox). safeunfollow.app'i ziyaret edin, ZIP dosyanızı yükleyin ve sonuçları anında görün. Ana ekranınızdan hızlı erişim için PWA (Progressive Web App) olarak da yükleyebilirsiniz. Uygulama mobil için optimize edilmiştir — kullanıcılarımızın %81'i telefon kullanıyor. Instagram uygulamasından veri dışa aktarımınızı talep edin, ZIP'i e-postanızdan indirin ve buraya yükleyin."
+      "answer": "Evet. SafeUnfollow herhangi bir modern mobil tarayıcıda çalışır (Safari, Chrome, Firefox). safeunfollow.app'i ziyaret edin, ZIP dosyanızı yükleyin ve sonuçlarınızı telefonda okuyun. Ana ekranınızdan hızlı erişim için PWA olarak da yükleyebilirsiniz. Kullananların çoğu telefonda ve düzen önce onun için tasarlandı. Instagram uygulamasından veri dışa aktarımınızı talep edin, ZIP'i e-postanızdan indirin ve buraya yükleyin."
     }
   }
 }

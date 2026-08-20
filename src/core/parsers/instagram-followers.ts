@@ -3,10 +3,16 @@
  * Handles multi-file followers_*.json parsing with dedup
  */
 
-import type JSZip from 'jszip';
 import type { FileExpectation, InstagramExportEntry, ParseWarning, RawItem } from '@/core/types';
 import { FILE_SPECS } from './instagram-file-specs';
-import { extractUsernames, listToRaw } from './instagram-utils';
+import {
+  UNREADABLE_ENTRIES_FIX,
+  describeUnreadableEntries,
+  extractUsernames,
+  resolveEntries,
+  resolveEntryList,
+} from './instagram-utils';
+import { describeUnreadableZipEntry, type ZipArchive, type ZipEntry } from './zip-archive';
 
 export interface FollowersParsed {
   followersRaw: RawItem[];
@@ -16,6 +22,31 @@ export interface FollowersParsed {
   foundFollowerPaths: string[];
   warnings: ParseWarning[];
   fileExpectation: FileExpectation;
+  /**
+   * True when the followers data was found but we could not read it (GH#21
+   * Task 3). This is not "no followers"; it is followers we cannot see, and
+   * `instagram.ts` uses it to keep the two out of the same exit.
+   *
+   * **Derived from the warnings**, not computed alongside them: it is exactly
+   * "this file produced an error-severity warning". That is deliberate and
+   * load-bearing. Both consumers of `hasMinimalData` take the FIRST
+   * error-severity warning as the diagnostic code, and this task removed the
+   * unconditional `createCriticalError` that used to guarantee one existed —
+   * so `unreadable` without an error warning would be a silent dead end on the
+   * most critical path. Defining one in terms of the other makes that state
+   * unreachable instead of merely absent today.
+   *
+   * **An unrecognised shard counts even when a sibling shard parsed fine.**
+   * Stricter than the entry-level half, and confirmed as intended: a partial
+   * follower list is not a smaller right answer, it is a wrong one. Every
+   * account in the missing shard is silently mislabelled `notFollowingBack` —
+   * the exact failure class this plan exists to remove — and the reader has no
+   * way to detect it. Showing thousands of readable followers beside a wrong
+   * verdict is worse than failing loudly. The contrast with an unreadable
+   * *record* is that the record is a loss we can count and report; a shard is a
+   * loss of unknown size.
+   */
+  unreadable: boolean;
 }
 
 /** Parse a single followers JSON text */
@@ -35,9 +66,89 @@ export async function parseFollowersJson(jsonText: string): Promise<string[]> {
   throw new Error('Invalid followers json format');
 }
 
+/**
+ * Turn the outcome of reading the shards into at most one warning.
+ *
+ * Extracted from `parseFollowersFromZip` rather than left inline: adding the
+ * entry-level branch took that function to complexity 21 against a limit of 20.
+ *
+ * The wrapper and entry findings **accumulate** here, unlike in
+ * `instagram-following.ts` where they are exclusive. That is not an
+ * inconsistency, it is the multi-shard case: one shard with a renamed wrapper
+ * and another whose records drifted is a single plausible Meta change, and only
+ * followers can be in both states at once. Reporting the wrapper alone would
+ * lose "the records also changed", which is the signal that separates a global
+ * format drift from one mangled file — the diagnosis is the whole product of
+ * this task, even where it does not change the decision.
+ *
+ * Worst first: both consumers of `hasMinimalData` report the FIRST error
+ * warning, so the graver finding has to be at the front.
+ */
+function describeFollowersOutcome(outcome: {
+  followersFound: boolean;
+  formatInvalidFiles: string[];
+  unresolvedEntries: number;
+  resolvedCount: number;
+}): ParseWarning[] {
+  const { followersFound, formatInvalidFiles, unresolvedEntries, resolvedCount } = outcome;
+
+  // Genuinely exclusive: with no shards at all, nothing below can be true.
+  if (!followersFound) {
+    return [
+      {
+        code: 'MISSING_FOLLOWERS',
+        message: 'followers_*.json files not found — cannot detect who follows you.',
+        severity: 'warning',
+        fix: 'Make sure your Instagram export includes "Followers and following" data. Re-request if needed.',
+      },
+    ];
+  }
+
+  const warnings: ParseWarning[] = [];
+
+  // Loud failure beats an undetectable wrong answer: at least one shard was
+  // found but its shape wasn't recognized, so we can't be sure the followers
+  // set is complete — and unlike an unreadable record, an unreadable shard is
+  // a loss of unknown size.
+  if (formatInvalidFiles.length > 0) {
+    warnings.push({
+      code: 'INVALID_FOLLOWERS_FORMAT',
+      message: `followers data was found (${formatInvalidFiles.join(', ')}), but its structure is not recognized — cannot detect who follows you.`,
+      severity: 'error',
+      fix: 'Instagram may have changed their export format. Please report this issue so we can add support.',
+    });
+  }
+
+  // The wrapper parsed and the records did not. Severity follows how much was
+  // lost: nothing readable at all inverts the badge math for every follower and
+  // has to reach DiagnosticErrorScreen, while losing some of them leaves the
+  // answer incomplete rather than backwards, and blocking an otherwise good
+  // upload over that is disproportionate.
+  if (unresolvedEntries > 0) {
+    warnings.push({
+      code: 'UNRESOLVED_ENTRIES_FOLLOWERS',
+      message: describeUnreadableEntries('followers_*.json', unresolvedEntries, resolvedCount),
+      severity: resolvedCount === 0 ? 'error' : 'warning',
+      fix: UNREADABLE_ENTRIES_FIX,
+    });
+  }
+
+  // Only when nothing above fired: "empty" is a claim about a file we could
+  // read, and saying it alongside a drift warning would contradict it.
+  if (warnings.length === 0 && resolvedCount === 0) {
+    warnings.push({
+      code: 'EMPTY_FOLLOWERS',
+      message: 'Followers files are empty or contain no valid accounts.',
+      severity: 'info',
+    });
+  }
+
+  return warnings;
+}
+
 /** Parse followers_*.json files from ZIP with dedup and multi-file merge */
 export async function parseFollowersFromZip(
-  zip: JSZip,
+  archive: ZipArchive,
   baseCandidates: string[]
 ): Promise<FollowersParsed> {
   const followersGlobs = baseCandidates
@@ -45,13 +156,22 @@ export async function parseFollowersFromZip(
     .concat(['followers_.*\\.json']);
   const followersRaw: RawItem[] = [];
   const followersSeen = new Set<string>();
-  const followersFilesByName = new Map<string, JSZip.JSZipObject>();
+  const followersFilesByName = new Map<string, ZipEntry>();
   const foundFollowerPaths: string[] = [];
   const warnings: ParseWarning[] = [];
+  // Names of shards whose top-level shape didn't resolve via `resolveEntryList`
+  // (GH#21) — neither a bare array, `{ relationships_followers: [...] }`, nor a
+  // single bare entry object. A malformed shard is not silently dropped into
+  // an empty result indistinguishable from having none.
+  const formatInvalidFiles: string[] = [];
+  // Summed across shards, not per shard: the reader has one followers list, so
+  // "40 of your followers could not be read" is the fact, and which of three
+  // files each came from is not something they can act on.
+  let unresolvedEntries = 0;
 
   for (const g of followersGlobs) {
     const regex = new RegExp('^' + g + '$', 'i');
-    for (const f of zip.file(regex)) {
+    for (const f of archive.find(regex)) {
       if (!followersFilesByName.has(f.name)) {
         followersFilesByName.set(f.name, f);
         foundFollowerPaths.push(f.name);
@@ -60,7 +180,7 @@ export async function parseFollowersFromZip(
   }
 
   if (followersFilesByName.size === 0) {
-    for (const f of zip.file(/followers_\d+\.json$/i)) {
+    for (const f of archive.find(/followers_\d+\.json$/i)) {
       if (!followersFilesByName.has(f.name)) {
         followersFilesByName.set(f.name, f);
         foundFollowerPaths.push(f.name);
@@ -70,7 +190,24 @@ export async function parseFollowersFromZip(
 
   for (const f of followersFilesByName.values()) {
     if (!f) continue;
-    const text = await f.async('text');
+    // Guarded, where the sibling call in instagram.ts:162 always was. The
+    // asymmetry was invisible while JSZip threw read failures at open time; the
+    // random-access reader raises them here, and an unguarded rejection escapes
+    // parseInstagramZipFile entirely — past every warning, past the discovery
+    // record, into the worker's catch, where classifyErrorMessage matches none
+    // of zip.js's phrasings and answers UNKNOWN. The reader is told an
+    // unexpected error occurred and pointed at the issue tracker.
+    let text: string;
+    try {
+      text = await f.text();
+    } catch (error) {
+      // Error severity, so `unreadable` below picks it up: one bad shard
+      // among good ones already marks the whole followers set unreadable
+      // (see the rationale above this loop), and a shard we cannot open is
+      // no better known than one whose shape we cannot recognise.
+      warnings.push(describeUnreadableZipEntry(f.name, error, 'error'));
+      continue;
+    }
     let json: unknown;
     try {
       json = JSON.parse(text);
@@ -82,11 +219,17 @@ export async function parseFollowersFromZip(
       });
       continue;
     }
-    const entries = Array.isArray(json)
-      ? json
-      : (json as { relationships_followers?: InstagramExportEntry[] })?.relationships_followers;
-    const items = listToRaw(entries);
-    for (const it of items) {
+    const entries = resolveEntryList(json, ['relationships_followers']);
+
+    if (entries === null) {
+      formatInvalidFiles.push(f.name);
+      continue;
+    }
+
+    const resolved = resolveEntries(entries);
+    unresolvedEntries += resolved.unresolved;
+
+    for (const it of resolved.items) {
       if (followersSeen.has(it.username)) continue;
       followersSeen.add(it.username);
       followersRaw.push(it);
@@ -107,22 +250,21 @@ export async function parseFollowersFromZip(
     found: followersFound,
     itemCount: followersUsers.length,
     foundPath: foundFollowerPaths[0],
+    unreadableItemCount: unresolvedEntries,
+    formatUnreadable: formatInvalidFiles.length > 0,
   };
 
-  if (!followersFound) {
-    warnings.push({
-      code: 'MISSING_FOLLOWERS',
-      message: 'followers_*.json files not found — cannot detect who follows you.',
-      severity: 'warning',
-      fix: 'Make sure your Instagram export includes "Followers and following" data. Re-request if needed.',
-    });
-  } else if (followersUsers.length === 0) {
-    warnings.push({
-      code: 'EMPTY_FOLLOWERS',
-      message: 'Followers files are empty or contain no valid accounts.',
-      severity: 'info',
-    });
-  }
+  const outcome = describeFollowersOutcome({
+    followersFound,
+    formatInvalidFiles,
+    unresolvedEntries,
+    resolvedCount: followersUsers.length,
+  });
+  warnings.push(...outcome);
+
+  // Derived from the warnings rather than recomputed alongside them, so the
+  // two cannot disagree. See FollowersParsed.unreadable.
+  const unreadable = outcome.some(w => w.severity === 'error');
 
   return {
     followersRaw,
@@ -132,5 +274,6 @@ export async function parseFollowersFromZip(
     foundFollowerPaths,
     warnings,
     fileExpectation,
+    unreadable,
   };
 }

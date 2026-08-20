@@ -16,6 +16,7 @@ import {
   captureUTMParams,
   setEntryCTA,
 } from '@/lib/analytics';
+import { flushEvents } from '@/lib/stats/queue';
 
 describe('Analytics', () => {
   let localStorageMock: Record<string, string> = {};
@@ -122,116 +123,110 @@ describe('Analytics', () => {
         vi.stubEnv('DEV', false);
       });
 
-      it('should track file upload start with file size', () => {
-        analytics.fileUploadStart(5.5);
+      // The upload funnel is batched — see stats/impression-batching.test.ts for
+      // why it moves as one unit. Payloads are asserted here against the real
+      // request body rather than a mocked call, because these fields are what
+      // the success rate and the loading-tip denominator are computed from.
+      describe('upload funnel payloads', () => {
+        /** Runs `emit`, drains the queue, returns the payloads actually sent. */
+        function sentPayloads(
+          emit: () => void
+        ): Array<{ name: string; data?: Record<string, unknown> }> {
+          const script = document.createElement('script');
+          script.setAttribute('src', 'https://umami.example/script.js');
+          script.setAttribute('data-website-id', 'test-website-id');
+          document.head.appendChild(script);
+          const fetchMock = vi.fn(() => Promise.resolve(new Response(null, { status: 200 })));
+          vi.stubGlobal('fetch', fetchMock);
 
-        expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.FILE_UPLOAD_START, {
-          file_size_mb: 5.5,
+          emit();
+          flushEvents();
+
+          const init = fetchMock.mock.calls[0]?.[1] as RequestInit | undefined;
+          script.remove();
+          if (!init) return [];
+          const body = JSON.parse(init.body as string) as Array<{
+            payload: { name: string; data?: Record<string, unknown> };
+          }>;
+          return body.map(entry => entry.payload);
+        }
+
+        it('should track file upload start with file size', () => {
+          const [payload] = sentPayloads(() => analytics.fileUploadStart(5.5));
+
+          expect(payload).toMatchObject({
+            name: AnalyticsEvents.FILE_UPLOAD_START,
+            data: { file_size_mb: 5.5 },
+          });
+          expect(windowSpy.umami.track).not.toHaveBeenCalled();
+        });
+
+        it('should round file size in upload start', () => {
+          const [payload] = sentPayloads(() => analytics.fileUploadStart(5.123456));
+
+          expect(payload?.data?.file_size_mb).toBe(5.12);
+        });
+
+        it('should track file upload success without hash or processing time', () => {
+          const [payload] = sentPayloads(() => analytics.fileUploadSuccess(1500, false));
+
+          expect(payload).toMatchObject({
+            name: AnalyticsEvents.FILE_UPLOAD_SUCCESS,
+            data: { account_count: 1500, from_cache: false },
+          });
+        });
+
+        it('should bucket parse duration rather than report raw milliseconds', () => {
+          const [payload] = sentPayloads(() => analytics.uploadParseDuration(2345, 'success'));
+
+          expect(payload?.data).toEqual({ duration_bucket: '1-3s', outcome: 'success' });
+        });
+
+        it('should keep the outcome so fast failures are separable from fast parses', () => {
+          const [payload] = sentPayloads(() => analytics.uploadParseDuration(400, 'error'));
+
+          expect(payload?.data).toEqual({ duration_bucket: '<1s', outcome: 'error' });
+        });
+
+        it('should enrich file upload success with UTM and entry CTA', () => {
+          sessionStorageMock['analytics_utm'] = JSON.stringify({
+            utm_source: 'producthunt',
+            utm_medium: 'launch',
+          });
+          sessionStorageMock['analytics_entry_cta'] = 'guide';
+
+          const [payload] = sentPayloads(() => analytics.fileUploadSuccess(1500, false));
+
+          expect(payload?.data).toMatchObject({
+            utm_source: 'producthunt',
+            utm_medium: 'launch',
+            entry_cta: 'guide',
+          });
+        });
+
+        it('sends the whole attempt in one request, which is the point of batching it', () => {
+          const payloads = sentPayloads(() => {
+            analytics.uploadClick();
+            analytics.fileUploadStart(5.5);
+            analytics.fileUploadSuccess(1500, false);
+            analytics.uploadParseDuration(2345, 'success');
+          });
+
+          expect(payloads.map(p => p.name)).toEqual([
+            AnalyticsEvents.UPLOAD_CLICK,
+            AnalyticsEvents.FILE_UPLOAD_START,
+            AnalyticsEvents.FILE_UPLOAD_SUCCESS,
+            AnalyticsEvents.UPLOAD_PARSE_DURATION,
+          ]);
         });
       });
 
-      it('should track file upload success without hash or processing time', () => {
-        analytics.fileUploadSuccess(1500, false);
-
-        expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.FILE_UPLOAD_SUCCESS, {
-          account_count: 1500,
-          from_cache: false,
-        });
-      });
-
-      it('should bucket parse duration rather than report raw milliseconds', () => {
-        analytics.uploadParseDuration(2345, 'success');
-
-        expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.UPLOAD_PARSE_DURATION, {
-          duration_bucket: '1-3s',
-          outcome: 'success',
-        });
-      });
-
-      it('should keep the outcome so fast failures are separable from fast parses', () => {
-        analytics.uploadParseDuration(400, 'error');
-
-        expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.UPLOAD_PARSE_DURATION, {
-          duration_bucket: '<1s',
-          outcome: 'error',
-        });
-      });
-
-      it('should enrich file upload success with UTM and entry CTA', () => {
-        sessionStorageMock['analytics_utm'] = JSON.stringify({
-          utm_source: 'producthunt',
-          utm_medium: 'launch',
-        });
-        sessionStorageMock['analytics_entry_cta'] = 'guide';
-
-        analytics.fileUploadSuccess(1500, false);
-
-        const call = windowSpy.umami.track.mock.calls[0];
-        expect(call[1].utm_source).toBe('producthunt');
-        expect(call[1].utm_medium).toBe('launch');
-        expect(call[1].entry_cta).toBe('guide');
-      });
-
-      it('should track filter toggle with 3% sampling', () => {
-        const originalRandom = Math.random;
-        Math.random = () => 0.02; // 2% < 3% threshold
-
-        analytics.filterToggle('notFollowingBack', 'enable', 3);
-
-        expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.FILTER_TOGGLE, {
-          filter_name: 'notFollowingBack',
-          filter_action: 'enable',
-          active_filter_count: 3,
-        });
-
-        Math.random = originalRandom;
-      });
-
-      it('should skip filter toggle when sampling excludes', () => {
-        const originalRandom = Math.random;
-        Math.random = () => 0.05; // 5% > 3% threshold
-
-        analytics.filterToggle('notFollowingBack', 'enable', 3);
-
-        expect(windowSpy.umami.track).not.toHaveBeenCalled();
-
-        Math.random = originalRandom;
-      });
-
-      it('should track filter clear all', () => {
-        analytics.filterClearAll(5);
-
-        expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.FILTER_CLEAR_ALL, {
-          previous_count: 5,
-        });
-      });
-
-      it('should track search with 5% sampling', () => {
-        const originalRandom = Math.random;
-        Math.random = () => 0.03; // 3% < 5% threshold
-
-        analytics.searchPerform(10, 25, 1000, true);
-
-        expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.SEARCH_PERFORM, {
-          query_length: 10,
-          result_count: 25,
-          total_count: 1000,
-          has_filters_active: true,
-        });
-
-        Math.random = originalRandom;
-      });
-
-      it('should skip search when sampling excludes', () => {
-        const originalRandom = Math.random;
-        Math.random = () => 0.1; // 10% > 5% threshold
-
-        analytics.searchPerform(10, 25, 1000, true);
-
-        expect(windowSpy.umami.track).not.toHaveBeenCalled();
-
-        Math.random = originalRandom;
-      });
+      // filter_toggle, filter_clear_all and search_perform left the immediate
+      // path for the batch queue — they fire repeatedly inside one page life and
+      // unload nothing, so one request for the page's set is as good as one
+      // each. Transport, payload and the sampling gate are asserted in
+      // stats/impression-batching.test.ts, which mocks both paths and can tell
+      // them apart; asserting them here would only prove umami.track is idle.
 
       it('should track results clicks summary with top 3 badges', () => {
         const originalRandom = Math.random;
@@ -279,30 +274,18 @@ describe('Analytics', () => {
         });
       });
 
-      it('should track hero CTA clicks and set entry CTA', () => {
+      // The CTA events themselves are batched — transport is asserted in
+      // stats/impression-batching.test.ts. What belongs here is the attribution
+      // side effect, which is independent of how the event travels.
+      it('sets the entry CTA on the first hero click and never overwrites it', () => {
         analytics.heroCTAGuide();
-        expect(windowSpy.umami.track).toHaveBeenCalledWith(
-          AnalyticsEvents.HERO_CTA_GUIDE,
-          undefined
-        );
         expect(sessionStorageMock['analytics_entry_cta']).toBe('guide');
 
         analytics.heroCTASample();
-        expect(windowSpy.umami.track).toHaveBeenCalledWith(
-          AnalyticsEvents.HERO_CTA_SAMPLE,
-          undefined
-        );
-        // Entry CTA should not be overwritten (first per session)
         expect(sessionStorageMock['analytics_entry_cta']).toBe('guide');
       });
 
-      it('should track theme toggle', () => {
-        analytics.themeToggle('dark');
-
-        expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.THEME_TOGGLE, {
-          mode: 'dark',
-        });
-      });
+      // theme_toggle is batched — see stats/impression-batching.test.ts.
 
       it('should track clear data action', () => {
         analytics.clearData();
@@ -310,42 +293,48 @@ describe('Analytics', () => {
         expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.CLEAR_DATA, undefined);
       });
 
-      it('should track wizard step view with 5% sampling and no step_title', () => {
-        const originalRandom = Math.random;
-        Math.random = () => 0.03; // 3% < 5% threshold
-
-        analytics.wizardStepView(1, 'Opening Settings');
-        expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.WIZARD_STEP_VIEW, {
-          step_id: 1,
-        });
-
-        Math.random = originalRandom;
-      });
+      // wizard_step_view is batched — see stats/impression-batching.test.ts.
 
       it('should skip wizard step view when sampling excludes', () => {
         const originalRandom = Math.random;
         Math.random = () => 0.1; // 10% > 5% threshold
 
-        analytics.wizardStepView(1, 'Opening Settings');
+        analytics.wizardStepView(1);
 
         expect(windowSpy.umami.track).not.toHaveBeenCalled();
 
         Math.random = originalRandom;
       });
 
-      it('should round file size in upload start', () => {
-        analytics.fileUploadStart(5.123456);
+      // The switcher reloads the page to fetch the new locale's SSG HTML, and
+      // window.umami.track() sends without keepalive — so this event used to
+      // announce the navigation that cancelled it. It now takes the batch
+      // transport's fetch, in the same tick.
+      it('should track language change over the keepalive path, not window.umami', () => {
+        const script = document.createElement('script');
+        script.setAttribute('src', 'https://umami.example/script.js');
+        script.setAttribute('data-website-id', 'test-website-id');
+        document.head.appendChild(script);
+        const fetchMock = vi.fn(() => Promise.resolve(new Response(null, { status: 200 })));
+        vi.stubGlobal('fetch', fetchMock);
 
-        const call = windowSpy.umami.track.mock.calls[0];
-        expect(call[1].file_size_mb).toBe(5.12);
-      });
-
-      it('should track language change', () => {
         analytics.languageChange('es');
 
-        expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.LANGUAGE_CHANGE, {
-          language: 'es',
+        expect(windowSpy.umami.track).not.toHaveBeenCalled();
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+
+        const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+        expect(url).toBe('https://umami.example/api/batch');
+        expect(init.keepalive).toBe(true);
+        const body = JSON.parse(init.body as string) as Array<{
+          payload: { name: string; data?: Record<string, unknown> };
+        }>;
+        expect(body[0]?.payload).toMatchObject({
+          name: AnalyticsEvents.LANGUAGE_CHANGE,
+          data: { language: 'es' },
         });
+
+        script.remove();
       });
 
       it('should track page view only once per session with UTM params', () => {
@@ -376,11 +365,6 @@ describe('Analytics', () => {
         expect(sessionStorageMock['analytics_first_pv']).toBe('1');
       });
 
-      it('should track upload click', () => {
-        analytics.uploadClick();
-        expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.UPLOAD_CLICK, undefined);
-      });
-
       it('should track diagnostic error events', () => {
         analytics.diagnosticErrorView('NOT_ZIP', 'upload');
         expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.DIAGNOSTIC_ERROR_VIEW, {
@@ -407,13 +391,7 @@ describe('Analytics', () => {
         });
       });
 
-      it('should track FAQ expansion without question_text', () => {
-        analytics.faqExpand(1, 'Some long question text');
-
-        expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.FAQ_EXPAND, {
-          question_id: 1,
-        });
-      });
+      // faq_expand is batched — see stats/impression-batching.test.ts.
 
       it('should track sample data load', () => {
         analytics.sampleDataLoad(500, 1234.567);
@@ -470,17 +448,32 @@ describe('Analytics', () => {
         Math.random = originalRandom;
       });
 
-      it('should track PWA events', () => {
-        analytics.pwaInstallPrompt();
-        expect(windowSpy.umami.track).toHaveBeenCalledWith(
-          AnalyticsEvents.PWA_INSTALL_PROMPT,
-          undefined
-        );
+      // pwa_install_prompt and pwa_installed are batched together, so the
+      // install rate divides one population — see
+      // stats/impression-batching.test.ts.
 
-        analytics.pwaInstalled();
+      // GH#21 Task 5: payload is exactly `{ mode }` — never a username or the
+      // resolved label string. See
+      // `usernameLabelResolutionTelemetry.test.ts` for the end-to-end version
+      // of this guarantee, run against a real parse.
+      it('should track how the username label was resolved', () => {
+        analytics.usernameLabelResolution('unresolved');
+
         expect(windowSpy.umami.track).toHaveBeenCalledWith(
-          AnalyticsEvents.PWA_INSTALLED,
-          undefined
+          AnalyticsEvents.USERNAME_LABEL_RESOLUTION,
+          { mode: 'unresolved' }
+        );
+      });
+
+      // The payload is one enum value naming which of the two lists arrived
+      // short. Never a count, a date, a username or anything derived from the
+      // file's bytes — the same line `usernameLabelResolution` above draws.
+      it('should track which relationship file arrived truncated', () => {
+        analytics.relationshipFileTruncated('followers');
+
+        expect(windowSpy.umami.track).toHaveBeenCalledWith(
+          AnalyticsEvents.RELATIONSHIP_FILE_TRUNCATED,
+          { file: 'followers' }
         );
       });
 

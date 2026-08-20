@@ -9,14 +9,32 @@ import {
   ChevronDown,
   ChevronUp,
   AlertCircle,
+  AlertTriangle,
   Ghost,
 } from 'lucide-react';
-import type { BadgeKey } from '@/core/types';
+import {
+  BADGES_OVERSTATED_BY_UNREADABLE_REQUESTS,
+  badgesAffectedByTruncation,
+} from '@/core/badges';
+import type { BadgeKey, TruncatedRelationshipFile } from '@/core/types';
 interface FilterChipsProps {
   selectedFilters: Set<BadgeKey>;
   onFiltersChange: (filters: Set<BadgeKey>) => void;
   filterCounts: Record<BadgeKey, number>;
   isFiltering?: boolean;
+  /**
+   * Marks the notFollowingBack chip as overstated (GH#41). The page-level
+   * notice explains why; this is what connects the explanation to the number,
+   * since the two are far apart on a phone.
+   */
+  followRequestsUnreadable?: boolean;
+  /**
+   * Marks every chip whose count a truncated relationship file corrupts. Unlike
+   * the flag above this one is not a single badge: which counts are wrong
+   * depends on which file arrived short, so the set comes from
+   * `badgesAffectedByTruncation` rather than being named here.
+   */
+  truncatedRelationshipFile?: TruncatedRelationshipFile;
 }
 import { analytics } from '@/lib/analytics';
 import type { ReactNode } from 'react';
@@ -45,7 +63,12 @@ const numberFormatter = new Intl.NumberFormat();
 function getBadgeIcon(type: BadgeKey, isActive: boolean): ReactNode {
   const config = BADGE_ICON_MAP[type];
   const IconComponent = config.icon;
-  return <IconComponent size={18} className={isActive ? 'text-primary-foreground' : config.defaultClass} />;
+  return (
+    <IconComponent
+      size={18}
+      className={isActive ? 'text-primary-foreground' : config.defaultClass}
+    />
+  );
 }
 
 // Filter configuration with badge types (labels come from i18n)
@@ -68,9 +91,22 @@ export const FilterChips = memo(function FilterChips({
   onFiltersChange,
   filterCounts,
   isFiltering: _isFiltering = false,
+  followRequestsUnreadable = false,
+  truncatedRelationshipFile = null,
 }: FilterChipsProps) {
   const { t } = useTranslation('results');
   const [showEmptyFilters, setShowEmptyFilters] = useState(false);
+
+  // Derived, never listed here: which counts a short file corrupts is a fact
+  // about the badge arithmetic, and a component naming badge keys by hand would
+  // be a second copy of it that drifts (`core/badges/index.ts`).
+  const affectedByTruncation = badgesAffectedByTruncation(truncatedRelationshipFile);
+
+  // Resolved once, outside the chip loop, and behind the null check the typed
+  // key union requires: `caveat.truncated.null.chipHint` is not a key.
+  const truncationHint = truncatedRelationshipFile
+    ? t(`caveat.truncated.${truncatedRelationshipFile}.chipHint`)
+    : '';
 
   const handleFilterToggle = (filter: BadgeKey) => {
     const newFilters = new Set(selectedFilters);
@@ -119,6 +155,20 @@ export const FilterChips = memo(function FilterChips({
           const isActive = selectedFilters.has(cfg.type);
           const count = getBadgeCount(cfg.type);
           const label = t(`badges.${cfg.type}`);
+          // The count itself is the thing that is wrong, so the mark goes on
+          // the chip, not only in the notice above the list (GH#41).
+          //
+          // "Unreliable" rather than "overstated": a truncated file drives
+          // `mutuals` and one of the two not-following counts DOWN, and calling
+          // that overstatement would be a second wrong answer on top of the
+          // first.
+          const truncationAffectsChip = affectedByTruncation.has(cfg.type);
+          const isUnreliable =
+            truncationAffectsChip ||
+            (followRequestsUnreadable && BADGES_OVERSTATED_BY_UNREADABLE_REQUESTS.has(cfg.type));
+          const chipLabel = isActive
+            ? t('filters.removeFilter', { label, count })
+            : t('filters.addFilter', { label, count });
           return (
             <button
               key={cfg.type}
@@ -128,10 +178,27 @@ export const FilterChips = memo(function FilterChips({
                   ? 'bg-primary text-primary-foreground border-primary shadow-md'
                   : 'text-zinc-600 dark:text-zinc-400 border-border bg-zinc-50/50 dark:bg-zinc-900/20 hover:border-primary/40'
               }`}
+              // Appended, not a separate element: an aria-label overrides the
+              // button's content, so a visually-hidden span inside would never
+              // be announced. The join is a translated template, not a
+              // hardcoded dash — `ar` and `ja` avoid that character in their own
+              // copy and would otherwise get one injected between two non-Latin
+              // runs.
               aria-label={
-                isActive
-                  ? t('filters.removeFilter', { label, count })
-                  : t('filters.addFilter', { label, count })
+                isUnreliable
+                  ? t('filters.chipWithHint', {
+                      label: chipLabel,
+                      // One hint, not both, when both causes apply to the same
+                      // chip. The mark's job is "this number cannot be trusted,
+                      // read the notice above", and both notices are on the
+                      // page; reciting two causes inside an aria-label the
+                      // reader cannot skim would cost more than it explains.
+                      // Truncation wins because it is the wider damage.
+                      hint: truncationAffectsChip
+                        ? truncationHint
+                        : t('caveat.followRequests.chipHint'),
+                    })
+                  : chipLabel
               }
               aria-pressed={isActive}
             >
@@ -147,7 +214,18 @@ export const FilterChips = memo(function FilterChips({
                   {numberFormatter.format(count)}
                 </span>
               </div>
-              <span className="mt-3 block leading-snug text-start text-xs">{label}</span>
+              <span className="mt-3 flex items-center gap-1.5 leading-snug text-start text-xs">
+                {label}
+                {isUnreliable && (
+                  <AlertTriangle
+                    size={13}
+                    aria-hidden="true"
+                    className={
+                      isActive ? 'text-primary-foreground shrink-0' : 'text-amber-500 shrink-0'
+                    }
+                  />
+                )}
+              </span>
             </button>
           );
         })}

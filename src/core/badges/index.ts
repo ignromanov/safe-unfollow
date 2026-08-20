@@ -1,4 +1,4 @@
-import type { ParsedAll, AccountBadges, BadgeKey } from '@/core/types';
+import type { ParsedAll, AccountBadges, BadgeKey, TruncatedRelationshipFile } from '@/core/types';
 
 // Helper function to collect all unique usernames
 function collectAllUsernames(parsed: ParsedAll): Set<string> {
@@ -14,9 +14,78 @@ function collectAllUsernames(parsed: ParsedAll): Set<string> {
   ]);
 }
 
+/**
+ * Badges whose count is too HIGH when a follow-requests file is present and
+ * unreadable (GH#41), because `computeDerivedRelationships` below subtracts
+ * those files' accounts and an empty map subtracts nobody.
+ *
+ * Declared beside the subtraction that causes it, and read by `FilterChips` to
+ * mark the chip: which badge inflates is a fact about the derivation, and a UI
+ * component comparing against a badge key by hand is a third independent copy
+ * of it. Only overstatement is listed — `pending` and `permanent` read the same
+ * maps and fall to 0, which is a different failure the caveat's own copy names.
+ */
+export const BADGES_OVERSTATED_BY_UNREADABLE_REQUESTS: ReadonlySet<BadgeKey> = new Set([
+  'notFollowingBack',
+]);
+
+/**
+ * Badges whose count is wrong when one relationship file was cut short before
+ * export — a date range picked in Meta's dialog filters `followers_*.json` by
+ * entry timestamp and leaves `following.json` whole.
+ *
+ * A function rather than a constant, because unlike GH#41 the damage depends on
+ * *which* file is short. The two cases are not disjoint and mostly overlap:
+ * each names its own file's badge, plus the same three derived badges, which
+ * are all read from both lists and so move whichever one lost people.
+ *
+ * Wrong in both directions, which is why this is not named "overstated" like
+ * its GH#41 sibling. A short followers list inflates `notFollowingBack` — the
+ * missing followers become accusations — and deflates `followers`, `mutuals`
+ * and `notFollowedBack`, all of which are read from the list that lost people.
+ * Measured on a real export: `notFollowingBack` 95 -> 294 while mutuals fell
+ * 298 -> 99. Telling the reader only about the inflated number would leave them
+ * believing they have a third of the friends they have.
+ *
+ * All four of every case are here because a smaller set was wrong: the first
+ * version of this listed three and omitted `notFollowedBack`, which is
+ * `followers` minus `following` and so shrinks with the file. `badges.test.ts`
+ * derives the real answer from `computeDerivedRelationships` rather than
+ * restating this list, and caught it. Keep that test honest and this list can
+ * stay hand-written.
+ *
+ * `pending`, `permanent` and the other optional-file badges are untouched:
+ * they are read from their own files, which the date range does not filter.
+ */
+const NO_BADGES: ReadonlySet<BadgeKey> = new Set<BadgeKey>();
+
+export function badgesAffectedByTruncation(
+  truncated: TruncatedRelationshipFile
+): ReadonlySet<BadgeKey> {
+  // A shared constant, not a fresh empty Set: `FilterChips` calls this on every
+  // render and almost every export is untruncated, so this is the hot answer.
+  if (truncated === null) return NO_BADGES;
+
+  // The short file's own badge, plus the three derived from both lists. Written
+  // as one expression rather than a literal per case: the two cases used to be
+  // spelled out separately, with the three shared badges in a different order
+  // each time, so telling them apart meant diffing two four-element lists to
+  // find the single element that differs.
+  return new Set<BadgeKey>([truncated, 'notFollowingBack', 'notFollowedBack', 'mutuals']);
+}
+
 // Helper function to compute derived relationship categories
 function computeDerivedRelationships(parsed: ParsedAll) {
   // notFollowingBack: User follows but account doesn't follow back (excluding pending/permanent requests)
+  //
+  // GH#41: the two request exclusions come from optional files that can be
+  // present and unreadable, in which case their maps are empty, nobody is
+  // subtracted, and this badge silently overstates itself. `ParseResult`
+  // carries `followRequestsUnreadable` for exactly this, and `/results` renders
+  // a caveat from it. Adding a THIRD exclusion here means asking whether that
+  // flag still covers the badge — `badges.test.ts` fails until someone does.
+  // What they must set is `feedsNotFollowingBackExclusion` on the new file's
+  // spec (`instagram-file-specs.ts`); the flag is what the caveat folds over.
   const notFollowingBack = new Set(
     [...parsed.following].filter(
       u =>

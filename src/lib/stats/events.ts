@@ -5,18 +5,81 @@
 import { AnalyticsEvents, parseDurationBucket } from './constants';
 import type { FilterAction, LinkType, ParseOutcome } from './constants';
 import { trackEvent } from './core';
-import { enqueueEvent } from './queue';
-import { getStoredUTM, getEntryCTA, setEntryCTA } from './utm';
+import { recordCTA } from './cta-capture';
+import { enqueueEvent, flushEvents, trackNavigating } from './queue';
+import { getStoredUTM, getEntryCTA } from './utm';
+import type { LabelResolutionMode, TruncatedRelationshipFile } from '@/core/types';
 import type { LicenseFailureReason } from '@/lib/export/license';
+
+/**
+ * True the first time this key is seen in this browser tab, false afterwards.
+ *
+ * The name says "tab" because `sessionStorage` is scoped to one tab and dies
+ * with it, while Umami's `session_id` is scoped to a visitor and can span
+ * days. The two disagree in the same direction every time: two tabs, or a
+ * reopen an hour later, give two `true` rows against one Umami session. A
+ * property called `first_view` would read as "first view this session" —
+ * false against the only notion of session the dashboard has.
+ *
+ * Both ends of the entry→instruction pair carry it. Without it the pair
+ * inherits wizard_step_view's back-navigation non-monotonicity — 1→2→1→2 counts
+ * twice on both ends and the ratio stops being a funnel. Mechanism follows the
+ * `analytics_first_pv` precedent below (`pageView`).
+ *
+ * Callers must evaluate this *before* the sampling gate, not after. The flag
+ * describes the reader's history ("has this screen been seen before"), not
+ * whether this particular view got sampled — an unreported view still
+ * happened, and the marker still needs writing so the next view (sampled or
+ * not) reads `false`. Gating first would make the marker's write conditional
+ * on the sample roll, so `first_view_in_tab: true` would mean "the first view that
+ * happened to be sampled", not "the reader's first view" — expected
+ * true-count per session becomes `1 - 0.95^n`, which is n-dependent, and the
+ * entry→step-2 ratio this flag exists to unbias stays skewed by
+ * back-navigation.
+ */
+function firstViewInTab(key: string): boolean {
+  if (typeof window === 'undefined') return false;
+  const storageKey = `analytics_first_in_tab_${key}`;
+  // The getter itself throws SecurityError under Safari's "Block all cookies"
+  // and Firefox's "Block cookies and site data", and both callers run inside a
+  // mount effect — an unguarded throw takes the screen down to report a view.
+  // Degrading to "not first view" under-reports instead, which is the same
+  // trade `getStoredUTM` makes for the identical call (utm.ts).
+  try {
+    if (sessionStorage.getItem(storageKey)) return false;
+    sessionStorage.setItem(storageKey, '1');
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Round a file size to two decimal places for the `file_size_mb` analytics
+ * property. Shared so `file_upload_start` and `upload_error_*` report the
+ * same file at the same precision.
+ */
+function roundMb(sizeMb: number): number {
+  return Math.round(sizeMb * 100) / 100;
+}
 
 /**
  * Analytics helper object with typed methods
  */
 export const analytics = {
   // File Upload events (V10: removed file_hash — not actionable in dashboard)
+  //
+  // The whole upload funnel is batched, and it moves as one unit on purpose:
+  // `file_upload_success` is divided by `file_upload_start`, and every
+  // `upload_error_<code>` is reported against that same denominator. Splitting
+  // the transports would split the gate — `enqueueEvent` needs only the script
+  // tag, `trackEvent` needs the script to have executed — and the 70.5% success
+  // rate would divide two populations. Nothing here unloads the page, and where
+  // an attempt's events are lost they are lost together, which leaves the ratio
+  // unbiased; losing a success while its start survived would understate it.
   fileUploadStart: (fileSizeMb: number) => {
-    trackEvent(AnalyticsEvents.FILE_UPLOAD_START, {
-      file_size_mb: Math.round(fileSizeMb * 100) / 100,
+    enqueueEvent(AnalyticsEvents.FILE_UPLOAD_START, {
+      file_size_mb: roundMb(fileSizeMb),
     });
   },
 
@@ -24,7 +87,7 @@ export const analytics = {
   fileUploadSuccess: (accountCount: number, fromCache: boolean) => {
     const utm = getStoredUTM();
     const entryCta = getEntryCTA();
-    trackEvent(AnalyticsEvents.FILE_UPLOAD_SUCCESS, {
+    enqueueEvent(AnalyticsEvents.FILE_UPLOAD_SUCCESS, {
       account_count: accountCount,
       from_cache: fromCache,
       ...(utm.utm_source && { utm_source: utm.utm_source }),
@@ -42,7 +105,7 @@ export const analytics = {
    * unappealing one look identical in the dashboard.
    */
   uploadParseDuration: (durationMs: number, outcome: ParseOutcome) => {
-    trackEvent(AnalyticsEvents.UPLOAD_PARSE_DURATION, {
+    enqueueEvent(AnalyticsEvents.UPLOAD_PARSE_DURATION, {
       duration_bucket: parseDurationBucket(durationMs),
       outcome,
     });
@@ -51,7 +114,7 @@ export const analytics = {
   // Filter events (V10: 3% sampling, was 10%)
   filterToggle: (filterName: string, action: FilterAction, activeCount: number) => {
     if (Math.random() > 0.03) return;
-    trackEvent(AnalyticsEvents.FILTER_TOGGLE, {
+    enqueueEvent(AnalyticsEvents.FILTER_TOGGLE, {
       filter_name: filterName,
       filter_action: action,
       active_filter_count: activeCount,
@@ -59,7 +122,7 @@ export const analytics = {
   },
 
   filterClearAll: (previousCount: number) => {
-    trackEvent(AnalyticsEvents.FILTER_CLEAR_ALL, {
+    enqueueEvent(AnalyticsEvents.FILTER_CLEAR_ALL, {
       previous_count: previousCount,
     });
   },
@@ -72,7 +135,7 @@ export const analytics = {
     hasFiltersActive: boolean
   ) => {
     if (Math.random() > 0.05) return;
-    trackEvent(AnalyticsEvents.SEARCH_PERFORM, {
+    enqueueEvent(AnalyticsEvents.SEARCH_PERFORM, {
       query_length: queryLength,
       result_count: resultCount,
       total_count: totalCount,
@@ -135,44 +198,70 @@ export const analytics = {
   },
 
   // Hero CTAs (sets entry CTA for conversion attribution)
-  heroCTAGuide: () => {
-    setEntryCTA('guide');
-    trackEvent(AnalyticsEvents.HERO_CTA_GUIDE);
-  },
+  //
+  // Batched, unlike the new-tab clicks above: once hydrated these are PrefixedLink,
+  // so the click is preventDefault + pushState and the document never unloads. The
+  // route change that follows drains the queue on the next tick, so the event
+  // leaves as promptly as it did on the immediate path — it just shares a
+  // request with the rest of the landing page's set.
+  //
+  // Before hydration none of that holds — the click is a real navigation and no
+  // handler runs at all, which is why the recorder is a capture-phase listener in
+  // index.html rather than an onClick. These four delegate to the same `recordCTA`
+  // that listener reaches, so the slug→event mapping has one definition (GH#99).
+  heroCTAGuide: () => recordCTA('guide'),
 
-  heroCTASample: () => {
-    setEntryCTA('sample');
-    trackEvent(AnalyticsEvents.HERO_CTA_SAMPLE);
-  },
+  heroCTASample: () => recordCTA('sample'),
 
-  heroCTAUploadDirect: () => {
-    setEntryCTA('upload_direct');
-    trackEvent(AnalyticsEvents.HERO_CTA_UPLOAD_DIRECT);
-  },
+  heroCTAUploadDirect: () => recordCTA('upload_direct'),
 
-  heroCTAContinue: () => {
-    setEntryCTA('continue');
-    trackEvent(AnalyticsEvents.HERO_CTA_CONTINUE);
-  },
+  heroCTAContinue: () => recordCTA('continue'),
 
   // Navigation
   themeToggle: (mode: 'dark' | 'light' | 'system') => {
-    trackEvent(AnalyticsEvents.THEME_TOGGLE, { mode });
+    enqueueEvent(AnalyticsEvents.THEME_TOGGLE, { mode });
   },
 
   clearData: () => {
     trackEvent(AnalyticsEvents.CLEAR_DATA);
   },
 
+  // Same-tab navigation: LanguageSwitcher does a full reload to fetch the new
+  // locale's SSG HTML. Same defect as checkoutStart — see queue.ts.
   languageChange: (language: string) => {
-    trackEvent(AnalyticsEvents.LANGUAGE_CHANGE, { language });
+    trackNavigating(AnalyticsEvents.LANGUAGE_CHANGE, { language });
+  },
+
+  /**
+   * The single-action entry screen that replaced wizard step 1.
+   *
+   * A NEW NAME rather than a `variant` on wizard_step_view: a variant field
+   * would leave step_id:1 meaning two different screens depending on the date,
+   * and every historical query silently wrong.
+   *
+   * Same 5% gate as wizardStepView — a ratio between two events sampled at the
+   * same rate is unbiased, and 5% already gives ±3% at this volume.
+   *
+   * NOT comparable across its own release: the old pair measured
+   * "slide 1 → slide 2", this one measures "entry → first instruction".
+   * Different denominators by construction.
+   */
+  guideEntryView: () => {
+    // Order matters — see firstViewInTab's doc comment. The marker must
+    // be written regardless of whether this view is sampled.
+    const isFirstView = firstViewInTab('guide_entry');
+    if (Math.random() > 0.05) return;
+    enqueueEvent(AnalyticsEvents.GUIDE_ENTRY_VIEW, { first_view_in_tab: isFirstView });
   },
 
   // Wizard events (V10: 5% sampling, was 25%)
-  wizardStepView: (stepId: number, _stepTitle?: string) => {
+  wizardStepView: (stepId: number) => {
+    // Order matters — see firstViewInTab's doc comment.
+    const isFirstView = firstViewInTab(`wizard_step_${stepId}`);
     if (Math.random() > 0.05) return;
-    trackEvent(AnalyticsEvents.WIZARD_STEP_VIEW, {
+    enqueueEvent(AnalyticsEvents.WIZARD_STEP_VIEW, {
       step_id: stepId,
+      first_view_in_tab: isFirstView,
     });
   },
 
@@ -194,7 +283,7 @@ export const analytics = {
 
   // Upload Zone
   uploadClick: () => {
-    trackEvent(AnalyticsEvents.UPLOAD_CLICK);
+    enqueueEvent(AnalyticsEvents.UPLOAD_CLICK);
   },
 
   // Diagnostic Errors
@@ -231,7 +320,7 @@ export const analytics = {
 
   // FAQ
   faqExpand: (questionId: number, _questionText?: string) => {
-    trackEvent(AnalyticsEvents.FAQ_EXPAND, {
+    enqueueEvent(AnalyticsEvents.FAQ_EXPAND, {
       question_id: questionId,
     });
   },
@@ -325,7 +414,8 @@ export const analytics = {
   uploadErrorByCode: (
     fileHash: string,
     code: import('@/core/types').DiagnosticErrorCode,
-    errorMessage?: string
+    errorMessage?: string,
+    fileSizeMb?: number
   ) => {
     const eventMap: Record<
       import('@/core/types').DiagnosticErrorCode,
@@ -338,10 +428,13 @@ export const analytics = {
       NO_DATA_FILES: AnalyticsEvents.UPLOAD_ERROR_NO_DATA,
       MISSING_FOLLOWING: AnalyticsEvents.UPLOAD_ERROR_MISSING_FOLLOWING,
       MISSING_FOLLOWERS: AnalyticsEvents.UPLOAD_ERROR_MISSING_FOLLOWERS,
+      INVALID_FOLLOWING_FORMAT: AnalyticsEvents.UPLOAD_ERROR_INVALID_FOLLOWING_FORMAT,
+      INVALID_FOLLOWERS_FORMAT: AnalyticsEvents.UPLOAD_ERROR_INVALID_FOLLOWERS_FORMAT,
       CORRUPTED_ZIP: AnalyticsEvents.UPLOAD_ERROR_CORRUPTED_ZIP,
       ZIP_ENCRYPTED: AnalyticsEvents.UPLOAD_ERROR_ZIP_ENCRYPTED,
       EMPTY_FILE: AnalyticsEvents.UPLOAD_ERROR_EMPTY_FILE,
       FILE_TOO_LARGE: AnalyticsEvents.UPLOAD_ERROR_FILE_TOO_LARGE,
+      TOO_MANY_ENTRIES: AnalyticsEvents.UPLOAD_ERROR_TOO_MANY_ENTRIES,
       JSON_PARSE_ERROR: AnalyticsEvents.UPLOAD_ERROR_JSON_PARSE,
       INVALID_DATA_STRUCTURE: AnalyticsEvents.UPLOAD_ERROR_INVALID_STRUCTURE,
       WORKER_TIMEOUT: AnalyticsEvents.UPLOAD_ERROR_TIMEOUT,
@@ -356,10 +449,24 @@ export const analytics = {
       NETWORK_ERROR: AnalyticsEvents.UPLOAD_ERROR_NETWORK,
       UNKNOWN: AnalyticsEvents.UPLOAD_ERROR_UNKNOWN,
     };
-    trackEvent(eventMap[code], {
+    enqueueEvent(eventMap[code], {
       file_hash: fileHash.slice(0, 12),
       error_message: errorMessage?.slice(0, 50) ?? '',
+      // The size used to reach the database only inside error_message, i18n'd
+      // into ten languages and truncated at 50 characters — German writes
+      // "1176 MB", Russian "956МБ" in Cyrillic with no space. All 437 records
+      // were recoverable by regex over translated prose. That worked once.
+      //
+      // Spread rather than defaulted: absent and zero must not be the same
+      // thing in a column decisions get made from. Rounded the way
+      // fileUploadStart rounds it, so two events about one file agree.
+      ...(fileSizeMb === undefined ? {} : { file_size_mb: roundMb(fileSizeMb) }),
     });
+    // Drained here rather than left to `pagehide`: unlike the success path, a
+    // failed upload navigates nowhere, so nothing else would trigger a flush
+    // while the visitor stares at the error screen. One request per failure is
+    // the price of not stranding the diagnostic the HTML-format work reads.
+    flushEvents();
   },
 
   // Session & Engagement
@@ -381,12 +488,15 @@ export const analytics = {
   },
 
   // PWA Install
+  //
+  // Batched together: the prompt is the denominator the install is divided by,
+  // so both must be gated on the same thing. Neither unloads the page.
   pwaInstallPrompt: () => {
-    trackEvent(AnalyticsEvents.PWA_INSTALL_PROMPT);
+    enqueueEvent(AnalyticsEvents.PWA_INSTALL_PROMPT);
   },
 
   pwaInstalled: () => {
-    trackEvent(AnalyticsEvents.PWA_INSTALLED);
+    enqueueEvent(AnalyticsEvents.PWA_INSTALLED);
   },
 
   // Ads — one viewable impression opportunity, by the MRC display standard.
@@ -395,6 +505,41 @@ export const analytics = {
     enqueueEvent(AnalyticsEvents.AD_SLOT_VIEWABLE, {
       slot,
     });
+  },
+
+  // GH#21: fires once per optional relationship file whose shape drifted
+  // (pending/restricted/close_friends/unfollowed/dismissed/permanent — see
+  // instagram-file-specs.ts driftCode). Immediate, not batched: this is a
+  // rare diagnostic signal about an upstream format change, not a high-volume
+  // impression where losing a few events to a dropped batch is acceptable.
+  optionalFileFormatDrift: (fileCode: string) => {
+    trackEvent(AnalyticsEvents.OPTIONAL_FILE_FORMAT_DRIFT, {
+      file_code: fileCode,
+    });
+  },
+
+  // GH#21 Task 5: fires once per parse, always — unlike the drift event
+  // above, a clean parse still emits this, as `fast-path`. Never the
+  // resolved label string: it is Meta's UI text in the export's own
+  // language, not the site's, and would leak that language. The mode alone
+  // carries what the diagnosis needs. Immediate for the same reason as
+  // `optionalFileFormatDrift`: a rare diagnostic about an upstream format
+  // change, not a high-volume impression.
+  usernameLabelResolution: (mode: LabelResolutionMode) => {
+    trackEvent(AnalyticsEvents.USERNAME_LABEL_RESOLUTION, { mode });
+  },
+
+  // Fires only when one of the two required relationship files looks cut short,
+  // so unlike `usernameLabelResolution` a clean parse emits nothing. Immediate
+  // rather than batched for the same reason as its two neighbours: a rare
+  // diagnostic about the shape of an upstream export, not a high-volume
+  // impression.
+  //
+  // The field is which of the two lists is short — a fact about the export's
+  // shape, never about its contents. Same line the label event draws: no
+  // username, no count, nothing derived from the file's bytes.
+  relationshipFileTruncated: (file: NonNullable<TruncatedRelationshipFile>) => {
+    trackEvent(AnalyticsEvents.RELATIONSHIP_FILE_TRUNCATED, { file });
   },
 
   // Pro Export
@@ -418,8 +563,13 @@ export const analytics = {
     trackEvent(AnalyticsEvents.FREE_EXPORT_DOWNLOAD, { capped });
   },
 
-  paywallView: () => {
-    trackEvent(AnalyticsEvents.PAYWALL_VIEW);
+  // locale and row_count are the two dimensions the paywall cannot be tuned
+  // without: GH#25 (PAYWALL_MIN_ROWS against real selection sizes) and the
+  // Indonesian share of the audience. Batched, so this divides the same
+  // population as checkout_start — both gate on the analytics tag being in the
+  // DOM, where trackEvent gates on the script having executed.
+  paywallView: (locale: string, rowCount: number) => {
+    enqueueEvent(AnalyticsEvents.PAYWALL_VIEW, { locale, row_count: rowCount });
   },
 
   // Fires only for the three Radix-driven closes (X, Escape, overlay click) —
@@ -428,12 +578,14 @@ export const analytics = {
   // directly, bypassing this handler). Both of those already have their own
   // event, and double-counting them here would corrupt the one ratio this
   // event exists to produce.
-  paywallDismiss: () => {
-    trackEvent(AnalyticsEvents.PAYWALL_DISMISS);
+  paywallDismiss: (locale: string, rowCount: number) => {
+    enqueueEvent(AnalyticsEvents.PAYWALL_DISMISS, { locale, row_count: rowCount });
   },
 
-  checkoutStart: () => {
-    trackEvent(AnalyticsEvents.CHECKOUT_START);
+  // Same-tab navigation: useProExport sets location.href in the next statement,
+  // and window.umami.track() has no keepalive. See queue.ts.
+  checkoutStart: (locale: string, rowCount: number) => {
+    trackNavigating(AnalyticsEvents.CHECKOUT_START, { locale, row_count: rowCount });
   },
 
   purchaseSuccess: () => {

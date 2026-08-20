@@ -1,0 +1,20 @@
+import { Wizard } from 'safe-unfollow';
+
+// Wizard is `fixed inset-0` — a full-screen carousel, not an inline section. It will
+// escape any grid cell regardless of these props; see learnings for the cardMode this needs.
+export function FirstStep() {
+  return <Wizard initialStep={1} onComplete={() => {}} onCancel={() => {}} />;
+}
+
+// Step 6 ("Change Format to JSON") is one of two `isWarning` steps — amber card, amber
+// title, and the bouncing "CRITICAL STEP" badge over the visual.
+export function FormatWarningStep() {
+  return <Wizard initialStep={6} onComplete={() => {}} onCancel={() => {}} />;
+}
+
+// WIZARD_STEPS has 8 entries, so step 8 is the last one: no external-link button, and
+// the pinned footer button reads "Done, let's go!" instead of "Next Step". This step also
+// adds the "Add Reminder to Calendar" CTA under the description.
+export function LastStep() {
+  return <Wizard initialStep={8} onComplete={() => {}} onCancel={() => {}} />;
+}

@@ -8,7 +8,7 @@
     "processing": "ローカルで分析中...",
     "processingHint": "大規模データセット（100万件以上）の処理には少し時間がかかることがあります。",
     "ariaLabel": "InstagramデータのZIPファイルをアップロード",
-    "jsonReminder": "データエクスポートをリクエストする際にJSON形式を選択したか確認してください。JSONとHTMLのZIPファイルは外見上同じに見えます。",
+    "jsonReminder": "InstagramのダイアログはデフォルトでHTML形式です — 必ずJSON形式を選択してください。JSONとHTMLのZIPファイルは外見上同じに見えます。",
     "seeGuide": "ステップバイステップガイドを見る",
     "jsonRequired": "JSON形式のエクスポートが必要です",
     "privacyMicro": "ファイルはデバイスから外に出ません",
@@ -33,6 +33,9 @@
     "howToFix": "修正方法",
     "tryAgain": "もう一度試す",
     "showMistakes": "間違いを確認",
+    "reExportJson": "JSON形式で再エクスポート：設定手順を開く",
+    "chooseDifferentFile": "別のファイルを選ぶ",
+    "actionsLabel": "復旧アクション",
     "reportIssue": "GitHubでこの問題を報告",
     "copyDetails": "エラー詳細をコピー",
     "copied": "コピーしました！",
@@ -46,12 +49,12 @@
       "HTML_FORMAT": {
         "title": "形式が違います: HTML",
         "message": "データをHTML形式でダウンロードしましたが、このツールはJSON形式が必要です。",
-        "fix": "Instagramの設定 → 情報をダウンロード → 形式を「JSON」に選択（HTMLではない）→ 再度ダウンロードをリクエストしてください。"
+        "fix": "Metaアカウントセンター → エクスポートを作成 → デバイスにエクスポート → 形式を「JSON」に設定（HTMLではない）→ もう一度エクスポートをリクエストしてください。"
       },
       "NOT_INSTAGRAM_EXPORT": {
         "title": "Instagramのエクスポートではありません",
         "message": "このZIPファイルはInstagramのデータエクスポートではないようです。",
-        "fix": "Instagramの「情報をダウンロード」機能から取得したZIPファイルをアップロードしているか確認してください。"
+        "fix": "Metaアカウントセンターの「エクスポートを作成」から取得したZIPファイルをアップロードしているか確認してください。"
       },
       "INCOMPLETE_EXPORT": {
         "title": "エクスポートが不完全です",
@@ -81,17 +84,22 @@
       "ZIP_ENCRYPTED": {
         "title": "パスワード保護されたZIP",
         "message": "ZIPファイルにパスワードが設定されていますが、Instagramのエクスポートは暗号化されていません。",
-        "fix": "有効なInstagramのデータエクスポートではない可能性があります。Instagramの設定から新しいエクスポートをリクエストしてください。"
+        "fix": "有効なInstagramのデータエクスポートではない可能性があります。Metaアカウントセンターから新しいエクスポートをリクエストしてください。"
       },
       "EMPTY_FILE": {
         "title": "ファイルが空です",
         "message": "アップロードされたファイルは空（0バイト）です。",
         "fix": "ダウンロードが途中で中断された可能性があります。Instagramから再度データをダウンロードしてください。"
       },
+      "TOO_MANY_ENTRIES": {
+        "title": "ファイルが多すぎます",
+        "message": "このZIPには、このツールがインデックスできる数を超えるファイルが含まれています。",
+        "fix": "小さいエクスポートをリクエスト：Meta Accounts Centerを開く → エクスポートを作成 →「フォロワーとフォロー中」のみ選択 → JSON形式。数百MBではなく数MBになります。"
+      },
       "FILE_TOO_LARGE": {
         "title": "ファイルサイズが大きすぎます",
-        "message": "ファイルサイズが{{sizeMb}}MBで、500MBの上限を超えています。",
-        "fix": "Instagramからより小さいデータエクスポートをリクエストするか、メモリの多いデスクトップブラウザをお使いください。"
+        "message": "ブラウザーがこのエクスポートを開けませんでした — この端末には大きすぎます。",
+        "fix": "小さいエクスポートをリクエスト：Meta Accounts Centerを開く → エクスポートを作成 →「フォロワーとフォロー中」のみ選択 → JSON形式。数百MBではなく数MBになります。"
       },
       "JSON_PARSE_ERROR": {
         "title": "データ形式が無効です",
@@ -160,28 +168,10 @@
       }
     }
   },
-  "quiz": {
-    "title": "どのフォーマットを選びましたか？",
-    "subtitle": "Instagramのデータエクスポートをリクエストした時、どのフォーマットを選びましたか？",
-    "json": "JSON",
-    "jsonHint": "分析に適した正しいフォーマット",
-    "html": "HTML",
-    "htmlHint": "使えません — JSONで再ダウンロードしてください",
-    "notSure": "わからない",
-    "notSureHint": "確認させてください",
-    "successMessage": "準備完了！下にZIPをアップロードしてください。",
-    "htmlMessage": "HTMLエクスポートは分析できません。JSON形式でデータを再リクエストしてください。",
-    "htmlCta": "JSON形式の取得方法を見る",
-    "comparisonTitle": "見分け方",
-    "comparisonJson": "ダウンロードページで「フォーマット：JSON」と表示されていればOKです。",
-    "comparisonHtml": "「フォーマット：HTML」や.htmlファイルが見える場合は再リクエストが必要です。",
-    "dismiss": "わかりました",
-    "fixedIt": "JSONで再リクエストしました"
-  },
   "formatWarning": "データエクスポートのリクエスト時にJSON（HTMLではなく）を選択してください。",
   "waiting": {
     "title": "Instagramを待っています...",
-    "description": "Instagramがデータエクスポートを準備中です。48時間以内にメールが届きます（通常はもっと早いです！）。",
+    "description": "Instagramがデータエクスポートを準備中です。多くは5〜30分でメールが届きます。大きなアカウントでは数時間かかることがあります。",
     "addReminder": "カレンダーにリマインダーを追加",
     "reminderHint": "2日後にチェックするリマインド",
     "calendarTitle": "Instagramエクスポートのメールを確認",

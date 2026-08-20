@@ -1,6 +1,12 @@
 {
   "header": {
-    "stepOf": "Étape {{current}} sur {{total}}"
+    "ariaLabel": "Assistant d'exportation des données Instagram",
+    "stepOf": "Étape {{current}} sur {{total}}",
+    "stepNavigation": "Navigation des étapes",
+    "stepLabel": "Étape {{step}}"
+  },
+  "footer": {
+    "navigation": "Actions de l'assistant"
   },
   "calendar": {
     "addReminder": "Ajouter un rappel au calendrier",
@@ -11,29 +17,50 @@
     "back": "Retour",
     "next": "Étape suivante",
     "done": "C'est fait, allons-y !",
-    "openInstagram": "Ouvrir la page d'exportation",
     "close": "Fermer le guide",
+    "cancel": "Annuler",
+    "trySample": "Essayer avec des données exemple",
     "uploadFile": "Téléverser mon fichier",
     "alreadyHaveFile": "J'ai déjà mon fichier ZIP"
   },
   "format": {
     "warning": "ÉTAPE CRITIQUE"
   },
-  "steps": {
-    "1": {
-      "title": "Ouvrez la page d'exportation Instagram",
-      "description": "Cliquez sur le bouton ci-dessous pour ouvrir le Centre de comptes Meta. Ensuite, cliquez sur « Créer une exportation ».",
-      "alt": "Étape 1 : Ouvrez la page d'exportation et cliquez sur Créer une exportation"
+  "entry": {
+    "title": "D'abord, demandez votre fichier à Instagram.",
+    "timeCost": {
+      "ours": "La demande prend environ 2 minutes.",
+      "theirs": "Instagram vous envoie ensuite le fichier par e-mail — l'attente est la leur, pas la nôtre."
     },
+    "cta": "Ouvrir l'Espace Comptes",
+    "trust": {
+      "noLogin": "Aucune connexion. Aucun mot de passe. Rien à relier.",
+      "local": "Votre export est lu dans ce navigateur et jamais téléversé."
+    },
+    "recipe": {
+      "title": "Que choisir dans la boîte de dialogue Instagram",
+      "rows": {
+        "destination": "Exporter sur mon appareil",
+        "range": "Tout",
+        "format": "JSON — pas HTML",
+        "quality": "Toute qualité de média",
+        "content": "Abonnés et abonnements"
+      }
+    },
+    "accordion": {
+      "trigger": "Guide étape par étape — {{count}} étapes"
+    }
+  },
+  "steps": {
     "2": {
       "title": "Choisissez votre profil Instagram",
       "description": "Sélectionnez votre compte Instagram dans la liste des profils connectés.",
       "alt": "Étape 2 : Choisissez votre profil Instagram"
     },
     "3": {
-      "title": "Sélectionnez « Exporter vers l'appareil »",
+      "title": "Sélectionnez « Exporter sur mon appareil »",
       "description": "Choisissez d'exporter directement vers votre appareil pour une confidentialité maximale. Vos données restent avec vous.",
-      "alt": "Étape 3 : Sélectionnez l'option Exporter vers l'appareil"
+      "alt": "Étape 3 : Sélectionnez l'option Exporter sur mon appareil"
     },
     "4": {
       "title": "⚠️ Sélectionnez uniquement « Abonnés et abonnements »",
@@ -42,7 +69,7 @@
     },
     "5": {
       "title": "Définissez la plage de dates sur « Tout »",
-      "description": "Cliquez sur « Plage de dates » → Sélectionnez « Tout » → Enregistrer. Cela garantit votre historique complet d'abonnés.",
+      "description": "Cliquez sur « Plage de dates » → Sélectionnez « Tout » → Enregistrer. Cela permet d'obtenir l'historique complet de vos abonnés.",
       "alt": "Étape 5 : Définissez la plage de dates sur Tout"
     },
     "6": {

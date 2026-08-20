@@ -5,23 +5,23 @@
     "highlight": "Parou de Te Seguir no Instagram",
     "suffix": "Sem Login"
   },
-  "subheadline": "Descubra quem parou de te seguir no Instagram gratis, sem login. Envie seu ZIP, analise localmente. 100% privado. Funciona offline.",
+  "subheadline": "Descubra quem parou de te seguir no Instagram grátis, sem login. Envie seu ZIP, analise localmente. 100% privado. Funciona offline.",
   "buttons": {
-    "getGuide": "Ver Quem Deixou de Seguir Grátis",
+    "getGuide": "Ver Quem Deixou de Te Seguir",
     "trySample": "Testar com Exemplo",
     "haveFile": "Já tenho meu arquivo ZIP",
     "viewResults": "Ver Resultados da Análise"
   },
   "trust": {
-    "free": "Gratuito para Sempre",
+    "free": "Análise Grátis",
     "noPassword": "Sem Precisar de Senha",
-    "privacy": "Privacidade Garantida"
+    "privacy": "100% Privado • Análise Local"
   },
   "features": {
     "heading": "Principais Recursos",
     "local": {
       "title": "100% Local",
-      "description": "Seus dados nunca saem do seu dispositivo"
+      "description": "Sua exportação do Instagram nunca sai deste navegador"
     },
     "noLogin": {
       "title": "Sem Login",
@@ -29,7 +29,7 @@
     },
     "scale": {
       "title": "Alta Escala",
-      "description": "Processa mais de 1 milhão de contas rapidamente"
+      "description": "Feito para exportações de mais de 1 milhão de contas"
     },
     "openSource": {
       "title": "Código Aberto",

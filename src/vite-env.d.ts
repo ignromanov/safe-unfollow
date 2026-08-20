@@ -15,6 +15,24 @@ interface ImportMetaEnv {
    * activation to test.dodopayments.com (see lib/export/license.ts).
    */
   readonly VITE_DODO_CHECKOUT_URL?: string;
+  /**
+   * Where the Umami tracker is loaded from. Defaults to the same-origin proxy
+   * `/v/script.js` (see `vercel.json` rewrites). Set to an absolute URL only to
+   * point at an instance that is not proxied. GH#63.
+   */
+  readonly VITE_UMAMI_SRC?: string;
+  /** Umami website id events are attributed to. GH#63. */
+  readonly VITE_UMAMI_WEBSITE_ID?: string;
+  /**
+   * Where the Umami heatmap recorder is loaded from. Defaults to the same-origin
+   * proxy `/v/recorder.js`, the same rewrite that serves the tracker. GH#95.
+   */
+  readonly VITE_UMAMI_RECORDER_SRC?: string;
+  /**
+   * Base the recorder resolves `/api/record` and its config endpoint against.
+   * Defaults to the `/v` proxy prefix. GH#95.
+   */
+  readonly VITE_UMAMI_HOST_URL?: string;
 }
 
 interface ImportMeta {

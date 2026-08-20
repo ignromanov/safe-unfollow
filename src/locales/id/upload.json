@@ -8,7 +8,7 @@
     "processing": "Menganalisis secara lokal...",
     "processingHint": "Memproses dataset besar (hingga 1 juta+) bisa memakan waktu sebentar.",
     "ariaLabel": "Unggah file ZIP data Instagram",
-    "jsonReminder": "Pastikan Anda memilih format JSON saat meminta ekspor data. File ZIP JSON dan HTML terlihat identik dari luar.",
+    "jsonReminder": "Dialog Instagram secara default memilih HTML — pastikan Anda memilih JSON. File ZIP JSON dan HTML terlihat identik dari luar.",
     "seeGuide": "Lihat panduan langkah demi langkah",
     "jsonRequired": "Memerlukan ekspor format JSON",
     "privacyMicro": "File Anda tidak pernah meninggalkan perangkat Anda",
@@ -33,6 +33,9 @@
     "howToFix": "Cara memperbaiki ini",
     "tryAgain": "Coba Lagi",
     "showMistakes": "Tunjukkan Kesalahan Saya",
+    "reExportJson": "Ekspor ulang sebagai JSON: buka langkah pengaturan",
+    "chooseDifferentFile": "Pilih file lain",
+    "actionsLabel": "Tindakan pemulihan",
     "reportIssue": "Laporkan masalah ini di GitHub",
     "copyDetails": "Salin detail error",
     "copied": "Tersalin!",
@@ -46,12 +49,12 @@
       "HTML_FORMAT": {
         "title": "Format Salah: HTML",
         "message": "Anda mengunduh data dalam format HTML, namun alat ini memerlukan format JSON.",
-        "fix": "Buka Instagram Pengaturan → Unduh Data Anda → Pilih format \"JSON\" (bukan HTML) → Minta unduhan lagi."
+        "fix": "Buka Pusat Akun Meta → Buat ekspor → Ekspor ke perangkat → pilih format \"JSON\" (bukan HTML) → mulai ekspor lagi."
       },
       "NOT_INSTAGRAM_EXPORT": {
         "title": "Bukan Ekspor Instagram",
         "message": "File ZIP ini tampaknya bukan ekspor data Instagram.",
-        "fix": "Pastikan Anda mengunggah file ZIP dari fitur \"Unduh Data Anda\" milik Instagram, bukan file ZIP sembarang."
+        "fix": "Pastikan Anda mengunggah file ZIP dari \"Buat ekspor\" di Pusat Akun Meta, bukan file ZIP sembarang."
       },
       "INCOMPLETE_EXPORT": {
         "title": "Ekspor Tidak Lengkap",
@@ -81,17 +84,22 @@
       "ZIP_ENCRYPTED": {
         "title": "ZIP Berpassword",
         "message": "File ZIP ini dilindungi kata sandi, padahal ekspor Instagram tidak dienkripsi.",
-        "fix": "Ini mungkin bukan ekspor data Instagram yang valid. Minta ekspor baru dari Pengaturan Instagram."
+        "fix": "Ini mungkin bukan ekspor data Instagram yang valid. Minta ekspor baru dari Pusat Akun Meta."
       },
       "EMPTY_FILE": {
         "title": "File Kosong",
         "message": "File yang diunggah kosong (0 byte).",
         "fix": "Unduhan mungkin terputus. Coba unduh ulang data Anda dari Instagram."
       },
+      "TOO_MANY_ENTRIES": {
+        "title": "Terlalu Banyak File",
+        "message": "ZIP ini berisi lebih banyak file daripada yang dapat diindeks alat ini.",
+        "fix": "Minta ekspor yang lebih kecil: Meta Accounts Center → Buat ekspor → pilih hanya \"Pengikut dan mengikuti\" → format JSON."
+      },
       "FILE_TOO_LARGE": {
         "title": "File Terlalu Besar",
-        "message": "Ukuran file {{sizeMb}}MB melebihi batas 500MB.",
-        "fix": "Coba minta ekspor data yang lebih kecil dari Instagram, atau gunakan browser desktop dengan memori lebih besar."
+        "message": "Browser Anda tidak dapat membuka ekspor ini — terlalu besar untuk perangkat ini.",
+        "fix": "Minta ekspor yang lebih kecil: Meta Accounts Center → Buat ekspor → pilih hanya \"Pengikut dan mengikuti\" → format JSON. Ekspor itu berukuran beberapa MB, bukan ratusan."
       },
       "JSON_PARSE_ERROR": {
         "title": "Format Data Tidak Valid",
@@ -160,28 +168,10 @@
       }
     }
   },
-  "quiz": {
-    "title": "Format apa yang Anda pilih?",
-    "subtitle": "Saat meminta ekspor data Instagram, format apa yang Anda pilih?",
-    "json": "JSON",
-    "jsonHint": "Format yang benar untuk analisis",
-    "html": "HTML",
-    "htmlHint": "Tidak berfungsi — perlu unduh ulang sebagai JSON",
-    "notSure": "Tidak yakin",
-    "notSureHint": "Biarkan saya periksa",
-    "successMessage": "Siap! Upload ZIP Anda di bawah.",
-    "htmlMessage": "Ekspor HTML tidak bisa dianalisis. Silakan minta ulang data dalam format JSON.",
-    "htmlCta": "Lihat cara mendapatkan format JSON",
-    "comparisonTitle": "Cara membedakannya",
-    "comparisonJson": "Jika Anda melihat \"Format: JSON\" di halaman unduhan, berarti sudah benar.",
-    "comparisonHtml": "Jika Anda melihat \"Format: HTML\" atau file .html di dalamnya, perlu minta ulang.",
-    "dismiss": "Mengerti",
-    "fixedIt": "Saya sudah meminta ulang dalam JSON"
-  },
   "formatWarning": "Pastikan Anda memilih JSON (bukan HTML) saat meminta ekspor data.",
   "waiting": {
     "title": "Menunggu Instagram...",
-    "description": "Instagram sedang menyiapkan ekspor data Anda. Anda akan menerima email dalam 48 jam (biasanya lebih cepat!).",
+    "description": "Instagram sedang menyiapkan ekspor data Anda. Sebagian besar tiba lewat email dalam 5–30 menit; akun besar bisa memakan waktu beberapa jam.",
     "addReminder": "Tambah Pengingat ke Kalender",
     "reminderHint": "Ingatkan saya untuk cek dalam 2 hari",
     "calendarTitle": "Cek Email Ekspor Instagram",

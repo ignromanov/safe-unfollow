@@ -4,22 +4,25 @@ import { classifyErrorMessage, extractErrorCode } from '@/lib/error-classifier';
 describe('error-classifier', () => {
   describe('classifyErrorMessage', () => {
     describe('ZIP errors', () => {
-      // Note: matchesRule uses .every(), so ALL keywords must be present
+      /**
+       * GH#35 — the keyword lists are synonyms, and any one of them identifies
+       * the failure. JSZip raises exactly one of these four phrases, never all
+       * four in the same message, so a rule that demanded all four could not
+       * fire against anything JSZip actually throws.
+       */
       it.each([
-        // CORRUPTED_ZIP requires: 'not a valid zip', 'corrupted', 'bad local file header', "can't find end of central directory"
-        // All four keywords must be present for this rule to match
-        [
-          "not a valid zip file, appears corrupted with bad local file header, can't find end of central directory",
-          'CORRUPTED_ZIP',
-        ],
+        ['not a valid zip file', 'CORRUPTED_ZIP'],
+        ['file appears corrupted', 'CORRUPTED_ZIP'],
+        ['bad local file header', 'CORRUPTED_ZIP'],
+        ["can't find end of central directory", 'CORRUPTED_ZIP'],
       ])('classifies "%s" as %s', (message, expected) => {
         expect(classifyErrorMessage(message)).toBe(expected);
       });
 
       it.each([
-        // ZIP_ENCRYPTED requires both 'encrypted' AND 'password'
         ['encrypted file needs password', 'ZIP_ENCRYPTED'],
         ['password required for encrypted archive', 'ZIP_ENCRYPTED'],
+        ['this archive is encrypted', 'ZIP_ENCRYPTED'],
       ])('classifies "%s" as %s', (message, expected) => {
         expect(classifyErrorMessage(message)).toBe(expected);
       });
@@ -32,9 +35,16 @@ describe('error-classifier', () => {
         expect(classifyErrorMessage(message)).toBe(expected);
       });
 
+      /**
+       * GH#35 — the first row is the string this app produces, from
+       * `diagnostic.errors.FILE_TOO_LARGE.message`. It was binned as UNKNOWN in
+       * production for the whole measured window, because it says 'exceeds' and
+       * the rule also demanded 'too large' and 'maximum size'.
+       */
       it.each([
-        // FILE_TOO_LARGE requires: 'too large', 'exceeds', AND 'maximum size' (all three)
-        ['file too large, exceeds maximum size', 'FILE_TOO_LARGE'],
+        ['File is 502MB, which exceeds the 500MB limit.', 'FILE_TOO_LARGE'],
+        ['file too large', 'FILE_TOO_LARGE'],
+        ['exceeds maximum size', 'FILE_TOO_LARGE'],
       ])('classifies "%s" as %s', (message, expected) => {
         expect(classifyErrorMessage(message)).toBe(expected);
       });
@@ -54,9 +64,11 @@ describe('error-classifier', () => {
 
     describe('Worker errors', () => {
       it.each([
-        // WORKER_TIMEOUT requires both 'timeout' AND 'took too long'
         ['timeout occurred, took too long to process', 'WORKER_TIMEOUT'],
         ['operation took too long, timeout', 'WORKER_TIMEOUT'],
+        // GH#35 — either phrase alone names the same failure
+        ['parse timeout', 'WORKER_TIMEOUT'],
+        ['the operation took too long', 'WORKER_TIMEOUT'],
       ])('classifies "%s" as %s (timeout)', (message, expected) => {
         expect(classifyErrorMessage(message)).toBe(expected);
       });
@@ -83,20 +95,19 @@ describe('error-classifier', () => {
     });
 
     describe('IndexedDB errors', () => {
+      /**
+       * GH#35 — `QuotaExceededError` is the DOMException name the browser
+       * raises; it arrives on its own, never alongside the words 'quota' and
+       * 'storage full' in one sentence. Demanding all three made the rule
+       * unreachable from any real quota failure.
+       */
       it.each([
-        // QUOTA_EXCEEDED requires ALL THREE: 'quota', 'storage full', AND 'quotaexceeded'
-        // This is a strict rule - all keywords must be present
         ['quota storage full quotaexceedederror thrown', 'QUOTA_EXCEEDED'],
-        // Note: simpler messages like "quota exceeded" won't match this strict rule
+        ['quota exceeded', 'QUOTA_EXCEEDED'],
+        ['storage full', 'QUOTA_EXCEEDED'],
+        ['quotaexceedederror', 'QUOTA_EXCEEDED'],
       ])('classifies "%s" as %s (quota)', (message, expected) => {
         expect(classifyErrorMessage(message)).toBe(expected);
-      });
-
-      it('returns UNKNOWN for partial quota matches (design limitation)', () => {
-        // These don't match because QUOTA_EXCEEDED rule requires ALL THREE keywords
-        expect(classifyErrorMessage('quota exceeded')).toBe('UNKNOWN');
-        expect(classifyErrorMessage('storage full')).toBe('UNKNOWN');
-        expect(classifyErrorMessage('quotaexceedederror')).toBe('UNKNOWN');
       });
 
       it.each([
@@ -160,30 +171,25 @@ describe('error-classifier', () => {
 
     describe('Instagram-specific errors', () => {
       it.each([
-        // HTML_FORMAT requires BOTH: 'html format' AND 'wrong format'
         ['detected html format when wrong format was uploaded', 'HTML_FORMAT'],
+        ['html format detected', 'HTML_FORMAT'],
+        ['wrong format uploaded', 'HTML_FORMAT'],
       ])('classifies "%s" as %s (html format)', (message, expected) => {
         expect(classifyErrorMessage(message)).toBe(expected);
       });
 
-      it('returns UNKNOWN for partial HTML_FORMAT matches (design limitation)', () => {
-        // Single keyword doesn't match the multi-keyword rule
-        expect(classifyErrorMessage('html format detected')).toBe('UNKNOWN');
-        expect(classifyErrorMessage('wrong format uploaded')).toBe('UNKNOWN');
-      });
-
+      /**
+       * GH#35 — 'not an instagram' and 'not instagram' are two spellings of one
+       * phrase, and no string contains both: "not an instagram" does not have
+       * "not instagram" as a substring. Requiring both made the rule matchable
+       * only by a sentence written to satisfy it.
+       */
       it.each([
-        // NOT_INSTAGRAM_EXPORT requires BOTH: 'not an instagram' AND 'not instagram'
-        // Tricky: "not an instagram" does NOT contain "not instagram" as substring
         ['this is not an instagram export and not instagram data', 'NOT_INSTAGRAM_EXPORT'],
+        ['not an instagram export', 'NOT_INSTAGRAM_EXPORT'],
+        ['this is not instagram data', 'NOT_INSTAGRAM_EXPORT'],
       ])('classifies "%s" as %s (not instagram)', (message, expected) => {
         expect(classifyErrorMessage(message)).toBe(expected);
-      });
-
-      it('returns UNKNOWN for partial NOT_INSTAGRAM_EXPORT matches (design limitation)', () => {
-        // Single pattern doesn't match the multi-keyword rule
-        expect(classifyErrorMessage('not an instagram export')).toBe('UNKNOWN');
-        expect(classifyErrorMessage('this is not instagram data')).toBe('UNKNOWN');
       });
     });
 
@@ -223,16 +229,16 @@ describe('error-classifier', () => {
       });
     });
 
-    describe('multi-keyword rules', () => {
-      it('requires ALL keywords to match for multi-keyword rules', () => {
-        // "worker" alone shouldn't match WORKER_INIT_ERROR (needs "worker" AND "init")
+    describe('qualified rules', () => {
+      it('requires the qualifier as well as one of the synonyms', () => {
+        // GH#35 — `qualifiedBy` narrows an ambiguous synonym rather than being a
+        // second synonym: the qualifier alone names no failure.
         expect(classifyErrorMessage('worker error')).toBe('UNKNOWN');
 
-        // Both keywords present
         expect(classifyErrorMessage('worker init error')).toBe('WORKER_INIT_ERROR');
       });
 
-      it('matches multi-keyword rules regardless of word order', () => {
+      it('matches qualified rules regardless of word order', () => {
         expect(classifyErrorMessage('init failed for worker')).toBe('WORKER_INIT_ERROR');
         expect(classifyErrorMessage('permission storage denied')).toBe('IDB_PERMISSION_DENIED');
       });
@@ -361,5 +367,43 @@ describe('error-classifier', () => {
         expect(extractErrorCode(error)).toBe('QUOTA_EXCEEDED');
       });
     });
+  });
+});
+
+describe('the strings the readers actually produce', () => {
+  // This suite's fixtures were written against JSZip, whose phrasings the
+  // program no longer contains. zip.js's own exported constants are these, and
+  // not one of them matched any CORRUPTED_ZIP keyword: a damaged local header
+  // or an unsupported compression method classified as UNKNOWN, which is in
+  // REPORTABLE_ERROR_CODES and points the reader at the issue tracker.
+  it.each([
+    'End of central directory not found',
+    'File format is not recognized',
+    'Split zip file',
+    'Local file header not found',
+    'Compression method not supported',
+    'Invalid compressed data',
+  ])('classifies zip.js\'s "%s" as a damaged archive', message => {
+    expect(classifyErrorMessage(message)).toBe('CORRUPTED_ZIP');
+  });
+
+  it('still calls an encrypted entry encrypted', () => {
+    expect(classifyErrorMessage('File contains encrypted entry')).toBe('ZIP_ENCRYPTED');
+  });
+
+  // FILE_TOO_LARGE lost its only producer when the 500 MB ceiling was deleted,
+  // while its copy was rewritten in ten locales to describe a browser that
+  // could not hold the file. No engine says "too large", "exceeds" or
+  // "maximum size" for a failed allocation, so the code was unreachable and
+  // the copy unshowable.
+  //
+  // This covers the allocation that throws. A tab the OS kills outright cannot
+  // be caught by anything and is not claimed here.
+  it.each([
+    'Array buffer allocation failed', // Chrome / V8
+    'Invalid string length', // V8, a string past its maximum
+    'out of memory', // Firefox
+  ])('classifies "%s" as a file this device could not hold', message => {
+    expect(classifyErrorMessage(message)).toBe('FILE_TOO_LARGE');
   });
 });

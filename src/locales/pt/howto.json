@@ -15,7 +15,7 @@
       "description": "Selecione sua conta do Instagram na lista de perfis conectados na Central de Contas."
     },
     "3": {
-      "title": "Selecione \"Exportar para dispositivo\"",
+      "title": "Selecione \"Exportar para o dispositivo\"",
       "description": "Escolha exportar diretamente para seu dispositivo. Isso mantém seus dados privados e seguros."
     },
     "4": {
@@ -24,7 +24,7 @@
     },
     "5": {
       "title": "Defina o período para \"Todo o período\"",
-      "description": "Clique em \"Período\" → Selecione \"Todo o período\" → Salvar. Isso garante o histórico completo."
+      "description": "Clique em \"Período\" → Selecione \"Todo o período\" → Salvar. Isso permite obter o histórico completo."
     },
     "6": {
       "title": "Mude o formato para JSON",
@@ -45,7 +45,7 @@
   },
   "cta": {
     "title": "Pronto para começar?",
-    "subtitle": "Analise sua exportação de dados de forma privada em segundos.",
+    "subtitle": "Analise sua exportação de dados de forma privada, inteiramente no seu navegador.",
     "button": "Abrir guia de análise"
   },
   "schema": {

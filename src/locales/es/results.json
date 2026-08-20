@@ -33,7 +33,8 @@
     "reset": "Restablecer",
     "emptyCategories": "Categorías vacías ({{count, number}})",
     "addFilter": "Agregar filtro {{label}} ({{count, number}} cuentas)",
-    "removeFilter": "Quitar filtro {{label}} ({{count, number}} cuentas)"
+    "removeFilter": "Quitar filtro {{label}} ({{count, number}} cuentas)",
+    "chipWithHint": "{{label}} — {{hint}}"
   },
   "badges": {
     "followers": "Seguidores",
@@ -48,6 +49,25 @@
     "close": "Amigo cercano",
     "dismissed": "Sugerencia descartada"
   },
+  "caveat": {
+    "followRequests": {
+      "title": "«No te siguen de vuelta» puede estar inflado.",
+      "body": "No pudimos leer tu archivo de solicitudes de seguimiento, así que las cuentas a las que enviaste una solicitud pueden aparecer en esta lista, y tus contadores de solicitudes pendientes se muestran vacíos. Seguidores, Siguiendo y Mutuos no se ven afectados.",
+      "chipHint": "Puede estar inflado — no pudimos leer tu archivo de solicitudes de seguimiento."
+    },
+    "truncated": {
+      "followers": {
+        "title": "Tu lista de seguidores parece incompleta.",
+        "body": "Empieza mucho después que tu lista de seguidos, que es lo que ocurre cuando se solicita una exportación con un rango de fechas limitado. Si elegiste uno, pide tus datos a Instagram de nuevo con el rango de fechas en \"Todo el tiempo\". Los recuentos marcados abajo están afectados: unos son demasiado altos y otros demasiado bajos.",
+        "chipHint": "Calculado a partir de una lista de seguidores que parece incompleta."
+      },
+      "following": {
+        "title": "Tu lista de seguidos parece incompleta.",
+        "body": "Empieza mucho después que tu lista de seguidores, que es lo que ocurre cuando se solicita una exportación con un rango de fechas limitado. Si elegiste uno, pide tus datos a Instagram de nuevo con el rango de fechas en \"Todo el tiempo\". Los recuentos marcados abajo están afectados: unos son demasiado altos y otros demasiado bajos.",
+        "chipHint": "Calculado a partir de una lista de seguidos que parece incompleta."
+      }
+    }
+  },
   "empty": {
     "noUsers": "No se encontraron usuarios",
     "resetFilters": "Restablecer filtros"
@@ -58,9 +78,9 @@
   },
   "donation": {
     "headline": "Acabas de analizar {{count}} cuentas — gratis.",
-    "body": "Sin login. Sin servidor. Sin datos enviados. Si te ahorró tiempo, un café lo mantiene vivo.",
-    "headlineMobile": "Gratis. Privado. Sin login.",
-    "bodyMobile": "Si fue útil, considera un café.",
+    "body": "Sin contraseña. Tu exportación de Instagram nunca salió de este navegador. Si te ahorró tiempo, un café lo mantiene vivo.",
+    "headlineMobile": "Análisis gratis. Privado. Sin contraseña.",
+    "bodyMobile": "Tu exportación nunca salió del navegador. Si fue útil, considera un café.",
     "cta": "Invitar un Café",
     "ctaMobile": "Apoyar",
     "dismiss": "Ahora no"
@@ -107,7 +127,7 @@
     "dismiss": "Quizás después",
     "disclaimer": "Herramientas seleccionadas que recomendamos. Los enlaces de afiliados financian actualizaciones gratuitas — sin costo para ti.",
     "urgency": {
-      "critical": "Actúa ahora — el engagement cae 40% después de 48 horas",
+      "critical": "Actúa ahora — cuanto más esperes, más cuesta recuperarlo",
       "warning": "Actuar temprano previene pérdidas mayores — optimiza ahora"
     },
     "ariaLabel": "Herramientas recomendadas para mejorar tu presencia en Instagram",
@@ -123,7 +143,7 @@
       "freeTrial14": "14 días gratis",
       "freePlan": "Plan gratis",
       "freeContacts": "1K gratis",
-      "freeForever": "Gratis siempre"
+      "freeForever": "Gratis sin caducidad"
     },
     "social": {
       "creators50k": "50K+ creadores",

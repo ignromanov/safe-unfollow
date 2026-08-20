@@ -3,7 +3,7 @@
   "items": {
     "howToFind": {
       "question": "Comment voir qui s'est désabonné de vous sur Instagram sans application ?",
-      "answer": "Ouvrez le Centre de comptes Meta → Créer une exportation → Sélectionnez votre profil → « Exporter vers l'appareil » → Uniquement « Abonnés et abonnements » → Format JSON. Téléchargez le ZIP quand il est prêt (généralement 5-30 minutes), et téléversez-le ici. L'outil analyse vos abonnés localement — voyez les désabonnements instantanément. Sans connexion.",
+      "answer": "Ouvrez l'Espace Comptes Meta → Créer une exportation → Sélectionnez votre profil → « Exporter vers l'appareil » → Uniquement « Abonnés et abonnements » → Format JSON. Téléchargez le ZIP quand il est prêt (généralement 5-30 minutes), puis téléversez-le ici. L'outil compare vos listes dans le navigateur : l'export n'est envoyé nulle part. Sans identifiants.",
       "relatedLink": {
         "text": "Démarrer le guide d'exportation",
         "href": "/wizard"
@@ -11,15 +11,15 @@
     },
     "withoutDownload": {
       "question": "Puis-je voir les désabonnements Instagram sans télécharger de données ou d'applications ?",
-      "answer": "Non. Instagram ne fournit pas de liste native des désabonnements. Les seules méthodes sûres sont : (1) Vérifier manuellement les comptes suivis vs abonnés, ou (2) Utiliser votre téléchargement officiel de données avec cet outil. Ce suivi rend la méthode 2 instantanée et gratuite — sans mot de passe, sans connexion, sans risque pour votre compte.",
+      "answer": "Non. Instagram ne fournit pas de liste native des désabonnements. Les seules méthodes sûres sont : (1) Vérifier manuellement les comptes suivis vs abonnés, ou (2) Utiliser votre téléchargement officiel de données avec cet outil. Cet outil fait la méthode 2 pour vous, gratuitement : sans mot de passe, sans connexion, sans risque pour votre compte.",
       "relatedLink": {
         "text": "Apprenez comment obtenir vos données",
         "href": "/wizard"
       }
     },
     "privacy": {
-      "question": "Comment fonctionne le suivi des désabonnements sans connexion ?",
-      "answer": "Ce suivi utilise votre exportation officielle de données Instagram (fichier ZIP) pour analyser les abonnés localement dans votre navigateur. Aucune connexion requise. Tout le traitement se fait sur votre appareil — vos données n'atteignent jamais nos serveurs. Cette méthode est sûre car elle utilise l'outil officiel d'exportation d'Instagram.",
+      "question": "Comment fonctionne le suivi des désabonnements sans identifiants ?",
+      "answer": "Ce suivi utilise votre exportation officielle de données Instagram (fichier ZIP) pour analyser les abonnés localement dans votre navigateur. Aucun identifiant requis. L'analyse, le filtrage et la recherche se font sur votre appareil, et votre export Instagram reste dans ce navigateur. Nous recevons uniquement des statistiques de visite anonymes, désactivables depuis le pied de page. Cette méthode est sûre car elle utilise l'outil officiel d'exportation d'Instagram.",
       "relatedLink": {
         "text": "Lisez notre politique de confidentialité",
         "href": "/privacy"
@@ -27,7 +27,7 @@
     },
     "safety": {
       "question": "Est-il sûr d'utiliser des applications de suivi des désabonnements Instagram ?",
-      "answer": "Oui, si elles utilisent votre exportation officielle de données Instagram. Les applications qui demandent votre mot de passe Instagram violent les Conditions d'utilisation et présentent des risques de sécurité. Les suivis sûrs utilisent uniquement le fichier ZIP de l'outil de téléchargement de données Instagram — sans connexion, sans mot de passe. Cet outil utilise exclusivement cette méthode.",
+      "answer": "Oui, si elles utilisent votre exportation officielle de données Instagram. Les applications qui demandent votre mot de passe Instagram violent les Conditions d'utilisation et présentent des risques de sécurité. Les suivis sûrs utilisent uniquement le fichier ZIP de l'outil de téléchargement de données Instagram : sans identifiants, sans mot de passe. Cet outil utilise exclusivement cette méthode.",
       "relatedLink": {
         "text": "Lisez notre politique de confidentialité",
         "href": "/privacy"
@@ -39,7 +39,7 @@
     },
     "zipFile": {
       "question": "Qu'est-ce que le téléchargement de données Instagram et pourquoi l'utiliser ?",
-      "answer": "Le téléchargement de données Instagram (via le Centre de comptes Meta) est l'outil officiel pour exporter les informations de votre compte, y compris les listes d'abonnés et d'abonnements. C'est la seule façon sûre et autorisée d'accéder à ces données sans risquer votre compte. Les applications qui demandent votre mot de passe violent les Conditions d'utilisation d'Instagram.",
+      "answer": "Le téléchargement de données Instagram (via l'Espace Comptes Meta) est l'outil officiel pour exporter les informations de votre compte, y compris les listes d'abonnés et d'abonnements. C'est la seule façon sûre et autorisée d'accéder à ces données sans risquer votre compte. Les applications qui demandent votre mot de passe violent les Conditions d'utilisation d'Instagram.",
       "relatedLink": {
         "text": "Suivez notre guide étape par étape",
         "href": "/wizard"
@@ -47,7 +47,7 @@
     },
     "accountSafety": {
       "question": "Mon compte Instagram sera-t-il en sécurité en utilisant ce suivi ?",
-      "answer": "Oui, 100% sûr. Contrairement aux applications qui demandent votre mot de passe et « extraient » des données (ce qui viole les Conditions d'utilisation), cet outil utilise votre exportation officielle de données. Aucune connexion requise — vous téléchargez le ZIP directement depuis Instagram et le téléversez localement dans votre navigateur. Nous n'accédons jamais à votre compte.",
+      "answer": "Oui, 100% sûr. Contrairement aux applications qui demandent votre mot de passe et « extraient » des données (ce qui viole les Conditions d'utilisation), cet outil utilise votre exportation officielle de données. Aucun identifiant requis : vous téléchargez le ZIP directement depuis Instagram et le téléversez localement dans votre navigateur. Nous n'accédons jamais à votre compte.",
       "relatedLink": {
         "text": "Voir nos conditions",
         "href": "/terms"
@@ -55,7 +55,7 @@
     },
     "downloadTime": {
       "question": "Combien de temps faut-il pour recevoir mon téléchargement de données Instagram ?",
-      "answer": "Meta envoie généralement vos données en 5-30 minutes par e-mail. Les grands comptes ou une charge serveur élevée peuvent prendre jusqu'à quelques heures. Après avoir téléchargé le ZIP, le téléverser sur ce suivi pour analyse est instantané — le traitement prend quelques secondes même pour des exportations d'un million de comptes.",
+      "answer": "Meta envoie généralement vos données en 5-30 minutes par e-mail. Les grands comptes ou une charge serveur élevée peuvent prendre jusqu'à quelques heures. Une fois le ZIP en main, l'analyse tourne dans votre propre navigateur plutôt que sur un serveur : ni file d'attente, ni attente de téléversement. Un export volumineux met naturellement plus de temps à être lu qu'un petit.",
       "relatedLink": {
         "text": "Ajouter un rappel au calendrier",
         "href": "/wizard/step/8"
@@ -63,7 +63,7 @@
     },
     "scale": {
       "question": "Quelle taille d'exportation de compte Instagram pouvez-vous analyser ?",
-      "answer": "Ce suivi gère des exportations jusqu'à 1 000 000+ de comptes. Nous utilisons le stockage en colonnes et l'indexation par bitset pour un filtrage ultra-rapide — traitant des ensembles de données massifs en moins de 5ms. Que vous ayez 100 abonnés ou 1M+, l'outil reste rapide et réactif. Testé et vérifié avec de vraies exportations.",
+      "answer": "Ce suivi gère des exportations jusqu'à 1 000 000+ de comptes. Nous utilisons le stockage en colonnes et l'indexation par bitset pour que le filtrage reste rapide à mesure que la liste grandit. Que vous ayez 100 abonnés ou 1M+, l'outil reste réactif.",
       "relatedLink": {
         "text": "Essayer avec des données exemple",
         "href": "/sample"
@@ -71,11 +71,11 @@
     },
     "free": {
       "question": "Existe-t-il des suivis de désabonnements Instagram gratuits ?",
-      "answer": "Oui. Cet outil est 100% gratuit, open source (licence MIT), et n'inclut aucun abonnement, mur payant ou limite cachée. La plupart des alternatives facturent 5-10$/mois. Ce suivi utilise votre exportation officielle de données Instagram traitée localement, éliminant entièrement les coûts serveur."
+      "answer": "Oui. L'analyse est gratuite à 100 % : tous les badges, filtres et autant de comptes que vous voulez, sans inscription ni limite. La plupart des alternatives par abonnement facturent 5-10$/mois. Un paiement unique de $7 n'est nécessaire que pour exporter votre liste filtrée sous forme de fichier ; la consulter ici reste toujours gratuit. Open source (licence MIT), et votre export Instagram est traité localement dans votre navigateur."
     },
     "analyzeData": {
       "question": "Comment analyser mon téléchargement de données Instagram pour trouver les désabonnements ?",
-      "answer": "Téléversez votre fichier ZIP Instagram sur ce suivi. L'outil décompresse vos listes d'abonnés/abonnements localement dans votre navigateur, les compare et met en évidence qui s'est désabonné. Les résultats montrent les désabonnements, les non-mutuels, les abonnés mutuels et plus — tout traité hors ligne sans serveurs. Cela prend moins de 30 secondes pour les exportations typiques.",
+      "answer": "Téléversez votre fichier ZIP Instagram sur ce suivi. L'outil décompresse vos listes d'abonnés et d'abonnements localement dans votre navigateur, les compare et met en évidence qui s'est désabonné. Les résultats montrent les désabonnements, les non-mutuels, les abonnés mutuels et plus, et la comparaison s'exécute sur votre appareil plutôt que sur un serveur.",
       "relatedLink": {
         "text": "Téléversez votre fichier maintenant",
         "href": "/upload"
@@ -83,7 +83,7 @@
     },
     "shareDataSafely": {
       "question": "Est-il sûr de téléverser mon téléchargement de données Instagram sur des outils tiers ?",
-      "answer": "Oui, si l'application traite les données localement dans votre navigateur sans téléverser sur des serveurs. Ce suivi traite votre fichier ZIP entièrement sur votre appareil — aucun serveur ne stocke ou n'accède à vos données. Ne téléversez jamais votre ZIP sur des suivis de désabonnements basés sur le cloud. Vérifiez toujours que l'application traite les données localement.",
+      "answer": "Oui, si l'application traite votre fichier localement dans votre navigateur et l'y conserve. Ce suivi lit votre fichier ZIP entièrement sur votre appareil : le fichier lui-même reste dans ce navigateur, et seules des statistiques de visite anonymes en sortent. Méfiez-vous des suivis de désabonnements basés sur le cloud qui vous demandent de remettre votre ZIP ou votre mot de passe Instagram : ceux-là envoient votre fichier sur la machine de quelqu'un d'autre. Vérifiez toujours que l'application part de l'export officiel et ne demande aucun identifiant.",
       "relatedLink": {
         "text": "Lisez notre engagement de confidentialité",
         "href": "/privacy"
@@ -91,7 +91,7 @@
     },
     "withoutPassword": {
       "question": "Comment SafeUnfollow fonctionne sans mon mot de passe Instagram ?",
-      "answer": "SafeUnfollow utilise la fonction officielle d'export de données Instagram (dans le Centre des comptes Meta) au lieu de votre mot de passe. Vous téléchargez vos données sous forme de fichier ZIP directement depuis Instagram et les téléversez ici. L'app lit les fichiers JSON du ZIP pour comparer les abonnés — tout est traité dans votre navigateur.",
+      "answer": "SafeUnfollow utilise la fonction officielle d'export de données Instagram (dans l'Espace Comptes Meta) au lieu de votre mot de passe. Vous téléchargez vos données sous forme de fichier ZIP directement depuis Instagram et les téléversez ici. L'app lit les fichiers JSON du ZIP pour comparer les abonnés. Tout est traité dans votre navigateur.",
       "relatedLink": {
         "text": "Voir le guide d'export",
         "href": "/wizard"
@@ -99,11 +99,11 @@
     },
     "betterThanPaid": {
       "question": "SafeUnfollow est-il meilleur que les apps payantes ?",
-      "answer": "Pour la plupart des utilisateurs, oui. SafeUnfollow est 100% gratuit, ne nécessite pas de connexion (pas de risque de bannissement), traite les données localement (confidentialité maximale), gère 1M+ comptes et est open source. Les apps payantes offrent un suivi en temps réel qui nécessite un accès API — mais cela viole les Conditions d'utilisation d'Instagram et met votre compte en danger. SafeUnfollow utilise la méthode officielle et sûre d'export de données."
+      "answer": "Pour la plupart des utilisateurs, oui. L'analyse est gratuite : sans inscription, sans abonnement, quel que soit le nombre de comptes dans votre export. Elle ne demande aucun identifiant (pas de risque de bannissement), traite votre export localement dans votre navigateur (confidentialité maximale), gère 1M+ comptes et est open source. Seul l'export de votre liste filtrée sous forme de fichier coûte un paiement unique de $7 ; tout ce que vous voyez à l'écran reste gratuit. Les apps payantes offrent un suivi en temps réel qui nécessite un accès API, mais cela viole les Conditions d'utilisation d'Instagram et met votre compte en danger. SafeUnfollow utilise la méthode officielle et sûre d'export de données."
     },
     "mobileUse": {
       "question": "Puis-je utiliser SafeUnfollow sur iPhone ou Android ?",
-      "answer": "Oui ! SafeUnfollow fonctionne dans tout navigateur mobile moderne (Safari, Chrome, Firefox). Visitez safeunfollow.app, téléversez votre ZIP et voyez les résultats instantanément. Vous pouvez aussi l'installer en PWA (Progressive Web App) pour un accès rapide depuis votre écran d'accueil. L'app est optimisée pour mobile — 81% de nos utilisateurs sont sur téléphone. Demandez votre export de données depuis l'app Instagram, téléchargez le ZIP depuis votre email, puis téléversez-le ici."
+      "answer": "Oui. SafeUnfollow fonctionne dans tout navigateur mobile moderne (Safari, Chrome, Firefox). Rendez-vous sur safeunfollow.app, téléversez votre ZIP et lisez vos résultats sur le téléphone. Vous pouvez aussi l'installer en PWA pour un accès rapide depuis votre écran d'accueil. La plupart des gens qui l'utilisent sont sur téléphone, et la mise en page est pensée pour ça d'abord. Demandez votre export de données depuis l'app Instagram, téléchargez le ZIP depuis votre e-mail, puis téléversez-le ici."
     }
   }
 }

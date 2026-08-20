@@ -1,15 +1,16 @@
 import i18n from 'i18next';
-import { Suspense, lazy, useEffect, useLayoutEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 
 import { BreadcrumbSchema } from '@/components/BreadcrumbSchema';
-import { BuyMeCoffeeWidget } from '@/components/BuyMeCoffeeWidget';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { LicenseDialogMount } from '@/components/export/LicenseDialogMount';
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { OrganizationSchema } from '@/components/OrganizationSchema';
 import { ThemeProvider } from '@/components/theme-provider';
 import { useEventQueueFlush } from '@/hooks/useEventQueueFlush';
+import { useHasResults } from '@/hooks/useHasResults';
 import { useInstagramData } from '@/hooks/useInstagramData';
 import { useLanguageFromPath } from '@/hooks/useLanguageFromPath';
 import { useLanguageRedirect } from '@/hooks/useLanguageRedirect';
@@ -18,12 +19,6 @@ import { useLayoutNavigation } from '@/hooks/useLayoutNavigation';
 import { useLayoutState } from '@/hooks/useLayoutState';
 import { consumeLicenseParam, getStoredLicense, isExportFeatureEnabled } from '@/lib/export/unlock';
 import { RTL_LANGUAGES, type SupportedLanguage } from '@/locales';
-
-// Only ever needed on the one page load that carries a checkout redirect, so it
-// stays out of the bundle that all 88 prerendered pages ship.
-const LicenseDialog = lazy(() =>
-  import('@/components/export/LicenseDialog').then(module => ({ default: module.LicenseDialog }))
-);
 
 // Use useLayoutEffect on client to sync language BEFORE paint,
 // preventing a flash of wrong language. Falls back to useEffect during SSG.
@@ -41,23 +36,14 @@ interface LayoutProps {
  * - Theme provider wrapper
  * - Header and Footer
  * - Language sync from URL path
- * - BMC widget display
  * - Structured data (SEO)
  */
 export function Layout({ lang }: LayoutProps) {
-  const { uploadState, handleClearData, fileMetadata } = useInstagramData();
+  const { handleClearData } = useInstagramData();
 
   // Extracted hooks
-  const {
-    pathname,
-    activeScreen,
-    isResultsPage,
-    handleViewResults,
-    handleUpload,
-    handleLogoClick,
-    handleClear,
-  } = useLayoutNavigation();
-  const { mounted } = useLayoutState(pathname);
+  const { pathname, activeScreen, handleClear } = useLayoutNavigation();
+  useLayoutState(pathname);
 
   // Analytics (UTM capture, page view, PWA install)
   useLayoutAnalytics();
@@ -118,9 +104,7 @@ export function Layout({ lang }: LayoutProps) {
   // Determine text direction for RTL languages (Arabic, etc.)
   const isRTL = lang ? RTL_LANGUAGES.includes(lang) : false;
 
-  // Guard with mounted to prevent hydration mismatch
-  // SSG renders with hasResults=false, client updates after mount
-  const hasResults = mounted && uploadState.status === 'success' && fileMetadata !== null;
+  const hasResults = useHasResults();
 
   return (
     <ErrorBoundary>
@@ -140,9 +124,6 @@ export function Layout({ lang }: LayoutProps) {
           <Header
             hasData={hasResults}
             activeScreen={activeScreen}
-            onViewResults={handleViewResults}
-            onUpload={handleUpload}
-            onLogoClick={handleLogoClick}
             onClear={() => handleClear(handleClearData)}
           />
 
@@ -152,28 +133,17 @@ export function Layout({ lang }: LayoutProps) {
 
           <Footer />
 
-          {/* BMC Widget - shows only on results pages, auto-expand after 60s */}
-          <BuyMeCoffeeWidget
-            show={isResultsPage}
-            expandDelay={60000}
-            autoCollapseAfter={10000}
-            skipStorageCheck={pathname.endsWith('/sample')}
-          />
-
           {/* Structured data for SEO */}
           <BreadcrumbSchema />
           <OrganizationSchema />
 
-          <Suspense fallback={null}>
-            {capturedLicenseKey !== null && isLicenseDialogOpen ? (
-              <LicenseDialog
-                open={isLicenseDialogOpen}
-                onOpenChange={setIsLicenseDialogOpen}
-                initialKey={capturedLicenseKey}
-                source="redirect"
-              />
-            ) : null}
-          </Suspense>
+          {capturedLicenseKey !== null && isLicenseDialogOpen ? (
+            <LicenseDialogMount
+              licenseKey={capturedLicenseKey}
+              open={isLicenseDialogOpen}
+              onOpenChange={setIsLicenseDialogOpen}
+            />
+          ) : null}
         </div>
       </ThemeProvider>
     </ErrorBoundary>

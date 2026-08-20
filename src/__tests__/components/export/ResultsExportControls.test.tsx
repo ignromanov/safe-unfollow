@@ -236,7 +236,10 @@ describe('ResultsExportControls', () => {
       );
       expect(vi.mocked(analytics.freeExportDownload)).toHaveBeenCalledWith(true);
       expect(await screen.findByText(paywallLabel)).toBeInTheDocument();
-      expect(vi.mocked(analytics.paywallView)).toHaveBeenCalled();
+      // The two dimensions the paywall is tuned against, read from the state
+      // the component already holds — asserted here because tsconfig excludes
+      // src/__tests__, so a stale zero-argument call site type-checks clean.
+      expect(vi.mocked(analytics.paywallView)).toHaveBeenCalledWith('en', defaultProps.totalCount);
       expect(vi.mocked(analytics.exportClick)).toHaveBeenCalledWith(false);
     });
 
@@ -601,7 +604,13 @@ describe('ResultsExportControls', () => {
 
       await user.click(screen.getByRole('button', { name: resultsEN.export.paywall.dismiss }));
 
+      // Same dimensions as the view it will be divided by — a dismiss rate
+      // split by locale is only meaningful if both halves carry the locale.
       expect(vi.mocked(analytics.paywallDismiss)).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(analytics.paywallDismiss)).toHaveBeenCalledWith(
+        'en',
+        defaultProps.totalCount
+      );
       expect(screen.queryByText(paywallLabel)).not.toBeInTheDocument();
     });
 
@@ -609,13 +618,19 @@ describe('ResultsExportControls', () => {
     // reaches without tabbing to a control. Asserted separately from the button
     // above rather than assumed from shared wiring: `showCloseButton={false}`
     // is one prop away from `onEscapeKeyDown` being suppressed too, and nothing
-    // else in the suite would notice.
+    // else in the suite would notice. The dimensions are re-asserted rather
+    // than taken on trust from the button above: two dismissal paths that
+    // record different shapes would split the series without failing anything.
     it('should fire when dismissed with Escape', async () => {
       const user = await openPaywall();
 
       await user.keyboard('{Escape}');
 
       expect(vi.mocked(analytics.paywallDismiss)).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(analytics.paywallDismiss)).toHaveBeenCalledWith(
+        'en',
+        defaultProps.totalCount
+      );
       expect(screen.queryByText(paywallLabel)).not.toBeInTheDocument();
     });
 
@@ -634,7 +649,9 @@ describe('ResultsExportControls', () => {
       await screen.findByText(paywallLabel);
       await user.click(screen.getByRole('button', { name: resultsEN.export.paywall.cta }));
 
-      expect(startCheckout).toHaveBeenCalledTimes(1);
+      // The count handed to checkout is the one the headline showed, not a
+      // freshly recomputed selection: what is recorded must be what was seen.
+      expect(startCheckout).toHaveBeenCalledWith('en', defaultProps.totalCount);
       expect(vi.mocked(analytics.paywallDismiss)).not.toHaveBeenCalled();
     });
 

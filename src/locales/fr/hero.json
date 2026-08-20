@@ -3,9 +3,9 @@
   "headline": {
     "prefix": "Découvrez qui",
     "highlight": "s'est désabonné de vous sur Instagram",
-    "suffix": "sans connexion"
+    "suffix": "sans compte"
   },
-  "subheadline": "Découvrez qui s'est désabonné de vous sur Instagram gratuitement, sans connexion. Téléversez votre ZIP, analyse locale. 100% privé. Fonctionne hors ligne.",
+  "subheadline": "Découvrez qui s'est désabonné de vous sur Instagram, gratuitement et sans compte. Téléversez votre ZIP, l'analyse reste dans votre navigateur. Fonctionne hors ligne.",
   "buttons": {
     "getGuide": "Voir qui s'est désabonné",
     "trySample": "Essayer avec des données exemple",
@@ -13,7 +13,7 @@
     "viewResults": "Voir les résultats de l'analyse"
   },
   "trust": {
-    "free": "100% Gratuit • Pour toujours",
+    "free": "Analyse Gratuite • Sans Compte",
     "noPassword": "Sans mot de passe • Sans risque",
     "privacy": "100% Privé • Analyse locale"
   },
@@ -21,15 +21,15 @@
     "heading": "Fonctionnalités principales",
     "local": {
       "title": "100% Local",
-      "description": "Vos données ne quittent jamais votre appareil"
+      "description": "Votre export Instagram ne quitte jamais ce navigateur"
     },
     "noLogin": {
-      "title": "Sans connexion",
+      "title": "Sans identifiants",
       "description": "Aucun risque de suspension ou de piratage"
     },
     "scale": {
       "title": "Grande échelle",
-      "description": "Gère plus de 1M de comptes à pleine vitesse"
+      "description": "Conçu pour les exports de plus de 1 000 000 de comptes"
     },
     "openSource": {
       "title": "Open source",
