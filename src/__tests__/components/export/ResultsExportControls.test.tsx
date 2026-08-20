@@ -342,6 +342,32 @@ describe('ResultsExportControls', () => {
       expect(describedBy).toBe(spoken.id);
     });
 
+    // A panel welded to the bottom edge that materialises in place reads as an
+    // overlay that happened to land there. It has to arrive from the edge it is
+    // attached to, or the geometry is a claim the motion contradicts.
+    //
+    // jsdom runs no animation, so the class list is the only proxy available —
+    // the same reason the touch-target test below pins `min-h-11` by name. The
+    // two cancels are asserted alongside the slides and not taken as read: the
+    // base is a centred dialog, and an inherited `zoom-in-95` left in place
+    // means the sheet scales up while it slides, which is the one combination
+    // that looks like neither.
+    it('should arrive from the bottom edge on a phone, not materialise in place', async () => {
+      unlocked(false);
+      const user = userEvent.setup();
+
+      render(<ResultsExportControls {...defaultProps} />);
+      await user.click(screen.getByRole('button', { name: triggerLabel }));
+
+      const sheet = await screen.findByRole('dialog');
+
+      expect(sheet.className).toContain('max-sm:bottom-0');
+      expect(sheet.className).toContain('max-sm:data-[state=open]:slide-in-from-bottom');
+      expect(sheet.className).toContain('max-sm:data-[state=closed]:slide-out-to-bottom');
+      expect(sheet.className).toContain('max-sm:data-[state=open]:zoom-in-100');
+      expect(sheet.className).toContain('max-sm:data-[state=closed]:zoom-out-100');
+    });
+
     // `size="lg"` reads as "the big one" and is `h-10` — 40px, under the 44px
     // touch target this product holds itself to, on its highest-value button
     // with 85% of sessions on a phone. The height therefore cannot come from

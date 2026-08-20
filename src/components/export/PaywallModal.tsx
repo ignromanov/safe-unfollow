@@ -94,10 +94,27 @@ export function PaywallModal({
           an overlay click still close it, so no input method is stranded.
 
           The bottom padding clears the home indicator; `p-6` alone leaves the
-          last control under it on a notched device. */}
+          last control under it on a notched device.
+
+          The second class group is the motion, and it is not decoration: the
+          base is a centred dialog, so it fades and zooms from 95%. A panel
+          welded to the bottom edge that materialises in place reads as an
+          overlay that happened to land there. It has to arrive from the edge it
+          is attached to, or the geometry is a claim the motion contradicts.
+          `zoom-in-100` and `fade-in-100` are how the inherited scale and
+          opacity are cancelled — tw-animate composes one `enter` keyframe out of
+          `--tw-enter-{scale,opacity,translate-y}`, so the way to remove a term
+          is to set it to its identity, not to omit it.
+
+          Safe against the centring: Tailwind v4 emits `translate-x-[-50%]` on
+          the `translate` **property** while the keyframe drives `transform`, so
+          the slide stacks on the centring instead of replacing it. Verified in
+          the built CSS, not assumed — had they shared a property the sheet
+          would have jumped half its width on open. `prefers-reduced-motion` is
+          already handled globally in `styles.css`. */}
       <DialogContent
         showCloseButton={false}
-        className="max-sm:top-auto max-sm:bottom-0 max-sm:max-w-none max-sm:translate-y-0 max-sm:rounded-t-3xl max-sm:rounded-b-none max-sm:border-b-0 max-sm:pb-[calc(1.5rem+env(safe-area-inset-bottom))]"
+        className="max-sm:top-auto max-sm:bottom-0 max-sm:max-w-none max-sm:translate-y-0 max-sm:rounded-t-3xl max-sm:rounded-b-none max-sm:border-b-0 max-sm:pb-[calc(1.5rem+env(safe-area-inset-bottom))] max-sm:duration-300 max-sm:ease-out max-sm:data-[state=open]:slide-in-from-bottom max-sm:data-[state=closed]:slide-out-to-bottom max-sm:data-[state=open]:zoom-in-100 max-sm:data-[state=closed]:zoom-out-100 max-sm:data-[state=open]:fade-in-100 max-sm:data-[state=closed]:fade-out-100"
       >
         {/* The dialog arrives together with a file the reader never asked for,
             and on iOS Safari a blob download can be silent or blocked outright.
