@@ -19,8 +19,8 @@
     "time": "{{time}}ms"
   },
   "sort": {
-    "asc": "Sortieren A→Z",
-    "desc": "Sortieren Z→A"
+    "asc": "Sortieren A›Z",
+    "desc": "Sortieren Z›A"
   },
   "stats": {
     "followers": "Follower",
@@ -117,12 +117,12 @@
       "cta": "Tippen für Empfehlungen"
     },
     "tools": {
-      "publer": "Plane Beiträge → bleib konsistent und wachse 2x schneller",
-      "predis": "KI erstellt Posts + Designs → Content 3x schneller",
-      "manychat": "Auto-Antworten 24/7 → spare 10+ Stunden/Woche",
-      "metricool": "Finde deine besten Zeiten → 40% schnelleres Wachstum",
-      "vistacreate": "Pro-Designs in 60 Sek → verpasse keinen Post",
-      "later": "Plane deinen Monat in 1 Stunde → bleib konsistent"
+      "publer": "Plane Beiträge › bleib konsistent und wachse 2x schneller",
+      "predis": "KI erstellt Posts + Designs › Content 3x schneller",
+      "manychat": "Auto-Antworten 24/7 › spare 10+ Stunden/Woche",
+      "metricool": "Finde deine besten Zeiten › 40% schnelleres Wachstum",
+      "vistacreate": "Pro-Designs in 60 Sek › verpasse keinen Post",
+      "later": "Plane deinen Monat in 1 Stunde › bleib konsistent"
     },
     "dismiss": "Vielleicht später",
     "disclaimer": "Handverlesene Tools, die wir empfehlen. Affiliate-Links finanzieren kostenlose Updates — keine Kosten für dich.",

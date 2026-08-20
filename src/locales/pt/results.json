@@ -19,8 +19,8 @@
     "time": "{{time}}ms"
   },
   "sort": {
-    "asc": "Ordenar A→Z",
-    "desc": "Ordenar Z→A"
+    "asc": "Ordenar A›Z",
+    "desc": "Ordenar Z›A"
   },
   "stats": {
     "followers": "Seguidores",
@@ -117,12 +117,12 @@
       "cta": "Toque para ver recomendações"
     },
     "tools": {
-      "publer": "Agende posts → mantenha a constância e cresça 2x mais rápido",
-      "predis": "IA cria posts + designs → conteúdo 3x mais rápido",
-      "manychat": "Respostas automáticas 24/7 → economize 10+ horas/semana",
-      "metricool": "Encontre seus melhores horários → crescimento 40% mais rápido",
-      "vistacreate": "Designs pro em 60 seg → nunca perca um post",
-      "later": "Planeje seu mês em 1 hora → mantenha consistência"
+      "publer": "Agende posts › mantenha a constância e cresça 2x mais rápido",
+      "predis": "IA cria posts + designs › conteúdo 3x mais rápido",
+      "manychat": "Respostas automáticas 24/7 › economize 10+ horas/semana",
+      "metricool": "Encontre seus melhores horários › crescimento 40% mais rápido",
+      "vistacreate": "Designs pro em 60 seg › nunca perca um post",
+      "later": "Planeje seu mês em 1 hora › mantenha consistência"
     },
     "dismiss": "Talvez depois",
     "disclaimer": "Ferramentas selecionadas que recomendamos. Links de afiliados financiam atualizações gratuitas — sem custo para você.",

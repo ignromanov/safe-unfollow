@@ -20,15 +20,15 @@
     },
     "4": {
       "title": "Select Only \"Followers and following\"",
-      "description": "Click \"Customize\" → Clear all → Check ONLY \"Followers and following\". This keeps your file compact."
+      "description": "Click \"Customize\" › Clear all › Check ONLY \"Followers and following\". This keeps your file compact."
     },
     "5": {
       "title": "Set Date Range to \"All time\"",
-      "description": "Click \"Date range\" → Select \"All time\" → Save. This ensures complete follower history."
+      "description": "Click \"Date range\" › Select \"All time\" › Save. This ensures complete follower history."
     },
     "6": {
       "title": "Change Format to JSON",
-      "description": "Critical step! Click \"Format\" → Select \"JSON\" (not HTML). HTML files will NOT work."
+      "description": "Critical step! Click \"Format\" › Select \"JSON\" (not HTML). HTML files will NOT work."
     },
     "7": {
       "title": "Review & Start Export",

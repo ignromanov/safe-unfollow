@@ -42,7 +42,7 @@ export const StatCard = memo(function StatCard({
       </div>
       <div className="space-y-0.5 md:space-y-1">
         <div
-          className={`text-xl md:text-3xl font-display font-black tracking-tight leading-none ${
+          className={`text-xl md:text-3xl font-display font-extrabold tracking-tight leading-none ${
             isActive ? 'text-primary-foreground' : 'text-zinc-900 dark:text-zinc-100'
           }`}
         >

@@ -146,7 +146,13 @@
   h3,
   .font-display {
     letter-spacing: -0.04em;
-    line-height: 1.15;
+    /* 1.15 cleared SF Pro, which is what actually rendered until 2026-08-20, by 0.025em
+       and clears none of the four faces now shipping: measured over the characters
+       present in src/locales, worst-case ink span is 1.229em for Plus Jakarta Sans latin
+       and 1.196em for Inter latin, so a line ending in 'ç' overlapped the next line's
+       'Í'. 1.25 restores the margin the design was drawn against.
+       Floor asserted by src/__tests__/build/font-loading.test.ts. */
+    line-height: 1.25;
   }
   /* RTL: Arabic text needs different letter-spacing */
   [dir='rtl'] h1,

@@ -64,17 +64,17 @@
     },
     "4": {
       "title": "⚠️ Selecione apenas \"Seguidores e seguindo\"",
-      "description": "Clique em \"Personalizar\" → Desmarque tudo → Marque APENAS \"Seguidores e seguindo\". Isso mantém seu arquivo pequeno e rápido.",
+      "description": "Clique em \"Personalizar\" › Desmarque tudo › Marque APENAS \"Seguidores e seguindo\". Isso mantém seu arquivo pequeno e rápido.",
       "alt": "Passo 4: Personalize para selecionar apenas Seguidores e seguindo"
     },
     "5": {
       "title": "Defina o período para \"Todo o período\"",
-      "description": "Clique em \"Período\" → Selecione \"Todo o período\" → Salvar. Isso permite obter seu histórico completo de seguidores.",
+      "description": "Clique em \"Período\" › Selecione \"Todo o período\" › Salvar. Isso permite obter seu histórico completo de seguidores.",
       "alt": "Passo 5: Defina o período para Todo o período"
     },
     "6": {
       "title": "⚠️ Mude o formato para JSON",
-      "description": "Isso é crítico! Clique em \"Formato\" → Selecione \"JSON\" (não HTML). Arquivos HTML NÃO funcionarão com nosso analisador.",
+      "description": "Isso é crítico! Clique em \"Formato\" › Selecione \"JSON\" (não HTML). Arquivos HTML NÃO funcionarão com nosso analisador.",
       "alt": "Passo 6: Mude o formato para JSON"
     },
     "7": {

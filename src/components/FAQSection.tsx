@@ -148,7 +148,7 @@ export function FAQSection() {
                           to={item.relatedLink.href}
                           className="text-primary hover:underline"
                         >
-                          {item.relatedLink.text} →
+                          {item.relatedLink.text} ›
                         </PrefixedLink>
                       </p>
                     )}

@@ -49,7 +49,7 @@
       "HTML_FORMAT": {
         "title": "Format Salah: HTML",
         "message": "Anda mengunduh data dalam format HTML, namun alat ini memerlukan format JSON.",
-        "fix": "Buka Pusat Akun Meta → Buat ekspor → Ekspor ke perangkat → pilih format \"JSON\" (bukan HTML) → mulai ekspor lagi."
+        "fix": "Buka Pusat Akun Meta › Buat ekspor › Ekspor ke perangkat › pilih format \"JSON\" (bukan HTML) › mulai ekspor lagi."
       },
       "NOT_INSTAGRAM_EXPORT": {
         "title": "Bukan Ekspor Instagram",
@@ -94,12 +94,12 @@
       "TOO_MANY_ENTRIES": {
         "title": "Terlalu Banyak File",
         "message": "ZIP ini berisi lebih banyak file daripada yang dapat diindeks alat ini.",
-        "fix": "Minta ekspor yang lebih kecil: Meta Accounts Center → Buat ekspor → pilih hanya \"Pengikut dan mengikuti\" → format JSON."
+        "fix": "Minta ekspor yang lebih kecil: Meta Accounts Center › Buat ekspor › pilih hanya \"Pengikut dan mengikuti\" › format JSON."
       },
       "FILE_TOO_LARGE": {
         "title": "File Terlalu Besar",
         "message": "Browser Anda tidak dapat membuka ekspor ini — terlalu besar untuk perangkat ini.",
-        "fix": "Minta ekspor yang lebih kecil: Meta Accounts Center → Buat ekspor → pilih hanya \"Pengikut dan mengikuti\" → format JSON. Ekspor itu berukuran beberapa MB, bukan ratusan."
+        "fix": "Minta ekspor yang lebih kecil: Meta Accounts Center › Buat ekspor › pilih hanya \"Pengikut dan mengikuti\" › format JSON. Ekspor itu berukuran beberapa MB, bukan ratusan."
       },
       "JSON_PARSE_ERROR": {
         "title": "Format Data Tidak Valid",

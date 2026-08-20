@@ -1,5 +1,5 @@
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { join, relative, resolve } from 'node:path';
 
 import { describe, it, expect } from 'vitest';
 
@@ -23,6 +23,13 @@ import { dropOnDemandFontPreloads } from '../../../vite/ssg-meta-injector';
  * Each check below fails on exactly one of those. Nothing else in the suite noticed,
  * because every one of them degrades to "renders in SF Pro / Roboto" rather than erroring.
  */
+
+function walk(dir: string): string[] {
+  return readdirSync(dir).flatMap(name => {
+    const full = join(dir, name);
+    return statSync(full).isDirectory() ? walk(full) : full.endsWith('.tsx') ? [full] : [];
+  });
+}
 
 const root = resolve(__dirname, '../../..');
 const dist = join(root, 'dist');
@@ -179,6 +186,41 @@ describe.runIf(built)('built font assets resolve', () => {
     expect(missing).toEqual([]);
   });
 
+  /**
+   * The locale-JSON check above is necessary but not sufficient: `→` also lived in
+   * hardcoded strings in src/core/types/errors.ts, the parsers, FAQSection, the Terms
+   * page and NotFoundPage — none of which that check can see. This one reads the text
+   * a reader actually receives, so it does not care where the string was authored.
+   */
+  it('no prerendered page renders a character the body font cannot carry', () => {
+    const pkg = bundledFontPackages().find(p => p.includes('inter'));
+    const ranges = shippedRanges(pkg!);
+    const pages = readdirSync(dist, { recursive: true } as never) as unknown as string[];
+    const html = pages.filter(f => typeof f === 'string' && f.endsWith('.html'));
+    expect(html.length, 'no prerendered pages to scan').toBeGreaterThan(0);
+
+    const orphans = new Map<number, string>();
+    for (const page of html) {
+      const text = readFileSync(join(dist, page), 'utf8')
+        .replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/g, ' ')
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/&[a-z]+;|&#\d+;/g, ' ');
+      for (const ch of text.replace(/\s/g, '')) {
+        const cp = ch.codePointAt(0)!;
+        if (orphans.has(cp)) continue;
+        if (inRanges(cp, ranges)) continue;
+        if (DELEGATED.some(d => cp >= d.from && cp <= d.to)) continue;
+        orphans.set(cp, page);
+      }
+    }
+    expect(
+      [...orphans].map(
+        ([cp, page]) =>
+          `U+${cp.toString(16).toUpperCase().padStart(4, '0')} ${String.fromCodePoint(cp)} (${page})`
+      )
+    ).toEqual([]);
+  });
+
   it('every preloaded font is one the stylesheet requests', () => {
     const html = readFileSync(join(dist, 'index.html'), 'utf8');
     const preloaded = [...html.matchAll(/<link[^>]+rel="preload"[^>]*>/g)]
@@ -187,5 +229,151 @@ describe.runIf(built)('built font assets resolve', () => {
     expect(preloaded.length, 'no font is preloaded').toBeGreaterThan(0);
     const requested = requestedFontUrls();
     for (const href of preloaded) expect(requested).toContain(href);
+  });
+});
+
+/**
+ * A character the shipped fonts do not carry is not an error — the browser silently
+ * borrows it from the system font, mid-sentence, at a slightly different weight and
+ * baseline. While no webfont loaded that was invisible, because every character came
+ * from the same system font. It stops being invisible the moment one does.
+ *
+ * `→` (U+2192) is how this was found: absent from both families' files AND from every
+ * shipped unicode-range, and present 264 times in the export instructions — 31 on every
+ * home page. `↑`, `↓` and `›` are all present, so the gap is specific, not a subsetting
+ * policy. Anything a family genuinely cannot carry belongs in DELEGATED with a reason.
+ */
+const DELEGATED: { name: string; from: number; to: number }[] = [
+  { name: 'Arabic — no Arabic subset exists in either family', from: 0x0600, to: 0x06ff },
+  { name: 'Kana and CJK — no CJK subset exists in either family', from: 0x3000, to: 0x30ff },
+  { name: 'CJK ideographs', from: 0x4e00, to: 0x9fff },
+  { name: 'Halfwidth/fullwidth forms', from: 0xff00, to: 0xffef },
+  { name: 'emoji and dingbats — always font-fallback, by design', from: 0x2600, to: 0x27bf },
+  { name: 'emoji presentation selector', from: 0xfe0f, to: 0xfe0f },
+  { name: 'emoji planes', from: 0x1f300, to: 0x1faff },
+];
+
+function shippedRanges(pkg: string): string[] {
+  const raw = readFileSync(join(root, 'node_modules', pkg, 'unicode.json'), 'utf8');
+  return Object.values(JSON.parse(raw) as Record<string, string>).flatMap(r => r.split(','));
+}
+
+function inRanges(cp: number, parts: string[]): boolean {
+  for (const part of parts) {
+    const p = part.trim().replace('U+', '');
+    if (p.includes('-')) {
+      const [a, b] = p.split('-');
+      if (parseInt(a, 16) <= cp && cp <= parseInt(b, 16)) return true;
+    } else if (p.includes('?')) {
+      const a = parseInt(p.replace(/\?/g, '0'), 16);
+      const b = parseInt(p.replace(/\?/g, 'F'), 16);
+      if (a <= cp && cp <= b) return true;
+    } else if (parseInt(p, 16) === cp) return true;
+  }
+  return false;
+}
+
+describe('every character in shipped copy has a glyph in the font that renders it', () => {
+  it('no locale string reaches for a character the body font cannot carry', () => {
+    const inter = bundledFontPackages().find(p => p.includes('inter'));
+    expect(inter, 'the body font package is not imported anywhere').toBeDefined();
+    const ranges = shippedRanges(inter!);
+
+    const used = new Map<number, string>();
+    for (const file of readdirSync(join(root, 'src/locales'), { withFileTypes: true })) {
+      if (!file.isDirectory()) continue;
+      for (const ns of readdirSync(join(root, 'src/locales', file.name))) {
+        const text = readFileSync(join(root, 'src/locales', file.name, ns), 'utf8');
+        for (const ch of text.replace(/\s/g, '')) {
+          const cp = ch.codePointAt(0)!;
+          if (!used.has(cp)) used.set(cp, `${file.name}/${ns}`);
+        }
+      }
+    }
+
+    const orphans = [...used]
+      .filter(([cp]) => !inRanges(cp, ranges))
+      .filter(([cp]) => !DELEGATED.some(d => cp >= d.from && cp <= d.to))
+      .map(
+        ([cp, where]) =>
+          `U+${cp.toString(16).toUpperCase().padStart(4, '0')} ${String.fromCodePoint(cp)} (${where})`
+      );
+
+    expect(orphans).toEqual([]);
+  });
+});
+
+/** Tailwind's numeric weights, for the classes this codebase actually uses. */
+const WEIGHTS: Record<string, number> = {
+  'font-thin': 100,
+  'font-extralight': 200,
+  'font-light': 300,
+  'font-normal': 400,
+  'font-medium': 500,
+  'font-semibold': 600,
+  'font-bold': 700,
+  'font-extrabold': 800,
+  'font-black': 900,
+};
+
+describe('no element asks its font for a weight the font does not have', () => {
+  it('every .font-display weight is inside the display family declared range', () => {
+    const pkg = bundledFontPackages().find(p => p.includes('jakarta'));
+    expect(pkg, 'the display font package is not imported anywhere').toBeDefined();
+    const css = readFileSync(join(root, 'node_modules', pkg!, 'index.css'), 'utf8');
+    const declared = /font-weight:\s*(\d+)\s+(\d+)/.exec(css);
+    expect(declared, 'the display family declares no weight range').not.toBeNull();
+    const [min, max] = [Number(declared![1]), Number(declared![2])];
+
+    // A weight outside the range does not warn — CSS clamps it to the nearest supported
+    // value in silence, so font-black and font-extrabold render identically and the
+    // distinction the markup draws is invisible.
+    const offenders: string[] = [];
+    for (const dir of ['src/components', 'src/pages']) {
+      for (const file of walk(join(root, dir))) {
+        const text = readFileSync(file, 'utf8');
+        for (const m of text.matchAll(/className=\{?[`"'][^`"']*font-display[^`"']*/g)) {
+          for (const w of m[0].matchAll(
+            /font-(?:thin|extralight|light|normal|medium|semibold|bold|extrabold|black)\b/g
+          )) {
+            const n = WEIGHTS[w[0]];
+            if (n < min || n > max) {
+              offenders.push(`${relative(root, file)}: ${w[0]} (${n}) outside ${min}..${max}`);
+            }
+          }
+        }
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+});
+
+/**
+ * `line-height` on a display heading must clear the tallest ink the shipped copy can
+ * produce, or a two-line heading overlaps itself — line N's `ç` into line N+1's `Í`.
+ *
+ * Measured over the characters actually present in src/locales (ar/ja excluded, they
+ * fall back wholesale), worst-case ink span per shipped face:
+ *
+ *   Plus Jakarta Sans latin  1.229em      Inter latin      1.196em
+ *   Plus Jakarta Sans lat-ext 1.179em     Inter latin-ext  1.149em
+ *   SF Pro, which rendered until 2026-08-20: 1.125em
+ *
+ * So 1.15 cleared SF Pro by +0.025em and clears none of the four faces now shipping.
+ * 1.25 clears the worst by +0.021em, restoring the margin the design was drawn against.
+ *
+ * Recompute if the font packages change — this is the one number here that is measured
+ * rather than derived at run time (no font parser in the test environment):
+ *   uv run --with fonttools --with brotli python3   # BoundsPen over dist/assets/*.woff2
+ */
+const DISPLAY_LINE_HEIGHT_FLOOR = 1.25;
+
+describe('display headings clear their own tallest glyphs', () => {
+  it('the shared h1/h2/h3/.font-display rule does not set a line-height that overlaps', () => {
+    const rule = /h1,\s*h2,\s*h3,\s*\.font-display\s*\{([^}]*)\}/.exec(flatten(stylesCss));
+    expect(rule, 'the shared heading rule is gone — find where line-height moved').not.toBeNull();
+    const lh = /line-height:\s*([\d.]+)/.exec(rule![1]);
+    expect(lh, 'the shared heading rule sets no line-height').not.toBeNull();
+    expect(Number(lh![1])).toBeGreaterThanOrEqual(DISPLAY_LINE_HEIGHT_FLOOR);
   });
 });

@@ -20,15 +20,15 @@
     },
     "4": {
       "title": "Selecciona solo \"Seguidores y seguidos\"",
-      "description": "Haz clic en \"Personalizar\" → Desmarca todo → Marca SOLO \"Seguidores y seguidos\". Esto mantiene tu archivo compacto."
+      "description": "Haz clic en \"Personalizar\" › Desmarca todo › Marca SOLO \"Seguidores y seguidos\". Esto mantiene tu archivo compacto."
     },
     "5": {
       "title": "Configura el rango de fechas a \"Todo el tiempo\"",
-      "description": "Haz clic en \"Rango de fechas\" → Selecciona \"Todo el tiempo\" → Guardar. Esto asegura el historial completo."
+      "description": "Haz clic en \"Rango de fechas\" › Selecciona \"Todo el tiempo\" › Guardar. Esto asegura el historial completo."
     },
     "6": {
       "title": "Cambia el formato a JSON",
-      "description": "¡Paso crítico! Haz clic en \"Formato\" → Selecciona \"JSON\" (no HTML). Los archivos HTML NO funcionarán."
+      "description": "¡Paso crítico! Haz clic en \"Formato\" › Selecciona \"JSON\" (no HTML). Los archivos HTML NO funcionarán."
     },
     "7": {
       "title": "Revisa e inicia la exportación",

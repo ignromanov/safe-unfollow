@@ -64,17 +64,17 @@
     },
     "4": {
       "title": "⚠️ Sadece \"Takipçiler ve takip edilenler\" Seç",
-      "description": "\"Özelleştir\" tıkla → Hepsini temizle → SADECE \"Takipçiler ve takip edilenler\" işaretle. Dosyanı küçük ve hızlı tutar.",
+      "description": "\"Özelleştir\" tıkla › Hepsini temizle › SADECE \"Takipçiler ve takip edilenler\" işaretle. Dosyanı küçük ve hızlı tutar.",
       "alt": "Adım 4: Özelleştirip sadece Takipçiler ve takip edilenler seç"
     },
     "5": {
       "title": "Tarih Aralığını \"Tüm zamanlar\" Olarak Ayarla",
-      "description": "\"Tarih aralığı\" tıkla → \"Tüm zamanlar\" seç → Kaydet. Tam takipçi geçmişini alırsın.",
+      "description": "\"Tarih aralığı\" tıkla › \"Tüm zamanlar\" seç › Kaydet. Tam takipçi geçmişini alırsın.",
       "alt": "Adım 5: Tarih aralığını Tüm zamanlar olarak ayarla"
     },
     "6": {
       "title": "⚠️ Formatı JSON Olarak Değiştir",
-      "description": "Bu kritik! \"Format\" tıkla → \"JSON\" seç (HTML değil). HTML dosyaları analizörümüzle ÇALIŞMAZ.",
+      "description": "Bu kritik! \"Format\" tıkla › \"JSON\" seç (HTML değil). HTML dosyaları analizörümüzle ÇALIŞMAZ.",
       "alt": "Adım 6: Formatı JSON olarak değiştir"
     },
     "7": {

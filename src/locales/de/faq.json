@@ -3,7 +3,7 @@
   "items": {
     "howToFind": {
       "question": "Wie kann ich ohne App sehen, wer mir auf Instagram entfolgt ist?",
-      "answer": "Öffne in der Meta-Kontenübersicht „Deine Informationen exportieren“ → Export erstellen → Wähle dein Profil → „Zu Gerät exportieren“ → Nur „Follower und Folge ich“ → Format JSON. Lade die ZIP herunter (normalerweise 5-30 Minuten) und lade sie hier hoch. Das Tool vergleicht deine Listen im Browser, der Export wird also nirgendwohin hochgeladen. Keine Anmeldung nötig.",
+      "answer": "Öffne in der Meta-Kontenübersicht „Deine Informationen exportieren“ › Export erstellen › Wähle dein Profil › „Zu Gerät exportieren“ › Nur „Follower und Folge ich“ › Format JSON. Lade die ZIP herunter (normalerweise 5-30 Minuten) und lade sie hier hoch. Das Tool vergleicht deine Listen im Browser, der Export wird also nirgendwohin hochgeladen. Keine Anmeldung nötig.",
       "relatedLink": {
         "text": "Export-Anleitung starten",
         "href": "/wizard"

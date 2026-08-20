@@ -49,7 +49,7 @@
       "HTML_FORMAT": {
         "title": "Yanlış Format: HTML",
         "message": "Verilerini HTML formatında indirdin, ancak bu araç çalışmak için JSON formatı gerektiriyor.",
-        "fix": "Meta Hesaplar Merkezi’ne dön → Dışa aktarma oluştur → Cihaza dışa aktar → formatı \"JSON\" seç (HTML değil) → dışa aktarmayı tekrar başlat."
+        "fix": "Meta Hesaplar Merkezi’ne dön › Dışa aktarma oluştur › Cihaza dışa aktar › formatı \"JSON\" seç (HTML değil) › dışa aktarmayı tekrar başlat."
       },
       "NOT_INSTAGRAM_EXPORT": {
         "title": "Instagram Dışa Aktarımı Değil",
@@ -94,12 +94,12 @@
       "TOO_MANY_ENTRIES": {
         "title": "Çok Fazla Dosya",
         "message": "Bu ZIP, bu aracın dizinleyebileceğinden daha fazla dosya içeriyor.",
-        "fix": "Daha küçük bir dışa aktarma isteyin: Meta Accounts Center → Dışa aktarma oluştur → yalnızca \"Takipçiler ve takip edilenler\" seçin → JSON formatı. Bu dışa aktarma yüzlerce yerine birkaç MB olur."
+        "fix": "Daha küçük bir dışa aktarma isteyin: Meta Accounts Center › Dışa aktarma oluştur › yalnızca \"Takipçiler ve takip edilenler\" seçin › JSON formatı. Bu dışa aktarma yüzlerce yerine birkaç MB olur."
       },
       "FILE_TOO_LARGE": {
         "title": "Dosya Çok Büyük",
         "message": "Tarayıcınız bu dışa aktarmayı açamadı — bu cihaz için çok büyük.",
-        "fix": "Daha küçük bir dışa aktarma isteyin: Meta Accounts Center → Dışa aktarma oluştur → yalnızca \"Takipçiler ve takip edilenler\" seçin → JSON formatı. Bu dışa aktarma yüzlerce yerine birkaç MB olur."
+        "fix": "Daha küçük bir dışa aktarma isteyin: Meta Accounts Center › Dışa aktarma oluştur › yalnızca \"Takipçiler ve takip edilenler\" seçin › JSON formatı. Bu dışa aktarma yüzlerce yerine birkaç MB olur."
       },
       "JSON_PARSE_ERROR": {
         "title": "Geçersiz Veri Formatı",

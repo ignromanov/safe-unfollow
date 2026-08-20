@@ -60,17 +60,17 @@ export function Component() {
           <ul className="space-y-2 text-sm font-medium text-zinc-600 dark:text-zinc-400">
             <li>
               <a href={`${prefix}/wizard`} className="hover:text-primary transition-colors">
-                → How to get Instagram data
+                › How to get Instagram data
               </a>
             </li>
             <li>
               <a href={`${prefix}/upload`} className="hover:text-primary transition-colors">
-                → Upload your data
+                › Upload your data
               </a>
             </li>
             <li>
               <a href={`${prefix}/sample`} className="hover:text-primary transition-colors">
-                → Try with sample data
+                › Try with sample data
               </a>
             </li>
           </ul>

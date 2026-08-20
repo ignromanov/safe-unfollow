@@ -124,7 +124,7 @@ export function createDiagnosticError(
       title: 'Wrong Format: HTML',
       message:
         'You downloaded your data in HTML format, but this tool requires JSON format to work.',
-      fix: 'Go back to Instagram Settings → Download Your Data → Select "JSON" format (not HTML) → Request download again.',
+      fix: 'Go back to Instagram Settings › Download Your Data › Select "JSON" format (not HTML) › Request download again.',
       icon: 'html',
       severity: 'error',
     },
@@ -204,14 +204,14 @@ export function createDiagnosticError(
     TOO_MANY_ENTRIES: {
       title: 'Too Many Files',
       message: 'This ZIP contains more files than this tool can index.',
-      fix: 'Ask Instagram for a smaller export: Meta Accounts Center → Create export → select only "Followers and following" → format JSON.',
+      fix: 'Ask Instagram for a smaller export: Meta Accounts Center › Create export › select only "Followers and following" › format JSON.',
       icon: 'file',
       severity: 'error',
     },
     FILE_TOO_LARGE: {
       title: 'File Too Large',
       message: 'Your browser could not open this export — it is too large for this device.',
-      fix: 'Ask Instagram for just the part this tool needs: Download your information → Some of your information → Followers and Following → JSON.',
+      fix: 'Ask Instagram for just the part this tool needs: Download your information › Some of your information › Followers and Following › JSON.',
       icon: 'file',
       severity: 'error',
     },

@@ -20,15 +20,15 @@
     },
     "4": {
       "title": "Wähle nur \"Follower und Gefolgte\"",
-      "description": "Klicke auf \"Anpassen\" → Alles abwählen → NUR \"Follower und Gefolgte\" auswählen. Das hält deine Datei kompakt."
+      "description": "Klicke auf \"Anpassen\" › Alles abwählen › NUR \"Follower und Gefolgte\" auswählen. Das hält deine Datei kompakt."
     },
     "5": {
       "title": "Setze den Zeitraum auf \"Gesamter Zeitraum\"",
-      "description": "Klicke auf \"Zeitraum\" → Wähle \"Gesamter Zeitraum\" → Speichern. Das stellt die komplette Historie sicher."
+      "description": "Klicke auf \"Zeitraum\" › Wähle \"Gesamter Zeitraum\" › Speichern. Das stellt die komplette Historie sicher."
     },
     "6": {
       "title": "Ändere das Format auf JSON",
-      "description": "Kritischer Schritt! Klicke auf \"Format\" → Wähle \"JSON\" (nicht HTML). HTML-Dateien funktionieren NICHT."
+      "description": "Kritischer Schritt! Klicke auf \"Format\" › Wähle \"JSON\" (nicht HTML). HTML-Dateien funktionieren NICHT."
     },
     "7": {
       "title": "Überprüfen & Export starten",

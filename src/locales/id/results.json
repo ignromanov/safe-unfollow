@@ -19,8 +19,8 @@
     "time": "{{time}}ms"
   },
   "sort": {
-    "asc": "Urut A→Z",
-    "desc": "Urut Z→A"
+    "asc": "Urut A›Z",
+    "desc": "Urut Z›A"
   },
   "stats": {
     "followers": "Pengikut",
@@ -117,12 +117,12 @@
       "cta": "Ketuk untuk lihat rekomendasi"
     },
     "tools": {
-      "publer": "Jadwalkan postingan → tetap konsisten & tumbuh 2x lebih cepat",
-      "predis": "AI buat postingan + desain → konten 3x lebih cepat",
-      "manychat": "Balasan otomatis 24/7 → hemat 10+ jam/minggu",
-      "metricool": "Temukan waktu terbaik Anda → pertumbuhan 40% lebih cepat",
-      "vistacreate": "Desain pro dalam 60 detik → jangan pernah lewatkan postingan",
-      "later": "Rencanakan bulan Anda dalam 1 jam → tetap konsisten"
+      "publer": "Jadwalkan postingan › tetap konsisten & tumbuh 2x lebih cepat",
+      "predis": "AI buat postingan + desain › konten 3x lebih cepat",
+      "manychat": "Balasan otomatis 24/7 › hemat 10+ jam/minggu",
+      "metricool": "Temukan waktu terbaik Anda › pertumbuhan 40% lebih cepat",
+      "vistacreate": "Desain pro dalam 60 detik › jangan pernah lewatkan postingan",
+      "later": "Rencanakan bulan Anda dalam 1 jam › tetap konsisten"
     },
     "dismiss": "Mungkin nanti",
     "disclaimer": "Tools pilihan yang kami rekomendasikan. Tautan afiliasi mendanai pembaruan gratis — tanpa biaya tambahan untuk Anda.",
