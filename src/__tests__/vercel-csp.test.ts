@@ -38,6 +38,18 @@ function readCspDirectives(): Map<string, string[]> {
   );
 }
 
+/** Every header key `vercel.json` declares, across all of its source rules. */
+function declaredHeaderKeys(): string[] {
+  const config = JSON.parse(readFileSync(resolve(ROOT, 'vercel.json'), 'utf8')) as {
+    headers: Array<{ source: string; headers: Array<{ key: string; value: string }> }>;
+  };
+
+  return config.headers.flatMap(entry => entry.headers).map(header => header.key);
+}
+
+/** The Umami dashboard, and the only origin allowed to frame the site. */
+const UMAMI_DASHBOARD_ORIGIN = 'https://m.safeunfollow.app';
+
 /** The default path the analytics tag is served from, read from its loader. */
 function umamiSrc(): string {
   const loader = readFileSync(resolve(ROOT, 'src/lib/umami-loader.ts'), 'utf8');
@@ -171,8 +183,31 @@ describe('vercel.json Content-Security-Policy', () => {
 
   it('keeps the directives that make a missing source fail closed', () => {
     expect(directives.get('default-src')).toEqual(["'self'"]);
-    expect(directives.get('frame-ancestors')).toEqual(["'none'"]);
     expect(directives.get('base-uri')).toEqual(["'self'"]);
     expect(directives.get('form-action')).toEqual(["'self'"]);
+  });
+
+  /**
+   * Umami's heatmap draws its background by framing the live production page:
+   * `Heatmap.tsx` renders `<iframe src={snapshot.url}>` and `getHeatmap.ts`
+   * builds that url from the website's own domain. `frame-ancestors 'none'`
+   * therefore blocks the report, and the fix is an allowlist of exactly one
+   * origin — the dashboard that renders it. Anything wider is a clickjacking
+   * surface across the whole site, `/results` and the checkout dialog included,
+   * because the header rule matches `/(.*)`.
+   */
+  it('lets the analytics dashboard frame the site, and nothing else', () => {
+    expect(directives.get('frame-ancestors')).toEqual([UMAMI_DASHBOARD_ORIGIN]);
+  });
+
+  /**
+   * `X-Frame-Options` has no allowlist form — `ALLOW-FROM` was removed from
+   * every browser — so it cannot express the rule above, only re-impose the
+   * block it replaced. Browsers ignore it whenever `frame-ancestors` is
+   * present, which is exactly why a stale `DENY` is worse than no header: it
+   * reads as protection while contradicting the policy that actually applies.
+   */
+  it('declares no X-Frame-Options, which frame-ancestors supersedes', () => {
+    expect(declaredHeaderKeys()).not.toContain('X-Frame-Options');
   });
 });
