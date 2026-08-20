@@ -74,6 +74,21 @@ export function PaywallModal({
 
   const totalLabel = totalRows.toLocaleString(i18n.language);
 
+  // U+2068 FIRST STRONG ISOLATE … U+2069 POP DIRECTIONAL ISOLATE around a value
+  // the user controls. `savedFilename` is derived from the name of the ZIP they
+  // uploaded, and it is the only interpolated value on this screen that is not
+  // ours. Two things go wrong without it, both on the one line whose whole
+  // purpose is turning an assertion into something the reader can go and check:
+  // an Arabic or mixed-script name reorders against the sentence around it, and
+  // a name carrying a bidi control (U+202E and friends) escapes the value and
+  // reorders the rest of the paragraph — React escapes HTML, not bidi.
+  //
+  // The isolate goes on the value rather than a `<bdi>` around it because the
+  // name arrives inside a translated sentence, where a locale is free to put it
+  // anywhere. The constant, all-ASCII email below already gets `dir="ltr"`;
+  // giving the fixed string isolation and the variable one none was backwards.
+  const isolatedFilename = `\u2068${savedFilename}\u2069`;
+
   // Share of the list the free file covers, as a percentage of the track. A
   // percentage rather than the pixel arithmetic the mockup used, because the
   // dialog is `max-w-[calc(100%-2rem)] sm:max-w-lg` — its track is a different
@@ -126,7 +141,7 @@ export function PaywallModal({
           <Check className="h-3.5 w-3.5 shrink-0 text-emerald-500 mt-0.5" />
           <span className="min-w-0 break-words">
             {t('export.saved.capped', {
-              filename: savedFilename,
+              filename: isolatedFilename,
               rows: FREE_EXPORT_ROWS,
               total: totalLabel,
             })}
@@ -302,7 +317,14 @@ export function PaywallModal({
             <a
               dir="ltr"
               href={`mailto:${REFUND_EMAIL}`}
-              className="text-primary underline underline-offset-2 hover:no-underline"
+              /* Not `text-primary`. That token is `oklch(0.6 0.18 264)` and
+                   measures 3.95:1 on this surface in light mode — a large-text
+                   colour, fine for the 48px number above and under the 4.5:1
+                   this 12px line needs. The underline is what says "link"; the
+                   colour was decoration, and it was decoration costing half a
+                   point of contrast on the dispute-defence line of the
+                   highest-value screen in the product. */
+              className="text-foreground underline underline-offset-2 hover:no-underline"
             >
               {REFUND_EMAIL}
             </a>
@@ -318,7 +340,7 @@ export function PaywallModal({
           <button
             type="button"
             onClick={onManualEntry}
-            className="mx-auto cursor-pointer px-1 py-2 text-xs text-muted-foreground underline underline-offset-2 transition-colors hover:text-primary focus-visible:text-primary"
+            className="mx-auto cursor-pointer rounded-sm px-1 py-2 text-xs text-muted-foreground underline underline-offset-2 transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
           >
             {t('export.license.havePurchase')}
           </button>

@@ -429,8 +429,14 @@ describe('ResultsExportControls', () => {
       // receipt naming a different file than the one on disk is worse than no
       // receipt, and only this coupling can catch the two drifting apart.
       const [, writtenName] = vi.mocked(downloadBlob).mock.calls[0];
+      // Wrapped in U+2068…U+2069 by the component, and asserted that way on
+      // purpose. The filename is the only value on this screen the user
+      // controls — it comes from the name of the ZIP they uploaded — so a name
+      // carrying a bidi control would otherwise reorder the sentence around it,
+      // on the one line whose job is to be checkable against what is on disk.
+      // Matching the bare name here would let the isolates be dropped silently.
       const receipt = resultsEN.export.saved.capped
-        .replace('{{filename}}', String(writtenName))
+        .replace('{{filename}}', `\u2068${String(writtenName)}\u2069`)
         .replace('{{rows}}', String(FREE_EXPORT_ROWS))
         .replace('{{total}}', String(defaultProps.totalCount));
 

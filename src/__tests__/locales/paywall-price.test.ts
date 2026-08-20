@@ -91,6 +91,14 @@ describe('paywall sample-size copy', () => {
       expect(savedCapped, `${language} export.saved.capped`).toContain('{{rows}}');
       expect(savedCapped, `${language} export.saved.capped`).toContain('{{total}}');
 
+      // The third placeholder, guarded for a different reason than the other
+      // two. `{{filename}}` is the only value on this screen the *user*
+      // controls, and the renderer wraps it in bidi isolates before handing it
+      // over. A locale that drops the placeholder does not merely lose the
+      // filename — it loses the isolation with it, and the sentence stops
+      // naming the file it exists to name.
+      expect(savedCapped, `${language} export.saved.capped`).toContain('{{filename}}');
+
       // `gap` is the one line that survives the bar being hidden from assistive
       // technology, so it is the only statement of the boundary a screen reader
       // reaches. It states both ends: the row the free file stops at, and the
