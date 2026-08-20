@@ -49,7 +49,7 @@
       "HTML_FORMAT": {
         "title": "Falsches Format: HTML",
         "message": "Du hast deine Daten im HTML-Format heruntergeladen, dieses Tool benötigt jedoch das JSON-Format.",
-        "fix": "Gehe zurück zur Meta-Kontenübersicht → Export erstellen → Zu Gerät exportieren → wähle das Format \"JSON\" (nicht HTML) → starte den Export erneut."
+        "fix": "Gehe zurück zur Meta-Kontenübersicht › Export erstellen › Zu Gerät exportieren › wähle das Format \"JSON\" (nicht HTML) › starte den Export erneut."
       },
       "NOT_INSTAGRAM_EXPORT": {
         "title": "Kein Instagram-Export",
@@ -94,12 +94,12 @@
       "TOO_MANY_ENTRIES": {
         "title": "Zu viele Dateien",
         "message": "Diese ZIP enthält mehr Dateien, als dieses Tool indexieren kann.",
-        "fix": "Fordere einen kleineren Export an: Meta Accounts Center → Export erstellen → nur \"Follower und Folge ich\" auswählen → Format JSON."
+        "fix": "Fordere einen kleineren Export an: Meta Accounts Center › Export erstellen › nur \"Follower und Folge ich\" auswählen › Format JSON."
       },
       "FILE_TOO_LARGE": {
         "title": "Datei zu groß",
         "message": "Dein Browser konnte diesen Export nicht öffnen — er ist zu groß für dieses Gerät.",
-        "fix": "Fordere einen kleineren Export an: Meta Accounts Center → Export erstellen → nur \"Follower und Folge ich\" auswählen → Format JSON. Dieser Export ist wenige MB groß statt Hunderte."
+        "fix": "Fordere einen kleineren Export an: Meta Accounts Center › Export erstellen › nur \"Follower und Folge ich\" auswählen › Format JSON. Dieser Export ist wenige MB groß statt Hunderte."
       },
       "JSON_PARSE_ERROR": {
         "title": "Ungültiges Datenformat",

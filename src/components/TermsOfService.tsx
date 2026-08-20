@@ -145,7 +145,7 @@ export function TermsOfService({ onBack }: TermsOfServiceProps) {
           <h3 className="text-lg font-semibold mt-6 mb-3">4.2 Data Export Compliance</h3>
           <p className="text-muted-foreground">
             The Service uses Instagram's official data export feature (available through Instagram
-            Settings → Your Activity → Download Your Information). This is a GDPR/CCPA-compliant
+            Settings › Your Activity › Download Your Information). This is a GDPR/CCPA-compliant
             feature provided by Instagram. You are responsible for following Instagram's procedures
             to obtain your data export.
           </p>

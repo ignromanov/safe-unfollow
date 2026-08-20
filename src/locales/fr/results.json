@@ -19,8 +19,8 @@
     "time": "{{time}}ms"
   },
   "sort": {
-    "asc": "Trier A→Z",
-    "desc": "Trier Z→A"
+    "asc": "Trier A›Z",
+    "desc": "Trier Z›A"
   },
   "stats": {
     "followers": "Abonnés",
@@ -117,12 +117,12 @@
       "cta": "Appuyez pour voir les recommandations"
     },
     "tools": {
-      "publer": "Planifiez vos posts → restez constant et grandissez 2x plus vite",
-      "predis": "L'IA crée posts + designs → contenu 3x plus rapide",
-      "manychat": "Réponses automatiques 24/7 → économisez 10+ heures/semaine",
-      "metricool": "Trouvez vos meilleurs horaires → croissance 40% plus rapide",
-      "vistacreate": "Designs pro en 60 sec → ne manquez jamais un post",
-      "later": "Planifiez votre mois en 1 heure → gardez la régularité"
+      "publer": "Planifiez vos posts › restez constant et grandissez 2x plus vite",
+      "predis": "L'IA crée posts + designs › contenu 3x plus rapide",
+      "manychat": "Réponses automatiques 24/7 › économisez 10+ heures/semaine",
+      "metricool": "Trouvez vos meilleurs horaires › croissance 40% plus rapide",
+      "vistacreate": "Designs pro en 60 sec › ne manquez jamais un post",
+      "later": "Planifiez votre mois en 1 heure › gardez la régularité"
     },
     "dismiss": "Peut-être plus tard",
     "disclaimer": "Outils sélectionnés que nous recommandons. Les liens d'affiliation financent les mises à jour gratuites — sans coût pour vous.",

@@ -13,6 +13,29 @@ import {
 const BASE_URL = 'https://safeunfollow.app';
 
 /**
+ * The only font subsets that belong on the critical path. index.html preloads exactly
+ * these two by hand; everything else is a unicode-range subset the browser fetches from
+ * the characters actually on the page.
+ */
+const CRITICAL_FONT_SUBSET = /-latin-wght-normal-/;
+
+/**
+ * Strip the font preloads vite-react-ssg injects for the whole asset graph.
+ *
+ * It emits one `rel="preload" as="font"` per woff2 reachable from the entry
+ * (vite-react-ssg dist/shared/…:218) with no notion of unicode-range. That is ten
+ * subsets, 269.5 KB, against the 73.8 KB of the two latin ones — forced onto all 162
+ * prerendered pages, and it defeats the mechanism the subsets exist for. Runs from
+ * onPageRendered, which vite-react-ssg calls AFTER renderPreloadLinks.
+ */
+export function dropOnDemandFontPreloads(html: string): string {
+  return html.replace(/<link\b[^>]*\brel="preload"[^>]*>/g, tag => {
+    if (!tag.includes('as="font"')) return tag;
+    return CRITICAL_FONT_SUBSET.test(tag) ? tag : '';
+  });
+}
+
+/**
  * modulepreload hrefs for the locale chunks a page will fetch, English first.
  *
  * initI18n awaits English unconditionally before the URL language, so a non-English page
@@ -54,17 +77,20 @@ function readViteManifest(rootDir: string): Record<string, { file: string }> {
 }
 
 /**
- * Font subsets needed for each language (for future reference).
+ * Font subsets needed for each language. Unused — kept because it is the input a
+ * per-locale preload would need, and the table itself is still correct.
  *
- * NOTE: Font preloading is currently DISABLED because:
- * - @fontsource CSS imports bundle fonts to /assets/ with hashes
- * - Manual preloads pointed to /files/ (static copies)
- * - This mismatch caused "preloaded but not used" warnings
+ * The note that stood here was half right and drew the wrong conclusion from it. It had
+ * the mismatch backwards — the hashed /assets/ URL was the PRELOAD, and /files/ was what
+ * the stylesheet asked for — and it closed with "fonts still load correctly via CSS
+ * @font-face rules", which was false twice over: the families never matched, and
+ * /assets/files/ never existed. Both are fixed as of 2026-08-20; see
+ * src/__tests__/build/font-loading.test.ts.
  *
- * Fonts still load correctly via CSS @font-face rules.
- * To re-enable preloading, we'd need to either:
- * 1. Use manual @font-face rules pointing to /files/
- * 2. Or extract Vite's hashed font URLs at build time
+ * Preloading per locale is the open question, and it is a measurement, not a decision:
+ * Inter's latin-ext alone is 83 KB, so preloading it for de/es/fr/pt/tr may well cost
+ * more than the swap it avoids. Only the two latin subsets ride the critical path until
+ * someone puts a number on it.
  */
 const _LANGUAGE_FONT_SUBSETS: Record<SupportedLanguage, string[]> = {
   en: ['latin'],
@@ -288,6 +314,9 @@ export async function injectLocalizedMeta(
   // Remove old og:locale and og:locale:alternate (will be added in seoTags)
   html = html.replace(/<meta\s+property="og:locale"\s+content="[^"]*"\s*\/?>\s*/g, '');
   html = html.replace(/<meta\s+property="og:locale:alternate"\s+content="[^"]*"\s*\/?>\s*/g, '');
+
+  // Drop the whole-asset-graph font preloads vite-react-ssg appended before this hook ran
+  html = dropOnDemandFontPreloads(html);
 
   // Inject SEO tags before </head>
   return html.replace('</head>', `${seoTags}</head>`);

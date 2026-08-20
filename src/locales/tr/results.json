@@ -19,8 +19,8 @@
     "time": "{{time}}ms"
   },
   "sort": {
-    "asc": "A→Z Sırala",
-    "desc": "Z→A Sırala"
+    "asc": "A›Z Sırala",
+    "desc": "Z›A Sırala"
   },
   "stats": {
     "followers": "Takipçiler",
@@ -117,12 +117,12 @@
       "cta": "Önerileri görmek için dokunun"
     },
     "tools": {
-      "publer": "Gönderileri planla → tutarlı ol ve 2 kat daha hızlı büyü",
-      "predis": "AI gönderi + tasarım oluşturur → 3x daha hızlı içerik",
-      "manychat": "7/24 otomatik yanıt → haftada 10+ saat tasarruf",
-      "metricool": "En iyi zamanlarınızı bulun → %40 daha hızlı büyüme",
-      "vistacreate": "60 saniyede profesyonel tasarım → hiç gönderi kaçırmayın",
-      "later": "1 saatte ayınızı planlayın → tutarlı kalın"
+      "publer": "Gönderileri planla › tutarlı ol ve 2 kat daha hızlı büyü",
+      "predis": "AI gönderi + tasarım oluşturur › 3x daha hızlı içerik",
+      "manychat": "7/24 otomatik yanıt › haftada 10+ saat tasarruf",
+      "metricool": "En iyi zamanlarınızı bulun › %40 daha hızlı büyüme",
+      "vistacreate": "60 saniyede profesyonel tasarım › hiç gönderi kaçırmayın",
+      "later": "1 saatte ayınızı planlayın › tutarlı kalın"
     },
     "dismiss": "Belki sonra",
     "disclaimer": "Önerdiğimiz el yapımı seçilmiş araçlar. Ortaklık bağlantıları ücretsiz güncellemeleri finanse eder — size ekstra maliyet yok.",

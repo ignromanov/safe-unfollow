@@ -3,7 +3,7 @@
   "items": {
     "howToFind": {
       "question": "Como ver quem deixou de te seguir no Instagram sem app?",
-      "answer": "Abra a Central de Contas da Meta → Criar exportação → selecione seu perfil → \"Exportar para o dispositivo\" → marque apenas \"Seguidores e seguindo\" → formato JSON. Baixe o ZIP quando estiver pronto (normalmente 5-30 minutos) e envie aqui. A ferramenta compara suas listas no navegador, então a exportação não é enviada para lugar nenhum. Sem login.",
+      "answer": "Abra a Central de Contas da Meta › Criar exportação › selecione seu perfil › \"Exportar para o dispositivo\" › marque apenas \"Seguidores e seguindo\" › formato JSON. Baixe o ZIP quando estiver pronto (normalmente 5-30 minutos) e envie aqui. A ferramenta compara suas listas no navegador, então a exportação não é enviada para lugar nenhum. Sem login.",
       "relatedLink": {
         "text": "Iniciar o guia de exportação",
         "href": "/wizard"

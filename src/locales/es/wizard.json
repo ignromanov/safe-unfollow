@@ -64,17 +64,17 @@
     },
     "4": {
       "title": "⚠️ Selecciona solo \"Seguidores y seguidos\"",
-      "description": "Haz clic en \"Personalizar\" → Desmarca todo → Marca SOLO \"Seguidores y seguidos\". Esto mantiene tu archivo pequeño y rápido.",
+      "description": "Haz clic en \"Personalizar\" › Desmarca todo › Marca SOLO \"Seguidores y seguidos\". Esto mantiene tu archivo pequeño y rápido.",
       "alt": "Paso 4: Personaliza para seleccionar solo Seguidores y seguidos"
     },
     "5": {
       "title": "Configura el rango de fechas a \"Todo el tiempo\"",
-      "description": "Haz clic en \"Rango de fechas\" → Selecciona \"Todo el tiempo\" → Guardar. Esto asegura tu historial completo de seguidores.",
+      "description": "Haz clic en \"Rango de fechas\" › Selecciona \"Todo el tiempo\" › Guardar. Esto asegura tu historial completo de seguidores.",
       "alt": "Paso 5: Configura el rango de fechas a Todo el tiempo"
     },
     "6": {
       "title": "⚠️ Cambia el formato a JSON",
-      "description": "¡Esto es crítico! Haz clic en \"Formato\" → Selecciona \"JSON\" (no HTML). Los archivos HTML NO funcionarán con nuestro analizador.",
+      "description": "¡Esto es crítico! Haz clic en \"Formato\" › Selecciona \"JSON\" (no HTML). Los archivos HTML NO funcionarán con nuestro analizador.",
       "alt": "Paso 6: Cambia el formato a JSON"
     },
     "7": {

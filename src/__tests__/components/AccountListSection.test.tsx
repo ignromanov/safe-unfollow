@@ -406,13 +406,13 @@ describe('AccountListSection', () => {
 
     renderWithRouter(<AccountListSection {...defaultProps} />);
 
-    const sortButton = screen.getByTitle('Sort Z→A');
+    const sortButton = screen.getByTitle('Sort Z›A');
     expect(sortButton).toBeInTheDocument();
 
     fireEvent.click(sortButton);
 
-    // After click, should show "Sort A→Z"
-    expect(screen.getByTitle('Sort A→Z')).toBeInTheDocument();
+    // After click, should show "Sort A›Z"
+    expect(screen.getByTitle('Sort A›Z')).toBeInTheDocument();
   });
 
   it('should call useAccountFiltering with correct options', () => {

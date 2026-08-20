@@ -3,7 +3,7 @@
   "items": {
     "howToFind": {
       "question": "Uygulama olmadan Instagram'da kimin takipten çıktığını nasıl kontrol ederim?",
-      "answer": "Meta Hesaplar Merkezi'ni açın → Dışa aktarma oluştur → Profilinizi seçin → \"Cihaza aktar\" → Yalnızca \"Takipçiler ve takip edilenler\" → JSON formatı. ZIP'i indirin (genellikle 5-30 dakika) ve buraya yükleyin. Araç listelerinizi tarayıcıda karşılaştırır, yani dışa aktarım hiçbir yere yüklenmez. Giriş yok.",
+      "answer": "Meta Hesaplar Merkezi'ni açın › Dışa aktarma oluştur › Profilinizi seçin › \"Cihaza aktar\" › Yalnızca \"Takipçiler ve takip edilenler\" › JSON formatı. ZIP'i indirin (genellikle 5-30 dakika) ve buraya yükleyin. Araç listelerinizi tarayıcıda karşılaştırır, yani dışa aktarım hiçbir yere yüklenmez. Giriş yok.",
       "relatedLink": {
         "text": "Dışa aktarma kılavuzunu başlat",
         "href": "/wizard"

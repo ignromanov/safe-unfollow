@@ -64,17 +64,17 @@
     },
     "4": {
       "title": "⚠️ Pilih Hanya \"Pengikut dan mengikuti\"",
-      "description": "Klik \"Sesuaikan\" → Hapus semua → Centang HANYA \"Pengikut dan mengikuti\". Ini menjaga file tetap kecil dan cepat.",
+      "description": "Klik \"Sesuaikan\" › Hapus semua › Centang HANYA \"Pengikut dan mengikuti\". Ini menjaga file tetap kecil dan cepat.",
       "alt": "Langkah 4: Sesuaikan untuk memilih hanya Pengikut dan mengikuti"
     },
     "5": {
       "title": "Atur Rentang Tanggal ke \"Sepanjang waktu\"",
-      "description": "Klik \"Rentang tanggal\" → Pilih \"Sepanjang waktu\" → Simpan. Ini memastikan riwayat pengikut lengkap.",
+      "description": "Klik \"Rentang tanggal\" › Pilih \"Sepanjang waktu\" › Simpan. Ini memastikan riwayat pengikut lengkap.",
       "alt": "Langkah 5: Atur rentang tanggal ke Sepanjang waktu"
     },
     "6": {
       "title": "⚠️ Ubah Format ke JSON",
-      "description": "Ini penting! Klik \"Format\" → Pilih \"JSON\" (bukan HTML). File HTML TIDAK akan berfungsi dengan alat analisis kami.",
+      "description": "Ini penting! Klik \"Format\" › Pilih \"JSON\" (bukan HTML). File HTML TIDAK akan berfungsi dengan alat analisis kami.",
       "alt": "Langkah 6: Ubah format ke JSON"
     },
     "7": {

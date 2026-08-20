@@ -2,6 +2,10 @@ import { ViteReactSSG } from 'vite-react-ssg';
 import { routes } from './routes';
 import { initI18n } from './locales';
 import { loadUmami, loadHeatmapRecorder } from './lib/umami-loader';
+// Imported here rather than via @import in styles.css: see the note at the top of that
+// file — Tailwind v4 inlines @import without rebasing url(), Vite's JS pipeline does not.
+import '@fontsource-variable/inter';
+import '@fontsource-variable/plus-jakarta-sans';
 import './styles.css';
 
 /**

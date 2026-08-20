@@ -49,7 +49,7 @@
       "HTML_FORMAT": {
         "title": "Mauvais format : HTML",
         "message": "Vous avez téléchargé vos données au format HTML, mais cet outil nécessite le format JSON.",
-        "fix": "Retournez dans l’Espace Comptes Meta → Créer une exportation → Exporter vers l’appareil → choisissez le format « JSON » (pas HTML) → relancez l’exportation."
+        "fix": "Retournez dans l’Espace Comptes Meta › Créer une exportation › Exporter vers l’appareil › choisissez le format « JSON » (pas HTML) › relancez l’exportation."
       },
       "NOT_INSTAGRAM_EXPORT": {
         "title": "Pas une exportation Instagram",
@@ -94,12 +94,12 @@
       "TOO_MANY_ENTRIES": {
         "title": "Trop de fichiers",
         "message": "Cette archive contient plus de fichiers que cet outil ne peut indexer.",
-        "fix": "Demandez une exportation plus petite : Centre de comptes Meta → Créer une exportation → sélectionnez uniquement « Abonnés et abonnements » → format JSON."
+        "fix": "Demandez une exportation plus petite : Centre de comptes Meta › Créer une exportation › sélectionnez uniquement « Abonnés et abonnements » › format JSON."
       },
       "FILE_TOO_LARGE": {
         "title": "Fichier trop volumineux",
         "message": "Votre navigateur n'a pas pu ouvrir cette exportation : elle est trop volumineuse pour cet appareil.",
-        "fix": "Demandez une exportation plus petite : Centre de comptes Meta → Créer une exportation → sélectionnez uniquement « Abonnés et abonnements » → format JSON. Cette exportation pèse quelques Mo au lieu de centaines."
+        "fix": "Demandez une exportation plus petite : Centre de comptes Meta › Créer une exportation › sélectionnez uniquement « Abonnés et abonnements » › format JSON. Cette exportation pèse quelques Mo au lieu de centaines."
       },
       "JSON_PARSE_ERROR": {
         "title": "Format de données invalide",

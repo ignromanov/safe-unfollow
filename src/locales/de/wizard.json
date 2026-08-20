@@ -64,17 +64,17 @@
     },
     "4": {
       "title": "⚠️ Wähle nur \"Follower und Gefolgte\"",
-      "description": "Klicke auf \"Anpassen\" → Alles abwählen → NUR \"Follower und Gefolgte\" auswählen. Das hält deine Datei klein und schnell.",
+      "description": "Klicke auf \"Anpassen\" › Alles abwählen › NUR \"Follower und Gefolgte\" auswählen. Das hält deine Datei klein und schnell.",
       "alt": "Schritt 4: Anpassen um nur Follower und Gefolgte auszuwählen"
     },
     "5": {
       "title": "Setze den Zeitraum auf \"Gesamter Zeitraum\"",
-      "description": "Klicke auf \"Zeitraum\" → Wähle \"Gesamter Zeitraum\" → Speichern. Das stellt sicher, dass du deine komplette Follower-Historie bekommst.",
+      "description": "Klicke auf \"Zeitraum\" › Wähle \"Gesamter Zeitraum\" › Speichern. Das stellt sicher, dass du deine komplette Follower-Historie bekommst.",
       "alt": "Schritt 5: Setze den Zeitraum auf Gesamter Zeitraum"
     },
     "6": {
       "title": "⚠️ Ändere das Format auf JSON",
-      "description": "Das ist kritisch! Klicke auf \"Format\" → Wähle \"JSON\" (nicht HTML). HTML-Dateien funktionieren NICHT mit unserem Analyzer.",
+      "description": "Das ist kritisch! Klicke auf \"Format\" › Wähle \"JSON\" (nicht HTML). HTML-Dateien funktionieren NICHT mit unserem Analyzer.",
       "alt": "Schritt 6: Ändere das Format auf JSON"
     },
     "7": {

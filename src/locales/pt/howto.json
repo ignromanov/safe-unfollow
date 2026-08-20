@@ -20,15 +20,15 @@
     },
     "4": {
       "title": "Selecione apenas \"Seguidores e seguindo\"",
-      "description": "Clique em \"Personalizar\" → Desmarque tudo → Marque APENAS \"Seguidores e seguindo\". Isso mantém seu arquivo compacto."
+      "description": "Clique em \"Personalizar\" › Desmarque tudo › Marque APENAS \"Seguidores e seguindo\". Isso mantém seu arquivo compacto."
     },
     "5": {
       "title": "Defina o período para \"Todo o período\"",
-      "description": "Clique em \"Período\" → Selecione \"Todo o período\" → Salvar. Isso permite obter o histórico completo."
+      "description": "Clique em \"Período\" › Selecione \"Todo o período\" › Salvar. Isso permite obter o histórico completo."
     },
     "6": {
       "title": "Mude o formato para JSON",
-      "description": "Passo crítico! Clique em \"Formato\" → Selecione \"JSON\" (não HTML). Arquivos HTML NÃO funcionarão."
+      "description": "Passo crítico! Clique em \"Formato\" › Selecione \"JSON\" (não HTML). Arquivos HTML NÃO funcionarão."
     },
     "7": {
       "title": "Revise e inicie a exportação",

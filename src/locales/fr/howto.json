@@ -20,15 +20,15 @@
     },
     "4": {
       "title": "Sélectionnez uniquement « Abonnés et abonnements »",
-      "description": "Cliquez sur « Personnaliser » → Décochez tout → Cochez UNIQUEMENT « Abonnés et abonnements ». Cela garde votre fichier compact."
+      "description": "Cliquez sur « Personnaliser » › Décochez tout › Cochez UNIQUEMENT « Abonnés et abonnements ». Cela garde votre fichier compact."
     },
     "5": {
       "title": "Définissez la plage de dates sur « Tout »",
-      "description": "Cliquez sur « Plage de dates » → Sélectionnez « Tout » → Enregistrer. Cela permet d'obtenir l'historique complet."
+      "description": "Cliquez sur « Plage de dates » › Sélectionnez « Tout » › Enregistrer. Cela permet d'obtenir l'historique complet."
     },
     "6": {
       "title": "Changez le format en JSON",
-      "description": "Étape critique ! Cliquez sur « Format » → Sélectionnez « JSON » (pas HTML). Les fichiers HTML NE fonctionneront PAS."
+      "description": "Étape critique ! Cliquez sur « Format » › Sélectionnez « JSON » (pas HTML). Les fichiers HTML NE fonctionneront PAS."
     },
     "7": {
       "title": "Vérifiez et lancez l'exportation",

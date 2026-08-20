@@ -3,7 +3,7 @@
   "items": {
     "howToFind": {
       "question": "How to check who unfollowed you on Instagram without app?",
-      "answer": "Open Meta Accounts Center → Create export → Select your profile → Choose \"Export to device\" → Select only \"Followers and following\" → Set format to JSON. Download the ZIP when ready (usually 5-30 minutes), then upload it here. The tool compares your lists in the browser, so the export is never uploaded anywhere. No login needed.",
+      "answer": "Open Meta Accounts Center › Create export › Select your profile › Choose \"Export to device\" › Select only \"Followers and following\" › Set format to JSON. Download the ZIP when ready (usually 5-30 minutes), then upload it here. The tool compares your lists in the browser, so the export is never uploaded anywhere. No login needed.",
       "relatedLink": {
         "text": "Start the export guide",
         "href": "/wizard"

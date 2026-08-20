@@ -64,17 +64,17 @@
     },
     "4": {
       "title": "⚠️ Sélectionnez uniquement « Abonnés et abonnements »",
-      "description": "Cliquez sur « Personnaliser » → Décochez tout → Cochez UNIQUEMENT « Abonnés et abonnements ». Cela garde votre fichier petit et rapide.",
+      "description": "Cliquez sur « Personnaliser » › Décochez tout › Cochez UNIQUEMENT « Abonnés et abonnements ». Cela garde votre fichier petit et rapide.",
       "alt": "Étape 4 : Personnalisez pour sélectionner uniquement Abonnés et abonnements"
     },
     "5": {
       "title": "Définissez la plage de dates sur « Tout »",
-      "description": "Cliquez sur « Plage de dates » → Sélectionnez « Tout » → Enregistrer. Cela permet d'obtenir l'historique complet de vos abonnés.",
+      "description": "Cliquez sur « Plage de dates » › Sélectionnez « Tout » › Enregistrer. Cela permet d'obtenir l'historique complet de vos abonnés.",
       "alt": "Étape 5 : Définissez la plage de dates sur Tout"
     },
     "6": {
       "title": "⚠️ Changez le format en JSON",
-      "description": "C'est crucial ! Cliquez sur « Format » → Sélectionnez « JSON » (pas HTML). Les fichiers HTML NE fonctionneront PAS avec notre analyseur.",
+      "description": "C'est crucial ! Cliquez sur « Format » › Sélectionnez « JSON » (pas HTML). Les fichiers HTML NE fonctionneront PAS avec notre analyseur.",
       "alt": "Étape 6 : Changez le format en JSON"
     },
     "7": {

@@ -104,7 +104,7 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
           code: 'TOO_MANY_ENTRIES',
           message: `This ZIP contains ${archive.count.toLocaleString()} files, more than this tool can index (${MAX_ZIP_ENTRIES.toLocaleString()}).`,
           severity: 'error',
-          fix: 'Ask Instagram for a smaller export: Meta Accounts Center → Create export → select only "Followers and following" → format JSON.',
+          fix: 'Ask Instagram for a smaller export: Meta Accounts Center › Create export › select only "Followers and following" › format JSON.',
         },
       ],
       discovery: { format: 'unknown', isInstagramExport: false, files: [] },

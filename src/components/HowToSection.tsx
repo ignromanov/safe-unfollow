@@ -145,7 +145,7 @@ export function HowToSection() {
 
           <div className="mt-24 md:mt-40 p-10 md:p-16 rounded-4xl bg-primary text-primary-foreground flex flex-col md:flex-row items-center justify-between gap-10 shadow-2xl shadow-primary/30">
             <div className="text-center md:text-start space-y-4">
-              <h4 className="text-3xl md:text-5xl font-display font-black tracking-tight leading-none">
+              <h4 className="text-3xl md:text-5xl font-display font-extrabold tracking-tight leading-none">
                 {t('cta.title')}
               </h4>
               <p className="opacity-90 font-bold text-base md:text-xl leading-relaxed">

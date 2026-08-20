@@ -20,15 +20,15 @@
     },
     "4": {
       "title": "Sadece \"Takipçiler ve takip edilenler\" Seç",
-      "description": "\"Özelleştir\" tıkla → Hepsini temizle → SADECE \"Takipçiler ve takip edilenler\" işaretle. Dosyanı kompakt tutar."
+      "description": "\"Özelleştir\" tıkla › Hepsini temizle › SADECE \"Takipçiler ve takip edilenler\" işaretle. Dosyanı kompakt tutar."
     },
     "5": {
       "title": "Tarih Aralığını \"Tüm zamanlar\" Olarak Ayarla",
-      "description": "\"Tarih aralığı\" tıkla → \"Tüm zamanlar\" seç → Kaydet. Tam geçmişi sağlar."
+      "description": "\"Tarih aralığı\" tıkla › \"Tüm zamanlar\" seç › Kaydet. Tam geçmişi sağlar."
     },
     "6": {
       "title": "Formatı JSON Olarak Değiştir",
-      "description": "Kritik adım! \"Format\" tıkla → \"JSON\" seç (HTML değil). HTML dosyaları ÇALIŞMAZ."
+      "description": "Kritik adım! \"Format\" tıkla › \"JSON\" seç (HTML değil). HTML dosyaları ÇALIŞMAZ."
     },
     "7": {
       "title": "Kontrol Et ve Dışa Aktarmayı Başlat",

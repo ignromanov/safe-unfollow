@@ -20,15 +20,15 @@
     },
     "4": {
       "title": "Pilih Hanya \"Pengikut dan mengikuti\"",
-      "description": "Klik \"Sesuaikan\" → Hapus semua → Centang HANYA \"Pengikut dan mengikuti\". File tetap kompak."
+      "description": "Klik \"Sesuaikan\" › Hapus semua › Centang HANYA \"Pengikut dan mengikuti\". File tetap kompak."
     },
     "5": {
       "title": "Atur Rentang Tanggal ke \"Sepanjang waktu\"",
-      "description": "Klik \"Rentang tanggal\" → Pilih \"Sepanjang waktu\" → Simpan. Memastikan riwayat lengkap."
+      "description": "Klik \"Rentang tanggal\" › Pilih \"Sepanjang waktu\" › Simpan. Memastikan riwayat lengkap."
     },
     "6": {
       "title": "Ubah Format ke JSON",
-      "description": "Langkah penting! Klik \"Format\" → Pilih \"JSON\" (bukan HTML). File HTML TIDAK berfungsi."
+      "description": "Langkah penting! Klik \"Format\" › Pilih \"JSON\" (bukan HTML). File HTML TIDAK berfungsi."
     },
     "7": {
       "title": "Tinjau & Mulai Ekspor",

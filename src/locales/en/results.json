@@ -19,8 +19,8 @@
     "time": "{{time}}ms"
   },
   "sort": {
-    "asc": "Sort A→Z",
-    "desc": "Sort Z→A"
+    "asc": "Sort A›Z",
+    "desc": "Sort Z›A"
   },
   "stats": {
     "followers": "Followers",
@@ -117,12 +117,12 @@
       "cta": "Tap to see recommendations"
     },
     "tools": {
-      "publer": "Schedule posts → stay consistent & grow 2x faster",
-      "predis": "AI creates posts + designs → ship content 3x faster",
-      "manychat": "Auto-reply 24/7 → 10+ hours/week saved",
-      "metricool": "Find your peak times → 40% faster growth",
-      "vistacreate": "Pro designs in 60 sec → never miss a post",
-      "later": "Plan your month in 1 hour → stay consistent"
+      "publer": "Schedule posts › stay consistent & grow 2x faster",
+      "predis": "AI creates posts + designs › ship content 3x faster",
+      "manychat": "Auto-reply 24/7 › 10+ hours/week saved",
+      "metricool": "Find your peak times › 40% faster growth",
+      "vistacreate": "Pro designs in 60 sec › never miss a post",
+      "later": "Plan your month in 1 hour › stay consistent"
     },
     "dismiss": "Maybe later",
     "disclaimer": "Hand-picked tools we recommend. Affiliate links fund free updates — no cost to you.",
