@@ -1,5 +1,9 @@
-@import '@fontsource-variable/inter';
-@import '@fontsource-variable/plus-jakarta-sans';
+/* The two webfont packages are imported from src/main.tsx, NOT here. Tailwind v4's
+   PostCSS plugin resolves @import with its own resolver and inlines the file without
+   rebasing relative url()s, so the packages' `url(./files/…)` survived verbatim into
+   /assets/app-*.css and resolved against /assets/ — a 404 for every subset. Imported
+   from JS, the same CSS goes through Vite's asset pipeline and the urls are hashed.
+   src/__tests__/build/font-loading.test.ts fails if they move back. */
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
@@ -79,9 +83,12 @@
 }
 
 @theme inline {
+  /* 'Inter Variable' is the family @fontsource-variable/inter actually declares; CSS
+     family matching is exact, so the 'Inter' this said until 2026-08-20 never matched
+     anything and every page rendered in the system fallback. */
   --font-sans:
-    'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
-    'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue',
+    Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
     'Noto Color Emoji';
   --font-mono:
     ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Monaco, Consolas, 'Liberation Mono',
@@ -167,7 +174,8 @@
 @layer utilities {
   /* V2 Display Typography */
   .font-display {
-    font-family: 'Plus Jakarta Sans', 'Inter', ui-sans-serif, system-ui, sans-serif;
+    font-family:
+      'Plus Jakarta Sans Variable', 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
   }
 
   /* V3 Gradient Text - OKLCH */

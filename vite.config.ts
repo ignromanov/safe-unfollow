@@ -2,7 +2,6 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 import { fileURLToPath } from "url";
 import { VitePWA } from "vite-plugin-pwa";
-import { viteStaticCopy } from "vite-plugin-static-copy";
 import { defineConfig } from "vite";
 import { buildConfig } from "./vite/build-config";
 import { pwaConfig } from "./vite/pwa-config";
@@ -16,21 +15,12 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA(pwaConfig),
-    // Copy @fontsource font files to /files/ directory
-    // Required because @fontsource CSS references fonts via relative ./files/ paths
-    // Only copy *-wght-normal.woff2 (variable weight, normal style) - reduces 50 → 11 files
-    viteStaticCopy({
-      targets: [
-        {
-          src: 'node_modules/@fontsource-variable/inter/files/*-wght-normal.woff2',
-          dest: 'files'
-        },
-        {
-          src: 'node_modules/@fontsource-variable/plus-jakarta-sans/files/*-wght-normal.woff2',
-          dest: 'files'
-        }
-      ]
-    }),
+    // A viteStaticCopy() of the @fontsource woff2 files into dist/files/ stood here until
+    // 2026-08-20. It existed to satisfy the packages' relative `url(./files/…)`, but the
+    // stylesheet that carries those urls is emitted at /assets/, so they resolved to
+    // /assets/files/ and the copies were never fetched by anything. The packages are now
+    // imported from src/main.tsx, which puts them through Vite's asset pipeline and hashes
+    // the urls properly — nothing needs copying.
   ],
   base: "/",
   // Include font assets from @fontsource packages

@@ -14,9 +14,11 @@
          closed. Google's ad origin gets no hint at all: AdSlot requests a fill
          only once the reader scrolls near it, long after the critical path. -->
 
-    <!-- Font preload: critical latin-normal subsets loaded BEFORE CSS parse.
-         Paths reference @fontsource-variable source files; Vite resolves them at build time
-         via the CSS @import in styles.css. These <link> tags give the browser an early hint. -->
+    <!-- Font preload: the two latin subsets, and ONLY those, ride the critical path.
+         Vite rewrites these node_modules paths to the same hashed /assets/ URLs the
+         stylesheet requests — they have to match exactly or the preload is dead weight.
+         Every other subset is fetched on demand from its unicode-range; the preloads
+         vite-react-ssg emits for them are stripped in vite/ssg-meta-injector.ts. -->
     <link rel="preload" href="/src/styles.css" as="style" />
 
     <!-- CRITICAL: Language redirect MUST be first script - before any other resources load -->
