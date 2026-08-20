@@ -138,7 +138,7 @@ export function PaywallModal({
             about something unseen into a claim the reader can go and check.
             Muted and small on purpose: a receipt, not a second headline. */}
         <p className="flex items-start gap-2 text-xs leading-normal text-muted-foreground">
-          <Check className="h-3.5 w-3.5 shrink-0 text-emerald-500 mt-0.5" />
+          <Check className="h-3.5 w-3.5 shrink-0 text-secondary mt-0.5" />
           <span className="min-w-0 break-words">
             {t('export.saved.capped', {
               filename: isolatedFilename,
@@ -174,29 +174,23 @@ export function PaywallModal({
             read aloud is two words and a shape nobody can see, and the two
             counts are already in the receipt above.
 
-            The 2px divider is `primary-foreground`, and the choice is measured
-            rather than stylistic. The two fills are 1.65:1 apart in light and
-            1.34:1 in dark, so the divider is not a nicety between them — it is
-            the entire boundary. As the sheet's own background it read 8.24:1
-            against the emerald in dark and 2.39:1 in light: the boundary
-            survived in one theme and dissolved in the other.
+            The 2px divider is `primary-foreground`. The two fills are 1.13:1
+            apart in light and 1.08:1 in dark — closer than any other pair of
+            colours on this screen — so the divider is not a nicety between
+            them, it is the entire boundary.
 
-            The fix is not "darker". It is that the divider must be near-black
-            in BOTH themes, because the fills are mid-lightness in both and do
-            not flip when the theme does. Any near-white divider fails against
-            the emerald (2.46:1) whichever theme it is in, and `foreground`
-            itself is wrong for exactly that reason — it is near-black in light
-            and near-white in dark, so it merely moves the failure from one
-            theme to the other (2.33:1 against emerald in dark).
+            Repainted 2026-08-20, and the repaint widened the choice rather
+            than narrowing it: against `secondary` all three candidates clear
+            3:1 (`background` worst case 3.49, `foreground` 3.11). Against the
+            emerald this replaced, only one did — a near-white divider measured
+            2.46:1 in both themes, and `foreground` flips with the theme, so it
+            moved the failure rather than fixing it (2.33:1 in dark).
 
-            `--primary-foreground` is `oklch(0.12 0.01 264)` in both themes, and
-            it is the one token whose stated job is to be legible on top of
-            `--primary`, which is what half this bar is painted with. Against
-            emerald 8.24:1, against primary 5.00:1 light and 6.15:1 dark.
-
-            The two fill colours are untouched. This fixes where the halves
-            meet, which is what the bar is for, and does not repaint the
-            reference.
+            `primary-foreground` keeps the job because it still has the widest
+            margin, and for the same reason as before: `oklch(0.12 0.01 264)` in
+            BOTH themes, while the fills are mid-lightness in both and do not
+            flip when the theme does. 5.66:1 and 5.72:1 against secondary,
+            5.00:1 and 6.15:1 against primary — worst case 5.00:1.
 
             The floor is `max(12px, …)` and not a bare percentage. At 8,930 rows
             the true share is 0.1% — under a pixel, so the segment would vanish
@@ -209,20 +203,23 @@ export function PaywallModal({
         <div aria-hidden="true" className="flex flex-col gap-2">
           <div className="flex h-4 overflow-hidden rounded-full border bg-muted">
             <div
-              className="shrink-0 bg-emerald-500"
+              className="shrink-0 bg-secondary"
               style={{ width: `max(12px, ${samplePercent}%)` }}
             />
             <div className="w-0.5 shrink-0 bg-primary-foreground" />
             <div className="grow bg-primary" />
           </div>
-          {/* The swatches are outlined, not bare. Emerald on the light surface
-              measures 2.39:1 against the 3:1 non-text threshold, and here the
-              fill is the only thing tying a label to a segment — the "it is
-              decorative" exemption does not apply to a key. The outline carries
-              the discriminability; the fill carries the meaning. */}
+          {/* The swatches are outlined, not bare. Each fill now clears the 3:1
+              non-text threshold against the sheet on its own — secondary 3.49:1
+              light and 5.72:1 dark, primary 3.95:1 and 6.15:1 — which the
+              emerald did not (2.39:1 light). So the outline is no longer what
+              makes a swatch visible; it is what keeps the two apart, and they
+              are 1.13:1 from each other. A key whose entries differ only in hue
+              has one entry for a reader who cannot separate those hues, and the
+              fill is the only thing tying a label to a segment. */}
           <div className="flex justify-between gap-3 text-xs">
             <span className="flex min-w-0 items-center gap-1.5">
-              <span className="h-2.5 w-2.5 shrink-0 rounded-[3px] border border-muted-foreground bg-emerald-500" />
+              <span className="h-2.5 w-2.5 shrink-0 rounded-[3px] border border-muted-foreground bg-secondary" />
               {t('export.paywall.legendSample', { rows: FREE_EXPORT_ROWS })}
             </span>
             <span className="flex shrink-0 items-center gap-1.5 font-semibold">
