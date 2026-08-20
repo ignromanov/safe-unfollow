@@ -146,6 +146,29 @@ describe('vercel.json Content-Security-Policy', () => {
     }
   );
 
+  /**
+   * Removed 2026-08-19 with `BuyMeCoffeeWidget`. The floating widget was the
+   * only thing on the site that loaded `cdnjs.buymeacoffee.com` or framed
+   * buymeacoffee.com; the two donation surfaces that remain — the footer block
+   * and `InlineDonationCard` — are plain `<a href target="_blank">` top-level
+   * navigations, which neither `script-src` nor `frame-src` governs.
+   *
+   * Pinned rather than merely deleted because the trust argument is arithmetic:
+   * the widget's clicks were unattributable by construction (an iframe), so it
+   * cost three third-party origins and returned no measurement. Re-adding a
+   * host here is re-taking that cost, and it should not happen by accident.
+   */
+  it.each([
+    { host: 'https://cdnjs.buymeacoffee.com', directive: 'script-src' },
+    { host: 'https://buymeacoffee.com', directive: 'frame-src' },
+    { host: 'https://www.buymeacoffee.com', directive: 'frame-src' },
+  ])(
+    'keeps $host out of $directive — nothing on the site loads it any more',
+    ({ host, directive }) => {
+      expect(directives.get(directive)).not.toContain(host);
+    }
+  );
+
   it('keeps the directives that make a missing source fail closed', () => {
     expect(directives.get('default-src')).toEqual(["'self'"]);
     expect(directives.get('frame-ancestors')).toEqual(["'none'"]);

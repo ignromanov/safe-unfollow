@@ -323,9 +323,11 @@ export function AccountListSection({
       )}
 
       {/* Below the list: an ask placed before the value is delivered inverts the
-          reciprocity that makes it work. BuyMeCoffeeWidget already covers the
-          after-the-fact ask, and this card above the list was its badly-timed
-          duplicate. Last of the two below-the-list blocks, behind the paid one:
+          reciprocity that makes it work, which is why this card is not above it.
+          It used to share the after-the-fact ask with a floating BuyMeACoffee
+          widget; that widget was removed 2026-08-19 because its clicks were
+          unattributable by construction, so this card and the footer link are
+          now the whole ask. Last of the two below-the-list blocks, behind the paid one:
           both are past the reciprocity threshold, and of the pair only the ad
           stops earning when it goes unseen. */}
       <InlineDonationCard accountCount={accountCount} isSample={isSample} />

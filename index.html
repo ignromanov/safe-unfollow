@@ -13,7 +13,6 @@
          open a TCP+TLS socket on every other page that goes unused and gets
          closed. Google's ad origin gets no hint at all: AdSlot requests a fill
          only once the reader scrolls near it, long after the critical path. -->
-    <link rel="dns-prefetch" href="https://cdnjs.buymeacoffee.com" />
 
     <!-- Font preload: critical latin-normal subsets loaded BEFORE CSS parse.
          Paths reference @fontsource-variable source files; Vite resolves them at build time
@@ -54,6 +53,54 @@
         } catch (e) {
           // localStorage unavailable (private mode) - continue with English
         }
+      })();
+    </script>
+
+    <!-- GH#99 — records a hero CTA click before React exists.
+         PrefixedLink renders a real <a href> so a prerendered page can be navigated
+         during the hydration window; React's onClick does not exist in that window, so
+         the click was lost twice — the event, and the session's entry_cta, which is
+         first-wins and so fell to whatever the reader clicked next.
+
+         Capture phase, and it must stay there: bubble puts it behind any
+         stopPropagation and behind React's own root listener.
+
+         Pre-hydration the click is a full document navigation, so an in-memory queue
+         would die with this page — sessionStorage is what survives it. Once the app is
+         up it installs __ctaSink and takes the click directly; there is exactly one
+         recorder either way, which is why Hero.tsx carries no onClick.
+
+         Contract pinned by src/__tests__/index-html.test.ts. -->
+    <script>
+      (function () {
+        // SYNC with src/lib/stats/cta-capture.ts PENDING_CTA_KEY
+        var PENDING_KEY = 'analytics_pending_cta';
+        // SYNC with src/lib/stats/constants.ts TRACKING_OPT_OUT_KEY
+        var OPT_OUT_KEY = 'umami-opt-out';
+
+        document.addEventListener(
+          'click',
+          function (event) {
+            var target = event.target;
+            if (!target || typeof target.closest !== 'function') return;
+            var anchor = target.closest('[data-cta]');
+            if (!anchor) return;
+            var cta = anchor.getAttribute('data-cta');
+            if (!cta) return;
+
+            try {
+              if (localStorage.getItem(OPT_OUT_KEY) === 'true') return;
+              if (typeof window.__ctaSink === 'function') {
+                window.__ctaSink(cta);
+                return;
+              }
+              sessionStorage.setItem(PENDING_KEY, JSON.stringify({ c: cta, p: location.pathname }));
+            } catch (error) {
+              // Storage disabled or full. A lost CTA click must not break navigation.
+            }
+          },
+          true
+        );
       })();
     </script>
 

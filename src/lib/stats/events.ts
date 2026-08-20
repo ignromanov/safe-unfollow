@@ -5,8 +5,9 @@
 import { AnalyticsEvents, parseDurationBucket } from './constants';
 import type { FilterAction, LinkType, ParseOutcome } from './constants';
 import { trackEvent } from './core';
+import { recordCTA } from './cta-capture';
 import { enqueueEvent, flushEvents, trackNavigating } from './queue';
-import { getStoredUTM, getEntryCTA, setEntryCTA } from './utm';
+import { getStoredUTM, getEntryCTA } from './utm';
 import type { LabelResolutionMode, TruncatedRelationshipFile } from '@/core/types';
 import type { LicenseFailureReason } from '@/lib/export/license';
 
@@ -198,30 +199,23 @@ export const analytics = {
 
   // Hero CTAs (sets entry CTA for conversion attribution)
   //
-  // Batched, unlike the new-tab clicks above: these are PrefixedLink, so the
-  // click is preventDefault + pushState and the document never unloads. The
+  // Batched, unlike the new-tab clicks above: once hydrated these are PrefixedLink,
+  // so the click is preventDefault + pushState and the document never unloads. The
   // route change that follows drains the queue on the next tick, so the event
   // leaves as promptly as it did on the immediate path — it just shares a
   // request with the rest of the landing page's set.
-  heroCTAGuide: () => {
-    setEntryCTA('guide');
-    enqueueEvent(AnalyticsEvents.HERO_CTA_GUIDE);
-  },
+  //
+  // Before hydration none of that holds — the click is a real navigation and no
+  // handler runs at all, which is why the recorder is a capture-phase listener in
+  // index.html rather than an onClick. These four delegate to the same `recordCTA`
+  // that listener reaches, so the slug→event mapping has one definition (GH#99).
+  heroCTAGuide: () => recordCTA('guide'),
 
-  heroCTASample: () => {
-    setEntryCTA('sample');
-    enqueueEvent(AnalyticsEvents.HERO_CTA_SAMPLE);
-  },
+  heroCTASample: () => recordCTA('sample'),
 
-  heroCTAUploadDirect: () => {
-    setEntryCTA('upload_direct');
-    enqueueEvent(AnalyticsEvents.HERO_CTA_UPLOAD_DIRECT);
-  },
+  heroCTAUploadDirect: () => recordCTA('upload_direct'),
 
-  heroCTAContinue: () => {
-    setEntryCTA('continue');
-    enqueueEvent(AnalyticsEvents.HERO_CTA_CONTINUE);
-  },
+  heroCTAContinue: () => recordCTA('continue'),
 
   // Navigation
   themeToggle: (mode: 'dark' | 'light' | 'system') => {

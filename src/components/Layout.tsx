@@ -3,7 +3,6 @@ import { useEffect, useLayoutEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 
 import { BreadcrumbSchema } from '@/components/BreadcrumbSchema';
-import { BuyMeCoffeeWidget } from '@/components/BuyMeCoffeeWidget';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { LicenseDialogMount } from '@/components/export/LicenseDialogMount';
 import { Footer } from '@/components/Footer';
@@ -37,14 +36,13 @@ interface LayoutProps {
  * - Theme provider wrapper
  * - Header and Footer
  * - Language sync from URL path
- * - BMC widget display
  * - Structured data (SEO)
  */
 export function Layout({ lang }: LayoutProps) {
   const { handleClearData } = useInstagramData();
 
   // Extracted hooks
-  const { pathname, activeScreen, isResultsPage, handleClear } = useLayoutNavigation();
+  const { pathname, activeScreen, handleClear } = useLayoutNavigation();
   useLayoutState(pathname);
 
   // Analytics (UTM capture, page view, PWA install)
@@ -134,14 +132,6 @@ export function Layout({ lang }: LayoutProps) {
           </main>
 
           <Footer />
-
-          {/* BMC Widget - shows only on results pages, auto-expand after 60s */}
-          <BuyMeCoffeeWidget
-            show={isResultsPage}
-            expandDelay={60000}
-            autoCollapseAfter={10000}
-            skipStorageCheck={pathname.endsWith('/sample')}
-          />
 
           {/* Structured data for SEO */}
           <BreadcrumbSchema />

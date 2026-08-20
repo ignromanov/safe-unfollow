@@ -1,7 +1,7 @@
 import { ViteReactSSG } from 'vite-react-ssg';
 import { routes } from './routes';
 import { initI18n } from './locales';
-import { loadUmami } from './lib/umami-loader';
+import { loadUmami, loadHeatmapRecorder } from './lib/umami-loader';
 import './styles.css';
 
 /**
@@ -35,6 +35,9 @@ export const createRoot = ViteReactSSG(
     if (isClient) {
       // Load analytics (respects user opt-out)
       loadUmami();
+
+      // Heatmap recorder — landing page only, after the first interaction (GH#95)
+      loadHeatmapRecorder();
 
       // Report Web Vitals (LCP, INP, CLS, FCP, TTFB) with 10% sampling
       import('./lib/web-vitals').then(({ initWebVitals }) => initWebVitals());
