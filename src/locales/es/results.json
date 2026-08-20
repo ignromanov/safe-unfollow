@@ -162,18 +162,16 @@
       "full": "Guardado {{filename}} — todas las {{total}} filas"
     },
     "paywall": {
-      "headline": "Las primeras {{rows}} ya están descargadas — ahora las {{total}}",
-      "subtitle": "Rastreadores similares cobran $5–10 al mes mientras quieras seguir vigilando a tus seguidores. Esto son $7 una sola vez, por el archivo.",
-      "bullet1": "Funciona en Excel y Google Sheets",
-      "bullet2": "Respeta tus filtros activos",
-      "bullet3": "Pago único de $7 — no es una suscripción. Se activa en hasta 3 dispositivos.",
-      "bullet4": "Sigue siendo 100% privado: el archivo se genera en tu navegador",
-      "teaserPdf": "Informe en PDF",
-      "teaserCompare": "Comparar dos exportaciones",
-      "comingSoon": "Próximamente",
+      "listLabel": "cuentas en este filtro",
+      "legendSample": "Ya tuyo — las primeras {{rows}}",
+      "legendRest": "El resto de tu lista",
+      "gap": "Tu archivo gratuito termina en la fila {{rows}}. La exportación se lleva las {{total}} — un archivo, un pago, no es una suscripción.",
       "cta": "Desbloquear exportación — $7",
-      "instantNote": "Desbloqueo instantáneo tras el pago",
-      "refund": "¿No es lo que esperabas? Escríbenos a {{email}} en un plazo de 30 días y te devolvemos el dinero."
+      "dismiss": "Ahora no",
+      "subtitle": "Rastreadores similares cobran $5–10 al mes mientras quieras seguir vigilando a tus seguidores. Esto son $7 una sola vez, por el archivo.",
+      "terms": "Pago único de $7. Se activa en hasta 3 dispositivos.",
+      "refund": "¿No es lo que esperabas? Escríbenos a {{email}} en un plazo de 30 días y te devolvemos el dinero.",
+      "instantNote": "Desbloqueo instantáneo tras el pago"
     },
     "license": {
       "title": "Activa tu exportación",

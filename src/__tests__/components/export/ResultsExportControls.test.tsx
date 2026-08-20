@@ -209,15 +209,12 @@ describe('ResultsExportControls', () => {
     expect(trigger).toHaveAccessibleName(trigger.textContent?.trim() ?? '');
   });
 
-  // The paywall headline interpolates the row cap and the reader's own total,
-  // so the rendered text is not the raw string. Matching on the stable half
-  // keeps the assertion honest without duplicating i18next's interpolation in
-  // the test.
-  const paywallHeadline = new RegExp(
-    resultsEN.export.paywall.headline
-      .replace('{{rows}}', String(FREE_EXPORT_ROWS))
-      .replace('{{total}}', String(defaultProps.totalCount))
-  );
+  // The paywall has no headline string: its heading is the reader's own total
+  // with this label under it, and Radix takes the dialog's accessible name from
+  // the pair. The label is therefore the probe for "the paywall is open" — it
+  // is the only paywall copy that is a plain string with nothing interpolated
+  // into it, so a match here cannot pass for the wrong reason.
+  const paywallLabel = resultsEN.export.paywall.listLabel;
 
   describe('the free sample', () => {
     it('should download a capped file and only then ask for money', async () => {
@@ -238,7 +235,7 @@ describe('ResultsExportControls', () => {
         defaultProps.totalCount
       );
       expect(vi.mocked(analytics.freeExportDownload)).toHaveBeenCalledWith(true);
-      expect(await screen.findByText(paywallHeadline)).toBeInTheDocument();
+      expect(await screen.findByText(paywallLabel)).toBeInTheDocument();
       // The two dimensions the paywall is tuned against, read from the state
       // the component already holds — asserted here because tsconfig excludes
       // src/__tests__, so a stale zero-argument call site type-checks clean.
@@ -282,14 +279,164 @@ describe('ResultsExportControls', () => {
         defaultProps.totalCount
       );
       expect(vi.mocked(analytics.freeExportDownload)).toHaveBeenCalledWith(false);
-      expect(screen.queryByText(paywallHeadline)).not.toBeInTheDocument();
+      expect(screen.queryByText(paywallLabel)).not.toBeInTheDocument();
       expect(vi.mocked(analytics.paywallView)).not.toHaveBeenCalled();
     });
 
-    // The paywall's headline offers "all 42" of a file the reader may never
-    // have seen land — 85% of traffic is mobile, and an iOS Safari blob
-    // download can be silent or blocked. The receipt is what makes the offer
-    // checkable rather than an assertion about something unseen.
+    // What the paywall leads with is the reader's own total, and it is the one
+    // claim on that screen checkable without trusting us: the sample is in
+    // Downloads and its rows can be counted, the total is the count the results
+    // header has been showing all along. A headline that says "the rest" over a
+    // hero showing someone else's numbers would be the opposite.
+    it('should lead with the reader own total, and name the dialog with it', async () => {
+      unlocked(false);
+      const user = userEvent.setup();
+
+      render(<ResultsExportControls {...defaultProps} />);
+      await user.click(screen.getByRole('button', { name: triggerLabel }));
+
+      const total = await screen.findByText(String(defaultProps.totalCount));
+
+      // Readable, unlike the pair this replaced. One numeral and its label read
+      // as a sentence — "42 accounts matched by this filter" — so the heading
+      // no longer needs hiding and the screen reader gets the same claim the
+      // sighted reader does, rather than a headline standing in for one.
+      expect(total.closest('[aria-hidden="true"]')).toBeNull();
+
+      // Read off the node Radix actually points `aria-labelledby` at, rather
+      // than trusting that whatever is largest on screen is the name. Both
+      // halves have to be in it: the numeral alone names the dialog "42".
+      const titleId = screen.getByRole('dialog').getAttribute('aria-labelledby');
+      const title = titleId === null ? null : document.getElementById(titleId);
+      expect(title?.textContent).toContain(String(defaultProps.totalCount));
+      expect(title?.textContent).toContain(paywallLabel);
+    });
+
+    // The bar is the argument, but it has no reading: a colour key read aloud
+    // is two words and a shape nobody can see. So it is hidden as one block —
+    // fills and legend together — and the sentence under it has to carry the
+    // same claim on its own. If that sentence ever loses a number, a screen
+    // reader user is left with the receipt and nothing else.
+    it('should keep the proportion bar out of the accessibility tree, and state it in words', async () => {
+      unlocked(false);
+      const user = userEvent.setup();
+
+      render(<ResultsExportControls {...defaultProps} />);
+      await user.click(screen.getByRole('button', { name: triggerLabel }));
+
+      const legend = await screen.findByText(resultsEN.export.paywall.legendRest);
+      expect(legend.closest('[aria-hidden="true"]')).not.toBeNull();
+
+      const gap = resultsEN.export.paywall.gap
+        .replace('{{rows}}', String(FREE_EXPORT_ROWS))
+        .replace('{{total}}', String(defaultProps.totalCount));
+      const spoken = screen.getByText(gap);
+      expect(spoken.closest('[aria-hidden="true"]')).toBeNull();
+
+      // And it is the node Radix describes the dialog with. Asserted rather
+      // than assumed, because the failure is silent in both directions: drop
+      // the description and Radix only warns to the console, which no test
+      // reads; leave it and mark it aria-hidden and the dialog announces an
+      // empty description.
+      const describedBy = screen.getByRole('dialog').getAttribute('aria-describedby');
+      expect(describedBy).toBe(spoken.id);
+    });
+
+    // A panel welded to the bottom edge that materialises in place reads as an
+    // overlay that happened to land there. It has to arrive from the edge it is
+    // attached to, or the geometry is a claim the motion contradicts.
+    //
+    // jsdom runs no animation, so the class list is the only proxy available —
+    // the same reason the touch-target test below pins `min-h-11` by name. The
+    // two cancels are asserted alongside the slides and not taken as read: the
+    // base is a centred dialog, and an inherited `zoom-in-95` left in place
+    // means the sheet scales up while it slides, which is the one combination
+    // that looks like neither.
+    it('should arrive from the bottom edge on a phone, not materialise in place', async () => {
+      unlocked(false);
+      const user = userEvent.setup();
+
+      render(<ResultsExportControls {...defaultProps} />);
+      await user.click(screen.getByRole('button', { name: triggerLabel }));
+
+      const sheet = await screen.findByRole('dialog');
+
+      expect(sheet.className).toContain('max-sm:bottom-0');
+      expect(sheet.className).toContain('max-sm:data-[state=open]:slide-in-from-bottom');
+      expect(sheet.className).toContain('max-sm:data-[state=closed]:slide-out-to-bottom');
+      expect(sheet.className).toContain('max-sm:data-[state=open]:zoom-in-100');
+      expect(sheet.className).toContain('max-sm:data-[state=closed]:zoom-out-100');
+    });
+
+    // `size="lg"` reads as "the big one" and is `h-10` — 40px, under the 44px
+    // touch target this product holds itself to, on its highest-value button
+    // with 85% of sessions on a phone. The height therefore cannot come from
+    // the size alone. `min-h-12` is 48px: the reference draws 48, and taking it
+    // puts the extra 4px on the safe side of the floor rather than sitting on
+    // it. jsdom measures nothing, so the class is the only proxy available; it
+    // is pinned by name for that reason and not as a style preference.
+    it('should give the paywall CTA a 48px touch target, not the size default', async () => {
+      unlocked(false);
+      const user = userEvent.setup();
+
+      render(<ResultsExportControls {...defaultProps} />);
+      await user.click(screen.getByRole('button', { name: triggerLabel }));
+
+      const cta = await screen.findByRole('button', { name: resultsEN.export.paywall.cta });
+      expect(cta.className).toMatch(/\bmin-h-12\b/);
+    });
+
+    // The CTA spent this branch rendering at 14px/600 against a reference of
+    // 16px/700, and the two halves failed differently. `font-semibold`
+    // displaced the cva base's `font-medium` and was merely one step light;
+    // the size class was ABSENT, so `text-sm` survived from the base — and an
+    // absence is what tailwind-merge cannot arbitrate, because there is
+    // nothing to arbitrate against. Pinned by name for the same reason the
+    // touch target above is: jsdom measures no text, so the class list is the
+    // only evidence there is, and this is the button the product is paid by.
+    it('should render the paywall CTA at the reference kegl and weight', async () => {
+      unlocked(false);
+      const user = userEvent.setup();
+
+      render(<ResultsExportControls {...defaultProps} />);
+      await user.click(screen.getByRole('button', { name: triggerLabel }));
+
+      const cta = await screen.findByRole('button', { name: resultsEN.export.paywall.cta });
+      expect(cta.className).toMatch(/\btext-base\b/);
+      expect(cta.className).toMatch(/\bfont-bold\b/);
+      expect(cta.className).not.toMatch(/\btext-sm\b/);
+    });
+
+    // The seam where the screen stops transacting and starts disclosing. It is
+    // drawn at 16px and was rendering at 8px, because the terms block was a
+    // third child of the footer and inherited the footer's own gap instead of
+    // the dialog grid's. Asserted structurally rather than by class: the number
+    // 16 lives in `DialogContent`'s `gap-4` and would move with it, but the
+    // block being a SIBLING of the buttons is the invariant that makes it the
+    // grid's gap at all. Nest it again and this fails; restyle the grid and it
+    // correctly does not.
+    it('should hang the terms block off the dialog grid, not off the button group', async () => {
+      unlocked(false);
+      const user = userEvent.setup();
+
+      render(<ResultsExportControls {...defaultProps} />);
+      await user.click(screen.getByRole('button', { name: triggerLabel }));
+
+      const dismiss = await screen.findByRole('button', {
+        name: resultsEN.export.paywall.dismiss,
+      });
+      const footer = dismiss.closest('[data-slot="dialog-footer"]');
+      const terms = screen.getByText(resultsEN.export.paywall.terms);
+
+      expect(footer).not.toBeNull();
+      expect(footer?.contains(terms)).toBe(false);
+      expect(terms.closest('.border-t')?.parentElement).toBe(footer?.parentElement);
+    });
+
+    // The paywall offers the rest of a file the reader may never have seen land
+    // — 85% of traffic is mobile, and an iOS Safari blob download can be silent
+    // or blocked. The receipt is what makes the offer checkable rather than an
+    // assertion about something unseen.
     it('should name the downloaded file in the paywall, matching what was written', async () => {
       unlocked(false);
       const user = userEvent.setup();
@@ -303,8 +450,14 @@ describe('ResultsExportControls', () => {
       // receipt naming a different file than the one on disk is worse than no
       // receipt, and only this coupling can catch the two drifting apart.
       const [, writtenName] = vi.mocked(downloadBlob).mock.calls[0];
+      // Wrapped in U+2068…U+2069 by the component, and asserted that way on
+      // purpose. The filename is the only value on this screen the user
+      // controls — it comes from the name of the ZIP they uploaded — so a name
+      // carrying a bidi control would otherwise reorder the sentence around it,
+      // on the one line whose job is to be checkable against what is on disk.
+      // Matching the bare name here would let the isolates be dropped silently.
       const receipt = resultsEN.export.saved.capped
-        .replace('{{filename}}', String(writtenName))
+        .replace('{{filename}}', `\u2068${String(writtenName)}\u2069`)
         .replace('{{rows}}', String(FREE_EXPORT_ROWS))
         .replace('{{total}}', String(defaultProps.totalCount));
 
@@ -371,7 +524,7 @@ describe('ResultsExportControls', () => {
       expect(await screen.findByRole('alert')).toHaveTextContent(resultsEN.export.dialog.error);
       expect(vi.mocked(analytics.exportError)).toHaveBeenCalledWith('csv');
       expect(vi.mocked(downloadBlob)).not.toHaveBeenCalled();
-      expect(screen.queryByText(paywallHeadline)).not.toBeInTheDocument();
+      expect(screen.queryByText(paywallLabel)).not.toBeInTheDocument();
     });
 
     // Clicking again *after* a finished export is legitimate and must keep
@@ -515,27 +668,50 @@ describe('ResultsExportControls', () => {
 
       render(<ResultsExportControls {...defaultProps} />);
       await user.click(screen.getByRole('button', { name: triggerLabel }));
-      await screen.findByText(paywallHeadline);
+      await screen.findByText(paywallLabel);
 
       return user;
     }
 
-    // The built-in close button (X) is one of the three Radix-driven closes
-    // (X, Escape, overlay click) — all three share the same onOpenChange
-    // callback, so exercising one proves the wiring for all.
-    it('should fire when closed via the built-in close button', async () => {
+    // "Not now" replaced the corner X: leaving is 56.7% of outcomes here, and
+    // an outcome that common gets a named control rather than a glyph. It is
+    // routed through the same `onOpenChange` Radix drives, so this one click
+    // proves the wiring for Escape and the overlay too — and proves the
+    // replacement did not quietly introduce a second dismissal path that the
+    // event series would have to be split across.
+    it('should fire when dismissed by the Not now button', async () => {
       const user = await openPaywall();
 
-      const closeButton = document.querySelector('[data-slot="dialog-close"]');
-      await user.click(closeButton as Element);
+      await user.click(screen.getByRole('button', { name: resultsEN.export.paywall.dismiss }));
 
       // Same dimensions as the view it will be divided by — a dismiss rate
       // split by locale is only meaningful if both halves carry the locale.
+      expect(vi.mocked(analytics.paywallDismiss)).toHaveBeenCalledTimes(1);
       expect(vi.mocked(analytics.paywallDismiss)).toHaveBeenCalledWith(
         'en',
         defaultProps.totalCount
       );
-      expect(screen.queryByText(paywallHeadline)).not.toBeInTheDocument();
+      expect(screen.queryByText(paywallLabel)).not.toBeInTheDocument();
+    });
+
+    // The X is gone, so Escape is now the only dismissal a keyboard user
+    // reaches without tabbing to a control. Asserted separately from the button
+    // above rather than assumed from shared wiring: `showCloseButton={false}`
+    // is one prop away from `onEscapeKeyDown` being suppressed too, and nothing
+    // else in the suite would notice. The dimensions are re-asserted rather
+    // than taken on trust from the button above: two dismissal paths that
+    // record different shapes would split the series without failing anything.
+    it('should fire when dismissed with Escape', async () => {
+      const user = await openPaywall();
+
+      await user.keyboard('{Escape}');
+
+      expect(vi.mocked(analytics.paywallDismiss)).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(analytics.paywallDismiss)).toHaveBeenCalledWith(
+        'en',
+        defaultProps.totalCount
+      );
+      expect(screen.queryByText(paywallLabel)).not.toBeInTheDocument();
     });
 
     // startCheckout only sets window.location.href — it never touches
@@ -550,7 +726,7 @@ describe('ResultsExportControls', () => {
 
       render(<ResultsExportControls {...defaultProps} />);
       await user.click(screen.getByRole('button', { name: triggerLabel }));
-      await screen.findByText(paywallHeadline);
+      await screen.findByText(paywallLabel);
       await user.click(screen.getByRole('button', { name: resultsEN.export.paywall.cta }));
 
       // The count handed to checkout is the one the headline showed, not a
@@ -581,7 +757,7 @@ describe('ResultsExportControls', () => {
     render(<ResultsExportControls {...defaultProps} />);
 
     expect(screen.queryByText(resultsEN.export.dialog.title)).not.toBeInTheDocument();
-    expect(screen.queryByText(resultsEN.export.paywall.headline)).not.toBeInTheDocument();
+    expect(screen.queryByText(resultsEN.export.paywall.listLabel)).not.toBeInTheDocument();
   });
 
   // Once the trigger leaves the sticky bar it is rendered on every load but seen

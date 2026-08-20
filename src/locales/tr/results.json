@@ -162,18 +162,16 @@
       "full": "{{filename}} kaydedildi — {{total}} satırın tamamı"
     },
     "paywall": {
-      "headline": "İlk {{rows}} satır indirildi — sıra {{total}} satırın tamamında",
-      "subtitle": "Benzer takip araçları, takipçilerini izlemeye devam etmen için ayda 5–10$ alır. Buradaysa dosyanın kendisi için tek seferlik 7$.",
-      "bullet1": "Excel ve Google Sheets’te çalışır",
-      "bullet2": "Aktif filtrelerine uyar",
-      "bullet3": "Tek seferlik 7$ — abonelik değil. En fazla 3 cihazda açılır.",
-      "bullet4": "Yine %100 gizli: dosya tarayıcında oluşturulur",
-      "teaserPdf": "PDF raporu",
-      "teaserCompare": "İki dışa aktarımı karşılaştır",
-      "comingSoon": "Yakında",
+      "listLabel": "hesap bu filtreye uyuyor",
+      "legendSample": "Sende — ilk {{rows}}",
+      "legendRest": "Listenin geri kalanı",
+      "gap": "Ücretsiz dosyan {{rows}}. satırda bitiyor. Dışa aktarma {{total}} satırın tamamını alır — tek dosya, tek ödeme, abonelik değil.",
       "cta": "Dışa aktarmayı aç — 7$",
-      "instantNote": "Ödemeden hemen sonra anında açılır",
-      "refund": "Beklediğin gibi değil mi? 30 gün içinde {{email}} adresine yaz, paranı iade edelim."
+      "dismiss": "Şimdi değil",
+      "subtitle": "Benzer takip araçları, takipçilerini izlemeye devam etmen için ayda 5–10$ alır. Buradaysa dosyanın kendisi için tek seferlik 7$.",
+      "terms": "Tek seferlik 7$. En fazla 3 cihazda açılır.",
+      "refund": "Beklediğin gibi değil mi? 30 gün içinde {{email}} adresine yaz, paranı iade edelim.",
+      "instantNote": "Ödemeden hemen sonra anında açılır"
     },
     "license": {
       "title": "Dışa aktarımını etkinleştir",

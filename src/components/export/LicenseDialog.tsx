@@ -154,6 +154,13 @@ export function LicenseDialog({ open, onOpenChange, initialKey, source }: Licens
               ? // Stable purpose text, not state text: the role="status" region
                 // below already announces "Activating…" on state change, so
                 // repeating it here would have a screen reader read it twice.
+                //
+                // Borrowed from the paywall's namespace, and this dialog is now
+                // its only reader — the paywall dropped its own feature line
+                // when the proportion became the argument. Left where it is
+                // rather than moved, because relocating a string on the
+                // activation path buys nothing but risk; delete it there and
+                // ten locales lose a description.
                 t('export.paywall.instantNote')
               : t('export.license.manualDescription')}
           </DialogDescription>

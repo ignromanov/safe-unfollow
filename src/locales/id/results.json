@@ -162,18 +162,16 @@
       "full": "{{filename}} tersimpan — semua {{total}} baris"
     },
     "paywall": {
-      "headline": "{{rows}} baris pertama sudah diunduh — sekarang semua {{total}}",
-      "subtitle": "Pelacak sejenis menagih $5–10 per bulan selama Anda ingin terus memantau pengikut Anda. Yang ini $7 sekali bayar, untuk filenya.",
-      "bullet1": "Berfungsi di Excel dan Google Sheets",
-      "bullet2": "Mengikuti filter aktif Anda",
-      "bullet3": "Sekali bayar $7 — bukan langganan. Berlaku di maksimal 3 perangkat.",
-      "bullet4": "Tetap 100% privat: file dibuat langsung di browser Anda",
-      "teaserPdf": "Laporan PDF",
-      "teaserCompare": "Bandingkan dua ekspor",
-      "comingSoon": "Segera hadir",
+      "listLabel": "akun sesuai filter ini",
+      "legendSample": "Sudah milik Anda — {{rows}} pertama",
+      "legendRest": "Sisa daftar Anda",
+      "gap": "File gratis Anda berhenti di baris {{rows}}. Ekspor mengambil seluruh {{total}} — satu file, satu pembayaran, bukan langganan.",
       "cta": "Buka ekspor — $7",
-      "instantNote": "Langsung terbuka setelah pembayaran",
-      "refund": "Tidak sesuai harapan? Kirim email ke {{email}} dalam 30 hari dan kami kembalikan uang Anda."
+      "dismiss": "Nanti saja",
+      "subtitle": "Pelacak sejenis menagih $5–10 per bulan selama Anda ingin terus memantau pengikut Anda. Yang ini $7 sekali bayar, untuk filenya.",
+      "terms": "Sekali bayar $7. Berlaku di maksimal 3 perangkat.",
+      "refund": "Tidak sesuai harapan? Kirim email ke {{email}} dalam 30 hari dan kami kembalikan uang Anda.",
+      "instantNote": "Langsung terbuka setelah pembayaran"
     },
     "license": {
       "title": "Aktifkan ekspor Anda",

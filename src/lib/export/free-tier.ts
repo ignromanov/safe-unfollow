@@ -20,32 +20,70 @@
 export const FREE_EXPORT_ROWS = 10;
 
 /**
- * The first rows of whatever the reader is currently looking at.
+ * How many times the free slice the view must be before there is anything worth
+ * selling.
  *
- * `indices === null` is the export layer's "all accounts", so the cap becomes a
- * leading range. With a filter active the cap applies to the filtered view, not
- * to the dataset — the sample should show the rows the reader asked for.
+ * The old rule was "anything over the slice", which made a view of twelve rows
+ * a paid offer: ten free, two for $7, about a file the reader can open and
+ * count. That is the same lie `isFreeExportCapped` was written to prevent at
+ * ten, one step to the right — the honesty of the pitch does not switch on at
+ * the allowance, it fades in over it.
  *
- * The rows land in the file in ascending index order regardless of the on-screen
- * sort, because `iterateAccountsForExport` normalises order. That matches the
- * paid export rather than the screen, which is the consistency that matters: the
- * sample must look like a smaller version of what is being sold.
+ * Three is a judgement, not a measurement. The reasoning is that a file's worth
+ * tracks how impossible the list is to copy out by hand: at 1,284 rows the file
+ * is the only way, at thirty it is a convenience the reader can refuse by
+ * scrolling. Nothing is given away that would have sold.
+ *
+ * The distribution of selection sizes is not instrumented: `export_trigger_viewable`
+ * carries `is_unlocked` but no row count, `free_export_download` carries only
+ * the capped flag, and account-list size is the wrong proxy because the export
+ * follows the active filter. Revisit once one of those events carries buckets.
  */
-export function capIndicesForFreeExport(indices: number[] | null, totalCount: number): number[] {
-  if (indices !== null) return indices.slice(0, FREE_EXPORT_ROWS);
+export const PAYWALL_MIN_RATIO = 3;
 
-  const length = Math.min(FREE_EXPORT_ROWS, Math.max(totalCount, 0));
-  return Array.from({ length }, (_, index) => index);
+/** Views at or below this size are handed over whole, with no pitch attached. */
+export const PAYWALL_MIN_ROWS = FREE_EXPORT_ROWS * PAYWALL_MIN_RATIO;
+
+/**
+ * Rows in what the reader is currently looking at.
+ *
+ * `indices === null` is the export layer's "all accounts"; anything else is the
+ * filtered view, and the filtered view is what the reader asked for.
+ */
+function viewSize(indices: number[] | null, totalCount: number): number {
+  return indices === null ? Math.max(totalCount, 0) : indices.length;
 }
 
 /**
  * Whether the free file leaves anything unsold.
  *
- * False means the reader's current view fits inside the allowance, so the file
- * they just received is complete. Nothing may be pitched on top of that: the
- * upsell would be claiming there is more, about a file they can open and count.
+ * False means the reader's current view is small enough to hand over whole, so
+ * the file they just received is complete. Nothing may be pitched on top of
+ * that: the upsell would be claiming there is more, about a file they can open
+ * and count.
  */
 export function isFreeExportCapped(indices: number[] | null, totalCount: number): boolean {
-  const rowCount = indices === null ? totalCount : indices.length;
-  return rowCount > FREE_EXPORT_ROWS;
+  return viewSize(indices, totalCount) > PAYWALL_MIN_ROWS;
+}
+
+/**
+ * The rows the free export actually writes.
+ *
+ * Derived from `isFreeExportCapped` rather than deciding for itself, because
+ * the two answers have to agree by construction: a view that gets no paywall
+ * must also get no `-sample` suffix and no truncation, and a caller holding one
+ * of those beliefs while the file holds the other is a silently wrong file.
+ *
+ * The rows land in ascending index order regardless of the on-screen sort,
+ * because `iterateAccountsForExport` normalises order. That matches the paid
+ * export rather than the screen, which is the consistency that matters: the
+ * sample must look like a smaller version of what is being sold.
+ */
+export function capIndicesForFreeExport(indices: number[] | null, totalCount: number): number[] {
+  const size = viewSize(indices, totalCount);
+  const length = isFreeExportCapped(indices, totalCount) ? FREE_EXPORT_ROWS : size;
+
+  if (indices !== null) return indices.slice(0, length);
+
+  return Array.from({ length }, (_, index) => index);
 }
