@@ -63,6 +63,12 @@ build would give. This is expected here, not a fault to chase.
 
 ## Two setup steps that are NOT in the repo and must be redone on a fresh clone
 
+**As of 2026-08-20, `bash .design-sync/tools/preflight.sh` runs both steps below in one
+command** — plus staging the skill's converter, installing its deps, and emitting the
+`.d.ts` declarations ("`.d.ts` extraction" further down). The script automates the steps;
+it doesn't change what they do or why skipping them fails the way described here, so the
+detail below is still worth reading once.
+
 1. **Self-link the package into node_modules:**
 
    ```sh
@@ -78,7 +84,7 @@ build would give. This is expected here, not a fault to chase.
 
 2. **Compile the stylesheet** (see next section):
    ```sh
-   node .ds-sync/compile-css.mjs
+   node .design-sync/tools/compile-css.mjs
    ```
 
 ## cssEntry must be COMPILED Tailwind v4, never `src/styles.css`
@@ -88,14 +94,14 @@ esbuild cannot resolve it — Tailwind v4 exposes `.` only under the `style` exp
 condition, so bundling dies with `Could not resolve "tailwindcss"` and
 `"tw-animate-css"`.
 
-`.ds-sync/compile-css.mjs` compiles it through the repo's own `@tailwindcss/postcss`
+`.design-sync/tools/compile-css.mjs` compiles it through the repo's own `@tailwindcss/postcss`
 into `.design-sync/.cache/app-compiled.css`, which `cfg.cssEntry` points at.
 
 **Do not point `cssEntry` at `dist/assets/app-*.css`.** It works, but the filename is
 content-hashed and moves on every app build, so it is a terrible re-sync anchor. The
 compiled path above is stable and reproducible.
 
-The wrapper at `.design-sync/.cache/ds-tailwind.css` adds `@source "../previews"` so
+The wrapper at `.design-sync/tools/ds-tailwind.css` adds `@source "../previews"` so
 utility classes used _only_ by authored preview `.tsx` files still get generated.
 **If an authored preview renders unstyled, check this first** — a class no app source
 file uses will not exist in the compiled CSS otherwise.
@@ -165,7 +171,7 @@ but not that it takes `variant` or `size`. Two independent causes, both needed f
 1. **No declarations exist.** The repo ships no `.d.ts`. Emit them before every sync:
 
    ```sh
-   npx tsc -p .design-sync/.cache/tsconfig.dts.json    # → dist/types/, 136 files
+   npx tsc -p .design-sync/tools/tsconfig.dts.json    # → dist/types/, 136 files
    ```
 
    `findTypesRoot` probes `dist/types` before falling back, so this is picked up with
@@ -196,7 +202,7 @@ honest there; do not "fix" it.
 - Import from `'safe-unfollow'` — esbuild externalises it to `window.SafeUnfollow`. **Your
   editor will show `Cannot find module 'safe-unfollow'` on every preview file.** Expected
   and harmless; the package has no `exports` map, and the import never resolves at type time.
-- **Run `node .ds-sync/compile-css.mjs` before rebuilding whenever previews use new utility
+- **Run `node .design-sync/tools/compile-css.mjs` before rebuilding whenever previews use new utility
   classes.** The wrapper's `@source "../previews"` scans authored previews, but the compile
   is a separate step. A class no app source uses will not exist otherwise, and the preview
   renders unstyled while looking like a component bug.
@@ -568,11 +574,21 @@ All four new components got authored previews (2-6 min of composition each, not 
 
 ## Re-sync risks
 
-- **The two setup steps above are not committed** (both live under gitignored paths —
-  `node_modules/` and `.design-sync/.cache/`). A fresh clone silently lacks both, and
-  the first failure mode (`ENOENT`, not a tagged error) does not name its own fix.
-- **`app-compiled.css` is generated, not committed.** Re-run `compile-css.mjs` before
-  any re-sync, otherwise `cssEntry` points at a missing or stale file.
+- **The package self-link still can't be committed** — `node_modules/safe-unfollow` is
+  inside `node_modules`, which stays gitignored regardless of anything else. As of
+  2026-08-20 `bash .design-sync/tools/preflight.sh` recreates it (and the rest of the
+  setup, see "Two setup steps" above) in one command; a fresh clone that skips it still
+  hits the same `ENOENT` from `dts.mjs:87`, un-tagged as before.
+- **`app-compiled.css` is generated, not committed.** It lives in `.design-sync/.cache/`,
+  which stays gitignored — derived output only, by design. Re-run
+  `.design-sync/tools/compile-css.mjs` before any re-sync, otherwise `cssEntry` points at
+  a missing or stale file.
+- **Invariant, added 2026-08-20 after a worktree removal destroyed three hand-authored
+  files that lived in a gitignored directory (see the dated entry at the bottom of this
+  file): nothing hand-authored goes under `.ds-sync/`, `ds-bundle/` or
+  `.design-sync/.cache/`.** Those paths hold only what a script can regenerate. Anything
+  that would cost real time to reconstruct belongs in the committed
+  `.design-sync/tools/`, `previews/`, or `overrides/` instead.
 - **Chrome auto-updates.** The `executablePath` route has no version guard; a Chrome
   major that outruns the pinned Playwright will fail at launch, not silently.
 - **Synth-entry mode is sensitive to what lands in `src/components/`.** Any new file
@@ -594,7 +610,7 @@ All four new components got authored previews (2-6 min of composition each, not 
   `ln -sfn ../.ds-sync/node_modules .design-sync/node_modules`.
 - **The app requests font families it never declares** — see the font section above. If the
   app is ever fixed to import the non-variable `@fontsource` packages (or to alias the
-  names), `.ds-sync/compile-css.mjs` will start emitting 0 aliases and **throws on purpose**
+  names), `.design-sync/tools/compile-css.mjs` will start emitting 0 aliases and **throws on purpose**
   rather than silently shipping no fonts. That throw is the signal to delete the alias step,
   not to work around it.
 
@@ -720,9 +736,23 @@ is on `main`. Consequences, in order of how bad they are:
    41 hand-authored files lose their guard at the same moment.
 2. Running it from the worktree finds the config but no converter, no bundle and no anchor.
 
-Both directories were consolidated into `.worktrees/design-sync` on 2026-08-19. **Run every
-future sync from the branch worktree**, and if `ds-bundle/` is missing there, look in the main
-checkout before rebuilding from scratch — it is 47 MB of `.ds-sync/` plus a 13 MB bundle.
+Both directories were consolidated into `.worktrees/design-sync` on 2026-08-19, and this file
+said: **"Run every future sync from the branch worktree."**
+
+⚠️ **That instruction expired 2026-08-20 — do not follow it.** Its premise was that
+`config.json` (the `projectId` pin) existed only in the worktree, because
+`chore/design-sync-main` was unmerged. PR #85 merged that branch into `main` as `eaacd1f`;
+the branch is now 0 commits ahead of `main`, `config.json` and all 97 durable files are on
+`main`, and the branch has since been deleted (fully merged, nothing left to keep a worktree
+for). Running from the **main checkout** now finds the pin, so the orphaned-second-project
+hazard described just above no longer applies there.
+
+**Current rule: design-sync never runs from a worktree.** `.ds-sync/`, `ds-bundle/` and
+`.design-sync/.cache/` live only in the main checkout (`/Users/ignat/code/safe-unfollow`);
+sync work happens on a branch checked out there, like any other change to this repo.
+Deleting the worktree also destroyed three hand-authored files nothing else tracked — see
+the dated entry at the bottom of this file for what was lost, why the worktree wasn't
+really the mechanism, and what changed as a result.
 
 **`.design-sync/overrides` is now in `.prettierignore`.** PR #90 made `format:check` a CI gate
 (`code-quality.yml`), and `dts.mjs` — a deliberate fork kept line-comparable against the
@@ -757,3 +787,47 @@ barrel-only lookup, so the fork stays.
 
 **Chrome 151.0.7922.138 against Playwright 1.62.1** (bundles Chromium 151) — still an exact
 major match, `DS_CHROMIUM_PATH` route works. NOTES recorded 151.0.7922.77 previously.
+
+## 2026-08-20: worktree removal deleted three hand-authored files nothing else tracked
+
+`.worktrees/design-sync` (branch `chore/design-sync-main`, merged into `main` as `eaacd1f`
+via PR #85) was removed as routine cleanup for a fully-merged branch. `git worktree remove`
+gave no warning, because it has none to give: `.ds-sync/`, `ds-bundle/` and
+`.design-sync/.cache/` are all gitignored (see "Re-sync risks" above), so nothing under them
+was ever staged, backed up, or captured in a skill version. Three files there were
+hand-authored and existed nowhere else:
+
+- `.ds-sync/compile-css.mjs` — the Tailwind v4 compiler wrapper ("cssEntry must be COMPILED
+  Tailwind v4" above)
+- `.design-sync/.cache/ds-tailwind.css` — the `@source "../previews"` wrapper stylesheet,
+  same section
+- `.design-sync/.cache/tsconfig.dts.json` — the declaration-emit config ("`.d.ts`
+  extraction" above)
+
+**The worktree was the trigger, not the mechanism.** `git clean -fdx` — which this file
+already names as a hazard elsewhere — would have destroyed the same three files identically,
+worktree or no worktree. The actual cause was hand-authored input living under a path this
+repo's own `.gitignore` already calls disposable. Reconstruction is happening from this
+file's own prose: the sections cited above documented what each file does and why in enough
+detail to rebuild them — the only reason this is a recovery and not a rewrite of the compile
+logic from scratch.
+
+**Operator-approved fix, 2026-08-20:**
+
+- The three files, plus a new `preflight.sh`, now live in the **committed**
+  `.design-sync/tools/` directory. Every path in this file that pointed at
+  `.ds-sync/compile-css.mjs` or the two `.cache/` files has been updated to
+  `.design-sync/tools/`. `.design-sync/.cache/` keeps only what a script regenerates —
+  `app-compiled.css`, `fonts-alias.css` — and `config.json`'s `cssEntry` still points there
+  unchanged.
+- `bash .design-sync/tools/preflight.sh` now runs, as one command, what this file previously
+  only documented in prose: stage the skill's converter, install its deps, recreate the
+  `node_modules` symlink, compile the CSS, emit the `.d.ts` declarations.
+- design-sync no longer runs from a worktree at all (see the correction above); the branch
+  it was for is deleted, fully merged.
+
+**The invariant that should outlast these specific files**: a gitignored directory is not
+storage, it is a place git has been told not to protect. Anything that costs real time to
+reconstruct — as opposed to a re-run of a committed script — does not belong under
+`.ds-sync/`, `ds-bundle/`, or `.design-sync/.cache/`, however convenient that location felt
+mid-session.
