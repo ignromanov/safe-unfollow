@@ -90,6 +90,22 @@ describe('paywall sample-size copy', () => {
       const savedCapped = String(bundleFor(language).export.saved.capped);
       expect(savedCapped, `${language} export.saved.capped`).toContain('{{rows}}');
       expect(savedCapped, `${language} export.saved.capped`).toContain('{{total}}');
+
+      // `gap` is the one line that survives the bar being hidden from assistive
+      // technology, so it is the only statement of the boundary a screen reader
+      // reaches. It states both ends: the row the free file stops at, and the
+      // total the export takes. A locale that spells either out keeps saying
+      // "row 10" after the constant moves, to the one reader who cannot check
+      // it against the picture.
+      const gap = String(bundleFor(language).export.paywall.gap);
+      expect(gap, `${language} paywall.gap`).toContain('{{rows}}');
+      expect(gap, `${language} paywall.gap`).toContain('{{total}}');
+
+      // The legend labels the segment whose width is computed from the same
+      // constant, so a hardcoded count here contradicts the picture beside it
+      // rather than merely going stale.
+      const legend = String(bundleFor(language).export.paywall.legendSample);
+      expect(legend, `${language} paywall.legendSample`).toContain('{{rows}}');
     }
   });
 
@@ -102,7 +118,7 @@ describe('paywall sample-size copy', () => {
   // the sweep too — it lives in this namespace but is rendered by
   // `LicenseDialog`, and it takes no values either.
   it('leaves no placeholder its renderer does not fill', () => {
-    const INTERPOLATED = ['refund'];
+    const INTERPOLATED = ['refund', 'gap', 'legendSample'];
 
     for (const language of SUPPORTED_LANGUAGES) {
       const paywall = bundleFor(language).export.paywall as Record<string, string>;
@@ -117,20 +133,17 @@ describe('paywall sample-size copy', () => {
     }
   });
 
-  // Both labels sit under a numeral the component renders. A locale that writes
-  // its own count into the label ("Alle 1.284") states a number that is true
-  // for one reader and wrong for everybody else, and unlike the headline it is
+  // The label sits under a numeral the component renders, and the two are read
+  // as one sentence — Radix takes the dialog's accessible name from both. A
+  // locale that writes its own count into the label ("1.284 Konten") states a
+  // number that is true for one reader and wrong for everybody else, and it is
   // too short for a reviewer to notice it drifting.
-  it('keeps the hero labels free of counts', () => {
+  it('keeps the list label free of counts', () => {
     for (const language of SUPPORTED_LANGUAGES) {
-      const paywall = bundleFor(language).export.paywall;
+      const label = String(bundleFor(language).export.paywall.listLabel);
 
-      for (const key of ['haveLabel', 'getLabel']) {
-        const label = String(paywall[key]);
-
-        expect(label, `${language} ${key}`).toBeTruthy();
-        expect(/\d/.test(label), `${language} ${key}: "${label}"`).toBe(false);
-      }
+      expect(label, `${language} listLabel`).toBeTruthy();
+      expect(/\d/.test(label), `${language} listLabel: "${label}"`).toBe(false);
     }
   });
 });

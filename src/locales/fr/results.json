@@ -142,13 +142,14 @@
       "full": "{{filename}} enregistré — toutes les {{total}} lignes"
     },
     "paywall": {
-      "headline": "Le reste de votre liste, en un seul fichier.",
-      "haveLabel": "Vous avez",
-      "getLabel": "Votre liste",
-      "subtitle": "Des outils de suivi comparables coûtent 5–10 $ par mois tant que vous voulez surveiller vos abonnés. Ici, c’est 7 $ une seule fois, pour le fichier.",
+      "listLabel": "comptes dans ce filtre",
+      "legendSample": "Déjà à vous — les {{rows}} premières",
+      "legendRest": "Le reste de votre liste",
+      "gap": "Votre fichier gratuit s’arrête à la ligne {{rows}}. L’export prend les {{total}} — un fichier, un paiement, pas d’abonnement.",
       "cta": "Débloquer l’export — 7 $",
-      "terms": "Paiement unique de 7 $ — pas d’abonnement. Valable sur 3 appareils maximum.",
-      "featureLine": "Déblocage instantané après paiement. Fonctionne dans Excel et Google Sheets, vos filtres sont respectés, généré dans votre navigateur.",
+      "dismiss": "Pas maintenant",
+      "subtitle": "Des outils de suivi comparables coûtent 5–10 $ par mois tant que vous voulez surveiller vos abonnés. Ici, c’est 7 $ une seule fois, pour le fichier.",
+      "terms": "Paiement unique de 7 $. Valable sur 3 appareils maximum.",
       "refund": "Ce n’est pas ce que vous attendiez ? Écrivez à {{email}} sous 30 jours et nous vous remboursons.",
       "instantNote": "Déblocage instantané après paiement"
     },

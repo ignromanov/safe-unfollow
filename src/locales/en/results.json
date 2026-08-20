@@ -142,13 +142,14 @@
       "full": "Saved {{filename}} — all {{total}} rows"
     },
     "paywall": {
-      "headline": "The rest of your list, as one file.",
-      "haveLabel": "You have",
-      "getLabel": "Your list",
-      "subtitle": "Similar trackers charge $5–10 a month to keep watching your followers. This is $7, once, for the file itself.",
+      "listLabel": "accounts matched by this filter",
+      "legendSample": "Yours — first {{rows}}",
+      "legendRest": "The rest of your list",
+      "gap": "Your free file stops at row {{rows}}. The export takes all {{total}} — one file, one payment, not a subscription.",
       "cta": "Unlock export — $7",
-      "terms": "One-time $7 — not a subscription. Unlocks on up to 3 devices.",
-      "featureLine": "Instant unlock after checkout. Works in Excel and Google Sheets, your filters kept, built in your browser.",
+      "dismiss": "Not now",
+      "subtitle": "Similar trackers charge $5–10 a month to keep watching your followers. This is $7, once, for the file itself.",
+      "terms": "One-time $7. Unlocks on up to 3 devices.",
       "refund": "Not what you expected? Email {{email}} within 30 days and we'll refund it.",
       "instantNote": "Instant unlock after checkout"
     },

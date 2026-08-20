@@ -142,13 +142,14 @@
       "full": "{{filename}} gespeichert — alle {{total}} Zeilen"
     },
     "paywall": {
-      "headline": "Der Rest deiner Liste, als eine Datei.",
-      "haveLabel": "Du hast",
-      "getLabel": "Deine Liste",
-      "subtitle": "Vergleichbare Tracker kosten 5–10 $ im Monat, solange du deine Follower im Blick behalten willst. Hier sind es 7 $, einmalig, für die Datei selbst.",
+      "listLabel": "Konten in dieser Auswahl",
+      "legendSample": "Schon deins — die ersten {{rows}}",
+      "legendRest": "Der Rest deiner Liste",
+      "gap": "Deine kostenlose Datei endet bei Zeile {{rows}}. Der Export nimmt alle {{total}} — eine Datei, eine Zahlung, kein Abo.",
       "cta": "Export freischalten — 7 $",
-      "terms": "Einmalig 7 $ — kein Abo. Für bis zu 3 Geräte.",
-      "featureLine": "Sofortige Freischaltung nach dem Kauf. Funktioniert in Excel und Google Sheets, deine Filter bleiben erhalten, erstellt in deinem Browser.",
+      "dismiss": "Jetzt nicht",
+      "subtitle": "Vergleichbare Tracker kosten 5–10 $ im Monat, solange du deine Follower im Blick behalten willst. Hier sind es 7 $, einmalig, für die Datei selbst.",
+      "terms": "Einmalig 7 $. Für bis zu 3 Geräte.",
       "refund": "Nicht das, was du erwartet hast? Schreib innerhalb von 30 Tagen an {{email}}, und wir erstatten dir den Betrag.",
       "instantNote": "Sofortige Freischaltung nach dem Kauf"
     },

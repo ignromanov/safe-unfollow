@@ -142,13 +142,14 @@
       "full": "{{filename}} kaydedildi — {{total}} satırın tamamı"
     },
     "paywall": {
-      "headline": "Listenin geri kalanı, tek bir dosyada.",
-      "haveLabel": "Sende",
-      "getLabel": "Listen",
-      "subtitle": "Benzer takip araçları, takipçilerini izlemeye devam etmen için ayda 5–10$ alır. Buradaysa dosyanın kendisi için tek seferlik 7$.",
+      "listLabel": "hesap bu filtreye uyuyor",
+      "legendSample": "Sende — ilk {{rows}}",
+      "legendRest": "Listenin geri kalanı",
+      "gap": "Ücretsiz dosyan {{rows}}. satırda bitiyor. Dışa aktarma {{total}} satırın tamamını alır — tek dosya, tek ödeme, abonelik değil.",
       "cta": "Dışa aktarmayı aç — 7$",
-      "terms": "Tek seferlik 7$ — abonelik değil. En fazla 3 cihazda açılır.",
-      "featureLine": "Ödemeden hemen sonra anında açılır. Excel ve Google Sheets’te çalışır, aktif filtrelerine uyar, tarayıcında oluşturulur.",
+      "dismiss": "Şimdi değil",
+      "subtitle": "Benzer takip araçları, takipçilerini izlemeye devam etmen için ayda 5–10$ alır. Buradaysa dosyanın kendisi için tek seferlik 7$.",
+      "terms": "Tek seferlik 7$. En fazla 3 cihazda açılır.",
       "refund": "Beklediğin gibi değil mi? 30 gün içinde {{email}} adresine yaz, paranı iade edelim.",
       "instantNote": "Ödemeden hemen sonra anında açılır"
     },

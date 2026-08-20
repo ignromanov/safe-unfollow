@@ -192,7 +192,7 @@ describe('ResultsExportControls', () => {
       .filter(Boolean);
 
     expect(classes).toContain('text-primary-foreground');
-    expect(classes.filter((c) => c.startsWith('dark:text-'))).toEqual([]);
+    expect(classes.filter(c => c.startsWith('dark:text-'))).toEqual([]);
   });
 
   // WCAG 2.5.3 Label in Name: the old icon button carried an aria-label of
@@ -209,10 +209,12 @@ describe('ResultsExportControls', () => {
     expect(trigger).toHaveAccessibleName(trigger.textContent?.trim() ?? '');
   });
 
-  // The headline no longer interpolates: the two counts moved into the hero
-  // pair, which renders them from the constant and from props. So this is a
-  // plain string match, and the numbers get their own assertions below.
-  const paywallHeadline = resultsEN.export.paywall.headline;
+  // The paywall has no headline string: its heading is the reader's own total
+  // with this label under it, and Radix takes the dialog's accessible name from
+  // the pair. The label is therefore the probe for "the paywall is open" — it
+  // is the only paywall copy that is a plain string with nothing interpolated
+  // into it, so a match here cannot pass for the wrong reason.
+  const paywallLabel = resultsEN.export.paywall.listLabel;
 
   describe('the free sample', () => {
     it('should download a capped file and only then ask for money', async () => {
@@ -233,7 +235,7 @@ describe('ResultsExportControls', () => {
         defaultProps.totalCount
       );
       expect(vi.mocked(analytics.freeExportDownload)).toHaveBeenCalledWith(true);
-      expect(await screen.findByText(paywallHeadline)).toBeInTheDocument();
+      expect(await screen.findByText(paywallLabel)).toBeInTheDocument();
       expect(vi.mocked(analytics.paywallView)).toHaveBeenCalled();
       expect(vi.mocked(analytics.exportClick)).toHaveBeenCalledWith(false);
     });
@@ -274,15 +276,16 @@ describe('ResultsExportControls', () => {
         defaultProps.totalCount
       );
       expect(vi.mocked(analytics.freeExportDownload)).toHaveBeenCalledWith(false);
-      expect(screen.queryByText(paywallHeadline)).not.toBeInTheDocument();
+      expect(screen.queryByText(paywallLabel)).not.toBeInTheDocument();
       expect(vi.mocked(analytics.paywallView)).not.toHaveBeenCalled();
     });
 
-    // What the paywall leads with is the reader's own two counts, and they are
-    // the one claim on that screen checkable without trusting us: the sample is
-    // in Downloads and its rows can be counted. A headline that says "the rest"
-    // over a hero showing someone else's numbers would be the opposite.
-    it('should lead with the reader own counts, and not repeat them to a screen reader', async () => {
+    // What the paywall leads with is the reader's own total, and it is the one
+    // claim on that screen checkable without trusting us: the sample is in
+    // Downloads and its rows can be counted, the total is the count the results
+    // header has been showing all along. A headline that says "the rest" over a
+    // hero showing someone else's numbers would be the opposite.
+    it('should lead with the reader own total, and name the dialog with it', async () => {
       unlocked(false);
       const user = userEvent.setup();
 
@@ -290,17 +293,50 @@ describe('ResultsExportControls', () => {
       await user.click(screen.getByRole('button', { name: triggerLabel }));
 
       const total = await screen.findByText(String(defaultProps.totalCount));
-      const held = screen.getByText(String(FREE_EXPORT_ROWS));
 
-      expect(total).toBeInTheDocument();
-      expect(held).toBeInTheDocument();
+      // Readable, unlike the pair this replaced. One numeral and its label read
+      // as a sentence — "42 accounts matched by this filter" — so the heading
+      // no longer needs hiding and the screen reader gets the same claim the
+      // sighted reader does, rather than a headline standing in for one.
+      expect(total.closest('[aria-hidden="true"]')).toBeNull();
 
-      // Hidden from the accessibility tree on purpose: the receipt above states
-      // both numbers in a sentence, and read a second time the pair is two bare
-      // numerals and two fragments. Asserted on the shared ancestor, because
-      // that is where the attribute has to sit for both to be covered.
-      expect(total.closest('[aria-hidden="true"]')).toBe(held.closest('[aria-hidden="true"]'));
-      expect(total.closest('[aria-hidden="true"]')).not.toBeNull();
+      // Read off the node Radix actually points `aria-labelledby` at, rather
+      // than trusting that whatever is largest on screen is the name. Both
+      // halves have to be in it: the numeral alone names the dialog "42".
+      const titleId = screen.getByRole('dialog').getAttribute('aria-labelledby');
+      const title = titleId === null ? null : document.getElementById(titleId);
+      expect(title?.textContent).toContain(String(defaultProps.totalCount));
+      expect(title?.textContent).toContain(paywallLabel);
+    });
+
+    // The bar is the argument, but it has no reading: a colour key read aloud
+    // is two words and a shape nobody can see. So it is hidden as one block —
+    // fills and legend together — and the sentence under it has to carry the
+    // same claim on its own. If that sentence ever loses a number, a screen
+    // reader user is left with the receipt and nothing else.
+    it('should keep the proportion bar out of the accessibility tree, and state it in words', async () => {
+      unlocked(false);
+      const user = userEvent.setup();
+
+      render(<ResultsExportControls {...defaultProps} />);
+      await user.click(screen.getByRole('button', { name: triggerLabel }));
+
+      const legend = await screen.findByText(resultsEN.export.paywall.legendRest);
+      expect(legend.closest('[aria-hidden="true"]')).not.toBeNull();
+
+      const gap = resultsEN.export.paywall.gap
+        .replace('{{rows}}', String(FREE_EXPORT_ROWS))
+        .replace('{{total}}', String(defaultProps.totalCount));
+      const spoken = screen.getByText(gap);
+      expect(spoken.closest('[aria-hidden="true"]')).toBeNull();
+
+      // And it is the node Radix describes the dialog with. Asserted rather
+      // than assumed, because the failure is silent in both directions: drop
+      // the description and Radix only warns to the console, which no test
+      // reads; leave it and mark it aria-hidden and the dialog announces an
+      // empty description.
+      const describedBy = screen.getByRole('dialog').getAttribute('aria-describedby');
+      expect(describedBy).toBe(spoken.id);
     });
 
     // `size="lg"` reads as "the big one" and is `h-10` — 40px, under the 44px
@@ -405,7 +441,7 @@ describe('ResultsExportControls', () => {
       expect(await screen.findByRole('alert')).toHaveTextContent(resultsEN.export.dialog.error);
       expect(vi.mocked(analytics.exportError)).toHaveBeenCalledWith('csv');
       expect(vi.mocked(downloadBlob)).not.toHaveBeenCalled();
-      expect(screen.queryByText(paywallHeadline)).not.toBeInTheDocument();
+      expect(screen.queryByText(paywallLabel)).not.toBeInTheDocument();
     });
 
     // Clicking again *after* a finished export is legitimate and must keep
@@ -549,22 +585,38 @@ describe('ResultsExportControls', () => {
 
       render(<ResultsExportControls {...defaultProps} />);
       await user.click(screen.getByRole('button', { name: triggerLabel }));
-      await screen.findByText(paywallHeadline);
+      await screen.findByText(paywallLabel);
 
       return user;
     }
 
-    // The built-in close button (X) is one of the three Radix-driven closes
-    // (X, Escape, overlay click) — all three share the same onOpenChange
-    // callback, so exercising one proves the wiring for all.
-    it('should fire when closed via the built-in close button', async () => {
+    // "Not now" replaced the corner X: leaving is 56.7% of outcomes here, and
+    // an outcome that common gets a named control rather than a glyph. It is
+    // routed through the same `onOpenChange` Radix drives, so this one click
+    // proves the wiring for Escape and the overlay too — and proves the
+    // replacement did not quietly introduce a second dismissal path that the
+    // event series would have to be split across.
+    it('should fire when dismissed by the Not now button', async () => {
       const user = await openPaywall();
 
-      const closeButton = document.querySelector('[data-slot="dialog-close"]');
-      await user.click(closeButton as Element);
+      await user.click(screen.getByRole('button', { name: resultsEN.export.paywall.dismiss }));
 
       expect(vi.mocked(analytics.paywallDismiss)).toHaveBeenCalledTimes(1);
-      expect(screen.queryByText(paywallHeadline)).not.toBeInTheDocument();
+      expect(screen.queryByText(paywallLabel)).not.toBeInTheDocument();
+    });
+
+    // The X is gone, so Escape is now the only dismissal a keyboard user
+    // reaches without tabbing to a control. Asserted separately from the button
+    // above rather than assumed from shared wiring: `showCloseButton={false}`
+    // is one prop away from `onEscapeKeyDown` being suppressed too, and nothing
+    // else in the suite would notice.
+    it('should fire when dismissed with Escape', async () => {
+      const user = await openPaywall();
+
+      await user.keyboard('{Escape}');
+
+      expect(vi.mocked(analytics.paywallDismiss)).toHaveBeenCalledTimes(1);
+      expect(screen.queryByText(paywallLabel)).not.toBeInTheDocument();
     });
 
     // startCheckout only sets window.location.href — it never touches
@@ -579,7 +631,7 @@ describe('ResultsExportControls', () => {
 
       render(<ResultsExportControls {...defaultProps} />);
       await user.click(screen.getByRole('button', { name: triggerLabel }));
-      await screen.findByText(paywallHeadline);
+      await screen.findByText(paywallLabel);
       await user.click(screen.getByRole('button', { name: resultsEN.export.paywall.cta }));
 
       expect(startCheckout).toHaveBeenCalledTimes(1);
@@ -608,7 +660,7 @@ describe('ResultsExportControls', () => {
     render(<ResultsExportControls {...defaultProps} />);
 
     expect(screen.queryByText(resultsEN.export.dialog.title)).not.toBeInTheDocument();
-    expect(screen.queryByText(resultsEN.export.paywall.headline)).not.toBeInTheDocument();
+    expect(screen.queryByText(resultsEN.export.paywall.listLabel)).not.toBeInTheDocument();
   });
 
   // Once the trigger leaves the sticky bar it is rendered on every load but seen
