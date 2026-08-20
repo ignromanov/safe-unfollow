@@ -37,11 +37,26 @@ function isOptedOut(): boolean {
   return typeof localStorage !== 'undefined' && localStorage.getItem('umami-opt-out') === 'true';
 }
 
+/**
+ * True when this document is not the top-level one.
+ *
+ * Umami's heatmap report draws its background by framing the live production
+ * page, and neither this loader nor Umami's own tracker carries a top-window
+ * check. Without one, opening the heatmap files a pageview against the very
+ * page being measured — and the recorder is landing-only, so the frame lands
+ * on exactly the route whose numbers are being read. Comparing the two window
+ * references is safe cross-origin; only reading *through* `window.top` is not.
+ */
+function isFramed(): boolean {
+  return window.top !== window.self;
+}
+
 export function loadUmami(): void {
   if (isOptedOut()) return;
 
   // Only load in browser
-  if (typeof document === 'undefined') return;
+  if (typeof document === 'undefined' || typeof window === 'undefined') return;
+  if (isFramed()) return;
 
   const script = document.createElement('script');
   script.defer = true;
@@ -147,6 +162,7 @@ async function injectRecorder(): Promise<void> {
 export function loadHeatmapRecorder(): void {
   if (typeof document === 'undefined' || typeof window === 'undefined') return;
   if (isOptedOut()) return;
+  if (isFramed()) return;
   if (!isLandingPath(window.location.pathname)) return;
 
   const controller = new AbortController();

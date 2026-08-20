@@ -375,4 +375,44 @@ describe('umami-loader', () => {
       expect(appendChildSpy).toHaveBeenCalledTimes(1);
     });
   });
+
+  /**
+   * Umami's heatmap report renders the live landing page in an iframe
+   * (`Heatmap.tsx` -> `<iframe src={snapshot.url}>`), and neither our loader nor
+   * Umami's own tracker carries a top-window check. Without one, every read of
+   * the heatmap files a pageview against the very page being measured — from
+   * the operator's browser, on the one route that collects heatmap data.
+   */
+  describe('inside a frame', () => {
+    beforeEach(() => {
+      Object.defineProperty(window, 'top', { value: {}, configurable: true });
+    });
+
+    afterEach(() => {
+      delete (window as unknown as Record<string, unknown>).top;
+    });
+
+    it('does not load the tracker, so a heatmap view is not counted as a visit', async () => {
+      const { loadUmami } = await import('@/lib/umami-loader');
+
+      loadUmami();
+
+      expect(appendChildSpy).not.toHaveBeenCalled();
+    });
+
+    it('does not arm the heatmap recorder either', async () => {
+      window.history.pushState({}, '', '/');
+      const fetchMock = vi.fn();
+      global.fetch = fetchMock as unknown as typeof fetch;
+
+      const { loadHeatmapRecorder } = await import('@/lib/umami-loader');
+
+      loadHeatmapRecorder();
+      window.dispatchEvent(new Event('pointerdown'));
+      await Promise.resolve();
+
+      expect(fetchMock).not.toHaveBeenCalled();
+      expect(appendChildSpy).not.toHaveBeenCalled();
+    });
+  });
 });
