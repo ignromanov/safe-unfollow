@@ -84,6 +84,21 @@ describe('GuideEntry', () => {
     expect(shortcut).toHaveAttribute('href', '/upload');
   });
 
+  // A styling assertion on purpose, and the only kind jsdom can make: it
+  // performs no layout, so "reads as a button" can only be checked as the
+  // classes that make it one. The invariant is the hierarchy, not the exact
+  // utilities — a bordered control at secondary weight, never the muted body
+  // register it shipped as, and never a second `bg-primary`.
+  it("gives the ZIP-holder's path secondary-button weight, not a muted line", () => {
+    render(<GuideEntry />);
+
+    const shortcut = screen.getByRole('link', { name: wizardEN.buttons.alreadyHaveFile });
+    expect(shortcut.className).toContain('border');
+    expect(shortcut.className).toContain('font-bold');
+    expect(shortcut.className).not.toContain('text-zinc-500');
+    expect(shortcut.className).not.toContain('bg-primary');
+  });
+
   it('renders the recipe card and the closed step accordion as reference material', () => {
     render(<GuideEntry />);
 

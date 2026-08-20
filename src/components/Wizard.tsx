@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowLeft, ArrowRight, X, AlertTriangle, Calendar } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ExternalLink, X, AlertTriangle, Calendar } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import FocusTrap from 'focus-trap-react';
 
@@ -258,7 +258,10 @@ export function Wizard({ initialStep = 1 }: WizardProps) {
             against 20 in English, which is plausibly three lines at 360px and
             would put the height back in play for exactly those locales. jsdom
             performs no layout, so no test here can settle it — it is on the
-            operator's device-check list in progress.md as fr/pt at 360px. */}
+            operator's device-check list in progress.md as fr/pt at 360px.
+            Dropping the back arrow in the swapped state (below) returns ~26px
+            to that row — the icon plus its gap — which helps those locales but
+            does not settle the question either. */}
         <nav
           className="shrink-0 border-t border-border bg-card px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
           aria-label={t('footer.navigation')}
@@ -274,7 +277,11 @@ export function Wizard({ initialStep = 1 }: WizardProps) {
               }
               className="cursor-pointer flex items-center gap-2 px-4 py-3 rounded-xl font-bold text-sm transition-all hover:bg-muted text-muted-foreground"
             >
-              <ArrowLeft size={18} />
+              {/* The arrow means "back one step". In the swapped state this
+                  same control goes to /sample — a sideways move, not a
+                  retreat — so the glyph would be telling the reader the
+                  opposite of where the href leads. */}
+              {!showBarPrimary && <ArrowLeft size={18} aria-hidden="true" />}
               <span>
                 {showBarPrimary
                   ? t('buttons.trySample')
@@ -286,14 +293,25 @@ export function Wizard({ initialStep = 1 }: WizardProps) {
             {showBarPrimary ? (
               // Same action as the in-flow CTA (GuideEntry.tsx) — external,
               // opens in a new tab — not an in-app PrefixedLink.
+              //
+              // It reports the same event too, and for the same reason this
+              // slot exists at all: the in-flow CTA scrolled away, so without
+              // it the click count for the one action this screen is for would
+              // depend on how far the reader had scrolled. The two controls are
+              // never on screen together, so no click is counted twice.
               <a
                 href={ACCOUNTS_CENTER_URL}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => analytics.linkClick('meta_accounts')}
                 className="cursor-pointer flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-xl font-bold text-sm shadow-lg hover:scale-105 active:scale-95 transition-all"
               >
                 {t('entry.cta')}
-                <ArrowRight size={18} />
+                {/* ExternalLink, not ArrowRight: this is the one control in
+                    the bar that leaves the site and opens a new tab, and it
+                    carries the same glyph as the in-flow CTA it stands in
+                    for. ArrowRight in this slot reads as "next step". */}
+                <ExternalLink size={18} aria-hidden="true" />
               </a>
             ) : (
               <PrefixedLink

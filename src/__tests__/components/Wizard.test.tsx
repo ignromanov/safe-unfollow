@@ -42,6 +42,7 @@ vi.mock('@/lib/analytics', () => ({
   analytics: {
     guideEntryView: vi.fn(),
     wizardStepView: vi.fn(),
+    linkClick: vi.fn(),
   },
 }));
 
@@ -408,6 +409,36 @@ describe('Wizard', () => {
 
       const trySample = within(bar).getByRole('link', { name: wizardEN.buttons.trySample });
       expect(trySample).toHaveAttribute('href', '/sample');
+    });
+
+    it('reports the CTA click from the bar under the same name as the in-flow control', () => {
+      renderWizardAtStep(1);
+      const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
+
+      scrollContent();
+      setCtaIntersecting(false);
+      fireEvent.click(within(bar).getByRole('link', { name: wizardEN.entry.cta }));
+
+      // Without this the count for the screen's one action would depend on
+      // how far the reader had scrolled when they took it.
+      expect(analytics.linkClick).toHaveBeenCalledExactlyOnceWith('meta_accounts');
+    });
+
+    it('drops the back arrow from the secondary slot once that slot stops meaning "back"', () => {
+      renderWizardAtStep(1);
+      const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
+
+      expect(
+        within(bar).getByRole('link', { name: wizardEN.buttons.cancel }).querySelector('svg')
+      ).not.toBeNull();
+
+      scrollContent();
+      setCtaIntersecting(false);
+
+      // The swapped slot goes to /sample — a sideways move, not a retreat.
+      expect(
+        within(bar).getByRole('link', { name: wizardEN.buttons.trySample }).querySelector('svg')
+      ).toBeNull();
     });
 
     it('swaps back to the normal step nav when the in-flow CTA re-enters view', () => {

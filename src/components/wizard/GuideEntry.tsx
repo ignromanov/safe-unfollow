@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Upload } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { analytics } from '@/lib/analytics';
@@ -12,9 +12,10 @@ import { ACCOUNTS_CENTER_URL } from '@/config/wizard-steps';
  * Replaces wizard step 1. 63.4% of readers left at the old step-1 card, which
  * competed a title, a description, an external-link button and a shortcut
  * link for attention. This screen has one action: open Instagram's Accounts
- * Center. Everything below it — the recipe card, the "already have my file"
- * shortcut, the step accordion — is reference material, not a second set of
- * instructions to complete before clicking.
+ * Center. Everything below it is reference material — the recipe card and the
+ * step accordion — with one exception: "I already have my ZIP file" is a
+ * second *path*, not a second instruction, and carries secondary-button
+ * weight to say so.
  *
  * "Try with sample" is deliberately absent — it lives in the bottom bar's
  * secondary slot (a separate task), not on this screen.
@@ -73,10 +74,28 @@ export function GuideEntry({ ctaRef }: { ctaRef?: (node: HTMLAnchorElement | nul
 
         <RecipeCard />
 
+        {/* The second path, not a footnote — the same promotion #96 made in
+            the hero, and this screen is where the argument is strongest: a
+            reader holding the ZIP arrived here by clicking "get the guide",
+            so the guide is the one thing they do not need. 9.4% of that
+            population ever found the hero's 12px link; the wizard's copy of
+            it was the same grey 14px line. Secondary weight, never a second
+            primary: bordered, `font-bold` against the CTA's `font-black`, no
+            shadow, and it sits below the recipe card rather than beside the
+            CTA, so the screen still has exactly one action in its first
+            viewport.
+
+            `Upload` and `buttons.alreadyHaveFile` are the hero's own icon and
+            string — `have-file-parity.test.ts` holds the two copies of that
+            sentence identical across all ten locales. No `cta` attribute:
+            that vocabulary is the four hero slugs `HeroCta` allows, and
+            attributing a wizard click to the hero would corrupt the series
+            #101 exists to keep honest. */}
         <PrefixedLink
           to="/upload"
-          className="cursor-pointer inline-flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400 hover:text-primary dark:hover:text-primary transition-colors"
+          className="cursor-pointer inline-flex min-h-[48px] w-full sm:w-auto items-center justify-center gap-2 whitespace-normal rounded-2xl border border-border bg-card px-8 py-3 text-center text-sm md:text-base font-bold hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all"
         >
+          <Upload size={20} aria-hidden="true" />
           {t('buttons.alreadyHaveFile')}
         </PrefixedLink>
 
