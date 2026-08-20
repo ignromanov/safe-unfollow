@@ -174,6 +174,30 @@ export function PaywallModal({
             read aloud is two words and a shape nobody can see, and the two
             counts are already in the receipt above.
 
+            The 2px divider is `primary-foreground`, and the choice is measured
+            rather than stylistic. The two fills are 1.65:1 apart in light and
+            1.34:1 in dark, so the divider is not a nicety between them — it is
+            the entire boundary. As the sheet's own background it read 8.24:1
+            against the emerald in dark and 2.39:1 in light: the boundary
+            survived in one theme and dissolved in the other.
+
+            The fix is not "darker". It is that the divider must be near-black
+            in BOTH themes, because the fills are mid-lightness in both and do
+            not flip when the theme does. Any near-white divider fails against
+            the emerald (2.46:1) whichever theme it is in, and `foreground`
+            itself is wrong for exactly that reason — it is near-black in light
+            and near-white in dark, so it merely moves the failure from one
+            theme to the other (2.33:1 against emerald in dark).
+
+            `--primary-foreground` is `oklch(0.12 0.01 264)` in both themes, and
+            it is the one token whose stated job is to be legible on top of
+            `--primary`, which is what half this bar is painted with. Against
+            emerald 8.24:1, against primary 5.00:1 light and 6.15:1 dark.
+
+            The two fill colours are untouched. This fixes where the halves
+            meet, which is what the bar is for, and does not repaint the
+            reference.
+
             The floor is `max(12px, …)` and not a bare percentage. At 8,930 rows
             the true share is 0.1% — under a pixel, so the segment would vanish
             and the bar would say the sample is nothing. The floor distorts in
@@ -188,7 +212,7 @@ export function PaywallModal({
               className="shrink-0 bg-emerald-500"
               style={{ width: `max(12px, ${samplePercent}%)` }}
             />
-            <div className="w-0.5 shrink-0 bg-background" />
+            <div className="w-0.5 shrink-0 bg-primary-foreground" />
             <div className="grow bg-primary" />
           </div>
           {/* The swatches are outlined, not bare. Emerald on the light surface
