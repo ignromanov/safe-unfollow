@@ -197,9 +197,14 @@ describe.runIf(built)('built font assets resolve', () => {
     const ranges = shippedRanges(pkg!);
     const pages = readdirSync(dist, { recursive: true } as never) as unknown as string[];
     const html = pages.filter(f => typeof f === 'string' && f.endsWith('.html'));
-    expect(html.length, 'no prerendered pages to scan').toBeGreaterThan(0);
+    // A floor, not a count: 162 pages today. Guards against a readdir change quietly
+    // reducing this to the handful at the top level and passing on a partial scan.
+    expect(html.length, 'too few prerendered pages — is the scan still recursive?').toBeGreaterThan(
+      100
+    );
 
     const orphans = new Map<number, string>();
+    const verdict = new Map<number, boolean>();
     for (const page of html) {
       const text = readFileSync(join(dist, page), 'utf8')
         .replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/g, ' ')
@@ -207,10 +212,15 @@ describe.runIf(built)('built font assets resolve', () => {
         .replace(/&[a-z]+;|&#\d+;/g, ' ');
       for (const ch of text.replace(/\s/g, '')) {
         const cp = ch.codePointAt(0)!;
-        if (orphans.has(cp)) continue;
-        if (inRanges(cp, ranges)) continue;
-        if (DELEGATED.some(d => cp >= d.from && cp <= d.to)) continue;
-        orphans.set(cp, page);
+        // Decide each codepoint once. Without this the scan is 162 pages x every
+        // character x a linear walk of 67 ranges, which passes locally and times out
+        // on a CI runner — the shape of the check is right, the repetition was not.
+        let ok = verdict.get(cp);
+        if (ok === undefined) {
+          ok = inRanges(cp, ranges) || DELEGATED.some(d => cp >= d.from && cp <= d.to);
+          verdict.set(cp, ok);
+        }
+        if (!ok && !orphans.has(cp)) orphans.set(cp, page);
       }
     }
     expect(
