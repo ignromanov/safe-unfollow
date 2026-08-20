@@ -114,14 +114,15 @@ export function PaywallModal({
           already handled globally in `styles.css`. */}
       <DialogContent
         showCloseButton={false}
-        className="max-sm:top-auto max-sm:bottom-0 max-sm:max-w-none max-sm:translate-y-0 max-sm:rounded-t-3xl max-sm:rounded-b-none max-sm:border-b-0 max-sm:pb-[calc(1.5rem+env(safe-area-inset-bottom))] max-sm:duration-300 max-sm:ease-out max-sm:data-[state=open]:slide-in-from-bottom max-sm:data-[state=closed]:slide-out-to-bottom max-sm:data-[state=open]:zoom-in-100 max-sm:data-[state=closed]:zoom-out-100 max-sm:data-[state=open]:fade-in-100 max-sm:data-[state=closed]:fade-out-100"
+        overlayClassName="max-sm:duration-300 max-sm:ease-out"
+        className="max-sm:top-auto max-sm:bottom-0 max-sm:max-w-none max-sm:translate-y-0 max-sm:rounded-t-3xl max-sm:rounded-b-none max-sm:border-b-0 max-sm:max-h-[90dvh] max-sm:overflow-y-auto max-sm:px-5 max-sm:pb-[calc(1.75rem+env(safe-area-inset-bottom))] max-sm:shadow-[0_-8px_30px_oklch(0_0_0/0.12)] max-sm:duration-300 max-sm:ease-out max-sm:data-[state=open]:slide-in-from-bottom max-sm:data-[state=closed]:slide-out-to-bottom max-sm:data-[state=open]:zoom-in-100 max-sm:data-[state=closed]:zoom-out-100 max-sm:data-[state=open]:fade-in-100 max-sm:data-[state=closed]:fade-out-100"
       >
         {/* The dialog arrives together with a file the reader never asked for,
             and on iOS Safari a blob download can be silent or blocked outright.
             Naming the file is what turns everything below from an assertion
             about something unseen into a claim the reader can go and check.
             Muted and small on purpose: a receipt, not a second headline. */}
-        <p className="flex items-start gap-2 text-xs text-muted-foreground">
+        <p className="flex items-start gap-2 text-xs leading-normal text-muted-foreground">
           <Check className="h-3.5 w-3.5 shrink-0 text-emerald-500 mt-0.5" />
           <span className="min-w-0 break-words">
             {t('export.saved.capped', {
@@ -132,7 +133,7 @@ export function PaywallModal({
           </span>
         </p>
 
-        <DialogHeader className="gap-1 text-start sm:text-start">
+        <DialogHeader className="text-start sm:text-start">
           {/* The heading is the number and its label together, not a sentence
               above them. Radix names the dialog from this node, so a screen
               reader gets "8,930 accounts matched by this filter" — which is the
@@ -143,7 +144,7 @@ export function PaywallModal({
               number in the product, and it carries the -0.04em / 1.15 pairing
               plus the RTL letter-spacing reset that a hand-rolled
               `tracking-tighter` would miss in Arabic. */}
-          <DialogTitle className="flex flex-col gap-1">
+          <DialogTitle className="flex flex-col gap-0.5">
             <span className="font-display text-5xl leading-none font-extrabold text-primary">
               {totalLabel}
             </span>
@@ -209,30 +210,45 @@ export function PaywallModal({
             document order. Not muted — the default `text-muted-foreground` is
             for descriptions that repeat the title, and this one carries the
             offer. */}
-        <DialogDescription className="text-sm text-foreground">
+        <DialogDescription className="text-sm leading-normal text-foreground">
           {t('export.paywall.gap', { rows: FREE_EXPORT_ROWS, total: totalLabel })}
         </DialogDescription>
 
-        {/* `sm:space-x-0` is not cosmetic: the footer's own class list carries
-            `sm:space-x-2` for the horizontal row it normally is, and that rule
-            puts an inline margin on every child but the first. Left in place, the
-            two buttons and the terms block sit 8px off the receipt above them
-            from 640px up — a misalignment nothing in jsdom can see. */}
-        <DialogFooter className="flex-col items-stretch gap-2 sm:flex-col sm:items-stretch sm:space-x-0">
-          {/* Three classes the variant does not give, each from a written rule
-              rather than taste. `min-h-11`: `size="lg"` is `h-10`, i.e. 40px,
-              under the 44px touch target the mobile contract sets — and 85% of
-              sessions are mobile, on the highest-value button in the product.
-              `rounded-2xl`: the app lives at the large end of the radius scale;
-              the variant's `rounded-md` is the shadcn default nothing else here
-              uses. The coloured `shadow-2xl` is the one heavy shadow in the
-              product and the guide reserves it for primary CTAs — Hero and
-              FooterCTA are its only other wearers, which is the company this
-              button belongs in. */}
+        {/* Two buttons and nothing else. The terms block used to live in here
+            too, and being a third child put it 8px from the dismiss button
+            instead of the 16px the reference draws — the footer's own `gap-2`
+            rather than the dialog grid's `gap-4`. That seam is where the screen
+            stops transacting and starts disclosing, so halving it is not a
+            rounding error. It is now a sibling below, which also restores the
+            column to six children and five gaps.
+
+            `gap-1` because the two buttons are one stacked control, not two
+            related ones. `sm:space-x-0` is not cosmetic either: the footer's own
+            class list carries `sm:space-x-2` for the horizontal row it normally
+            is, and that rule puts an inline margin on every child but the first
+            — from 640px up the buttons would sit 8px off the receipt above
+            them, a misalignment nothing in jsdom can see. */}
+        <DialogFooter className="flex-col items-stretch gap-1 sm:flex-col sm:items-stretch sm:space-x-0">
+          {/* Four classes the variant does not give, each from a written rule
+              rather than taste. `min-h-12` is 48px: `size="lg"` is `h-10`, i.e.
+              40px, under the 44px touch target the mobile contract sets — and
+              85% of sessions are mobile, on the highest-value button in the
+              product. 48 rather than the bare 44 because that is what the
+              reference draws, and the extra 4px is margin over the floor rather
+              than against it. `px-5` likewise from the reference, and it buys
+              the only wrap safety this button has: the cva base sets
+              `whitespace-nowrap`, so the longest locale (`es`, 28 characters)
+              clears its box by about 50px and there is no second line to fall
+              back on. `rounded-2xl`: the app lives at the large end of the
+              radius scale; the variant's `rounded-md` is the shadcn default
+              nothing else here uses. The coloured `shadow-2xl` is the one heavy
+              shadow in the product and the guide reserves it for primary CTAs —
+              Hero and FooterCTA are its only other wearers, which is the company
+              this button belongs in. */}
           <Button
             onClick={onCheckout}
             size="lg"
-            className="min-h-11 rounded-2xl font-semibold shadow-2xl shadow-primary/30"
+            className="min-h-12 rounded-2xl px-5 font-semibold shadow-2xl shadow-primary/30"
           >
             {t('export.paywall.cta')}
           </Button>
@@ -246,13 +262,17 @@ export function PaywallModal({
             variant="ghost"
             size="lg"
             onClick={() => onOpenChange(false)}
-            className="min-h-11 rounded-2xl font-semibold text-muted-foreground"
+            className="min-h-12 rounded-2xl font-semibold text-muted-foreground"
           >
             {t('export.paywall.dismiss')}
           </Button>
+        </DialogFooter>
 
-          <div className="flex flex-col gap-1.5 border-t pt-3.5">
-            {/* The only place the buyer is given something to compare $7
+        {/* A sibling of the button group, not a child of it — see the note
+            above. The dialog's own `gap-4` is what puts 16px above this border,
+            and that gap is the whole point of the rule. */}
+        <div className="flex flex-col gap-1.5 border-t pt-3.5">
+          {/* The only place the buyer is given something to compare $7
                 against. Category pricing measured on the App Store 2026-08-08:
                 modal Pro tiers $4.99/mo, advanced tiers $9.99/mo. A dated
                 observation, not a standing fact. It compares the pricing *model*
@@ -262,46 +282,47 @@ export function PaywallModal({
                 Quiet, and below the CTA rather than under the headline, because
                 the argument this screen makes is the proportion above. The
                 anchor is the answer to a question the reader may not ask. */}
-            <p className="text-center text-xs text-muted-foreground">
-              {t('export.paywall.subtitle')}
-            </p>
+          <p className="text-center text-xs leading-normal text-muted-foreground">
+            {t('export.paywall.subtitle')}
+          </p>
 
-            {/* The device cap. Stated because it is real and used to be stated
+          {/* The device cap. Stated because it is real and used to be stated
                 nowhere: a buyer met it for the first time as a `limit_reached`
                 error on their fourth device, which is a dispute at roughly five
                 sales each. */}
-            <p className="text-center text-xs text-muted-foreground">{t('export.paywall.terms')}</p>
+          <p className="text-center text-xs leading-normal text-muted-foreground">
+            {t('export.paywall.terms')}
+          </p>
 
-            {/* Risk reversal belongs next to the action it de-risks, not among
+          {/* Risk reversal belongs next to the action it de-risks, not among
                 the feature lines. `dir="ltr"` on the address keeps its
                 dot-separated run intact inside the Arabic sentence around it. */}
-            <p className="text-center text-xs text-muted-foreground">
-              {refundBefore}
-              <a
-                dir="ltr"
-                href={`mailto:${REFUND_EMAIL}`}
-                className="text-primary underline underline-offset-2 hover:no-underline"
-              >
-                {REFUND_EMAIL}
-              </a>
-              {refundAfter}
-            </p>
+          <p className="text-center text-xs leading-normal text-muted-foreground">
+            {refundBefore}
+            <a
+              dir="ltr"
+              href={`mailto:${REFUND_EMAIL}`}
+              className="text-primary underline underline-offset-2 hover:no-underline"
+            >
+              {REFUND_EMAIL}
+            </a>
+            {refundAfter}
+          </p>
 
-            {/* A recovery path, not a second offer. As a full-width ghost button
+          {/* A recovery path, not a second offer. As a full-width ghost button
                 it read as a rival primary action; as a quiet centred link it
                 reads as what it is. Still a real button, so it stays
                 keyboard-reachable inside the focus trap. `py-2` keeps the hit
                 area past WCAG 2.5.8 AA without giving a third-order link more
                 room than the action it sits under. */}
-            <button
-              type="button"
-              onClick={onManualEntry}
-              className="mx-auto cursor-pointer px-1 py-2 text-xs text-muted-foreground underline underline-offset-2 transition-colors hover:text-primary focus-visible:text-primary"
-            >
-              {t('export.license.havePurchase')}
-            </button>
-          </div>
-        </DialogFooter>
+          <button
+            type="button"
+            onClick={onManualEntry}
+            className="mx-auto cursor-pointer px-1 py-2 text-xs text-muted-foreground underline underline-offset-2 transition-colors hover:text-primary focus-visible:text-primary"
+          >
+            {t('export.license.havePurchase')}
+          </button>
+        </div>
       </DialogContent>
     </Dialog>
   );

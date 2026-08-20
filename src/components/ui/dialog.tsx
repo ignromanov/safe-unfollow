@@ -41,13 +41,27 @@ const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
     showCloseButton?: boolean;
+    /**
+     * Classes for the scrim behind this dialog.
+     *
+     * Exists because the overlay is rendered here and nowhere else, so a
+     * consumer that changes how its own content animates has no way to keep the
+     * scrim in step — Radix gives Overlay and Content separate `Presence`
+     * instances and synchronises nothing. The overlay carries no duration of
+     * its own, so it falls back to tw-animate's 150ms; a dialog that animates
+     * for longer than that finishes over a scrim that has already gone.
+     *
+     * Opt-in and additive: passing nothing leaves every existing dialog exactly
+     * as it was.
+     */
+    overlayClassName?: string;
   }
->(({ className, children, showCloseButton = true, ...props }, ref) => {
+>(({ className, overlayClassName, children, showCloseButton = true, ...props }, ref) => {
   const { t } = useTranslation('common');
 
   return (
     <DialogPortal data-slot="dialog-portal">
-      <DialogOverlay />
+      <DialogOverlay className={overlayClassName} />
       <DialogPrimitive.Content
         ref={ref}
         data-slot="dialog-content"

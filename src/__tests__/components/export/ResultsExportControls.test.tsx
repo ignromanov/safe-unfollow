@@ -371,10 +371,11 @@ describe('ResultsExportControls', () => {
     // `size="lg"` reads as "the big one" and is `h-10` — 40px, under the 44px
     // touch target this product holds itself to, on its highest-value button
     // with 85% of sessions on a phone. The height therefore cannot come from
-    // the size alone. jsdom measures nothing, so the class is the only proxy
-    // available; it is pinned by name for that reason and not as a style
-    // preference.
-    it('should give the paywall CTA a 44px touch target, not the size default', async () => {
+    // the size alone. `min-h-12` is 48px: the reference draws 48, and taking it
+    // puts the extra 4px on the safe side of the floor rather than sitting on
+    // it. jsdom measures nothing, so the class is the only proxy available; it
+    // is pinned by name for that reason and not as a style preference.
+    it('should give the paywall CTA a 48px touch target, not the size default', async () => {
       unlocked(false);
       const user = userEvent.setup();
 
@@ -382,7 +383,33 @@ describe('ResultsExportControls', () => {
       await user.click(screen.getByRole('button', { name: triggerLabel }));
 
       const cta = await screen.findByRole('button', { name: resultsEN.export.paywall.cta });
-      expect(cta.className).toMatch(/\bmin-h-11\b/);
+      expect(cta.className).toMatch(/\bmin-h-12\b/);
+    });
+
+    // The seam where the screen stops transacting and starts disclosing. It is
+    // drawn at 16px and was rendering at 8px, because the terms block was a
+    // third child of the footer and inherited the footer's own gap instead of
+    // the dialog grid's. Asserted structurally rather than by class: the number
+    // 16 lives in `DialogContent`'s `gap-4` and would move with it, but the
+    // block being a SIBLING of the buttons is the invariant that makes it the
+    // grid's gap at all. Nest it again and this fails; restyle the grid and it
+    // correctly does not.
+    it('should hang the terms block off the dialog grid, not off the button group', async () => {
+      unlocked(false);
+      const user = userEvent.setup();
+
+      render(<ResultsExportControls {...defaultProps} />);
+      await user.click(screen.getByRole('button', { name: triggerLabel }));
+
+      const dismiss = await screen.findByRole('button', {
+        name: resultsEN.export.paywall.dismiss,
+      });
+      const footer = dismiss.closest('[data-slot="dialog-footer"]');
+      const terms = screen.getByText(resultsEN.export.paywall.terms);
+
+      expect(footer).not.toBeNull();
+      expect(footer?.contains(terms)).toBe(false);
+      expect(terms.closest('.border-t')?.parentElement).toBe(footer?.parentElement);
     });
 
     // The paywall offers the rest of a file the reader may never have seen land
