@@ -1,6 +1,12 @@
 {
   "header": {
-    "stepOf": "Passo {{current}} de {{total}}"
+    "ariaLabel": "Assistente de exportação de dados do Instagram",
+    "stepOf": "Passo {{current}} de {{total}}",
+    "stepNavigation": "Navegação de passos",
+    "stepLabel": "Passo {{step}}"
+  },
+  "footer": {
+    "navigation": "Ações do assistente"
   },
   "calendar": {
     "addReminder": "Adicionar lembrete ao calendário",
@@ -11,20 +17,41 @@
     "back": "Voltar",
     "next": "Próximo Passo",
     "done": "Pronto, vamos lá!",
-    "openInstagram": "Abrir página de exportação",
     "close": "Fechar guia",
+    "cancel": "Cancelar",
+    "trySample": "Experimente com dados de exemplo",
     "uploadFile": "Enviar meu arquivo",
     "alreadyHaveFile": "Já tenho meu arquivo ZIP"
   },
   "format": {
     "warning": "PASSO CRÍTICO"
   },
-  "steps": {
-    "1": {
-      "title": "Abra a página de exportação do Instagram",
-      "description": "Clique no botão abaixo para abrir a Central de Contas da Meta. Depois clique em \"Criar exportação\".",
-      "alt": "Passo 1: Abra a página de exportação e clique em Criar exportação"
+  "entry": {
+    "title": "Primeiro, peça seu arquivo ao Instagram.",
+    "timeCost": {
+      "ours": "Pedir leva cerca de 2 minutos.",
+      "theirs": "Depois o Instagram envia o arquivo por email — a espera é dele, não nossa."
     },
+    "cta": "Abrir Central de Contas",
+    "trust": {
+      "noLogin": "Sem login. Sem senha. Nada para conectar.",
+      "local": "Sua exportação é lida neste navegador e nunca enviada."
+    },
+    "recipe": {
+      "title": "O que escolher na caixa de diálogo do Instagram",
+      "rows": {
+        "destination": "Exportar para o dispositivo",
+        "range": "Todo o período",
+        "format": "JSON — não HTML",
+        "quality": "Qualquer qualidade de mídia",
+        "content": "Seguidores e seguindo"
+      }
+    },
+    "accordion": {
+      "trigger": "Guia passo a passo — {{count}} passos"
+    }
+  },
+  "steps": {
     "2": {
       "title": "Escolha seu perfil do Instagram",
       "description": "Selecione sua conta do Instagram na lista de perfis conectados.",

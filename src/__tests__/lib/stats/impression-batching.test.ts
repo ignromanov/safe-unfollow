@@ -18,6 +18,7 @@ import { analytics } from '@/lib/stats/events';
 describe('promo impression batching', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    sessionStorage.clear();
   });
 
   it('queues the ad viewable impression instead of sending it immediately', () => {
@@ -140,7 +141,10 @@ describe('promo impression batching', () => {
 
       analytics.wizardStepView(3);
 
-      expect(enqueueEvent).toHaveBeenCalledWith('wizard_step_view', { step_id: 3 });
+      expect(enqueueEvent).toHaveBeenCalledWith('wizard_step_view', {
+        step_id: 3,
+        first_view_in_tab: true,
+      });
       expect(trackEvent).not.toHaveBeenCalled();
       random.mockRestore();
     });
@@ -193,15 +197,6 @@ describe('promo impression batching', () => {
       expect(trackNavigating).not.toHaveBeenCalled();
     });
 
-    it('drops the wizard step title, as the immediate path did — it is page copy, not a dimension', () => {
-      const random = vi.spyOn(Math, 'random').mockReturnValue(0);
-
-      analytics.wizardStepView(2, 'Choose Your Instagram Profile');
-
-      expect(enqueueEvent).toHaveBeenCalledWith('wizard_step_view', { step_id: 2 });
-      random.mockRestore();
-    });
-
     it('keeps the sampling gate in front of the queue, not behind it', () => {
       const random = vi.spyOn(Math, 'random').mockReturnValue(0.99);
 
@@ -210,6 +205,117 @@ describe('promo impression batching', () => {
       analytics.wizardStepView(3);
 
       expect(enqueueEvent).not.toHaveBeenCalled();
+      random.mockRestore();
+    });
+  });
+
+  // guide_entry_view and wizard_step_view's first_view_in_tab — a ratio between two
+  // events needs a matching definition of "first" on both ends, or 1→2→1→2
+  // stops being a funnel. See analytics.guideEntryView for the full rationale.
+  describe('guide entry / first instruction pair', () => {
+    it('marks the first view of the entry screen and only the first', () => {
+      const random = vi.spyOn(Math, 'random').mockReturnValue(0);
+
+      analytics.guideEntryView();
+      analytics.guideEntryView();
+
+      expect(enqueueEvent).toHaveBeenNthCalledWith(1, 'guide_entry_view', {
+        first_view_in_tab: true,
+      });
+      expect(enqueueEvent).toHaveBeenNthCalledWith(2, 'guide_entry_view', {
+        first_view_in_tab: false,
+      });
+      random.mockRestore();
+    });
+
+    it('marks first views per step, so 1→2→1→2 is not two funnels', () => {
+      const random = vi.spyOn(Math, 'random').mockReturnValue(0);
+
+      analytics.wizardStepView(2);
+      analytics.wizardStepView(3);
+      analytics.wizardStepView(2);
+
+      expect(enqueueEvent).toHaveBeenNthCalledWith(1, 'wizard_step_view', {
+        step_id: 2,
+        first_view_in_tab: true,
+      });
+      expect(enqueueEvent).toHaveBeenNthCalledWith(3, 'wizard_step_view', {
+        step_id: 2,
+        first_view_in_tab: false,
+      });
+      random.mockRestore();
+    });
+
+    it('keeps the 5% gate on both, so the ratio between them stays unbiased', () => {
+      const random = vi.spyOn(Math, 'random').mockReturnValue(0.06);
+
+      analytics.guideEntryView();
+      analytics.wizardStepView(2);
+
+      expect(enqueueEvent).not.toHaveBeenCalled();
+      random.mockRestore();
+    });
+
+    // Every test above pins Math.random to a single value, which makes
+    // "compute first_view_in_tab before the gate" and "compute it after" produce
+    // identical output — both orders are indistinguishable when every call
+    // is sampled the same way. This is the case that actually tells them
+    // apart: the first call is dropped by the gate but must still consume
+    // the "seen before" marker, so the later, sampled call reports
+    // first_view_in_tab: false — not true, which is what gate-before-marker would
+    // report instead.
+    it('marks a later sampled view as not-first when an earlier, unsampled view already happened', () => {
+      const random = vi.spyOn(Math, 'random');
+
+      random.mockReturnValueOnce(0.9); // dropped by the gate — never enqueued
+      analytics.guideEntryView();
+      expect(enqueueEvent).not.toHaveBeenCalled();
+
+      random.mockReturnValueOnce(0); // inside the gate
+      analytics.guideEntryView();
+
+      expect(enqueueEvent).toHaveBeenCalledExactlyOnceWith('guide_entry_view', {
+        first_view_in_tab: false,
+      });
+      random.mockRestore();
+    });
+
+    // Safari's "Block all cookies" and Firefox's "Block cookies and site
+    // data" make the getter itself throw, and both callers run inside a mount
+    // effect — an unguarded throw would take the screen down to report a view.
+    it('reports a view rather than throwing when sessionStorage is blocked', () => {
+      const random = vi.spyOn(Math, 'random').mockReturnValue(0);
+      vi.stubGlobal('sessionStorage', {
+        getItem: () => {
+          throw new DOMException('The operation is insecure.', 'SecurityError');
+        },
+        setItem: () => {},
+        clear: () => {},
+      });
+
+      expect(() => analytics.guideEntryView()).not.toThrow();
+
+      expect(enqueueEvent).toHaveBeenCalledExactlyOnceWith('guide_entry_view', {
+        first_view_in_tab: false,
+      });
+      vi.unstubAllGlobals();
+      random.mockRestore();
+    });
+
+    it('does the same for wizardStepView', () => {
+      const random = vi.spyOn(Math, 'random');
+
+      random.mockReturnValueOnce(0.9);
+      analytics.wizardStepView(4);
+      expect(enqueueEvent).not.toHaveBeenCalled();
+
+      random.mockReturnValueOnce(0);
+      analytics.wizardStepView(4);
+
+      expect(enqueueEvent).toHaveBeenCalledExactlyOnceWith('wizard_step_view', {
+        step_id: 4,
+        first_view_in_tab: false,
+      });
       random.mockRestore();
     });
   });

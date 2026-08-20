@@ -12,6 +12,49 @@ import type { LabelResolutionMode, TruncatedRelationshipFile } from '@/core/type
 import type { LicenseFailureReason } from '@/lib/export/license';
 
 /**
+ * True the first time this key is seen in this browser tab, false afterwards.
+ *
+ * The name says "tab" because `sessionStorage` is scoped to one tab and dies
+ * with it, while Umami's `session_id` is scoped to a visitor and can span
+ * days. The two disagree in the same direction every time: two tabs, or a
+ * reopen an hour later, give two `true` rows against one Umami session. A
+ * property called `first_view` would read as "first view this session" —
+ * false against the only notion of session the dashboard has.
+ *
+ * Both ends of the entry→instruction pair carry it. Without it the pair
+ * inherits wizard_step_view's back-navigation non-monotonicity — 1→2→1→2 counts
+ * twice on both ends and the ratio stops being a funnel. Mechanism follows the
+ * `analytics_first_pv` precedent below (`pageView`).
+ *
+ * Callers must evaluate this *before* the sampling gate, not after. The flag
+ * describes the reader's history ("has this screen been seen before"), not
+ * whether this particular view got sampled — an unreported view still
+ * happened, and the marker still needs writing so the next view (sampled or
+ * not) reads `false`. Gating first would make the marker's write conditional
+ * on the sample roll, so `first_view_in_tab: true` would mean "the first view that
+ * happened to be sampled", not "the reader's first view" — expected
+ * true-count per session becomes `1 - 0.95^n`, which is n-dependent, and the
+ * entry→step-2 ratio this flag exists to unbias stays skewed by
+ * back-navigation.
+ */
+function firstViewInTab(key: string): boolean {
+  if (typeof window === 'undefined') return false;
+  const storageKey = `analytics_first_in_tab_${key}`;
+  // The getter itself throws SecurityError under Safari's "Block all cookies"
+  // and Firefox's "Block cookies and site data", and both callers run inside a
+  // mount effect — an unguarded throw takes the screen down to report a view.
+  // Degrading to "not first view" under-reports instead, which is the same
+  // trade `getStoredUTM` makes for the identical call (utm.ts).
+  try {
+    if (sessionStorage.getItem(storageKey)) return false;
+    sessionStorage.setItem(storageKey, '1');
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Round a file size to two decimal places for the `file_size_mb` analytics
  * property. Shared so `file_upload_start` and `upload_error_*` report the
  * same file at the same precision.
@@ -189,11 +232,36 @@ export const analytics = {
     trackNavigating(AnalyticsEvents.LANGUAGE_CHANGE, { language });
   },
 
+  /**
+   * The single-action entry screen that replaced wizard step 1.
+   *
+   * A NEW NAME rather than a `variant` on wizard_step_view: a variant field
+   * would leave step_id:1 meaning two different screens depending on the date,
+   * and every historical query silently wrong.
+   *
+   * Same 5% gate as wizardStepView — a ratio between two events sampled at the
+   * same rate is unbiased, and 5% already gives ±3% at this volume.
+   *
+   * NOT comparable across its own release: the old pair measured
+   * "slide 1 → slide 2", this one measures "entry → first instruction".
+   * Different denominators by construction.
+   */
+  guideEntryView: () => {
+    // Order matters — see firstViewInTab's doc comment. The marker must
+    // be written regardless of whether this view is sampled.
+    const isFirstView = firstViewInTab('guide_entry');
+    if (Math.random() > 0.05) return;
+    enqueueEvent(AnalyticsEvents.GUIDE_ENTRY_VIEW, { first_view_in_tab: isFirstView });
+  },
+
   // Wizard events (V10: 5% sampling, was 25%)
-  wizardStepView: (stepId: number, _stepTitle?: string) => {
+  wizardStepView: (stepId: number) => {
+    // Order matters — see firstViewInTab's doc comment.
+    const isFirstView = firstViewInTab(`wizard_step_${stepId}`);
     if (Math.random() > 0.05) return;
     enqueueEvent(AnalyticsEvents.WIZARD_STEP_VIEW, {
       step_id: stepId,
+      first_view_in_tab: isFirstView,
     });
   },
 

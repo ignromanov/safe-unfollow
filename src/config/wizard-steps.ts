@@ -43,3 +43,9 @@ export const WIZARD_STEPS: WizardStep[] = [
     visual: '/wizard/step-8',
   },
 ];
+
+// Step 1's external link, derived once here rather than recomputed in each
+// consumer — Wizard.tsx's bottom bar and GuideEntry.tsx's in-flow CTA both
+// point at it, and a copy in each risked drifting apart (see "no copied
+// facts" in CLAUDE.md).
+export const ACCOUNTS_CENTER_URL = WIZARD_STEPS.find(step => step.id === 1)?.externalLink;

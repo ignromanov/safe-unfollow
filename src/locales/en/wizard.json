@@ -1,6 +1,12 @@
 {
   "header": {
-    "stepOf": "Step {{current}} of {{total}}"
+    "ariaLabel": "Instagram data export wizard",
+    "stepOf": "Step {{current}} of {{total}}",
+    "stepNavigation": "Step navigation",
+    "stepLabel": "Step {{step}}"
+  },
+  "footer": {
+    "navigation": "Wizard actions"
   },
   "calendar": {
     "addReminder": "Add Reminder to Calendar",
@@ -11,20 +17,41 @@
     "back": "Back",
     "next": "Next Step",
     "done": "Done, let's go!",
-    "openInstagram": "Open Instagram Export Page",
     "close": "Close guide",
+    "cancel": "Cancel",
+    "trySample": "Try with sample data",
     "uploadFile": "Upload My File",
     "alreadyHaveFile": "I already have my ZIP file"
   },
   "format": {
     "warning": "CRITICAL STEP"
   },
-  "steps": {
-    "1": {
-      "title": "Open Instagram Export Page",
-      "description": "Click the button below to open Meta Accounts Center. Then click \"Create export\" to begin.",
-      "alt": "Step 1: Open Instagram Export Page and click Create export"
+  "entry": {
+    "title": "First, ask Instagram for your file.",
+    "timeCost": {
+      "ours": "Asking takes about 2 minutes.",
+      "theirs": "Instagram then emails the file — the wait is theirs, not ours."
     },
+    "cta": "Open Accounts Center",
+    "trust": {
+      "noLogin": "No login. No password. Nothing to connect.",
+      "local": "Your export is read in this browser and never uploaded."
+    },
+    "recipe": {
+      "title": "What to pick in Instagram's dialog",
+      "rows": {
+        "destination": "Export to device",
+        "range": "All time",
+        "format": "JSON — not HTML",
+        "quality": "Any media quality",
+        "content": "Followers and following"
+      }
+    },
+    "accordion": {
+      "trigger": "Step-by-step guide — {{count}} steps"
+    }
+  },
+  "steps": {
     "2": {
       "title": "Choose Your Instagram Profile",
       "description": "Select your Instagram account from the list of connected profiles.",

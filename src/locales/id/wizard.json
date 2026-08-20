@@ -1,6 +1,12 @@
 {
   "header": {
-    "stepOf": "Langkah {{current}} dari {{total}}"
+    "ariaLabel": "Wizard ekspor data Instagram",
+    "stepOf": "Langkah {{current}} dari {{total}}",
+    "stepNavigation": "Navigasi langkah",
+    "stepLabel": "Langkah {{step}}"
+  },
+  "footer": {
+    "navigation": "Aksi wizard"
   },
   "calendar": {
     "addReminder": "Tambah pengingat ke kalender",
@@ -11,20 +17,41 @@
     "back": "Kembali",
     "next": "Langkah Berikutnya",
     "done": "Selesai, ayo mulai!",
-    "openInstagram": "Buka halaman ekspor",
     "close": "Tutup panduan",
+    "cancel": "Batal",
+    "trySample": "Coba dengan data sampel",
     "uploadFile": "Unggah File Saya",
     "alreadyHaveFile": "Saya sudah punya file ZIP"
   },
   "format": {
     "warning": "LANGKAH PENTING"
   },
-  "steps": {
-    "1": {
-      "title": "Buka Halaman Ekspor Instagram",
-      "description": "Klik tombol di bawah untuk membuka Pusat Akun Meta. Lalu klik \"Buat ekspor\".",
-      "alt": "Langkah 1: Buka halaman ekspor dan klik Buat ekspor"
+  "entry": {
+    "title": "Pertama, minta filemu ke Instagram.",
+    "timeCost": {
+      "ours": "Memintanya butuh sekitar 2 menit.",
+      "theirs": "Instagram lalu mengirim file lewat email — itu waktu tunggu mereka, bukan kami."
     },
+    "cta": "Buka Pusat Akun",
+    "trust": {
+      "noLogin": "Tanpa login. Tanpa kata sandi. Tidak ada yang perlu dihubungkan.",
+      "local": "Ekspormu dibaca di browser ini dan tidak pernah diunggah."
+    },
+    "recipe": {
+      "title": "Yang harus dipilih di dialog Instagram",
+      "rows": {
+        "destination": "Ekspor ke perangkat",
+        "range": "Sepanjang waktu",
+        "format": "JSON — bukan HTML",
+        "quality": "Kualitas media apa pun",
+        "content": "Pengikut dan mengikuti"
+      }
+    },
+    "accordion": {
+      "trigger": "Panduan langkah demi langkah — {{count}} langkah"
+    }
+  },
+  "steps": {
     "2": {
       "title": "Pilih Profil Instagram Anda",
       "description": "Pilih akun Instagram Anda dari daftar profil yang terhubung.",

@@ -41,19 +41,6 @@ const ACTIONS: Record<string, string> = {
  * below fails otherwise, so this list can only shrink.
  */
 const KNOWN_DEAD: Record<string, string> = {
-  'Step 1': 'wizard step indicator — goToStep(n)',
-  'Step 2': 'wizard step indicator — goToStep(n)',
-  'Step 3': 'wizard step indicator — goToStep(n)',
-  'Step 4': 'wizard step indicator — goToStep(n)',
-  'Step 5': 'wizard step indicator — goToStep(n)',
-  'Step 6': 'wizard step indicator — goToStep(n)',
-  'Step 7': 'wizard step indicator — goToStep(n)',
-  'Step 8': 'wizard step indicator — goToStep(n)',
-  'Next Step': 'wizard — goToStep(current + 1)',
-  Back: 'wizard — goToStep(current - 1)',
-  Cancel: 'wizard — onCancel prop, navigates home',
-  'Close guide': 'wizard — onCancel prop, navigates home',
-  "Done, let's go!": 'wizard last step — navigates to /upload',
   'Back to Home': 'PrivacyPolicy / Terms — onBack prop',
   'See the step-by-step guide': 'UploadZone — onOpenWizard prop',
   'Not sure what to upload? See the guide': 'UploadZone — onOpenWizard prop',

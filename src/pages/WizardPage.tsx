@@ -1,24 +1,14 @@
-import { useNavigate } from 'react-router-dom';
 import { Wizard } from '@/components/Wizard';
-import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
 
 /**
  * Wizard page (step-by-step guide)
  * Prerendered for SEO - shows Instagram export instructions
+ *
+ * Every control inside Wizard computes its own destination via PrefixedLink (GH#50), so
+ * this page no longer threads navigate() callbacks down to it.
  */
 export function Component() {
-  const navigate = useNavigate();
-  const prefix = useLanguagePrefix();
-
-  const handleComplete = () => {
-    navigate(`${prefix}/upload`);
-  };
-
-  const handleCancel = () => {
-    navigate(`${prefix}/`);
-  };
-
-  return <Wizard onComplete={handleComplete} onCancel={handleCancel} />;
+  return <Wizard />;
 }
 
 export default Component;

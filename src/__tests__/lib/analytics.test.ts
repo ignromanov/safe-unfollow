@@ -293,14 +293,13 @@ describe('Analytics', () => {
         expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.CLEAR_DATA, undefined);
       });
 
-      // wizard_step_view is batched, and dropping step_title is asserted there
-      // too — see stats/impression-batching.test.ts.
+      // wizard_step_view is batched — see stats/impression-batching.test.ts.
 
       it('should skip wizard step view when sampling excludes', () => {
         const originalRandom = Math.random;
         Math.random = () => 0.1; // 10% > 5% threshold
 
-        analytics.wizardStepView(1, 'Opening Settings');
+        analytics.wizardStepView(1);
 
         expect(windowSpy.umami.track).not.toHaveBeenCalled();
 

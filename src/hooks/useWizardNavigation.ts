@@ -28,7 +28,13 @@ export function useWizardNavigation(initialStep: number = 1) {
     [navigate, prefix]
   );
 
-  // `prefix` and `navigate` were also returned until the wizard's "I already have my ZIP
-  // file" shortcut became a PrefixedLink. Nothing reads them now.
-  return { currentStep, goToStep };
+  // Escape-key navigation cannot follow an `href` the way a click can — it needs a real
+  // navigate() call. Every clickable control computes its own destination via
+  // PrefixedLink instead (see Wizard.tsx), so this is the only caller left that needs
+  // the prefix directly.
+  const goHome = useCallback(() => {
+    navigate(prefix || '/');
+  }, [navigate, prefix]);
+
+  return { currentStep, goToStep, goHome };
 }

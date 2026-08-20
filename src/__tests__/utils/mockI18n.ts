@@ -24,18 +24,33 @@ import type { ReactNode } from 'react';
  * ```
  */
 export function createI18nMockFactory(translationObject: unknown) {
+  // Navigate nested keys like 'buttons.next'
+  const lookup = (key: string): string | undefined => {
+    const keys = key.split('.');
+    let value: unknown = translationObject;
+
+    for (const k of keys) {
+      value = (value as Record<string, unknown>)?.[k];
+    }
+
+    return typeof value === 'string' ? value : undefined;
+  };
+
   return () => ({
     useTranslation: (ns?: string) => ({
       t: (key: string, options?: Record<string, unknown>) => {
-        // Navigate nested keys like 'buttons.next'
-        const keys = key.split('.');
-        let value: unknown = translationObject;
+        let value = lookup(key);
 
-        for (const k of keys) {
-          value = (value as Record<string, unknown>)?.[k];
+        // i18next plural key resolution: when a `count` option is passed
+        // and the bare key doesn't exist, fall back to `${key}_one` /
+        // `${key}_other` — the two-way split every supported language
+        // resource actually defines. This mirrors real i18next closely
+        // enough for tests, which only ever load the English bundle.
+        if (value === undefined && typeof options?.count === 'number') {
+          value = lookup(`${key}${options.count === 1 ? '_one' : '_other'}`);
         }
 
-        let result = (value as string) || key;
+        let result = value || key;
 
         // Handle interpolation (e.g., {{count}}, {{label}})
         if (options) {
