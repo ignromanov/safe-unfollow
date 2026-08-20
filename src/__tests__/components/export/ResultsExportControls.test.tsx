@@ -386,6 +386,27 @@ describe('ResultsExportControls', () => {
       expect(cta.className).toMatch(/\bmin-h-12\b/);
     });
 
+    // The CTA spent this branch rendering at 14px/600 against a reference of
+    // 16px/700, and the two halves failed differently. `font-semibold`
+    // displaced the cva base's `font-medium` and was merely one step light;
+    // the size class was ABSENT, so `text-sm` survived from the base — and an
+    // absence is what tailwind-merge cannot arbitrate, because there is
+    // nothing to arbitrate against. Pinned by name for the same reason the
+    // touch target above is: jsdom measures no text, so the class list is the
+    // only evidence there is, and this is the button the product is paid by.
+    it('should render the paywall CTA at the reference kegl and weight', async () => {
+      unlocked(false);
+      const user = userEvent.setup();
+
+      render(<ResultsExportControls {...defaultProps} />);
+      await user.click(screen.getByRole('button', { name: triggerLabel }));
+
+      const cta = await screen.findByRole('button', { name: resultsEN.export.paywall.cta });
+      expect(cta.className).toMatch(/\btext-base\b/);
+      expect(cta.className).toMatch(/\bfont-bold\b/);
+      expect(cta.className).not.toMatch(/\btext-sm\b/);
+    });
+
     // The seam where the screen stops transacting and starts disclosing. It is
     // drawn at 16px and was rendering at 8px, because the terms block was a
     // third child of the footer and inherited the footer's own gap instead of

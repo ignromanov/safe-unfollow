@@ -158,9 +158,18 @@ export function PaywallModal({
               `font-display` is the design system's register for every stat
               number in the product, and it carries the -0.04em / 1.15 pairing
               plus the RTL letter-spacing reset that a hand-rolled
-              `tracking-tighter` would miss in Arabic. */}
+              `tracking-tighter` would miss in Arabic.
+
+              The size is the reference's 44px on the sheet and the system's
+              48px rung from 640px up. 44 is not on the type scale, but this is
+              the only bare `text-5xl` in the product — the other seven all sit
+              behind `md:`/`lg:`, and the bare mobile ceiling here is
+              `text-4xl`. 48px at 390px would be 1.6x the H1 of the page the
+              reader arrives from (`text-3xl` = 30px there), so the arbitrary
+              value buys the artboard's number without inventing a mobile rung
+              the design system does not have. */}
           <DialogTitle className="flex flex-col gap-0.5">
-            <span className="font-display text-5xl leading-none font-extrabold text-primary">
+            <span className="font-display text-[2.75rem] leading-none font-extrabold text-primary sm:text-5xl">
               {totalLabel}
             </span>
             <span className="text-sm font-semibold text-muted-foreground">
@@ -222,7 +231,7 @@ export function PaywallModal({
               <span className="h-2.5 w-2.5 shrink-0 rounded-[3px] border border-muted-foreground bg-secondary" />
               {t('export.paywall.legendSample', { rows: FREE_EXPORT_ROWS })}
             </span>
-            <span className="flex shrink-0 items-center gap-1.5 font-semibold">
+            <span className="flex shrink-0 items-center gap-1.5 font-bold">
               <span className="h-2.5 w-2.5 shrink-0 rounded-[3px] border border-muted-foreground bg-primary" />
               {t('export.paywall.legendRest')}
             </span>
@@ -265,8 +274,16 @@ export function PaywallModal({
             — from 640px up the buttons would sit 8px off the receipt above
             them, a misalignment nothing in jsdom can see. */}
         <DialogFooter className="flex-col items-stretch gap-1 sm:flex-col sm:items-stretch sm:space-x-0">
-          {/* Four classes the variant does not give, each from a written rule
-              rather than taste. `min-h-12` is 48px: `size="lg"` is `h-10`, i.e.
+          {/* Six classes the variant does not give, each from a written rule
+              rather than taste. `text-base font-bold` is the reference's
+              16px/700, and both are needed for the same reason in opposite
+              directions: `font-semibold` displaced the cva base's
+              `font-medium`, but no size class was present at all, so
+              `text-sm` survived from the base untouched — tailwind-merge only
+              removes what something else replaces. The highest-value control
+              in the product was rendering 12.5% under its specified size
+              because of an absence, which is the hardest kind of drift to
+              see. `min-h-12` is 48px: `size="lg"` is `h-10`, i.e.
               40px, under the 44px touch target the mobile contract sets — and
               85% of sessions are mobile, on the highest-value button in the
               product. 48 rather than the bare 44 because that is what the
@@ -284,7 +301,7 @@ export function PaywallModal({
           <Button
             onClick={onCheckout}
             size="lg"
-            className="min-h-12 rounded-2xl px-5 font-semibold shadow-2xl shadow-primary/30"
+            className="min-h-12 rounded-2xl px-5 text-base font-bold shadow-2xl shadow-primary/30"
           >
             {t('export.paywall.cta')}
           </Button>
@@ -298,7 +315,7 @@ export function PaywallModal({
             variant="ghost"
             size="lg"
             onClick={() => onOpenChange(false)}
-            className="min-h-12 rounded-2xl font-semibold text-muted-foreground"
+            className="min-h-12 rounded-2xl font-bold text-muted-foreground"
           >
             {t('export.paywall.dismiss')}
           </Button>
