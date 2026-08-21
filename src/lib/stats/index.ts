@@ -13,6 +13,8 @@
  * - Removed results_scroll_depth (engagement inferred from time_on_results)
  * - Removed wizard_back_click, wizard_cancel (low actionability)
  * - Tightened sampling: wizardStepView 5%, filterToggle 3%, searchPerform 5%, webVital 3%
+ *   (the first three, and guideEntryView, were unsampled again on 2026-08-21 — GH#123;
+ *   every one of those series steps by 20x or 33x on that deploy date)
  * - Added 25% sampling to resultsClicksSummary
  * - Simplified payloads: removed file_hash from upload events, removed processing_time_ms
  */

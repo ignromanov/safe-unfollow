@@ -26,16 +26,14 @@ import type { LicenseFailureReason } from '@/lib/export/license';
  * twice on both ends and the ratio stops being a funnel. Mechanism follows the
  * `analytics_first_pv` precedent below (`pageView`).
  *
- * Callers must evaluate this *before* the sampling gate, not after. The flag
- * describes the reader's history ("has this screen been seen before"), not
- * whether this particular view got sampled — an unreported view still
- * happened, and the marker still needs writing so the next view (sampled or
- * not) reads `false`. Gating first would make the marker's write conditional
- * on the sample roll, so `first_view_in_tab: true` would mean "the first view that
- * happened to be sampled", not "the reader's first view" — expected
- * true-count per session becomes `1 - 0.95^n`, which is n-dependent, and the
- * entry→step-2 ratio this flag exists to unbias stays skewed by
- * back-navigation.
+ * Both callers are unsampled since GH#123, so nothing currently stands between
+ * this call and the enqueue. If a gate is ever reintroduced it goes *after*
+ * this call, never before: the flag describes the reader's history ("has this
+ * screen been seen before"), not whether the view got reported. Writing the
+ * marker behind a gate would make `first_view_in_tab: true` mean "the first
+ * view that happened to be sampled" — expected true-count per session becomes
+ * `1 - (1-rate)^n`, which is n-dependent, and the entry→step-2 ratio this flag
+ * exists to unbias stays skewed by back-navigation.
  */
 function firstViewInTab(key: string): boolean {
   if (typeof window === 'undefined') return false;
@@ -111,9 +109,9 @@ export const analytics = {
     });
   },
 
-  // Filter events (V10: 3% sampling, was 10%)
+  // Filter events — unsampled since GH#123; read as an absolute count, and
+  // sampling serves ratios over large N rather than counts.
   filterToggle: (filterName: string, action: FilterAction, activeCount: number) => {
-    if (Math.random() > 0.03) return;
     enqueueEvent(AnalyticsEvents.FILTER_TOGGLE, {
       filter_name: filterName,
       filter_action: action,
@@ -127,14 +125,13 @@ export const analytics = {
     });
   },
 
-  // Search events (V10: 5% sampling, was 25%)
+  // Search events — unsampled since GH#123, see filterToggle.
   searchPerform: (
     queryLength: number,
     resultCount: number,
     totalCount: number,
     hasFiltersActive: boolean
   ) => {
-    if (Math.random() > 0.05) return;
     enqueueEvent(AnalyticsEvents.SEARCH_PERFORM, {
       query_length: queryLength,
       result_count: resultCount,
@@ -239,26 +236,22 @@ export const analytics = {
    * would leave step_id:1 meaning two different screens depending on the date,
    * and every historical query silently wrong.
    *
-   * Same 5% gate as wizardStepView — a ratio between two events sampled at the
-   * same rate is unbiased, and 5% already gives ±3% at this volume.
+   * Unsampled since GH#123, as is wizardStepView. At 49 observed rows in 30
+   * days under a 5% gate this event carried ~14% relative noise before any
+   * other error, and it is read as a count rather than as a ratio.
    *
    * NOT comparable across its own release: the old pair measured
    * "slide 1 → slide 2", this one measures "entry → first instruction".
    * Different denominators by construction.
    */
   guideEntryView: () => {
-    // Order matters — see firstViewInTab's doc comment. The marker must
-    // be written regardless of whether this view is sampled.
     const isFirstView = firstViewInTab('guide_entry');
-    if (Math.random() > 0.05) return;
     enqueueEvent(AnalyticsEvents.GUIDE_ENTRY_VIEW, { first_view_in_tab: isFirstView });
   },
 
-  // Wizard events (V10: 5% sampling, was 25%)
+  // Wizard events — unsampled since GH#123.
   wizardStepView: (stepId: number) => {
-    // Order matters — see firstViewInTab's doc comment.
     const isFirstView = firstViewInTab(`wizard_step_${stepId}`);
-    if (Math.random() > 0.05) return;
     enqueueEvent(AnalyticsEvents.WIZARD_STEP_VIEW, {
       step_id: stepId,
       first_view_in_tab: isFirstView,
