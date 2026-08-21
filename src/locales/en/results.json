@@ -177,7 +177,7 @@
       "instantNote": "Instant unlock after checkout"
     },
     "checkout": {
-      "privacy": "Your Instagram export stays in this browser. The payment page never sees your data.",
+      "privacy": "Your Instagram export stays in this browser. The payment page never sees it.",
       "summary": "{{rows}} rows · CSV + JSON · $7, once.",
       "methods": "Cards and local methods are shown on the next page."
     },

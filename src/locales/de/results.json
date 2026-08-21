@@ -177,7 +177,7 @@
       "instantNote": "Sofortige Freischaltung nach dem Kauf"
     },
     "checkout": {
-      "privacy": "Dein Instagram-Export bleibt in diesem Browser. Die Bezahlseite sieht deine Daten nie.",
+      "privacy": "Dein Instagram-Export bleibt in diesem Browser. Die Bezahlseite sieht ihn nie.",
       "summary": "{{rows}} Zeilen · CSV + JSON · 7 $, einmalig.",
       "methods": "Karten und lokale Zahlungsmethoden erscheinen auf der nächsten Seite."
     },

@@ -177,7 +177,7 @@
       "instantNote": "Desbloqueo instantáneo tras el pago"
     },
     "checkout": {
-      "privacy": "Tu exportación de Instagram se queda en este navegador. La página de pago nunca ve tus datos.",
+      "privacy": "Tu exportación de Instagram se queda en este navegador. La página de pago nunca la ve.",
       "summary": "{{rows}} filas · CSV + JSON · $7, una sola vez.",
       "methods": "Las tarjetas y los métodos locales aparecen en la página siguiente."
     },

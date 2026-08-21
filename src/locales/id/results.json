@@ -177,7 +177,7 @@
       "instantNote": "Langsung terbuka setelah pembayaran"
     },
     "checkout": {
-      "privacy": "Ekspor Instagram Anda tetap di browser ini. Halaman pembayaran tidak pernah melihat data Anda.",
+      "privacy": "Ekspor Instagram Anda tetap di browser ini. Halaman pembayaran tidak pernah melihatnya.",
       "summary": "{{rows}} baris · CSV + JSON · $7, sekali bayar.",
       "methods": "Kartu dan metode pembayaran lokal ditampilkan di halaman berikutnya."
     },

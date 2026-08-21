@@ -177,7 +177,7 @@
       "instantNote": "Ödemeden hemen sonra anında açılır"
     },
     "checkout": {
-      "privacy": "Instagram dışa aktarman bu tarayıcıda kalır. Ödeme sayfası verilerini asla görmez.",
+      "privacy": "Instagram dışa aktarman bu tarayıcıda kalır. Ödeme sayfası onu asla görmez.",
       "summary": "{{rows}} satır · CSV + JSON · tek seferlik 7$.",
       "methods": "Kartlar ve yerel ödeme yöntemleri sonraki sayfada gösterilir."
     },
