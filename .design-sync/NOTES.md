@@ -932,3 +932,41 @@ storage, it is a place git has been told not to protect. Anything that costs rea
 reconstruct — as opposed to a re-run of a committed script — does not belong under
 `.ds-sync/`, `ds-bundle/`, or `.design-sync/.cache/`, however convenient that location felt
 mid-session.
+
+## 2026-08-21 upload: the first sync since #105, and the read that stopped it going wrong
+
+543 files written to `5e633d36-…`, `deletes: []` as always. Bundle built from `main` at
+`4883c72` plus the alias restoration.
+
+| Batch                                                        | Files |
+| ------------------------------------------------------------ | ----- |
+| root + `fonts/` + `_vendor/` + `guidelines/` + `_preview/`   | 123   |
+| `components/` (53 components)                                | 212   |
+| `components/` (52 components, incl. the new `wizard/` group) | 208   |
+
+**New in the project**: a `components/wizard/` group — `GuideEntry`, `RecipeCard`,
+`StepAccordion`. Verified after upload by reading `GuideEntry.d.ts` back: it carries the
+optional `ctaRef` prop, so the group landed with real types rather than an empty contract.
+This closes §2a — the guide finally has a representation in the design project.
+
+**What the pre-upload read caught, and no gate would have.** Reading the project before
+writing to it turned up two things, in this order:
+
+1. Its `fonts/fonts.css` held **22** `@font-face` rules, 11 suffixed and 11 bare. That single
+   fact retracted the "every card was captured in the system font" story two sessions had
+   agreed on — see the retraction under "Re-sync risks".
+2. Following from it, **28 hand-authored files request the bare names** and the bundle about
+   to be uploaded no longer carried them. Uploading would have unstyled all 28 silently. The
+   aliases were restored before anything was written.
+
+The order matters: the first read was for curiosity about a claim, and the second only became
+askable because of it. **Read the project before every upload, not only when something looks
+wrong** — the coupling at the top of this file has no other detector.
+
+Left as it was, deliberately: `BuyMeCoffeeWidget` and the two `.blocked` components
+(`Wizard`, `RouteErrorPage`) still have stale files in the project. `deletes: []` means stale
+beats deleted, and none of them is wrong enough to hand-enumerate a deletion for.
+
+`_ds_needs_recompile` was included in the upload — it is the marker that asks the project to
+rebuild `_ds_manifest.json`, which is what makes the three new cards appear in the Design
+System pane. If they do not show up, that file is the first thing to check.
