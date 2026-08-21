@@ -41,3 +41,9 @@ public/fo-verify.html
 # design-sync lib forks — vendored copies of the skill's own lib/*.mjs, kept
 # byte-comparable against upstream so re-syncs can diff and merge changes.
 .design-sync/overrides
+
+# Backup of the Claude Design project's hand-authored files. A backup that has
+# been reformatted is no longer the thing it backs up — restoring it would push
+# prettier's line breaks into a project this repo does not own. Same reason as
+# .design-sync/overrides above: fidelity beats formatting.
+designs/claude-design-project
