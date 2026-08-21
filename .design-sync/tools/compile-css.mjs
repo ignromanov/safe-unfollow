@@ -30,6 +30,7 @@ const repoRoot = path.resolve(__dirname, '..', '..');
 const entry = path.join(__dirname, 'ds-tailwind.css');
 const cacheDir = path.join(repoRoot, '.design-sync', '.cache');
 const outCss = path.join(cacheDir, 'app-compiled.css');
+const outFonts = path.join(cacheDir, 'fonts-alias.css');
 
 fs.mkdirSync(cacheDir, { recursive: true });
 
@@ -84,3 +85,54 @@ if (faceCount === 0) {
 }
 
 console.log(`[compile-css] wrote ${path.relative(repoRoot, outCss)} (${faceCount} @font-face)`);
+
+// --- bare-name aliases, for the DESIGN PROJECT's hand-authored cards -----------------
+//
+// These were deleted on 2026-08-21 and restored the same day, because the reason they
+// exist is not the reason that was written down. Recording both, since the wrong one is
+// the intuitive one:
+//
+// The comment here used to say the aliases bridged the APP's mistake — `src/styles.css`
+// asked for 'Inter' while `@fontsource-variable/*` declares only 'Inter Variable'. PR
+// #105 fixed that, so the app-side justification is genuinely dead and deleting on that
+// basis looked correct.
+//
+// It was not. The live consumer is the Claude Design project, which pre-dates this sync
+// and holds 28 HAND-AUTHORED files — all 18 `foundations/*.card.html`, all 5
+// `catalog/*.card.html`, `ui_kits/app/index.html` and the 4 `templates/conversion-audit`
+// mockups — whose own CSS requests the BARE names. The converter overwrites the project's
+// shared `styles.css` and `fonts/fonts.css` on every upload, so dropping these aliases
+// silently removes the only faces those 28 files match. Verified against the project on
+// 2026-08-21: its `fonts/fonts.css` carries 22 faces, 11 suffixed and 11 bare, and the
+// bare set is load-bearing.
+//
+// This is the exact coupling NOTES.md flags under "NEVER reconcile-delete": a `cssEntry`
+// change unstyles hand-authored cards and no converter check catches it. The check that
+// would catch it does not live in this repo, which is why it is written here instead.
+//
+// Do not delete this step because the app no longer needs it. Delete it only when those
+// 28 files are confirmed to ask for the suffixed names.
+const aliasRoot = postcss.root();
+const VARIABLE_SUFFIX = ' Variable';
+
+postcss.parse(result.css, { from: outCss }).walkAtRules('font-face', rule => {
+  let familyDecl;
+  rule.walkDecls('font-family', decl => {
+    familyDecl = decl;
+  });
+  if (!familyDecl) return;
+
+  const family = familyDecl.value.replace(/^['"]|['"]$/g, '');
+  if (!family.endsWith(VARIABLE_SUFFIX)) return;
+
+  const aliasRule = rule.clone();
+  aliasRule.walkDecls('font-family', decl => {
+    decl.value = `'${family.slice(0, -VARIABLE_SUFFIX.length)}'`;
+  });
+  aliasRoot.append(aliasRule);
+});
+
+fs.writeFileSync(outFonts, aliasRoot.toString());
+console.log(
+  `[compile-css] wrote ${path.relative(repoRoot, outFonts)} (${aliasRoot.nodes.length} aliases)`
+);

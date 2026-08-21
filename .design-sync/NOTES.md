@@ -674,28 +674,45 @@ All four new components got authored previews (2-6 min of composition each, not 
   re-enters the app through one CSS file and inherits every assumption that file makes. A
   guard that names its own cause in prose will keep naming it after the cause has changed.
 
-  **The consequence for the design project itself, which follows from this and is not
-  obvious (raised by the parallel session, 2026-08-21).** Two established facts had never
-  been put together. #105 established that no webfont has ever rendered on the site since
-  `8d907a2` (Sep 2025). The finding above establishes that this pipeline's own fonts came
-  from an alias file naming `'Inter'` and `'Plus Jakarta Sans'` — the names that match
-  nothing. So the site and the sync agreed, for the project's whole history, on the system
-  fallback: **every card now in the Claude Design project was captured in the system font**,
-  and the project has been typographically faithful to production by coincidence rather
-  than by design.
+  **⛔ RETRACTED, SAME DAY, AGAINST THE PROJECT ITSELF — and the retraction is the more
+  useful entry.** What stood here claimed: every card in the Claude Design project was
+  captured in the system font, the project has been faithful to production only by
+  coincidence, and a partial re-capture would leave it in two typefaces. **All three are
+  false.** They were an inference from two established facts, believed by two sessions,
+  written into this file, `progress.md` and PR #113 — and never checked against the one
+  artifact that decides it.
 
-  That coincidence ends here. The next capture produces the first cards in that project's
-  history rendered in Inter and Jakarta, and anything not re-captured keeps the system font.
-  So **a partial re-capture after #105 is not a smaller version of a full one — it is a
-  project in two states**, and a designer reading it cannot tell which cards are current.
-  The failure is silent, like the glyph gaps #105's second round found. Either capture the
-  full component set, or record in the project which cards predate the font fix.
+  Reading the project settles it in one call. Its `fonts/fonts.css` carries **22**
+  `@font-face` rules: 11 under `'Inter Variable'` / `'Plus Jakarta Sans Variable'` **and**
+  11 under the bare names. The suffixed set came from `cssEntry`, the bare set from the
+  alias step. So the cards have always had a matching face and **have always rendered in
+  real Inter and Jakarta**. The alias step was making the design project correct during
+  precisely the period the site was broken — the opposite of the story above.
 
-  The 43 committed files under `designs/claude-design-project/` are hand-authored HTML, not
-  captures, so they are unaffected as source — but any screenshot asset among them dates
-  from the system-font era and is stale evidence now.
+  Two further corrections follow. The project stores **no per-card images** — cards are
+  live HTML linking one shared `styles.css` — so "captured in" was the wrong verb
+  throughout, and a partial upload cannot produce two typefaces because fonts are global
+  to the project, not baked per card. Nothing here needs a full re-capture on font
+  grounds.
 
-  Whether to re-capture everything is an operator and design call. Nothing here decides it.
+  **What was true**: between #105 and the fix above, a sync would have shipped cards in the
+  system fallback — a clean checkout throws at compile-css, and a stale cache ships
+  bare-name faces that post-#105 stacks no longer request. That is a forward-looking
+  regression, not a retrospective one, and it is what the fix prevents.
+
+  **The method failure worth keeping**: the inference was sound and the premises were true.
+  It was wrong because a third fact — that the bundle ships _both_ name sets — was never
+  in evidence, and one `get_file` would have supplied it. Two sessions agreeing does not
+  add evidence; it adds confidence. Read the artifact.
+
+  **And it nearly cost 28 files.** Acting on the retracted story, the alias step was
+  deleted as dead output on the grounds that the app no longer requests bare names. True
+  of the app, false of the project: 28 hand-authored files request the bare names — all
+  18 `foundations/*.card.html`, all 5 `catalog/*.card.html`, `ui_kits/app/index.html` and
+  the 4 `templates/conversion-audit/*.dc.html`. Uploading that bundle would have stripped
+  the typeface from every one of them, silently, which is the coupling this file already
+  warns about at the top and which no converter check catches. The aliases are restored,
+  with the reason they actually have written next to them.
 
 ## Validate findings (2026-08-09, first full pass after the `origin/main` rebase)
 
@@ -915,3 +932,41 @@ storage, it is a place git has been told not to protect. Anything that costs rea
 reconstruct — as opposed to a re-run of a committed script — does not belong under
 `.ds-sync/`, `ds-bundle/`, or `.design-sync/.cache/`, however convenient that location felt
 mid-session.
+
+## 2026-08-21 upload: the first sync since #105, and the read that stopped it going wrong
+
+543 files written to `5e633d36-…`, `deletes: []` as always. Bundle built from `main` at
+`4883c72` plus the alias restoration.
+
+| Batch                                                        | Files |
+| ------------------------------------------------------------ | ----- |
+| root + `fonts/` + `_vendor/` + `guidelines/` + `_preview/`   | 123   |
+| `components/` (53 components)                                | 212   |
+| `components/` (52 components, incl. the new `wizard/` group) | 208   |
+
+**New in the project**: a `components/wizard/` group — `GuideEntry`, `RecipeCard`,
+`StepAccordion`. Verified after upload by reading `GuideEntry.d.ts` back: it carries the
+optional `ctaRef` prop, so the group landed with real types rather than an empty contract.
+This closes §2a — the guide finally has a representation in the design project.
+
+**What the pre-upload read caught, and no gate would have.** Reading the project before
+writing to it turned up two things, in this order:
+
+1. Its `fonts/fonts.css` held **22** `@font-face` rules, 11 suffixed and 11 bare. That single
+   fact retracted the "every card was captured in the system font" story two sessions had
+   agreed on — see the retraction under "Re-sync risks".
+2. Following from it, **28 hand-authored files request the bare names** and the bundle about
+   to be uploaded no longer carried them. Uploading would have unstyled all 28 silently. The
+   aliases were restored before anything was written.
+
+The order matters: the first read was for curiosity about a claim, and the second only became
+askable because of it. **Read the project before every upload, not only when something looks
+wrong** — the coupling at the top of this file has no other detector.
+
+Left as it was, deliberately: `BuyMeCoffeeWidget` and the two `.blocked` components
+(`Wizard`, `RouteErrorPage`) still have stale files in the project. `deletes: []` means stale
+beats deleted, and none of them is wrong enough to hand-enumerate a deletion for.
+
+`_ds_needs_recompile` was included in the upload — it is the marker that asks the project to
+rebuild `_ds_manifest.json`, which is what makes the three new cards appear in the Design
+System pane. If they do not show up, that file is the first thing to check.
