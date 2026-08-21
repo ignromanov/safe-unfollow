@@ -137,8 +137,6 @@ describe('promo impression batching', () => {
     });
 
     it('queues the wizard step view — it is an impression, and the step change unloads nothing', () => {
-      const random = vi.spyOn(Math, 'random').mockReturnValue(0);
-
       analytics.wizardStepView(3);
 
       expect(enqueueEvent).toHaveBeenCalledWith('wizard_step_view', {
@@ -146,12 +144,9 @@ describe('promo impression batching', () => {
         first_view_in_tab: true,
       });
       expect(trackEvent).not.toHaveBeenCalled();
-      random.mockRestore();
     });
 
     it('queues in-page interactions, which fire repeatedly inside one page life', () => {
-      const random = vi.spyOn(Math, 'random').mockReturnValue(0);
-
       analytics.filterToggle('mutuals', 'enable', 1);
       analytics.filterClearAll(3);
       analytics.searchPerform(4, 10, 100, false);
@@ -175,7 +170,6 @@ describe('promo impression batching', () => {
       expect(enqueueEvent).toHaveBeenNthCalledWith(4, 'faq_expand', { question_id: 2 });
       expect(enqueueEvent).toHaveBeenNthCalledWith(5, 'theme_toggle', { mode: 'dark' });
       expect(trackEvent).not.toHaveBeenCalled();
-      random.mockRestore();
     });
 
     // The four hero CTAs are PrefixedLink, i.e. react-router Link: the click is
@@ -197,14 +191,19 @@ describe('promo impression batching', () => {
       expect(trackNavigating).not.toHaveBeenCalled();
     });
 
-    it('keeps the sampling gate in front of the queue, not behind it', () => {
+    // GH#123 removed the 3%/5% gates from these four. A batched flush is one
+    // request whatever it carries, so the volume argument that justified the
+    // gates does not apply on this transport — and all four are read as counts,
+    // which sampling harms rather than helps. The worst roll must still report.
+    it('reports the four batched events on any roll — nothing samples them', () => {
       const random = vi.spyOn(Math, 'random').mockReturnValue(0.99);
 
       analytics.filterToggle('mutuals', 'enable', 1);
       analytics.searchPerform(4, 10, 100, false);
       analytics.wizardStepView(3);
+      analytics.guideEntryView();
 
-      expect(enqueueEvent).not.toHaveBeenCalled();
+      expect(enqueueEvent).toHaveBeenCalledTimes(4);
       random.mockRestore();
     });
   });
@@ -214,8 +213,6 @@ describe('promo impression batching', () => {
   // stops being a funnel. See analytics.guideEntryView for the full rationale.
   describe('guide entry / first instruction pair', () => {
     it('marks the first view of the entry screen and only the first', () => {
-      const random = vi.spyOn(Math, 'random').mockReturnValue(0);
-
       analytics.guideEntryView();
       analytics.guideEntryView();
 
@@ -225,12 +222,9 @@ describe('promo impression batching', () => {
       expect(enqueueEvent).toHaveBeenNthCalledWith(2, 'guide_entry_view', {
         first_view_in_tab: false,
       });
-      random.mockRestore();
     });
 
     it('marks first views per step, so 1→2→1→2 is not two funnels', () => {
-      const random = vi.spyOn(Math, 'random').mockReturnValue(0);
-
       analytics.wizardStepView(2);
       analytics.wizardStepView(3);
       analytics.wizardStepView(2);
@@ -243,48 +237,12 @@ describe('promo impression batching', () => {
         step_id: 2,
         first_view_in_tab: false,
       });
-      random.mockRestore();
-    });
-
-    it('keeps the 5% gate on both, so the ratio between them stays unbiased', () => {
-      const random = vi.spyOn(Math, 'random').mockReturnValue(0.06);
-
-      analytics.guideEntryView();
-      analytics.wizardStepView(2);
-
-      expect(enqueueEvent).not.toHaveBeenCalled();
-      random.mockRestore();
-    });
-
-    // Every test above pins Math.random to a single value, which makes
-    // "compute first_view_in_tab before the gate" and "compute it after" produce
-    // identical output — both orders are indistinguishable when every call
-    // is sampled the same way. This is the case that actually tells them
-    // apart: the first call is dropped by the gate but must still consume
-    // the "seen before" marker, so the later, sampled call reports
-    // first_view_in_tab: false — not true, which is what gate-before-marker would
-    // report instead.
-    it('marks a later sampled view as not-first when an earlier, unsampled view already happened', () => {
-      const random = vi.spyOn(Math, 'random');
-
-      random.mockReturnValueOnce(0.9); // dropped by the gate — never enqueued
-      analytics.guideEntryView();
-      expect(enqueueEvent).not.toHaveBeenCalled();
-
-      random.mockReturnValueOnce(0); // inside the gate
-      analytics.guideEntryView();
-
-      expect(enqueueEvent).toHaveBeenCalledExactlyOnceWith('guide_entry_view', {
-        first_view_in_tab: false,
-      });
-      random.mockRestore();
     });
 
     // Safari's "Block all cookies" and Firefox's "Block cookies and site
     // data" make the getter itself throw, and both callers run inside a mount
     // effect — an unguarded throw would take the screen down to report a view.
     it('reports a view rather than throwing when sessionStorage is blocked', () => {
-      const random = vi.spyOn(Math, 'random').mockReturnValue(0);
       vi.stubGlobal('sessionStorage', {
         getItem: () => {
           throw new DOMException('The operation is insecure.', 'SecurityError');
@@ -299,24 +257,24 @@ describe('promo impression batching', () => {
         first_view_in_tab: false,
       });
       vi.unstubAllGlobals();
-      random.mockRestore();
     });
 
     it('does the same for wizardStepView', () => {
-      const random = vi.spyOn(Math, 'random');
+      vi.stubGlobal('sessionStorage', {
+        getItem: () => {
+          throw new DOMException('The operation is insecure.', 'SecurityError');
+        },
+        setItem: () => {},
+        clear: () => {},
+      });
 
-      random.mockReturnValueOnce(0.9);
-      analytics.wizardStepView(4);
-      expect(enqueueEvent).not.toHaveBeenCalled();
-
-      random.mockReturnValueOnce(0);
-      analytics.wizardStepView(4);
+      expect(() => analytics.wizardStepView(4)).not.toThrow();
 
       expect(enqueueEvent).toHaveBeenCalledExactlyOnceWith('wizard_step_view', {
         step_id: 4,
         first_view_in_tab: false,
       });
-      random.mockRestore();
+      vi.unstubAllGlobals();
     });
   });
 
@@ -344,17 +302,16 @@ describe('promo impression batching', () => {
     });
 
     it('queues the error code on the same gate as the start it is divided by', () => {
-      analytics.uploadErrorByCode('abcdef0123456789', 'HTML_FORMAT', 'not a json export');
+      analytics.uploadErrorByCode('HTML_FORMAT', 'not a json export');
 
       expect(enqueueEvent).toHaveBeenCalledWith('upload_error_html_format', {
-        file_hash: 'abcdef012345',
         error_message: 'not a json export',
       });
       expect(trackEvent).not.toHaveBeenCalled();
     });
 
     it('flushes on the error, because the error path navigates nowhere to trigger one', () => {
-      analytics.uploadErrorByCode('abcdef0123456789', 'HTML_FORMAT');
+      analytics.uploadErrorByCode('HTML_FORMAT');
 
       expect(flushEvents).toHaveBeenCalledTimes(1);
     });

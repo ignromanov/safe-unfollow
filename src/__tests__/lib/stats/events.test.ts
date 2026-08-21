@@ -27,7 +27,7 @@ describe('uploadErrorByCode', () => {
   });
 
   it('carries the file size as a number, not buried in translated prose', () => {
-    analytics.uploadErrorByCode('', 'CORRUPTED_ZIP', 'boom', 863.42);
+    analytics.uploadErrorByCode('CORRUPTED_ZIP', 'boom', 863.42);
 
     expect(enqueueEvent).toHaveBeenCalledWith(
       'upload_error_corrupted_zip',
@@ -36,7 +36,7 @@ describe('uploadErrorByCode', () => {
   });
 
   it('rounds the size exactly as fileUploadStart does, so the two cannot disagree', () => {
-    analytics.uploadErrorByCode('', 'CORRUPTED_ZIP', 'boom', 863.4267578125);
+    analytics.uploadErrorByCode('CORRUPTED_ZIP', 'boom', 863.4267578125);
     analytics.fileUploadStart(863.4267578125);
 
     const [, errorPayload] = enqueueEvent.mock.calls[0];
@@ -44,8 +44,21 @@ describe('uploadErrorByCode', () => {
     expect(errorPayload.file_size_mb).toBe(startPayload.file_size_mb);
   });
 
+  // The refusal, pinned. `file_hash` rode on all ten upload_error events until
+  // 2026-08-21: 12 hex characters derived from the user's own Instagram export,
+  // stable across sessions, read by no report. A field a product deliberately
+  // refuses needs a test as much as a field it deliberately sends, or the next
+  // author reads its absence as an oversight.
+  it('sends nothing derived from the export itself', () => {
+    analytics.uploadErrorByCode('CORRUPTED_ZIP', 'boom', 863.42);
+
+    const [, payload] = enqueueEvent.mock.calls[0];
+    expect(payload).not.toHaveProperty('file_hash');
+    expect(payload).not.toHaveProperty('file_hash_prefix');
+  });
+
   it('omits the size when the failure happened before a file was known', () => {
-    analytics.uploadErrorByCode('', 'UPLOAD_CANCELLED', undefined, undefined);
+    analytics.uploadErrorByCode('UPLOAD_CANCELLED', undefined, undefined);
 
     // Absent and zero must not be the same thing: a 0 would be a real-looking
     // value in a column decisions get made from.

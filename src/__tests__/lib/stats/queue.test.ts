@@ -5,8 +5,10 @@ import {
   clearEventQueue,
   enqueueEvent,
   flushEvents,
+  getDeliveryStats,
   getQueuedCount,
   MAX_BATCH_SIZE,
+  resetDeliveryStats,
   trackNavigating,
 } from '@/lib/stats/queue';
 
@@ -27,6 +29,7 @@ describe('event queue', () => {
     vi.stubEnv('DEV', false);
     localStorage.clear();
     clearEventQueue();
+    resetDeliveryStats();
 
     const script = document.createElement('script');
     script.setAttribute('src', `${ORIGIN}/script.js`);
@@ -158,6 +161,137 @@ describe('event queue', () => {
     enqueueEvent(AnalyticsEvents.AD_SLOT_VIEWABLE, { slot: 'results' });
 
     expect(() => flushEvents()).not.toThrow();
+  });
+
+  describe('delivery reporting', () => {
+    /** A batch response in the shape /api/batch documents. */
+    function batchResponse(size: number, errors: number, status = 200): Response {
+      return new Response(
+        JSON.stringify({ size, processed: size - errors, errors, details: [], cache: 't' }),
+        { status, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    it('counts a delivered batch', async () => {
+      fetchMock.mockImplementation(() => Promise.resolve(batchResponse(1, 0)));
+      enqueueEvent(AnalyticsEvents.AD_SLOT_VIEWABLE, { slot: 'results' });
+
+      flushEvents();
+
+      await vi.waitFor(() => expect(getDeliveryStats().batchesSent).toBe(1));
+      expect(getDeliveryStats().batchesFailed).toBe(0);
+      expect(getDeliveryStats().eventsRejected).toBe(0);
+    });
+
+    it('counts the events the server reports it rejected', async () => {
+      fetchMock.mockImplementation(() => Promise.resolve(batchResponse(3, 2)));
+      enqueueEvent(AnalyticsEvents.AD_SLOT_VIEWABLE, { slot: 'a' });
+      enqueueEvent(AnalyticsEvents.AD_SLOT_VIEWABLE, { slot: 'b' });
+      enqueueEvent(AnalyticsEvents.AD_SLOT_VIEWABLE, { slot: 'c' });
+
+      flushEvents();
+
+      await vi.waitFor(() => expect(getDeliveryStats().eventsRejected).toBe(2));
+    });
+
+    it('retries once on a 5xx and reports success when the retry lands', async () => {
+      fetchMock
+        .mockImplementationOnce(() => Promise.resolve(batchResponse(1, 0, 500)))
+        .mockImplementationOnce(() => Promise.resolve(batchResponse(1, 0)));
+      enqueueEvent(AnalyticsEvents.AD_SLOT_VIEWABLE, { slot: 'results' });
+
+      flushEvents();
+
+      await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+      expect(getDeliveryStats().batchesSent).toBe(1);
+      expect(getDeliveryStats().batchesFailed).toBe(0);
+    });
+
+    it('retries once on a network failure', async () => {
+      fetchMock
+        .mockImplementationOnce(() => Promise.reject(new Error('network down')))
+        .mockImplementationOnce(() => Promise.resolve(batchResponse(1, 0)));
+      enqueueEvent(AnalyticsEvents.AD_SLOT_VIEWABLE, { slot: 'results' });
+
+      flushEvents();
+
+      await vi.waitFor(() => expect(getDeliveryStats().batchesSent).toBe(1));
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('resends the same batch on retry, so nothing is dropped between attempts', async () => {
+      fetchMock
+        .mockImplementationOnce(() => Promise.resolve(batchResponse(2, 0, 503)))
+        .mockImplementationOnce(() => Promise.resolve(batchResponse(2, 0)));
+      enqueueEvent(AnalyticsEvents.AD_SLOT_VIEWABLE, { slot: 'a' });
+      enqueueEvent(AnalyticsEvents.AD_SLOT_VIEWABLE, { slot: 'b' });
+
+      flushEvents();
+
+      await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+      const [first, second] = fetchMock.mock.calls.map(
+        call => (call[1] as RequestInit).body as string
+      );
+      expect(second).toBe(first);
+    });
+
+    it('gives up after one retry rather than looping', async () => {
+      fetchMock.mockImplementation(() => Promise.resolve(batchResponse(1, 0, 500)));
+      enqueueEvent(AnalyticsEvents.AD_SLOT_VIEWABLE, { slot: 'results' });
+
+      flushEvents();
+
+      await vi.waitFor(() => expect(getDeliveryStats().batchesFailed).toBe(1));
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      expect(getDeliveryStats().batchesSent).toBe(0);
+    });
+
+    it('does not retry a 4xx, because the retry would send the same rejected payload', async () => {
+      fetchMock.mockImplementation(() => Promise.resolve(new Response(null, { status: 400 })));
+      enqueueEvent(AnalyticsEvents.AD_SLOT_VIEWABLE, { slot: 'results' });
+
+      flushEvents();
+
+      await vi.waitFor(() => expect(getDeliveryStats().batchesFailed).toBe(1));
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not retry a partially-failed 200, which would duplicate what already landed', async () => {
+      fetchMock.mockImplementation(() => Promise.resolve(batchResponse(3, 1)));
+      enqueueEvent(AnalyticsEvents.AD_SLOT_VIEWABLE, { slot: 'a' });
+      enqueueEvent(AnalyticsEvents.AD_SLOT_VIEWABLE, { slot: 'b' });
+      enqueueEvent(AnalyticsEvents.AD_SLOT_VIEWABLE, { slot: 'c' });
+
+      flushEvents();
+
+      await vi.waitFor(() => expect(getDeliveryStats().eventsRejected).toBe(1));
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('treats an unreadable response body as a delivered batch, not a failure', async () => {
+      fetchMock.mockImplementation(() =>
+        Promise.resolve(new Response('not json', { status: 200 }))
+      );
+      enqueueEvent(AnalyticsEvents.AD_SLOT_VIEWABLE, { slot: 'results' });
+
+      flushEvents();
+
+      await vi.waitFor(() => expect(getDeliveryStats().batchesSent).toBe(1));
+      expect(getDeliveryStats().batchesFailed).toBe(0);
+    });
+
+    it('never rejects out of flushEvents, whatever the transport does', async () => {
+      fetchMock.mockImplementation(() => Promise.reject(new Error('network down')));
+      const onUnhandled = vi.fn();
+      window.addEventListener('unhandledrejection', onUnhandled);
+      enqueueEvent(AnalyticsEvents.AD_SLOT_VIEWABLE, { slot: 'results' });
+
+      expect(() => flushEvents()).not.toThrow();
+
+      await vi.waitFor(() => expect(getDeliveryStats().batchesFailed).toBe(1));
+      expect(onUnhandled).not.toHaveBeenCalled();
+      window.removeEventListener('unhandledrejection', onUnhandled);
+    });
   });
 
   describe('trackNavigating', () => {
