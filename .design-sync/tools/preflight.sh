@@ -18,22 +18,63 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$REPO_ROOT"
 
-# The design-sync skill's own directory changes with every Claude Code release (it is
-# versioned into a path like .../bundled-skills/<version>/<hash>/design-sync/), so a
-# hardcoded default rots. Override with DS_SKILL_DIR when it has moved.
-DS_SKILL_DIR="${DS_SKILL_DIR:-/private/tmp/claude-501/bundled-skills/2.1.238/98ca0bdab7254c7c0cc94998cad9e60c/design-sync}"
+# Where the design-sync skill lives. This is the one input this script cannot own, and
+# the first version of it got that wrong: it hardcoded
+# /private/tmp/claude-501/bundled-skills/2.1.238/<hash>/design-sync and anticipated only
+# version drift. Within a day the whole `bundled-skills/` tree was gone from /private/tmp
+# — bundled skills are extracted on demand and the tree is temp storage, so it is evicted,
+# not just renamed. The script then died at step 2 printing a remedy ("find its current
+# path") that had nowhere to point.
+#
+# So: search rather than assume, and never make the failure fatal while a working copy of
+# the converter is already staged.
+if [ -z "${DS_SKILL_DIR:-}" ]; then
+  DS_SKILL_DIR="$(
+    find /private/tmp/claude-501 /tmp/claude-"$(id -u)" "$HOME/.claude" \
+      -maxdepth 6 -type d -name design-sync 2>/dev/null | head -1
+  )"
+fi
 
-if [ ! -d "$DS_SKILL_DIR" ]; then
-  echo "ERROR: DS_SKILL_DIR does not exist: $DS_SKILL_DIR" >&2
-  echo "The design-sync skill has likely moved to a new Claude Code version." >&2
-  echo "Find its current path and re-run with: DS_SKILL_DIR=<path> bash $0" >&2
-  exit 1
+# .ds-sync/ is a full, self-sufficient copy of the converter once step 2 has run once.
+# It is gitignored, so it is a local cache and not a backup — but it is a perfectly good
+# input for every later step, and re-staging over it is the only thing the skill is
+# needed for here.
+DS_SYNC_COMPLETE=0
+if [ -f .ds-sync/package-build.mjs ] && [ -f .ds-sync/resync.mjs ] && [ -d .ds-sync/lib ]; then
+  DS_SYNC_COMPLETE=1
+fi
+
+if [ ! -d "${DS_SKILL_DIR:-/nonexistent}" ]; then
+  if [ "$DS_SYNC_COMPLETE" = "1" ]; then
+    echo "WARNING: the design-sync skill is not on disk, so step 2 is skipped." >&2
+    echo "  .ds-sync/ already holds a complete converter and every later step uses it." >&2
+    echo "  It is GITIGNORED: it is the only copy on this machine right now. Do not run" >&2
+    echo "  'git clean -fdx' or delete .ds-sync/ until the skill is back on disk." >&2
+    echo "  To restore the skill: invoke /design-sync in a Claude Code session, which" >&2
+    echo "  re-extracts it, then re-run this script." >&2
+    echo >&2
+    SKIP_STAGING=1
+  else
+    echo "ERROR: the design-sync skill was not found and .ds-sync/ is incomplete." >&2
+    echo "  Searched: /private/tmp/claude-501, /tmp/claude-\$(id -u), \$HOME/.claude" >&2
+    echo "  Bundled skills are extracted on demand into temp storage and get evicted," >&2
+    echo "  so an absent path is normal, not a broken install. Invoke /design-sync in a" >&2
+    echo "  Claude Code session to re-extract it, then re-run this script." >&2
+    echo "  If you know the path: DS_SKILL_DIR=<path> bash $0" >&2
+    exit 1
+  fi
+else
+  SKIP_STAGING=0
+  echo "design-sync skill: $DS_SKILL_DIR"
 fi
 
 echo "== 1/6: self-link (package-build.mjs resolves the DS at <node-modules>/<pkg>; in the package's own repo that path doesn't exist on its own) =="
 ln -sfn .. node_modules/safe-unfollow
 
 echo "== 2/6: staging the skill's converter into .ds-sync/ =="
+if [ "$SKIP_STAGING" = "1" ]; then
+  echo "   skipped — using the copy already in .ds-sync/ (see warning above)"
+else
 mkdir -p .ds-sync
 cp -r \
   "$DS_SKILL_DIR"/package-build.mjs \
@@ -43,6 +84,7 @@ cp -r \
   "$DS_SKILL_DIR"/lib \
   "$DS_SKILL_DIR"/storybook \
   .ds-sync/
+fi
 
 echo "== 3/6: converter deps in .ds-sync/ =="
 if [ ! -f .ds-sync/package.json ]; then
