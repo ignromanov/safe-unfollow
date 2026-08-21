@@ -10,6 +10,27 @@
  */
 @import '../../src/styles.css';
 
+/* The two webfont packages, imported HERE and not reachable any other way.
+ *
+ * Until 2026-08-20 `src/styles.css` imported these itself, so the line above pulled
+ * them in for free. PR #105 (`d4e5416`) moved both to `src/main.tsx`, because Tailwind
+ * v4's PostCSS plugin inlines `@import` with its own resolver and never rebases the
+ * relative `url()`s inside — which is why no webfont had ever rendered on the site.
+ *
+ * The design-sync bundle has no JS entry: it never executes `main.tsx`, so nothing
+ * carries the `@font-face` rules into the preview CSS. Without these two lines the
+ * compiled stylesheet contains ZERO font faces and every card screenshots in the
+ * system fallback — reintroducing, inside the design project, the exact bug #105 fixed
+ * on the site. Verified: 0 `@font-face` in `app-compiled.css` on 2026-08-21 before this.
+ *
+ * The rebasing hazard that bit the app does not bite here: compile-css.mjs passes an
+ * explicit `to:` (`.design-sync/.cache/app-compiled.css`), so Tailwind rebases the
+ * inlined `url()`s against that path and they resolve back into `node_modules/`. That
+ * is the difference between this file and `src/styles.css`, and it is the reason the
+ * imports belong in this wrapper rather than back in the app's stylesheet. */
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/plus-jakarta-sans';
+
 @source '../previews';
 
 /* Safelist for common layout/utility classes preview authors reach for before this
