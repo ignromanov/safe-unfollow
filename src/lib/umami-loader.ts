@@ -23,10 +23,17 @@ import { SUPPORTED_LANGUAGES } from '@/config/languages';
  */
 const UMAMI_SRC = import.meta.env.VITE_UMAMI_SRC || '/v/script.js';
 
-/** Website record the events are attributed to. Changed once already, at the
- *  Neon -> Supabase migration, which is why it is configurable. */
-const UMAMI_WEBSITE_ID =
-  import.meta.env.VITE_UMAMI_WEBSITE_ID || 'f204b58f-a5bb-4231-b02b-4cc05f472d02';
+/**
+ * Website record the events are attributed to. Changed once already, at the
+ * Neon -> Supabase migration, which is why it is configurable.
+ *
+ * No default: an unset value means "do not collect". The production id used to
+ * stand here as a fallback, which made the variable impossible to switch off —
+ * scoping it to Production on Vercel left preview builds falling through the
+ * `||` to that same id, so every preview session wrote into the dataset the
+ * live numbers are read from. Absence must be the safe state, not the old one.
+ */
+const UMAMI_WEBSITE_ID = import.meta.env.VITE_UMAMI_WEBSITE_ID;
 
 /**
  * The single definition of the analytics opt-out gate. Both the tracker and the
@@ -52,6 +59,7 @@ function isFramed(): boolean {
 }
 
 export function loadUmami(): void {
+  if (!UMAMI_WEBSITE_ID) return;
   if (isOptedOut()) return;
 
   // Only load in browser
@@ -160,6 +168,7 @@ async function injectRecorder(): Promise<void> {
  * A direct arrival at `/results` never loads it at all. See GH#95.
  */
 export function loadHeatmapRecorder(): void {
+  if (!UMAMI_WEBSITE_ID) return;
   if (typeof document === 'undefined' || typeof window === 'undefined') return;
   if (isOptedOut()) return;
   if (isFramed()) return;

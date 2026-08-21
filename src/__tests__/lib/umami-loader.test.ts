@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
+const WEBSITE_ID = 'f204b58f-a5bb-4231-b02b-4cc05f472d02';
+
 describe('umami-loader', () => {
   let localStorageMock: Record<string, string> = {};
   let mockScript: HTMLScriptElement;
@@ -8,6 +10,10 @@ describe('umami-loader', () => {
   beforeEach(() => {
     // Reset module cache to reload with fresh state
     vi.resetModules();
+
+    // The loader has no built-in website id: unset means "do not collect".
+    // Every test that expects collection has to say which record it collects to.
+    vi.stubEnv('VITE_UMAMI_WEBSITE_ID', WEBSITE_ID);
 
     // Mock localStorage
     localStorageMock = {};
@@ -52,6 +58,7 @@ describe('umami-loader', () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+    vi.unstubAllEnvs();
   });
 
   describe('loadUmami', () => {
@@ -63,8 +70,22 @@ describe('umami-loader', () => {
       expect(document.createElement).toHaveBeenCalledWith('script');
       expect(mockScript.defer).toBe(true);
       expect(mockScript.src).toBe('/v/script.js');
-      expect(mockScript.dataset.websiteId).toBe('f204b58f-a5bb-4231-b02b-4cc05f472d02');
+      expect(mockScript.dataset.websiteId).toBe(WEBSITE_ID);
       expect(appendChildSpy).toHaveBeenCalledWith(mockScript);
+    });
+
+    it('should not load Umami script when no website id is configured', async () => {
+      // Preview and local builds carry no VITE_UMAMI_WEBSITE_ID. Without this
+      // gate the loader fell back to the production id and every preview
+      // session landed in the dataset the live numbers are read from.
+      vi.stubEnv('VITE_UMAMI_WEBSITE_ID', '');
+
+      const { loadUmami } = await import('@/lib/umami-loader');
+
+      loadUmami();
+
+      expect(document.createElement).not.toHaveBeenCalled();
+      expect(appendChildSpy).not.toHaveBeenCalled();
     });
 
     it('should not load Umami script when user opted out', async () => {
@@ -144,7 +165,7 @@ describe('umami-loader', () => {
 
       loadUmami();
 
-      expect(mockScript.dataset.websiteId).toBe('f204b58f-a5bb-4231-b02b-4cc05f472d02');
+      expect(mockScript.dataset.websiteId).toBe(WEBSITE_ID);
     });
 
     it('should append script to document head', async () => {
@@ -214,7 +235,7 @@ describe('umami-loader', () => {
   });
 
   describe('loadHeatmapRecorder', () => {
-    const CONFIG_URL = '/v/api/websites/f204b58f-a5bb-4231-b02b-4cc05f472d02/recorder';
+    const CONFIG_URL = `/v/api/websites/${WEBSITE_ID}/recorder`;
 
     let fetchMock: ReturnType<typeof vi.fn>;
 
@@ -253,9 +274,22 @@ describe('umami-loader', () => {
 
       expect(fetchMock).toHaveBeenCalledWith(CONFIG_URL, { credentials: 'omit' });
       expect(mockScript.src).toBe('/v/recorder.js');
-      expect(mockScript.dataset.websiteId).toBe('f204b58f-a5bb-4231-b02b-4cc05f472d02');
+      expect(mockScript.dataset.websiteId).toBe(WEBSITE_ID);
       expect(mockScript.dataset.hostUrl).toBe('/v');
       expect(appendChildSpy).toHaveBeenCalledWith(mockScript);
+    });
+
+    it('attaches no listener when no website id is configured', async () => {
+      vi.stubEnv('VITE_UMAMI_WEBSITE_ID', '');
+
+      const { loadHeatmapRecorder } = await import('@/lib/umami-loader');
+
+      loadHeatmapRecorder();
+      window.dispatchEvent(new Event('pointerdown'));
+      await Promise.resolve();
+
+      expect(fetchMock).not.toHaveBeenCalled();
+      expect(appendChildSpy).not.toHaveBeenCalled();
     });
 
     it('accepts a prefixed locale landing page', async () => {
