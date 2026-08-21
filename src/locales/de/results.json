@@ -167,11 +167,19 @@
       "legendRest": "Der Rest deiner Liste",
       "gap": "Deine kostenlose Datei endet bei Zeile {{rows}}. Der Export nimmt alle {{total}} — eine Datei, eine Zahlung, kein Abo.",
       "cta": "Export freischalten — 7 $",
+      "opening": "Bezahlseite wird geöffnet…",
+      "failed": "Die Bezahlseite hat sich nicht geöffnet — erneut versuchen",
+      "failedCause": "Die Bezahlseite wurde nicht geladen. Prüfe deine Verbindung und versuche es erneut.",
       "dismiss": "Jetzt nicht",
       "subtitle": "Vergleichbare Tracker kosten 5–10 $ im Monat, solange du deine Follower im Blick behalten willst. Hier sind es 7 $, einmalig, für die Datei selbst.",
       "terms": "Einmalig 7 $. Für bis zu 3 Geräte.",
       "refund": "Nicht das, was du erwartet hast? Schreib innerhalb von 30 Tagen an {{email}}, und wir erstatten dir den Betrag.",
       "instantNote": "Sofortige Freischaltung nach dem Kauf"
+    },
+    "checkout": {
+      "privacy": "Dein Instagram-Export bleibt in diesem Browser. Die Bezahlseite sieht ihn nie.",
+      "summary": "{{rows}} Zeilen · CSV + JSON · 7 $, einmalig.",
+      "methods": "Karten und lokale Zahlungsmethoden erscheinen auf der nächsten Seite."
     },
     "license": {
       "title": "Export aktivieren",

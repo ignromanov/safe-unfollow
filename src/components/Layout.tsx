@@ -1,5 +1,5 @@
 import i18n from 'i18next';
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 
 import { BreadcrumbSchema } from '@/components/BreadcrumbSchema';
@@ -49,27 +49,51 @@ export function Layout({ lang }: LayoutProps) {
   useLayoutAnalytics();
   useEventQueueFlush();
 
-  // Read once, during the first render: the param must be stripped before any
-  // navigation or analytics can observe the key. A second read would spend one
-  // of the license's 3 device activations, so nothing may re-trigger this.
-  // NOTE: this initializer has a side effect (history.replaceState). The app
-  // does not use StrictMode today; under StrictMode React double-invokes this
-  // initializer and commits the second result, which would find the param
-  // already stripped and silently drop the paid redirect.
-  const [capturedLicenseKey] = useState<string | null>(() => {
+  const [capturedLicenseKey, setCapturedLicenseKey] = useState<string | null>(null);
+  const [isLicenseDialogOpen, setIsLicenseDialogOpen] = useState(false);
+  // Survives re-runs of the effect against the same mounted component; a real
+  // remount gets a fresh one, which is what the recovery path below needs.
+  const hasConsumedLicenseParam = useRef(false);
+
+  // Read once, after the tree is committed — NOT during render, which is the
+  // distinction the whole redirect depends on.
+  //
+  // `consumeLicenseParam` strips the param with history.replaceState, so it is
+  // a side effect, and a render may be thrown away. `/results` is prerendered
+  // and therefore hydrated: on 2026-08-21 a real test purchase returned to
+  // /results?license_key=..., the client's first render mounted a dialog the
+  // server HTML did not have (React #418), React discarded that render and
+  // client-rendered the whole root (#423) — and the discarded render had
+  // already eaten the param. The second one found an empty URL and the buyer's
+  // export stayed locked. The file predicted this failure for StrictMode and
+  // called it hypothetical; hydration recovery is the same double invocation.
+  //
+  // A commit-phase read cannot lose that way: the render React throws away
+  // never commits, so this never ran, and the param is still in the URL for
+  // the render that does commit.
+  //
+  // Layout-phase rather than passive, and this is load-bearing: stripping must
+  // beat anything that can observe the URL. useLayoutAnalytics fires its
+  // pageview from a passive useEffect, and every passive effect in the tree
+  // runs after every layout effect — so the key is out of the address bar
+  // before analytics can read it, whatever order the hooks are declared in.
+  useIsomorphicLayoutEffect(() => {
+    if (hasConsumedLicenseParam.current) return;
+    hasConsumedLicenseParam.current = true;
+
     // Stripping is always safe and must happen even when the feature flag is
     // off — otherwise a key lingers in the address bar and in Umami's
-    // auto-tracked pageview URL. Only mounting the dialog below is gated on
-    // the flag.
+    // auto-tracked pageview URL. Only the dialog is gated on the flag.
     const key = consumeLicenseParam();
-    return isExportFeatureEnabled() ? key : null;
-  });
-  const [isLicenseDialogOpen, setIsLicenseDialogOpen] = useState(() => {
+    if (!isExportFeatureEnabled() || key === null) return;
+
+    setCapturedLicenseKey(key);
+
     // An empty or whitespace-only `?license_key=` (e.g. a truncated link) is not
     // a key at all — opening the manual-entry form for it would show a
     // license prompt to someone who never bought anything.
-    const trimmed = capturedLicenseKey?.trim() ?? '';
-    if (trimmed.length === 0) return false;
+    const trimmed = key.trim();
+    if (trimmed.length === 0) return;
 
     // If this device already holds this exact key, opening the dialog only
     // for LicenseDialog's own guard to close it immediately flashes a modal
@@ -77,8 +101,10 @@ export function Layout({ lang }: LayoutProps) {
     // lazy chunk for nothing. Decide not to open at all instead — the guard
     // inside LicenseDialog stays as the correct last line of defence for
     // every other caller.
-    return getStoredLicense()?.key !== trimmed;
-  });
+    if (getStoredLicense()?.key === trimmed) return;
+
+    setIsLicenseDialogOpen(true);
+  }, []);
 
   // SSG: Switch language synchronously BEFORE rendering
   // This works because during SSG all language resources are preloaded

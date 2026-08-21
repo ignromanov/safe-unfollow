@@ -167,11 +167,19 @@
       "legendRest": "Sisa daftar Anda",
       "gap": "File gratis Anda berhenti di baris {{rows}}. Ekspor mengambil seluruh {{total}} — satu file, satu pembayaran, bukan langganan.",
       "cta": "Buka ekspor — $7",
+      "opening": "Membuka pembayaran…",
+      "failed": "Pembayaran tidak terbuka — coba lagi",
+      "failedCause": "Halaman pembayaran tidak termuat. Periksa koneksi Anda dan coba lagi.",
       "dismiss": "Nanti saja",
       "subtitle": "Pelacak sejenis menagih $5–10 per bulan selama Anda ingin terus memantau pengikut Anda. Yang ini $7 sekali bayar, untuk filenya.",
       "terms": "Sekali bayar $7. Berlaku di maksimal 3 perangkat.",
       "refund": "Tidak sesuai harapan? Kirim email ke {{email}} dalam 30 hari dan kami kembalikan uang Anda.",
       "instantNote": "Langsung terbuka setelah pembayaran"
+    },
+    "checkout": {
+      "privacy": "Ekspor Instagram Anda tetap di browser ini. Halaman pembayaran tidak pernah melihatnya.",
+      "summary": "{{rows}} baris · CSV + JSON · $7, sekali bayar.",
+      "methods": "Kartu dan metode pembayaran lokal ditampilkan di halaman berikutnya."
     },
     "license": {
       "title": "Aktifkan ekspor Anda",

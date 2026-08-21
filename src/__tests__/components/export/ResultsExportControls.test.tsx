@@ -79,7 +79,13 @@ function dwell(): void {
 }
 
 function unlocked(isUnlocked: boolean) {
-  mockUseProExport.mockReturnValue({ isEnabled: true, isUnlocked, startCheckout: vi.fn() });
+  mockUseProExport.mockReturnValue({
+    isEnabled: true,
+    isUnlocked,
+    checkoutState: 'idle',
+    startCheckout: vi.fn(),
+    resetCheckout: vi.fn(),
+  });
 }
 
 describe('ResultsExportControls', () => {
@@ -112,7 +118,9 @@ describe('ResultsExportControls', () => {
     mockUseProExport.mockReturnValue({
       isEnabled: false,
       isUnlocked: false,
+      checkoutState: 'idle',
       startCheckout: vi.fn(),
+      resetCheckout: vi.fn(),
     });
 
     render(<ResultsExportControls {...defaultProps} />);
@@ -721,7 +729,13 @@ describe('ResultsExportControls', () => {
     // click is what proves the checkout path was taken at all.
     it('should not fire when leaving via checkout', async () => {
       const startCheckout = vi.fn();
-      mockUseProExport.mockReturnValue({ isEnabled: true, isUnlocked: false, startCheckout });
+      mockUseProExport.mockReturnValue({
+        isEnabled: true,
+        isUnlocked: false,
+        checkoutState: 'idle',
+        startCheckout,
+        resetCheckout: vi.fn(),
+      });
       const user = userEvent.setup();
 
       render(<ResultsExportControls {...defaultProps} />);

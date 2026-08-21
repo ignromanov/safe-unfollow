@@ -6,6 +6,7 @@ import resultsEN from '@/locales/en/results.json';
 import { useAppStore } from '@/lib/store';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { StrictMode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock analytics (V9: added captureUTMParams for UTM tracking)
@@ -138,8 +139,19 @@ vi.mock('@/locales', () => ({
 }));
 
 // Helper to render Layout with router
-const renderLayout = (initialPath = '/', lang?: 'en' | 'es' | 'ar') => {
+const renderLayout = (
+  initialPath = '/',
+  lang?: 'en' | 'es' | 'ar',
+  { strict = false }: { strict?: boolean } = {}
+) => {
   const TestOutlet = () => <div data-testid="page-content">Page Content</div>;
+
+  // StrictMode double-invokes the render phase while committing once — the same
+  // shape as React discarding a failed hydration render and rendering the root
+  // again. Anything with a side effect in render survives one and not the other.
+  const wrapper = strict
+    ? ({ children }: { children: React.ReactNode }) => <StrictMode>{children}</StrictMode>
+    : undefined;
 
   return render(
     <MemoryRouter
@@ -161,7 +173,8 @@ const renderLayout = (initialPath = '/', lang?: 'en' | 'es' | 'ar') => {
           <Route path=":lang/*" element={<TestOutlet />} />
         </Route>
       </Routes>
-    </MemoryRouter>
+    </MemoryRouter>,
+    { wrapper }
   );
 };
 
@@ -576,6 +589,34 @@ describe('Layout', () => {
       // file (see the vi.mock above), so nothing here suspends — it renders
       // in the same pass as Layout. getByTestId, not findByTestId.
       expect(screen.getByTestId('license-dialog')).toBeInTheDocument();
+    });
+
+    // The regression this pins: on 2026-08-21 a real test purchase returned to
+    // /results?license_key=... and the export stayed locked. `/results` is
+    // prerendered (`data-server-rendered="true"`), so React hydrates it; the
+    // client's first render mounted a dialog the server HTML did not contain,
+    // which is React #418, followed by #423 — "the entire root will switch to
+    // client rendering". React throws that render away and renders the root
+    // again. Capturing in a `useState` initializer put the URL-stripping
+    // `history.replaceState` in the render phase, so the discarded render had
+    // already consumed the param and the second one found nothing.
+    //
+    // StrictMode reproduces the shape exactly and is the cheapest way to hold
+    // it: the render phase runs twice, the commit happens once. Layout.tsx
+    // carried a comment predicting this failure under StrictMode and treated it
+    // as hypothetical. It was not — hydration recovery is the same double
+    // invocation, and it reached a paying buyer.
+    it('should keep the captured key when the render phase runs twice, as it does after a hydration error', async () => {
+      window.history.replaceState(
+        {},
+        '',
+        '/results?license_key=38b1460a-5104-4067-a91d-77b872934d51'
+      );
+
+      renderLayout('/results', undefined, { strict: true });
+
+      expect(await screen.findByTestId('license-dialog')).toBeInTheDocument();
+      expect(window.location.search).toBe('');
     });
 
     it('should not render the license dialog without the param', () => {

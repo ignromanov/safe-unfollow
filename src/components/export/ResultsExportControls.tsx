@@ -54,7 +54,7 @@ export function ResultsExportControls({
   filename,
 }: ResultsExportControlsProps) {
   const { t, i18n } = useTranslation('results');
-  const { isEnabled, isUnlocked, startCheckout } = useProExport();
+  const { isEnabled, isUnlocked, checkoutState, startCheckout, resetCheckout } = useProExport();
   const [isPaywallOpen, setIsPaywallOpen] = useState(false);
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [isLicenseDialogOpen, setIsLicenseDialogOpen] = useState(false);
@@ -164,6 +164,11 @@ export function ResultsExportControls({
     // reports; no `saved` means no modal, and therefore nothing to dismiss.
     if (!open && saved) {
       analytics.paywallDismiss(i18n.language, saved.total);
+      // The modal is what draws the checkout state, so a dismissal has to clear
+      // it. Without this a reader who leaves during a slow redirect and reopens
+      // the paywall meets a disabled button explaining a checkout they already
+      // walked away from.
+      resetCheckout();
     }
     setIsPaywallOpen(open);
   };
@@ -252,6 +257,7 @@ export function ResultsExportControls({
             onManualEntry={openLicenseDialog}
             savedFilename={saved.filename}
             totalRows={saved.total}
+            checkoutState={checkoutState}
           />
         ) : null}
         {isExportDialogOpen ? (
