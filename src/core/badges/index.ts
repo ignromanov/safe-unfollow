@@ -184,21 +184,6 @@ export const BADGE_ORDER: readonly BadgeKey[] = [
   'dismissed',
 ] as const;
 
-// Human-readable labels for each badge type (V2 naming)
-export const BADGE_LABELS: Record<BadgeKey, string> = {
-  following: 'Following',
-  followers: 'Follower',
-  mutuals: 'Mutual',
-  notFollowingBack: 'Not Following Back',
-  notFollowedBack: 'Fan',
-  pending: 'Pending',
-  permanent: 'Removed',
-  restricted: 'Restricted',
-  close: 'Close Friend',
-  unfollowed: 'Unfollowed You',
-  dismissed: 'Dismissed',
-} as const;
-
 // V3 Color scheme using OKLCH for perceptual uniformity
 export const BADGE_COLORS: Record<BadgeKey, string> = {
   following:
