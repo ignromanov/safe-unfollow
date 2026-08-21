@@ -2,19 +2,21 @@
 
 Repo-specific gotchas for future syncs. Read this before re-running the converter.
 
-## ⛔ NEVER reconcile-delete in this project — 41 files are hand-authored
+## ⛔ NEVER reconcile-delete in this project — 52 files are hand-authored
 
 The target project (`5e633d36-642a-4605-8000-3ecc1eecb00c`) **pre-dates design-sync** and was
 adopted, not created by it. Alongside the converter's output it holds a hand-authored design
 system that the converter does not produce and therefore cannot re-create:
 
-| Path                                                        | Count | What                                                                  |
-| ----------------------------------------------------------- | ----- | --------------------------------------------------------------------- |
-| `foundations/*.card.html`                                   | 18    | Colour, type, spacing, radius, shadow, motion, brand, icon specimens  |
-| `catalog/*.card.html`                                       | 5     | Component variant grids mounted from the bundle                       |
-| `ui_kits/app/*`                                             | 6     | Click-through recreation of the app (hero → guide → upload → results) |
-| `assets/*`                                                  | 8     | Logo, favicon, OG image, product screenshots                          |
-| `DESIGN-GUIDE.md`, `SKILL.md`, `SYNC-FIXES.md`, `github.md` | 4     | Judgment layer + agent entry point                                    |
+| Path                           | Count | What                                                                                                 |
+| ------------------------------ | ----- | ---------------------------------------------------------------------------------------------------- |
+| `foundations/*.card.html`      | 18    | Colour, type, spacing, radius, shadow, motion, brand, icon specimens                                 |
+| `catalog/*.card.html`          | 5     | Component variant grids mounted from the bundle                                                      |
+| `ui_kits/app/*`                | 6     | Click-through recreation of the app (hero → guide → upload → results)                                |
+| `assets/*`                     | 8     | Logo, favicon, OG image, product screenshots                                                         |
+| root text files                | 6     | `DESIGN-GUIDE.md` `SKILL.md` `SYNC-ADVICE.md` `SYNC-FIXES.md` `github.md` `_adherence.oxlintrc.json` |
+| `handoff/*`                    | 2     | The 2026-08-17 conversion brief and Claude Design's answers to it                                    |
+| `templates/conversion-audit/*` | 7     | Four `.dc.html` mockups + `ds-base.js` loader + `support.js` runtime + `.thumbnail`                  |
 
 The upload section's reconciliation-delete step assumes _everything in the project came from
 this sync_ — true for a freshly created project, **false here**. Following it literally deletes
@@ -34,9 +36,25 @@ tokens defined twice (light + dark) in the `_ds_bundle.css` closure, Inter shipp
 both sides derive from the same Tailwind config. **A `cssEntry` change would silently unstyle
 18 hand-authored cards, and no converter check would catch it.**
 
-Backup: `designs/claude-design-project/` in the repo. `DESIGN-GUIDE.md` is copied there; the
-remaining text files were not (nothing is being deleted, so the copy is belt-and-braces). The
-8 assets all have local sources already (`public/`, `designs/screenshots/`).
+**The count above was 41 until 2026-08-20, and the undercount was the dangerous kind: it named
+four root text files where there are six, and omitted `handoff/` and `templates/` entirely.**
+A guard rule that enumerates what it protects is only as good as the enumeration — `SYNC-ADVICE.md`,
+both handoff documents and the mockups' own loader were outside it. Re-derive this table from
+`DesignSync list_files` rather than trusting it; the converter's output is everything NOT listed
+here (`components/` `_preview/` `_vendor/` `fonts/` `guidelines/` `styles.css` `README.md`
+`_ds_bundle.*` `_ds_manifest.json` `_ds_sync.json`), which is the cheaper half to identify.
+
+Backup: `designs/claude-design-project/` in the repo — **43 of the 52 now, up from 1.** Until
+2026-08-20 only `DESIGN-GUIDE.md` was copied, on the reasoning that nothing was being deleted;
+that reasoning protects against reconciliation and against nothing else, while the guard rule
+itself lived in this file, which had just been lost with the worktree. Deliberately not copied:
+the 8 `assets/` (verified 2026-08-20 — all eight have local sources in `public/` and
+`designs/screenshots/`) and `.thumbnail`.
+
+One correction worth keeping: `templates/conversion-audit/support.js` is 69 KB of **Claude Design's
+own runtime**, headed `GENERATED from dc-runtime/src/*.ts — do not edit`. It is not our design work
+and was nearly skipped on that basis — but it is the parser for `<x-dc>`, so without it the four
+backed-up `.dc.html` mockups are inert files. It is vendored deliberately; do not "clean it up".
 
 ## The `--remote` anchor is already on disk — check before fetching it
 

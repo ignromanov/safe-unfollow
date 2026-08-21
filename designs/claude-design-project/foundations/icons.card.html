@@ -1,0 +1,13 @@
+<!-- @dsCard group="Brand" viewport="700x210" subtitle="Lucide, 14–24px, strokeWidth 2 (2.5 for the shield)" name="Iconography" -->
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css"><style>body{margin:0;padding:18px 20px;background:var(--background);color:var(--foreground);font-family:'Inter',ui-sans-serif,system-ui}.g{display:flex;gap:18px;flex-wrap:wrap}.i{display:flex;flex-direction:column;align-items:center;gap:6px;width:74px}.i span{font-size:9px;font-family:ui-monospace,Menlo,monospace;color:var(--muted-foreground)}.note{font-size:11px;font-family:ui-monospace,Menlo,monospace;color:var(--muted-foreground);margin-top:16px;line-height:1.7}</style></head><body>
+<div class="g" id="g"></div>
+<div class="note">lucide-react · size 14 (footer links) · 18 (chips, header) · 20–22 (buttons, logo) · 24 (feature cards)<br>colour comes from a Tailwind text-* class, never a fill on the path. No emoji anywhere in product UI.</div>
+<script src="https://unpkg.com/lucide@0.446.0/dist/umd/lucide.min.js"></script>
+<script>
+var names=['shield-check','shield','ban','infinity','code','database','arrow-right','circle-check-big','users','user-plus','heart','trending-down','ghost','clock','circle-x','circle-alert','filter','search','upload','trash-2','layout-dashboard','sun','moon','sun-moon','coffee','github','book-open','eye-off','chevron-down','x','loader-circle'];
+var colors={'shield':'#10b981','ban':'#f43f5e','infinity':'#6366f1','code':'#f59e0b','circle-check-big':'#10b981','heart':'#ec4899','trending-down':'#f43f5e','ghost':'#f59e0b','shield-check':'oklch(0.6 0.18 264)','filter':'oklch(0.6 0.18 264)'};
+var g=document.getElementById('g');
+g.innerHTML=names.map(function(n){return '<div class="i"><i data-lucide="'+n+'" style="color:'+(colors[n]||'var(--muted-foreground)')+'"></i><span>'+n+'</span></div>'}).join('');
+lucide.createIcons({attrs:{width:22,height:22,'stroke-width':2}});
+</script>
+</body></html>

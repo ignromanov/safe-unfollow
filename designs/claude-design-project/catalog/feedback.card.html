@@ -1,0 +1,17 @@
+<!-- @dsCard group="Components" viewport="700x300" subtitle="Alert, skeleton rows and the route loader" name="Feedback" -->
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css"><style>body{margin:0;padding:18px 20px;background:var(--background);color:var(--foreground);font-family:'Inter',ui-sans-serif,system-ui}.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:14px}.cap{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-foreground);width:100%;margin-bottom:-4px}</style></head><body><div id="root"></div>
+<script src="../_vendor/react.js"></script><script src="../_vendor/react-dom.js"></script><script src="../_ds_bundle.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel">
+const NS=window.SafeUnfollow;
+
+const {Alert,AlertTitle,AlertDescription,SkeletonItem,PageLoader}=NS;
+function Card(){return <div>
+<Alert><AlertTitle>HTML export detected</AlertTitle><AlertDescription>Instagram exports must be JSON. Re-run the export and choose Format → JSON.</AlertDescription></Alert>
+<div style={{height:12}} />
+<Alert variant="destructive"><AlertTitle>Export failed</AlertTitle><AlertDescription>Please try again.</AlertDescription></Alert>
+<div style={{height:16}} /><span className="cap">skeleton</span>
+<div style={{border:'1px solid var(--border)',borderRadius:24,overflow:'hidden',marginTop:8}}><SkeletonItem /><SkeletonItem /><SkeletonItem /></div>
+</div>}
+ReactDOM.createRoot(document.getElementById('root')).render(<Card/>);
+</script></body></html>
