@@ -251,3 +251,33 @@ describe('paywall device-limit copy', () => {
     }
   });
 });
+
+// The handoff restates the purchase at the moment the reader leaves for a
+// third-party domain, which makes it the last place a wrong number can be
+// corrected — and the first place a translator sees the price out of context.
+// Two things are pinned, and the second is the one nothing else in this repo
+// checks: a dropped `{{rows}}` renders the literal braces to the buyer, and no
+// locale gate catches a lost interpolation (GH#70's neighbour).
+describe('checkout handoff summary', () => {
+  const PRICE = '7';
+
+  it('quotes our price and no other in every supported language', () => {
+    for (const language of SUPPORTED_LANGUAGES) {
+      const summary = String(bundleFor(language).export.checkout.summary);
+      const amounts = amountsIn(summary).filter(amount => amount !== '{{rows}}');
+
+      expect(amounts, `${language} handoff summary quotes our price`).toContain(PRICE);
+      for (const amount of amounts) {
+        expect(amount, `${language} handoff summary quotes only ${PRICE}`).toBe(PRICE);
+      }
+    }
+  });
+
+  it('keeps the row-count placeholder every language interpolates', () => {
+    for (const language of SUPPORTED_LANGUAGES) {
+      const summary = String(bundleFor(language).export.checkout.summary);
+
+      expect(summary, `${language} handoff summary names the row count`).toContain('{{rows}}');
+    }
+  });
+});

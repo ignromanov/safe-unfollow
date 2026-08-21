@@ -167,11 +167,19 @@
       "legendRest": "Listenin geri kalanı",
       "gap": "Ücretsiz dosyan {{rows}}. satırda bitiyor. Dışa aktarma {{total}} satırın tamamını alır — tek dosya, tek ödeme, abonelik değil.",
       "cta": "Dışa aktarmayı aç — 7$",
+      "opening": "Ödeme açılıyor…",
+      "failed": "Ödeme açılmadı — tekrar dene",
+      "failedCause": "Ödeme sayfası yüklenmedi. Bağlantını kontrol et ve tekrar dene.",
       "dismiss": "Şimdi değil",
       "subtitle": "Benzer takip araçları, takipçilerini izlemeye devam etmen için ayda 5–10$ alır. Buradaysa dosyanın kendisi için tek seferlik 7$.",
       "terms": "Tek seferlik 7$. En fazla 3 cihazda açılır.",
       "refund": "Beklediğin gibi değil mi? 30 gün içinde {{email}} adresine yaz, paranı iade edelim.",
       "instantNote": "Ödemeden hemen sonra anında açılır"
+    },
+    "checkout": {
+      "privacy": "Instagram dışa aktarman bu tarayıcıda kalır. Ödeme sayfası verilerini asla görmez.",
+      "summary": "{{rows}} satır · CSV + JSON · tek seferlik 7$.",
+      "methods": "Kartlar ve yerel ödeme yöntemleri sonraki sayfada gösterilir."
     },
     "license": {
       "title": "Dışa aktarımını etkinleştir",

@@ -1,6 +1,8 @@
-import { Check } from 'lucide-react';
+import { Check, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
+import { CheckoutHandoff } from '@/components/export/CheckoutHandoff';
+import type { CheckoutState } from '@/hooks/useProExport';
 import { FREE_EXPORT_ROWS } from '@/lib/export/free-tier';
 import {
   Dialog,
@@ -21,6 +23,23 @@ import {
  */
 const REFUND_EMAIL = 'refunds@safeunfollow.app';
 
+/**
+ * The label the control wears in each state.
+ *
+ * `failed` says what went wrong and offers the retry in the same breath, so the
+ * button never returns to looking merely pressable — a control that goes quiet
+ * and then quietly re-arms is what taught the reader to press it twice.
+ */
+const CTA_KEY = {
+  idle: 'export.paywall.cta',
+  opening: 'export.paywall.opening',
+  failed: 'export.paywall.failed',
+  // `as const` and not `Record<CheckoutState, string>`: i18next's keys are a
+  // literal union here, and the wide annotation throws that away — the map
+  // would type-check while naming a key no bundle has. `satisfies` keeps the
+  // exhaustiveness check the annotation was there for.
+} as const satisfies Record<CheckoutState, string>;
+
 export interface PaywallModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -30,6 +49,8 @@ export interface PaywallModalProps {
   savedFilename: string;
   /** Rows in the view the sample was cut from */
   totalRows: number;
+  /** What the checkout control is doing — see useProExport */
+  checkoutState: CheckoutState;
 }
 
 /**
@@ -61,6 +82,7 @@ export function PaywallModal({
   onManualEntry,
   savedFilename,
   totalRows,
+  checkoutState,
 }: PaywallModalProps) {
   const { t, i18n } = useTranslation('results');
 
@@ -95,6 +117,9 @@ export function PaywallModal({
   // width on every viewport, and a figure computed against one of them would be
   // wrong on all the others.
   const samplePercent = (FREE_EXPORT_ROWS / totalRows) * 100;
+
+  const isOpening = checkoutState === 'opening';
+  const hasFailed = checkoutState === 'failed';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -132,145 +157,157 @@ export function PaywallModal({
         overlayClassName="max-sm:duration-300 max-sm:ease-out"
         className="max-sm:top-auto max-sm:bottom-0 max-sm:max-w-none max-sm:translate-y-0 max-sm:rounded-t-3xl max-sm:rounded-b-none max-sm:border-b-0 max-sm:max-h-[90dvh] max-sm:overflow-y-auto max-sm:px-5 max-sm:pb-[calc(1.75rem+env(safe-area-inset-bottom))] max-sm:shadow-[0_-8px_30px_oklch(0_0_0/0.12)] max-sm:duration-300 max-sm:ease-out max-sm:data-[state=open]:slide-in-from-bottom max-sm:data-[state=closed]:slide-out-to-bottom max-sm:data-[state=open]:zoom-in-100 max-sm:data-[state=closed]:zoom-out-100 max-sm:data-[state=open]:fade-in-100 max-sm:data-[state=closed]:fade-out-100"
       >
-        {/* The dialog arrives together with a file the reader never asked for,
-            and on iOS Safari a blob download can be silent or blocked outright.
-            Naming the file is what turns everything below from an assertion
-            about something unseen into a claim the reader can go and check.
-            Muted and small on purpose: a receipt, not a second headline. */}
-        <p className="flex items-start gap-2 text-xs leading-normal text-muted-foreground">
-          <Check className="h-3.5 w-3.5 shrink-0 text-emerald-500 mt-0.5" />
-          <span className="min-w-0 break-words">
-            {t('export.saved.capped', {
-              filename: isolatedFilename,
-              rows: FREE_EXPORT_ROWS,
-              total: totalLabel,
-            })}
-          </span>
-        </p>
+        {/* The redirect is not instant — `location.href` starts a navigation
+            the browser completes only when the checkout host answers — so this
+            swap is a screen the reader actually sees, and it is the gap the
+            re-taps happened in. The argument is finished by then: they decided.
+            What replaces it is what a person wants while crossing to a payment
+            domain. The terms of the deal stay below, unswapped. */}
+        {checkoutState === 'opening' ? (
+          <CheckoutHandoff rows={totalRows} />
+        ) : (
+          <>
+            {/* The dialog arrives together with a file the reader never asked for,
+                and on iOS Safari a blob download can be silent or blocked outright.
+                Naming the file is what turns everything below from an assertion
+                about something unseen into a claim the reader can go and check.
+                Muted and small on purpose: a receipt, not a second headline. */}
+            <p className="flex items-start gap-2 text-xs leading-normal text-muted-foreground">
+              <Check className="h-3.5 w-3.5 shrink-0 text-emerald-500 mt-0.5" />
+              <span className="min-w-0 break-words">
+                {t('export.saved.capped', {
+                  filename: isolatedFilename,
+                  rows: FREE_EXPORT_ROWS,
+                  total: totalLabel,
+                })}
+              </span>
+            </p>
 
-        <DialogHeader className="text-start sm:text-start">
-          {/* The heading is the number and its label together, not a sentence
-              above them. Radix names the dialog from this node, so a screen
-              reader gets "8,930 accounts matched by this filter" — which is the
-              same claim the sighted reader gets, rather than a headline written
-              to stand in for one.
+            <DialogHeader className="text-start sm:text-start">
+              {/* The heading is the number and its label together, not a sentence
+                  above them. Radix names the dialog from this node, so a screen
+                  reader gets "8,930 accounts matched by this filter" — which is the
+                  same claim the sighted reader gets, rather than a headline written
+                  to stand in for one.
 
-              `font-display` is the design system's register for every stat
-              number in the product, and it carries the -0.04em / 1.15 pairing
-              plus the RTL letter-spacing reset that a hand-rolled
-              `tracking-tighter` would miss in Arabic.
+                  `font-display` is the design system's register for every stat
+                  number in the product, and it carries the -0.04em / 1.15 pairing
+                  plus the RTL letter-spacing reset that a hand-rolled
+                  `tracking-tighter` would miss in Arabic.
 
-              The size is the reference's 44px on the sheet and the system's
-              48px rung from 640px up. 44 is not on the type scale, but this is
-              the only bare `text-5xl` in the product — the other seven all sit
-              behind `md:`/`lg:`, and the bare mobile ceiling here is
-              `text-4xl`. 48px at 390px would be 1.6x the H1 of the page the
-              reader arrives from (`text-3xl` = 30px there), so the arbitrary
-              value buys the artboard's number without inventing a mobile rung
-              the design system does not have. */}
-          <DialogTitle className="flex flex-col gap-0.5">
-            <span className="font-display text-[2.75rem] leading-none font-extrabold text-primary sm:text-5xl">
-              {totalLabel}
-            </span>
-            <span className="text-sm font-semibold text-muted-foreground">
-              {t('export.paywall.listLabel')}
-            </span>
-          </DialogTitle>
-        </DialogHeader>
+                  The size is the reference's 44px on the sheet and the system's
+                  48px rung from 640px up. 44 is not on the type scale, but this is
+                  the only bare `text-5xl` in the product — the other seven all sit
+                  behind `md:`/`lg:`, and the bare mobile ceiling here is
+                  `text-4xl`. 48px at 390px would be 1.6x the H1 of the page the
+                  reader arrives from (`text-3xl` = 30px there), so the arbitrary
+                  value buys the artboard's number without inventing a mobile rung
+                  the design system does not have. */}
+              <DialogTitle className="flex flex-col gap-0.5">
+                <span className="font-display text-[2.75rem] leading-none font-extrabold text-primary sm:text-5xl">
+                  {totalLabel}
+                </span>
+                <span className="text-sm font-semibold text-muted-foreground">
+                  {t('export.paywall.listLabel')}
+                </span>
+              </DialogTitle>
+            </DialogHeader>
 
-        {/* aria-hidden on the whole block, bar and legend together: it restates
-            the sentence below it in a form that has no reading. A colour key
-            read aloud is two words and a shape nobody can see, and the two
-            counts are already in the receipt above.
+            {/* aria-hidden on the whole block, bar and legend together: it restates
+                the sentence below it in a form that has no reading. A colour key
+                read aloud is two words and a shape nobody can see, and the two
+                counts are already in the receipt above.
 
-            The 2px divider is `primary-foreground`, and the choice is measured
-            rather than stylistic. The two fills are 1.65:1 apart in light and
-            1.34:1 in dark, so the divider is not a nicety between them — it is
-            the entire boundary. As the sheet's own background it read 8.24:1
-            against the emerald in dark and 2.39:1 in light: the boundary
-            survived in one theme and dissolved in the other.
+                The 2px divider is `primary-foreground`, and the choice is measured
+                rather than stylistic. The two fills are 1.65:1 apart in light and
+                1.34:1 in dark, so the divider is not a nicety between them — it is
+                the entire boundary. As the sheet's own background it read 8.24:1
+                against the emerald in dark and 2.39:1 in light: the boundary
+                survived in one theme and dissolved in the other.
 
-            The fix is not "darker". It is that the divider must be near-black
-            in BOTH themes, because the fills are mid-lightness in both and do
-            not flip when the theme does. Any near-white divider fails against
-            the emerald (2.46:1) whichever theme it is in, and `foreground`
-            itself is wrong for exactly that reason — it is near-black in light
-            and near-white in dark, so it merely moves the failure from one
-            theme to the other (2.33:1 against emerald in dark).
+                The fix is not "darker". It is that the divider must be near-black
+                in BOTH themes, because the fills are mid-lightness in both and do
+                not flip when the theme does. Any near-white divider fails against
+                the emerald (2.46:1) whichever theme it is in, and `foreground`
+                itself is wrong for exactly that reason — it is near-black in light
+                and near-white in dark, so it merely moves the failure from one
+                theme to the other (2.33:1 against emerald in dark).
 
-            `--primary-foreground` is `oklch(0.12 0.01 264)` in both themes, and
-            it is the one token whose stated job is to be legible on top of
-            `--primary`, which is what half this bar is painted with. Against
-            emerald 8.24:1, against primary 5.00:1 light and 6.15:1 dark.
+                `--primary-foreground` is `oklch(0.12 0.01 264)` in both themes, and
+                it is the one token whose stated job is to be legible on top of
+                `--primary`, which is what half this bar is painted with. Against
+                emerald 8.24:1, against primary 5.00:1 light and 6.15:1 dark.
 
-            The two fill colours are untouched. This fixes where the halves
-            meet, which is what the bar is for, and does not repaint the
-            reference.
+                The two fill colours are untouched. This fixes where the halves
+                meet, which is what the bar is for, and does not repaint the
+                reference.
 
-            The floor is `max(12px, …)` and not a bare percentage. At 8,930 rows
-            the true share is 0.1% — under a pixel, so the segment would vanish
-            and the bar would say the sample is nothing. The floor distorts in
-            the sample's favour, which is the safe direction: it can only make
-            our free tier look more generous than it is. Just above
-            `PAYWALL_MIN_ROWS` — the smallest list that opens this modal at all
-            — the share is 32% and the floor stops applying, so the distortion
-            disappears exactly where it would start to matter. */}
-        <div aria-hidden="true" className="flex flex-col gap-2">
-          <div className="flex h-4 overflow-hidden rounded-full border bg-muted">
-            <div
-              className="shrink-0 bg-emerald-500"
-              style={{ width: `max(12px, ${samplePercent}%)` }}
-            />
-            <div className="w-0.5 shrink-0 bg-primary-foreground" />
-            <div className="grow bg-primary" />
-          </div>
-          {/* The swatches are outlined, not bare. Emerald on the light surface
-              measures 2.39:1 against the 3:1 non-text threshold, and here the
-              fill is the only thing tying a label to a segment — the "it is
-              decorative" exemption does not apply to a key. The outline carries
-              the discriminability; the fill carries the meaning.
+                The floor is `max(12px, …)` and not a bare percentage. At 8,930 rows
+                the true share is 0.1% — under a pixel, so the segment would vanish
+                and the bar would say the sample is nothing. The floor distorts in
+                the sample's favour, which is the safe direction: it can only make
+                our free tier look more generous than it is. Just above
+                `PAYWALL_MIN_ROWS` — the smallest list that opens this modal at all
+                — the share is 32% and the floor stops applying, so the distortion
+                disappears exactly where it would start to matter. */}
+            <div aria-hidden="true" className="flex flex-col gap-2">
+              <div className="flex h-4 overflow-hidden rounded-full border bg-muted">
+                <div
+                  className="shrink-0 bg-emerald-500"
+                  style={{ width: `max(12px, ${samplePercent}%)` }}
+                />
+                <div className="w-0.5 shrink-0 bg-primary-foreground" />
+                <div className="grow bg-primary" />
+              </div>
+              {/* The swatches are outlined, not bare. Emerald on the light surface
+                  measures 2.39:1 against the 3:1 non-text threshold, and here the
+                  fill is the only thing tying a label to a segment — the "it is
+                  decorative" exemption does not apply to a key. The outline carries
+                  the discriminability; the fill carries the meaning.
 
-              Do not repaint this to close the 2.39:1. It was tried on
-              2026-08-20 — `--secondary`, the second brand token, clears the
-              threshold in both themes (3.19:1 against the track, 3.49:1
-              against the sheet) and would also stop the fill being a literal
-              with one value for both themes. The operator declined it on the
-              rendered result, which is the call they own; the repaint and its
-              measurements are in the reverted `7abdab0` if a future reader
-              wants the numbers rather than to re-derive them. The outline
-              above is what holds this within the guideline meanwhile. */}
-          <div className="flex justify-between gap-3 text-xs">
-            <span className="flex min-w-0 items-center gap-1.5">
-              <span className="h-2.5 w-2.5 shrink-0 rounded-[3px] border border-muted-foreground bg-emerald-500" />
-              {t('export.paywall.legendSample', { rows: FREE_EXPORT_ROWS })}
-            </span>
-            <span className="flex shrink-0 items-center gap-1.5 font-bold">
-              <span className="h-2.5 w-2.5 shrink-0 rounded-[3px] border border-muted-foreground bg-primary" />
-              {t('export.paywall.legendRest')}
-            </span>
-          </div>
-        </div>
+                  Do not repaint this to close the 2.39:1. It was tried on
+                  2026-08-20 — `--secondary`, the second brand token, clears the
+                  threshold in both themes (3.19:1 against the track, 3.49:1
+                  against the sheet) and would also stop the fill being a literal
+                  with one value for both themes. The operator declined it on the
+                  rendered result, which is the call they own; the repaint and its
+                  measurements are in the reverted `7abdab0` if a future reader
+                  wants the numbers rather than to re-derive them. The outline
+                  above is what holds this within the guideline meanwhile. */}
+              <div className="flex justify-between gap-3 text-xs">
+                <span className="flex min-w-0 items-center gap-1.5">
+                  <span className="h-2.5 w-2.5 shrink-0 rounded-[3px] border border-muted-foreground bg-emerald-500" />
+                  {t('export.paywall.legendSample', { rows: FREE_EXPORT_ROWS })}
+                </span>
+                <span className="flex shrink-0 items-center gap-1.5 font-bold">
+                  <span className="h-2.5 w-2.5 shrink-0 rounded-[3px] border border-muted-foreground bg-primary" />
+                  {t('export.paywall.legendRest')}
+                </span>
+              </div>
+            </div>
 
-        {/* The one line that has to stand without the bar, because the bar is
-            hidden from assistive technology. It states the boundary as a row
-            number and the offer as a total, so the proportion survives being
-            read out. "Not a subscription" is in this sentence rather than in the
-            quiet band below: it is a dispute defence, and a dispute costs $30
-            against $5.50 net — at current volume one of them can exceed a month
-            of revenue.
+            {/* The one line that has to stand without the bar, because the bar is
+                hidden from assistive technology. It states the boundary as a row
+                number and the offer as a total, so the proportion survives being
+                read out. "Not a subscription" is in this sentence rather than in the
+                quiet band below: it is a dispute defence, and a dispute costs $30
+                against $5.50 net — at current volume one of them can exceed a month
+                of revenue.
 
-            `DialogDescription` rather than a bare `<p>`, and that is not a
-            formality: Radix points `aria-describedby` at it, so the sentence
-            that replaces the bar for a screen reader is also the one the dialog
-            announces itself with. Without it Radix warns, and the reader who
-            most needs this line gets the receipt and nothing else. Placed after
-            the bar because that is where it reads; the wiring is by id, not by
-            document order. Not muted — the default `text-muted-foreground` is
-            for descriptions that repeat the title, and this one carries the
-            offer. */}
-        <DialogDescription className="text-sm leading-normal text-foreground">
-          {t('export.paywall.gap', { rows: FREE_EXPORT_ROWS, total: totalLabel })}
-        </DialogDescription>
+                `DialogDescription` rather than a bare `<p>`, and that is not a
+                formality: Radix points `aria-describedby` at it, so the sentence
+                that replaces the bar for a screen reader is also the one the dialog
+                announces itself with. Without it Radix warns, and the reader who
+                most needs this line gets the receipt and nothing else. Placed after
+                the bar because that is where it reads; the wiring is by id, not by
+                document order. Not muted — the default `text-muted-foreground` is
+                for descriptions that repeat the title, and this one carries the
+                offer. */}
+            <DialogDescription className="text-sm leading-normal text-foreground">
+              {t('export.paywall.gap', { rows: FREE_EXPORT_ROWS, total: totalLabel })}
+            </DialogDescription>
+          </>
+        )}
 
         {/* Two buttons and nothing else. The terms block used to live in here
             too, and being a third child put it 8px from the dismiss button
@@ -311,13 +348,36 @@ export function PaywallModal({
               shadow in the product and the guide reserves it for primary CTAs —
               Hero and FooterCTA are its only other wearers, which is the company
               this button belongs in. */}
+          {/* `touch-manipulation` is the seventh class and the only new one:
+              it drops the 300ms double-tap wait, which is part of what makes a
+              second tap likely before anything has visibly happened. */}
           <Button
             onClick={onCheckout}
             size="lg"
-            className="min-h-12 rounded-2xl px-5 text-base font-bold shadow-2xl shadow-primary/30"
+            disabled={isOpening}
+            aria-busy={isOpening}
+            className="min-h-12 touch-manipulation rounded-2xl px-5 text-base font-bold shadow-2xl shadow-primary/30"
           >
-            {t('export.paywall.cta')}
+            {isOpening ? (
+              // Wrapped, because the button's own `[&_svg]` rules size the icon
+              // and the spin has to be on a box those rules do not touch — the
+              // same shape LicenseDialog uses for its activating state.
+              <div className="animate-spin">
+                <Loader2 className="h-4 w-4" />
+              </div>
+            ) : null}
+            {t(CTA_KEY[checkoutState])}
           </Button>
+
+          {/* A named cause, not a silent return to `idle`. It sits with the
+              control it explains rather than in the disclosure block below,
+              and `role="alert"` because the reader is looking at a button that
+              just came back to life and needs to know why. */}
+          {hasFailed ? (
+            <p role="alert" className="text-center text-xs leading-normal text-destructive">
+              {t('export.paywall.failedCause')}
+            </p>
+          ) : null}
 
           {/* Leaving is a legitimate outcome here — 56.7% of readers take it —
               so it gets a real control instead of only a corner glyph. Routed
