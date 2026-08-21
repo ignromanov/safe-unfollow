@@ -302,17 +302,16 @@ describe('promo impression batching', () => {
     });
 
     it('queues the error code on the same gate as the start it is divided by', () => {
-      analytics.uploadErrorByCode('abcdef0123456789', 'HTML_FORMAT', 'not a json export');
+      analytics.uploadErrorByCode('HTML_FORMAT', 'not a json export');
 
       expect(enqueueEvent).toHaveBeenCalledWith('upload_error_html_format', {
-        file_hash: 'abcdef012345',
         error_message: 'not a json export',
       });
       expect(trackEvent).not.toHaveBeenCalled();
     });
 
     it('flushes on the error, because the error path navigates nowhere to trigger one', () => {
-      analytics.uploadErrorByCode('abcdef0123456789', 'HTML_FORMAT');
+      analytics.uploadErrorByCode('HTML_FORMAT');
 
       expect(flushEvents).toHaveBeenCalledTimes(1);
     });

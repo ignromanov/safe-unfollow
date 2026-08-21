@@ -666,7 +666,7 @@ describe('useFileUpload', () => {
         }
       });
 
-      const codes = vi.mocked(analytics.uploadErrorByCode).mock.calls.map(call => call[1]);
+      const codes = vi.mocked(analytics.uploadErrorByCode).mock.calls.map(call => call[0]);
       expect(codes).not.toContain('FILE_TOO_LARGE');
     });
   });
@@ -688,7 +688,6 @@ describe('useFileUpload', () => {
 
       expect(analytics.uploadErrorByCode).toHaveBeenCalledTimes(1);
       expect(analytics.uploadErrorByCode).toHaveBeenCalledWith(
-        '',
         'NOT_ZIP',
         expect.any(String),
         expect.any(Number)
@@ -751,7 +750,6 @@ describe('useFileUpload', () => {
       );
       expect(analytics.uploadErrorByCode).toHaveBeenCalledTimes(1);
       expect(analytics.uploadErrorByCode).toHaveBeenCalledWith(
-        '',
         'UPLOAD_CANCELLED',
         undefined,
         expect.any(Number)
