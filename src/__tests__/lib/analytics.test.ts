@@ -224,7 +224,7 @@ describe('Analytics', () => {
       // filter_toggle, filter_clear_all and search_perform left the immediate
       // path for the batch queue — they fire repeatedly inside one page life and
       // unload nothing, so one request for the page's set is as good as one
-      // each. Transport, payload and the sampling gate are asserted in
+      // each. Transport and payload are asserted in
       // stats/impression-batching.test.ts, which mocks both paths and can tell
       // them apart; asserting them here would only prove umami.track is idle.
 
@@ -294,17 +294,6 @@ describe('Analytics', () => {
       });
 
       // wizard_step_view is batched — see stats/impression-batching.test.ts.
-
-      it('should skip wizard step view when sampling excludes', () => {
-        const originalRandom = Math.random;
-        Math.random = () => 0.1; // 10% > 5% threshold
-
-        analytics.wizardStepView(1);
-
-        expect(windowSpy.umami.track).not.toHaveBeenCalled();
-
-        Math.random = originalRandom;
-      });
 
       // The switcher reloads the page to fetch the new locale's SSG HTML, and
       // window.umami.track() sends without keepalive — so this event used to
