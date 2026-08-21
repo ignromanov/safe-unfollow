@@ -428,10 +428,30 @@ wrapper whose `translateZ(0)` causes the collapse, so that mode is the failure, 
 
 1. **Upstream**: the harness fix named above — a `min-height` on `.ds-single`, or an opt-out for
    stories that need genuine fixed positioning.
-2. **Here, once `feat/guide-entry` lands**: author `previews/GuideEntry.tsx` (plus `RecipeCard`,
-   `StepAccordion`). These are ordinary in-flow cards, not `fixed inset-0` — the collapse cause
-   does not apply to them, and they are what a designer actually needs to see. This gives the
-   guide a representation without faking the wizard shell or touching the harness.
+2. ~~**Here, once `feat/guide-entry` lands**~~: **done 2026-08-21.** `previews/GuideEntry.tsx`,
+   `RecipeCard.tsx` and `StepAccordion.tsx` are authored and committed. These are ordinary
+   in-flow cards, not `fixed inset-0` — the collapse cause does not apply to them, and they are
+   what a designer actually needs to see. This gives the guide a representation without faking
+   the wizard shell or touching the harness. **They have not reached the Claude Design project
+   yet**: authoring a preview only puts a card in the _bundle_; the project sees it after a
+   `resync.mjs` upload. Until then §2a's consequence — no representation of the guide — is
+   fixed here and still true there.
+
+   **How they were nearly lost, which is a different mechanism from the 2026-08-20 incident and
+   worth separating.** All four (the three above plus a `UploadZone.tsx` correction) sat
+   uncommitted in `.worktrees/guide-previews` for two days. Nothing about `.gitignore` was
+   involved this time — `.design-sync/previews/` is tracked, and `git status` in that worktree
+   listed all four. They were simply never committed, and the branch they sat on was already
+   merged, so the next `git worktree remove` would have taken them with no warning and no
+   ignored-path excuse. PR #112 moved hand-authored files out of ignored paths; it does nothing
+   for hand-authored files that are merely _unstaged_. **Before removing a worktree, read
+   `git status` in it, not just `git branch --merged`** — a merged branch says nothing about the
+   working tree standing on it.
+
+   The `UploadZone.tsx` correction rode along and is not cosmetic: the committed version seeded
+   `format-quiz-answer` / `format-quiz-dismissed` and documented a `FormatQuiz` composition, and
+   `FormatQuiz` was deleted in `cb63655` (PR #73, 2026-08-18). The preview was teaching a
+   component that no longer exists.
 
 **3. `RouteErrorPage` cannot mount — cross-bundle React Context identity, not a missing data router.**
 `PARKED as previews/RouteErrorPage.tsx.blocked`. `useRouteError()` does **not** return `undefined`
@@ -626,11 +646,56 @@ All four new components got authored previews (2-6 min of composition each, not 
 - **`.design-sync/node_modules` is a gitignored symlink** (`→ ../.ds-sync/node_modules`)
   that the fork needs to resolve its bare `ts-morph` import. Recreate it on a fresh clone:
   `ln -sfn ../.ds-sync/node_modules .design-sync/node_modules`.
-- **The app requests font families it never declares** — see the font section above. If the
-  app is ever fixed to import the non-variable `@fontsource` packages (or to alias the
-  names), `.design-sync/tools/compile-css.mjs` will start emitting 0 aliases and **throws on purpose**
-  rather than silently shipping no fonts. That throw is the signal to delete the alias step,
-  not to work around it.
+- ~~**The app requests font families it never declares**~~ — **not since PR #105
+  (`d4e5416`, 2026-08-20), and the consequence here was the opposite of what this bullet
+  predicted.** It said a fixed app would make `compile-css.mjs` emit 0 aliases, and that the
+  throw would be the signal to delete the alias step. The throw fired on 2026-08-21 exactly
+  as written — and **acting on its stated reason would have shipped a bundle with no fonts
+  at all.**
+
+  The real cause was not that the app stopped asking for bare names (it did, but that alone
+  leaves the faces in place). #105 also moved the two `@fontsource` imports out of
+  `src/styles.css` into `src/main.tsx`, because Tailwind v4's PostCSS plugin inlines
+  `@import` without rebasing the relative `url()`s inside. **This pipeline is CSS-only and
+  never executes `main.tsx`**, so `app-compiled.css` went from 11 `@font-face` rules to
+  **zero**, and the alias walk found nothing to alias because there was nothing there —
+  not because the aliases had become unnecessary. Both things were true at once and the
+  guard could not tell them apart.
+
+  Fixed by importing both packages from `.design-sync/tools/ds-tailwind.css`, where
+  `compile-css.mjs`'s explicit `to:` makes Tailwind rebase the inlined `url()`s correctly.
+  The alias emission is deleted (nothing requests the bare names any more) and `config.json`
+  no longer carries `extraFonts`; the faces ride in `cssEntry` itself. What replaced the
+  alias count is a direct guard: **0 `@font-face` in the compiled CSS is now the throw**,
+  which is the invariant that actually matters.
+
+  The generalisation, and the reason this is written at length: **an app-side change can
+  break this pipeline without touching anything under `.design-sync/`**, because the pipeline
+  re-enters the app through one CSS file and inherits every assumption that file makes. A
+  guard that names its own cause in prose will keep naming it after the cause has changed.
+
+  **The consequence for the design project itself, which follows from this and is not
+  obvious (raised by the parallel session, 2026-08-21).** Two established facts had never
+  been put together. #105 established that no webfont has ever rendered on the site since
+  `8d907a2` (Sep 2025). The finding above establishes that this pipeline's own fonts came
+  from an alias file naming `'Inter'` and `'Plus Jakarta Sans'` — the names that match
+  nothing. So the site and the sync agreed, for the project's whole history, on the system
+  fallback: **every card now in the Claude Design project was captured in the system font**,
+  and the project has been typographically faithful to production by coincidence rather
+  than by design.
+
+  That coincidence ends here. The next capture produces the first cards in that project's
+  history rendered in Inter and Jakarta, and anything not re-captured keeps the system font.
+  So **a partial re-capture after #105 is not a smaller version of a full one — it is a
+  project in two states**, and a designer reading it cannot tell which cards are current.
+  The failure is silent, like the glyph gaps #105's second round found. Either capture the
+  full component set, or record in the project which cards predate the font fix.
+
+  The 43 committed files under `designs/claude-design-project/` are hand-authored HTML, not
+  captures, so they are unaffected as source — but any screenshot asset among them dates
+  from the system-font era and is stale evidence now.
+
+  Whether to re-capture everything is an operator and design call. Nothing here decides it.
 
 ## Validate findings (2026-08-09, first full pass after the `origin/main` rebase)
 
@@ -836,8 +901,9 @@ logic from scratch.
   `.design-sync/tools/` directory. Every path in this file that pointed at
   `.ds-sync/compile-css.mjs` or the two `.cache/` files has been updated to
   `.design-sync/tools/`. `.design-sync/.cache/` keeps only what a script regenerates —
-  `app-compiled.css`, `fonts-alias.css` — and `config.json`'s `cssEntry` still points there
-  unchanged.
+  `app-compiled.css` — and `config.json`'s `cssEntry` still points there unchanged.
+  (`fonts-alias.css` was the second such file until 2026-08-21; it is gone with the alias
+  step, see the font bullet above.)
 - `bash .design-sync/tools/preflight.sh` now runs, as one command, what this file previously
   only documented in prose: stage the skill's converter, install its deps, recreate the
   `node_modules` symlink, compile the CSS, emit the `.d.ts` declarations.

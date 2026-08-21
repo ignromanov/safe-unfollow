@@ -6,7 +6,6 @@
   "srcDir": "src/components",
   "tsconfig": "tsconfig.json",
   "cssEntry": ".design-sync/.cache/app-compiled.css",
-  "extraFonts": [".design-sync/.cache/fonts-alias.css"],
   "extraEntries": ["./.design-sync/ds-providers.tsx"],
   "provider": {
     "component": "DsPreviewProvider"

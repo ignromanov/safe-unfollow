@@ -30,7 +30,6 @@ const repoRoot = path.resolve(__dirname, '..', '..');
 const entry = path.join(__dirname, 'ds-tailwind.css');
 const cacheDir = path.join(repoRoot, '.design-sync', '.cache');
 const outCss = path.join(cacheDir, 'app-compiled.css');
-const outFonts = path.join(cacheDir, 'fonts-alias.css');
 
 fs.mkdirSync(cacheDir, { recursive: true });
 
@@ -53,56 +52,35 @@ if (result.map) {
   fs.writeFileSync(`${outCss}.map`, result.map.toString());
 }
 
-// --- font-family aliases -----------------------------------------------------------
+// --- font presence guard ------------------------------------------------------------
 //
-// The app's own CSS requests bare family names it never declares: `--font-sans` and
-// `.font-display` (`src/styles.css`) ask for 'Inter' / 'Plus Jakarta Sans', but the
-// installed `@fontsource-variable/*` packages only declare the " Variable"-suffixed
-// names ('Inter Variable', 'Plus Jakarta Sans Variable'). Without an alias, any preview
-// that requests the bare name falls back silently to the system font — no error, just
-// a component that renders in the wrong typeface.
+// This block used to emit bare-name ALIASES: the app asked for 'Inter' / 'Plus Jakarta
+// Sans' while `@fontsource-variable/*` declares only the " Variable"-suffixed names, and
+// CSS family matching is exact. PR #105 (`d4e5416`, 2026-08-20) fixed the app to request
+// the declared names, so nothing asks for the bare ones any more — the aliases became
+// dead output and are gone.
 //
-// This is deliberately generic rather than a hardcoded two-entry map: any `@font-face`
-// this build produces whose family ends in " Variable" gets a second declaration under
-// the un-suffixed name, reusing the same `src`. If the app is ever fixed (e.g. it starts
-// requesting the " Variable" names, or aliases them itself), this loop finds nothing to
-// alias and the throw below fires on purpose — see NOTES.md "Re-sync risks".
-const compiledRoot = postcss.parse(result.css, { from: outCss });
-const aliasRoot = postcss.root();
-const VARIABLE_SUFFIX = ' Variable';
+// What replaced them is the check, not the emission. The same PR moved the two
+// `@fontsource` imports out of `src/styles.css` into `src/main.tsx`, and the design-sync
+// bundle never executes `main.tsx`. On 2026-08-21 that left `app-compiled.css` with ZERO
+// `@font-face` rules and every card screenshotting in the system fallback — silently,
+// because a missing font is never an error anywhere. `ds-tailwind.css` now imports both
+// packages itself; this guard is what makes a regression of that loud.
+//
+// If it fires, the fix is in `ds-tailwind.css`, not here.
 
-compiledRoot.walkAtRules('font-face', rule => {
-  let familyDecl;
-  rule.walkDecls('font-family', decl => {
-    familyDecl = decl;
-  });
-  if (!familyDecl) return;
+const faceCount = postcss
+  .parse(result.css, { from: outCss })
+  .nodes.filter(n => n.type === 'atrule' && n.name === 'font-face').length;
 
-  const family = familyDecl.value.replace(/^['"]|['"]$/g, '');
-  if (!family.endsWith(VARIABLE_SUFFIX)) return;
-
-  const aliasFamily = family.slice(0, -VARIABLE_SUFFIX.length);
-  const aliasRule = rule.clone();
-  aliasRule.walkDecls('font-family', decl => {
-    decl.value = `'${aliasFamily}'`;
-  });
-  aliasRoot.append(aliasRule);
-});
-
-const aliasCount = aliasRoot.nodes.length;
-
-if (aliasCount === 0) {
+if (faceCount === 0) {
   throw new Error(
-    'compile-css.mjs: 0 font-family aliases emitted. This is deliberate, not a bug — ' +
-      'see NOTES.md "Re-sync risks": it means the app no longer requests a family name ' +
-      "it doesn't declare. Delete this alias step (and the `extraFonts` entry in " +
-      'config.json) rather than working around the throw.'
+    'compile-css.mjs: the compiled stylesheet contains 0 @font-face rules, so every ' +
+      'design-sync card would render in the system fallback. The app imports its ' +
+      'webfonts from src/main.tsx (PR #105), which this CSS-only pipeline never runs, ' +
+      'so .design-sync/tools/ds-tailwind.css must import them itself. Check that its ' +
+      "@import lines for '@fontsource-variable/*' are still present and still resolve."
   );
 }
 
-fs.writeFileSync(outFonts, aliasRoot.toString() + '\n');
-
-console.log(`[compile-css] wrote ${path.relative(repoRoot, outCss)}`);
-console.log(
-  `[compile-css] wrote ${path.relative(repoRoot, outFonts)} (${aliasCount} alias${aliasCount === 1 ? '' : 'es'})`
-);
+console.log(`[compile-css] wrote ${path.relative(repoRoot, outCss)} (${faceCount} @font-face)`);
