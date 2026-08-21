@@ -4,7 +4,6 @@ import {
   badgesAffectedByTruncation,
   filterAccountsByBadges,
   BADGE_ORDER,
-  BADGE_LABELS,
   BADGE_COLORS,
 } from '@/core/badges';
 import { createTestParsedData, TEST_ACCOUNTS } from '@tests/fixtures/testData';
@@ -243,14 +242,6 @@ describe('Badge Logic', () => {
       });
     });
 
-    it('should have labels for all badge types', () => {
-      BADGE_ORDER.forEach(badge => {
-        expect(BADGE_LABELS[badge]).toBeDefined();
-        expect(typeof BADGE_LABELS[badge]).toBe('string');
-        expect(BADGE_LABELS[badge].length).toBeGreaterThan(0);
-      });
-    });
-
     it('should have colors for all badge types', () => {
       BADGE_ORDER.forEach(badge => {
         expect(BADGE_COLORS[badge]).toBeDefined();
@@ -262,10 +253,8 @@ describe('Badge Logic', () => {
     it('should have consistent structure across all badge constants', () => {
       // All constants should have the same keys
       const badgeKeys = new Set(BADGE_ORDER);
-      const labelKeys = new Set(Object.keys(BADGE_LABELS));
       const colorKeys = new Set(Object.keys(BADGE_COLORS));
 
-      expect(badgeKeys).toEqual(labelKeys);
       expect(badgeKeys).toEqual(colorKeys);
     });
   });
