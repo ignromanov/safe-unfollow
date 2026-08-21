@@ -1,38 +1,29 @@
-import { useState } from 'react';
 import { UploadZone } from 'safe-unfollow';
 
-// UploadZone composes FormatQuiz internally, which reads localStorage on
-// mount (see FormatQuiz.tsx for why). Cleared here so this story's card
-// shows the real first-visit composition rather than whatever a previous
-// component's capture left in the shared browser origin.
-function useSeedCleanQuiz() {
-  useState(() => {
-    try {
-      localStorage.removeItem('format-quiz-answer');
-      localStorage.removeItem('format-quiz-dismissed');
-    } catch {
-      // localStorage unavailable
-    }
-    return null;
-  });
-}
-
+// The /upload page's whole body: headline, the touch/desktop drop zone, the
+// loading tips and the affiliate block, plus a two-card sidebar that appears
+// from `lg` up. On a 390px card only the single-column mobile composition
+// renders, which is the one 85% of readers get.
 export function Default() {
-  useSeedCleanQuiz();
   return <UploadZone onUploadStart={() => {}} onOpenWizard={() => {}} />;
 }
 
 export function Processing() {
-  useSeedCleanQuiz();
   return <UploadZone onUploadStart={() => {}} onOpenWizard={() => {}} isProcessing={true} />;
 }
 
-// The dominant real failure (HTML_FORMAT is 48% of all upload errors) routes
-// UploadZone to its embedded DiagnosticErrorScreen branch instead of the
-// normal upload UI — this is the one composition FormatQuiz never reaches,
-// so no seeding needed.
+// The dominant real failure — HTML_FORMAT is 55.2% of every upload error —
+// routes UploadZone to its embedded DiagnosticErrorScreen branch instead of
+// the normal upload UI, so this card shows a different screen rather than a
+// variant of the one above.
+//
+// Only `code` and `severity` decide what renders. `severity: 'error'` is what
+// sends UploadZone down this branch at all, and the screen then resolves every
+// visible string from the locale by code (DiagnosticErrorScreen.tsx:128,
+// `diagnostic.errors.<code>.*`) — a fixture cannot put words on this card. So
+// `message` is the locale's own, verbatim, rather than an invented copy that
+// silently stops matching the product.
 export function WithCriticalError() {
-  useSeedCleanQuiz();
   return (
     <UploadZone
       onUploadStart={() => {}}
@@ -43,7 +34,6 @@ export function WithCriticalError() {
           message:
             'You downloaded your data in HTML format, but this tool requires JSON format to work.',
           severity: 'error',
-          fix: 'Go back to Instagram Settings → Download Your Data → Select "JSON" format (not HTML) → Request download again.',
         },
       ]}
     />
