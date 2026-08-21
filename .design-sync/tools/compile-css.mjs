@@ -14,27 +14,27 @@
 //
 // Usage: node .design-sync/tools/compile-css.mjs   (run from the repo root)
 
-import fs from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-import postcss from "postcss";
-import tailwindcssPostcss from "@tailwindcss/postcss";
-import autoprefixer from "autoprefixer";
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import postcss from 'postcss';
+import tailwindcssPostcss from '@tailwindcss/postcss';
+import autoprefixer from 'autoprefixer';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const repoRoot = path.resolve(__dirname, "..", "..");
+const repoRoot = path.resolve(__dirname, '..', '..');
 
 // Compile the wrapper, not `src/styles.css` directly — the wrapper adds `@source
 // '../previews'` so utility classes used only by authored preview .tsx files still
 // get generated (see NOTES.md "Authoring previews").
-const entry = path.join(__dirname, "ds-tailwind.css");
-const cacheDir = path.join(repoRoot, ".design-sync", ".cache");
-const outCss = path.join(cacheDir, "app-compiled.css");
-const outFonts = path.join(cacheDir, "fonts-alias.css");
+const entry = path.join(__dirname, 'ds-tailwind.css');
+const cacheDir = path.join(repoRoot, '.design-sync', '.cache');
+const outCss = path.join(cacheDir, 'app-compiled.css');
+const outFonts = path.join(cacheDir, 'fonts-alias.css');
 
 fs.mkdirSync(cacheDir, { recursive: true });
 
-const source = fs.readFileSync(entry, "utf8");
+const source = fs.readFileSync(entry, 'utf8');
 
 // `from`/`to` matter beyond diagnostics: Tailwind v4's own @import handling rebases
 // the relative `url()`s it inlines (font files, etc.) against `to`, so the compiled
@@ -69,21 +69,21 @@ if (result.map) {
 // alias and the throw below fires on purpose — see NOTES.md "Re-sync risks".
 const compiledRoot = postcss.parse(result.css, { from: outCss });
 const aliasRoot = postcss.root();
-const VARIABLE_SUFFIX = " Variable";
+const VARIABLE_SUFFIX = ' Variable';
 
-compiledRoot.walkAtRules("font-face", (rule) => {
+compiledRoot.walkAtRules('font-face', rule => {
   let familyDecl;
-  rule.walkDecls("font-family", (decl) => {
+  rule.walkDecls('font-family', decl => {
     familyDecl = decl;
   });
   if (!familyDecl) return;
 
-  const family = familyDecl.value.replace(/^['"]|['"]$/g, "");
+  const family = familyDecl.value.replace(/^['"]|['"]$/g, '');
   if (!family.endsWith(VARIABLE_SUFFIX)) return;
 
   const aliasFamily = family.slice(0, -VARIABLE_SUFFIX.length);
   const aliasRule = rule.clone();
-  aliasRule.walkDecls("font-family", (decl) => {
+  aliasRule.walkDecls('font-family', decl => {
     decl.value = `'${aliasFamily}'`;
   });
   aliasRoot.append(aliasRule);
@@ -93,16 +93,16 @@ const aliasCount = aliasRoot.nodes.length;
 
 if (aliasCount === 0) {
   throw new Error(
-    "compile-css.mjs: 0 font-family aliases emitted. This is deliberate, not a bug — " +
-      "see NOTES.md \"Re-sync risks\": it means the app no longer requests a family name " +
+    'compile-css.mjs: 0 font-family aliases emitted. This is deliberate, not a bug — ' +
+      'see NOTES.md "Re-sync risks": it means the app no longer requests a family name ' +
       "it doesn't declare. Delete this alias step (and the `extraFonts` entry in " +
-      "config.json) rather than working around the throw.",
+      'config.json) rather than working around the throw.'
   );
 }
 
-fs.writeFileSync(outFonts, aliasRoot.toString() + "\n");
+fs.writeFileSync(outFonts, aliasRoot.toString() + '\n');
 
 console.log(`[compile-css] wrote ${path.relative(repoRoot, outCss)}`);
 console.log(
-  `[compile-css] wrote ${path.relative(repoRoot, outFonts)} (${aliasCount} alias${aliasCount === 1 ? "" : "es"})`,
+  `[compile-css] wrote ${path.relative(repoRoot, outFonts)} (${aliasCount} alias${aliasCount === 1 ? '' : 'es'})`
 );
