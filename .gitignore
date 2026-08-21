@@ -1,5 +1,5 @@
 # Dependencies
-node_modules/
+node_modules
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -146,13 +146,23 @@ umami-backup-*.sql.gz
 !scripts/generate-large-archive.ts
 
 # design-sync working state — the converter, the generated bundle and the machine
-# caches a resync leaves behind. ~60 MB at repo root, untracked on every branch but
-# chore/design-sync-main, which is one `git add -A` away from a commit. Matches the
-# block that branch already carries, so the two do not disagree.
-.ds-sync/
-ds-bundle/
-.design-sync/.cache/
-.design-sync/learnings/
-# No trailing slash: this one is a symlink to ../.ds-sync/node_modules, and git
-# classifies a symlink as a blob — a directory-only pattern never matches it.
+# caches a resync leaves behind, ~60 MB at repo root. All of it is DERIVED:
+# `.design-sync/tools/preflight.sh` rebuilds every path below from scratch.
+#
+# Nothing hand-authored may live here. On 2026-08-20 three hand-written files did
+# (compile-css.mjs and two .cache/ configs) and `git worktree remove` destroyed
+# them with no warning it could have given — git does not track what it ignores.
+# Hand-authored input belongs in the committed .design-sync/{tools,previews,overrides}/.
+#
+# No trailing slashes below, deliberately. Git classifies a symlink as a blob, so a
+# directory-only pattern (`foo/`) never matches one — the same defect as the root
+# `node_modules` rule on line 2. It matters most for exactly the change someone is
+# most likely to try next: symlinking these into a worktree instead of running the
+# sync from the main checkout. With a slash, that symlink is not ignored and
+# `git add -A` stages 47 MB of converter.
+.ds-sync
+ds-bundle
+.design-sync/.cache
+.design-sync/learnings
+# Symlink to ../.ds-sync/node_modules, needed by .design-sync/overrides/dts.mjs.
 .design-sync/node_modules

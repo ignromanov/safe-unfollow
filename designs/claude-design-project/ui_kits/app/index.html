@@ -1,0 +1,36 @@
+<!-- @dsCard group="App" viewport="1280x820" subtitle="Click-through recreation: hero → guide → upload → results" name="SafeUnfollow.app" -->
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>SafeUnfollow.app — UI kit</title>
+<link rel="stylesheet" href="../../styles.css">
+<style>body{margin:0;background:var(--background);font-family:'Inter',ui-sans-serif,system-ui}a{color:inherit}a:hover{color:oklch(0.6 0.18 264)}</style>
+</head><body>
+<div id="root"></div>
+<script src="../../_vendor/react.js"></script>
+<script src="../../_vendor/react-dom.js"></script>
+<script src="https://unpkg.com/lucide@0.446.0/dist/umd/lucide.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="kit.jsx"></script>
+<script type="text/babel" src="Chrome.jsx"></script>
+<script type="text/babel" src="Screens.jsx"></script>
+<script type="text/babel" src="Results.jsx"></script>
+<script type="text/babel">
+const { useState } = React;
+function App(){
+  const [screen,setScreen]=useState('hero');
+  const [hasData,setHasData]=useState(false);
+  const [sample,setSample]=useState(false);
+  const load=(isSample)=>{setHasData(true);setSample(isSample);setScreen('results')};
+  return <div className="min-h-screen flex flex-col">
+    <AppHeader screen={screen} hasData={hasData} go={setScreen} onClear={()=>{setHasData(false);setSample(false);setScreen('hero')}} />
+    <div className="flex-grow">
+      {screen==='hero' && <div className="container mx-auto px-4"><HeroScreen go={setScreen} hasData={hasData} loadSample={()=>load(true)} /></div>}
+      {screen==='wizard' && <WizardScreen go={setScreen} />}
+      {screen==='upload' && <UploadScreen onDrop={()=>load(false)} />}
+      {screen==='results' && <ResultsScreen sample={sample} />}
+    </div>
+    <AppFooter />
+  </div>;
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body></html>

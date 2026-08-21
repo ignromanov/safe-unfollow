@@ -1,0 +1,27 @@
+/* design-sync wrapper over the app's real stylesheet.
+ *
+ * Purpose: authored preview .tsx files under `.design-sync/previews/` are not part of
+ * `src/`, so the app's own Tailwind pass never scans them. `@source` below tells this
+ * build's scanner to also look there, so utility classes used ONLY by preview files
+ * still get generated (see NOTES.md "cssEntry must be COMPILED Tailwind v4").
+ *
+ * Both `.design-sync/tools/` and `.design-sync/.cache/` are direct children of
+ * `.design-sync/`, so the relative paths below resolve the same from either location.
+ */
+@import '../../src/styles.css';
+
+@source '../previews';
+
+/* Safelist for common layout/utility classes preview authors reach for before this
+ * file has been recompiled against their new markup (parallel authoring agents cannot
+ * recompile this shared stylesheet themselves — see NOTES.md "Authoring previews").
+ * Extend this list rather than telling agents to avoid a class. */
+@source inline('{flex,grid,inline-flex,inline-grid,hidden,block}');
+@source inline('{flex-row,flex-col,flex-wrap,flex-nowrap,items-center,items-start,items-end,justify-center,justify-start,justify-end,justify-between}');
+@source inline('{gap,gap-x,gap-y}-{0,1,2,3,4,5,6,8,10,12}');
+@source inline('{p,px,py,pt,pr,pb,pl,m,mx,my,mt,mr,mb,ml}-{0,1,2,3,4,5,6,8,10,12}');
+@source inline('{w,h}-{full,fit,auto,4,6,8,10,12,16,20,24,32,48,64}');
+@source inline('max-w-{sm,md,lg,xl,2xl,full}');
+@source inline('rounded-{sm,md,lg,xl,full}');
+@source inline('text-{xs,sm,base,lg,xl,2xl}');
+@source inline('font-{normal,medium,semibold,bold}');
