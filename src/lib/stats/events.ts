@@ -411,8 +411,13 @@ export const analytics = {
   },
 
   // Granular Upload Errors
+  // No file hash. A 12-hex digest of the user's own export is stable across
+  // sessions and was distinct for 877 of 2 818 error events — enough to link
+  // every session that uploaded the same archive, on a product whose one
+  // promise is that the export never leaves the browser. Nothing consumed it.
+  // The parameter is gone rather than the field, so restoring it cannot be a
+  // one-line change inside this function.
   uploadErrorByCode: (
-    fileHash: string,
     code: import('@/core/types').DiagnosticErrorCode,
     errorMessage?: string,
     fileSizeMb?: number
@@ -450,7 +455,6 @@ export const analytics = {
       UNKNOWN: AnalyticsEvents.UPLOAD_ERROR_UNKNOWN,
     };
     enqueueEvent(eventMap[code], {
-      file_hash: fileHash.slice(0, 12),
       error_message: errorMessage?.slice(0, 50) ?? '',
       // The size used to reach the database only inside error_message, i18n'd
       // into ten languages and truncated at 50 characters — German writes
