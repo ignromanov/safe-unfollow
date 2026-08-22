@@ -1,21 +1,31 @@
 /**
- * Guards the pairing of `--accent-foreground` with `--accent`.
+ * Guards `--accent` as what its only consumers actually use it for: a neutral
+ * *state* surface — hover on the outline and ghost buttons and the outline
+ * badge, open on the dialog close control. Nothing paints it decoratively.
  *
- * Light paired a near-white foreground with the vivid purple accent at 3.50:1,
- * below AA; dark already paired near-black with its accent and cleared at
- * 6.88:1. Same shape as the `--primary` defect fixed alongside it — light was
- * the outlier, so light moved.
+ * It used to be the brand violet, brighter and almost twice the chroma of
+ * `--primary` (dark: oklch(0.7 0.2 285) against the CTA's oklch(0.65 0.16 264)).
+ * The consequence was a hierarchy defect rather than a contrast one: the ghost
+ * "Not now" on the paywall composited to #4d4684 on hover and read as a second
+ * primary button, at the moment the cursor was on the decision. Both themes now
+ * take the values `--sidebar-accent` already carried — the same token for the
+ * sidebar, neutral there since it was written.
  *
- * The token is only correct on a *flat* `--accent` fill. Where accent is
- * composited at partial alpha over a dark page (`dark:hover:bg-accent/50`, the
- * ghost button) the surface stays dark and this token is the wrong answer —
- * that case is guarded in components/ui/button.test.tsx, and the split is the
- * reason the token flip alone did not close the defect.
+ * Two invariants below, and the second one replaced its own opposite. The old
+ * test pinned "foreground darker than accent, in both themes", which held only
+ * because a saturated mid-tone accent is a light surface in *either* theme. A
+ * neutral accent belongs to its own theme's end of the scale, so the pairing
+ * direction is now theme-dependent by design, and what is worth pinning is that
+ * accent stays near its background rather than which side the text sits on.
+ *
+ * The partial-alpha case (`dark:hover:bg-accent/50`) is still guarded in
+ * components/ui/button.test.tsx and is no longer in tension with this file:
+ * flat and composited accent now sit on the same side of the page.
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
-import { contrastRatio, token, WCAG_AA_NORMAL } from '@tests/utils/contrast';
+import { contrastRatio, readThemeTokens, token, WCAG_AA_NORMAL } from '@tests/utils/contrast';
 
 const SRC = resolve(process.cwd(), 'src');
 
@@ -40,13 +50,35 @@ describe('text on a flat --accent meets WCAG AA', () => {
     });
   }
 
-  it('keeps the foreground darker than the accent it sits on, in both themes', () => {
-    // Pins the direction rather than a hex. --accent is a saturated mid-tone in
-    // both themes, so the legible pairing is a dark foreground either way —
-    // which is exactly what the light theme got wrong.
-    const lum = (c: readonly number[]) => 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+  it('keeps accent a near-neutral, so a state surface never outranks the CTA', () => {
+    // Chroma read from the token text, not from the parsed sRGB triple: the
+    // defect this pins is saturation, and sRGB cannot say how saturated a
+    // colour was meant to be. --primary is the reference because outranking it
+    // is the failure mode — a hover surface may not carry more colour than the
+    // button that takes the payment.
+    const chroma = (theme: 'light' | 'dark', name: string) => {
+      const raw = readThemeTokens(theme)[name];
+      const m = raw?.match(/oklch\(\s*[\d.]+\s+([\d.]+)/);
+      if (!m) throw new Error(`${name} is not an oklch() in ${theme}: ${raw}`);
+      return parseFloat(m[1]);
+    };
+
     for (const theme of ['light', 'dark'] as const) {
-      expect(lum(token(theme, '--accent-foreground'))).toBeLessThan(lum(token(theme, '--accent')));
+      expect(chroma(theme, '--accent')).toBeLessThan(chroma(theme, '--primary'));
+      expect(chroma(theme, '--accent')).toBeLessThanOrEqual(0.05);
+    }
+  });
+
+  it('keeps accent on its own theme\u2019s side of the scale, not a mid-tone in both', () => {
+    // The direction that replaced "foreground darker than accent". A state
+    // surface is a lift off the page, so it must stay near the background and
+    // far from the foreground — which is what makes the text pairing flip
+    // between themes instead of being fixed.
+    for (const theme of ['light', 'dark'] as const) {
+      const toBackground = contrastRatio(token(theme, '--accent'), token(theme, '--background'));
+      const toForeground = contrastRatio(token(theme, '--accent'), token(theme, '--foreground'));
+      expect(toBackground).toBeLessThan(2);
+      expect(toForeground).toBeGreaterThan(toBackground);
     }
   });
 });
