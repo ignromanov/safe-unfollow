@@ -19,7 +19,12 @@ export interface LicenseDialogProps {
   /** Key carried by the checkout redirect; null means "ask the user for it". */
   initialKey: string | null;
   source: 'redirect' | 'manual';
-  /** Where "Choose a format" goes. Absent on the redirect mount, which has no view. */
+  /**
+   * Where "Choose a format" goes. Absent only when nothing can receive the
+   * handoff — the manual path passes it directly, the redirect mount resolves it
+   * through `lib/export/export-opener.ts`, and neither has it when the results
+   * view is not mounted (no list, so no format to choose one for).
+   */
   onContinue?: () => void;
 }
 

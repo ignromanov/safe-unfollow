@@ -1,11 +1,12 @@
 import { Download } from 'lucide-react';
-import { Suspense, lazy, useRef, useState } from 'react';
+import { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { useAdViewability } from '@/hooks/useAdViewability';
 import { useProExport } from '@/hooks/useProExport';
 import { downloadBlob } from '@/lib/export/download';
+import { registerExportOpener } from '@/lib/export/export-opener';
 import { capIndicesForFreeExport, isFreeExportCapped } from '@/lib/export/free-tier';
 import { analytics } from '@/lib/stats';
 
@@ -77,6 +78,20 @@ export function ResultsExportControls({
   // count the moment `isEnabled` flips, which React rejects. Harmless when
   // disabled — nothing mounts, so the ref stays null and the hook no-ops.
   useAdViewability(triggerRef, isEnabled, () => analytics.exportTriggerViewable(isUnlocked));
+
+  // The redirect back from checkout is captured in Layout, which cannot reach
+  // this state — see lib/export/export-opener.ts. Registering here is what lets
+  // that dialog end in "Choose a format" instead of a closed sheet, which is
+  // the one activation path a buyer who has actually paid takes.
+  //
+  // Above the early return for the same reason as useAdViewability: the hook
+  // count may not change when `isEnabled` flips. Guarded rather than skipped —
+  // with the feature off there is no format dialog to hand anything to, and a
+  // registration would make the other side offer a button that opens nothing.
+  useEffect(() => {
+    if (!isEnabled) return;
+    return registerExportOpener(() => setIsExportDialogOpen(true));
+  }, [isEnabled]);
 
   if (!isEnabled) return null;
 
