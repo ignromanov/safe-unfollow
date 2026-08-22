@@ -2,14 +2,8 @@ import { FileJson, FileSpreadsheet, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ExportSheet } from '@/components/export/ExportSheet';
 import { useExportWorker } from '@/hooks/useExportWorker';
 import { downloadBlob } from '@/lib/export/download';
 import { validateLicense } from '@/lib/export/license';
@@ -129,54 +123,52 @@ export function ExportDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t('export.dialog.title')}</DialogTitle>
-          <DialogDescription>{t('export.dialog.rowCount', { count: rowCount })}</DialogDescription>
-        </DialogHeader>
+    <ExportSheet open={open} onOpenChange={onOpenChange}>
+      <DialogHeader>
+        <DialogTitle>{t('export.dialog.title')}</DialogTitle>
+        <DialogDescription>{t('export.dialog.rowCount', { count: rowCount })}</DialogDescription>
+      </DialogHeader>
 
-        <div role="status" aria-live="polite" className="min-h-5 text-sm text-muted-foreground">
-          {isPending ? t('export.dialog.generating', { percent: toPercent(progress) }) : ''}
-        </div>
+      <div role="status" aria-live="polite" className="min-h-5 text-sm text-muted-foreground">
+        {isPending ? t('export.dialog.generating', { percent: toPercent(progress) }) : ''}
+      </div>
 
-        {hasFailed ? (
-          <p role="alert" className="text-sm text-destructive">
-            {t('export.dialog.error')}
-          </p>
-        ) : null}
+      {hasFailed ? (
+        <p role="alert" className="text-sm text-destructive">
+          {t('export.dialog.error')}
+        </p>
+      ) : null}
 
-        {isRevoked ? (
-          <p role="alert" className="text-sm text-destructive">
-            {t('export.license.revoked')}
-          </p>
-        ) : null}
+      {isRevoked ? (
+        <p role="alert" className="text-sm text-destructive">
+          {t('export.license.revoked')}
+        </p>
+      ) : null}
 
-        <DialogFooter className="flex-col gap-2 sm:flex-col sm:items-stretch">
-          <Button
-            variant="outline"
-            size="lg"
-            className="min-h-12"
-            disabled={isPending || isRevoked}
-            aria-busy={pendingFormat === 'csv'}
-            onClick={() => void handleExport('csv')}
-          >
-            {renderIcon('csv')}
-            {t('export.dialog.csv')}
-          </Button>
-          <Button
-            variant="outline"
-            size="lg"
-            className="min-h-12"
-            disabled={isPending || isRevoked}
-            aria-busy={pendingFormat === 'json'}
-            onClick={() => void handleExport('json')}
-          >
-            {renderIcon('json')}
-            {t('export.dialog.json')}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      <DialogFooter className="flex-col gap-2 sm:flex-col sm:items-stretch">
+        <Button
+          variant="outline"
+          size="lg"
+          className="min-h-12"
+          disabled={isPending || isRevoked}
+          aria-busy={pendingFormat === 'csv'}
+          onClick={() => void handleExport('csv')}
+        >
+          {renderIcon('csv')}
+          {t('export.dialog.csv')}
+        </Button>
+        <Button
+          variant="outline"
+          size="lg"
+          className="min-h-12"
+          disabled={isPending || isRevoked}
+          aria-busy={pendingFormat === 'json'}
+          onClick={() => void handleExport('json')}
+        >
+          {renderIcon('json')}
+          {t('export.dialog.json')}
+        </Button>
+      </DialogFooter>
+    </ExportSheet>
   );
 }

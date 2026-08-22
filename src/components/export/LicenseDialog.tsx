@@ -3,14 +3,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ExportSheet } from '@/components/export/ExportSheet';
 import { Input } from '@/components/ui/input';
 import type { LicenseFailureReason } from '@/lib/export/license';
 import { activateLicense, isLicenseKeyFormat } from '@/lib/export/license';
@@ -145,74 +139,72 @@ export function LicenseDialog({ open, onOpenChange, initialKey, source }: Licens
   const isActivating = state.kind === 'activating';
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t('export.license.title')}</DialogTitle>
-          <DialogDescription>
-            {hasActivationKey
-              ? // Stable purpose text, not state text: the role="status" region
-                // below already announces "Activating…" on state change, so
-                // repeating it here would have a screen reader read it twice.
-                //
-                // Borrowed from the paywall's namespace, and this dialog is now
-                // its only reader — the paywall dropped its own feature line
-                // when the proportion became the argument. Left where it is
-                // rather than moved, because relocating a string on the
-                // activation path buys nothing but risk; delete it there and
-                // ten locales lose a description.
-                t('export.paywall.instantNote')
-              : t('export.license.manualDescription')}
-          </DialogDescription>
-        </DialogHeader>
+    <ExportSheet open={open} onOpenChange={onOpenChange}>
+      <DialogHeader>
+        <DialogTitle>{t('export.license.title')}</DialogTitle>
+        <DialogDescription>
+          {hasActivationKey
+            ? // Stable purpose text, not state text: the role="status" region
+              // below already announces "Activating…" on state change, so
+              // repeating it here would have a screen reader read it twice.
+              //
+              // Borrowed from the paywall's namespace, and this dialog is now
+              // its only reader — the paywall dropped its own feature line
+              // when the proportion became the argument. Left where it is
+              // rather than moved, because relocating a string on the
+              // activation path buys nothing but risk; delete it there and
+              // ten locales lose a description.
+              t('export.paywall.instantNote')
+            : t('export.license.manualDescription')}
+        </DialogDescription>
+      </DialogHeader>
 
-        <div role="status" aria-live="polite" className="min-h-5 text-sm text-muted-foreground">
-          {isActivating ? t('export.license.activating') : ''}
-        </div>
+      <div role="status" aria-live="polite" className="min-h-5 text-sm text-muted-foreground">
+        {isActivating ? t('export.license.activating') : ''}
+      </div>
 
-        {state.kind === 'error' ? (
-          <p role="alert" className="text-sm text-destructive">
-            {t(ERROR_KEYS[state.reason])}
-          </p>
+      {state.kind === 'error' ? (
+        <p role="alert" className="text-sm text-destructive">
+          {t(ERROR_KEYS[state.reason])}
+        </p>
+      ) : null}
+
+      {!hasActivationKey && state.kind !== 'activating' ? (
+        <Input
+          value={inputValue}
+          onChange={event => setInputValue(event.target.value)}
+          placeholder={t('export.license.placeholder')}
+          aria-label={t('export.license.title')}
+          autoComplete="off"
+          spellCheck={false}
+        />
+      ) : null}
+
+      <DialogFooter className="flex-col gap-2 sm:flex-col sm:items-stretch">
+        {isActivating ? (
+          <Button size="lg" className="min-h-12" disabled aria-busy>
+            <div className="animate-spin">
+              <Loader2 className="h-4 w-4" />
+            </div>
+            {t('export.license.activating')}
+          </Button>
         ) : null}
 
-        {!hasActivationKey && state.kind !== 'activating' ? (
-          <Input
-            value={inputValue}
-            onChange={event => setInputValue(event.target.value)}
-            placeholder={t('export.license.placeholder')}
-            aria-label={t('export.license.title')}
-            autoComplete="off"
-            spellCheck={false}
-          />
+        {!isActivating && !hasActivationKey ? (
+          <Button size="lg" className="min-h-12" onClick={handleSubmit}>
+            {t('export.license.submit')}
+          </Button>
         ) : null}
 
-        <DialogFooter className="flex-col gap-2 sm:flex-col sm:items-stretch">
-          {isActivating ? (
-            <Button size="lg" className="min-h-12" disabled aria-busy>
-              <div className="animate-spin">
-                <Loader2 className="h-4 w-4" />
-              </div>
-              {t('export.license.activating')}
-            </Button>
-          ) : null}
-
-          {!isActivating && !hasActivationKey ? (
-            <Button size="lg" className="min-h-12" onClick={handleSubmit}>
-              {t('export.license.submit')}
-            </Button>
-          ) : null}
-
-          {!isActivating &&
-          hasActivationKey &&
-          state.kind === 'error' &&
-          RETRYABLE_REASONS.has(state.reason) ? (
-            <Button size="lg" className="min-h-12" onClick={handleRetry}>
-              {t('export.license.retry')}
-            </Button>
-          ) : null}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        {!isActivating &&
+        hasActivationKey &&
+        state.kind === 'error' &&
+        RETRYABLE_REASONS.has(state.reason) ? (
+          <Button size="lg" className="min-h-12" onClick={handleRetry}>
+            {t('export.license.retry')}
+          </Button>
+        ) : null}
+      </DialogFooter>
+    </ExportSheet>
   );
 }
