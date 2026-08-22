@@ -103,6 +103,23 @@ export function ResultsExportControls({
    * to saying what it does.
    */
   const runFreeExport = async (): Promise<void> => {
+    // The reader already has this file. 59 sessions collected two or more
+    // unrequested sample CSVs and one collected nine, because nothing
+    // remembered that the ten rows had already been written. The paywall
+    // still opens — the offer is not what is being capped — but it opens
+    // against the receipt that exists rather than making another.
+    //
+    // `saved.total === rowCount` is the test for "same view". It is a proxy:
+    // two different filters can select the same number of rows, in which
+    // case the reader gets the earlier file's receipt. The cost of that
+    // collision is one stale filename in a modal; the cost of getting it
+    // wrong the other way is another unwanted file.
+    if (saved !== null && saved.capped && saved.total === rowCount) {
+      analytics.paywallView(i18n.language, rowCount);
+      setIsPaywallOpen(true);
+      return;
+    }
+
     isRunningRef.current = true;
     setIsBusy(true);
     setHasError(false);
