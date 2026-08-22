@@ -76,18 +76,24 @@ describe('button outline variant', () => {
 });
 
 /**
- * `ghost` carried the identical defect and needed the identical fix. It is not a
- * copy of the outline suite though: ghost's dark hover surface is `accent/50`,
- * not `input/50`, and that difference is the whole reason correcting
- * `--accent-foreground` was not sufficient on its own — a token that is right on
- * flat accent is wrong on accent composited over a dark page.
+ * `ghost` carried the identical defect and needed the identical fix. It used to
+ * differ from `outline` in one respect worth noting even though it no longer
+ * holds: ghost's dark hover surface was `dark:hover:bg-accent/50`, not
+ * `input/50`, and that difference was the whole reason correcting
+ * `--accent-foreground` was not sufficient on its own — a token that was right
+ * on flat accent was wrong on accent composited over a dark page. The `/50`
+ * override is gone now: with `--accent` a neutral rather than the brand
+ * violet, the alpha existed only to push a flat, already-legible surface under
+ * the MD 8% hover-visibility floor (accent-contrast.test.ts), so ghost hovers
+ * to flat `--accent` in both themes, same as the light side always did.
  */
 describe('button ghost variant', () => {
-  it('still renders and carries its hover surface classes', () => {
+  it('still renders and carries its hover surface class, unscoped by theme', () => {
     render(<Button variant="ghost">Clear</Button>);
 
     const button = screen.getByRole('button', { name: 'Clear' });
-    expect(button).toHaveClass('hover:bg-accent', 'dark:hover:bg-accent/50');
+    expect(button).toHaveClass('hover:bg-accent');
+    expect(button.className).not.toMatch(/dark:hover:bg-accent\/50/);
   });
 
   it('sets no resting text colour, so the label inherits the surface it sits on', () => {
@@ -101,17 +107,10 @@ describe('button ghost variant', () => {
     expect(ghost.split(/\s+/).filter(c => !c.includes(':') && isTextColour(c))).toEqual([]);
   });
 
-  it('keeps the label legible on the light hover surface (flat --accent)', () => {
-    const fg = token('light', hoverForegroundToken(ghost));
-    expect(contrastRatio(fg, token('light', '--accent'))).toBeGreaterThanOrEqual(WCAG_AA_NORMAL);
-  });
-
-  // --card is the SearchBar's surface on /results; --background covers the page.
-  for (const surface of ['--background', '--card'] as const) {
-    it(`keeps the label legible on dark:hover:bg-accent/50 over ${surface}`, () => {
-      const fg = token('dark', hoverForegroundToken(ghost));
-      const blended = over(token('dark', '--accent'), 0.5, token('dark', surface));
-      expect(contrastRatio(fg, blended)).toBeGreaterThanOrEqual(WCAG_AA_NORMAL);
+  for (const theme of ['light', 'dark'] as const) {
+    it(`keeps the label legible on the ${theme} hover surface (flat --accent)`, () => {
+      const fg = token(theme, hoverForegroundToken(ghost));
+      expect(contrastRatio(fg, token(theme, '--accent'))).toBeGreaterThanOrEqual(WCAG_AA_NORMAL);
     });
   }
 });

@@ -60,7 +60,11 @@
   --secondary-foreground: oklch(0.98 0.005 264);
   --muted: oklch(0.25 0.02 264);
   --muted-foreground: oklch(0.75 0.02 264);
-  --accent: oklch(0.25 0.02 264);
+  /* 0.25 matched --input/--border, but a flat state surface at that lightness
+     falls under the MD 8% hover-overlay floor against --card (1.175 vs the
+     1.2185 required) — see accent-contrast.test.ts. 0.28 clears both
+     --background (1.390) and --card (1.288) surfaces it hovers over. */
+  --accent: oklch(0.28 0.02 264);
   --accent-foreground: oklch(0.98 0.005 264);
   --destructive: oklch(0.55 0.22 25);
   --destructive-foreground: oklch(0.98 0.005 264);
