@@ -35,3 +35,11 @@ describe('the dialog primitives clear the measured line-height floor', () => {
     expect(BELOW_FLOOR.filter(utility => source.includes(utility))).toEqual([]);
   });
 });
+
+describe('the licence key field is a touch target', () => {
+  it('Input is at least the 48px product standard, not the 36px default', () => {
+    const source = readFileSync(join(UI_ROOT, 'input.tsx'), 'utf-8');
+    expect(source).not.toContain('h-9');
+    expect(source).toContain('h-12');
+  });
+});
