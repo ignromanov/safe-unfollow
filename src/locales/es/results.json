@@ -193,7 +193,21 @@
       "errorNotFound": "No pudimos encontrar esta clave de licencia. Revisa la clave en tu correo de compra.",
       "errorLimit": "Esta clave ya se usó en los 3 dispositivos permitidos. Libera uno o contacta con soporte.",
       "errorGeneric": "No se pudo activar. Revisa tu conexión e inténtalo de nuevo.",
-      "revoked": "Esta licencia ya no está activa. Si esto es inesperado, contacta con soporte."
+      "revoked": "Esta licencia ya no está activa. Si esto es inesperado, contacta con soporte.",
+      "successTitle": "Export unlocked",
+      "successBody": "This browser can now export your full list, as CSV or JSON, as often as you want.",
+      "successMeta": "Paid $7 · no subscription",
+      "keyLabel": "Your key",
+      "keyNote": "Saved in this browser. Your key works on up to 3 devices — the link in your purchase email unlocks the next one.",
+      "continue": "Choose a format",
+      "done": "Done",
+      "enterManually": "Enter the key by hand",
+      "blockedTitle": "All 3 devices are in use",
+      "blockedBody": "Your key is already active on three browsers. Your purchase is fine — this one cannot be the fourth.",
+      "blockedAction": "Email {{email}} with your key. If we cannot free a device, we refund the $7 in full.",
+      "revokedTitle": "This key is no longer active",
+      "revokedBody": "It was disabled or refunded. If that is unexpected, email {{email}} with the key — that is all we need.",
+      "emailSupport": "Email support"
     },
     "dialog": {
       "title": "Exportar cuentas",

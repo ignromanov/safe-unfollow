@@ -5,17 +5,8 @@ import { CheckoutHandoff } from '@/components/export/CheckoutHandoff';
 import { ExportSheet } from '@/components/export/ExportSheet';
 import type { CheckoutState } from '@/hooks/useProExport';
 import { FREE_EXPORT_ROWS } from '@/lib/export/free-tier';
+import { SUPPORT_EMAIL } from '@/lib/export/support-email';
 import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-
-/**
- * Where a refund request lands. A dedicated address rather than the general
- * `hello@` one: an unstated refund policy is a named driver of friendly-fraud
- * chargebacks, because the buyer can honestly say they did not know the terms —
- * and a Dodo dispute costs $30 against a $7 sale, so the refund is the cheap
- * outcome by a factor of four. Mirrored in the Terms of Service (§2.1); the two
- * must not drift apart.
- */
-const REFUND_EMAIL = 'refunds@safeunfollow.app';
 
 /**
  * The label the control wears in each state.
@@ -85,8 +76,8 @@ export function PaywallModal({
   // "{{email}} adresine yaz"), so appending a link to a finished sentence would
   // mistranslate. A locale that drops {{email}} is caught by the locale guard.
   const [refundBefore, refundAfter] = t('export.paywall.refund', {
-    email: REFUND_EMAIL,
-  }).split(REFUND_EMAIL);
+    email: SUPPORT_EMAIL,
+  }).split(SUPPORT_EMAIL);
 
   const totalLabel = totalRows.toLocaleString(i18n.language);
 
@@ -387,7 +378,7 @@ export function PaywallModal({
           {refundBefore}
           <a
             dir="ltr"
-            href={`mailto:${REFUND_EMAIL}`}
+            href={`mailto:${SUPPORT_EMAIL}`}
             /* Not `text-primary`. That token is `oklch(0.6 0.18 264)` and
                    measures 3.95:1 on this surface in light mode — a large-text
                    colour, fine for the 48px number above and under the 4.5:1
@@ -397,7 +388,7 @@ export function PaywallModal({
                    highest-value screen in the product. */
             className="text-foreground underline underline-offset-2 hover:no-underline"
           >
-            {REFUND_EMAIL}
+            {SUPPORT_EMAIL}
           </a>
           {refundAfter}
         </p>

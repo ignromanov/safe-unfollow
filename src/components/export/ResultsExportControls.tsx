@@ -276,6 +276,10 @@ export function ResultsExportControls({
             onOpenChange={setIsLicenseDialogOpen}
             initialKey={null}
             source="manual"
+            onContinue={() => {
+              setIsLicenseDialogOpen(false);
+              setIsExportDialogOpen(true);
+            }}
           />
         ) : null}
       </Suspense>

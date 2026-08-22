@@ -193,7 +193,21 @@
       "errorNotFound": "Bu lisans anahtarını bulamadık. Satın alma e-postandaki anahtarı kontrol et.",
       "errorLimit": "Bu anahtar izin verilen 3 cihazın tümünde kullanıldı. Birini boşalt ya da destek ile iletişime geç.",
       "errorGeneric": "Etkinleştirme başarısız oldu. Bağlantını kontrol et ve tekrar dene.",
-      "revoked": "Bu lisans artık aktif değil. Bu beklenmiyorsa destek ile iletişime geç."
+      "revoked": "Bu lisans artık aktif değil. Bu beklenmiyorsa destek ile iletişime geç.",
+      "successTitle": "Export unlocked",
+      "successBody": "This browser can now export your full list, as CSV or JSON, as often as you want.",
+      "successMeta": "Paid $7 · no subscription",
+      "keyLabel": "Your key",
+      "keyNote": "Saved in this browser. Your key works on up to 3 devices — the link in your purchase email unlocks the next one.",
+      "continue": "Choose a format",
+      "done": "Done",
+      "enterManually": "Enter the key by hand",
+      "blockedTitle": "All 3 devices are in use",
+      "blockedBody": "Your key is already active on three browsers. Your purchase is fine — this one cannot be the fourth.",
+      "blockedAction": "Email {{email}} with your key. If we cannot free a device, we refund the $7 in full.",
+      "revokedTitle": "This key is no longer active",
+      "revokedBody": "It was disabled or refunded. If that is unexpected, email {{email}} with the key — that is all we need.",
+      "emailSupport": "Email support"
     },
     "dialog": {
       "title": "Hesapları dışa aktar",

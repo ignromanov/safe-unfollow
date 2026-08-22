@@ -57,15 +57,14 @@ describe('LicenseDialog', () => {
     expect(analytics.purchaseSuccess).toHaveBeenCalled();
   });
 
-  it('should close itself after a successful redirect activation', async () => {
+  it('should confirm the unlock instead of closing itself', async () => {
     const onOpenChange = vi.fn();
     vi.mocked(activateLicense).mockResolvedValue({ ok: true, instanceId: INSTANCE });
 
     render(<LicenseDialog open initialKey={KEY} source="redirect" onOpenChange={onOpenChange} />);
 
-    await waitFor(() => {
-      expect(onOpenChange).toHaveBeenCalledWith(false);
-    });
+    expect(await screen.findByText(resultsEN.export.license.successTitle)).toBeInTheDocument();
+    expect(onOpenChange).not.toHaveBeenCalledWith(false);
   });
 
   it('should show the activation-limit message and report the reason', async () => {
@@ -73,7 +72,9 @@ describe('LicenseDialog', () => {
 
     render(<LicenseDialog open initialKey={KEY} source="redirect" onOpenChange={vi.fn()} />);
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(resultsEN.export.license.errorLimit);
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      resultsEN.export.license.blockedTitle
+    );
     expect(analytics.licenseError).toHaveBeenCalledWith('limit_reached');
     expect(getStoredLicense()).toBeNull();
   });
@@ -93,7 +94,9 @@ describe('LicenseDialog', () => {
 
     render(<LicenseDialog open initialKey={KEY} source="redirect" onOpenChange={vi.fn()} />);
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(resultsEN.export.license.revoked);
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      resultsEN.export.license.revokedTitle
+    );
   });
 
   it('should show the generic message for a network failure and allow a retry', async () => {
@@ -215,7 +218,9 @@ describe('LicenseDialog', () => {
 
     render(<LicenseDialog open initialKey={KEY} source="redirect" onOpenChange={vi.fn()} />);
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(resultsEN.export.license.errorLimit);
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      resultsEN.export.license.blockedTitle
+    );
     expect(
       screen.queryByRole('button', { name: resultsEN.export.license.retry })
     ).not.toBeInTheDocument();
@@ -245,5 +250,60 @@ describe('LicenseDialog', () => {
     expect(loggedMissingDescription).toBe(false);
 
     consoleSpy.mockRestore();
+  });
+
+  it('should mask the key rather than printing it', async () => {
+    vi.mocked(activateLicense).mockResolvedValue({ ok: true, instanceId: 'inst-1' });
+
+    render(<LicenseDialog open initialKey={KEY} source="redirect" onOpenChange={vi.fn()} />);
+
+    await screen.findByText(resultsEN.export.license.successTitle);
+    expect(screen.queryByText(KEY)).not.toBeInTheDocument();
+    expect(screen.getByText(new RegExp(KEY.slice(-4)))).toBeInTheDocument();
+  });
+
+  it('should offer a route out of the device cap instead of a dead sentence', async () => {
+    vi.mocked(activateLicense).mockResolvedValue({ ok: false, reason: 'limit_reached' });
+
+    render(<LicenseDialog open initialKey={KEY} source="redirect" onOpenChange={vi.fn()} />);
+
+    expect(await screen.findByText(resultsEN.export.license.blockedTitle)).toBeInTheDocument();
+    expect(screen.getByRole('link')).toHaveAttribute(
+      'href',
+      expect.stringContaining('mailto:refunds@safeunfollow.app')
+    );
+  });
+
+  it('should let a bad key from the purchase email be retyped by hand', async () => {
+    vi.mocked(activateLicense).mockResolvedValue({ ok: false, reason: 'not_found' });
+    const user = userEvent.setup();
+
+    render(<LicenseDialog open initialKey={KEY} source="redirect" onOpenChange={vi.fn()} />);
+
+    await user.click(
+      await screen.findByRole('button', { name: resultsEN.export.license.enterManually })
+    );
+    expect(screen.getByRole('textbox')).toBeInTheDocument();
+  });
+
+  it('should hand the reader on to the format choice when the caller supplied one', async () => {
+    vi.mocked(activateLicense).mockResolvedValue({ ok: true, instanceId: 'inst-1' });
+    const onContinue = vi.fn();
+    const user = userEvent.setup();
+
+    render(
+      <LicenseDialog
+        open
+        initialKey={KEY}
+        source="manual"
+        onOpenChange={vi.fn()}
+        onContinue={onContinue}
+      />
+    );
+
+    await user.click(
+      await screen.findByRole('button', { name: resultsEN.export.license.continue })
+    );
+    expect(onContinue).toHaveBeenCalledOnce();
   });
 });

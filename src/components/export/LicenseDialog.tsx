@@ -8,6 +8,7 @@ import { ExportSheet } from '@/components/export/ExportSheet';
 import { Input } from '@/components/ui/input';
 import type { LicenseFailureReason } from '@/lib/export/license';
 import { activateLicense, isLicenseKeyFormat } from '@/lib/export/license';
+import { SUPPORT_EMAIL } from '@/lib/export/support-email';
 import { getStoredLicense, storeLicense } from '@/lib/export/unlock';
 import { analytics } from '@/lib/stats';
 
@@ -17,11 +18,14 @@ export interface LicenseDialogProps {
   /** Key carried by the checkout redirect; null means "ask the user for it". */
   initialKey: string | null;
   source: 'redirect' | 'manual';
+  /** Where "Choose a format" goes. Absent on the redirect mount, which has no view. */
+  onContinue?: () => void;
 }
 
 type DialogState =
   | { kind: 'form' }
   | { kind: 'activating' }
+  | { kind: 'activated' }
   | { kind: 'error'; reason: LicenseFailureReason | 'format' };
 
 // 'disabled' maps to the "revoked" copy, not "not found" — telling someone
@@ -52,6 +56,163 @@ const RETRYABLE_REASONS = new Set<LicenseFailureReason | 'format'>([
   'unknown',
 ]);
 
+// The two verdicts that get a screen of their own rather than a red sentence. Both are
+// permanent and neither is the reader's fault, so both end in the one action that can
+// actually resolve them.
+const TERMINAL_REASONS = new Set<LicenseFailureReason | 'format'>([
+  'limit_reached',
+  'disabled',
+  'invalid',
+]);
+
+/**
+ * Shows enough of the key to recognise it, and no more.
+ *
+ * The reader does not need to retype it on the device that just activated — it is
+ * already in localStorage. What they need is to tell this key apart from another one in
+ * their inbox, which the last four characters do.
+ */
+function maskKey(key: string): string {
+  const tail = key.slice(-4);
+  return `${'•'.repeat(8)}${tail}`;
+}
+
+// Split out of LicenseDialog itself: the component's own render carries seven
+// state-gated blocks already, and folding this one in pushed its cyclomatic
+// complexity over the lint ceiling. The markup and classes are unchanged from
+// what used to sit inline.
+function ActivatedBody({ activatedKey }: { activatedKey: string }) {
+  const { t } = useTranslation('results');
+
+  return (
+    <div role="status" className="flex flex-col gap-3">
+      <DialogHeader className="text-start sm:text-start">
+        <DialogTitle>{t('export.license.successTitle')}</DialogTitle>
+        <DialogDescription>{t('export.license.successBody')}</DialogDescription>
+      </DialogHeader>
+      <p className="text-xs text-muted-foreground">{t('export.license.successMeta')}</p>
+      <div className="flex flex-col gap-1.5">
+        <span className="text-xs font-semibold text-muted-foreground">
+          {t('export.license.keyLabel')}
+        </span>
+        <span className="rounded-2xl border bg-muted px-3 py-2 font-mono text-sm">
+          {maskKey(activatedKey)}
+        </span>
+        <span className="text-xs leading-normal text-muted-foreground">
+          {t('export.license.keyNote')}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// Same reason as ActivatedBody: pulled out to keep LicenseDialog's own
+// complexity under the lint ceiling, not for reuse — `reason` is always one
+// of TERMINAL_REASONS by the time this renders.
+function TerminalErrorBody({ reason }: { reason: LicenseFailureReason | 'format' }) {
+  const { t } = useTranslation('results');
+  const isBlocked = reason === 'limit_reached';
+
+  return (
+    <div role="alert" className="flex flex-col gap-3">
+      <DialogHeader className="text-start sm:text-start">
+        <DialogTitle>
+          {isBlocked ? t('export.license.blockedTitle') : t('export.license.revokedTitle')}
+        </DialogTitle>
+        <DialogDescription>
+          {isBlocked
+            ? t('export.license.blockedBody')
+            : t('export.license.revokedBody', { email: SUPPORT_EMAIL })}
+        </DialogDescription>
+      </DialogHeader>
+      {isBlocked ? (
+        <p className="text-sm leading-normal text-muted-foreground">
+          {t('export.license.blockedAction', { email: SUPPORT_EMAIL })}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+interface LicenseFooterActionsProps {
+  state: DialogState;
+  isActivating: boolean;
+  showManualForm: boolean;
+  hasActivationKey: boolean;
+  onContinue?: () => void;
+  onDone: () => void;
+  onSubmit: () => void;
+  onRetry: () => void;
+  onEnterManually: () => void;
+}
+
+// Same reason as ActivatedBody and TerminalErrorBody: this is the other half
+// of LicenseDialog's render that pushed the component over the complexity
+// ceiling. Every branch here is unchanged from what used to sit inline in
+// DialogFooter.
+function LicenseFooterActions({
+  state,
+  isActivating,
+  showManualForm,
+  hasActivationKey,
+  onContinue,
+  onDone,
+  onSubmit,
+  onRetry,
+  onEnterManually,
+}: LicenseFooterActionsProps) {
+  const { t } = useTranslation('results');
+  const isError = state.kind === 'error';
+  const isRetryable = isError && RETRYABLE_REASONS.has(state.reason);
+  const isTerminal = isError && TERMINAL_REASONS.has(state.reason);
+
+  return (
+    <>
+      {isActivating ? (
+        <Button size="lg" className="min-h-12" disabled aria-busy>
+          <div className="animate-spin">
+            <Loader2 className="h-4 w-4" />
+          </div>
+          {t('export.license.activating')}
+        </Button>
+      ) : null}
+
+      {!isActivating && showManualForm ? (
+        <Button size="lg" className="min-h-12" onClick={onSubmit}>
+          {t('export.license.submit')}
+        </Button>
+      ) : null}
+
+      {!isActivating && hasActivationKey && isRetryable ? (
+        <Button size="lg" className="min-h-12" onClick={onRetry}>
+          {t('export.license.retry')}
+        </Button>
+      ) : null}
+
+      {state.kind === 'activated' ? (
+        <Button size="lg" className="min-h-12" onClick={onContinue ?? onDone}>
+          {onContinue ? t('export.license.continue') : t('export.license.done')}
+        </Button>
+      ) : null}
+
+      {isTerminal ? (
+        <a
+          href={`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent('Pro Export licence')}`}
+          className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-primary px-6 font-bold text-primary-foreground"
+        >
+          {t('export.license.emailSupport')}
+        </a>
+      ) : null}
+
+      {isError && hasActivationKey && !isRetryable && !isTerminal ? (
+        <Button size="lg" variant="outline" className="min-h-12" onClick={onEnterManually}>
+          {t('export.license.enterManually')}
+        </Button>
+      ) : null}
+    </>
+  );
+}
+
 /**
  * Activation surface for both entry points: the post-checkout redirect (key in
  * hand, activate on mount) and manual entry on a second device.
@@ -60,7 +221,13 @@ const RETRYABLE_REASONS = new Set<LicenseFailureReason | 'format'>([
  * after handing over money, so every failure path ends in a visible message and
  * a retry rather than a console error.
  */
-export function LicenseDialog({ open, onOpenChange, initialKey, source }: LicenseDialogProps) {
+export function LicenseDialog({
+  open,
+  onOpenChange,
+  initialKey,
+  source,
+  onContinue,
+}: LicenseDialogProps) {
   const { t } = useTranslation('results');
   // A redirect URL can carry `?license_key=` with nothing after it — treat that
   // the same as "no key" (show the manual form) rather than activating an
@@ -72,6 +239,12 @@ export function LicenseDialog({ open, onOpenChange, initialKey, source }: Licens
     hasActivationKey ? { kind: 'activating' } : { kind: 'form' }
   );
   const [inputValue, setInputValue] = useState('');
+  const [activatedKey, setActivatedKey] = useState('');
+  // Starts where the old `!hasActivationKey` guard started, so nothing about the two
+  // existing entry points changes. The escape below is the only thing that can turn it
+  // on afterwards: a key that arrived in a redirect and was rejected for good is the one
+  // case where the reader has to be able to type it themselves.
+  const [showManualForm, setShowManualForm] = useState(!hasActivationKey);
   // Guards the automatic mount activation independently of runActivation's
   // identity: activateLicense() is treated as non-idempotent (a new device
   // instance per call, against a limit of 3 — see lib/export/license.ts for
@@ -92,7 +265,13 @@ export function LicenseDialog({ open, onOpenChange, initialKey, source }: Licens
         } else {
           analytics.licenseRestored();
         }
-        onOpenChange(false);
+        // Not onOpenChange(false). This is the only moment in the product where a
+        // reader has handed over money, and closing the dialog was the entire
+        // confirmation they got — Layout.tsx:99-105 documents that being read as
+        // another failure. The screen is terminal: activateLicense() mints a device
+        // instance per call against a cap of 3, so nothing here may re-enter it.
+        setActivatedKey(key.trim());
+        setState({ kind: 'activated' });
         return;
       }
 
@@ -136,6 +315,13 @@ export function LicenseDialog({ open, onOpenChange, initialKey, source }: Licens
     setState({ kind: 'form' });
   };
 
+  const handleEnterManually = (): void => {
+    setShowManualForm(true);
+    setState({ kind: 'form' });
+  };
+
+  const handleDone = (): void => onOpenChange(false);
+
   const isActivating = state.kind === 'activating';
 
   return (
@@ -163,13 +349,19 @@ export function LicenseDialog({ open, onOpenChange, initialKey, source }: Licens
         {isActivating ? t('export.license.activating') : ''}
       </div>
 
-      {state.kind === 'error' ? (
+      {state.kind === 'activated' ? <ActivatedBody activatedKey={activatedKey} /> : null}
+
+      {state.kind === 'error' && TERMINAL_REASONS.has(state.reason) ? (
+        <TerminalErrorBody reason={state.reason} />
+      ) : null}
+
+      {state.kind === 'error' && !TERMINAL_REASONS.has(state.reason) ? (
         <p role="alert" className="text-sm text-destructive">
           {t(ERROR_KEYS[state.reason])}
         </p>
       ) : null}
 
-      {!hasActivationKey && state.kind !== 'activating' ? (
+      {showManualForm && state.kind !== 'activating' && state.kind !== 'activated' ? (
         <Input
           value={inputValue}
           onChange={event => setInputValue(event.target.value)}
@@ -177,33 +369,22 @@ export function LicenseDialog({ open, onOpenChange, initialKey, source }: Licens
           aria-label={t('export.license.title')}
           autoComplete="off"
           spellCheck={false}
+          className="font-mono"
         />
       ) : null}
 
       <DialogFooter className="flex-col gap-2 sm:flex-col sm:items-stretch">
-        {isActivating ? (
-          <Button size="lg" className="min-h-12" disabled aria-busy>
-            <div className="animate-spin">
-              <Loader2 className="h-4 w-4" />
-            </div>
-            {t('export.license.activating')}
-          </Button>
-        ) : null}
-
-        {!isActivating && !hasActivationKey ? (
-          <Button size="lg" className="min-h-12" onClick={handleSubmit}>
-            {t('export.license.submit')}
-          </Button>
-        ) : null}
-
-        {!isActivating &&
-        hasActivationKey &&
-        state.kind === 'error' &&
-        RETRYABLE_REASONS.has(state.reason) ? (
-          <Button size="lg" className="min-h-12" onClick={handleRetry}>
-            {t('export.license.retry')}
-          </Button>
-        ) : null}
+        <LicenseFooterActions
+          state={state}
+          isActivating={isActivating}
+          showManualForm={showManualForm}
+          hasActivationKey={hasActivationKey}
+          onContinue={onContinue}
+          onDone={handleDone}
+          onSubmit={handleSubmit}
+          onRetry={handleRetry}
+          onEnterManually={handleEnterManually}
+        />
       </DialogFooter>
     </ExportSheet>
   );

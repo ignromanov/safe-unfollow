@@ -193,7 +193,21 @@
       "errorNotFound": "لم نتمكن من العثور على مفتاح الترخيص هذا. تحقق من المفتاح في رسالة الشراء.",
       "errorLimit": "تم استخدام هذا المفتاح على جميع الأجهزة الـ 3 المسموح بها. حرّر أحدها أو تواصل مع الدعم.",
       "errorGeneric": "فشل التفعيل. تحقق من اتصالك وحاول مرة أخرى.",
-      "revoked": "هذا الترخيص لم يعد نشطًا. إذا كان هذا غير متوقع، تواصل مع الدعم."
+      "revoked": "هذا الترخيص لم يعد نشطًا. إذا كان هذا غير متوقع، تواصل مع الدعم.",
+      "successTitle": "Export unlocked",
+      "successBody": "This browser can now export your full list, as CSV or JSON, as often as you want.",
+      "successMeta": "Paid $7 · no subscription",
+      "keyLabel": "Your key",
+      "keyNote": "Saved in this browser. Your key works on up to 3 devices — the link in your purchase email unlocks the next one.",
+      "continue": "Choose a format",
+      "done": "Done",
+      "enterManually": "Enter the key by hand",
+      "blockedTitle": "All 3 devices are in use",
+      "blockedBody": "Your key is already active on three browsers. Your purchase is fine — this one cannot be the fourth.",
+      "blockedAction": "Email {{email}} with your key. If we cannot free a device, we refund the $7 in full.",
+      "revokedTitle": "This key is no longer active",
+      "revokedBody": "It was disabled or refunded. If that is unexpected, email {{email}} with the key — that is all we need.",
+      "emailSupport": "Email support"
     },
     "dialog": {
       "title": "تصدير الحسابات",
