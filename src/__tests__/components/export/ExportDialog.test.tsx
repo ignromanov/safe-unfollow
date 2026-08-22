@@ -42,6 +42,12 @@ import { analytics } from '@/lib/stats';
 
 const blob = new Blob(['csv'], { type: 'text/csv;charset=utf-8' });
 
+// Each format button now carries a second line explaining what the format is
+// for (Step 7), which becomes part of its accessible name — so lookups match
+// on the label as a substring rather than the full (label + hint) string.
+const csvButtonName = new RegExp(resultsEN.export.dialog.csv, 'i');
+const jsonButtonName = new RegExp(resultsEN.export.dialog.json, 'i');
+
 const defaultProps = {
   open: true,
   onOpenChange: vi.fn(),
@@ -61,7 +67,7 @@ describe('ExportDialog', () => {
     const user = userEvent.setup();
     render(<ExportDialog {...defaultProps} />);
 
-    await user.click(screen.getByRole('button', { name: resultsEN.export.dialog.csv }));
+    await user.click(screen.getByRole('button', { name: csvButtonName }));
 
     await waitFor(() => {
       expect(vi.mocked(downloadBlob)).toHaveBeenCalledWith(blob, 'my-export.csv');
@@ -69,16 +75,18 @@ describe('ExportDialog', () => {
     expect(vi.mocked(analytics.download)).toHaveBeenCalledWith('csv', 42);
   });
 
-  it('should close the dialog after a successful export', async () => {
+  it('should confirm the file instead of closing', async () => {
     const onOpenChange = vi.fn();
     const user = userEvent.setup();
+    buildExport.mockResolvedValue(new Blob(['a,b']));
+
     render(<ExportDialog {...defaultProps} onOpenChange={onOpenChange} />);
+    await user.click(screen.getByRole('button', { name: csvButtonName }));
 
-    await user.click(screen.getByRole('button', { name: resultsEN.export.dialog.json }));
-
-    await waitFor(() => {
-      expect(onOpenChange).toHaveBeenCalledWith(false);
-    });
+    expect(await screen.findByText(resultsEN.export.dialog.savedTitle)).toBeInTheDocument();
+    expect(screen.getByText(/\.csv/)).toBeInTheDocument();
+    expect(onOpenChange).not.toHaveBeenCalledWith(false);
+    expect(downloadBlob).toHaveBeenCalledOnce();
   });
 
   // A silent failure is the worst outcome here: the user has paid and gets
@@ -89,7 +97,7 @@ describe('ExportDialog', () => {
     const user = userEvent.setup();
     render(<ExportDialog {...defaultProps} onOpenChange={onOpenChange} />);
 
-    await user.click(screen.getByRole('button', { name: resultsEN.export.dialog.csv }));
+    await user.click(screen.getByRole('button', { name: csvButtonName }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent(resultsEN.export.dialog.error);
     expect(onOpenChange).not.toHaveBeenCalledWith(false);
@@ -101,7 +109,7 @@ describe('ExportDialog', () => {
     const user = userEvent.setup();
     render(<ExportDialog {...defaultProps} />);
 
-    await user.click(screen.getByRole('button', { name: resultsEN.export.dialog.csv }));
+    await user.click(screen.getByRole('button', { name: csvButtonName }));
 
     await waitFor(() => {
       expect(vi.mocked(analytics.exportError)).toHaveBeenCalledWith('csv');
@@ -113,7 +121,7 @@ describe('ExportDialog', () => {
     const user = userEvent.setup();
     render(<ExportDialog {...defaultProps} />);
 
-    const csvButton = screen.getByRole('button', { name: resultsEN.export.dialog.csv });
+    const csvButton = screen.getByRole('button', { name: csvButtonName });
     await user.click(csvButton);
     await screen.findByRole('alert');
 
@@ -136,15 +144,18 @@ describe('ExportDialog', () => {
     const user = userEvent.setup();
     render(<ExportDialog {...defaultProps} />);
 
-    const csvButton = screen.getByRole('button', { name: resultsEN.export.dialog.csv });
+    const csvButton = screen.getByRole('button', { name: csvButtonName });
     await user.click(csvButton);
 
     expect(csvButton).toHaveAttribute('aria-busy', 'true');
-    expect(screen.getByRole('button', { name: resultsEN.export.dialog.json })).toBeDisabled();
+    expect(screen.getByRole('button', { name: jsonButtonName })).toBeDisabled();
 
+    // The busy button itself is replaced by the receipt on success (Step 6/7)
+    // rather than flipping back to idle, so what "no longer busy" means here
+    // is the receipt taking its place.
     resolveBuild(blob);
     await waitFor(() => {
-      expect(csvButton).toHaveAttribute('aria-busy', 'false');
+      expect(screen.getByText(resultsEN.export.dialog.savedTitle)).toBeInTheDocument();
     });
   });
 
@@ -164,7 +175,7 @@ describe('ExportDialog', () => {
     const user = userEvent.setup();
     render(<ExportDialog {...defaultProps} />);
 
-    await user.click(screen.getByRole('button', { name: resultsEN.export.dialog.csv }));
+    await user.click(screen.getByRole('button', { name: csvButtonName }));
 
     const status = await screen.findByRole('status');
     expect(status).toHaveAttribute('aria-live', 'polite');
@@ -184,7 +195,7 @@ describe('ExportDialog', () => {
       render(<ExportDialog {...defaultProps} />);
 
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: resultsEN.export.dialog.csv })).toBeEnabled();
+        expect(screen.getByRole('button', { name: csvButtonName })).toBeEnabled();
       });
       expect(getStoredLicense()).not.toBeNull();
     });
@@ -205,8 +216,8 @@ describe('ExportDialog', () => {
 
       render(<ExportDialog {...defaultProps} />);
 
-      expect(screen.getByRole('button', { name: resultsEN.export.dialog.csv })).toBeEnabled();
-      expect(screen.getByRole('button', { name: resultsEN.export.dialog.json })).toBeEnabled();
+      expect(screen.getByRole('button', { name: csvButtonName })).toBeEnabled();
+      expect(screen.getByRole('button', { name: jsonButtonName })).toBeEnabled();
     });
 
     it('should clear a revoked license even if the dialog unmounts before validation resolves', async () => {
@@ -242,9 +253,26 @@ describe('ExportDialog', () => {
 
       render(<ExportDialog {...defaultProps} />);
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: resultsEN.export.dialog.csv })).toBeEnabled();
+        expect(screen.getByRole('button', { name: csvButtonName })).toBeEnabled();
       });
       expect(validateLicense).toHaveBeenCalledTimes(1);
     });
+  });
+
+  it('should tell the reader what each format is for', () => {
+    render(<ExportDialog {...defaultProps} />);
+    expect(screen.getByText(resultsEN.export.dialog.csvHint)).toBeInTheDocument();
+    expect(screen.getByText(resultsEN.export.dialog.jsonHint)).toBeInTheDocument();
+  });
+
+  it('should offer another export from the receipt', async () => {
+    const user = userEvent.setup();
+    buildExport.mockResolvedValue(new Blob(['a,b']));
+
+    render(<ExportDialog {...defaultProps} />);
+    await user.click(screen.getByRole('button', { name: csvButtonName }));
+    await user.click(await screen.findByRole('button', { name: resultsEN.export.dialog.again }));
+
+    expect(screen.getByRole('button', { name: csvButtonName })).toBeInTheDocument();
   });
 });

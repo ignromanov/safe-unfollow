@@ -214,7 +214,17 @@
       "rowCount": "سيتم تصدير {{count}} حسابًا",
       "csv": "تنزيل CSV",
       "json": "تنزيل JSON",
+      "csvHint": "Opens in Excel, Google Sheets and Numbers",
+      "jsonHint": "For scripts, or loading back in later",
       "generating": "جارٍ الإنشاء… {{percent}}%",
+      "buildingTitle": "Building your file",
+      "buildingNote": "Your export is built here, in this browser.",
+      "progress": "{{done}} of {{total}} rows",
+      "savedTitle": "Saved to your device",
+      "savedBody": "{{filename}} — all {{total}} rows.",
+      "savedWhere": "Check your Downloads folder. On iPhone, look in Files › Downloads.",
+      "done": "Done",
+      "again": "Export again",
       "error": "فشل التصدير. يرجى المحاولة مرة أخرى."
     }
   }
