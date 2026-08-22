@@ -114,6 +114,17 @@ export function ResultsExportControls({
     // case the reader gets the earlier file's receipt. The cost of that
     // collision is one stale filename in a modal; the cost of getting it
     // wrong the other way is another unwanted file.
+    //
+    // Two more limits on this guard, both deliberate:
+    // - `saved` is component state (`useState`), so the cap only holds within
+    //   one mount. Navigating off `/results` and back resets it, and a repeat
+    //   press there writes a second file.
+    // - The guard also requires `saved.capped`, so it covers capped views
+    //   only. An uncapped view — a small list where the free file is the
+    //   whole export and no paywall ever appears — is not covered at all;
+    //   repeat presses there still rebuild and re-download. That is outside
+    //   the measured harm (the repeat downloads seen were all capped sample
+    //   CSVs), so the narrower scope is intentional, just unwritten until now.
     if (saved !== null && saved.capped && saved.total === rowCount) {
       analytics.paywallView(i18n.language, rowCount);
       setIsPaywallOpen(true);
