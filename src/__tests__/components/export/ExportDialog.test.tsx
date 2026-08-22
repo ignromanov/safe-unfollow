@@ -42,6 +42,12 @@ import { analytics } from '@/lib/stats';
 
 const blob = new Blob(['csv'], { type: 'text/csv;charset=utf-8' });
 
+// Each format button now carries a second line explaining what the format is
+// for (Step 7), which becomes part of its accessible name — so lookups match
+// on the label as a substring rather than the full (label + hint) string.
+const csvButtonName = new RegExp(resultsEN.export.dialog.csv, 'i');
+const jsonButtonName = new RegExp(resultsEN.export.dialog.json, 'i');
+
 const defaultProps = {
   open: true,
   onOpenChange: vi.fn(),
@@ -57,11 +63,38 @@ describe('ExportDialog', () => {
     buildExport.mockResolvedValue(blob);
   });
 
+  // The sheet used to draw a permanent "Export accounts" header and stack each
+  // state's own header under it, so the build and receipt screens carried two
+  // DialogTitles — ambiguous `aria-labelledby` (GH#140), and visibly a stale
+  // headline over the screen that replaced it. The header is the state now, and
+  // this is the assertion that keeps it that way.
+  describe('one title per state', () => {
+    it('should show only the offer title while idle', () => {
+      render(<ExportDialog {...defaultProps} />);
+
+      expect(screen.getAllByRole('heading')).toHaveLength(1);
+      expect(screen.getByRole('heading')).toHaveTextContent(resultsEN.export.dialog.title);
+    });
+
+    it('should replace the offer title with the receipt, not stack them', async () => {
+      const user = userEvent.setup();
+      render(<ExportDialog {...defaultProps} />);
+
+      await user.click(screen.getByRole('button', { name: csvButtonName }));
+
+      await waitFor(() => {
+        expect(screen.getByRole('heading')).toHaveTextContent(resultsEN.export.dialog.savedTitle);
+      });
+      expect(screen.getAllByRole('heading')).toHaveLength(1);
+      expect(screen.queryByText(resultsEN.export.dialog.title)).not.toBeInTheDocument();
+    });
+  });
+
   it('should download the generated file when a format is chosen', async () => {
     const user = userEvent.setup();
     render(<ExportDialog {...defaultProps} />);
 
-    await user.click(screen.getByRole('button', { name: resultsEN.export.dialog.csv }));
+    await user.click(screen.getByRole('button', { name: csvButtonName }));
 
     await waitFor(() => {
       expect(vi.mocked(downloadBlob)).toHaveBeenCalledWith(blob, 'my-export.csv');
@@ -69,16 +102,18 @@ describe('ExportDialog', () => {
     expect(vi.mocked(analytics.download)).toHaveBeenCalledWith('csv', 42);
   });
 
-  it('should close the dialog after a successful export', async () => {
+  it('should confirm the file instead of closing', async () => {
     const onOpenChange = vi.fn();
     const user = userEvent.setup();
+    buildExport.mockResolvedValue(new Blob(['a,b']));
+
     render(<ExportDialog {...defaultProps} onOpenChange={onOpenChange} />);
+    await user.click(screen.getByRole('button', { name: csvButtonName }));
 
-    await user.click(screen.getByRole('button', { name: resultsEN.export.dialog.json }));
-
-    await waitFor(() => {
-      expect(onOpenChange).toHaveBeenCalledWith(false);
-    });
+    expect(await screen.findByText(resultsEN.export.dialog.savedTitle)).toBeInTheDocument();
+    expect(screen.getByText(/\.csv/)).toBeInTheDocument();
+    expect(onOpenChange).not.toHaveBeenCalledWith(false);
+    expect(downloadBlob).toHaveBeenCalledOnce();
   });
 
   // A silent failure is the worst outcome here: the user has paid and gets
@@ -89,7 +124,7 @@ describe('ExportDialog', () => {
     const user = userEvent.setup();
     render(<ExportDialog {...defaultProps} onOpenChange={onOpenChange} />);
 
-    await user.click(screen.getByRole('button', { name: resultsEN.export.dialog.csv }));
+    await user.click(screen.getByRole('button', { name: csvButtonName }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent(resultsEN.export.dialog.error);
     expect(onOpenChange).not.toHaveBeenCalledWith(false);
@@ -101,7 +136,7 @@ describe('ExportDialog', () => {
     const user = userEvent.setup();
     render(<ExportDialog {...defaultProps} />);
 
-    await user.click(screen.getByRole('button', { name: resultsEN.export.dialog.csv }));
+    await user.click(screen.getByRole('button', { name: csvButtonName }));
 
     await waitFor(() => {
       expect(vi.mocked(analytics.exportError)).toHaveBeenCalledWith('csv');
@@ -113,7 +148,7 @@ describe('ExportDialog', () => {
     const user = userEvent.setup();
     render(<ExportDialog {...defaultProps} />);
 
-    const csvButton = screen.getByRole('button', { name: resultsEN.export.dialog.csv });
+    const csvButton = screen.getByRole('button', { name: csvButtonName });
     await user.click(csvButton);
     await screen.findByRole('alert');
 
@@ -136,15 +171,18 @@ describe('ExportDialog', () => {
     const user = userEvent.setup();
     render(<ExportDialog {...defaultProps} />);
 
-    const csvButton = screen.getByRole('button', { name: resultsEN.export.dialog.csv });
+    const csvButton = screen.getByRole('button', { name: csvButtonName });
     await user.click(csvButton);
 
     expect(csvButton).toHaveAttribute('aria-busy', 'true');
-    expect(screen.getByRole('button', { name: resultsEN.export.dialog.json })).toBeDisabled();
+    expect(screen.getByRole('button', { name: jsonButtonName })).toBeDisabled();
 
+    // The busy button itself is replaced by the receipt on success (Step 6/7)
+    // rather than flipping back to idle, so what "no longer busy" means here
+    // is the receipt taking its place.
     resolveBuild(blob);
     await waitFor(() => {
-      expect(csvButton).toHaveAttribute('aria-busy', 'false');
+      expect(screen.getByText(resultsEN.export.dialog.savedTitle)).toBeInTheDocument();
     });
   });
 
@@ -164,10 +202,49 @@ describe('ExportDialog', () => {
     const user = userEvent.setup();
     render(<ExportDialog {...defaultProps} />);
 
-    await user.click(screen.getByRole('button', { name: resultsEN.export.dialog.csv }));
+    await user.click(screen.getByRole('button', { name: csvButtonName }));
 
     const status = await screen.findByRole('status');
     expect(status).toHaveAttribute('aria-live', 'polite');
+  });
+
+  it('should round the announced progress to 10% steps instead of every chunk', async () => {
+    // Progress fires roughly once per 1000 rows — a thousand-plus calls on a
+    // large export. The announced text must only change on a real milestone, or
+    // a screen reader hears one announcement per chunk.
+    let resolveBuild: (value: Blob) => void = () => {};
+    buildExport.mockImplementationOnce(
+      (
+        _format: string,
+        _hash: string,
+        _indices: number[] | null,
+        _total: number,
+        onProgress?: (p: { processed: number; total: number }) => void
+      ) => {
+        onProgress?.({ processed: 1, total: 1000 }); // 0.1% -> milestone 0
+        onProgress?.({ processed: 25, total: 1000 }); // 2.5% -> milestone 0
+        onProgress?.({ processed: 340, total: 1000 }); // 34% -> milestone 30
+        return new Promise<Blob>(resolve => {
+          resolveBuild = resolve;
+        });
+      }
+    );
+    const user = userEvent.setup();
+    render(<ExportDialog {...defaultProps} />);
+
+    await user.click(screen.getByRole('button', { name: csvButtonName }));
+
+    const status = await screen.findByRole('status');
+    expect(status).toHaveTextContent(
+      resultsEN.export.dialog.generating.replace('{{percent}}', '30')
+    );
+    expect(status).not.toHaveTextContent('2%');
+    expect(status).not.toHaveTextContent('34%');
+
+    resolveBuild(blob);
+    await waitFor(() => {
+      expect(screen.getByText(resultsEN.export.dialog.savedTitle)).toBeInTheDocument();
+    });
   });
 
   describe('per-session validation', () => {
@@ -184,7 +261,7 @@ describe('ExportDialog', () => {
       render(<ExportDialog {...defaultProps} />);
 
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: resultsEN.export.dialog.csv })).toBeEnabled();
+        expect(screen.getByRole('button', { name: csvButtonName })).toBeEnabled();
       });
       expect(getStoredLicense()).not.toBeNull();
     });
@@ -194,7 +271,18 @@ describe('ExportDialog', () => {
 
       render(<ExportDialog {...defaultProps} />);
 
-      expect(await screen.findByRole('alert')).toHaveTextContent(resultsEN.export.license.revoked);
+      // Full terminal screen, not a red sentence: the format buttons disappear
+      // entirely (a paying user with a revoked key cannot start a build that will
+      // only fail later) and the one action that can resolve it — email support,
+      // key pre-filled via mailto — replaces them.
+      expect(await screen.findByRole('alert')).toHaveTextContent(
+        resultsEN.export.license.revokedTitle
+      );
+      expect(screen.queryByRole('button', { name: csvButtonName })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: jsonButtonName })).not.toBeInTheDocument();
+      expect(
+        screen.getByRole('link', { name: resultsEN.export.license.emailSupport })
+      ).toHaveAttribute('href', expect.stringContaining('mailto:refunds@safeunfollow.app'));
       expect(getStoredLicense()).toBeNull();
       expect(analytics.licenseRevoked).toHaveBeenCalled();
     });
@@ -205,8 +293,8 @@ describe('ExportDialog', () => {
 
       render(<ExportDialog {...defaultProps} />);
 
-      expect(screen.getByRole('button', { name: resultsEN.export.dialog.csv })).toBeEnabled();
-      expect(screen.getByRole('button', { name: resultsEN.export.dialog.json })).toBeEnabled();
+      expect(screen.getByRole('button', { name: csvButtonName })).toBeEnabled();
+      expect(screen.getByRole('button', { name: jsonButtonName })).toBeEnabled();
     });
 
     it('should clear a revoked license even if the dialog unmounts before validation resolves', async () => {
@@ -242,9 +330,45 @@ describe('ExportDialog', () => {
 
       render(<ExportDialog {...defaultProps} />);
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: resultsEN.export.dialog.csv })).toBeEnabled();
+        expect(screen.getByRole('button', { name: csvButtonName })).toBeEnabled();
       });
       expect(validateLicense).toHaveBeenCalledTimes(1);
     });
+  });
+
+  it('should tell the reader what each format is for', () => {
+    render(<ExportDialog {...defaultProps} />);
+    expect(screen.getByText(resultsEN.export.dialog.csvHint)).toBeInTheDocument();
+    expect(screen.getByText(resultsEN.export.dialog.jsonHint)).toBeInTheDocument();
+  });
+
+  it('should offer another export from the receipt', async () => {
+    const user = userEvent.setup();
+    buildExport.mockResolvedValue(new Blob(['a,b']));
+
+    render(<ExportDialog {...defaultProps} />);
+    await user.click(screen.getByRole('button', { name: csvButtonName }));
+    await user.click(await screen.findByRole('button', { name: resultsEN.export.dialog.again }));
+
+    expect(screen.getByRole('button', { name: csvButtonName })).toBeInTheDocument();
+  });
+
+  it('should make "Export again" the primary action on the receipt, not "Done"', async () => {
+    // design.md §4.4: "Export again" is "the whole point of having paid" — the
+    // emphasis and order were inverted before this fix (Done was primary and
+    // first, Export again was demoted to `variant="outline"` and listed second).
+    const user = userEvent.setup();
+    buildExport.mockResolvedValue(new Blob(['a,b']));
+
+    render(<ExportDialog {...defaultProps} />);
+    await user.click(screen.getByRole('button', { name: csvButtonName }));
+    await screen.findByText(resultsEN.export.dialog.savedTitle);
+
+    const buttons = screen.getAllByRole('button');
+    const againButton = screen.getByRole('button', { name: resultsEN.export.dialog.again });
+    const doneButton = screen.getByRole('button', { name: resultsEN.export.dialog.done });
+
+    expect(buttons.indexOf(againButton)).toBeLessThan(buttons.indexOf(doneButton));
+    expect(doneButton.className).toMatch(/\bborder\b/);
   });
 });

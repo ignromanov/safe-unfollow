@@ -57,14 +57,38 @@ describe('LicenseDialog', () => {
     expect(analytics.purchaseSuccess).toHaveBeenCalled();
   });
 
-  it('should close itself after a successful redirect activation', async () => {
+  it('should confirm the unlock instead of closing itself', async () => {
     const onOpenChange = vi.fn();
     vi.mocked(activateLicense).mockResolvedValue({ ok: true, instanceId: INSTANCE });
 
     render(<LicenseDialog open initialKey={KEY} source="redirect" onOpenChange={onOpenChange} />);
 
-    await waitFor(() => {
-      expect(onOpenChange).toHaveBeenCalledWith(false);
+    expect(await screen.findByText(resultsEN.export.license.successTitle)).toBeInTheDocument();
+    expect(onOpenChange).not.toHaveBeenCalledWith(false);
+  });
+
+  // Same invariant ExportDialog carries: activation success and the two terminal
+  // verdicts bring their own header, so the standing "Activate your export" title
+  // must step aside rather than stack above them (GH#140) — and it must, because
+  // it names the thing the reader has just finished doing.
+  describe('one title per state', () => {
+    it('should replace the activation title on success, not stack them', async () => {
+      vi.mocked(activateLicense).mockResolvedValue({ ok: true, instanceId: INSTANCE });
+
+      render(<LicenseDialog open initialKey={KEY} source="redirect" onOpenChange={vi.fn()} />);
+
+      expect(await screen.findByText(resultsEN.export.license.successTitle)).toBeInTheDocument();
+      expect(screen.getAllByRole('heading')).toHaveLength(1);
+      expect(screen.queryByText(resultsEN.export.license.title)).not.toBeInTheDocument();
+    });
+
+    it('should replace the activation title on a terminal verdict', async () => {
+      vi.mocked(activateLicense).mockResolvedValue({ ok: false, reason: 'disabled' });
+
+      render(<LicenseDialog open initialKey={KEY} source="redirect" onOpenChange={vi.fn()} />);
+
+      expect(await screen.findByText(resultsEN.export.license.revokedTitle)).toBeInTheDocument();
+      expect(screen.getAllByRole('heading')).toHaveLength(1);
     });
   });
 
@@ -73,7 +97,9 @@ describe('LicenseDialog', () => {
 
     render(<LicenseDialog open initialKey={KEY} source="redirect" onOpenChange={vi.fn()} />);
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(resultsEN.export.license.errorLimit);
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      resultsEN.export.license.blockedTitle
+    );
     expect(analytics.licenseError).toHaveBeenCalledWith('limit_reached');
     expect(getStoredLicense()).toBeNull();
   });
@@ -93,7 +119,9 @@ describe('LicenseDialog', () => {
 
     render(<LicenseDialog open initialKey={KEY} source="redirect" onOpenChange={vi.fn()} />);
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(resultsEN.export.license.revoked);
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      resultsEN.export.license.revokedTitle
+    );
   });
 
   it('should show the generic message for a network failure and allow a retry', async () => {
@@ -215,7 +243,9 @@ describe('LicenseDialog', () => {
 
     render(<LicenseDialog open initialKey={KEY} source="redirect" onOpenChange={vi.fn()} />);
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(resultsEN.export.license.errorLimit);
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      resultsEN.export.license.blockedTitle
+    );
     expect(
       screen.queryByRole('button', { name: resultsEN.export.license.retry })
     ).not.toBeInTheDocument();
@@ -245,5 +275,84 @@ describe('LicenseDialog', () => {
     expect(loggedMissingDescription).toBe(false);
 
     consoleSpy.mockRestore();
+  });
+
+  it('should mask the key rather than printing it', async () => {
+    vi.mocked(activateLicense).mockResolvedValue({ ok: true, instanceId: 'inst-1' });
+
+    render(<LicenseDialog open initialKey={KEY} source="redirect" onOpenChange={vi.fn()} />);
+
+    await screen.findByText(resultsEN.export.license.successTitle);
+    expect(screen.queryByText(KEY)).not.toBeInTheDocument();
+    expect(screen.getByText(new RegExp(KEY.slice(-4)))).toBeInTheDocument();
+  });
+
+  it('should offer a route out of the device cap instead of a dead sentence', async () => {
+    vi.mocked(activateLicense).mockResolvedValue({ ok: false, reason: 'limit_reached' });
+
+    render(<LicenseDialog open initialKey={KEY} source="redirect" onOpenChange={vi.fn()} />);
+
+    expect(await screen.findByText(resultsEN.export.license.blockedTitle)).toBeInTheDocument();
+    expect(screen.getByRole('link')).toHaveAttribute(
+      'href',
+      expect.stringContaining('mailto:refunds@safeunfollow.app')
+    );
+  });
+
+  it('should let a bad key from the purchase email be retyped by hand', async () => {
+    vi.mocked(activateLicense).mockResolvedValue({ ok: false, reason: 'not_found' });
+    const user = userEvent.setup();
+
+    render(<LicenseDialog open initialKey={KEY} source="redirect" onOpenChange={vi.fn()} />);
+
+    await user.click(
+      await screen.findByRole('button', { name: resultsEN.export.license.enterManually })
+    );
+    expect(screen.getByRole('textbox')).toBeInTheDocument();
+  });
+
+  it('should not render the manual form or Submit alongside a terminal error', async () => {
+    // Reproduces the exact combination the whole-branch review found: no key from a
+    // redirect (hasActivationKey === false), the manual form already showing (the
+    // default when there is no key), and a terminal reason. Before the fix this
+    // rendered TerminalErrorBody, the Input and Submit, and the mailto link all at
+    // once — two primary-styled actions under a screen saying the cap is reached.
+    vi.mocked(activateLicense).mockResolvedValue({ ok: false, reason: 'limit_reached' });
+    const user = userEvent.setup();
+
+    render(<LicenseDialog open initialKey={null} source="manual" onOpenChange={vi.fn()} />);
+
+    await user.type(screen.getByRole('textbox'), KEY);
+    await user.click(screen.getByRole('button', { name: resultsEN.export.license.submit }));
+
+    expect(await screen.findByText(resultsEN.export.license.blockedTitle)).toBeInTheDocument();
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: resultsEN.export.license.submit })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: resultsEN.export.license.emailSupport })
+    ).toHaveAttribute('href', expect.stringContaining('mailto:refunds@safeunfollow.app'));
+  });
+
+  it('should hand the reader on to the format choice when the caller supplied one', async () => {
+    vi.mocked(activateLicense).mockResolvedValue({ ok: true, instanceId: 'inst-1' });
+    const onContinue = vi.fn();
+    const user = userEvent.setup();
+
+    render(
+      <LicenseDialog
+        open
+        initialKey={KEY}
+        source="manual"
+        onOpenChange={vi.fn()}
+        onContinue={onContinue}
+      />
+    );
+
+    await user.click(
+      await screen.findByRole('button', { name: resultsEN.export.license.continue })
+    );
+    expect(onContinue).toHaveBeenCalledOnce();
   });
 });

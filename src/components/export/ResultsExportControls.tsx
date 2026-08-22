@@ -1,11 +1,12 @@
 import { Download } from 'lucide-react';
-import { Suspense, lazy, useRef, useState } from 'react';
+import { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { useAdViewability } from '@/hooks/useAdViewability';
 import { useProExport } from '@/hooks/useProExport';
 import { downloadBlob } from '@/lib/export/download';
+import { registerExportOpener } from '@/lib/export/export-opener';
 import { capIndicesForFreeExport, isFreeExportCapped } from '@/lib/export/free-tier';
 import { analytics } from '@/lib/stats';
 
@@ -78,6 +79,20 @@ export function ResultsExportControls({
   // disabled — nothing mounts, so the ref stays null and the hook no-ops.
   useAdViewability(triggerRef, isEnabled, () => analytics.exportTriggerViewable(isUnlocked));
 
+  // The redirect back from checkout is captured in Layout, which cannot reach
+  // this state — see lib/export/export-opener.ts. Registering here is what lets
+  // that dialog end in "Choose a format" instead of a closed sheet, which is
+  // the one activation path a buyer who has actually paid takes.
+  //
+  // Above the early return for the same reason as useAdViewability: the hook
+  // count may not change when `isEnabled` flips. Guarded rather than skipped —
+  // with the feature off there is no format dialog to hand anything to, and a
+  // registration would make the other side offer a button that opens nothing.
+  useEffect(() => {
+    if (!isEnabled) return;
+    return registerExportOpener(() => setIsExportDialogOpen(true));
+  }, [isEnabled]);
+
   if (!isEnabled) return null;
 
   const rowCount = indices === null ? totalCount : indices.length;
@@ -103,6 +118,34 @@ export function ResultsExportControls({
    * to saying what it does.
    */
   const runFreeExport = async (): Promise<void> => {
+    // The reader already has this file. 59 sessions collected two or more
+    // unrequested sample CSVs and one collected nine, because nothing
+    // remembered that the ten rows had already been written. The paywall
+    // still opens — the offer is not what is being capped — but it opens
+    // against the receipt that exists rather than making another.
+    //
+    // `saved.total === rowCount` is the test for "same view". It is a proxy:
+    // two different filters can select the same number of rows, in which
+    // case the reader gets the earlier file's receipt. The cost of that
+    // collision is one stale filename in a modal; the cost of getting it
+    // wrong the other way is another unwanted file.
+    //
+    // Two more limits on this guard, both deliberate:
+    // - `saved` is component state (`useState`), so the cap only holds within
+    //   one mount. Navigating off `/results` and back resets it, and a repeat
+    //   press there writes a second file.
+    // - The guard also requires `saved.capped`, so it covers capped views
+    //   only. An uncapped view — a small list where the free file is the
+    //   whole export and no paywall ever appears — is not covered at all;
+    //   repeat presses there still rebuild and re-download. That is outside
+    //   the measured harm (the repeat downloads seen were all capped sample
+    //   CSVs), so the narrower scope is intentional, just unwritten until now.
+    if (saved !== null && saved.capped && saved.total === rowCount) {
+      analytics.paywallView(i18n.language, rowCount);
+      setIsPaywallOpen(true);
+      return;
+    }
+
     isRunningRef.current = true;
     setIsBusy(true);
     setHasError(false);
@@ -216,7 +259,7 @@ export function ResultsExportControls({
           disabled={isBusy}
           aria-busy={isBusy}
           variant="default"
-          className="h-auto min-h-11 gap-2 rounded-2xl px-4 py-2.5 font-semibold"
+          className="h-auto min-h-11 gap-2 rounded-2xl px-4 py-2.5 font-bold"
         >
           <Download size={18} />
           {t('export.trigger')}
@@ -276,6 +319,10 @@ export function ResultsExportControls({
             onOpenChange={setIsLicenseDialogOpen}
             initialKey={null}
             source="manual"
+            onContinue={() => {
+              setIsLicenseDialogOpen(false);
+              setIsExportDialogOpen(true);
+            }}
           />
         ) : null}
       </Suspense>

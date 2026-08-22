@@ -251,6 +251,31 @@ describe('ResultsExportControls', () => {
       expect(vi.mocked(analytics.exportClick)).toHaveBeenCalledWith(false);
     });
 
+    // 59 sessions collected two or more unrequested sample CSVs, and one
+    // collected nine, because nothing remembered that the ten rows had
+    // already been written for this view. The cap is on the file, not on the
+    // offer: the paywall still opens on every press, against the receipt that
+    // already exists, and only the second write is suppressed.
+    it('should write the sample once per view, however often Export is pressed', async () => {
+      unlocked(false);
+      const user = userEvent.setup();
+
+      render(<ResultsExportControls {...defaultProps} />);
+      await user.click(screen.getByRole('button', { name: triggerLabel }));
+      expect(await screen.findByText(paywallLabel)).toBeInTheDocument();
+
+      await user.keyboard('{Escape}');
+      await waitFor(() => expect(screen.queryByText(paywallLabel)).not.toBeInTheDocument());
+
+      await user.click(screen.getByRole('button', { name: triggerLabel }));
+      expect(await screen.findByText(paywallLabel)).toBeInTheDocument();
+
+      // The paywall came back both times; the file was written once.
+      expect(vi.mocked(downloadBlob)).toHaveBeenCalledOnce();
+      expect(vi.mocked(analytics.freeExportDownload)).toHaveBeenCalledOnce();
+      expect(vi.mocked(analytics.paywallView)).toHaveBeenCalledTimes(2);
+    });
+
     // A file that stops short must say so somewhere durable. The modal is gone
     // the moment it is dismissed; the filename is still there next week.
     it('should mark the capped file in its name', async () => {
