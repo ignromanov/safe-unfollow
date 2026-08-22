@@ -1,3 +1,4 @@
+import { CircleAlert } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -15,9 +16,21 @@ export function RevokedLicenseNotice() {
 
   return (
     <div role="alert" className="flex flex-col gap-3">
-      <DialogHeader className="text-start sm:text-start">
-        <DialogTitle>{t('export.license.revokedTitle')}</DialogTitle>
-        <DialogDescription>
+      {/* `pe-8` on every header in this flow that can render under the sheet's own
+          close control: the X sits at `end-4` and the header was given the full
+          inner width, so a title that reaches the end of its first line runs under
+          the glyph. English clears it; `de` and `ar` are the two locales already on
+          the owner's device list for exactly this class of thing.
+
+          The icon is the counterweight to the emerald check the two success screens
+          now wear. Without it the flow signals success visually and failure only in
+          words, which reads as the failure being less certain than it is. */}
+      <DialogHeader className="text-start pe-8">
+        <DialogTitle className="flex items-center gap-2">
+          <CircleAlert className="h-5 w-5 shrink-0 text-destructive" />
+          {t('export.license.revokedTitle')}
+        </DialogTitle>
+        <DialogDescription className="break-words">
           {t('export.license.revokedBody', { email: SUPPORT_EMAIL })}
         </DialogDescription>
       </DialogHeader>

@@ -37,7 +37,7 @@ export function CheckoutHandoff({ rows }: CheckoutHandoffProps) {
     // once. Radix names the dialog from DialogTitle on open; a title that
     // changes mid-dialog is announced by nothing otherwise.
     <div role="status" className="flex flex-col gap-3">
-      <DialogHeader className="text-start sm:text-start">
+      <DialogHeader className="text-start">
         {/* The load-bearing sentence, and the one this screen exists for. It is
             narrow on purpose: the export never leaves the browser, which is
             true and checkable. "No third-party requests" would be false on a

@@ -63,6 +63,33 @@ describe('ExportDialog', () => {
     buildExport.mockResolvedValue(blob);
   });
 
+  // The sheet used to draw a permanent "Export accounts" header and stack each
+  // state's own header under it, so the build and receipt screens carried two
+  // DialogTitles — ambiguous `aria-labelledby` (GH#140), and visibly a stale
+  // headline over the screen that replaced it. The header is the state now, and
+  // this is the assertion that keeps it that way.
+  describe('one title per state', () => {
+    it('should show only the offer title while idle', () => {
+      render(<ExportDialog {...defaultProps} />);
+
+      expect(screen.getAllByRole('heading')).toHaveLength(1);
+      expect(screen.getByRole('heading')).toHaveTextContent(resultsEN.export.dialog.title);
+    });
+
+    it('should replace the offer title with the receipt, not stack them', async () => {
+      const user = userEvent.setup();
+      render(<ExportDialog {...defaultProps} />);
+
+      await user.click(screen.getByRole('button', { name: csvButtonName }));
+
+      await waitFor(() => {
+        expect(screen.getByRole('heading')).toHaveTextContent(resultsEN.export.dialog.savedTitle);
+      });
+      expect(screen.getAllByRole('heading')).toHaveLength(1);
+      expect(screen.queryByText(resultsEN.export.dialog.title)).not.toBeInTheDocument();
+    });
+  });
+
   it('should download the generated file when a format is chosen', async () => {
     const user = userEvent.setup();
     render(<ExportDialog {...defaultProps} />);

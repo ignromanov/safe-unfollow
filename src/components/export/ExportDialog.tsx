@@ -1,4 +1,4 @@
-import { FileJson, FileSpreadsheet, Loader2 } from 'lucide-react';
+import { Check, CircleAlert, FileJson, FileSpreadsheet, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
@@ -138,21 +138,37 @@ export function ExportDialog({
     );
   };
 
+  // One screen at a time, and the header is the screen. Before this the sheet drew a
+  // permanent "Export accounts" header and stacked the state's own header underneath
+  // it, so the build screen carried two titles and the success screen still announced
+  // itself as the offer the reader had already accepted. Precedence is the order a
+  // reader travels: a file already written outranks everything, a build in flight
+  // outranks a revocation that arrived while it ran (the file is not taken back
+  // mid-write), and revocation outranks the offer.
+  const view =
+    savedFilename !== null ? 'saved' : isPending ? 'building' : isRevoked ? 'revoked' : 'idle';
+
   return (
     <ExportSheet open={open} onOpenChange={onOpenChange}>
-      <DialogHeader>
-        <DialogTitle>{t('export.dialog.title')}</DialogTitle>
-        <DialogDescription>{t('export.dialog.rowCount', { count: rowCount })}</DialogDescription>
-      </DialogHeader>
+      {/* `text-start` everywhere in this flow, overriding DialogHeader's
+          `text-center sm:text-start`. Below 640px — 85% of sessions — the base rule
+          centred this title while every body under it was left-aligned, and on a
+          full-width bottom sheet that misalignment is the first thing visible. */}
+      {view === 'idle' ? (
+        <DialogHeader className="text-start pe-8">
+          <DialogTitle>{t('export.dialog.title')}</DialogTitle>
+          <DialogDescription>{t('export.dialog.rowCount', { count: rowCount })}</DialogDescription>
+        </DialogHeader>
+      ) : null}
 
-      {isPending ? (
+      {view === 'building' ? (
         <div className="flex flex-col gap-3">
-          <DialogHeader className="text-start sm:text-start">
+          <DialogHeader className="text-start pe-8">
             <DialogTitle>{t('export.dialog.buildingTitle')}</DialogTitle>
             <DialogDescription>{t('export.dialog.buildingNote')}</DialogDescription>
           </DialogHeader>
 
-          {/* aria-hidden, and the role="status" line below carries the same fact in
+          {/* aria-hidden, and the sr-only status below carries the same fact in
               words: a bar read aloud is a shape nobody can see. Same split the
               paywall's proportion bar uses. */}
           <div aria-hidden="true" className="flex h-2 overflow-hidden rounded-full bg-muted">
@@ -162,25 +178,34 @@ export function ExportDialog({
             />
           </div>
 
-          <p className="text-xs text-muted-foreground">
+          {/* The one visible statement of progress. The bar shows the proportion and
+              this shows the count, which is the part the bar cannot say; the percentage
+              was a third rendering of the same fact and is now announced only.
+              `tabular-nums` because this figure changes about once per 1000 rows and
+              proportional digits make the whole line shift on every tick. */}
+          <p className="text-xs tabular-nums text-muted-foreground">
             {t('export.dialog.progress', {
               done: (progress?.processed ?? 0).toLocaleString(i18n.language),
               total: rowCount.toLocaleString(i18n.language),
             })}
           </p>
+
+          <p role="status" aria-live="polite" className="sr-only">
+            {t('export.dialog.generating', { percent: toMilestonePercent(progress) })}
+          </p>
         </div>
       ) : null}
 
-      {isPending ? (
-        <div role="status" aria-live="polite" className="min-h-5 text-sm text-muted-foreground">
-          {t('export.dialog.generating', { percent: toMilestonePercent(progress) })}
-        </div>
-      ) : null}
-
-      {savedFilename !== null ? (
+      {view === 'saved' && savedFilename !== null ? (
         <div role="status" aria-live="polite" className="flex flex-col gap-3">
-          <DialogHeader className="text-start sm:text-start">
-            <DialogTitle>{t('export.dialog.savedTitle')}</DialogTitle>
+          <DialogHeader className="text-start pe-8">
+            {/* The same emerald check the paywall's receipt uses, so "a file exists"
+                looks identical wherever the reader meets it. The icon adds no text, so
+                the accessible name Radix builds from this title is unchanged. */}
+            <DialogTitle className="flex items-center gap-2">
+              <Check className="h-5 w-5 shrink-0 text-emerald-500" />
+              {t('export.dialog.savedTitle')}
+            </DialogTitle>
             <DialogDescription className="break-words">
               {t('export.dialog.savedBody', {
                 filename: savedFilename,
@@ -194,21 +219,26 @@ export function ExportDialog({
         </div>
       ) : null}
 
-      {hasFailed ? (
-        <p role="alert" className="text-sm text-destructive">
-          {t('export.dialog.error')}
-        </p>
-      ) : null}
-
       {/* Reuses LicenseDialog's revoked screen rather than a bare red sentence: a
           licence disabled mid-session is the same dead end as one that never
           activated, and the mailto-support footer below is the only action that
-          resolves either. Shown only ahead of a first save — a file already
+          resolves either. It brings its own header, which is now the sheet's only
+          title in this state. Shown only ahead of a first save — a file already
           delivered this session is not retroactively taken away. */}
-      {savedFilename === null && isRevoked ? <RevokedLicenseNotice /> : null}
+      {view === 'revoked' ? <RevokedLicenseNotice /> : null}
+
+      {hasFailed && view === 'idle' ? (
+        <p role="alert" className="flex items-start gap-2 text-sm leading-normal text-destructive">
+          {/* Same icon the two terminal licence screens wear, so a failure is
+              recognisable as one before the sentence is read — the counterpart to
+              the emerald check on the receipt. */}
+          <CircleAlert className="mt-0.5 h-4 w-4 shrink-0" />
+          <span className="min-w-0">{t('export.dialog.error')}</span>
+        </p>
+      ) : null}
 
       <DialogFooter className="flex-col gap-2 sm:flex-col sm:items-stretch">
-        {savedFilename === null && !isRevoked ? (
+        {view === 'idle' || view === 'building' ? (
           <>
             <Button
               variant="outline"
@@ -245,9 +275,9 @@ export function ExportDialog({
           </>
         ) : null}
 
-        {savedFilename === null && isRevoked ? <SupportMailtoLink /> : null}
+        {view === 'revoked' ? <SupportMailtoLink /> : null}
 
-        {savedFilename !== null ? (
+        {view === 'saved' ? (
           <>
             {/* "Export again" is the whole point of having paid (design.md §4.4), so
                 it is the primary action and comes first — matching both the paywall's

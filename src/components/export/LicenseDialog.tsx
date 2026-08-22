@@ -1,4 +1,4 @@
-import { Loader2 } from 'lucide-react';
+import { Check, CircleAlert, Loader2 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -87,8 +87,15 @@ function ActivatedBody({ activatedKey }: { activatedKey: string }) {
 
   return (
     <div role="status" className="flex flex-col gap-3">
-      <DialogHeader className="text-start sm:text-start">
-        <DialogTitle>{t('export.license.successTitle')}</DialogTitle>
+      <DialogHeader className="text-start pe-8">
+        {/* The same emerald check ExportDialog's saved screen and the paywall's
+            receipt wear, so success looks like success at all three points of this
+            one flow. The icon carries no text, so the accessible name Radix builds
+            from this title is unchanged. */}
+        <DialogTitle className="flex items-center gap-2">
+          <Check className="h-5 w-5 shrink-0 text-emerald-500" />
+          {t('export.license.successTitle')}
+        </DialogTitle>
         <DialogDescription>{t('export.license.successBody')}</DialogDescription>
       </DialogHeader>
       <p className="text-xs text-muted-foreground">{t('export.license.successMeta')}</p>
@@ -96,7 +103,7 @@ function ActivatedBody({ activatedKey }: { activatedKey: string }) {
         <span className="text-xs font-semibold text-muted-foreground">
           {t('export.license.keyLabel')}
         </span>
-        <span className="rounded-2xl border bg-muted px-3 py-2 font-mono text-sm">
+        <span className="rounded-2xl border bg-muted px-3 py-2 font-mono text-sm break-all">
           {maskKey(activatedKey)}
         </span>
         <span className="text-xs leading-normal text-muted-foreground">
@@ -119,8 +126,15 @@ function TerminalErrorBody({ reason }: { reason: LicenseFailureReason | 'format'
 
   return (
     <div role="alert" className="flex flex-col gap-3">
-      <DialogHeader className="text-start sm:text-start">
-        <DialogTitle>{t('export.license.blockedTitle')}</DialogTitle>
+      {/* Muted, not destructive, and the difference is the copy's: "Your purchase is
+          fine — this one cannot be the fourth." A red icon over that sentence would
+          contradict it. The shape matches RevokedLicenseNotice so both read as the
+          same kind of screen; the colour is what separates a dead end from a limit. */}
+      <DialogHeader className="text-start pe-8">
+        <DialogTitle className="flex items-center gap-2">
+          <CircleAlert className="h-5 w-5 shrink-0 text-muted-foreground" />
+          {t('export.license.blockedTitle')}
+        </DialogTitle>
         <DialogDescription>{t('export.license.blockedBody')}</DialogDescription>
       </DialogHeader>
       <p className="text-sm leading-normal text-muted-foreground">
@@ -329,29 +343,47 @@ export function LicenseDialog({
   const handleDone = (): void => onOpenChange(false);
 
   const isActivating = state.kind === 'activating';
+  // The states that draw their own DialogTitle: activation success, and the two
+  // terminal verdicts routed through TerminalErrorBody / RevokedLicenseNotice.
+  const hasOwnHeader =
+    state.kind === 'activated' || (state.kind === 'error' && isTerminalReason(state.reason));
 
   return (
     <ExportSheet open={open} onOpenChange={onOpenChange}>
-      <DialogHeader>
-        <DialogTitle>{t('export.license.title')}</DialogTitle>
-        <DialogDescription>
-          {hasActivationKey
-            ? // Stable purpose text, not state text: the role="status" region
-              // below already announces "Activating…" on state change, so
-              // repeating it here would have a screen reader read it twice.
-              //
-              // Borrowed from the paywall's namespace, and this dialog is now
-              // its only reader — the paywall dropped its own feature line
-              // when the proportion became the argument. Left where it is
-              // rather than moved, because relocating a string on the
-              // activation path buys nothing but risk; delete it there and
-              // ten locales lose a description.
-              t('export.paywall.instantNote')
-            : t('export.license.manualDescription')}
-        </DialogDescription>
-      </DialogHeader>
+      {/* Drawn only while no other state supplies a title. Activation success and
+          the two terminal verdicts bring their own header, and stacking this one
+          above them put two DialogTitles in one DialogContent — and, worse to read,
+          left "Activate your export" standing over a screen that says the export is
+          already unlocked. `text-start` overrides DialogHeader's `text-center
+          sm:text-start`: below 640px this title was centred over a left-aligned
+          body, on the viewport 85% of sessions use. */}
+      {hasOwnHeader ? null : (
+        <DialogHeader className="text-start pe-8">
+          <DialogTitle>{t('export.license.title')}</DialogTitle>
+          <DialogDescription>
+            {hasActivationKey
+              ? // Stable purpose text, not state text: the role="status" region
+                // below already announces "Activating…" on state change, so
+                // repeating it here would have a screen reader read it twice.
+                //
+                // Borrowed from the paywall's namespace, and this dialog is now
+                // its only reader — the paywall dropped its own feature line
+                // when the proportion became the argument. Left where it is
+                // rather than moved, because relocating a string on the
+                // activation path buys nothing but risk; delete it there and
+                // ten locales lose a description.
+                t('export.paywall.instantNote')
+              : t('export.license.manualDescription')}
+          </DialogDescription>
+        </DialogHeader>
+      )}
 
-      <div role="status" aria-live="polite" className="min-h-5 text-sm text-muted-foreground">
+      {/* sr-only, not a visible line. "Unlocking…" is already on the footer button
+          during the only state this ever has text in, so visibly it said the same
+          thing twice — and in every other state the `min-h-5` reserved 20px of
+          blank sheet plus the dialog grid's own 16px gap under the header. The
+          announcement it exists for is unchanged. */}
+      <div role="status" aria-live="polite" className="sr-only">
         {isActivating ? t('export.license.activating') : ''}
       </div>
 

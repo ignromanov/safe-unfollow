@@ -134,7 +134,7 @@ export function PaywallModal({
             </span>
           </p>
 
-          <DialogHeader className="text-start sm:text-start">
+          <DialogHeader className="text-start">
             {/* The heading is the number and its label together, not a sentence
                   above them. Radix names the dialog from this node, so a screen
                   reader gets "8,930 accounts matched by this filter" — which is the

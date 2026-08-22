@@ -67,6 +67,31 @@ describe('LicenseDialog', () => {
     expect(onOpenChange).not.toHaveBeenCalledWith(false);
   });
 
+  // Same invariant ExportDialog carries: activation success and the two terminal
+  // verdicts bring their own header, so the standing "Activate your export" title
+  // must step aside rather than stack above them (GH#140) — and it must, because
+  // it names the thing the reader has just finished doing.
+  describe('one title per state', () => {
+    it('should replace the activation title on success, not stack them', async () => {
+      vi.mocked(activateLicense).mockResolvedValue({ ok: true, instanceId: INSTANCE });
+
+      render(<LicenseDialog open initialKey={KEY} source="redirect" onOpenChange={vi.fn()} />);
+
+      expect(await screen.findByText(resultsEN.export.license.successTitle)).toBeInTheDocument();
+      expect(screen.getAllByRole('heading')).toHaveLength(1);
+      expect(screen.queryByText(resultsEN.export.license.title)).not.toBeInTheDocument();
+    });
+
+    it('should replace the activation title on a terminal verdict', async () => {
+      vi.mocked(activateLicense).mockResolvedValue({ ok: false, reason: 'disabled' });
+
+      render(<LicenseDialog open initialKey={KEY} source="redirect" onOpenChange={vi.fn()} />);
+
+      expect(await screen.findByText(resultsEN.export.license.revokedTitle)).toBeInTheDocument();
+      expect(screen.getAllByRole('heading')).toHaveLength(1);
+    });
+  });
+
   it('should show the activation-limit message and report the reason', async () => {
     vi.mocked(activateLicense).mockResolvedValue({ ok: false, reason: 'limit_reached' });
 

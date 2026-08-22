@@ -45,6 +45,19 @@ export function ExportSheet({
         overlayClassName="max-sm:duration-300 max-sm:ease-out"
         className="max-sm:top-auto max-sm:bottom-0 max-sm:max-w-none max-sm:translate-y-0 max-sm:rounded-t-3xl max-sm:rounded-b-none max-sm:border-b-0 max-sm:max-h-[90dvh] max-sm:overflow-y-auto max-sm:px-5 max-sm:pb-[calc(1.75rem+env(safe-area-inset-bottom))] max-sm:shadow-[0_-8px_30px_oklch(0_0_0/0.12)] max-sm:duration-300 max-sm:ease-out max-sm:data-[state=open]:slide-in-from-bottom max-sm:data-[state=closed]:slide-out-to-bottom max-sm:data-[state=open]:zoom-in-100 max-sm:data-[state=closed]:zoom-out-100 max-sm:data-[state=open]:fade-in-100 max-sm:data-[state=closed]:fade-out-100"
       >
+        {/* The bottom sheet's own affordance, and mobile-only: from 640px up this
+            is a centred card and a drag handle would be a lie about how it moves.
+            `absolute`, so it stays out of DialogContent's `grid gap-4` and cannot
+            shift the geometry the paywall's conversion was measured against — it
+            sits in the 24px of top padding that was already there.
+
+            aria-hidden and not focusable: it is a shape that says "this is a
+            sheet", and the dismiss routes a screen reader already has (the X, the
+            overlay, Escape) are unchanged. */}
+        <div
+          aria-hidden="true"
+          className="absolute top-2 left-1/2 h-1 w-9 -translate-x-1/2 rounded-full bg-border sm:hidden"
+        />
         {children}
       </DialogContent>
     </Dialog>
