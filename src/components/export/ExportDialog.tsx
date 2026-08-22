@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ExportSheet } from '@/components/export/ExportSheet';
+import { RevokedLicenseNotice, SupportMailtoLink } from '@/components/export/RevokedLicenseNotice';
 import { useExportWorker } from '@/hooks/useExportWorker';
 import { downloadBlob } from '@/lib/export/download';
 import { validateLicense } from '@/lib/export/license';
@@ -28,6 +29,16 @@ export interface ExportDialogProps {
 function toPercent(progress: ExportProgress | null): number {
   if (!progress || progress.total === 0) return 0;
   return Math.min(100, Math.round((progress.processed / progress.total) * 100));
+}
+
+// Progress fires roughly once per 1000 rows (CHUNK_SIZE in lib/export/data.ts), which
+// is on the order of a thousand `onProgress` calls for a 1M-row export. The bar above
+// stays at full resolution — it is aria-hidden and visual-only — but a screen reader
+// announcing every one of those calls would be unusable. Rounding to the nearest 10%
+// before it reaches the live region means the announced text only changes on a real
+// milestone, so the DOM text is unchanged (and nothing is announced) between them.
+function toMilestonePercent(progress: ExportProgress | null): number {
+  return Math.floor(toPercent(progress) / 10) * 10;
 }
 
 export function ExportDialog({
@@ -162,7 +173,7 @@ export function ExportDialog({
 
       {isPending ? (
         <div role="status" aria-live="polite" className="min-h-5 text-sm text-muted-foreground">
-          {t('export.dialog.generating', { percent: toPercent(progress) })}
+          {t('export.dialog.generating', { percent: toMilestonePercent(progress) })}
         </div>
       ) : null}
 
@@ -189,24 +200,25 @@ export function ExportDialog({
         </p>
       ) : null}
 
-      {isRevoked ? (
-        <p role="alert" className="text-sm text-destructive">
-          {t('export.license.revoked')}
-        </p>
-      ) : null}
+      {/* Reuses LicenseDialog's revoked screen rather than a bare red sentence: a
+          licence disabled mid-session is the same dead end as one that never
+          activated, and the mailto-support footer below is the only action that
+          resolves either. Shown only ahead of a first save — a file already
+          delivered this session is not retroactively taken away. */}
+      {savedFilename === null && isRevoked ? <RevokedLicenseNotice /> : null}
 
       <DialogFooter className="flex-col gap-2 sm:flex-col sm:items-stretch">
-        {savedFilename === null ? (
+        {savedFilename === null && !isRevoked ? (
           <>
             <Button
               variant="outline"
               size="lg"
-              className="min-h-12 flex-col items-start gap-0.5 py-2 text-start"
-              disabled={isPending || isRevoked}
+              className="min-h-12 flex-col items-start gap-0.5 rounded-2xl py-2 text-start"
+              disabled={isPending}
               aria-busy={pendingFormat === 'csv'}
               onClick={() => void handleExport('csv')}
             >
-              <span className="flex items-center gap-2 font-semibold">
+              <span className="flex items-center gap-2 font-bold">
                 {renderIcon('csv')}
                 {t('export.dialog.csv')}
               </span>
@@ -217,12 +229,12 @@ export function ExportDialog({
             <Button
               variant="outline"
               size="lg"
-              className="min-h-12 flex-col items-start gap-0.5 py-2 text-start"
-              disabled={isPending || isRevoked}
+              className="min-h-12 flex-col items-start gap-0.5 rounded-2xl py-2 text-start"
+              disabled={isPending}
               aria-busy={pendingFormat === 'json'}
               onClick={() => void handleExport('json')}
             >
-              <span className="flex items-center gap-2 font-semibold">
+              <span className="flex items-center gap-2 font-bold">
                 {renderIcon('json')}
                 {t('export.dialog.json')}
               </span>
@@ -233,18 +245,27 @@ export function ExportDialog({
           </>
         ) : null}
 
+        {savedFilename === null && isRevoked ? <SupportMailtoLink /> : null}
+
         {savedFilename !== null ? (
           <>
-            <Button size="lg" className="min-h-12" onClick={() => onOpenChange(false)}>
-              {t('export.dialog.done')}
+            {/* "Export again" is the whole point of having paid (design.md §4.4), so
+                it is the primary action and comes first — matching both the paywall's
+                CTA-then-dismiss order and LicenseDialog's own primary-first footer. */}
+            <Button
+              size="lg"
+              className="min-h-12 rounded-2xl font-bold"
+              onClick={() => setSavedFilename(null)}
+            >
+              {t('export.dialog.again')}
             </Button>
             <Button
               size="lg"
               variant="outline"
-              className="min-h-12"
-              onClick={() => setSavedFilename(null)}
+              className="min-h-12 rounded-2xl font-bold"
+              onClick={() => onOpenChange(false)}
             >
-              {t('export.dialog.again')}
+              {t('export.dialog.done')}
             </Button>
           </>
         ) : null}

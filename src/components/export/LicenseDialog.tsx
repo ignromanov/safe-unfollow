@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ExportSheet } from '@/components/export/ExportSheet';
+import { RevokedLicenseNotice, SupportMailtoLink } from '@/components/export/RevokedLicenseNotice';
 import { Input } from '@/components/ui/input';
 import type { LicenseFailureReason } from '@/lib/export/license';
 import { activateLicense, isLicenseKeyFormat } from '@/lib/export/license';
@@ -28,42 +29,42 @@ type DialogState =
   | { kind: 'activated' }
   | { kind: 'error'; reason: LicenseFailureReason | 'format' };
 
-// 'disabled' maps to the "revoked" copy, not "not found" — telling someone
-// whose license was disabled that we "could not find" their key sends them
-// hunting through their purchase email for a typo that does not exist.
-// `as const` keeps the literal dot-paths so `t()` can type-check them below.
-const ERROR_KEYS = {
-  format: 'export.license.errorFormat',
-  not_found: 'export.license.errorNotFound',
-  limit_reached: 'export.license.errorLimit',
-  disabled: 'export.license.revoked',
-  // Unreachable from this dialog — 'invalid' is the reason validateLicense
-  // returns for Dodo's bare `valid: false`, and this dialog only activates.
-  // The exhaustive `satisfies` below still demands an entry, and "revoked" is
-  // the honest copy for a key the server no longer accepts.
-  invalid: 'export.license.revoked',
-  invalid_input: 'export.license.errorGeneric',
-  network: 'export.license.errorGeneric',
-  unknown: 'export.license.errorGeneric',
-} as const satisfies Record<LicenseFailureReason | 'format', string>;
-
-// not_found, limit_reached and disabled are permanent verdicts from Dodo —
-// the same key fails the same way forever, so offering "Try again" for those
-// reasons would just invite a click that cannot help.
-const RETRYABLE_REASONS = new Set<LicenseFailureReason | 'format'>([
-  'invalid_input',
-  'network',
-  'unknown',
-]);
+type AllReasons = LicenseFailureReason | 'format';
 
 // The two verdicts that get a screen of their own rather than a red sentence. Both are
 // permanent and neither is the reader's fault, so both end in the one action that can
 // actually resolve them.
-const TERMINAL_REASONS = new Set<LicenseFailureReason | 'format'>([
-  'limit_reached',
-  'disabled',
-  'invalid',
-]);
+const TERMINAL_REASONS = new Set<AllReasons>(['limit_reached', 'disabled', 'invalid']);
+
+/**
+ * A type predicate, not a bare `Set.has()` call — the difference matters here.
+ * `ERROR_KEYS` below is keyed on exactly the non-terminal reasons, so a reader
+ * who narrows `state.reason` with this function (rather than the set directly)
+ * gets a compiler proof that a terminal reason can never reach `ERROR_KEYS[...]`.
+ * That proof is what closed GH's `errorLimit` bug: the key used to exist for
+ * `limit_reached`, which is terminal and was never read through this path —
+ * dead copy that `satisfies` alone could not catch, because exhaustiveness
+ * over the wrong set still type-checks.
+ */
+function isTerminalReason(reason: AllReasons): reason is 'limit_reached' | 'disabled' | 'invalid' {
+  return TERMINAL_REASONS.has(reason);
+}
+
+// 'disabled' and 'invalid' are handled by TerminalErrorBody, not by this map — see
+// isTerminalReason above. `as const` keeps the literal dot-paths so `t()` can
+// type-check them below.
+const ERROR_KEYS = {
+  format: 'export.license.errorFormat',
+  not_found: 'export.license.errorNotFound',
+  invalid_input: 'export.license.errorGeneric',
+  network: 'export.license.errorGeneric',
+  unknown: 'export.license.errorGeneric',
+} as const satisfies Record<Exclude<AllReasons, 'limit_reached' | 'disabled' | 'invalid'>, string>;
+
+// not_found, limit_reached and disabled are permanent verdicts from Dodo —
+// the same key fails the same way forever, so offering "Try again" for those
+// reasons would just invite a click that cannot help.
+const RETRYABLE_REASONS = new Set<AllReasons>(['invalid_input', 'network', 'unknown']);
 
 /**
  * Shows enough of the key to recognise it, and no more.
@@ -108,28 +109,23 @@ function ActivatedBody({ activatedKey }: { activatedKey: string }) {
 
 // Same reason as ActivatedBody: pulled out to keep LicenseDialog's own
 // complexity under the lint ceiling, not for reuse — `reason` is always one
-// of TERMINAL_REASONS by the time this renders.
+// of TERMINAL_REASONS by the time this renders. The `disabled`/`invalid`
+// branch is RevokedLicenseNotice, shared with ExportDialog's own revocation
+// screen — both describe the identical situation.
 function TerminalErrorBody({ reason }: { reason: LicenseFailureReason | 'format' }) {
   const { t } = useTranslation('results');
-  const isBlocked = reason === 'limit_reached';
+
+  if (reason !== 'limit_reached') return <RevokedLicenseNotice />;
 
   return (
     <div role="alert" className="flex flex-col gap-3">
       <DialogHeader className="text-start sm:text-start">
-        <DialogTitle>
-          {isBlocked ? t('export.license.blockedTitle') : t('export.license.revokedTitle')}
-        </DialogTitle>
-        <DialogDescription>
-          {isBlocked
-            ? t('export.license.blockedBody')
-            : t('export.license.revokedBody', { email: SUPPORT_EMAIL })}
-        </DialogDescription>
+        <DialogTitle>{t('export.license.blockedTitle')}</DialogTitle>
+        <DialogDescription>{t('export.license.blockedBody')}</DialogDescription>
       </DialogHeader>
-      {isBlocked ? (
-        <p className="text-sm leading-normal text-muted-foreground">
-          {t('export.license.blockedAction', { email: SUPPORT_EMAIL })}
-        </p>
-      ) : null}
+      <p className="text-sm leading-normal text-muted-foreground">
+        {t('export.license.blockedAction', { email: SUPPORT_EMAIL })}
+      </p>
     </div>
   );
 }
@@ -164,12 +160,12 @@ function LicenseFooterActions({
   const { t } = useTranslation('results');
   const isError = state.kind === 'error';
   const isRetryable = isError && RETRYABLE_REASONS.has(state.reason);
-  const isTerminal = isError && TERMINAL_REASONS.has(state.reason);
+  const isTerminal = isError && isTerminalReason(state.reason);
 
   return (
     <>
       {isActivating ? (
-        <Button size="lg" className="min-h-12" disabled aria-busy>
+        <Button size="lg" className="min-h-12 rounded-2xl font-bold" disabled aria-busy>
           <div className="animate-spin">
             <Loader2 className="h-4 w-4" />
           </div>
@@ -177,35 +173,33 @@ function LicenseFooterActions({
         </Button>
       ) : null}
 
-      {!isActivating && showManualForm ? (
-        <Button size="lg" className="min-h-12" onClick={onSubmit}>
+      {!isActivating && showManualForm && !isTerminal ? (
+        <Button size="lg" className="min-h-12 rounded-2xl font-bold" onClick={onSubmit}>
           {t('export.license.submit')}
         </Button>
       ) : null}
 
       {!isActivating && hasActivationKey && isRetryable ? (
-        <Button size="lg" className="min-h-12" onClick={onRetry}>
+        <Button size="lg" className="min-h-12 rounded-2xl font-bold" onClick={onRetry}>
           {t('export.license.retry')}
         </Button>
       ) : null}
 
       {state.kind === 'activated' ? (
-        <Button size="lg" className="min-h-12" onClick={onContinue ?? onDone}>
+        <Button size="lg" className="min-h-12 rounded-2xl font-bold" onClick={onContinue ?? onDone}>
           {onContinue ? t('export.license.continue') : t('export.license.done')}
         </Button>
       ) : null}
 
-      {isTerminal ? (
-        <a
-          href={`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent('Pro Export licence')}`}
-          className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-primary px-6 font-bold text-primary-foreground"
-        >
-          {t('export.license.emailSupport')}
-        </a>
-      ) : null}
+      {isTerminal ? <SupportMailtoLink /> : null}
 
       {isError && hasActivationKey && !isRetryable && !isTerminal ? (
-        <Button size="lg" variant="outline" className="min-h-12" onClick={onEnterManually}>
+        <Button
+          size="lg"
+          variant="outline"
+          className="min-h-12 rounded-2xl font-bold"
+          onClick={onEnterManually}
+        >
           {t('export.license.enterManually')}
         </Button>
       ) : null}
@@ -251,32 +245,44 @@ export function LicenseDialog({
   // why that is an inference rather than a documented guarantee), so this must
   // not re-fire just because a parent re-render gave onOpenChange a new closure.
   const activatedKeyRef = useRef<string | null>(null);
+  // Synchronous, unlike the `isActivating` state Submit is disabled on: React
+  // state updates land a tick late, and activateLicense() mints a device
+  // instance per call against a cap of 3 with no deactivation route anywhere
+  // in the product — a burnt slot from a double-fired call is unrecoverable.
+  // Mirrors ResultsExportControls's isRunningRef guard on its own trigger.
+  const isActivatingRef = useRef(false);
 
   const runActivation = useCallback(
     async (key: string): Promise<void> => {
+      if (isActivatingRef.current) return;
+      isActivatingRef.current = true;
       setState({ kind: 'activating' });
 
-      const result = await activateLicense(key);
+      try {
+        const result = await activateLicense(key);
 
-      if (result.ok) {
-        storeLicense(key.trim(), result.instanceId);
-        if (source === 'redirect') {
-          analytics.purchaseSuccess();
-        } else {
-          analytics.licenseRestored();
+        if (result.ok) {
+          storeLicense(key.trim(), result.instanceId);
+          if (source === 'redirect') {
+            analytics.purchaseSuccess();
+          } else {
+            analytics.licenseRestored();
+          }
+          // Not onOpenChange(false). This is the only moment in the product where a
+          // reader has handed over money, and closing the dialog was the entire
+          // confirmation they got — Layout.tsx:99-105 documents that being read as
+          // another failure. The screen is terminal: activateLicense() mints a device
+          // instance per call against a cap of 3, so nothing here may re-enter it.
+          setActivatedKey(key.trim());
+          setState({ kind: 'activated' });
+          return;
         }
-        // Not onOpenChange(false). This is the only moment in the product where a
-        // reader has handed over money, and closing the dialog was the entire
-        // confirmation they got — Layout.tsx:99-105 documents that being read as
-        // another failure. The screen is terminal: activateLicense() mints a device
-        // instance per call against a cap of 3, so nothing here may re-enter it.
-        setActivatedKey(key.trim());
-        setState({ kind: 'activated' });
-        return;
-      }
 
-      analytics.licenseError(result.reason);
-      setState({ kind: 'error', reason: result.reason });
+        analytics.licenseError(result.reason);
+        setState({ kind: 'error', reason: result.reason });
+      } finally {
+        isActivatingRef.current = false;
+      }
     },
     [onOpenChange, source]
   );
@@ -351,17 +357,20 @@ export function LicenseDialog({
 
       {state.kind === 'activated' ? <ActivatedBody activatedKey={activatedKey} /> : null}
 
-      {state.kind === 'error' && TERMINAL_REASONS.has(state.reason) ? (
+      {state.kind === 'error' && isTerminalReason(state.reason) ? (
         <TerminalErrorBody reason={state.reason} />
       ) : null}
 
-      {state.kind === 'error' && !TERMINAL_REASONS.has(state.reason) ? (
+      {state.kind === 'error' && !isTerminalReason(state.reason) ? (
         <p role="alert" className="text-sm text-destructive">
           {t(ERROR_KEYS[state.reason])}
         </p>
       ) : null}
 
-      {showManualForm && state.kind !== 'activating' && state.kind !== 'activated' ? (
+      {showManualForm &&
+      state.kind !== 'activating' &&
+      state.kind !== 'activated' &&
+      !(state.kind === 'error' && isTerminalReason(state.reason)) ? (
         <Input
           value={inputValue}
           onChange={event => setInputValue(event.target.value)}

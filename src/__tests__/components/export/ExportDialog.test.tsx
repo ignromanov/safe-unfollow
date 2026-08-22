@@ -181,6 +181,45 @@ describe('ExportDialog', () => {
     expect(status).toHaveAttribute('aria-live', 'polite');
   });
 
+  it('should round the announced progress to 10% steps instead of every chunk', async () => {
+    // Progress fires roughly once per 1000 rows — a thousand-plus calls on a
+    // large export. The announced text must only change on a real milestone, or
+    // a screen reader hears one announcement per chunk.
+    let resolveBuild: (value: Blob) => void = () => {};
+    buildExport.mockImplementationOnce(
+      (
+        _format: string,
+        _hash: string,
+        _indices: number[] | null,
+        _total: number,
+        onProgress?: (p: { processed: number; total: number }) => void
+      ) => {
+        onProgress?.({ processed: 1, total: 1000 }); // 0.1% -> milestone 0
+        onProgress?.({ processed: 25, total: 1000 }); // 2.5% -> milestone 0
+        onProgress?.({ processed: 340, total: 1000 }); // 34% -> milestone 30
+        return new Promise<Blob>(resolve => {
+          resolveBuild = resolve;
+        });
+      }
+    );
+    const user = userEvent.setup();
+    render(<ExportDialog {...defaultProps} />);
+
+    await user.click(screen.getByRole('button', { name: csvButtonName }));
+
+    const status = await screen.findByRole('status');
+    expect(status).toHaveTextContent(
+      resultsEN.export.dialog.generating.replace('{{percent}}', '30')
+    );
+    expect(status).not.toHaveTextContent('2%');
+    expect(status).not.toHaveTextContent('34%');
+
+    resolveBuild(blob);
+    await waitFor(() => {
+      expect(screen.getByText(resultsEN.export.dialog.savedTitle)).toBeInTheDocument();
+    });
+  });
+
   describe('per-session validation', () => {
     beforeEach(() => {
       localStorage.clear();
@@ -205,7 +244,18 @@ describe('ExportDialog', () => {
 
       render(<ExportDialog {...defaultProps} />);
 
-      expect(await screen.findByRole('alert')).toHaveTextContent(resultsEN.export.license.revoked);
+      // Full terminal screen, not a red sentence: the format buttons disappear
+      // entirely (a paying user with a revoked key cannot start a build that will
+      // only fail later) and the one action that can resolve it — email support,
+      // key pre-filled via mailto — replaces them.
+      expect(await screen.findByRole('alert')).toHaveTextContent(
+        resultsEN.export.license.revokedTitle
+      );
+      expect(screen.queryByRole('button', { name: csvButtonName })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: jsonButtonName })).not.toBeInTheDocument();
+      expect(
+        screen.getByRole('link', { name: resultsEN.export.license.emailSupport })
+      ).toHaveAttribute('href', expect.stringContaining('mailto:refunds@safeunfollow.app'));
       expect(getStoredLicense()).toBeNull();
       expect(analytics.licenseRevoked).toHaveBeenCalled();
     });
@@ -274,5 +324,24 @@ describe('ExportDialog', () => {
     await user.click(await screen.findByRole('button', { name: resultsEN.export.dialog.again }));
 
     expect(screen.getByRole('button', { name: csvButtonName })).toBeInTheDocument();
+  });
+
+  it('should make "Export again" the primary action on the receipt, not "Done"', async () => {
+    // design.md §4.4: "Export again" is "the whole point of having paid" — the
+    // emphasis and order were inverted before this fix (Done was primary and
+    // first, Export again was demoted to `variant="outline"` and listed second).
+    const user = userEvent.setup();
+    buildExport.mockResolvedValue(new Blob(['a,b']));
+
+    render(<ExportDialog {...defaultProps} />);
+    await user.click(screen.getByRole('button', { name: csvButtonName }));
+    await screen.findByText(resultsEN.export.dialog.savedTitle);
+
+    const buttons = screen.getAllByRole('button');
+    const againButton = screen.getByRole('button', { name: resultsEN.export.dialog.again });
+    const doneButton = screen.getByRole('button', { name: resultsEN.export.dialog.done });
+
+    expect(buttons.indexOf(againButton)).toBeLessThan(buttons.indexOf(doneButton));
+    expect(doneButton.className).toMatch(/\bborder\b/);
   });
 });

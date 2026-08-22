@@ -286,6 +286,30 @@ describe('LicenseDialog', () => {
     expect(screen.getByRole('textbox')).toBeInTheDocument();
   });
 
+  it('should not render the manual form or Submit alongside a terminal error', async () => {
+    // Reproduces the exact combination the whole-branch review found: no key from a
+    // redirect (hasActivationKey === false), the manual form already showing (the
+    // default when there is no key), and a terminal reason. Before the fix this
+    // rendered TerminalErrorBody, the Input and Submit, and the mailto link all at
+    // once — two primary-styled actions under a screen saying the cap is reached.
+    vi.mocked(activateLicense).mockResolvedValue({ ok: false, reason: 'limit_reached' });
+    const user = userEvent.setup();
+
+    render(<LicenseDialog open initialKey={null} source="manual" onOpenChange={vi.fn()} />);
+
+    await user.type(screen.getByRole('textbox'), KEY);
+    await user.click(screen.getByRole('button', { name: resultsEN.export.license.submit }));
+
+    expect(await screen.findByText(resultsEN.export.license.blockedTitle)).toBeInTheDocument();
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: resultsEN.export.license.submit })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: resultsEN.export.license.emailSupport })
+    ).toHaveAttribute('href', expect.stringContaining('mailto:refunds@safeunfollow.app'));
+  });
+
   it('should hand the reader on to the format choice when the caller supplied one', async () => {
     vi.mocked(activateLicense).mockResolvedValue({ ok: true, instanceId: 'inst-1' });
     const onContinue = vi.fn();
