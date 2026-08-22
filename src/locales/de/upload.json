@@ -8,7 +8,7 @@
     "processing": "Lokal analysieren...",
     "processingHint": "Die Verarbeitung großer Datensätze (bis zu 1M+) kann einen Moment dauern.",
     "ariaLabel": "Instagram-Daten-ZIP-Datei hochladen",
-    "jsonReminder": "Der Dialog von Instagram wählt standardmäßig HTML — stelle sicher, dass du JSON auswählst. JSON- und HTML-ZIP-Dateien sehen von außen identisch aus.",
+    "jsonShort": "Der Export muss im JSON-Format sein, nicht HTML.",
     "seeGuide": "Schritt-für-Schritt-Anleitung ansehen",
     "jsonRequired": "Erfordert Export im JSON-Format",
     "privacyMicro": "Deine Datei verlässt nie dein Gerät",

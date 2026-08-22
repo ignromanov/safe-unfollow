@@ -251,6 +251,21 @@
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
+
+  /* Indeterminate sweep for the touch upload button while a ZIP parses. The
+     parse emits no progress events, so this reports liveness, not completion.
+     The global prefers-reduced-motion reset below already stills it. */
+  @keyframes upload-sweep {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(250%);
+    }
+  }
+  .animate-upload-sweep {
+    animation: upload-sweep 1.4s ease-in-out infinite;
+  }
 }
 
 /* P0.4: Accessibility — respect user motion preferences */

@@ -8,7 +8,7 @@
     "processing": "Yerel olarak analiz ediliyor...",
     "processingHint": "Büyük veri setlerini (1M+'a kadar) işlemek biraz zaman alabilir.",
     "ariaLabel": "Instagram veri ZIP dosyasını yükle",
-    "jsonReminder": "Instagram'ın penceresi varsayılan olarak HTML'yi seçer — JSON'u seçtiğinden emin ol. JSON ve HTML ZIP dosyaları dışarıdan aynı görünür.",
+    "jsonShort": "Dışa aktarma JSON biçiminde olmalı, HTML değil.",
     "seeGuide": "Adım adım kılavuzu gör",
     "jsonRequired": "JSON formatında dışa aktarım gerektirir",
     "privacyMicro": "Dosyanız cihazınızdan asla ayrılmaz",

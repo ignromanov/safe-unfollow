@@ -8,7 +8,7 @@
     "processing": "Menganalisis secara lokal...",
     "processingHint": "Memproses dataset besar (hingga 1 juta+) bisa memakan waktu sebentar.",
     "ariaLabel": "Unggah file ZIP data Instagram",
-    "jsonReminder": "Dialog Instagram secara default memilih HTML — pastikan Anda memilih JSON. File ZIP JSON dan HTML terlihat identik dari luar.",
+    "jsonShort": "Perlu ekspor dengan format JSON, bukan HTML.",
     "seeGuide": "Lihat panduan langkah demi langkah",
     "jsonRequired": "Memerlukan ekspor format JSON",
     "privacyMicro": "File Anda tidak pernah meninggalkan perangkat Anda",
