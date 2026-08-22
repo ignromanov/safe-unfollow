@@ -8,7 +8,7 @@
     "processing": "Analyzing locally...",
     "processingHint": "Processing large datasets (up to 1M+) can take a moment.",
     "ariaLabel": "Upload Instagram data ZIP file",
-    "jsonReminder": "Instagram's dialog defaults to HTML — make sure you select JSON. JSON and HTML ZIP files look identical from the outside.",
+    "jsonShort": "You need the JSON export, not HTML.",
     "seeGuide": "See the step-by-step guide",
     "jsonRequired": "Requires JSON format export",
     "privacyMicro": "Your file never leaves your device",

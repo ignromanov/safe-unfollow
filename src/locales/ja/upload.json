@@ -8,7 +8,7 @@
     "processing": "ローカルで分析中...",
     "processingHint": "大規模データセット（100万件以上）の処理には少し時間がかかることがあります。",
     "ariaLabel": "InstagramデータのZIPファイルをアップロード",
-    "jsonReminder": "InstagramのダイアログはデフォルトでHTML形式です — 必ずJSON形式を選択してください。JSONとHTMLのZIPファイルは外見上同じに見えます。",
+    "jsonShort": "エクスポートは JSON 形式が必要です（HTML は不可）。",
     "seeGuide": "ステップバイステップガイドを見る",
     "jsonRequired": "JSON形式のエクスポートが必要です",
     "privacyMicro": "ファイルはデバイスから外に出ません",

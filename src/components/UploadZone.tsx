@@ -158,7 +158,7 @@ export function UploadZone({
 
       <div className="grid gap-12 lg:grid-cols-5">
         {/* Main upload area - 3 columns */}
-        <div className="flex flex-col gap-8 lg:col-span-3">
+        <div className="flex flex-col gap-5 lg:col-span-3 lg:gap-8">
           {/* Title */}
           <div className="text-center md:text-start">
             <h1 className="mb-4 text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-white md:text-6xl">
@@ -169,12 +169,17 @@ export function UploadZone({
             </p>
           </div>
 
-          {/* JSON format reminder — inline hint, no card chrome */}
-          <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 md:text-sm">
+          {/* JSON format reminder — one line, no card chrome. It used to spend
+              three sentences explaining *why* the mistake happens; on a 390px
+              viewport that cost ~110px directly above the call to action and
+              pushed the paid block past the fold. The reason now lives behind
+              the link; what stays here is the instruction and the contrast,
+              because HTML is what Instagram hands you by default and is 48% of
+              all failed uploads. */}
+          <p className="text-center text-xs font-medium text-zinc-500 dark:text-zinc-400 md:text-start md:text-sm">
             <Info size={14} className="me-1.5 inline shrink-0 text-zinc-400" aria-hidden="true" />
-            {t('zone.jsonReminder', {
-              defaultValue:
-                "Instagram's dialog defaults to HTML — make sure you select JSON. JSON and HTML ZIP files look identical from the outside.",
+            {t('zone.jsonShort', {
+              defaultValue: 'You need the JSON export, not HTML.',
             })}
             {onOpenWizard && (
               <>
@@ -189,40 +194,55 @@ export function UploadZone({
             )}
           </p>
 
-          {/* Upload zone: touch-optimized vs desktop drag-and-drop */}
-          {isTouchDevice ? (
-            <TouchUploadZone
-              fileInputRef={fileInputRef}
-              isProcessing={isProcessing}
-              onFileInput={handleFileInput}
-            />
-          ) : (
-            <DesktopDropZone
-              fileInputRef={fileInputRef}
-              isProcessing={isProcessing}
-              isDragOver={isDragOver}
-              dragValidation={dragValidation}
-              dragBorderClass={dragBorderClass}
-              onFileInput={handleFileInput}
-              onDrop={handleDrop}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-            />
-          )}
+          {/* Upload zone plus its own caption, deliberately tighter than the
+              column gap: the privacy line is the button's caption, not a
+              section of its own. At gap-8 plus an mt-4 it read as 48px of
+              nothing between the two. */}
+          <div className="flex flex-col gap-2">
+            {isTouchDevice ? (
+              <TouchUploadZone
+                fileInputRef={fileInputRef}
+                isProcessing={isProcessing}
+                onFileInput={handleFileInput}
+              />
+            ) : (
+              <DesktopDropZone
+                fileInputRef={fileInputRef}
+                isProcessing={isProcessing}
+                isDragOver={isDragOver}
+                dragValidation={dragValidation}
+                dragBorderClass={dragBorderClass}
+                onFileInput={handleFileInput}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+              />
+            )}
+
+            {/* Mobile-only: the sidebar carries this on desktop. */}
+            <p className="text-center text-xs font-medium text-zinc-400 lg:hidden dark:text-zinc-500">
+              {t('zone.privacyMicro', {
+                defaultValue: 'Your file never leaves your device',
+              })}
+            </p>
+          </div>
+
+          {/* Above the tips, not below them. LoadingTips returns null until a
+              parse starts, so the whole list arrives in one frame and shifts
+              everything after it down by its full height — enough to push this
+              block off a 390px screen. Its own comment claims it cannot cause
+              CLS, which is true between tips and false for the list. */}
+          <UploadAffiliateBlock />
 
           {/* Sibling of the drop zone: the desktop zone is a <label>, which
               cannot legally contain the affiliate link, and its fixed
               aspect-ratio box has no room for the cards. */}
           <LoadingTips isProcessing={isProcessing} />
 
-          {/* Mobile-only: compact help section (replaces sidebar cards) */}
-          <div className="mt-4 space-y-2 text-center lg:hidden">
-            <p className="text-xs font-medium text-zinc-400 dark:text-zinc-500">
-              {t('zone.privacyMicro', {
-                defaultValue: 'Your file never leaves your device',
-              })}
-            </p>
-            {onOpenWizard && (
+          {/* Mobile-only, and last: it is the long-form escape hatch, so it can
+              afford to sit below the offer and the tips. */}
+          {onOpenWizard && (
+            <div className="text-center lg:hidden">
               <button
                 onClick={() => onOpenWizard?.()}
                 className="text-xs font-semibold text-primary underline underline-offset-2 hover:text-primary/80"
@@ -231,13 +251,8 @@ export function UploadZone({
                   defaultValue: 'Not sure what to upload? See the guide',
                 })}
               </button>
-            )}
-          </div>
-
-          {/* Last in the column on purpose: the drop zone above is an
-              interaction target, and the help block plus the parent's gap-8
-              keep real distance from it. */}
-          <UploadAffiliateBlock />
+            </div>
+          )}
         </div>
 
         {/* Sidebar - desktop only; hidden on mobile to keep CTA visible without scroll */}

@@ -61,8 +61,8 @@ describe('UploadZone', () => {
   it('should display JSON format reminder inline text', () => {
     renderWithRouter(<UploadZone onUploadStart={mockOnUploadStart} />);
 
-    // zone.jsonReminder is now shown as inline muted text (not a badge)
-    expect(screen.getByText(uploadEN.zone.jsonReminder)).toBeInTheDocument();
+    // zone.jsonShort is shown as inline muted text (not a badge)
+    expect(screen.getByText(uploadEN.zone.jsonShort)).toBeInTheDocument();
   });
 
   it('asks nothing before the file is chosen', () => {
@@ -71,11 +71,15 @@ describe('UploadZone', () => {
     expect(screen.queryByRole('radiogroup')).not.toBeInTheDocument();
   });
 
-  it('warns that Instagram defaults to HTML format', () => {
+  it('names both formats in the pre-upload warning', () => {
     renderWithRouter(<UploadZone onUploadStart={mockOnUploadStart} />);
 
-    // zone.jsonReminder carries the "defaults to HTML" warning inline, next to the drop zone.
-    expect(screen.getByText(/defaults to HTML/i)).toBeInTheDocument();
+    // The short line is the only pre-upload format warning on mobile, so it has
+    // to carry the contrast rather than just the required value: HTML is what
+    // Instagram's dialog hands you by default and 48% of failed uploads are it.
+    const warning = screen.getByText(uploadEN.zone.jsonShort);
+    expect(warning).toHaveTextContent(/JSON/);
+    expect(warning).toHaveTextContent(/HTML/);
   });
 
   it('should display pre-upload checklist', () => {
@@ -226,5 +230,20 @@ describe('UploadZone', () => {
     // assertion below would also pass if UploadZone rendered nothing at all.
     expect(analytics.diagnosticErrorView).toHaveBeenCalled();
     expect(container.querySelector('aside')).toBeNull();
+  });
+
+  it('keeps the paid block above the loading tips, which mount all at once', () => {
+    const { container } = renderWithRouter(
+      <UploadZone onUploadStart={vi.fn()} isProcessing={true} />
+    );
+
+    // LoadingTips returns null until a parse starts, so the whole list arrives
+    // in one frame and everything after it moves down by its full height. The
+    // offer must not be in that set — on a 390px viewport the shift was enough
+    // to push it off the screen entirely.
+    const block = container.querySelector('aside') as HTMLElement;
+    const firstTip = screen.getByText(uploadEN.loadingTips.localProcessing.title);
+    expect(block).not.toBeNull();
+    expect(block.compareDocumentPosition(firstTip) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 });
