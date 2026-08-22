@@ -15,21 +15,34 @@ const buttonVariants = cva(
         // The hover surface is overridden per theme (`dark:hover:bg-input/50`)
         // but the hover foreground was not, so `--accent-foreground` — a colour
         // chosen to sit on `--accent` — landed on near-black `--input` in dark
-        // mode at 1.16:1. Light was no better: near-white `--accent-foreground`
-        // on `--accent` is 3.50:1. `--foreground` is legible on both hover
-        // surfaces (5.46:1 light, 16.52:1 dark), i.e. hover changes the fill and
-        // leaves the label alone.
+        // mode at 1.16:1. `--foreground` is legible on both hover surfaces
+        // (17.51:1 light on flat accent, 16.52:1 dark on input/50 over a card),
+        // i.e. hover changes the fill and leaves the label alone. The light
+        // figure was 5.46:1 while `--accent` was the brand violet; it moved
+        // when that token became a neutral, not because anything here changed.
         outline:
           'border bg-background shadow-xs hover:bg-accent hover:text-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50',
         secondary: 'bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80',
-        // Same defect as `outline`, and the token flip alone does not close it.
-        // Light hover is flat `--accent`, which the corrected token now handles
-        // (5.63:1) — but dark hover is `accent/50` composited over a dark page,
-        // so the surface stays dark and the near-black `--accent-foreground`
-        // that is right on flat accent measures 2.43:1 on it. `--foreground` is
-        // correct on both (5.46:1 light, 7.88:1 dark): hover moves the fill,
-        // not the ink.
-        ghost: 'hover:bg-accent hover:text-foreground dark:hover:bg-accent/50',
+        // Same defect as `outline` — `--foreground` on both, so hover moves the
+        // fill and not the ink.
+        //
+        // History: `--accent` was the brand violet, and `dark:hover:bg-accent/50`
+        // over a dark page composited to #4d4684. On the paywall that made the
+        // ghost "Not now" read as a second primary button at the moment the
+        // cursor was on the decision — a hierarchy defect, not a contrast one;
+        // it measured 7.88:1, better than the paid CTA's own 6.15:1. `--accent`
+        // became the neutral its four consumers always used it as, and the
+        // first attempt at that reused `--input`'s lightness (0.25) — which then
+        // undershot the MD 8% hover-overlay floor as a flat surface (1.175:1 on
+        // --card against a 1.2185 requirement) once the `/50` alpha that had
+        // been softening it was still applied on top. `--accent` is now 0.28,
+        // clearing that floor on both --background and --card
+        // (accent-contrast.test.ts), and the `/50` override is dropped here:
+        // the alpha existed only to tame the violet, and against a neutral
+        // token it was the thing pushing the hover under the visibility floor.
+        // Dropping it also means ghost hovers to flat `--accent` in both
+        // themes, same as the light side already did.
+        ghost: 'hover:bg-accent hover:text-foreground',
         link: 'text-primary underline-offset-4 hover:underline',
       },
       size: {
