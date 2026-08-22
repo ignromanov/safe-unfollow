@@ -189,7 +189,7 @@ export function LicenseDialog({ open, onOpenChange, initialKey, source }: Licens
 
         <DialogFooter className="flex-col gap-2 sm:flex-col sm:items-stretch">
           {isActivating ? (
-            <Button size="lg" disabled aria-busy>
+            <Button size="lg" className="min-h-12" disabled aria-busy>
               <div className="animate-spin">
                 <Loader2 className="h-4 w-4" />
               </div>
@@ -198,7 +198,7 @@ export function LicenseDialog({ open, onOpenChange, initialKey, source }: Licens
           ) : null}
 
           {!isActivating && !hasActivationKey ? (
-            <Button size="lg" onClick={handleSubmit}>
+            <Button size="lg" className="min-h-12" onClick={handleSubmit}>
               {t('export.license.submit')}
             </Button>
           ) : null}
@@ -207,7 +207,7 @@ export function LicenseDialog({ open, onOpenChange, initialKey, source }: Licens
           hasActivationKey &&
           state.kind === 'error' &&
           RETRYABLE_REASONS.has(state.reason) ? (
-            <Button size="lg" onClick={handleRetry}>
+            <Button size="lg" className="min-h-12" onClick={handleRetry}>
               {t('export.license.retry')}
             </Button>
           ) : null}

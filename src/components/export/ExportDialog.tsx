@@ -156,6 +156,7 @@ export function ExportDialog({
           <Button
             variant="outline"
             size="lg"
+            className="min-h-12"
             disabled={isPending || isRevoked}
             aria-busy={pendingFormat === 'csv'}
             onClick={() => void handleExport('csv')}
@@ -166,6 +167,7 @@ export function ExportDialog({
           <Button
             variant="outline"
             size="lg"
+            className="min-h-12"
             disabled={isPending || isRevoked}
             aria-busy={pendingFormat === 'json'}
             onClick={() => void handleExport('json')}

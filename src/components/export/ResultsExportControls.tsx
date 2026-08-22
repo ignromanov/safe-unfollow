@@ -216,7 +216,7 @@ export function ResultsExportControls({
           disabled={isBusy}
           aria-busy={isBusy}
           variant="default"
-          className="h-auto min-h-11 gap-2 rounded-2xl px-4 py-2.5 font-semibold"
+          className="h-auto min-h-11 gap-2 rounded-2xl px-4 py-2.5 font-bold"
         >
           <Download size={18} />
           {t('export.trigger')}
