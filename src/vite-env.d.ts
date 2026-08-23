@@ -38,3 +38,10 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
+
+/**
+ * Build version, inlined by `define` in vite.config.ts: the short commit sha in
+ * Vercel builds, `package.json`'s version otherwise. Used as the Tally feedback
+ * form's `version` hidden field (src/lib/feedback/tally.ts) — never per-user.
+ */
+declare const __APP_VERSION__: string;

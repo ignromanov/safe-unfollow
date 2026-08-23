@@ -100,6 +100,14 @@ const REQUIRED: Array<{ host: string; directives: string[]; why: string }> = [
     // the observed violation asks for.
     why: 'an AdSense creative frames www.google.com — reported blocked 2026-08-14',
   },
+  {
+    host: 'https://tally.so',
+    directives: ['script-src', 'frame-src'],
+    // The feedback widget embeds Tally as an iframe: script-src loads its
+    // embed script, frame-src renders the form. Deliberately NOT connect-src
+    // — see the negative test below.
+    why: 'the Tally feedback widget: loads an embed script and renders an iframe',
+  },
 ];
 
 describe('vercel.json Content-Security-Policy', () => {
@@ -180,6 +188,18 @@ describe('vercel.json Content-Security-Policy', () => {
       expect(directives.get(directive)).not.toContain(host);
     }
   );
+
+  /**
+   * The Tally widget is an iframe: everything it does — rendering the form,
+   * submitting an answer — happens inside tally.so's own origin, not this
+   * one. Our connect-src governs requests this page's own script makes
+   * (`fetch`/`XHR`/`WebSocket`/`sendBeacon`), and the bundle has none — the
+   * widget is embedded, never called into. Widening connect-src here would
+   * grant this origin a permission the feature never uses.
+   */
+  it('keeps https://tally.so out of connect-src — the widget is an iframe, its own origin makes the requests', () => {
+    expect(directives.get('connect-src')).not.toContain('https://tally.so');
+  });
 
   it('keeps the directives that make a missing source fail closed', () => {
     expect(directives.get('default-src')).toEqual(["'self'"]);

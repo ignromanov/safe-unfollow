@@ -85,6 +85,12 @@
     "ctaMobile": "応援する",
     "dismiss": "今はいい"
   },
+  "feedback": {
+    "headline": "次に何を作るべきだと思いますか？",
+    "body": "質問は2つ、所要時間は約1分。アカウント登録もメールも不要です。",
+    "notice": "Tallyがホストするフォームが開きます。入力内容はTallyに送信されます — Instagramのエクスポートデータが送信されることはありません。",
+    "cta": "フィードバックを送る"
+  },
   "rescue": {
     "critical": {
       "title": "{{unfollowedPercent}}%を失いました — 7日で回復しましょう",

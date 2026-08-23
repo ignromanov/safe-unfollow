@@ -85,6 +85,12 @@
     "ctaMobile": "Destekle",
     "dismiss": "Şimdi değil"
   },
+  "feedback": {
+    "headline": "Sırada ne inşa etmeliyiz?",
+    "body": "İki soru, yaklaşık bir dakika. Hesap yok, e-posta yok.",
+    "notice": "Tally tarafından barındırılan bir form açar. Yazdıklarınız onlara gider — Instagram dışa aktarımınız asla.",
+    "cta": "Geri Bildirim Ver"
+  },
   "rescue": {
     "critical": {
       "title": "{{unfollowedPercent}}% kaybettiniz — 7 günde kurtarın",
