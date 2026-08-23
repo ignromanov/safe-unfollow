@@ -36,9 +36,12 @@ export interface AffiliateCreativeVariant {
 export interface AffiliateCreative {
   /** The one cut served at every viewport, `lg` included.
    *
-   *  Column width at `lg`: `max-w-4xl` (896px) minus `px-4` padding (16px ×
-   *  2) leaves 864px content; `grid-cols-5` with `gap-12` (48px) gives a
-   *  track of (864 − 4 × 48) / 5 = 134.4px, and `col-span-3` spans
+   *  Column width at `lg`, derived from `UploadZone.tsx:151,158,160`
+   *  (`max-w-4xl`, `grid-cols-5 gap-12`, `col-span-3`) — re-check there
+   *  before trusting this number, it is only correct as long as that grid
+   *  is: `max-w-4xl` (896px) minus `px-4` padding (16px × 2) leaves 864px
+   *  content; `grid-cols-5` with `gap-12` (48px) gives a track of
+   *  (864 − 4 × 48) / 5 = 134.4px, and `col-span-3` spans
    *  3 × 134.4 + 2 × 48 = 499px. */
   base: AffiliateCreativeVariant;
 }

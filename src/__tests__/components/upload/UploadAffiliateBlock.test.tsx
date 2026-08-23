@@ -73,6 +73,10 @@ describe('UploadAffiliateBlock', () => {
     // `shrink-0` on the chip: without it, the much longer translated labels
     // (e.g. `Реклама`, `Publicidade`) could compress the pitch line beside it.
     expect(chip.className).toMatch(/\bshrink-0\b/);
+    // `w-full` on the image: the creative is 1200px intrinsic in a 499px
+    // desktop / ~358px mobile column, and this class is the only thing
+    // scaling it down — without it the page blows out horizontally.
+    expect(img.className).toMatch(/\bw-full\b/);
     // The `<picture>`/`<source>` pair is gone with the `wide` cut it served —
     // one bare `<img>`, nothing left to degrade.
     expect(container.querySelectorAll('img')).toHaveLength(1);
