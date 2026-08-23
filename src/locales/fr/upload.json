@@ -196,6 +196,7 @@
   "affiliate": {
     "disclosure": "Lien d'affilié — nous pouvons toucher une commission, sans frais pour vous.",
     "opensInNewTab": "s'ouvre dans un nouvel onglet",
+    "adLabel": "Publicité",
     "nordvpn": {
       "title": "Gardez le reste de votre navigation privée",
       "desc": "Votre export ne quitte jamais cet onglet, mais votre fournisseur voit toujours chaque site que vous visitez. Un VPN comble cet écart."

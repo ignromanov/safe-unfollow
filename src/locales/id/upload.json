@@ -196,6 +196,7 @@
   "affiliate": {
     "disclosure": "Tautan afiliasi — kami mungkin mendapat komisi tanpa biaya tambahan bagi Anda.",
     "opensInNewTab": "terbuka di tab baru",
+    "adLabel": "Iklan",
     "nordvpn": {
       "title": "Jaga privasi sisa aktivitas browsing Anda",
       "desc": "Arsip Anda tidak pernah keluar dari tab ini, tetapi penyedia internet Anda masih melihat setiap situs yang Anda buka. VPN menutup celah itu."

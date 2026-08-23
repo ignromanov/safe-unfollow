@@ -54,20 +54,30 @@ describe('UploadAffiliateBlock', () => {
     expect(screen.getByText('affiliate.disclosure')).toBeInTheDocument();
   });
 
-  it('leads with our line, then the banner, when the offer has a creative', () => {
+  it('leads with the Ad chip and our line, then the banner, when the offer has a creative', () => {
     const { container } = render(<UploadAffiliateBlock />);
 
     // Queried by tag, not by role: a decorative `alt=""` image is removed from
     // the a11y tree, so there is no role for Testing Library to find.
     const img = container.querySelector('img') as HTMLImageElement;
+    const chip = screen.getByText('affiliate.adLabel');
     const lead = screen.getByText('affiliate.nordvpn.title');
     expect(img).not.toBeNull();
     expect(img.getAttribute('src')).toBe('/affiliate/nordvpn-v3-1200x628.webp');
     // Intrinsic size present so the banner cannot shift layout as it decodes.
     expect(img.getAttribute('width')).toBe('1200');
     expect(img.getAttribute('height')).toBe('628');
-    // Our line above their ad, never beside it.
+    // Chip and lead above their ad, never beside it.
+    expect(chip.compareDocumentPosition(img) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(lead.compareDocumentPosition(img) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    // `shrink-0` on the chip: without it, the much longer translated labels
+    // (e.g. `Реклама`, `Publicidade`) could compress the pitch line beside it.
+    expect(chip.className).toMatch(/\bshrink-0\b/);
+    // The `<picture>`/`<source>` pair is gone with the `wide` cut it served —
+    // one bare `<img>`, nothing left to degrade.
+    expect(container.querySelectorAll('img')).toHaveLength(1);
+    expect(container.querySelector('picture')).toBeNull();
+    expect(container.querySelector('source')).toBeNull();
   });
 
   it('drops our body copy when the banner is present, so there is one pitch not two', () => {

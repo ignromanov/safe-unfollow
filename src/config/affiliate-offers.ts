@@ -41,10 +41,6 @@ export interface AffiliateCreative {
    *  track of (864 − 4 × 48) / 5 = 134.4px, and `col-span-3` spans
    *  3 × 134.4 + 2 × 48 = 499px. */
   base: AffiliateCreativeVariant;
-  /** Unused since the v3 creative went single-cut (2026-08-23) — no offer
-   *  sets it. Scheduled for removal once `UploadAffiliateBlock.tsx` drops the
-   *  `<picture>` element that reads it. */
-  wide?: AffiliateCreativeVariant;
 }
 
 /**

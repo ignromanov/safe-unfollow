@@ -7,14 +7,6 @@ import { analytics } from '@/lib/stats';
 import type { ReactElement } from 'react';
 
 /**
- * Tailwind's default `lg`. Hard-coded because a `<source media>` query is a
- * string the CSS engine never sees — it cannot inherit the framework's value.
- * `tailwind.config.js` overrides `screens` only inside `container`, so the
- * global scale is untouched; if that ever changes, this must change with it.
- */
-const LG_BREAKPOINT_PX = 1024;
-
-/**
  * Persistent affiliate placement in the `/upload` body.
  *
  * It lives here rather than in the parsing spinner because a typical parse
@@ -42,7 +34,7 @@ export function UploadAffiliateBlock(): ReactElement | null {
   const { creative } = offer;
 
   return (
-    <aside className="rounded-2xl border border-zinc-200 bg-white/70 p-3 dark:border-zinc-700 dark:bg-zinc-800/60">
+    <aside className="flex flex-col gap-2 border-t border-zinc-200 dark:border-zinc-800 pt-5 mt-3">
       <a
         href={offer.url}
         target="_blank"
@@ -51,39 +43,28 @@ export function UploadAffiliateBlock(): ReactElement | null {
         className="block text-start"
       >
         {creative ? (
-          // Our line leads, their ad closes. The creative is a finished
-          // advertisement with its own headline and its own button, so our body
-          // copy is omitted here: side by side it would be two pitches in one
-          // clickable box. Our line supplies the message-match the generic ad
-          // creative has none of.
+          // The creative is a finished advertisement with its own headline and
+          // its own button. Our line no longer leads it — it drops to a label
+          // beside an "Ad" chip, above the image, and exists only to supply the
+          // message-match the generic ad creative has none of.
           <>
-            <p className="mb-2 text-sm font-semibold text-zinc-900 dark:text-white">
-              {t(`affiliate.${offer.copyKey}.title` as any)}
-            </p>
-            <picture>
-              {creative.wide ? (
-                <source
-                  media={`(min-width: ${LG_BREAKPOINT_PX}px)`}
-                  srcSet={creative.wide.src}
-                  width={creative.wide.width}
-                  height={creative.wide.height}
-                />
-              ) : null}
-              {/* `max-w-full` without `w-full`: the image settles at its own
-                  intrinsic width and shrinks only when the column is narrower.
-                  That keeps the cap out of the className — a hard-coded
-                  `max-w-[300px]` would be a second copy of a number the
-                  registry already owns, free to drift away from the file. */}
-              <img
-                src={creative.base.src}
-                width={creative.base.width}
-                height={creative.base.height}
-                alt=""
-                loading="lazy"
-                decoding="async"
-                className="mx-auto block h-auto max-w-full rounded-lg"
-              />
-            </picture>
+            <div className="mb-2 flex items-center gap-1.5">
+              <span className="shrink-0 rounded border border-zinc-300 px-1.5 py-px text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:border-zinc-600 dark:text-zinc-500">
+                {t('affiliate.adLabel')}
+              </span>
+              <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                {t(`affiliate.${offer.copyKey}.title` as any)}
+              </p>
+            </div>
+            <img
+              src={creative.base.src}
+              width={creative.base.width}
+              height={creative.base.height}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              className="w-full h-auto rounded-xl ring-1 ring-black/5 dark:ring-white/10"
+            />
           </>
         ) : (
           <div className="flex items-start gap-3">
@@ -103,7 +84,9 @@ export function UploadAffiliateBlock(): ReactElement | null {
             </span>
           </div>
         )}
-        <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">{t('affiliate.disclosure')}</p>
+        <p className="mt-2 text-[11px] text-zinc-400 dark:text-zinc-500">
+          {t('affiliate.disclosure')}
+        </p>
         <span className="sr-only">{t('affiliate.opensInNewTab')}</span>
       </a>
     </aside>

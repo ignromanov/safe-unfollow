@@ -465,7 +465,7 @@ externals list — harness code. This is a **fourth** unpreviewable component, f
 than the three env-gated ones above.
 
 **4. Anything referencing a `public/` asset renders as a broken image.**
-`UploadAffiliateBlock` shows the broken-image glyph where `/affiliate/nordvpn-v2-300x250.webp`
+`UploadAffiliateBlock` shows the broken-image glyph where `/affiliate/nordvpn-v3-1200x628.webp`
 should be. The file exists in the repo and the path is correct — the synth-entry preview bundle
 simply serves no route for `public/`, only `src/`-bundled assets resolve. **Not** a hotlink
 violation and not a preview mistake. Expect the same for any future `public/`-referencing
@@ -800,7 +800,7 @@ in preview cards and in any design the agent builds:
 
 | Component                             | Asset                                                           | Symptom                  |
 | ------------------------------------- | --------------------------------------------------------------- | ------------------------ |
-| `UploadAffiliateBlock` / `UploadZone` | `/affiliate/nordvpn-v2-{300x250,970x250}.webp`                  | broken-image placeholder |
+| `UploadAffiliateBlock` / `UploadZone` | `/affiliate/nordvpn-v3-1200x628.webp`                           | broken-image placeholder |
 | `HowToSection`                        | `/wizard/step-{1..9}` + suffix (built at `HowToSection.tsx:68`) | nine empty media boxes   |
 
 ⚠️ **A literal grep of the bundle under-reports this.** `grep -oE '"/[^"]+\.(webp|mp4|…)"'`

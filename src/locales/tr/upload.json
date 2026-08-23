@@ -196,6 +196,7 @@
   "affiliate": {
     "disclosure": "Bağlı kuruluş bağlantısı — size ek maliyet olmadan komisyon kazanabiliriz.",
     "opensInNewTab": "yeni sekmede açılır",
+    "adLabel": "Reklam",
     "nordvpn": {
       "title": "Gezinmenizin kalanı da gizli kalsın",
       "desc": "Arşiviniz bu sekmeden hiç çıkmıyor, ama sağlayıcınız ziyaret ettiğiniz her siteyi görüyor. VPN bu boşluğu kapatır."
