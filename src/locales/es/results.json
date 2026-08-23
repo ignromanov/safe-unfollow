@@ -157,6 +157,7 @@
   },
   "export": {
     "trigger": "Exportar",
+    "freeHint": "Gratis — las primeras {{rows}} filas",
     "saved": {
       "capped": "Guardado {{filename}} — las primeras {{rows}} de {{total}} filas",
       "full": "Guardado {{filename}} — todas las {{total}} filas"

@@ -157,6 +157,7 @@
   },
   "export": {
     "trigger": "エクスポート",
+    "freeHint": "無料 — 最初の{{rows}}行",
     "saved": {
       "capped": "{{filename}} を保存しました — {{total}}行のうち最初の{{rows}}行",
       "full": "{{filename}} を保存しました — 全{{total}}行"

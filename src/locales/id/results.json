@@ -157,6 +157,7 @@
   },
   "export": {
     "trigger": "Ekspor",
+    "freeHint": "Gratis — {{rows}} baris pertama",
     "saved": {
       "capped": "{{filename}} tersimpan — {{rows}} baris pertama dari {{total}}",
       "full": "{{filename}} tersimpan — semua {{total}} baris"

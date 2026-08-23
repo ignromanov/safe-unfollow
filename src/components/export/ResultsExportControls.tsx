@@ -7,7 +7,11 @@ import { useAdViewability } from '@/hooks/useAdViewability';
 import { useProExport } from '@/hooks/useProExport';
 import { downloadBlob } from '@/lib/export/download';
 import { registerExportOpener } from '@/lib/export/export-opener';
-import { capIndicesForFreeExport, isFreeExportCapped } from '@/lib/export/free-tier';
+import {
+  capIndicesForFreeExport,
+  FREE_EXPORT_ROWS,
+  isFreeExportCapped,
+} from '@/lib/export/free-tier';
 import { analytics } from '@/lib/stats';
 
 // Lazy: the paywall, the export dialog and everything they pull in (export
@@ -264,6 +268,19 @@ export function ResultsExportControls({
           <Download size={18} />
           {t('export.trigger')}
         </Button>
+        {/* Answers the one uncertainty a reader has before the first click:
+            what it costs. Gone the moment there is evidence either way — once
+            unlocked (the operator's rule: a buyer told their click is free is
+            being told something irrelevant), and once a receipt is on screen
+            (this seat's addition: an uncapped receipt says "all {{total}}
+            rows" right below, and "the first {{rows}}" above it would then be
+            false). $7 stays out of this line on purpose — see
+            `runFreeExport`'s docstring above. */}
+        {!isUnlocked && !saved && (
+          <p className="text-end text-xs text-muted-foreground">
+            {t('export.freeHint', { rows: FREE_EXPORT_ROWS })}
+          </p>
+        )}
         {/* A dead click is the worst outcome at the narrowest step of the
             funnel, and IndexedDB here has a known hang with no timeout. Reuses
             the export dialog's message rather than adding a tenth translation

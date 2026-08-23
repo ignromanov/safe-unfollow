@@ -157,6 +157,7 @@
   },
   "export": {
     "trigger": "Экспорт",
+    "freeHint": "Бесплатно — первые {{rows}} строк",
     "saved": {
       "capped": "Сохранён файл {{filename}} — первые {{rows}} строк из {{total}}",
       "full": "Сохранён файл {{filename}} — все строки ({{total}})"
