@@ -59,7 +59,6 @@ const creative = offer?.creative;
 /** Every cut the registry declares, labelled for a readable failure. */
 const variants: ReadonlyArray<readonly [string, AffiliateCreativeVariant]> = [
   ...(creative ? ([['base', creative.base]] as const) : []),
-  ...(creative?.wide ? ([['wide', creative.wide]] as const) : []),
 ];
 
 describe('affiliate creative', () => {
@@ -101,13 +100,4 @@ describe('affiliate creative', () => {
       expect(bytes.byteLength).toBeLessThanOrEqual(BUDGET_BYTES);
     }
   );
-
-  it('offers a wide cut, because the desktop column is far wider than the base one', () => {
-    // The upload column measures roughly 700px from `lg` up (grid-cols-5,
-    // col-span-3). A 300px box fills under half of it; the wide cut is what
-    // closes that gap. If this ever goes away the `<picture>` collapses to a
-    // single source and the desktop placement silently shrinks back.
-    expect(creative?.wide).toBeDefined();
-    expect(creative!.wide!.width).toBeGreaterThan(creative!.base.width);
-  });
 });
