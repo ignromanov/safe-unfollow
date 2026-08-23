@@ -156,4 +156,37 @@ describe('FeedbackPrompt', () => {
 
     expect(analytics.feedbackPromptViewable).not.toHaveBeenCalled();
   });
+  // Three design decisions here are load-bearing and none of them is visible
+  // from the behaviour above. Each was a real defect in the first version of
+  // this component, found in review on 2026-08-23, so each gets a named test
+  // rather than a comment: an intention that nothing checks is not a property.
+  describe('the weight it claims against the donation card above it', () => {
+    it('carries no fill, so the mandatory notice keeps its contrast', () => {
+      render(<FeedbackPrompt />);
+
+      // `text-muted-foreground` at 12px measures 4.32:1 on `bg-muted` and
+      // 4.72:1 on the page background. The notice is velum-cdpo's condition 3
+      // and is the one line here that may not be hard to read.
+      expect(screen.getByTestId('feedback-prompt').className).not.toContain('bg-muted');
+    });
+
+    it('never stretches its trigger to the full width', () => {
+      render(<FeedbackPrompt />);
+
+      // The donation card's CTA is auto-width. This ask is forecast at ~7
+      // responses a month against $5.50 a sale on the export above it, so its
+      // control must not be the widest thing in the tail.
+      expect(screen.getByRole('button').className).not.toMatch(/(^|\s)w-full(\s|$)/);
+    });
+
+    it('renders exactly one icon, not one per breakpoint pair', () => {
+      const { container } = render(<FeedbackPrompt />);
+
+      // Two copies exist in the markup because the lead glyph moves between
+      // breakpoints, but only one is ever painted; a second glyph inside the
+      // button would put the same shape on screen twice at 390px.
+      expect(container.querySelectorAll('svg')).toHaveLength(2);
+      expect(screen.getByRole('button').querySelector('svg')).toBeNull();
+    });
+  });
 });
