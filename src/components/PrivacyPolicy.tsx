@@ -63,7 +63,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
               <span>
                 <strong className="text-foreground">Ads Keep This Free</strong> — We show ads from
                 Google AdSense, which set their own cookies. They can never be targeted using your
-                Instagram data, because that data never reaches us or Google. See section 5.3.
+                Instagram data, because that data never reaches us or Google. See section 5.4.
               </span>
             </li>
           </ul>
@@ -132,7 +132,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
           <p className="text-muted-foreground mt-4">
             In the EEA, UK and Switzerland, Google's consent tool additionally stores your
             advertising consent choice on your device so it does not have to ask again on every
-            visit (see section 5.3).
+            visit (see section 5.4).
           </p>
         </section>
 
@@ -253,7 +253,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             privacy policy applies to any interaction on their platform.
           </p>
 
-          <h3 className="text-lg font-semibold mt-6 mb-3">5.3 Advertising (Google AdSense)</h3>
+          <h3 className="text-lg font-semibold mt-6 mb-3">5.4 Advertising (Google AdSense)</h3>
           <p className="text-muted-foreground">
             This service is free and has no paid tier. Ads from Google AdSense cover its running
             costs. Google, as a third-party vendor, uses cookies and similar technologies to serve
@@ -269,7 +269,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
           </div>
           <p className="text-muted-foreground mt-4">
             AdSense units are not shown on the sample-data page, and there are none on the upload
-            screen. The upload screen does carry one partner link, described in 5.4.
+            screen. The upload screen does carry one partner link, described in 5.5.
           </p>
           <p className="text-muted-foreground mt-4">
             If you are in the EEA, UK or Switzerland, a consent dialog from Google's certified
@@ -296,7 +296,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             .
           </p>
 
-          <h3 className="text-lg font-semibold mt-6 mb-3">5.4 Affiliate Links</h3>
+          <h3 className="text-lg font-semibold mt-6 mb-3">5.5 Affiliate Links</h3>
           <p className="text-muted-foreground">
             Some outbound links on this site are affiliate links, including a partner block on the
             upload screen and the tool suggestions on the results screen. If you buy something after
@@ -321,6 +321,18 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             Which partner offer you see depends on the language you are viewing the site in, because
             these programmes are not available in every country. We do not claim to use these
             products ourselves.
+          </p>
+
+          <h3 className="text-lg font-semibold mt-6 mb-3">5.6 Feedback Form (Tally)</h3>
+          <p className="text-muted-foreground">
+            The results screen carries a feedback link. Nothing reaches Tally until the form is
+            opened — the script included: opening it loads Tally's widget, which then receives
+            whatever you type, plus your language, the page you opened it from, and the site
+            version.
+          </p>
+          <p className="text-muted-foreground mt-4">
+            Tally uses Cloudflare Turnstile to check that whoever opened the form is not a bot, and
+            Turnstile processes the opener's IP address to do that check.
           </p>
         </section>
 
@@ -352,7 +364,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             </li>
             <li>
               <strong className="text-foreground">Change your ad consent:</strong> Reopen the
-              consent dialog (EEA, UK, Switzerland) or use Google's My Ad Center — see section 5.3
+              consent dialog (EEA, UK, Switzerland) or use Google's My Ad Center — see section 5.4
             </li>
             <li>
               <strong className="text-foreground">Audit the code:</strong> Review our open-source

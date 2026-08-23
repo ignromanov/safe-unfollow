@@ -7,11 +7,20 @@ import { buildConfig } from "./vite/build-config";
 import { pwaConfig } from "./vite/pwa-config";
 import { injectLocalizedMeta } from "./vite/ssg-meta-injector";
 import { SUPPORTED_LANGUAGES } from "./src/config/languages";
+import pkg from "./package.json";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default defineConfig({
+  // Build version for the Tally feedback hidden field (src/lib/feedback/tally.ts).
+  // Vercel's build environment exposes the commit sha, not `VITE_`-prefixed, so it
+  // is read here at build time and inlined — never a runtime env read.
+  define: {
+    __APP_VERSION__: JSON.stringify(
+      process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? pkg.version
+    ),
+  },
   plugins: [
     react(),
     VitePWA(pwaConfig),

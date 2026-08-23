@@ -54,7 +54,7 @@ describe('PrivacyPolicy Component', () => {
     it('should disclose advertising and that ads cannot use Instagram data', () => {
       render(<PrivacyPolicy onBack={mockOnBack} />);
 
-      expect(screen.getByText(/5\.3 Advertising \(Google AdSense\)/i)).toBeInTheDocument();
+      expect(screen.getByText(/5\.4 Advertising \(Google AdSense\)/i)).toBeInTheDocument();
       expect(
         screen.getByText(/Ads are never targeted using your Instagram data/i)
       ).toBeInTheDocument();
@@ -92,9 +92,26 @@ describe('PrivacyPolicy Component', () => {
     it('should disclose affiliate links and that partners are not contacted before a click', () => {
       render(<PrivacyPolicy onBack={mockOnBack} />);
 
-      expect(screen.getByText(/5\.4 Affiliate Links/i)).toBeInTheDocument();
+      expect(screen.getByText(/5\.5 Affiliate Links/i)).toBeInTheDocument();
       expect(screen.getByText(/Nothing is sent to a partner until you click/i)).toBeInTheDocument();
       expect(screen.getByText(/served from our own\s+domain/i)).toBeInTheDocument();
+    });
+
+    // The results screen carries a Tally feedback link (see
+    // lib/feedback/tally.ts). Two claims matter here: the timing one — same
+    // shape as the AdSense and affiliate disclosures above, nothing reaches
+    // Tally until the form is opened — and the Turnstile one, because a
+    // processor that receives an identifier (the opener's IP) is named or it
+    // is not.
+    it('should disclose the Tally feedback form and Turnstile bot-check processing', () => {
+      render(<PrivacyPolicy onBack={mockOnBack} />);
+
+      expect(screen.getByText(/5\.6 Feedback Form \(Tally\)/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Nothing reaches Tally until the form is opened/i)
+      ).toBeInTheDocument();
+      expect(screen.getByText(/Cloudflare Turnstile/i)).toBeInTheDocument();
+      expect(screen.getByText(/processes the opener's IP address/i)).toBeInTheDocument();
     });
 
     it('should render all main sections', () => {
@@ -145,6 +162,50 @@ describe('PrivacyPolicy Component', () => {
       expect(vercelLink).toBeInTheDocument();
       expect(vercelLink).toHaveAttribute('href', 'https://vercel.com/legal/privacy-policy');
       expect(vercelLink).toHaveAttribute('target', '_blank');
+    });
+  });
+
+  // The duplicate 5.3 (External Links / Advertising) survived because nothing
+  // parsed the headings and checked them against the "see section 5.x"
+  // cross-references scattered through the rest of the document. These two
+  // tests make that invariant visible instead of relying on someone noticing.
+  describe('section 5 numbering', () => {
+    it('should have unique, contiguous 5.x subsection numbers starting at 5.1', () => {
+      const { container } = render(<PrivacyPolicy onBack={mockOnBack} />);
+
+      const h3Headings = Array.from(container.querySelectorAll('h3'));
+      const numbers = h3Headings
+        .map(heading => heading.textContent?.match(/^5\.(\d+)\s/)?.[1])
+        .filter((n): n is string => n !== undefined)
+        .map(Number);
+
+      expect(numbers.length).toBeGreaterThan(0);
+
+      const uniqueNumbers = new Set(numbers);
+      expect(uniqueNumbers.size).toBe(numbers.length);
+
+      const sorted = [...uniqueNumbers].sort((a, b) => a - b);
+      expect(sorted).toEqual(Array.from({ length: sorted.length }, (_, i) => i + 1));
+    });
+
+    it('should only cross-reference 5.x subsection numbers that exist as headings', () => {
+      const { container } = render(<PrivacyPolicy onBack={mockOnBack} />);
+
+      const h3Headings = Array.from(container.querySelectorAll('h3'));
+      const headingNumbers = new Set(
+        h3Headings
+          .map(heading => heading.textContent?.match(/^5\.(\d+)\s/)?.[1])
+          .filter((n): n is string => n !== undefined)
+          .map(Number)
+      );
+
+      const bodyText = container.textContent ?? '';
+      const references = [...bodyText.matchAll(/section 5\.(\d+)/g)].map(m => Number(m[1]));
+
+      expect(references.length).toBeGreaterThan(0);
+      for (const reference of references) {
+        expect(headingNumbers.has(reference)).toBe(true);
+      }
     });
   });
 

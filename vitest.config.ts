@@ -7,6 +7,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default defineConfig({
+  // Mirrors vite.config.ts's define for the same global — see its comment.
+  // Tests never run through Vercel's build, so there is no commit sha to read;
+  // a fixed string is enough since no test asserts a particular version value.
+  define: {
+    __APP_VERSION__: JSON.stringify("test"),
+  },
   plugins: [react()],
   resolve: {
     alias: {

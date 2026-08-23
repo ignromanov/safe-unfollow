@@ -150,6 +150,12 @@ export const AnalyticsEvents = {
   RESCUE_PLAN_TOOL_CLICK: 'rescue_plan_tool_click',
   RESCUE_PLAN_DISMISS: 'rescue_plan_dismiss',
 
+  // Feedback prompt on /results (100% sampled — see events.ts for why).
+  // No `feedback_submit`: submission happens inside Tally's iframe with no
+  // callback, so completion is read from Tally's own dashboard instead.
+  FEEDBACK_PROMPT_VIEWABLE: 'feedback_prompt_viewable',
+  FEEDBACK_PROMPT_CLICK: 'feedback_prompt_click',
+
   // Error tracking
   ERROR_BOUNDARY: 'error_boundary',
   ROUTE_ERROR: 'route_error',

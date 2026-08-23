@@ -85,6 +85,12 @@
     "ctaMobile": "Dukung",
     "dismiss": "Nanti saja"
   },
+  "feedback": {
+    "headline": "Apa yang harus kami bangun selanjutnya?",
+    "body": "Dua pertanyaan, sekitar satu menit. Tanpa akun, tanpa email.",
+    "notice": "Membuka formulir yang dihosting oleh Tally. Yang Anda ketik dikirim ke mereka — ekspor Instagram Anda tidak pernah.",
+    "cta": "Beri Masukan"
+  },
   "rescue": {
     "critical": {
       "title": "Anda kehilangan {{unfollowedPercent}}% — pulih dalam 7 hari",

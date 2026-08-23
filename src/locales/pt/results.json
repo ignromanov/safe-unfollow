@@ -85,6 +85,12 @@
     "ctaMobile": "Apoiar",
     "dismiss": "Agora não"
   },
+  "feedback": {
+    "headline": "O que devemos construir a seguir?",
+    "body": "Duas perguntas, cerca de um minuto. Sem conta, sem e-mail.",
+    "notice": "Abre um formulário hospedado pela Tally. O que você digitar vai para eles — sua exportação do Instagram nunca vai.",
+    "cta": "Dar Feedback"
+  },
   "rescue": {
     "critical": {
       "title": "Você perdeu {{unfollowedPercent}}% — recupere em 7 dias",

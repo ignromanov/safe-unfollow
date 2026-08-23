@@ -345,6 +345,21 @@ export const analytics = {
     });
   },
 
+  // Feedback prompt (/results, 100% sampling — deliberately, not house style).
+  // The 3-5% precedents elsewhere in this file exist for high-volume events;
+  // at ~7 clicks/month forecast, 5% sampling yields 0.35 events/month and the
+  // series would measure nothing. Viewable batches like the ad/export
+  // impressions it mirrors; click fires unbatched, before the Tally script
+  // injection it precedes, so a failed script fetch still lands in the
+  // numerator.
+  feedbackPromptViewable: () => {
+    enqueueEvent(AnalyticsEvents.FEEDBACK_PROMPT_VIEWABLE);
+  },
+
+  feedbackPromptClick: () => {
+    trackEvent(AnalyticsEvents.FEEDBACK_PROMPT_CLICK);
+  },
+
   // Rescue Plan (100% sampling — high-value conversion events)
   rescuePlanImpression: (
     severity: string,
