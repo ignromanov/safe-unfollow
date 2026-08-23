@@ -606,6 +606,44 @@ describe('ResultsExportControls', () => {
     });
   });
 
+  // Answers the one uncertainty a reader has before the first click — what it
+  // costs — and only there: gone once the reader has evidence either way.
+  describe('the free hint', () => {
+    const freeHint = resultsEN.export.freeHint.replace('{{rows}}', String(FREE_EXPORT_ROWS));
+
+    it('should show before the first click, to a reader who has not paid', () => {
+      unlocked(false);
+
+      render(<ResultsExportControls {...defaultProps} />);
+
+      expect(screen.getByText(freeHint)).toBeInTheDocument();
+    });
+
+    // The operator's rule: a buyer told their click is free is being told
+    // something irrelevant.
+    it('should not show once unlocked', () => {
+      unlocked(true);
+
+      render(<ResultsExportControls {...defaultProps} />);
+
+      expect(screen.queryByText(freeHint)).not.toBeInTheDocument();
+    });
+
+    // Added by this seat, not the operator: an uncapped receipt says "all
+    // {{total}} rows" right below this line, and "the first {{rows}}" above it
+    // would then be false.
+    it('should not show once a receipt is on screen', async () => {
+      unlocked(false);
+      const user = userEvent.setup();
+
+      render(<ResultsExportControls {...defaultProps} indices={[4, 8, 15]} />);
+      await user.click(screen.getByRole('button', { name: triggerLabel }));
+      await screen.findByRole('status');
+
+      expect(screen.queryByText(freeHint)).not.toBeInTheDocument();
+    });
+  });
+
   it('should open the export dialog when unlocked', async () => {
     unlocked(true);
     const user = userEvent.setup();

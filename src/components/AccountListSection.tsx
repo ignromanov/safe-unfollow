@@ -279,7 +279,12 @@ export function AccountListSection({
             <p
               aria-live="polite"
               aria-atomic="true"
-              className="text-sm font-semibold text-zinc-500 min-w-0"
+              // `text-zinc-500` had no dark variant and measured 4.20:1 on the
+              // dark background — under the 4.5:1 floor. The semantic token is
+              // 4.72:1 light / 9.12:1 dark, and it is what the export caption
+              // opposite it in this row uses, so the two sides of the row stop
+              // reading from different grey systems.
+              className="text-sm font-semibold text-muted-foreground min-w-0"
             >
               {t('header.showing', {
                 filtered: displayCount.toLocaleString(i18n.language),

@@ -157,6 +157,7 @@
   },
   "export": {
     "trigger": "تصدير",
+    "freeHint": "مجانًا — أول {{rows}} صفوف",
     "saved": {
       "capped": "تم حفظ {{filename}} — أول {{rows}} صفوف من أصل {{total}}",
       "full": "تم حفظ {{filename}} — جميع الصفوف ({{total}})"

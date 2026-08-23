@@ -157,6 +157,7 @@
   },
   "export": {
     "trigger": "Dışa aktar",
+    "freeHint": "Ücretsiz — ilk {{rows}} satır",
     "saved": {
       "capped": "{{filename}} kaydedildi — {{total}} satırın ilk {{rows}} satırı",
       "full": "{{filename}} kaydedildi — {{total}} satırın tamamı"
