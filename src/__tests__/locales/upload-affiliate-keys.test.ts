@@ -21,6 +21,7 @@ describe('upload affiliate copy', () => {
       expect(bundle.affiliate?.nordvpn?.desc, `${language} desc`).toBeTruthy();
       expect(bundle.affiliate?.disclosure, `${language} disclosure`).toBeTruthy();
       expect(bundle.affiliate?.opensInNewTab, `${language} opensInNewTab`).toBeTruthy();
+      expect(bundle.affiliate?.adLabel, `${language} adLabel`).toBeTruthy();
     }
   });
 

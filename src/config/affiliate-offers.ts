@@ -34,17 +34,16 @@ export interface AffiliateCreativeVariant {
 }
 
 export interface AffiliateCreative {
-  /** Below `lg`, and the fallback wherever no `<source>` matches. */
-  base: AffiliateCreativeVariant;
-  /** From `lg` up, where the upload column measures roughly 750px and a 300px
-   *  box fills under half of it. Optional: an offer may ship one cut only.
+  /** The one cut served at every viewport, `lg` included.
    *
-   *  Pick this by AREA, not by width. A 728×90 leaderboard closed 96% of the
-   *  column and still read as smaller than the box it replaced — 65 520 px²
-   *  against the base cut's 75 000. The 970×250 billboard lands at roughly
-   *  750×193 in this column: 2.2× the leaderboard's area, and a 0.77 downscale
-   *  keeps its headline legible where the square cut's sub-text turned to mush. */
-  wide?: AffiliateCreativeVariant;
+   *  Column width at `lg`, derived from `UploadZone.tsx:152,159,161`
+   *  (`max-w-4xl`, `grid-cols-5 gap-12`, `col-span-3`) — re-check there
+   *  before trusting this number, it is only correct as long as that grid
+   *  is: `max-w-4xl` (896px) minus `px-4` padding (16px × 2) leaves 864px
+   *  content; `grid-cols-5` with `gap-12` (48px) gives a track of
+   *  (864 − 4 × 48) / 5 = 134.4px, and `col-span-3` spans
+   *  3 × 134.4 + 2 × 48 = 499px. */
+  base: AffiliateCreativeVariant;
 }
 
 /**
@@ -57,8 +56,7 @@ export interface AffiliateCreative {
  * property per offer — do not let this comment rot into an established fact.
  */
 const NORDVPN_CREATIVE: AffiliateCreative = {
-  base: { src: '/affiliate/nordvpn-v2-300x250.webp', width: 300, height: 250 },
-  wide: { src: '/affiliate/nordvpn-v2-970x250.webp', width: 970, height: 250 },
+  base: { src: '/affiliate/nordvpn-v3-1200x628.webp', width: 1200, height: 628 },
 };
 
 export interface AffiliateOffer {

@@ -196,6 +196,7 @@
   "affiliate": {
     "disclosure": "Enlace de afiliado — podemos recibir una comisión sin costo adicional para ti.",
     "opensInNewTab": "se abre en una pestaña nueva",
+    "adLabel": "Publicidad",
     "nordvpn": {
       "title": "Mantén privado el resto de tu navegación",
       "desc": "Tu archivo nunca sale de esta pestaña, pero tu proveedor sigue viendo cada sitio que visitas. Una VPN cierra esa brecha."

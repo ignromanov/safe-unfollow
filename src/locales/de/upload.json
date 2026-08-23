@@ -196,6 +196,7 @@
   "affiliate": {
     "disclosure": "Affiliate-Link — ggf. Provision, ohne Mehrkosten für dich.",
     "opensInNewTab": "wird in einem neuen Tab geöffnet",
+    "adLabel": "Anzeige",
     "nordvpn": {
       "title": "Auch den restlichen Verkehr privat halten",
       "desc": "Dein Export verlässt diesen Tab nie, aber dein Provider sieht weiterhin jede Seite, die du öffnest. Ein VPN schließt diese Lücke."

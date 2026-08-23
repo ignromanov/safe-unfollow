@@ -54,46 +54,34 @@ describe('UploadAffiliateBlock', () => {
     expect(screen.getByText('affiliate.disclosure')).toBeInTheDocument();
   });
 
-  it('leads with our line, then the banner, when the offer has a creative', () => {
+  it('leads with the Ad chip and our line, then the banner, when the offer has a creative', () => {
     const { container } = render(<UploadAffiliateBlock />);
 
     // Queried by tag, not by role: a decorative `alt=""` image is removed from
     // the a11y tree, so there is no role for Testing Library to find.
     const img = container.querySelector('img') as HTMLImageElement;
+    const chip = screen.getByText('affiliate.adLabel');
     const lead = screen.getByText('affiliate.nordvpn.title');
     expect(img).not.toBeNull();
-    expect(img.getAttribute('src')).toBe('/affiliate/nordvpn-v2-300x250.webp');
+    expect(img.getAttribute('src')).toBe('/affiliate/nordvpn-v3-1200x628.webp');
     // Intrinsic size present so the banner cannot shift layout as it decodes.
-    expect(img.getAttribute('width')).toBe('300');
-    expect(img.getAttribute('height')).toBe('250');
-    // Our line above their ad, never beside it.
+    expect(img.getAttribute('width')).toBe('1200');
+    expect(img.getAttribute('height')).toBe('628');
+    // Chip and lead above their ad, never beside it.
+    expect(chip.compareDocumentPosition(img) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(lead.compareDocumentPosition(img) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-  });
-
-  it('offers the wide cut from lg up, carrying its own intrinsic size', () => {
-    // The upload column is roughly 750px from `lg`; the 300px base cut fills
-    // under half of it. The size attributes matter as much as the source: they
-    // are what reserves the wide box instead of the base 6:5 one, and jsdom
-    // will never catch a wrong pair by rendering it.
-    const { container } = render(<UploadAffiliateBlock />);
-
-    const source = container.querySelector('picture > source') as HTMLSourceElement;
-    expect(source).not.toBeNull();
-    expect(source.getAttribute('media')).toBe('(min-width: 1024px)');
-    expect(source.getAttribute('srcset')).toBe('/affiliate/nordvpn-v2-970x250.webp');
-    expect(source.getAttribute('width')).toBe('970');
-    expect(source.getAttribute('height')).toBe('250');
-  });
-
-  it('keeps the wide cut ahead of the fallback img, or the browser never sees it', () => {
-    // `<picture>` takes the first matching child. An `<img>` placed above the
-    // `<source>` wins unconditionally and the desktop cut becomes dead weight
-    // in the repo — downloaded by nobody, noticed by nobody.
-    const { container } = render(<UploadAffiliateBlock />);
-
-    const source = container.querySelector('picture > source') as HTMLSourceElement;
-    const img = container.querySelector('picture > img') as HTMLImageElement;
-    expect(source.compareDocumentPosition(img) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    // `shrink-0` on the chip: without it, the much longer translated labels
+    // (e.g. `Реклама`, `Publicidade`) could compress the pitch line beside it.
+    expect(chip.className).toMatch(/\bshrink-0\b/);
+    // `w-full` on the image: the creative is 1200px intrinsic in a 499px
+    // desktop / ~358px mobile column, and this class is the only thing
+    // scaling it down — without it the page blows out horizontally.
+    expect(img.className).toMatch(/\bw-full\b/);
+    // The `<picture>`/`<source>` pair is gone with the `wide` cut it served —
+    // one bare `<img>`, nothing left to degrade.
+    expect(container.querySelectorAll('img')).toHaveLength(1);
+    expect(container.querySelector('picture')).toBeNull();
+    expect(container.querySelector('source')).toBeNull();
   });
 
   it('drops our body copy when the banner is present, so there is one pitch not two', () => {
