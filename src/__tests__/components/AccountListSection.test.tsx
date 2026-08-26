@@ -80,7 +80,7 @@ const mockUseUploadCaveats = vi.mocked(useUploadCaveats);
 /** Both caveats quiet unless a test says otherwise. */
 const caveats = (overrides: Partial<ReturnType<typeof useUploadCaveats>> = {}) => ({
   followRequestsUnreadable: false,
-  truncatedRelationshipFile: null,
+  truncatedRelationshipFile: 'not-applicable' as const,
   ...overrides,
 });
 
@@ -210,6 +210,35 @@ describe('AccountListSection', () => {
         screen.queryByText(resultsEN.caveat.truncated.following.title)
       ).not.toBeInTheDocument();
     });
+
+    /**
+     * The three verdicts with no copy must render nothing — and specifically
+     * must not render their own name.
+     *
+     * `TruncatedFileCaveat` builds its i18n key by interpolating the verdict,
+     * and i18next answers a missing key with the key string itself. So a
+     * verdict that slipped past the guard would not fail loudly; it would paint
+     * `caveat.truncated.insufficient-data.title` into the page, in all ten
+     * languages, on every affected upload. That is why the guard is an
+     * allow-list over the two verdicts that have copy rather than a `!==` on
+     * the one that does not — a sixth verdict added later stays silent by
+     * default instead of announcing itself to the reader.
+     *
+     * `insufficient-data` earns its own line here for a second reason: it is
+     * the verdict that means "nothing was checked", and rendering the
+     * truncation banner for it would state a defect nobody measured.
+     */
+    it.each(['no-skew', 'insufficient-data', 'not-applicable'] as const)(
+      'renders nothing at all for %s, not even the key',
+      verdict => {
+        mockUseUploadCaveats.mockReturnValue(caveats({ truncatedRelationshipFile: verdict }));
+        const { container } = renderWithRouter(<AccountListSection {...defaultProps} />);
+
+        expect(screen.queryByText(resultsEN.caveat.truncated.followers.title)).toBeNull();
+        expect(screen.queryByText(resultsEN.caveat.truncated.following.title)).toBeNull();
+        expect(container.textContent).not.toContain('caveat.truncated');
+      }
+    );
 
     it('names the short list and the one action that settles it', () => {
       mockUseUploadCaveats.mockReturnValue(caveats({ truncatedRelationshipFile: 'followers' }));

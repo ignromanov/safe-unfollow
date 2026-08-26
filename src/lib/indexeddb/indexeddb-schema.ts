@@ -9,7 +9,7 @@
  * - indexes: Search index cache (prefix/trigram bitsets)
  */
 
-import type { BadgeKey, FileMetadata, TruncatedRelationshipFile } from '@/core/types';
+import type { BadgeKey, FileMetadata, RelationshipSkew } from '@/core/types';
 
 export const DB_CONFIG = {
   name: 'instagram-tracker-v2',
@@ -125,8 +125,16 @@ export interface FileMetadataRecord {
    *
    * No DB version bump, for the reason documented above: these object stores
    * are schemaless (GH#23).
+   *
+   * The value set widened on 2026-08-25 and still needs no bump, for the same
+   * reason: records already in the store hold `followers`, `following` or
+   * nothing, all three of which the reader still handles — absent is read as
+   * `not-applicable`, which is what an old record actually tells us. Nothing
+   * migrates and nothing is lost, which matters more here than usual: the
+   * truncation caveat fires on roughly a quarter of parses, and those readers
+   * reach `/results` from this record without ever re-parsing.
    */
-  truncatedRelationshipFile?: TruncatedRelationshipFile;
+  truncatedRelationshipFile?: RelationshipSkew;
 }
 
 // ===== Conversion Utilities =====

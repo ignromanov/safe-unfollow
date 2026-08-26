@@ -15,9 +15,17 @@ import {
   objectInsteadOfArray,
 } from '../../fixtures/instagram-format-drift';
 
-// Mock the ZIP reader, not whichever library is behind it
+// Mock the ZIP reader, not whichever library is behind it.
+//
+// Spreads the real module and overrides one export. It replaced the whole
+// module until 2026-08-25, which left every other export undefined — so the
+// failure guard in `parseInstagramZipFile` could not be reached from this file
+// at all: making `openZipArchive` reject sent the catch straight into an
+// undefined `classifyZipFailure`, and the test read as a parser bug rather
+// than as a missing mock.
 let mockZipInstance: any;
-vi.mock('@/core/parsers/zip-archive', () => ({
+vi.mock('@/core/parsers/zip-archive', async importOriginal => ({
+  ...(await importOriginal<typeof import('@/core/parsers/zip-archive')>()),
   openZipArchive: vi.fn().mockImplementation(() => Promise.resolve(mockZipInstance)),
 }));
 
@@ -1060,10 +1068,36 @@ describe('Instagram Parser', () => {
       expect(result.warnings.filter(w => w.severity === 'error')).toHaveLength(0);
     });
 
-    it('stays silent on the untruncated export from the same account', async () => {
+    it('reports a measured no-skew on the untruncated export from the same account', async () => {
       const result = await parseWith(FOLLOWING_OLDEST, FOLLOWERS_OLDEST_WHOLE);
 
-      expect(result.truncatedRelationshipFile).toBeNull();
+      // `no-skew`, not "silent". The distinction is the whole of the
+      // 2026-08-25 fix: this parse compared two lists and found them to begin
+      // together, which is a different statement from the one an export with
+      // too few timestamps produces, and until now both were `null`.
+      expect(result.truncatedRelationshipFile).toBe('no-skew');
+    });
+
+    /**
+     * The exit paths that never opened a relationship file.
+     *
+     * Their answer must not be confusable with a verdict. A parse that failed
+     * before reading either list has established nothing about skew, and
+     * `no-skew` here would have been a claim manufactured by an early return.
+     */
+    it('reports not-applicable when the archive would not open', async () => {
+      // Rejected at `openZipArchive`, so the function returns from its first
+      // guard and no relationship file is ever read. Driven through the module
+      // mock rather than by handing in a non-ZIP File: `openZipArchive` is
+      // mocked for this whole file and resolves whatever `mockZipInstance`
+      // currently holds, so a bad File would silently reuse the previous
+      // test's archive and parse cleanly.
+      const { openZipArchive } = await import('@/core/parsers/zip-archive');
+      vi.mocked(openZipArchive).mockRejectedValueOnce(new Error('not a zip'));
+
+      const result = await parseInstagramZipFile(new File([''], 'export.zip'));
+
+      expect(result.truncatedRelationshipFile).toBe('not-applicable');
     });
   });
 });

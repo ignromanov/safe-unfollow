@@ -7,7 +7,7 @@ import type {
   FileDiscovery,
   LabelResolutionMode,
   ParseWarning,
-  TruncatedRelationshipFile,
+  RelationshipSkew,
 } from '@/core/types';
 import { buildAccountBadgeIndex } from '@/core/badges';
 import { indexedDBService } from './indexeddb/indexeddb-service';
@@ -19,7 +19,7 @@ export interface ParseErrorData {
   warnings?: ParseWarning[];
   discovery?: FileDiscovery;
   labelResolutionMode?: LabelResolutionMode;
-  truncatedRelationshipFile?: TruncatedRelationshipFile;
+  truncatedRelationshipFile?: RelationshipSkew;
 }
 
 // Worker timeout constant (ms)
@@ -31,7 +31,7 @@ export interface ParseResult {
   warnings?: ParseWarning[];
   discovery?: FileDiscovery;
   labelResolutionMode?: LabelResolutionMode;
-  truncatedRelationshipFile?: TruncatedRelationshipFile;
+  truncatedRelationshipFile?: RelationshipSkew;
 }
 
 export interface ProgressCallback {

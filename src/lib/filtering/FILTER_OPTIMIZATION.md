@@ -133,6 +133,11 @@ interface BitsetRecord {
 
 **4. timestamps** — Sparse time-based data
 
+> ⚠️ **Not implemented.** The store is created but never written or read; see
+> `indexeddb/INDEXEDDB_ARCHITECTURE.md` § 4 for the greps and the 2026-08-25
+> ruling. Stated once there rather than twice, per CLAUDE.md's no-copied-facts
+> rule.
+
 ```typescript
 interface TimestampRecord {
   fileHash: string; // Composite key [fileHash, username]

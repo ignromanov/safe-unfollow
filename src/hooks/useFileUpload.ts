@@ -1,4 +1,5 @@
 import { OPTIONAL_FILE_DRIFT_CODES } from '@/core/parsers/instagram-file-specs';
+import { namesTruncatedFile } from '@/core/types';
 import type { FileDiscovery, ParseWarning } from '@/core/types';
 import { analytics } from '@/lib/analytics';
 import type { ParseOutcome } from '@/lib/analytics';
@@ -75,8 +76,27 @@ function reportParseDiagnostics({
   // upload finished, and a truncated export finishes — that is the defect. It
   // also keeps the cache path silent, which is right, because a returning
   // reader re-opening the same file has not measured anything new.
+  //
+  // Two events, and the split is the fix of 2026-08-25. The verdict goes out on
+  // every parse; the truncation event only when a file is actually named.
+  //
+  // This was one `if (truncatedRelationshipFile)`, and that line is where the
+  // defect did its damage. It read as "was a file short?" and meant "is the
+  // value truthy?", which was the same question only while both quiet answers
+  // were `null`. So an export whose timestamps the detector could not judge
+  // fell through the gate silently and wrote no row anywhere — the layer with
+  // the least excuse for it, since telemetry is the one thing here that costs
+  // the reader nothing and is the only record that outlives the session.
   if (truncatedRelationshipFile) {
-    analytics.relationshipFileTruncated(truncatedRelationshipFile);
+    analytics.relationshipSkewVerdict(truncatedRelationshipFile);
+
+    // Deliberately not `!== 'no-skew'`. Only these two name a file, and the
+    // value is sent as an event field: a verdict that slipped through would
+    // publish `insufficient-data` into a series whose whole meaning is "a file
+    // was short", corrupting the one number we have about the defect.
+    if (namesTruncatedFile(truncatedRelationshipFile)) {
+      analytics.relationshipFileTruncated(truncatedRelationshipFile);
+    }
   }
 }
 

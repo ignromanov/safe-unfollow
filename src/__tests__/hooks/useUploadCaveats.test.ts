@@ -27,8 +27,16 @@ describe('useUploadCaveats', () => {
       ...overrides,
     }) as never;
 
-  /** What the hook reports when there is nothing to warn about — its own NO_CAVEATS. */
-  const QUIET = { followRequestsUnreadable: false, truncatedRelationshipFile: null };
+  /**
+   * What the hook reports when there is nothing to warn about — its own
+   * NO_CAVEATS.
+   *
+   * `not-applicable` rather than a verdict, because every case that lands here
+   * is a record that never told us one: absent field, missing record, or
+   * IndexedDB unavailable. Reading those as `no-skew` would report a clean
+   * comparison that no parse performed.
+   */
+  const QUIET = { followRequestsUnreadable: false, truncatedRelationshipFile: 'not-applicable' };
 
   beforeEach(() => {
     vi.clearAllMocks();

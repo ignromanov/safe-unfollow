@@ -22,7 +22,7 @@
  * costs 199 wrong accusations the reader has no way to notice.
  */
 
-import type { TruncatedRelationshipFile } from '@/core/types';
+import type { SkewVerdict } from '@/core/types';
 
 /**
  * How far apart the two lists may start before it is worth saying so.
@@ -58,6 +58,10 @@ const SECONDS_PER_DAY = 86_400;
  * so a record Instagram exported without a date is a zero here, not an absence.
  * Treating those as 1970 would make every export look like it began at the
  * epoch and fire this detector on all of them.
+ *
+ * `null` here is unambiguous and stays — it means one thing, "not enough to
+ * trust". It is the *caller's* `null` that had to go, because that one was
+ * reached from two directions.
  */
 function oldestTimestamp(timestamps: ReadonlyMap<string, number>): number | null {
   let usable = 0;
@@ -91,8 +95,15 @@ function oldestTimestamp(timestamps: ReadonlyMap<string, number>): number | null
  * and reports the wrong file, which is precisely the wrong answer this module
  * exists to prevent.
  *
- * @returns which list is short, or null when the two begin close enough
- *   together, or when either is too small to judge.
+ * @returns which list is short, `no-skew` when the two begin close enough
+ *   together, or `insufficient-data` when either list is too small to judge.
+ *
+ * The last two are separate values rather than one falsy answer, and that is
+ * the correction of 2026-08-25. As a single `null` they were read as agreement
+ * by six consumers in a row — including `useFileUpload`, whose truthiness gate
+ * meant a parse that could not be judged emitted no telemetry at all, so the
+ * rate was not merely invisible but unrecoverable after the fact. A detector
+ * that cannot report its own abstention is not a guard.
  */
 export function detectRelationshipSkew({
   following,
@@ -100,14 +111,14 @@ export function detectRelationshipSkew({
 }: {
   following: ReadonlyMap<string, number>;
   followers: ReadonlyMap<string, number>;
-}): TruncatedRelationshipFile {
+}): SkewVerdict {
   const followingOldest = oldestTimestamp(following);
   const followersOldest = oldestTimestamp(followers);
 
-  if (followingOldest === null || followersOldest === null) return null;
+  if (followingOldest === null || followersOldest === null) return 'insufficient-data';
 
   const skewSeconds = followersOldest - followingOldest;
-  if (Math.abs(skewSeconds) < SKEW_THRESHOLD_DAYS * SECONDS_PER_DAY) return null;
+  if (Math.abs(skewSeconds) < SKEW_THRESHOLD_DAYS * SECONDS_PER_DAY) return 'no-skew';
 
   return skewSeconds > 0 ? 'followers' : 'following';
 }

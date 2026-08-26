@@ -8,7 +8,7 @@ import { trackEvent } from './core';
 import { recordCTA } from './cta-capture';
 import { enqueueEvent, flushEvents, trackNavigating } from './queue';
 import { getStoredUTM, getEntryCTA } from './utm';
-import type { LabelResolutionMode, TruncatedRelationshipFile } from '@/core/types';
+import type { LabelResolutionMode, RelationshipSkew } from '@/core/types';
 import type { LicenseFailureReason } from '@/lib/export/license';
 
 /**
@@ -550,8 +550,18 @@ export const analytics = {
   // The field is which of the two lists is short — a fact about the export's
   // shape, never about its contents. Same line the label event draws: no
   // username, no count, nothing derived from the file's bytes.
-  relationshipFileTruncated: (file: NonNullable<TruncatedRelationshipFile>) => {
+  relationshipFileTruncated: (file: 'followers' | 'following') => {
     trackEvent(AnalyticsEvents.RELATIONSHIP_FILE_TRUNCATED, { file });
+  },
+
+  // The same parse's verdict, including the two quiet ones and the abstention.
+  // Fires on every parse, so unlike its neighbour it has a denominator and can
+  // give the neighbour one. See the constant for why both exist.
+  //
+  // The verdict is a fixed four-way enum plus `not-applicable`, not a value
+  // derived from the archive's bytes — same line the two events above draw.
+  relationshipSkewVerdict: (verdict: RelationshipSkew) => {
+    trackEvent(AnalyticsEvents.RELATIONSHIP_SKEW_VERDICT, { verdict });
   },
 
   // Pro Export

@@ -1,4 +1,5 @@
-import type { TruncatedRelationshipFile } from '@/core/types';
+import { namesTruncatedFile } from '@/core/types';
+import type { RelationshipSkew } from '@/core/types';
 import { indexedDBService } from '@/lib/indexeddb/indexeddb-service';
 import { useEffect, useState } from 'react';
 
@@ -18,7 +19,7 @@ import { useEffect, useState } from 'react';
  */
 export interface UploadCaveats {
   followRequestsUnreadable: boolean;
-  truncatedRelationshipFile: TruncatedRelationshipFile;
+  truncatedRelationshipFile: RelationshipSkew;
 }
 
 /**
@@ -30,7 +31,7 @@ export interface UploadCaveats {
  */
 const NO_CAVEATS: UploadCaveats = {
   followRequestsUnreadable: false,
-  truncatedRelationshipFile: null,
+  truncatedRelationshipFile: 'not-applicable',
 };
 
 /**
@@ -66,14 +67,24 @@ export function useUploadCaveats(fileHash: string | null): UploadCaveats {
       .then(record => {
         if (cancelled) return;
         const followRequestsUnreadable = record?.followRequestsUnreadable === true;
-        const truncatedRelationshipFile = record?.truncatedRelationshipFile ?? null;
+        // Absent means a record written before the field existed, or before the
+        // verdict was widened — either way nothing is known about this parse's
+        // skew, which is what `not-applicable` says. `no-skew` would turn a
+        // missing field into a clean bill of health for every record in the
+        // store that predates 2026-08-19.
+        const truncatedRelationshipFile = record?.truncatedRelationshipFile ?? 'not-applicable';
         // The quiet case returns the shared constant rather than an equal-looking
         // literal. `useState` bails out on `Object.is`, so a fresh object here
         // would re-render `/results` on every visit, including the overwhelming
         // majority that have no caveat at all — a cost the boolean hook this
         // replaced did not have.
+        // The shared constant covers every case with nothing to render, which
+        // now means three verdicts rather than one `null`. Asked through the
+        // predicate so the identity-stability trick above keeps working for the
+        // quiet majority: `no-skew` and `insufficient-data` must land on
+        // NO_CAVEATS too, or `/results` re-renders on every visit again.
         setCaveats(
-          !followRequestsUnreadable && truncatedRelationshipFile === null
+          !followRequestsUnreadable && !namesTruncatedFile(truncatedRelationshipFile)
             ? NO_CAVEATS
             : { followRequestsUnreadable, truncatedRelationshipFile }
         );

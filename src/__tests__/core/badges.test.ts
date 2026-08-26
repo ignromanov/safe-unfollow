@@ -292,8 +292,29 @@ describe('Badge Logic', () => {
 
   describe('badgesAffectedByTruncation', () => {
     it('names nothing when neither file looks short', () => {
-      expect(badgesAffectedByTruncation(null).size).toBe(0);
+      expect(badgesAffectedByTruncation('no-skew').size).toBe(0);
     });
+
+    /**
+     * `insufficient-data` must not mark chips, and the reason is the opposite
+     * of the one that keeps `no-skew` quiet.
+     *
+     * `no-skew` is quiet because the comparison ran and found nothing.
+     * `insufficient-data` is quiet because the comparison could not run, so
+     * naming four badges as corrupted would assert a defect nobody measured —
+     * on the majority of chips, on every such upload. The absence of knowledge
+     * is not evidence of either answer, and this is the one place where saying
+     * so loudly would be actively wrong.
+     *
+     * `not-applicable` is quiet for the plainest reason of the three: no
+     * relationship file was read at all on that path.
+     */
+    it.each(['insufficient-data', 'not-applicable'] as const)(
+      'names nothing for %s — an unmeasured export is not a corrupted one',
+      verdict => {
+        expect(badgesAffectedByTruncation(verdict).size).toBe(0);
+      }
+    );
 
     it('names the badges a short followers file corrupts', () => {
       expect([...badgesAffectedByTruncation('followers')].sort()).toEqual([
