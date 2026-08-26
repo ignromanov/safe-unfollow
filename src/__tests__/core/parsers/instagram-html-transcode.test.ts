@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest';
 import FOLLOWERS_HTML from '../../fixtures/instagram-html/followers_1.html?raw';
 import FOLLOWERS_JSON from '../../fixtures/instagram-html/followers_1.json?raw';
 import FOLLOWING_HTML from '../../fixtures/instagram-html/following.html?raw';
+import FOLLOWING_EN from '../../fixtures/instagram-html/following.en.html?raw';
+import FOLLOWING_ES from '../../fixtures/instagram-html/following.es.html?raw';
+import FOLLOWING_JA from '../../fixtures/instagram-html/following.ja.html?raw';
 import FOLLOWING_JSON from '../../fixtures/instagram-html/following.json?raw';
 import { transcodeRelationshipHtml } from '@/core/parsers/instagram-html';
 import { resolveEntries, resolveEntryList } from '@/core/parsers/instagram-utils';
@@ -81,6 +84,68 @@ describe('the same account, the same day, both formats', () => {
     const items = resolveEntries(entries ?? []).items;
 
     expect(items.every(i => i.href?.startsWith('https://www.instagram.com/'))).toBe(true);
+  });
+});
+
+describe('the dates, against the same rows in the JSON twin', () => {
+  const items = (doc: unknown, keys: string[]) =>
+    new Map(resolveEntries(resolveEntryList(doc, keys) ?? []).items.map(i => [i.username, i]));
+
+  const offsets = (html: string, json: string, keys: string[]): number[] => {
+    const fromHtml = items(transcodeRelationshipHtml(html), keys);
+    const fromJson = items(JSON.parse(json), keys);
+    const out: number[] = [];
+    for (const [name, htmlItem] of fromHtml) {
+      const jsonItem = fromJson.get(name);
+      if (htmlItem.timestamp && jsonItem?.timestamp) {
+        out.push(htmlItem.timestamp - jsonItem.timestamp);
+      }
+    }
+    return out;
+  };
+
+  it('dates every record it read', () => {
+    const dated = [...items(transcodeRelationshipHtml(FOLLOWING_HTML), FOLLOWING_KEYS).values()];
+
+    expect(dated).toHaveLength(25);
+    expect(dated.every(i => typeof i.timestamp === 'number' && i.timestamp > 0)).toBe(true);
+  });
+
+  it('sits a constant offset from the JSON twin, not a scattered one', () => {
+    // The claim being pinned is UNIFORMITY, not the value. Meta renders the
+    // per-row dates at a fixed UTC−8 with no DST adjustment and truncates the
+    // seconds, so HTML and JSON disagree by −28 800 s minus the dropped
+    // seconds, i.e. a 60-second-wide band.
+    //
+    // Uniformity is what makes the offset harmless, and the argument is
+    // algebraic rather than a tolerance: the only consumer of these timestamps
+    // takes `followersOldest - followingOldest`, and a constant added to both
+    // operands cancels — `(f+C) − (g+C) = f − g`. So the skew detector reads
+    // an HTML export exactly as it reads a JSON one. A SCATTERED offset would
+    // break that, which is why the spread is asserted and the value is not
+    // corrected for.
+    const all = [
+      ...offsets(FOLLOWING_HTML, FOLLOWING_JSON, FOLLOWING_KEYS),
+      ...offsets(FOLLOWERS_HTML, FOLLOWERS_JSON, FOLLOWERS_KEYS),
+    ];
+
+    expect(all.length).toBe(50);
+    expect(Math.max(...all) - Math.min(...all)).toBeLessThan(60);
+  });
+
+  it('reads the same instants out of all three languages', () => {
+    // Locale invariance for the DATES specifically, which is a stronger claim
+    // than reading the same accounts: the month token, and the meridiem's case,
+    // differ in all three files.
+    const en = items(transcodeRelationshipHtml(FOLLOWING_EN), FOLLOWING_KEYS);
+    const es = items(transcodeRelationshipHtml(FOLLOWING_ES), FOLLOWING_KEYS);
+    const ja = items(transcodeRelationshipHtml(FOLLOWING_JA), FOLLOWING_KEYS);
+
+    for (const [name, item] of en) {
+      expect(es.get(name)?.timestamp).toBe(item.timestamp);
+      expect(ja.get(name)?.timestamp).toBe(item.timestamp);
+    }
+    expect(en.size).toBe(20);
   });
 });
 

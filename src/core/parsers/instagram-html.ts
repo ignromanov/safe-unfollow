@@ -70,6 +70,7 @@
  */
 
 import { Parser } from 'htmlparser2';
+import { fitMonthTable, readRowDate, splitRowDate } from './instagram-html-dates';
 
 /**
  * The wrapper every record sits in, in every file, in every sample held.
@@ -96,7 +97,14 @@ const PROFILE_HREF = /^https:\/\/www\.instagram\.com\/(?:_u\/)?([^/?#]+)\/?$/;
 /** One record, in the shape `resolveEntry` already reads from JSON. */
 interface TranscodedEntry {
   title: string;
-  string_list_data: [{ href: string }];
+  string_list_data: [{ href: string; timestamp?: number }];
+}
+
+/** A record as read from the markup, before the file's month table is known. */
+interface RawRecord {
+  username: string;
+  href: string;
+  dateText: string | null;
 }
 
 /**
@@ -112,7 +120,39 @@ interface TranscodedEntry {
  *   which is the drift signal rather than an answer.
  */
 export function transcodeRelationshipHtml(html: string): unknown {
-  const entries: TranscodedEntry[] = [];
+  const records = readRecords(html);
+
+  // Two passes, and the second cannot be folded into the first: the month table
+  // is fitted to the tokens of the WHOLE file, so no row can be dated until
+  // every row has been seen. That is the point of fitting rather than choosing
+  // — a per-row guess is exactly what a table nobody chose protects against.
+  const tokens = records
+    .map(r => (r.dateText === null ? null : splitRowDate(r.dateText)?.monthToken))
+    .filter((t): t is string => typeof t === 'string');
+  const monthTable = fitMonthTable(tokens);
+
+  return records.map(({ username, href, dateText }) => {
+    const timestamp = dateText === null ? undefined : readRowDate(dateText, monthTable);
+    // Omitted rather than zeroed when unreadable. `resolveEntry` reads
+    // `item?.timestamp` and the parsers store `?? 0`, so the zero is applied
+    // one layer down where it already means "Instagram gave no date" — writing
+    // it here would make an unreadable date indistinguishable from an absent
+    // one at the only layer that can still tell them apart.
+    const entry: TranscodedEntry = { title: username, string_list_data: [{ href }] };
+    if (timestamp !== undefined) entry.string_list_data[0].timestamp = timestamp;
+    return entry;
+  });
+}
+
+/**
+ * The markup pass: every record's username, profile link and raw date text.
+ *
+ * Separated from dating so that "what the file says" and "what that means" stay
+ * apart — the first is a fact about the bytes, the second depends on a table
+ * fitted across all of them.
+ */
+function readRecords(html: string): RawRecord[] {
+  const records: RawRecord[] = [];
 
   // Depth of `<div>` nesting inside the record currently open; 0 means none is.
   // Counted rather than matched on the closing tag, because the close carries
@@ -120,6 +160,8 @@ export function transcodeRelationshipHtml(html: string): unknown {
   let depth = 0;
   let href: string | null = null;
   let username: string | null = null;
+  let dateText: string | null = null;
+  let text = '';
 
   const parser = new Parser(
     {
@@ -131,9 +173,13 @@ export function transcodeRelationshipHtml(html: string): unknown {
             depth = 1;
             href = null;
             username = null;
+            dateText = null;
           }
+          text = '';
           return;
         }
+
+        text = '';
 
         // First profile link wins. A record holds one account; a second
         // instagram.com anchor would be something else, and taking the last
@@ -147,7 +193,24 @@ export function transcodeRelationshipHtml(html: string): unknown {
         }
       },
 
+      ontext(chunk) {
+        if (depth > 0) text += chunk;
+      },
+
       onclosetag(name) {
+        // The date is found by SHAPE, not by position — the first text inside
+        // the record that parses as a row date. Positional reading ("the div
+        // after the anchor's div") would be a second thing to break when Meta
+        // rearranges a record, and it has rearranged records before without
+        // touching a single class name.
+        //
+        // Accumulated across an element rather than read per text node, because
+        // a parser may split text at any boundary it likes.
+        if (depth > 0 && dateText === null && splitRowDate(text.trim()) !== null) {
+          dateText = text.trim();
+        }
+        text = '';
+
         if (name !== 'div' || depth === 0) return;
         depth--;
         if (depth > 0) return;
@@ -156,10 +219,11 @@ export function transcodeRelationshipHtml(html: string): unknown {
         // `resolveEntries` counts what it cannot read, so a file that starts
         // producing these leaves a trace instead of quietly shrinking.
         if (username !== null && href !== null) {
-          entries.push({ title: username, string_list_data: [{ href }] });
+          records.push({ username, href, dateText });
         }
         href = null;
         username = null;
+        dateText = null;
       },
     },
     // Entities matter: a handle cannot contain one, but the surrounding markup
@@ -170,5 +234,5 @@ export function transcodeRelationshipHtml(html: string): unknown {
   parser.write(html);
   parser.end();
 
-  return entries;
+  return records;
 }
