@@ -16,7 +16,8 @@ import {
   BADGES_OVERSTATED_BY_UNREADABLE_REQUESTS,
   badgesAffectedByTruncation,
 } from '@/core/badges';
-import type { BadgeKey, TruncatedRelationshipFile } from '@/core/types';
+import { namesTruncatedFile } from '@/core/types';
+import type { BadgeKey, RelationshipSkew } from '@/core/types';
 interface FilterChipsProps {
   selectedFilters: Set<BadgeKey>;
   onFiltersChange: (filters: Set<BadgeKey>) => void;
@@ -34,7 +35,7 @@ interface FilterChipsProps {
    * depends on which file arrived short, so the set comes from
    * `badgesAffectedByTruncation` rather than being named here.
    */
-  truncatedRelationshipFile?: TruncatedRelationshipFile;
+  truncatedRelationshipFile?: RelationshipSkew;
 }
 import { analytics } from '@/lib/analytics';
 import type { ReactNode } from 'react';
@@ -92,7 +93,7 @@ export const FilterChips = memo(function FilterChips({
   filterCounts,
   isFiltering: _isFiltering = false,
   followRequestsUnreadable = false,
-  truncatedRelationshipFile = null,
+  truncatedRelationshipFile = 'not-applicable',
 }: FilterChipsProps) {
   const { t } = useTranslation('results');
   const [showEmptyFilters, setShowEmptyFilters] = useState(false);
@@ -102,9 +103,18 @@ export const FilterChips = memo(function FilterChips({
   // be a second copy of it that drifts (`core/badges/index.ts`).
   const affectedByTruncation = badgesAffectedByTruncation(truncatedRelationshipFile);
 
-  // Resolved once, outside the chip loop, and behind the null check the typed
-  // key union requires: `caveat.truncated.null.chipHint` is not a key.
-  const truncationHint = truncatedRelationshipFile
+  // Resolved once, outside the chip loop, and behind the allow-list the typed
+  // key union requires: only `followers` and `following` have a `chipHint`, and
+  // the key is built by interpolation. Under the truthiness check this replaced,
+  // the three quiet verdicts the union gained on 2026-08-25 would each ask
+  // i18next for a key that does not exist — `caveat.truncated.no-skew.chipHint`
+  // — and i18next answers a missing key with the key string, so the chip's
+  // tooltip would read as a raw dotted path in all ten languages (GH#78).
+  //
+  // The default above is `not-applicable` rather than a verdict: a caller that
+  // passes nothing has told us no comparison happened, which is true, where
+  // `no-skew` would be a conclusion nobody reached.
+  const truncationHint = namesTruncatedFile(truncatedRelationshipFile)
     ? t(`caveat.truncated.${truncatedRelationshipFile}.chipHint`)
     : '';
 

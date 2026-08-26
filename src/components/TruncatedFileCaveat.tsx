@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import type { TruncatedRelationshipFile } from '@/core/types';
+import type { RelationshipSkew } from '@/core/types';
 import { CaveatAlert } from './CaveatAlert';
 
 /**
@@ -26,14 +26,29 @@ import { CaveatAlert } from './CaveatAlert';
  * shape, so the text states what was observed and names the one action that
  * settles it, rather than telling the reader what Instagram did.
  *
- * Self-guarding on `null` rather than being conditioned by its caller, so that
- * "is there anything to say" and "what to say" stay in one place — `/results`
- * renders it unconditionally and the detector's verdict is the only input.
+ * Self-guarding on the verdict rather than being conditioned by its caller, so
+ * that "is there anything to say" and "what to say" stay in one place —
+ * `/results` renders it unconditionally and the detector's verdict is the only
+ * input.
+ *
+ * Renders for exactly the two verdicts that name a file, and the guard is
+ * written as an allow-list rather than as `!== 'no-skew'`. The union gained
+ * three quiet members on 2026-08-25, and only these two have copy: the key
+ * below is built by interpolation, so a verdict that slipped through would ask
+ * i18next for `caveat.truncated.insufficient-data.title` and i18next renders a
+ * missing key as the key string itself — a raw dotted path on a live page in
+ * ten languages, which is the failure mode GH#78 already tracks.
+ *
+ * `insufficient-data` is deliberately silent *here* and not silent everywhere:
+ * it is reported to analytics on every parse. Telling a reader "we could not
+ * check whether your export was cut short" is copy, in ten languages, aimed at
+ * a population nobody has measured yet — so the rate gets measured first. The
+ * wording call belongs to lumen-cro, not to this component.
  */
-export function TruncatedFileCaveat({ truncated }: { truncated: TruncatedRelationshipFile }) {
+export function TruncatedFileCaveat({ truncated }: { truncated: RelationshipSkew }) {
   const { t } = useTranslation('results');
 
-  if (truncated === null) return null;
+  if (truncated !== 'followers' && truncated !== 'following') return null;
 
   return (
     <CaveatAlert

@@ -40,14 +40,63 @@ export type ParseWarningSeverity = 'info' | 'warning' | 'error';
 export type LabelResolutionMode = 'fast-path' | 'inferred' | 'unresolved' | 'not-applicable';
 
 /**
- * Which of the two required relationship files starts materially later than
- * the other, and so appears to have been cut short before it was exported.
+ * What the skew detector concluded about the two required relationship files.
  *
- * `null` is the ordinary case: the two lists begin close enough together, or
- * one of them is too small to judge. The detector and its thresholds live in
- * `core/parsers/relationship-skew.ts`.
+ * `followers` / `following` name the list that starts materially later than the
+ * other, and so appears to have been cut short before it was exported. The
+ * detector and its thresholds live in `core/parsers/relationship-skew.ts`.
+ *
+ * The two quiet answers are deliberately not the same value, and that is the
+ * whole point of this type. Until 2026-08-25 both were `null`, and from there
+ * down every layer read them identically — no caveat, no affected chip, and no
+ * analytics event, because `useFileUpload` gated on truthiness. So a parse that
+ * produced no usable timestamp at all was indistinguishable from a clean one,
+ * recorded as a successful upload, and left no trace to count later:
+ *
+ * - `no-skew`: the comparison ran on enough data and the two lists begin close
+ *   enough together. A measured verdict.
+ * - `insufficient-data`: the comparison could not run, because fewer than
+ *   `MIN_TIMESTAMPS_FOR_SKEW` records in one of the lists carry a usable
+ *   timestamp. **Nothing is known** about whether the export is short. This is
+ *   the value that must never be read as reassurance.
  */
-export type TruncatedRelationshipFile = 'followers' | 'following' | null;
+export type SkewVerdict = 'no-skew' | 'insufficient-data' | 'followers' | 'following';
+
+/**
+ * A `SkewVerdict`, or the admission that no comparison was ever attempted.
+ *
+ * `not-applicable` belongs to the early exits in `parseInstagramZipFile` — an
+ * archive that would not open, one with too many entries, one that is not an
+ * Instagram export. No relationship file was read on any of those paths, so
+ * `no-skew` would assert a comparison that never happened and
+ * `insufficient-data` a measurement that was never taken. Both are the same
+ * class of untruth this type exists to remove. Named after
+ * `LabelResolutionMode`'s member for the identical situation.
+ */
+export type RelationshipSkew = SkewVerdict | 'not-applicable';
+
+/**
+ * Whether the verdict names a relationship file as short.
+ *
+ * Every layer that renders or counts a truncation asks this, and each of them
+ * used to ask it as a truthiness check on a nullable value. That was correct
+ * for exactly as long as the two quiet answers were both `null`: the moment
+ * they became distinct strings, `if (verdict)` started passing `no-skew`,
+ * `insufficient-data` and `not-applicable` through as if a file were short —
+ * silently, because all three are truthy and all three feed string
+ * interpolation into i18n keys and analytics fields.
+ *
+ * So the question is asked in one place, as an allow-list over the two members
+ * that mean it, rather than as a denial of the members that do not. A sixth
+ * verdict added later is excluded by default, which is the safe direction: it
+ * renders nothing until someone writes its copy, instead of rendering its own
+ * name at the reader.
+ */
+export function namesTruncatedFile(
+  verdict: RelationshipSkew
+): verdict is 'followers' | 'following' {
+  return verdict === 'followers' || verdict === 'following';
+}
 
 /** Warning about missing or malformed data during parsing */
 export interface ParseWarning {
@@ -168,13 +217,19 @@ export interface ParseResult {
    *
    * Required, not optional, for the same reason as its sibling: every exit in
    * `parseInstagramZipFile` knows the answer, including the early ones that
-   * read no relationship file at all — nothing was compared, so nothing is
-   * known to be short, and the value is `null`.
+   * read no relationship file at all — those report `not-applicable`.
+   *
+   * Keeps the field name it was persisted under while carrying the wider type,
+   * and that asymmetry is deliberate. `FileMetadataRecord` writes this key into
+   * IndexedDB, `/results` reads it back for visitors who never re-parse, and
+   * 37.3% of sessions with a successful upload carry a real value here. A
+   * rename would read every one of those records as absent and silently drop
+   * the caveat for exactly the readers it was built for.
    *
    * See `core/parsers/relationship-skew.ts` for what "cut short" is measured
    * against and why a false positive is the cheaper mistake here.
    */
-  truncatedRelationshipFile: TruncatedRelationshipFile;
+  truncatedRelationshipFile: RelationshipSkew;
 }
 
 /**

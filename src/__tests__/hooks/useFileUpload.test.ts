@@ -24,6 +24,7 @@ vi.mock('@/lib/analytics', () => ({
     optionalFileFormatDrift: vi.fn(),
     usernameLabelResolution: vi.fn(),
     relationshipFileTruncated: vi.fn(),
+    relationshipSkewVerdict: vi.fn(),
   },
 }));
 
@@ -333,6 +334,70 @@ describe('useFileUpload', () => {
       // Unlike usernameLabelResolution, a clean parse emits nothing here — the
       // event has no denominator of its own by design.
       expect(analytics.relationshipFileTruncated).not.toHaveBeenCalled();
+    });
+
+    /**
+     * The defect of 2026-08-25, at the layer where it was worst.
+     *
+     * `insufficient-data` and `no-skew` were one `null`, and this function
+     * gated on truthiness — so a parse that could not be judged at all emitted
+     * nothing, and the rate of it was not merely invisible on the dashboard
+     * but unrecoverable, because no row was ever written to go back to.
+     *
+     * The new event fires on every parse whatever the verdict, deliberately
+     * unlike `relationshipFileTruncated`. That shape is copied from
+     * `usernameLabelResolution`, and it also hands `relationship_file_truncated`
+     * the denominator `constants.ts` records it as lacking.
+     */
+    const parseYielding = async (truncatedRelationshipFile: string) => {
+      const { parseInstagramZipFile } = await import('@/core/parsers/instagram');
+      vi.mocked(parseInstagramZipFile).mockResolvedValue({
+        data: {
+          following: new Set(['user1']),
+          followers: new Set(['user2']),
+          pendingSent: new Map(),
+          permanentRequests: new Map(),
+          restricted: new Map(),
+          closeFriends: new Map(),
+          unfollowed: new Map(),
+          dismissedSuggestions: new Map(),
+          followingTimestamps: new Map(),
+          followersTimestamps: new Map(),
+        },
+        warnings: [],
+        discovery: { format: 'json', isInstagramExport: true, basePath: '', files: [] },
+        hasMinimalData: true,
+        labelResolutionMode: 'fast-path',
+        truncatedRelationshipFile,
+      } as any);
+
+      const { result } = renderHook(() => useFileUpload());
+      await act(async () => {
+        await result.current.handleZipUpload(mockFile);
+      });
+    };
+
+    it('counts a parse it could not judge, instead of passing it off as clean', async () => {
+      await parseYielding('insufficient-data');
+
+      expect(analytics.relationshipSkewVerdict).toHaveBeenCalledWith('insufficient-data');
+      // And emphatically not as a truncation: nothing is known about this
+      // export's shape, which is a different claim from "no file was short".
+      expect(analytics.relationshipFileTruncated).not.toHaveBeenCalled();
+    });
+
+    it('reports the verdict on a clean parse too, so the event has a denominator', async () => {
+      await parseYielding('no-skew');
+
+      expect(analytics.relationshipSkewVerdict).toHaveBeenCalledWith('no-skew');
+      expect(analytics.relationshipSkewVerdict).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports both events when a file really is short', async () => {
+      await parseYielding('followers');
+
+      expect(analytics.relationshipSkewVerdict).toHaveBeenCalledWith('followers');
+      expect(analytics.relationshipFileTruncated).toHaveBeenCalledWith('followers');
     });
 
     it('does not report a resolution mode on the cached path — nothing was parsed', async () => {

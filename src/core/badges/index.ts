@@ -1,4 +1,5 @@
-import type { ParsedAll, AccountBadges, BadgeKey, TruncatedRelationshipFile } from '@/core/types';
+import type { ParsedAll, AccountBadges, BadgeKey, RelationshipSkew } from '@/core/types';
+import { namesTruncatedFile } from '@/core/types';
 
 // Helper function to collect all unique usernames
 function collectAllUsernames(parsed: ParsedAll): Set<string> {
@@ -59,12 +60,19 @@ export const BADGES_OVERSTATED_BY_UNREADABLE_REQUESTS: ReadonlySet<BadgeKey> = n
  */
 const NO_BADGES: ReadonlySet<BadgeKey> = new Set<BadgeKey>();
 
-export function badgesAffectedByTruncation(
-  truncated: TruncatedRelationshipFile
-): ReadonlySet<BadgeKey> {
+export function badgesAffectedByTruncation(truncated: RelationshipSkew): ReadonlySet<BadgeKey> {
   // A shared constant, not a fresh empty Set: `FilterChips` calls this on every
   // render and almost every export is untruncated, so this is the hot answer.
-  if (truncated === null) return NO_BADGES;
+  //
+  // Asked as an allow-list over the two verdicts that name a file, not as a
+  // denial of the ones that do not, and here the difference is not stylistic.
+  // The line below spreads `truncated` into the returned set as if it were a
+  // `BadgeKey` — so under the old `!== null` shape, `insufficient-data` would
+  // have entered the affected-badge set as a badge named `insufficient-data`,
+  // marking a chip that does not exist while leaving the real ones unmarked.
+  // The union widened on 2026-08-25 and this call site is the reason it widened
+  // behind a predicate rather than a comparison.
+  if (!namesTruncatedFile(truncated)) return NO_BADGES;
 
   // The short file's own badge, plus the three derived from both lists. Written
   // as one expression rather than a literal per case: the two cases used to be

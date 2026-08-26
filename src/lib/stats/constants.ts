@@ -199,6 +199,27 @@ export const AnalyticsEvents = {
   // that people unfollowed them when the export simply never mentioned those
   // people.
   RELATIONSHIP_FILE_TRUNCATED: 'relationship_file_truncated',
+
+  // The skew detector's verdict for this parse, whatever it concluded
+  // (RelationshipSkew in core/types/upload.ts). Fires once per parse, always —
+  // the shape of `username_label_resolution` above, not of the event beside it.
+  //
+  // Added 2026-08-25 for a failure the event above structurally cannot report.
+  // The detector abstains when fewer than MIN_TIMESTAMPS_FOR_SKEW records carry
+  // a usable timestamp, and that abstention shared a `null` with a clean
+  // verdict all the way down to `useFileUpload`'s truthiness gate — so an
+  // export nobody could judge emitted nothing at all and left no row to count
+  // later. The rate was not unmeasured; it was unmeasurable after the fact.
+  //
+  // It also gives `relationship_file_truncated` the denominator its own comment
+  // says it lacks. Both events are kept rather than one widened: the truncation
+  // series has run since 2026-08-19 and reads 425 of 1 139 sessions, and
+  // folding it into this one would put a deploy boundary through the middle of
+  // the only number we have about the defect.
+  //
+  // ALARM: any sustained `insufficient-data` rate. Unlike a truncation, it does
+  // not mean the answer is wrong — it means nothing checked whether it was.
+  RELATIONSHIP_SKEW_VERDICT: 'relationship_skew_verdict',
 } as const;
 
 export type AnalyticsEventName = (typeof AnalyticsEvents)[keyof typeof AnalyticsEvents];

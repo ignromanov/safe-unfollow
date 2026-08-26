@@ -43,7 +43,7 @@ describe('detectRelationshipSkew', () => {
       followers: 294,
       fgOldest: 1403384748,
       frOldest: 1398234904,
-      expected: null,
+      expected: 'no-skew',
     },
     {
       label: '2025-09-04',
@@ -51,7 +51,7 @@ describe('detectRelationshipSkew', () => {
       followers: 284,
       fgOldest: 1403384748,
       frOldest: 1398234904,
-      expected: null,
+      expected: 'no-skew',
     },
     {
       label: '2025-09-18',
@@ -59,7 +59,7 @@ describe('detectRelationshipSkew', () => {
       followers: 290,
       fgOldest: 1403384748,
       frOldest: 1398234904,
-      expected: null,
+      expected: 'no-skew',
     },
     {
       label: '2026-01-08',
@@ -67,7 +67,7 @@ describe('detectRelationshipSkew', () => {
       followers: 324,
       fgOldest: 1403384748,
       frOldest: 1398234904,
-      expected: null,
+      expected: 'no-skew',
     },
     {
       label: '2026-08-11-en',
@@ -75,7 +75,7 @@ describe('detectRelationshipSkew', () => {
       followers: 364,
       fgOldest: 1403384748,
       frOldest: 1398234904,
-      expected: null,
+      expected: 'no-skew',
     },
     {
       label: '2026-08-11-ru',
@@ -83,7 +83,7 @@ describe('detectRelationshipSkew', () => {
       followers: 364,
       fgOldest: 1403384748,
       frOldest: 1398234904,
-      expected: null,
+      expected: 'no-skew',
     },
     {
       label: '2026-08-13-ru',
@@ -116,7 +116,7 @@ describe('detectRelationshipSkew', () => {
       });
 
     it('does not fire one day below the threshold', () => {
-      expect(at(SKEW_THRESHOLD_DAYS - 1)).toBeNull();
+      expect(at(SKEW_THRESHOLD_DAYS - 1)).toBe('no-skew');
     });
 
     it('fires exactly at the threshold', () => {
@@ -133,7 +133,7 @@ describe('detectRelationshipSkew', () => {
     });
 
     it('does not fire one day below the threshold in the mirror direction', () => {
-      expect(at(-(SKEW_THRESHOLD_DAYS - 1))).toBeNull();
+      expect(at(-(SKEW_THRESHOLD_DAYS - 1))).toBe('no-skew');
     });
   });
 
@@ -150,22 +150,22 @@ describe('detectRelationshipSkew', () => {
       ).toBe('followers');
     });
 
-    it('stays silent one entry below the minimum sample size', () => {
+    it('cannot judge one entry below the minimum sample size', () => {
       expect(
         detectRelationshipSkew({
           following: mapWithOldest(base, MIN_TIMESTAMPS_FOR_SKEW - 1, 'fg'),
           followers: mapWithOldest(far, MIN_TIMESTAMPS_FOR_SKEW, 'fr'),
         })
-      ).toBeNull();
+      ).toBe('insufficient-data');
     });
 
-    it('stays silent when either map is empty', () => {
+    it('cannot judge when either map is empty', () => {
       expect(
         detectRelationshipSkew({ following: new Map(), followers: mapWithOldest(far, 50, 'fr') })
-      ).toBeNull();
+      ).toBe('insufficient-data');
       expect(
         detectRelationshipSkew({ following: mapWithOldest(base, 50, 'fg'), followers: new Map() })
-      ).toBeNull();
+      ).toBe('insufficient-data');
     });
 
     /**
@@ -179,7 +179,7 @@ describe('detectRelationshipSkew', () => {
       for (let i = 0; i < 40; i++) zeroed.set(`z${i}`, 0);
       expect(
         detectRelationshipSkew({ following: zeroed, followers: mapWithOldest(far, 50, 'fr') })
-      ).toBeNull();
+      ).toBe('insufficient-data');
 
       const mixed = new Map(zeroed);
       for (let i = 0; i < MIN_TIMESTAMPS_FOR_SKEW; i++) mixed.set(`m${i}`, base + i * DAY);
@@ -188,13 +188,38 @@ describe('detectRelationshipSkew', () => {
       ).toBe('followers');
     });
 
-    it('stays silent when the readable entries are too few to judge', () => {
+    it('cannot judge when the readable entries are too few', () => {
       const mostlyZero = new Map<string, number>();
       for (let i = 0; i < 400; i++) mostlyZero.set(`z${i}`, 0);
       for (let i = 0; i < MIN_TIMESTAMPS_FOR_SKEW - 1; i++) mostlyZero.set(`m${i}`, base + i * DAY);
       expect(
         detectRelationshipSkew({ following: mostlyZero, followers: mapWithOldest(far, 50, 'fr') })
-      ).toBeNull();
+      ).toBe('insufficient-data');
     });
+  });
+  /**
+   * The defect this split exists to close.
+   *
+   * Both of these used to return `null`, and from that point every layer below
+   * read them the same way: no caveat, no chip marked affected, and — the one
+   * that matters — no analytics event, because `useFileUpload` gated on
+   * truthiness. A parse that produced no usable timestamp at all was recorded
+   * as a clean upload and left no trace anywhere.
+   *
+   * Asserted as a difference rather than as two values, because the bug was
+   * never that either answer was wrong. It was that they were equal.
+   */
+  it('does not give the same answer for a clean export and an unjudgeable one', () => {
+    const base = 1_600_000_000;
+    const clean = detectRelationshipSkew({
+      following: mapWithOldest(base, 50, 'fg'),
+      followers: mapWithOldest(base, 50, 'fr'),
+    });
+    const unjudgeable = detectRelationshipSkew({
+      following: new Map(),
+      followers: new Map(),
+    });
+
+    expect(clean).not.toBe(unjudgeable);
   });
 });

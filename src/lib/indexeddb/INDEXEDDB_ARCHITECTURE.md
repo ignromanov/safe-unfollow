@@ -90,6 +90,32 @@ interface BitsetRecord {
 
 #### 4. `timestamps` Store
 
+> ⚠️ **Declared, created in every visitor's browser, and never written or read.**
+> Corrected 2026-08-25 — the section below describes an intent, not the code.
+> `STORE_CONFIGS` still configures the store, so `onupgradeneeded` creates it for
+> everyone, but nothing writes a `TimestampRecord` and nothing reads one:
+>
+> ```
+> grep -rn "STORES.TIMESTAMPS" src/   → indexeddb-schema.ts + two test assertions
+> grep -rn "'timestamps'" src/lib src/workers src/hooks  → indexeddb-schema.ts only
+> ```
+>
+> `TimestampRecord` and `TIME_BASED_BADGES` have no production consumer either
+> — `TIME_BASED_BADGES` feeds only `ALL_BADGES`, which nothing outside the tests
+> imports. Per-record timestamps exist only in memory during a parse, on
+> `ParsedAll.followingTimestamps` / `followersTimestamps`, and the one thing
+> that reads them is `detectRelationshipSkew`.
+>
+> This matters beyond tidiness: a reader planning work against per-record dates
+> will size it against a store that persists them, and it does not.
+>
+> **Ruled 2026-08-25 (operator): wire it, but specify the feature first.** The
+> store is not to be deleted and not to be filled in passing — temporal badges
+> are a product feature and get a written spec before any code. Until that spec
+> lands, treat everything above as a design intent with no implementation, and
+> do not add a caller. Pre-spec:
+> `.conclave/.claude/plans/2026-08-25-temporal-badges/pre-spec.md`.
+
 Sparse storage for time-based badges.
 
 ```typescript

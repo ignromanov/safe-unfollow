@@ -89,8 +89,9 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
       // nothing to overstate (GH#41).
       labelResolutionMode: 'not-applicable',
       followRequestsUnreadable: false,
-      // Nothing was compared, so nothing is known to be short.
-      truncatedRelationshipFile: null,
+      // No relationship file was read on this path, so there is no verdict to
+      // give — not `no-skew`, which would assert a comparison that never ran.
+      truncatedRelationshipFile: 'not-applicable',
     };
   }
 
@@ -111,8 +112,9 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
       hasMinimalData: false,
       labelResolutionMode: 'not-applicable',
       followRequestsUnreadable: false,
-      // Nothing was compared, so nothing is known to be short.
-      truncatedRelationshipFile: null,
+      // No relationship file was read on this path, so there is no verdict to
+      // give — not `no-skew`, which would assert a comparison that never ran.
+      truncatedRelationshipFile: 'not-applicable',
     };
   }
 
@@ -158,8 +160,9 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
       hasMinimalData: false,
       labelResolutionMode: 'not-applicable',
       followRequestsUnreadable: false,
-      // Nothing was compared, so nothing is known to be short.
-      truncatedRelationshipFile: null,
+      // No relationship file was read on this path, so there is no verdict to
+      // give — not `no-skew`, which would assert a comparison that never ran.
+      truncatedRelationshipFile: 'not-applicable',
     };
   }
 
@@ -285,10 +288,18 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
     files: fileExpectations,
   };
 
-  // Run unconditionally, including when the parse is already failing: the
-  // detector's own sample-size guard returns null for the empty maps that an
-  // unreadable file leaves behind, so no branch is needed to keep the two
-  // diagnoses from talking over each other.
+  // Run unconditionally, including when the parse is already failing. The
+  // detector's own sample-size guard answers `insufficient-data` for the empty
+  // maps an unreadable file leaves behind, so it never invents a second
+  // diagnosis on top of the one already being reported.
+  //
+  // That used to be phrased as "returns null, so no branch is needed", and the
+  // wording hid the defect: `insufficient-data` and `no-skew` were the same
+  // `null`, so "no branch is needed" was true only because nothing downstream
+  // could act on either. Now they differ, and the reason no branch is needed
+  // here is different too — this exit reports the verdict, it does not act on
+  // it. Whether an unjudgeable parse is worth telling the reader about is
+  // decided at the layer that has the reader, not here.
   const truncatedRelationshipFile = detectRelationshipSkew({
     following: followingParsed.followingTimestamps,
     followers: followersParsed.followersTimestamps,
