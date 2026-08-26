@@ -20,8 +20,7 @@
     "close": "Anleitung schließen",
     "cancel": "Abbrechen",
     "trySample": "Mit Beispieldaten ausprobieren",
-    "uploadFile": "Meine Datei hochladen",
-    "alreadyHaveFile": "Ich habe bereits meine ZIP-Datei"
+    "uploadFile": "Meine Datei hochladen"
   },
   "format": {
     "warning": "KRITISCHER SCHRITT"

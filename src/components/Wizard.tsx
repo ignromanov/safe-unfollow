@@ -1,14 +1,13 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowLeft, ArrowRight, ExternalLink, X, AlertTriangle, Calendar } from 'lucide-react';
+import { useCallback, useEffect, useRef } from 'react';
+import { ArrowLeft, ArrowRight, X, AlertTriangle, Calendar } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import FocusTrap from 'focus-trap-react';
 
 import { analytics } from '@/lib/analytics';
-import { GuideEntry } from '@/components/wizard/GuideEntry';
 import { PrefixedLink } from '@/components/PrefixedLink';
 import { ResponsiveGif } from '@/components/ResponsiveGif';
-import { ACCOUNTS_CENTER_URL, WIZARD_STEPS } from '@/config/wizard-steps';
-import { useIsElementInView } from '@/hooks/useIsElementInView';
+import { UploadGuideBlock } from '@/components/upload/UploadGuideBlock';
+import { WIZARD_STEPS } from '@/config/wizard-steps';
 import { useWizardNavigation } from '@/hooks/useWizardNavigation';
 
 interface WizardProps {
@@ -18,31 +17,7 @@ interface WizardProps {
 export function Wizard({ initialStep = 1 }: WizardProps) {
   const { t } = useTranslation('wizard');
   const { currentStep, goToStep, goHome } = useWizardNavigation(initialStep);
-  // Only meaningful on step 1 — GuideEntry (and its <a ref={ctaRef}>) is
-  // unmounted on every other step, so the hook has nothing attached there
-  // and its default (true) is inert.
-  const [ctaInView, ctaRef] = useIsElementInView<HTMLAnchorElement>();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [hasScrolled, setHasScrolled] = useState(false);
-
-  // A prerendered anchor's destination must not change in the same frame the
-  // page becomes interactive. IntersectionObserver delivers its first callback
-  // on observe(), so a reader who scrolled past the in-flow CTA while JS was
-  // still loading would otherwise have the bar's two slots swap the instant
-  // hydration completes — including the right slot, from an in-app route to a
-  // cross-origin target="_blank" link — under a thumb already on it. This flag
-  // is set by a scroll that happens *after* the listener attached, i.e. after
-  // hydration, so such a reader keeps the bar the static HTML showed them
-  // until they scroll again. The wizard scrolls in the inner container below,
-  // never the window, so that is where the listener goes.
-  useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-
-    const markScrolled = () => setHasScrolled(true);
-    container.addEventListener('scroll', markScrolled, { passive: true });
-    return () => container.removeEventListener('scroll', markScrolled);
-  }, []);
 
   // The wizard scrolls in the container below, and WizardPage never remounts
   // across wizard URLs (routes.tsx reuses one element for every :stepId), so
@@ -64,9 +39,12 @@ export function Wizard({ initialStep = 1 }: WizardProps) {
     scrollContainerRef.current?.scrollTo({ top: 0 });
   }, [currentStep]);
 
-  // Track analytics on step view. Step 1 is GuideEntry, which reports its
-  // own guideEntryView — reporting wizardStepView here too would double the
-  // view event for the same screen (see GuideEntry.tsx).
+  // Track analytics on step view. Step 1 stays exempt, and the reason changed
+  // with this PR rather than disappearing: it used to emit guide_entry_view
+  // from GuideEntry, which is gone. Adding step 1 to wizard_step_view now
+  // would open a value in that series days before PR 3 deletes these routes
+  // altogether — noise, not a measurement. The guide's own view event is
+  // redesigned as guide_open in PR 4, on the surface it actually lives on.
   useEffect(() => {
     if (currentStep === 1) return;
     analytics.wizardStepView(currentStep);
@@ -79,11 +57,6 @@ export function Wizard({ initialStep = 1 }: WizardProps) {
 
   const isFirstStep = currentStep === 1;
   const isLastStep = currentStep === WIZARD_STEPS.length;
-  // Step 1 only: once the in-flow CTA scrolls out of view, the bottom bar
-  // takes over as the primary action so there is always exactly one on
-  // screen. Every other step keeps its normal Back/Next bar. `hasScrolled`
-  // gates the swap on a post-hydration scroll — see the effect above.
-  const showBarPrimary = isFirstStep && hasScrolled && !ctaInView;
 
   // Back/Next/Done/the step dots/Close guide are now plain PrefixedLinks — each
   // computes its own destination, so the browser can follow it before hydration.
@@ -167,7 +140,9 @@ export function Wizard({ initialStep = 1 }: WizardProps) {
         <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
           <div className="min-h-full flex items-center justify-center p-4">
             {currentStep === 1 ? (
-              <GuideEntry ctaRef={ctaRef} />
+              <div className="w-full max-w-xl">
+                <UploadGuideBlock />
+              </div>
             ) : (
               <div
                 className={`max-w-xl w-full rounded-4xl overflow-hidden shadow-2xl border transition-all ${
@@ -234,98 +209,41 @@ export function Wizard({ initialStep = 1 }: WizardProps) {
           </div>
         </div>
 
-        {/* Pinned navigation bar — outside scrollable content. On step 1, once
-            the in-flow CTA (GuideEntry's own Accounts Center link) scrolls
-            out of view, this bar's two slots swap label and destination to
-            take over as the primary action — see showBarPrimary above.
+        {/* Pinned navigation bar — outside scrollable content, and now
+            unconditional Back/Next on every step.
 
-            Only the secondary slot keeps its element identity across that
-            swap (one PrefixedLink with a ternary `to`). The primary slot
-            renders an <a> in one branch and a PrefixedLink in the other —
-            two component types at the same position, so React unmounts one
-            and mounts the other, and focus on that control is lost to
-            <body> when the swap fires.
+            It used to swap both slots on step 1 once the in-flow Accounts
+            Center CTA scrolled out of view, so that a screen with exactly one
+            action always showed that action. Step 1 stopped being such a
+            screen: it renders the guide block, a section of the upload
+            document (UploadGuideBlock). With the swap go `min-h-16`, which
+            reserved height for the swapped pair's two-line labels, and the
+            IntersectionObserver that drove it.
 
-            The bar's height is held by `min-h-16` below, not by identity:
-            neither label carries `truncate` or `whitespace-nowrap`, the row
-            does not wrap, and the swapped pair is far wider than the ~196px
-            an inner row gets at 360px — so the labels wrap to two lines.
-            16 = the two-line case: 2 × 20px (text-sm leading) + 24px (the
-            controls' py-3).
-
-            Reserved on step 1 only, because only step 1 can swap; the other
-            seven steps would otherwise carry ~20px of chrome for an event
-            that cannot reach them, on the phones that are 85% of readers.
-
-            The two-line figure is derived from English and is NOT measured.
-            `buttons.trySample` runs to 30-32 characters in de, fr, pt and ru
-            against 20 in English, which is plausibly three lines at 360px and
-            would put the height back in play for exactly those locales. jsdom
-            performs no layout, so no test here can settle it — it is on the
-            operator's device-check list in progress.md as fr/pt at 360px.
-            Dropping the back arrow in the swapped state (below) returns ~26px
-            to that row — the icon plus its gap — which helps those locales but
-            does not settle the question either. */}
+            The hydration invariant that swap needed is NOT retired with it —
+            a prerendered anchor's destination must not change in the frame
+            the page becomes interactive, and that binds any control an
+            observer decides. It is recorded against the popup rail in the
+            PR-2 plan. */}
         <nav
           className="shrink-0 border-t border-border bg-card px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
           aria-label={t('footer.navigation')}
         >
-          <div
-            className={`max-w-xl mx-auto flex items-center justify-between ${
-              isFirstStep ? 'min-h-16' : ''
-            }`}
-          >
+          <div className="max-w-xl mx-auto flex items-center justify-between">
             <PrefixedLink
-              to={
-                showBarPrimary ? '/sample' : isFirstStep ? '/' : `/wizard/step/${currentStep - 1}`
-              }
+              to={isFirstStep ? '/' : `/wizard/step/${currentStep - 1}`}
               className="cursor-pointer flex items-center gap-2 px-4 py-3 rounded-xl font-bold text-sm transition-all hover:bg-muted text-muted-foreground"
             >
-              {/* The arrow means "back one step". In the swapped state this
-                  same control goes to /sample — a sideways move, not a
-                  retreat — so the glyph would be telling the reader the
-                  opposite of where the href leads. */}
-              {!showBarPrimary && <ArrowLeft size={18} aria-hidden="true" />}
-              <span>
-                {showBarPrimary
-                  ? t('buttons.trySample')
-                  : isFirstStep
-                    ? t('buttons.cancel')
-                    : t('buttons.back')}
-              </span>
+              <ArrowLeft size={18} aria-hidden="true" />
+              <span>{isFirstStep ? t('buttons.cancel') : t('buttons.back')}</span>
             </PrefixedLink>
-            {showBarPrimary ? (
-              // Same action as the in-flow CTA (GuideEntry.tsx) — external,
-              // opens in a new tab — not an in-app PrefixedLink.
-              //
-              // It reports the same event too, and for the same reason this
-              // slot exists at all: the in-flow CTA scrolled away, so without
-              // it the click count for the one action this screen is for would
-              // depend on how far the reader had scrolled. The two controls are
-              // never on screen together, so no click is counted twice.
-              <a
-                href={ACCOUNTS_CENTER_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => analytics.linkClick('meta_accounts')}
-                className="cursor-pointer flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-xl font-bold text-sm shadow-lg hover:scale-105 active:scale-95 transition-all"
-              >
-                {t('entry.cta')}
-                {/* ExternalLink, not ArrowRight: this is the one control in
-                    the bar that leaves the site and opens a new tab, and it
-                    carries the same glyph as the in-flow CTA it stands in
-                    for. ArrowRight in this slot reads as "next step". */}
-                <ExternalLink size={18} aria-hidden="true" />
-              </a>
-            ) : (
-              <PrefixedLink
-                to={isLastStep ? '/upload' : `/wizard/step/${currentStep + 1}`}
-                className="cursor-pointer flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-xl font-bold text-sm shadow-lg hover:scale-105 active:scale-95 transition-all"
-              >
-                {isLastStep ? t('buttons.done') : t('buttons.next')}
-                <ArrowRight size={18} />
-              </PrefixedLink>
-            )}
+            <PrefixedLink
+              to={isLastStep ? '/upload' : `/wizard/step/${currentStep + 1}`}
+              className="cursor-pointer flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-xl font-bold text-sm shadow-lg hover:scale-105 active:scale-95 transition-all"
+            >
+              {isLastStep ? t('buttons.done') : t('buttons.next')}
+              <ArrowRight size={18} />
+            </PrefixedLink>
           </div>
         </nav>
       </div>

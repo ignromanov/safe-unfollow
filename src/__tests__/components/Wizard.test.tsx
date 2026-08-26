@@ -1,5 +1,5 @@
-import { vi, beforeEach, afterEach } from 'vitest';
-import { act, render, screen, fireEvent, within } from '@testing-library/react';
+import { vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import wizardEN from '@/locales/en/wizard.json';
 import { createI18nMock } from '@/__tests__/utils/mockI18n';
 
@@ -53,54 +53,11 @@ function renderWizardAtStep(step: number) {
   return render(<Wizard />);
 }
 
-// Double for the one IntersectionObserver the wizard's bottom bar depends on
-// (via useIsElementInView) — the seam that lets these tests move the in-flow
-// CTA in and out of view without a real layout. Mirrors the double in
-// useAdViewability.test.tsx: capture observe() calls, drive them by hand.
-let observedEntries: Array<{ element: Element; callback: IntersectionObserverCallback }>;
-
-function setCtaIntersecting(isIntersecting: boolean) {
-  act(() => {
-    for (const { element, callback } of observedEntries) {
-      callback(
-        [{ isIntersecting, target: element } as IntersectionObserverEntry],
-        {} as IntersectionObserver
-      );
-    }
-  });
-}
-
-// The swap is gated on a scroll delivered after the listener attached, i.e.
-// after hydration (Wizard.tsx). Every test that wants the swapped bar has to
-// scroll the wizard's own container first, exactly as a reader does — the
-// observer's own first callback is not enough on its own.
-function scrollContent() {
-  const container = screen.getByRole('dialog').querySelector('.overflow-y-auto');
-  if (!container) throw new Error('wizard scroll container not found');
-  fireEvent.scroll(container);
-}
-
 describe('Wizard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockPathname = '/wizard';
     mockUseLanguagePrefix.mockReturnValue('');
-    observedEntries = [];
-    vi.stubGlobal(
-      'IntersectionObserver',
-      class {
-        constructor(private callback: IntersectionObserverCallback) {}
-        observe(element: Element): void {
-          observedEntries.push({ element, callback: this.callback });
-        }
-        unobserve(): void {}
-        disconnect(): void {}
-      }
-    );
-  });
-
-  afterEach(() => {
-    vi.unstubAllGlobals();
   });
 
   it('should render without crashing', () => {
@@ -116,7 +73,7 @@ describe('Wizard', () => {
     expect(screen.getByText('Step 1 of 8')).toBeInTheDocument();
   });
 
-  it('should render the GuideEntry headline on step 1', () => {
+  it('should render the guide block headline on step 1', () => {
     render(<Wizard />);
 
     expect(screen.getByRole('heading', { name: wizardEN.entry.title })).toBeInTheDocument();
@@ -129,7 +86,7 @@ describe('Wizard', () => {
     expect(screen.getByText(wizardEN.buttons.cancel)).toBeInTheDocument();
   });
 
-  it('should render the GuideEntry CTA linking to Accounts Center on step 1', () => {
+  it('should render the guide block CTA linking to Accounts Center on step 1', () => {
     render(<Wizard />);
 
     const cta = screen.getByRole('link', { name: new RegExp(wizardEN.entry.cta) });
@@ -200,8 +157,8 @@ describe('Wizard', () => {
   });
 
   it('should render step video with alt text as aria-label', () => {
-    // Step 1 is GuideEntry now, which carries no video — step 2 still uses
-    // the generic step card this behavior belongs to.
+    // Step 1 is the guide block now, which carries no video — step 2 still
+    // uses the generic step card this behavior belongs to.
     renderWizardAtStep(2);
 
     const video = screen.getByLabelText(wizardEN.steps['2'].alt);
@@ -234,53 +191,15 @@ describe('Wizard', () => {
     );
   });
 
-  it('should render "I already have my ZIP file" link on step 1', () => {
-    renderWizardAtStep(1);
-
-    const alreadyHaveFileLink = screen.getByRole('link', {
-      name: wizardEN.buttons.alreadyHaveFile,
-    });
-    expect(alreadyHaveFileLink).toBeInTheDocument();
-  });
-
-  it('should link "I already have my ZIP file" to /upload', () => {
-    // Prerendered wizard step pages are inert until React hydrates, so this
-    // control must be a real <a href> — not a button firing navigate() on
-    // click — or it does nothing during that window. See PrefixedLink.tsx.
-    renderWizardAtStep(1);
-
-    const alreadyHaveFileLink = screen.getByRole('link', {
-      name: wizardEN.buttons.alreadyHaveFile,
-    });
-
-    expect(alreadyHaveFileLink).toHaveAttribute('href', '/upload');
-  });
-
-  it('should prefix the "I already have my ZIP file" href with the current locale', () => {
-    mockPathname = '/ru/wizard/step/1';
-    mockUseLanguagePrefix.mockReturnValue('/ru');
-    render(<Wizard />);
-
-    const alreadyHaveFileLink = screen.getByRole('link', {
-      name: wizardEN.buttons.alreadyHaveFile,
-    });
-
-    expect(alreadyHaveFileLink).toHaveAttribute('href', '/ru/upload');
-  });
-
-  it('should not render "I already have my ZIP file" link on other steps', () => {
-    renderWizardAtStep(2);
-
-    const alreadyHaveFileLink = screen.queryByRole('link', {
-      name: wizardEN.buttons.alreadyHaveFile,
-    });
-    expect(alreadyHaveFileLink).not.toBeInTheDocument();
-  });
-
-  it('should not report wizardStepView for step 1 — GuideEntry owns its own view event', () => {
+  // Step 1 emits no view event at all now. GuideEntry used to emit
+  // guide_entry_view here and is gone; adding step 1 to wizard_step_view would
+  // open a value in that series days before PR 3 deletes these routes. The
+  // guide's replacement event, guide_open, lands in PR 4 on /upload.
+  it('reports no view event for step 1', () => {
     render(<Wizard />);
 
     expect(analytics.wizardStepView).not.toHaveBeenCalled();
+    expect(analytics.guideEntryView).not.toHaveBeenCalled();
   });
 
   it('should report wizardStepView for step 2', () => {
@@ -330,187 +249,44 @@ describe('Wizard', () => {
       ).toBeInTheDocument();
     });
 
-    it('shows the normal step nav, and only one primary, while the in-flow CTA is visible', () => {
+    // The bar used to swap both slots on step 1 once the in-flow Accounts
+    // Center CTA scrolled out of view, driven by an IntersectionObserver and
+    // gated on a post-hydration scroll. Step 1 is no longer a screen with one
+    // action, so the mechanism is gone rather than relaxed — these assertions
+    // are what is left of that suite: the bar is Back/Next on every step, and
+    // there is exactly one Accounts Center link on the page.
+    it('carries the normal step nav, and no second Accounts Center link', () => {
       renderWizardAtStep(1);
 
       const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
-      expect(within(bar).getByText('Next Step')).toBeInTheDocument();
-      expect(within(bar).queryByText(wizardEN.entry.cta)).not.toBeInTheDocument();
-      // The in-flow CTA itself is the only "Accounts Center" link on screen.
-      expect(screen.getAllByRole('link', { name: /accounts center/i })).toHaveLength(1);
-    });
-
-    it('swaps both bar slots — without changing which two controls are present, or the bar height — when the in-flow CTA scrolls out', () => {
-      renderWizardAtStep(1);
-      const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
-      const heightBefore = bar.getBoundingClientRect().height;
-      const linksBefore = within(bar).getAllByRole('link');
-      expect(linksBefore).toHaveLength(2);
-
-      scrollContent();
-      setCtaIntersecting(false);
-
-      const linksAfter = within(bar).getAllByRole('link');
-      expect(linksAfter).toHaveLength(2);
-      expect(within(bar).getByText(wizardEN.entry.cta)).toBeInTheDocument();
-      expect(within(bar).getByText(wizardEN.buttons.trySample)).toBeInTheDocument();
-      expect(within(bar).queryByText('Next Step')).not.toBeInTheDocument();
-      expect(within(bar).queryByText(wizardEN.buttons.cancel)).not.toBeInTheDocument();
-      expect(bar.getBoundingClientRect().height).toBe(heightBefore);
-    });
-
-    // Critical 1 (extra review of PR-2): the invariant is that a prerendered
-    // anchor's destination must not change in the same frame the page becomes
-    // interactive. IntersectionObserver fires its first callback on observe(),
-    // so for a reader who scrolled past the in-flow CTA while JS was still
-    // loading, that callback lands at hydration — and the right slot would go
-    // from an in-app route to a cross-origin target="_blank" link under a
-    // thumb already resting on it.
-    it('leaves the bar alone when the observer reports out-of-view with no scroll since hydration', () => {
-      renderWizardAtStep(1);
-      const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
-
-      setCtaIntersecting(false);
-
       expect(within(bar).getByText('Next Step')).toBeInTheDocument();
       expect(within(bar).getByText(wizardEN.buttons.cancel)).toBeInTheDocument();
       expect(within(bar).queryByText(wizardEN.entry.cta)).not.toBeInTheDocument();
+      expect(screen.getAllByRole('link', { name: /accounts center/i })).toHaveLength(1);
     });
 
-    it('swaps once that same out-of-view report is followed by a scroll', () => {
-      renderWizardAtStep(1);
-      const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
-
-      setCtaIntersecting(false);
-      scrollContent();
-
-      expect(within(bar).getByText(wizardEN.entry.cta)).toBeInTheDocument();
-      expect(within(bar).queryByText('Next Step')).not.toBeInTheDocument();
-    });
-
-    it('links the swapped bar primary to the same Accounts Center destination as the in-flow CTA', () => {
-      renderWizardAtStep(1);
-      const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
-
-      scrollContent();
-      setCtaIntersecting(false);
-
-      const barCta = within(bar).getByRole('link', { name: wizardEN.entry.cta });
-      expect(barCta).toHaveAttribute(
-        'href',
-        'https://accountscenter.instagram.com/info_and_permissions/dyi/?entry_point=app_settings'
-      );
-    });
-
-    it('links the swapped bar secondary to /sample', () => {
-      renderWizardAtStep(1);
-      const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
-
-      scrollContent();
-      setCtaIntersecting(false);
-
-      const trySample = within(bar).getByRole('link', { name: wizardEN.buttons.trySample });
-      expect(trySample).toHaveAttribute('href', '/sample');
-    });
-
-    it('reports the CTA click from the bar under the same name as the in-flow control', () => {
-      renderWizardAtStep(1);
-      const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
-
-      scrollContent();
-      setCtaIntersecting(false);
-      fireEvent.click(within(bar).getByRole('link', { name: wizardEN.entry.cta }));
-
-      // Without this the count for the screen's one action would depend on
-      // how far the reader had scrolled when they took it.
-      expect(analytics.linkClick).toHaveBeenCalledExactlyOnceWith('meta_accounts');
-    });
-
-    it('drops the back arrow from the secondary slot once that slot stops meaning "back"', () => {
-      renderWizardAtStep(1);
-      const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
-
-      expect(
-        within(bar).getByRole('link', { name: wizardEN.buttons.cancel }).querySelector('svg')
-      ).not.toBeNull();
-
-      scrollContent();
-      setCtaIntersecting(false);
-
-      // The swapped slot goes to /sample — a sideways move, not a retreat.
-      expect(
-        within(bar).getByRole('link', { name: wizardEN.buttons.trySample }).querySelector('svg')
-      ).toBeNull();
-    });
-
-    it('swaps back to the normal step nav when the in-flow CTA re-enters view', () => {
-      renderWizardAtStep(1);
-      const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
-
-      scrollContent();
-      setCtaIntersecting(false);
-      setCtaIntersecting(true);
-
-      expect(within(bar).getByText('Next Step')).toBeInTheDocument();
-      expect(within(bar).queryByText(wizardEN.entry.cta)).not.toBeInTheDocument();
-    });
-
-    it('does not swap the bar on other steps', () => {
-      renderWizardAtStep(2);
-
-      const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
-      // No in-flow CTA is mounted on this step, so there is nothing for
-      // setCtaIntersecting to drive here — the assertion below is the point:
-      // the bar stays in its normal Back/Next state on a step that never
-      // observes anything.
-      expect(within(bar).queryByText(wizardEN.entry.cta)).not.toBeInTheDocument();
-    });
-
-    // Critical 2 (final whole-branch review of PR-2): Wizard never remounts
-    // across step changes (routes.tsx reuses one element for every
-    // `:stepId`), only `currentStep` does. The bar's swap must therefore
-    // survive re-renders that mount and unmount GuideEntry's in-flow CTA —
-    // not just the initial mount these `renderWizardAtStep` tests exercise.
-    it('starts observing the in-flow CTA once step 1 is reached by navigation, not only on mount', () => {
-      mockPathname = '/wizard/step/3';
-      const { rerender } = render(<Wizard />);
-      expect(observedEntries).toHaveLength(0);
-
-      mockPathname = '/wizard/step/1';
-      rerender(<Wizard />);
-
-      // The deep-link path used to leave observedEntries empty forever,
-      // because the effect that creates the observer only ever ran once, at
-      // the step-3 mount, when there was nothing to attach it to.
-      expect(observedEntries.length).toBeGreaterThan(0);
-
-      const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
-      scrollContent();
-      setCtaIntersecting(false);
-
-      expect(within(bar).getByText(wizardEN.entry.cta)).toBeInTheDocument();
-      expect(within(bar).queryByText('Next Step')).not.toBeInTheDocument();
-    });
-
-    it('does not leave two Accounts Center primaries on screen after navigating step 1 → 2 → 1', () => {
+    it('keeps exactly one Accounts Center link across step 1 -> 2 -> 1', () => {
+      // Wizard never remounts across step changes (routes.tsx reuses one
+      // element for every :stepId), only `currentStep` does.
       mockPathname = '/wizard/step/1';
       const { rerender } = render(<Wizard />);
-
-      // The in-flow CTA scrolls out before the reader leaves the step.
-      scrollContent();
-      setCtaIntersecting(false);
 
       mockPathname = '/wizard/step/2';
       rerender(<Wizard />);
       mockPathname = '/wizard/step/1';
       rerender(<Wizard />);
 
-      // GuideEntry remounted a brand-new anchor; the stale, disconnected one
-      // from the first visit must not keep the bar permanently swapped.
       const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
       expect(within(bar).getByText('Next Step')).toBeInTheDocument();
-      expect(within(bar).queryByText(wizardEN.entry.cta)).not.toBeInTheDocument();
       expect(screen.getAllByRole('link', { name: /accounts center/i })).toHaveLength(1);
+    });
+
+    it('does not reserve extra bar height on step 1 any more', () => {
+      // `min-h-16` existed only to hold the swapped pair's two-line labels.
+      renderWizardAtStep(1);
+
+      const bar = screen.getByRole('navigation', { name: wizardEN.footer.navigation });
+      expect(bar.querySelector('.min-h-16')).toBeNull();
     });
   });
 

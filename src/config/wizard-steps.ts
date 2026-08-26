@@ -45,7 +45,8 @@ export const WIZARD_STEPS: WizardStep[] = [
 ];
 
 // Step 1's external link, derived once here rather than recomputed in each
-// consumer — Wizard.tsx's bottom bar and GuideEntry.tsx's in-flow CTA both
-// point at it, and a copy in each risked drifting apart (see "no copied
-// facts" in CLAUDE.md).
+// consumer, so no copy can drift from the step list (see "no copied facts" in
+// CLAUDE.md). Both consumers this comment used to name are gone: the wizard
+// bar's swapped-in copy and GuideEntry's in-flow CTA. UploadGuideBlock is the
+// one that remains.
 export const ACCOUNTS_CENTER_URL = WIZARD_STEPS.find(step => step.id === 1)?.externalLink;
