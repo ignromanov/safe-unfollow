@@ -139,18 +139,18 @@ describe('an Instagram export downloaded in HTML format', () => {
 });
 
 describe('an archive that is not an Instagram export at all', () => {
-  it('is still blamed on the format, which overstates html_format', async () => {
-    // CHARACTERIZATION OF A DEFECT. `createCriticalError` tests
-    // `hasHtmlFiles && !hasJsonFiles` first (`instagram-zip-analysis.ts:52`),
-    // before it ever asks whether the archive is an Instagram export. So any
-    // ZIP of `.html` files — a saved web page, a report, anything — is told to
-    // re-request its data from Instagram in JSON.
+  it('is told what it actually is, not to go and pick JSON', async () => {
+    // `createCriticalError` used to test the format before it asked whether the
+    // archive was an Instagram export, so ANY ZIP of `.html` — a saved web
+    // page, a report, anything — was told to re-request its data from
+    // Instagram in JSON. Advice that cannot help, for a problem the reader does
+    // not have.
     //
-    // It matters beyond the advice being wrong: every such upload lands in the
-    // `upload_error_html_format` bucket, so the 2 276 events that bucket holds
-    // are an UPPER bound on "users who chose HTML", not a measurement of it.
-    // Any sizing of the HTML work that treats them as equal is overstated by an
-    // unknown amount. Nothing today separates the two populations.
+    // It also cost a measurement. Every such upload landed in the
+    // `upload_error_html_format` bucket, which is why that bucket's 2 276
+    // events are an UPPER bound on "users who chose HTML" rather than a count
+    // of them, and why the sizing derived from it is an upper bound too.
+    // Nothing separated the two populations before this ordering.
     const zip = new JSZip();
     zip.file('index.html', '<html><body>not instagram</body></html>');
     zip.file('about/team.html', '<html><body>still not</body></html>');
@@ -158,24 +158,23 @@ describe('an archive that is not an Instagram export at all', () => {
     const result = await parseInstagramZipFile(asFile(await zip.generateAsync({ type: 'blob' })));
 
     expect(result.discovery?.isInstagramExport).toBe(false);
-    expect(result.warnings.find(w => w.severity === 'error')?.code).toBe('HTML_FORMAT');
+    expect(result.warnings.find(w => w.severity === 'error')?.code).toBe('NOT_INSTAGRAM_EXPORT');
   });
 });
 
 describe('an archive holding both formats', () => {
-  it('is called JSON on the strength of one irrelevant file', async () => {
-    // CHARACTERIZATION OF A DEFECT, and the one that becomes reachable when the
-    // predicate becomes a dispatch. `hasJsonFiles` is an `endsWith` over every
-    // entry name with no content inspection, and `instagram.ts:124` reads
-    // `hasJsonFiles ? 'json' : hasHtmlFiles ? 'html' : 'unknown'`. So a single
-    // unrelated `.json` anywhere in the archive outvotes every HTML
-    // relationship file in it.
+  it('takes its format from the relationship files, not from a stray one', async () => {
+    // `hasJsonFiles` is an `endsWith` over every entry name with no content
+    // inspection, so a single unrelated `.json` anywhere used to outvote every
+    // HTML relationship file in the archive: the export resolved to 'json',
+    // found no relationship data, and reported a code the reader could not act
+    // on instead of the one they could.
     //
-    // Harmless today only because a real Meta HTML export contains zero `.json`
-    // entries — verified against `raw/real/2026-08-11-en-html-x9g96b0A`. It
-    // stops being harmless for a re-zipped or partially merged archive, which
-    // resolves to 'json', finds no relationship data, and reports a code the
-    // reader cannot act on instead of the one they can.
+    // Harmless on genuine archives — measured, a real JSON export is 9 files
+    // and 100% `.json`, a real HTML export is 10 `.html` plus one `.png`, and
+    // neither mixes. It bites a re-zipped or partially merged one, and it
+    // becomes reachable in general the moment reject becomes dispatch, because
+    // then this predicate chooses a PARSER rather than an error code.
     const result = await parseInstagramZipFile(
       asFile(
         await buildHtmlExport({
@@ -183,6 +182,21 @@ describe('an archive holding both formats', () => {
         })
       )
     );
+
+    expect(result.discovery?.format).toBe('html');
+    expect(result.warnings.find(w => w.severity === 'error')?.code).toBe('HTML_FORMAT');
+  });
+
+  it('does not mistake a JSON export for HTML because of one stray page', async () => {
+    // The mirror, and the reason the fix keys on relationship files rather than
+    // simply flipping which extension wins. An export whose relationship files
+    // are JSON is a JSON export, whatever else somebody put in the archive.
+    const zip = new JSZip();
+    zip.file(`${BASE}/following.json`, JSON.stringify({ relationships_following: [] }));
+    zip.file(`${BASE}/followers_1.json`, JSON.stringify([]));
+    zip.file('start_here.html', '<html><body>a page</body></html>');
+
+    const result = await parseInstagramZipFile(asFile(await zip.generateAsync({ type: 'blob' })));
 
     expect(result.discovery?.format).toBe('json');
     expect(result.warnings.find(w => w.severity === 'error')?.code).not.toBe('HTML_FORMAT');

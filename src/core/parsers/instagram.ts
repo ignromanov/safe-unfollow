@@ -123,12 +123,11 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
   const warnings: ParseWarning[] = [];
   const fileExpectations: FileExpectation[] = [];
 
-  // Determine format
-  const format: FileDiscovery['format'] = analysis.hasJsonFiles
-    ? 'json'
-    : analysis.hasHtmlFiles
-      ? 'html'
-      : 'unknown';
+  // Decided in `analyzeZipStructure`, not here. This was a second copy of the
+  // same nested ternary, and `createCriticalError` held a third variant of the
+  // rule; the three disagreed about a mixed archive, which is how one of them
+  // came to be wrong without any of them looking wrong.
+  const format: FileDiscovery['format'] = analysis.format;
 
   // Check if this is an Instagram export
   const isInstagramExport = analysis.hasConnections || analysis.hasFollowersFolder;
