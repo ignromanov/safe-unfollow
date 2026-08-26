@@ -12,6 +12,7 @@ import { DesktopDropZone } from './upload/DesktopDropZone';
 import { DevErrorSelector } from './upload/DevErrorSelector';
 import { LoadingTips } from './upload/LoadingTips';
 import { UploadAffiliateBlock } from './upload/UploadAffiliateBlock';
+import { UploadGuideBlock } from './upload/UploadGuideBlock';
 
 import type { DragValidation } from './upload/DesktopDropZone';
 
@@ -238,6 +239,12 @@ export function UploadZone({
               cannot legally contain the affiliate link, and its fixed
               aspect-ratio box has no room for the cards. */}
           <LoadingTips isProcessing={isProcessing} />
+
+          {/* The guide, below the paid surface by operator ruling
+              (2026-08-25). Mobile-first ordering: the drop zone and its
+              one-line escape hatch are what a reader holding a file needs;
+              this block is for the reader who has none. */}
+          <UploadGuideBlock />
 
           {/* Mobile-only, and last: it is the long-form escape hatch, so it can
               afford to sit below the offer and the tips. */}
