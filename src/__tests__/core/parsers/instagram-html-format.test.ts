@@ -14,16 +14,11 @@ import { parseInstagramZipFile } from '@/core/parsers/instagram';
  * `error-classifier.test.ts`, `analytics.test.ts`) asserts the code *string*
  * against UI and classifier logic, never against bytes.
  *
- * **These are characterization tests, not specifications.** They pin what the
- * predicate does today. That is the point: `instagram-zip-analysis.ts:21-22`
- * decides format by file extension alone, and the plan of record turns that
- * rejection into a dispatch so an HTML archive is parsed rather than refused.
- * A rewrite with no test underneath it would silently change which uploads are
- * refused, and the refused population is the one nobody sees.
- *
- * Two of the four cases below record behaviour that is arguably wrong. They are
- * written as `it` rather than `it.fails` because they are what ships, and the
- * comments say which way they should move.
+ * **These were characterization tests and are now specifications.** They pinned
+ * what the predicate did while HTML was refused, so that turning that rejection
+ * into a dispatch could not silently change which uploads are refused — the
+ * refused population being the one nobody sees. The dispatch has landed, and
+ * each of them now states what the reader gets instead.
  *
  * The archive is built here rather than read from `raw/`, which is gitignored
  * (`.gitignore:117`) and therefore invisible to CI — a fixture only one laptop
@@ -70,6 +65,27 @@ function record(username: string, date: string, withProfileHref: boolean): strin
   );
 }
 
+/**
+ * One optional-file record, in the third grammar: a table of label/value rows
+ * with the date in a trailing div.
+ *
+ * Nested exactly as Meta nests it — an outer record wrapper holding an inner
+ * one — because that nesting is what makes one outermost wrapper equal one
+ * record in BOTH grammars, which is what lets an empty file stay
+ * distinguishable from a drifted one.
+ */
+function tableRecord(name: string, username: string, date: string): string {
+  return (
+    `<div class="pam _3-95 _2ph- _a6-g uiBoxWhite noborder">` +
+    `<div class="_3-95 _a6-p"><div class="pam _3-95 _2ph- _a6-g uiBoxWhite noborder">` +
+    `<div class="_a6-p"><table style="table-layout: fixed;">` +
+    `<tr><td class="_a6_q">Name</td><td class="_2piu _a6_r">${name}</td></tr>` +
+    `<tr><td class="_a6_q">Username</td><td class="_2piu _a6_r">${username}</td></tr>` +
+    `</table></div></div></div>` +
+    `<div class="_3-94 _a6-o">${date}</div></div>`
+  );
+}
+
 /** The document wrapper, reduced to the two elements every real file carries. */
 function htmlDocument(title: string, body: string): string {
   return (
@@ -101,40 +117,94 @@ async function buildHtmlExport(extra?: Record<string, string>): Promise<Blob> {
 }
 
 describe('an Instagram export downloaded in HTML format', () => {
-  it('is refused with the code that names the format, not a generic failure', async () => {
+  it('is read, not refused', async () => {
+    // The whole point of the feature. `upload_error_html_format` was 53.4% of
+    // every upload error on the site and 60.2% of the sessions that hit it
+    // never succeeded at all — for an archive holding the same people, in the
+    // same order, with the same dates, written in different markup.
     const result = await parseInstagramZipFile(asFile(await buildHtmlExport()));
 
-    expect(result.hasMinimalData).toBe(false);
-    expect(result.warnings.find(w => w.severity === 'error')?.code).toBe('HTML_FORMAT');
+    expect(result.warnings.filter(w => w.severity === 'error')).toEqual([]);
+    expect(result.hasMinimalData).toBe(true);
+    expect([...result.data.following].sort()).toEqual(['alpha', 'bravo']);
+    expect([...result.data.followers].sort()).toEqual(['bravo', 'charlie']);
   });
 
-  it('is recognised as an Instagram export, so the advice is about the format', async () => {
-    // The distinction the reader acts on. `createCriticalError` would otherwise
-    // reach NOT_INSTAGRAM_EXPORT, whose fix tells them to download their data —
-    // which they already did. Only HTML_FORMAT tells them the one thing that
-    // resolves it: pick JSON in Meta's dialog.
+  it('still says which format it was, because that is a fact about the archive', async () => {
+    // `format` stops choosing an error message and starts describing what was
+    // read. It must keep being reported: `FileDiscovery` is what the diagnostic
+    // screen and the upload analytics are built on.
     const result = await parseInstagramZipFile(asFile(await buildHtmlExport()));
 
     expect(result.discovery?.isInstagramExport).toBe(true);
     expect(result.discovery?.format).toBe('html');
   });
 
-  it('lists the .html entries even though none of them can be read', async () => {
-    // Why the predicate can see HTML at all: `openZipArchive` pushes every
-    // entry name (`zip-archive.ts:161`) *before* applying the `keep` filter
-    // (`:165`), and `RELEVANT_FILE_PATTERN` matches `.json` only
-    // (`instagram-file-specs.ts:218-221`). So names are complete and readable
-    // objects are not.
+  it('carries the dates through, so the skew detector can still judge', async () => {
+    // An HTML export used to reach `detectRelationshipSkew` with nothing to
+    // compare, and the honest degradation for that was `insufficient-data`.
+    // Dates read from localised human text are what let it reach a real
+    // verdict instead.
     //
-    // This is the invariant the dispatch will rest on, which is why it is
-    // pinned separately from the code assertion above: if `names` ever became
-    // post-filter, `hasHtmlFiles` would be false for every archive, HTML_FORMAT
-    // would silently stop firing, and 1 293 sessions a month would fall through
-    // to a less useful error instead.
-    const result = await parseInstagramZipFile(asFile(await buildHtmlExport()));
+    // Twelve records per list, not two: `MIN_TIMESTAMPS_FOR_SKEW` is 10, so a
+    // smaller archive answers `insufficient-data` whether or not the dates were
+    // read — an assertion over it would pass on a reader that carried no dates
+    // at all, which is exactly the state this test exists to rule out.
+    const many = (n: number, withHref: boolean) =>
+      Array.from({ length: n }, (_, i) =>
+        record(
+          `user${String(i).padStart(2, '0')}`,
+          `Aug ${String(i + 1).padStart(2, '0')}, 2026 6:32 pm`,
+          withHref
+        )
+      ).join('');
 
-    expect(result.discovery?.format).toBe('html');
-    expect(result.warnings.find(w => w.severity === 'error')?.code).toBe('HTML_FORMAT');
+    const zip = new JSZip();
+    zip.file(`${BASE}/following.html`, htmlDocument('Following', many(12, true)));
+    zip.file(`${BASE}/followers_1.html`, htmlDocument('Followers', many(12, false)));
+    const result = await parseInstagramZipFile(asFile(await zip.generateAsync({ type: 'blob' })));
+
+    expect(result.truncatedRelationshipFile).toBe('no-skew');
+    expect([...result.data.followingTimestamps.values()].every(t => t > 0)).toBe(true);
+  });
+
+  it('reads the optional files too, so notFollowingBack is not inflated', async () => {
+    // The correctness stake, and the one a set of followers cannot show.
+    // `pending_follow_requests` is SUBTRACTED from `following` to compute the
+    // app's most-used badge. Left unread it does not empty that badge, it
+    // inflates it — and silently, because an unread file and an empty one are
+    // the same empty array.
+    const result = await parseInstagramZipFile(
+      asFile(
+        await buildHtmlExport({
+          [`${BASE}/pending_follow_requests.html`]: htmlDocument(
+            'Pending follow requests',
+            tableRecord('Alpha Person', 'alpha', 'Aug 09, 2026 1:15 pm')
+          ),
+        })
+      )
+    );
+
+    expect([...result.data.pendingSent.keys()]).toEqual(['alpha']);
+    expect(result.followRequestsUnreadable).toBe(false);
+  });
+
+  it('reports an optional file it cannot read rather than calling it empty', async () => {
+    // The other half of the same stake. A grammar this reader does not know
+    // must not come back as "you have no pending requests" — that is the same
+    // wrong badge with none of the warning.
+    const result = await parseInstagramZipFile(
+      asFile(
+        await buildHtmlExport({
+          [`${BASE}/pending_follow_requests.html`]: htmlDocument(
+            'Pending follow requests',
+            '<div class="pam _3-95 _2ph- _a6-g uiBoxWhite noborder"><p>something new</p></div>'
+          ),
+        })
+      )
+    );
+
+    expect(result.followRequestsUnreadable).toBe(true);
   });
 });
 
@@ -184,7 +254,7 @@ describe('an archive holding both formats', () => {
     );
 
     expect(result.discovery?.format).toBe('html');
-    expect(result.warnings.find(w => w.severity === 'error')?.code).toBe('HTML_FORMAT');
+    expect(result.hasMinimalData).toBe(true);
   });
 
   it('does not mistake a JSON export for HTML because of one stray page', async () => {

@@ -5,7 +5,13 @@ import type {
   ParseResult,
   ParseWarning,
 } from '@/core/types';
-import { BASE_PATH_CANDIDATES, FILE_SPECS, RELEVANT_FILE_PATTERN } from './instagram-file-specs';
+import {
+  BASE_PATH_CANDIDATES,
+  FILE_SPECS,
+  RELEVANT_FILE_PATTERN,
+  htmlTwin,
+} from './instagram-file-specs';
+import { parseRelationshipFile } from './instagram-html';
 import { escapeRegExp, extractUsernames } from './instagram-utils';
 import { analyzeZipStructure, createCriticalError } from './instagram-zip-analysis';
 import { parseFollowersFromZip } from './instagram-followers';
@@ -132,8 +138,14 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
   // Check if this is an Instagram export
   const isInstagramExport = analysis.hasConnections || analysis.hasFollowersFolder;
 
-  // If not a valid Instagram export, return early with error
-  if (!isInstagramExport || format === 'html') {
+  // If not a valid Instagram export, return early with error.
+  //
+  // `format === 'html'` used to sit in this condition, and removing it is the
+  // whole feature: an HTML export is now read rather than refused. HTML_FORMAT
+  // is still reachable, but only from the `!hasMinimalData` exit below — where
+  // it means "we found an Instagram export, tried to read it, and got nothing",
+  // and where "request JSON instead" is still the most effective advice we have.
+  if (!isInstagramExport) {
     const error = createCriticalError(analysis);
     warnings.push(error);
 
@@ -183,11 +195,18 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
   // follower badged notFollowedBack and no error anywhere.
   let unreadableRequiredPath: string | undefined;
 
-  const readJsonFromZip = async (
+  const readRelationshipFileFromZip = async (
     patterns: string[],
     required = false
   ): Promise<{ data: unknown; path: string } | null> => {
-    for (const p of patterns) {
+    // Each candidate path is tried in both formats, JSON first. Expanded here
+    // rather than at every call site so that the caller keeps naming files the
+    // way it always has, and so that one archive holding both formats reads
+    // each file the way that file is written.
+    //
+    // JSON first at each base rather than JSON everywhere first: a base path
+    // that holds the export is the one to read from, whatever markup it used.
+    for (const p of patterns.flatMap(name => [name, htmlTwin(name)])) {
       const f = archive.find(new RegExp('^' + escapeRegExp(p) + '$', 'i'))[0];
       if (!f) continue;
 
@@ -203,7 +222,7 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
       }
 
       try {
-        return { data: JSON.parse(text), path: f.name };
+        return { data: parseRelationshipFile(f.name, text), path: f.name };
       } catch (error) {
         warnings.push({
           code: 'JSON_PARSE_ERROR',
@@ -221,7 +240,7 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
     .map(b => `${b}/following.json`)
     .concat(['following.json']);
   const followingParsed = parseFollowingPayload(
-    await readJsonFromZip(followingFilePatterns, true),
+    await readRelationshipFileFromZip(followingFilePatterns, true),
     unreadableRequiredPath
   );
   const followingUsers = followingParsed.followingUsers;
@@ -244,7 +263,7 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
   };
   const optionalParsed = await parseOptionalFiles(
     baseCandidates,
-    readJsonFromZip,
+    readRelationshipFileFromZip,
     readKnownUsernames
   );
   warnings.push(...optionalParsed.warnings);

@@ -200,7 +200,7 @@ export const OPTIONAL_FILE_DRIFT_CODES: ReadonlySet<string> = new Set(
  * Case-insensitive because the pattern below is, and a `.JSON` alternative that
  * silently produced `.JSON.html` would be findable in neither format.
  */
-function htmlTwin(fileName: string): string {
+export function htmlTwin(fileName: string): string {
   return fileName.replace(/\.json$/i, '.html');
 }
 

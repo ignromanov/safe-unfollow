@@ -12,6 +12,7 @@ import {
   resolveEntries,
   resolveEntryList,
 } from './instagram-utils';
+import { parseRelationshipFile } from './instagram-html';
 import { describeUnreadableZipEntry, type ZipArchive, type ZipEntry } from './zip-archive';
 
 export interface FollowersParsed {
@@ -151,9 +152,12 @@ export async function parseFollowersFromZip(
   archive: ZipArchive,
   baseCandidates: string[]
 ): Promise<FollowersParsed> {
+  // Both extensions, because both are readable, and wider than any spec's
+  // `fileNames` on purpose: an export sharded into `followers_4` and beyond is
+  // read today and must keep being read, in either format.
   const followersGlobs = baseCandidates
-    .map(b => `${b}/followers_.*\\.json`)
-    .concat(['followers_.*\\.json']);
+    .map(b => `${b}/followers_.*\\.(json|html)`)
+    .concat(['followers_.*\\.(json|html)']);
   const followersRaw: RawItem[] = [];
   const followersSeen = new Set<string>();
   const followersFilesByName = new Map<string, ZipEntry>();
@@ -180,7 +184,7 @@ export async function parseFollowersFromZip(
   }
 
   if (followersFilesByName.size === 0) {
-    for (const f of archive.find(/followers_\d+\.json$/i)) {
+    for (const f of archive.find(/followers_\d+\.(json|html)$/i)) {
       if (!followersFilesByName.has(f.name)) {
         followersFilesByName.set(f.name, f);
         foundFollowerPaths.push(f.name);
@@ -210,7 +214,9 @@ export async function parseFollowersFromZip(
     }
     let json: unknown;
     try {
-      json = JSON.parse(text);
+      // By the entry's own extension, not by the archive's format: the first is
+      // a fact about this file, the second an aggregate over the whole ZIP.
+      json = parseRelationshipFile(f.name, text);
     } catch (error) {
       warnings.push({
         code: 'JSON_PARSE_ERROR',

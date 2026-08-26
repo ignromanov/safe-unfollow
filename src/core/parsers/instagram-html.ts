@@ -94,6 +94,30 @@ import { Parser } from 'htmlparser2';
 import { fitMonthTable, readRowDate, splitRowDate } from './instagram-html-dates';
 
 /**
+ * Read one relationship file's text into records, whatever markup it is in.
+ *
+ * The single place the two formats meet, and it decides per FILE rather than
+ * per archive: the entry's own extension is a fact, `analysis.format` is an
+ * aggregate over the whole ZIP. A half-merged archive therefore reads each file
+ * the way that file is actually written, and no caller has to be told which
+ * format it is holding.
+ *
+ * It lives in this module rather than beside the file names in
+ * `instagram-file-specs.ts` for a bundle reason, not an aesthetic one:
+ * `useFileUpload.ts` imports `OPTIONAL_FILE_DRIFT_CODES` from that module, so
+ * anything it reaches is main-bundle code, and this reaches htmlparser2. Here it
+ * stays inside the lazily-loaded parse worker.
+ *
+ * @param name the entry's path in the archive, used only for its extension.
+ * @throws whatever `JSON.parse` throws for malformed JSON. The HTML side does
+ *   not throw — an unreadable document yields no records, which the layer above
+ *   reports as an empty or drifted file.
+ */
+export function parseRelationshipFile(name: string, text: string): unknown {
+  return /\.html$/i.test(name) ? transcodeRelationshipHtml(text) : JSON.parse(text);
+}
+
+/**
  * The wrapper every record sits in, in every file, in every sample held.
  *
  * Matched as a whitespace-delimited class rather than a substring, so that a
@@ -217,13 +241,21 @@ function readRecords(html: string): RawRecord[] {
   let labelValues: { label: string; value: string }[] = [];
 
   const closeRecord = () => {
-    // A record that yielded neither a profile anchor nor a label row is dropped
-    // rather than guessed at. `resolveEntries` counts what it cannot read, so a
-    // file that starts producing these leaves a trace instead of quietly
-    // shrinking.
-    if ((username !== null && href !== null) || labelValues.length > 0) {
-      records.push({ username, href, labelValues, dateText });
-    }
+    // EVERY closed wrapper is a record, including one that yielded neither a
+    // profile anchor nor a label row. It becomes an entry with nothing in it,
+    // which `resolveEntry` cannot read and `resolveEntries` therefore COUNTS —
+    // and that count is the difference between "Instagram changed the record
+    // model" and "you have no pending follow requests".
+    //
+    // Dropping it instead would make a grammar we have never seen come back as
+    // an empty file: no drift warning, no `followRequestsUnreadable`, and
+    // `notFollowingBack` inflated by every request the file held. That is
+    // strictly worse than the JSON path, which has counted unreadable records
+    // since GH#21, and this reader must not be the weaker of the two.
+    //
+    // A file with no records at all still yields nothing, because both grammars
+    // leave one outermost wrapper per record and none when there are none.
+    records.push({ username, href, labelValues, dateText });
     href = null;
     username = null;
     dateText = null;
