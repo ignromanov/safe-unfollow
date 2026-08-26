@@ -1,7 +1,7 @@
 {
   "zone": {
     "title": "Envie seu ZIP do Instagram",
-    "description": "Seus dados permanecem 100% privados. Analisamos seu arquivo ZIP do Instagram localmente no seu navegador.",
+    "description": "Veja quem deixou de te seguir. Sem login, sem conta.",
     "dropHere": "Arraste seu arquivo ZIP do Instagram aqui",
     "orBrowse": "Ou toque para procurar no seu armazenamento local.",
     "jsonOnly": "Apenas Formato JSON",

@@ -1,7 +1,7 @@
 {
   "zone": {
     "title": "Téléversez votre ZIP Instagram",
-    "description": "Vos données restent 100% privées. Nous analysons votre fichier ZIP Instagram localement dans votre navigateur.",
+    "description": "Voyez qui s'est désabonné. Sans connexion, sans compte.",
     "dropHere": "Déposez votre fichier ZIP Instagram ici",
     "orBrowse": "Ou appuyez pour parcourir votre stockage local.",
     "jsonOnly": "Format JSON uniquement",

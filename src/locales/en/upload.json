@@ -1,7 +1,7 @@
 {
   "zone": {
     "title": "Upload Your Instagram ZIP",
-    "description": "Your data remains 100% private. We analyze your Instagram ZIP file locally in your browser.",
+    "description": "See who unfollowed you. No login, no account.",
     "dropHere": "Drop your Instagram ZIP file here",
     "orBrowse": "Or tap to browse your local storage.",
     "jsonOnly": "JSON Format Only",

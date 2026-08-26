@@ -1,7 +1,7 @@
 {
   "zone": {
     "title": "Instagram ZIPをアップロード",
-    "description": "データは100%プライベートです。Instagram ZIPファイルをブラウザ内でローカル分析します。",
+    "description": "誰がフォローを外したか確認。ログインもアカウントも不要。",
     "dropHere": "Instagram ZIPファイルをここにドロップ",
     "orBrowse": "またはタップしてローカルストレージを参照",
     "jsonOnly": "JSON形式のみ",
