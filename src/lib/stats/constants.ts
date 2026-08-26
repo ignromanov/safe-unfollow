@@ -36,6 +36,10 @@ export const AnalyticsEvents = {
 
   // Links
   LINK_CLICK: 'link_click',
+  // The one control at the end of the guide. Instrumented before GH#102 moves
+  // it: its reach was measured (83.4% of step-2 sessions), its usefulness never
+  // was, so a move with no "before" would be unarguable either way.
+  CALENDAR_REMINDER_CLICK: 'calendar_reminder_click',
 
   // Hero CTAs
   HERO_CTA_GUIDE: 'hero_cta_guide',
