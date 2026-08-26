@@ -183,6 +183,28 @@ export const OPTIONAL_FILE_DRIFT_CODES: ReadonlySet<string> = new Set(
 );
 
 /**
+ * The same file's name in an HTML export.
+ *
+ * Derived rather than listed, on a measurement: the nine relationship files of
+ * `raw/real/2026-08-11-en-html-x9g96b0A` are each the JSON name with the
+ * extension swapped — `close_friends.html`, `recently_unfollowed_profiles.html`,
+ * `recent_follow_requests.html` and the rest. Not one base name differs, and the
+ * folder layout is the same `connections/followers_and_following`.
+ *
+ * A second hand-written `htmlFileNames` beside `fileNames` would restate nine
+ * facts that already have a home, and the two lists would disagree the first
+ * time either changed. Stating it once means an alternative added to
+ * `fileNames` — the way `friends.json` sits beside `close_friends.json` — is
+ * covered on both sides without anyone remembering to do it twice.
+ *
+ * Case-insensitive because the pattern below is, and a `.JSON` alternative that
+ * silently produced `.JSON.html` would be findable in neither format.
+ */
+function htmlTwin(fileName: string): string {
+  return fileName.replace(/\.json$/i, '.html');
+}
+
+/**
  * Common base paths where Instagram data might be located
  */
 export const BASE_PATH_CANDIDATES = [
@@ -209,13 +231,21 @@ export const BASE_PATH_CANDIDATES = [
  * that list: `instagram-followers.ts` looks up `followers_.*\.json`, so an
  * export sharded into `followers_4.json` and beyond is read today and must
  * keep being read.
+ *
+ * Both extensions, because both are readable. An entry this pattern does not
+ * name keeps no object, so the parser cannot open it however correctly
+ * everything downstream is written — it reports the file MISSING, which is a
+ * silent wrong answer rather than a crash. That makes this the first seam an
+ * HTML export passes through, and the reason it is widened before anything that
+ * reads one.
  */
 const KEPT_FILE_NAMES = [...FILE_SPECS, PERMANENT_REQUESTS_SPEC]
   .filter(spec => spec.name !== 'followers_*.json')
   .flatMap(spec => spec.fileNames)
+  .flatMap(name => [name, htmlTwin(name)])
   .map(escapeRegExp);
 
 export const RELEVANT_FILE_PATTERN = new RegExp(
-  `(^|/)(followers_[^/]*\\.json|${KEPT_FILE_NAMES.join('|')})$`,
+  `(^|/)(followers_[^/]*\\.(json|html)|${KEPT_FILE_NAMES.join('|')})$`,
   'i'
 );
