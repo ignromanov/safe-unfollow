@@ -51,6 +51,42 @@ extracts:
 | `following`   |  413 |  413 |                **0** |
 | `followers_1` |  364 |  364 |                **0** |
 
+---
+
+# Locale trio — `following.{en,es,ja}.html`
+
+The same account's `following.html` exported **three times minutes apart on
+2026-08-25**, in three Meta UI languages. Sources:
+`raw/real/2026-08-25-{en-html-sxQFBjYF,es-html-hGW6A2H6,ja-html-Jb0i1oPA}`.
+
+The only variable between these three files is the interface language, which is
+what makes them a controlled experiment rather than three samples. Verified over
+the full files when the extracts were cut: **393 records in each, in the same
+order, with the same set of accounts.** The committed extracts are the first 20,
+through one substitution map so the three still agree.
+
+Japanese is the third on purpose, not for coverage. It shares no alphabet, no
+month-naming convention and no conventional date field order with the other two,
+so anything the parser reads that a translator can touch fails there and nowhere
+else.
+
+|                  | en                     | es                     | ja                     |
+| ---------------- | ---------------------- | ---------------------- | ---------------------- |
+| `<h1>`           | `Following`            | `Seguidos`             | `フォロー中`           |
+| first row's date | `Aug 10, 2026 6:32 pm` | `ago 10, 2026 6:32 pm` | `8月 10, 2026 6:32 PM` |
+
+Two properties of that last row are load-bearing for the date parser that does
+not exist yet:
+
+- **The meridiem is uppercase in Japanese.** A published forensics conclusion
+  said "am/pm always lowercase ASCII, regardless of locale, zero exceptions" —
+  true of the four samples it was drawn from and false of the fifth. A
+  case-sensitive `(am|pm)` fails on 100% of Japanese rows.
+- **Meta's month abbreviations are not CLDR's.** Spanish September is `sep`;
+  `Intl.DateTimeFormat('es', { month: 'short' })` gives `sept`. A CLDR table
+  would miss those rows silently, because an unparsed date becomes 0 and the
+  oldest-timestamp statistic skips zeros.
+
 ## Regenerating
 
 There is no committed generator, and that is deliberate: it would need the real
