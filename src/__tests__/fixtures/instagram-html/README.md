@@ -95,3 +95,65 @@ would rot unnoticed. If these need recutting, the procedure is in this file —
 match records by the `href` anchor, substitute handles through one map across
 all four files, and assert no real handle survives in any output before
 writing.
+
+---
+
+# Grammar C — `close_friends.{html,json}`
+
+The third record model, from the **same two archives as the golden pair above**
+— `raw/real/2026-08-11-{en-html-x9g96b0A,en-json-Zzt7gCja}` — so it is the same
+account on the same day in both formats.
+
+The two required files write a profile anchor per record. The seven optional
+files write a `<table>` of label/value rows, with the date in a trailing div:
+
+| label      | what it holds                           |
+| ---------- | --------------------------------------- |
+| `Name`     | the display name                        |
+| `Username` | the handle                              |
+| `URL`      | the account's bio link, when it has one |
+
+Measured across the whole HTML export: the two required files carry 413 and 364
+profile anchors and **zero** tables; the optional ones carry 9, 6, 6, 2, 1 and 1
+tables and **zero** profile anchors. The two grammars never mix.
+
+That table is the `label_values` shape the 2026-08 JSON export already carries,
+rendered as markup — so the transcoded record needs no new reader and no new
+label resolution.
+
+## Why this file and not one of the other six
+
+`close_friends` is the only optional file in the archive carrying `URL` rows,
+which is the value that must **not** become a profile link — `resolveEntry`
+drops `href` for this shape deliberately, because the bio link is whatever the
+account put there.
+
+## Redaction
+
+Wider than the golden pair's, because grammar C carries more: `Username`,
+`Name`, `fbid` and the owner's handle in the page header all identify a person
+and all were substituted through one map applied to both files. Display names
+were replaced **character class by character class**, so a name that was
+non-ASCII, spaced or emoji-bearing still is — those are the properties a parser
+breaks on. Everything else is Meta's bytes: class names, row order, the empty
+`URL` value that JSON keeps and HTML omits, timestamps, the inline CSS.
+
+The cutting script refuses to write if any original value survives in either
+output.
+
+## The claim these stand in for
+
+Verified over the **full** archives, all eight relationship files, HTML against
+JSON — symmetric difference **0** in every one, nothing unresolved, every record
+dated:
+
+| file                           | HTML | JSON |
+| ------------------------------ | ---: | ---: |
+| `following`                    |  413 |  413 |
+| `followers_1`                  |  364 |  364 |
+| `close_friends`                |    9 |    9 |
+| `pending_follow_requests`      |    6 |    6 |
+| `recent_follow_requests`       |    6 |    6 |
+| `recently_unfollowed_profiles` |    2 |    2 |
+| `removed_suggestions`          |    1 |    1 |
+| `restricted_profiles`          |    1 |    1 |

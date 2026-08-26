@@ -34,7 +34,7 @@
  *
  * ## What it keys on, and why that choice is the whole design
  *
- * Two record grammars ship today:
+ * Two record grammars ship in the two REQUIRED files:
  *
  * - `following.html` — an `<h2>` holding the username, and an anchor to
  *   `instagram.com/_u/NAME`.
@@ -48,6 +48,28 @@
  * pair: `following` 413 = 413 and `followers_1` 364 = 364 against their JSON
  * twins, symmetric difference 0 in both.
  *
+ * A third grammar ships in the seven OPTIONAL files: a `<table>` of label/value
+ * rows — `Name`, `Username`, and `URL` when the account has a bio link — with
+ * the date in a trailing div. Measured across the whole 2026-08-11 export: the
+ * two required files hold 413 and 364 profile anchors and **zero tables**; the
+ * optional ones hold nine, six, two and one tables and **zero profile
+ * anchors**. The two never mix, so the reader tries the anchor and falls back
+ * to the table rather than choosing between them.
+ *
+ * That table is not a model to invent a reader for: it is the `label_values`
+ * shape the 2026-08 JSON export already carries, rendered as markup — same
+ * labels, same values, same order — so a transcoded record is read by
+ * `resolveEntry`'s third shape and its localised username label is resolved by
+ * `instagram-labels.ts`, both unchanged.
+ *
+ * Reading it is a correctness stake rather than completeness.
+ * `pending_follow_requests` and `recent_follow_requests` are SUBTRACTED from
+ * `following` to compute `notFollowingBack` (`core/badges/index.ts`), and both
+ * are grammar C. A reader that returned nothing from them would not empty a
+ * badge, it would inflate the app's most-used one — silently, because an unread
+ * file and an empty one are the same empty array, so `followRequestsUnreadable`
+ * (GH#41) would stay false.
+ *
  * Nothing here reads a class name that could be localised, a heading, a label,
  * or a file name. The class names ARE stable — byte-identical across five
  * months and three locales — but the record model behind them is not: Meta
@@ -57,16 +79,15 @@
  * record, and a change to either produces zero records rather than a partial
  * read presented as a whole one.
  *
- * ## What it does not carry yet
+ * ## The one thing an empty answer must not mean
  *
- * Timestamps. The per-record date is localised human text — `Aug 10, 2026 6:32
- * pm`, `ago 10, 2026 6:32 p. m.`, `2026年8月10日 6:32 PM` — with no machine form
- * anywhere in the document. Reading it needs a month table fitted to the file's
- * own tokens, which is its own problem and its own commit. Until then every
- * record here has an undefined timestamp, which the parsers store as 0, which
- * makes `detectRelationshipSkew` return `insufficient-data` — visible and
- * counted since `65cb74a`, rather than silently indistinguishable from a clean
- * export. That degradation is the honest one and it is why that fix came first.
+ * Zero records is reported as zero records, never as a partial read. Both
+ * grammars leave exactly one outermost record wrapper per record and NONE when
+ * there are no records — measured: grammar C nests wrappers at div depths 3 and
+ * 5, N at each for N records, with no outer collection wrapper to survive an
+ * empty list. So a file whose wrapper class changed and a file belonging to a
+ * user with no close friends both come back empty, and the layer above tells
+ * them apart the way it already does for JSON: by whether the file was found.
  */
 
 import { Parser } from 'htmlparser2';
@@ -94,16 +115,33 @@ const RECORD_CLASS = 'uiBoxWhite';
  */
 const PROFILE_HREF = /^https:\/\/www\.instagram\.com\/(?:_u\/)?([^/?#]+)\/?$/;
 
-/** One record, in the shape `resolveEntry` already reads from JSON. */
+/** One anchor record, in the shape `resolveEntry` already reads from JSON. */
 interface TranscodedEntry {
   title: string;
   string_list_data: [{ href: string; timestamp?: number }];
 }
 
+/**
+ * One table record, in the `label_values` shape `resolveEntry` reads third.
+ *
+ * No `href`, deliberately, and the omission mirrors the JSON reader rather than
+ * being a gap in this one: the `URL` label holds whatever the account put in its
+ * bio — in one real `removed_suggestions` it is a WhatsApp shortlink — so
+ * carrying it as a profile link would aim a click off Instagram entirely.
+ */
+interface TranscodedLabelEntry {
+  label_values: { label: string; value: string }[];
+  timestamp?: number;
+}
+
 /** A record as read from the markup, before the file's month table is known. */
 interface RawRecord {
-  username: string;
-  href: string;
+  /** Grammar A/B: the handle read out of the profile anchor. */
+  username: string | null;
+  /** Grammar A/B: the profile anchor itself. */
+  href: string | null;
+  /** Grammar C: the record's label/value rows, in document order. */
+  labelValues: { label: string; value: string }[];
   dateText: string | null;
 }
 
@@ -131,15 +169,26 @@ export function transcodeRelationshipHtml(html: string): unknown {
     .filter((t): t is string => typeof t === 'string');
   const monthTable = fitMonthTable(tokens);
 
-  return records.map(({ username, href, dateText }) => {
+  return records.map(({ username, href, labelValues, dateText }) => {
     const timestamp = dateText === null ? undefined : readRowDate(dateText, monthTable);
-    // Omitted rather than zeroed when unreadable. `resolveEntry` reads
-    // `item?.timestamp` and the parsers store `?? 0`, so the zero is applied
-    // one layer down where it already means "Instagram gave no date" — writing
-    // it here would make an unreadable date indistinguishable from an absent
-    // one at the only layer that can still tell them apart.
-    const entry: TranscodedEntry = { title: username, string_list_data: [{ href }] };
-    if (timestamp !== undefined) entry.string_list_data[0].timestamp = timestamp;
+
+    // The anchor grammar first, because it is the one the two required files
+    // use and the one whose `href` is worth keeping. A record never carries
+    // both — measured, the anchor files hold zero tables and the table files
+    // zero anchors — so the order is a preference, not a tiebreak.
+    if (username !== null && href !== null) {
+      // Omitted rather than zeroed when unreadable. `resolveEntry` reads
+      // `item?.timestamp` and the parsers store `?? 0`, so the zero is applied
+      // one layer down where it already means "Instagram gave no date" —
+      // writing it here would make an unreadable date indistinguishable from an
+      // absent one at the only layer that can still tell them apart.
+      const entry: TranscodedEntry = { title: username, string_list_data: [{ href }] };
+      if (timestamp !== undefined) entry.string_list_data[0].timestamp = timestamp;
+      return entry;
+    }
+
+    const entry: TranscodedLabelEntry = { label_values: labelValues };
+    if (timestamp !== undefined) entry.timestamp = timestamp;
     return entry;
   });
 }
@@ -162,6 +211,25 @@ function readRecords(html: string): RawRecord[] {
   let username: string | null = null;
   let dateText: string | null = null;
   let text = '';
+  // Grammar C. `cells` accumulates one row's `<td>` texts; `labelValues` the
+  // rows of the record currently open.
+  let cells: string[] = [];
+  let labelValues: { label: string; value: string }[] = [];
+
+  const closeRecord = () => {
+    // A record that yielded neither a profile anchor nor a label row is dropped
+    // rather than guessed at. `resolveEntries` counts what it cannot read, so a
+    // file that starts producing these leaves a trace instead of quietly
+    // shrinking.
+    if ((username !== null && href !== null) || labelValues.length > 0) {
+      records.push({ username, href, labelValues, dateText });
+    }
+    href = null;
+    username = null;
+    dateText = null;
+    cells = [];
+    labelValues = [];
+  };
 
   const parser = new Parser(
     {
@@ -174,6 +242,8 @@ function readRecords(html: string): RawRecord[] {
             href = null;
             username = null;
             dateText = null;
+            cells = [];
+            labelValues = [];
           }
           text = '';
           return;
@@ -198,32 +268,46 @@ function readRecords(html: string): RawRecord[] {
       },
 
       onclosetag(name) {
-        // The date is found by SHAPE, not by position — the first text inside
-        // the record that parses as a row date. Positional reading ("the div
-        // after the anchor's div") would be a second thing to break when Meta
-        // rearranges a record, and it has rearranged records before without
-        // touching a single class name.
+        // Captured before the reset, because both readings below need it: the
+        // date, and a table cell.
         //
         // Accumulated across an element rather than read per text node, because
         // a parser may split text at any boundary it likes.
-        if (depth > 0 && dateText === null && splitRowDate(text.trim()) !== null) {
-          dateText = text.trim();
-        }
+        const captured = text.trim();
         text = '';
+        if (depth === 0) return;
 
-        if (name !== 'div' || depth === 0) return;
+        // The date is found by SHAPE, not by position — the first text inside
+        // the record that parses as a row date. That is what lets one rule read
+        // both grammars, whose dates sit in different places: grammar A/B puts
+        // it in a sibling div of the anchor, grammar C in a div after the whole
+        // table. Positional reading would be a second thing to break when Meta
+        // rearranges a record, and it has rearranged records before without
+        // touching a single class name.
+        if (dateText === null && splitRowDate(captured) !== null) {
+          dateText = captured;
+        }
+
+        if (name === 'td') {
+          cells.push(captured);
+          return;
+        }
+
+        // Two cells is the whole shape: label, then value. Read by POSITION
+        // rather than by the `_a6_q` / `_a6_r` classes that mark them, because
+        // position is the part of a table that cannot be renamed. A row of any
+        // other width is not a label pair and is dropped.
+        if (name === 'tr') {
+          const [label, value] = cells;
+          if (cells.length === 2 && label) labelValues.push({ label, value: value ?? '' });
+          cells = [];
+          return;
+        }
+
+        if (name !== 'div') return;
         depth--;
         if (depth > 0) return;
-
-        // A record with no profile link is dropped rather than guessed at.
-        // `resolveEntries` counts what it cannot read, so a file that starts
-        // producing these leaves a trace instead of quietly shrinking.
-        if (username !== null && href !== null) {
-          records.push({ username, href, dateText });
-        }
-        href = null;
-        username = null;
-        dateText = null;
+        closeRecord();
       },
     },
     // Entities matter: a handle cannot contain one, but the surrounding markup
