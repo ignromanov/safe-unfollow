@@ -2,7 +2,6 @@ import { useId, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { PrefixedLink } from '@/components/PrefixedLink';
 import { GUIDE_STEPS } from '@/config/wizard-steps';
 
 /**
@@ -22,13 +21,18 @@ const REMAINING_STEPS = GUIDE_STEPS;
 
 const TRIGGER_ID = 'step-accordion-trigger';
 
+interface StepAccordionProps {
+  /** Open the guide dialog at a section. Absent on the wizard route, which is its own screen. */
+  onSelect?: (step: number) => void;
+}
+
 /**
- * One disclosure, seven links. Rows are plain images pointing at each step's
+ * One disclosure, seven rows. Rows are plain images pointing at each step's
  * poster (no `<video>` on this screen — the moving image lives on the step
  * route the link goes to) and stay unmounted until the row is opened, so
  * opening never shifts layout and nothing is reachable before the click.
  */
-export function StepAccordion() {
+export function StepAccordion({ onSelect }: StepAccordionProps = {}) {
   const { t } = useTranslation('wizard');
   const [isOpen, setIsOpen] = useState(false);
   const listId = useId();
@@ -86,12 +90,14 @@ export function StepAccordion() {
 
             return (
               <li key={step.id}>
-                <PrefixedLink
-                  // +1 bridges the guide's numbering to the route numbering
-                  // these eight indexed URLs still carry. Both the link and
-                  // the arithmetic go away when the rows open the dialog.
-                  to={`/wizard/step/${step.id + 1}`}
-                  className="flex items-center gap-3 p-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+                {/* A button, not a link, and that costs nothing here: the
+                    rows do not exist until the disclosure above is clicked, so
+                    they were never reachable in the pre-hydration window a
+                    real href exists to serve. */}
+                <button
+                  type="button"
+                  onClick={() => onSelect?.(step.id)}
+                  className="flex w-full items-center gap-3 p-3 text-start hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
                 >
                   {/* Decorative here, hence the empty alt: the row's whole
                       content is the link's accessible name, so a described
@@ -110,7 +116,7 @@ export function StepAccordion() {
                   <span className="text-sm font-medium text-zinc-700 dark:text-zinc-200">
                     {t(`steps.${step.id}.title` as any)}
                   </span>
-                </PrefixedLink>
+                </button>
               </li>
             );
           })}

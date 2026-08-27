@@ -2,7 +2,7 @@ import type { DiagnosticErrorCode, ParseWarning } from '@/core/types';
 import { ALL_DIAGNOSTIC_ERROR_CODES, createDiagnosticError } from '@/core/types';
 import { analytics } from '@/lib/analytics';
 import { useIsTouchDevice } from '@/hooks/useIsTouchDevice';
-import { ArrowLeft, CheckCircle2, Info } from 'lucide-react';
+import { ArrowLeft, Info } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
@@ -13,12 +13,15 @@ import { DevErrorSelector } from './upload/DevErrorSelector';
 import { LoadingTips } from './upload/LoadingTips';
 import { UploadAffiliateBlock } from './upload/UploadAffiliateBlock';
 import { UploadGuideBlock } from './upload/UploadGuideBlock';
+import { UploadWaitingState } from './upload/UploadWaitingState';
 
 import type { DragValidation } from './upload/DesktopDropZone';
 
 export interface UploadZoneProps {
   onUploadStart: (file: File) => void;
   onOpenWizard?: () => void;
+  /** Open the guide dialog at a section. Absent where no dialog is mounted (ResultsPage). */
+  onOpenGuide?: (step: number) => void;
   isProcessing?: boolean;
   parseWarnings?: ParseWarning[];
 }
@@ -26,6 +29,7 @@ export interface UploadZoneProps {
 export function UploadZone({
   onUploadStart,
   onOpenWizard,
+  onOpenGuide,
   isProcessing = false,
   parseWarnings,
 }: UploadZoneProps) {
@@ -33,6 +37,10 @@ export function UploadZone({
   const [isDragOver, setIsDragOver] = useState(false);
   const [dragValidation, setDragValidation] = useState<DragValidation>('none');
   const [showDiagnostic, setShowDiagnostic] = useState(true);
+  // Set by the Accounts Center click, which opens a new tab and leaves this
+  // page standing. Never replaces the drop zone: someone who clicks through,
+  // checks their email and finds the file must not have to undo a state.
+  const [hasAskedInstagram, setHasAskedInstagram] = useState(false);
   const isTouchDevice = useIsTouchDevice();
 
   // Dev mode: preview any error state
@@ -220,6 +228,13 @@ export function UploadZone({
               />
             )}
 
+            {hasAskedInstagram && (
+              <UploadWaitingState
+                onUploadNow={() => fileInputRef.current?.click()}
+                onDismiss={() => setHasAskedInstagram(false)}
+              />
+            )}
+
             {/* Mobile-only: the sidebar carries this on desktop. */}
             <p className="text-center text-xs font-medium text-zinc-400 lg:hidden dark:text-zinc-500">
               {t('zone.privacyMicro', {
@@ -243,8 +258,18 @@ export function UploadZone({
           {/* The guide, below the paid surface by operator ruling
               (2026-08-25). Mobile-first ordering: the drop zone and its
               one-line escape hatch are what a reader holding a file needs;
-              this block is for the reader who has none. */}
-          <UploadGuideBlock />
+              this block is for the reader who has none.
+
+              Mobile only: on desktop the same block is the right column
+              (direction A, operator). Two mount points, one component — the
+              hidden one is display:none and so is out of the accessibility
+              tree, not a duplicate for a screen reader. */}
+          <div className="lg:hidden">
+            <UploadGuideBlock
+              onOpenGuide={onOpenGuide}
+              onAskedInstagram={() => setHasAskedInstagram(true)}
+            />
+          </div>
 
           {/* Mobile-only, and last: it is the long-form escape hatch, so it can
               afford to sit below the offer and the tips. */}
@@ -264,29 +289,15 @@ export function UploadZone({
 
         {/* Sidebar - desktop only; hidden on mobile to keep CTA visible without scroll */}
         <div className="hidden space-y-6 lg:block lg:col-span-2">
-          {/* Pre-upload Checklist */}
-          <div className="rounded-4xl border border-border bg-card p-8 shadow-sm">
-            <h4 className="mb-6 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-zinc-900 dark:text-white">
-              <CheckCircle2 size={16} className="text-emerald-500" aria-hidden="true" />{' '}
-              {t('checklist.title')}
-            </h4>
-            <ul className="space-y-5">
-              {[
-                t('checklist.format'),
-                t('checklist.includes'),
-                t('checklist.timeframe'),
-                t('checklist.fileType'),
-              ].map((item, i) => (
-                <li
-                  key={i}
-                  className="flex items-center gap-3 text-sm font-medium text-zinc-600 dark:text-zinc-400"
-                >
-                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
+          {/* Direction A (operator): the guide sits beside the upload, not
+              under it. What stood here was a four-row checklist saying what to
+              pick in Instagram's dialog — the same five rows RecipeCard
+              renders inside this block, one screen apart. The duplicate is
+              what goes; the guide is what takes its place. */}
+          <UploadGuideBlock
+            onOpenGuide={onOpenGuide}
+            onAskedInstagram={() => setHasAskedInstagram(true)}
+          />
 
           {/* Most Common Error */}
           <div className="rounded-4xl border border-zinc-200 bg-zinc-50 p-8 dark:border-zinc-800 dark:bg-zinc-900/40">

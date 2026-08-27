@@ -196,10 +196,12 @@ describe('ResultsPage', () => {
 
       const wizardLink = screen
         .getAllByRole('link')
-        .find(link => link.getAttribute('href')?.includes('/wizard/step/'));
+        .find(link => link.getAttribute('href')?.includes('/upload?'));
 
       expect(wizardLink).toBeDefined();
-      expect(wizardLink!).toHaveAttribute('href', expect.stringMatching(/\/wizard\/step\/1$/));
+      // Undiagnosed opens the guide from the start rather than claiming a
+      // section — ?guide=1, not ?step=1.
+      expect(wizardLink!).toHaveAttribute('href', expect.stringMatching(/\/upload\?guide=1$/));
 
       vi.doUnmock('@/components/DiagnosticErrorScreen');
       vi.doUnmock('react-router-dom');

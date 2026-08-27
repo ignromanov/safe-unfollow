@@ -88,14 +88,22 @@ describe('UploadZone', () => {
     expect(warning).toHaveTextContent(/HTML/);
   });
 
-  it('should display pre-upload checklist', () => {
+  it('puts the guide beside the upload, where the checklist duplicated it', () => {
+    // The desktop sidebar used to carry a four-row checklist naming what to
+    // pick in Instagram's dialog — the same rows RecipeCard renders inside
+    // the guide block, one screen apart. Direction A (operator) replaces it
+    // with the guide block itself, so the same component is mounted twice:
+    // once for mobile flow, once as the desktop column. Only one is displayed
+    // at any width, and `hidden` is display:none, so the other is out of the
+    // accessibility tree rather than duplicated in it.
+    //
+    // ⚠️ `upload.checklist.*` is orphaned by this and deliberately not
+    // deleted: `checklist.format` is one of the strings that tells readers to
+    // pick JSON, which is a copy decision (lumen-cro), not a cleanup.
     renderWithRouter(<UploadZone onUploadStart={mockOnUploadStart} />);
 
-    // checklist.title translation
-    expect(screen.getByText(uploadEN.checklist.title)).toBeInTheDocument();
-    // Checklist items from translations
-    expect(screen.getByText(uploadEN.checklist.format)).toBeInTheDocument();
-    expect(screen.getByText(uploadEN.checklist.includes)).toBeInTheDocument();
+    expect(screen.queryByText(uploadEN.checklist.title)).toBeNull();
+    expect(screen.getAllByText(wizardEN.entry.recipe.title)).toHaveLength(2);
   });
 
   it('should display common error hint section', () => {
@@ -262,7 +270,10 @@ describe('UploadZone', () => {
     const { container } = renderWithRouter(<UploadZone onUploadStart={vi.fn()} />);
 
     const block = container.querySelector('aside') as HTMLElement;
-    const guide = screen.getByRole('heading', { level: 2, name: wizardEN.entry.title });
+    // The first of the two mount points: the mobile flow, which is what the
+    // ruling was about. The second is the desktop column, which sits beside
+    // the drop zone rather than under the offer.
+    const guide = screen.getAllByRole('heading', { level: 2, name: wizardEN.entry.title })[0]!;
     expect(block).not.toBeNull();
     expect(block.compareDocumentPosition(guide) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });

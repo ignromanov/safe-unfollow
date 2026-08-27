@@ -24,7 +24,18 @@ import { ACCOUNTS_CENTER_URL } from '@/config/wizard-steps';
  * Ordering on the page is deliberate and was ruled on: the affiliate block
  * stays above this one (operator, 2026-08-25).
  */
-export function UploadGuideBlock() {
+interface UploadGuideBlockProps {
+  /** Open the guide dialog at a section. */
+  onOpenGuide?: (step: number) => void;
+  /**
+   * The reader has gone to ask Instagram for the file. Fired on the CTA click,
+   * which opens a new tab — this page survives it, which is the whole reason
+   * the waiting state can exist at all.
+   */
+  onAskedInstagram?: () => void;
+}
+
+export function UploadGuideBlock({ onOpenGuide, onAskedInstagram }: UploadGuideBlockProps = {}) {
   const { t } = useTranslation('wizard');
 
   return (
@@ -55,7 +66,10 @@ export function UploadGuideBlock() {
           href={ACCOUNTS_CENTER_URL}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={() => analytics.linkClick('meta_accounts')}
+          onClick={() => {
+            analytics.linkClick('meta_accounts');
+            onAskedInstagram?.();
+          }}
           className="inline-flex min-h-[48px] w-full cursor-pointer items-center justify-center gap-3 whitespace-normal rounded-2xl bg-primary px-8 py-3 text-center text-sm font-black text-primary-foreground shadow-xl transition-all hover:scale-105 active:scale-95 sm:w-auto md:text-base"
         >
           {t('entry.cta')} <ExternalLink size={20} className="shrink-0" aria-hidden="true" />
@@ -70,7 +84,7 @@ export function UploadGuideBlock() {
       </div>
 
       <RecipeCard />
-      <StepAccordion />
+      <StepAccordion onSelect={onOpenGuide} />
     </section>
   );
 }

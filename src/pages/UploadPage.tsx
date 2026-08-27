@@ -1,8 +1,9 @@
+import { GuideDialog } from '@/components/guide/GuideDialog';
 import { PageLoader } from '@/components/PageLoader';
 import { UploadZone } from '@/components/UploadZone';
 import { useInstagramData } from '@/hooks/useInstagramData';
+import { useGuideDialog } from '@/hooks/useGuideDialog';
 import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
-import { guideStepForError } from '@/lib/errors/wizard-routing';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -14,6 +15,7 @@ export function Component() {
   const navigate = useNavigate();
   const prefix = useLanguagePrefix();
   const { uploadState, handleZipUpload, parseWarnings } = useInstagramData();
+  const guide = useGuideDialog();
 
   // Auto-navigate to results after successful upload
   useEffect(() => {
@@ -35,20 +37,27 @@ export function Component() {
     handleZipUpload(file).catch(() => {});
   };
 
-  const handleOpenWizard = () => {
-    // Still a route, still the old numbering: +1 because GUIDE_STEPS renumbered
-    // and these URLs did not. This whole handler is replaced by opening the
-    // dialog in place, at which point neither the navigate nor the +1 remains.
-    navigate(`${prefix}/wizard/step/${(guideStepForError() ?? 0) + 1}`);
-  };
+  // No navigate: the guide is a dialog on this page now, and the URL it
+  // writes is a query on this same path.
+  const handleOpenWizard = () => guide.open('zone');
 
   return (
-    <UploadZone
-      onUploadStart={handleUploadStart}
-      onOpenWizard={handleOpenWizard}
-      isProcessing={uploadState.status === 'loading'}
-      parseWarnings={parseWarnings}
-    />
+    <>
+      <UploadZone
+        onUploadStart={handleUploadStart}
+        onOpenWizard={handleOpenWizard}
+        onOpenGuide={step => guide.open('accordion', step)}
+        isProcessing={uploadState.status === 'loading'}
+        parseWarnings={parseWarnings}
+      />
+      <GuideDialog
+        open={guide.isOpen}
+        step={guide.step}
+        source={guide.source}
+        onGoToStep={guide.goToStep}
+        onClose={guide.close}
+      />
+    </>
   );
 }
 

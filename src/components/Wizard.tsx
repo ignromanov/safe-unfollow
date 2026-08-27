@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { ArrowLeft, ArrowRight, X, AlertTriangle, Calendar } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import FocusTrap from 'focus-trap-react';
 
 import { analytics } from '@/lib/analytics';
@@ -9,6 +10,7 @@ import { PrefixedLink } from '@/components/PrefixedLink';
 import { ResponsiveGif } from '@/components/ResponsiveGif';
 import { UploadGuideBlock } from '@/components/upload/UploadGuideBlock';
 import { GUIDE_STEPS } from '@/config/wizard-steps';
+import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
 import { useWizardNavigation } from '@/hooks/useWizardNavigation';
 
 /**
@@ -25,6 +27,8 @@ interface WizardProps {
 export function Wizard({ initialStep = 1 }: WizardProps) {
   const { t } = useTranslation('wizard');
   const { currentStep, goToStep, goHome } = useWizardNavigation(initialStep);
+  const navigate = useNavigate();
+  const prefix = useLanguagePrefix();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // The wizard scrolls in the container below, and WizardPage never remounts
@@ -140,7 +144,10 @@ export function Wizard({ initialStep = 1 }: WizardProps) {
           <div className="min-h-full flex items-center justify-center p-4">
             {currentStep === 1 ? (
               <div className="w-full max-w-xl">
-                <UploadGuideBlock />
+                {/* The accordion's rows open a dialog that lives on /upload,
+                    so from this route they are a navigation. The route itself
+                    goes in PR 3 and takes this callback with it. */}
+                <UploadGuideBlock onOpenGuide={step => navigate(`${prefix}/upload?step=${step}`)} />
               </div>
             ) : step ? (
               <div

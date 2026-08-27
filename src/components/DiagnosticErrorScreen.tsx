@@ -13,7 +13,7 @@ import {
   getColorScheme,
   isRecoverable,
 } from '@/lib/errors/diagnostic-utils';
-import { guideStepForError } from '@/lib/errors/wizard-routing';
+import { guideHrefForError } from '@/lib/errors/wizard-routing';
 
 export interface DiagnosticErrorScreenProps {
   /** Error code for direct error display */
@@ -155,7 +155,11 @@ export function DiagnosticErrorScreen({
         {/* Actions. For a recoverable failure the wizard leads, because retrying
             the same file cannot work by construction — retry is pressed by 57.8%
             against 31.8% eventual success. It is a real link, not a button, so it
-            supports cmd/middle-click and "copy link address". */}
+            supports cmd/middle-click and "copy link address" — and it still is,
+            now that the guide's destination is a query on this same page
+            rather than a route. Navigating to it opens the dialog, because the
+            URL is what holds the dialog open (useGuideDialog). No handler is
+            needed for that, which is why none was added. */}
         <div
           className="flex flex-col gap-3 sm:flex-row"
           role="group"
@@ -163,7 +167,7 @@ export function DiagnosticErrorScreen({
         >
           {onOpenWizard && (
             <PrefixedLink
-              to={`/wizard/step/${(guideStepForError(diagnosticError.code) ?? 0) + 1}`}
+              to={guideHrefForError('', diagnosticError.code)}
               onClick={handleOpenWizard}
               className={recoverable ? PRIMARY_ACTION_CLASS : SECONDARY_ACTION_CLASS(colors)}
             >

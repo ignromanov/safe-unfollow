@@ -36,6 +36,9 @@ vi.mock('@/components/PageLoader', () => ({
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
+  // useGuideDialog reads the dialog's state off the URL, so the page needs a
+  // location as well as a navigate.
+  useLocation: () => ({ pathname: '/upload', search: '', hash: '', state: null, key: 'test' }),
 }));
 
 // Mock hooks with vi.fn() for dynamic returns
@@ -234,13 +237,14 @@ describe('UploadPage', () => {
   });
 
   describe('navigation - UploadZone handlers', () => {
-    it('should navigate to wizard when Open Wizard is clicked', async () => {
+    it('opens the guide on this page instead of navigating to a wizard route', async () => {
       const user = userEvent.setup();
       render(<UploadPage />);
 
       await user.click(screen.getByText('Open Wizard'));
 
-      expect(mockNavigate).toHaveBeenCalledWith('/wizard/step/6');
+      // A push, and onto the same path: the guide is a query on /upload now.
+      expect(mockNavigate).toHaveBeenCalledWith('/upload?guide=1', { replace: false });
     });
   });
 
@@ -253,7 +257,9 @@ describe('UploadPage', () => {
 
       await user.click(screen.getByText('Open Wizard'));
 
-      expect(mockNavigate).toHaveBeenCalledWith('/es/wizard/step/6');
+      // The prefix comes from the location the dialog writes back onto, not
+      // from useLanguagePrefix — the guide never leaves the page it is on.
+      expect(mockNavigate).toHaveBeenCalledWith('/upload?guide=1', { replace: false });
     });
 
     it('should use language prefix in auto-navigation to results', async () => {
