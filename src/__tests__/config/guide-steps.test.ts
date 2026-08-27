@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { ACCOUNTS_CENTER_URL, GUIDE_STEPS } from '@/config/wizard-steps';
+import { ACCOUNTS_CENTER_URL, GUIDE_STEPS, guideStepPosterSize } from '@/config/wizard-steps';
 
 describe('GUIDE_STEPS', () => {
   it('numbers seven sections from one', () => {
@@ -25,16 +25,25 @@ describe('GUIDE_STEPS', () => {
     ]);
   });
 
-  it('marks the two steps that still carry a warning', () => {
-    // Old 4 -> new 3 ("only Followers and following") and old 6 -> new 5
-    // (format). Step 3 is the one that grows in weight: it governs file size,
-    // and TOO_MANY_ENTRIES / FILE_TOO_LARGE survive HTML parsing while
-    // html_format does not (design.md §6.5).
-    expect(GUIDE_STEPS.filter(s => s.isWarning).map(s => s.id)).toEqual([3, 5]);
+  it('marks step 5 as the only warning in the guide', () => {
+    // Step 3 used to carry isWarning too, but two amber cards out of seven is
+    // a colour, not a hierarchy — and step 3's own description promises a
+    // smaller file, while step 5's says HTML will not work at all. Step 5
+    // (format) is the one warning worth singling out.
+    expect(GUIDE_STEPS.filter(s => s.isWarning).map(s => s.id)).toEqual([5]);
   });
 
   it('keeps the Accounts Center URL reachable without a step', () => {
     expect(ACCOUNTS_CENTER_URL).toContain('accountscenter.instagram.com');
+  });
+
+  it('gives step 1 its 5:3 poster size and every other step the 4:3 default', () => {
+    // Section 1's asset is 600x360, unlike every other step's 600x450 — the
+    // one place StepAccordion and GuideStepSection both need to agree.
+    expect(guideStepPosterSize(1)).toEqual({ width: 600, height: 360 });
+    for (const step of GUIDE_STEPS.slice(1)) {
+      expect(guideStepPosterSize(step.id)).toEqual({ width: 600, height: 450 });
+    }
   });
 
   it('carries one copy key per section, in every locale', () => {

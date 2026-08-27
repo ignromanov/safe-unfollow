@@ -21,8 +21,12 @@ describe('GuideRail', () => {
   });
 
   it('meets the touch target floor', () => {
-    // 44px is the floor, and these seven sit side by side across a 390px
-    // viewport — ~55px each horizontally, so height is the binding dimension.
+    // 44px is the floor. These seven sit side by side across a 390px
+    // viewport: max-w-[calc(100%-2rem)] gives 358px, minus the header's
+    // px-4 (16) and pe-12 (48) leaves a 294px content box, i.e. ~42px each
+    // horizontally (37.7px at 360px) — narrower than the 44px floor, but
+    // still clear of WCAG 2.5.8's 24px minimum. Height is the binding
+    // dimension here, not width.
     render(<GuideRail current={1} onSelect={vi.fn()} />);
 
     expect(screen.getAllByRole('button')[0]!.className).toMatch(/min-h-\[44px\]|min-h-11/);
@@ -58,5 +62,18 @@ describe('GuideRail', () => {
 
     expect(screen.queryByText(/step \d+ of 7/i)).toBeNull();
     expect(screen.queryByRole('button', { current: 'step' })).toBeNull();
+  });
+
+  it('gives an unfilled segment a track that clears WCAG 1.4.11 contrast', () => {
+    // bg-border measured 1.27:1 light / 1.18:1 dark against the card — far
+    // short of the 3:1 floor for a non-text UI component. bg-muted-foreground
+    // is the only option that clears it in both themes without an alpha
+    // modifier washing it back out against the near-white card.
+    render(<GuideRail current={3} onSelect={vi.fn()} />);
+
+    const segments = screen.getAllByRole('button').map(button => button.querySelector('span'));
+    expect(segments[6]!.className).toContain('bg-muted-foreground');
+    expect(segments[6]!.className).not.toContain('bg-border');
+    expect(segments[0]!.className).toContain('bg-primary');
   });
 });

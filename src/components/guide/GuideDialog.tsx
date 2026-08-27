@@ -88,17 +88,55 @@ export function GuideDialog({ open, step, source, onGoToStep, onClose }: GuideDi
   const { t } = useTranslation('wizard');
   const scrollRef = useRef<HTMLDivElement>(null);
   const inView = useSectionsInView(scrollRef, open);
+  // Whether this opening has already scrolled once. Reset on close, so the
+  // next opening arrives with the same 'auto' jump rather than inheriting
+  // the 'smooth' behaviour a rail tap earns later in the same session.
+  const hasArrivedRef = useRef(false);
+  // Forces the arrival effect below to re-run even when `step` is unchanged —
+  // needed because a rail tap on the section the reader is already at (by
+  // the URL's account) would otherwise be a no-op scroll.
+  const [scrollNonce, setScrollNonce] = useState(0);
 
-  // Scroll to the claimed section. Runs on every `step` change, so a rail tap
-  // and a URL arriving with ?step=6 take the same path.
-  useEffect(() => {
-    if (!open || step === null) return;
+  const scrollToStep = useCallback((target: number, behavior: ScrollBehavior) => {
     const root = scrollRef.current;
-    const target = root?.querySelector<HTMLElement>(`#${guideStepAnchorId(step)}`);
-    if (!root || !target) return;
+    const section = root?.querySelector<HTMLElement>(`#${guideStepAnchorId(target)}`);
+    if (!root || !section) return;
 
-    root.scrollTo?.({ top: target.offsetTop - root.offsetTop, behavior: 'smooth' });
-  }, [open, step]);
+    // scroll-margin-top (the `scroll-mt-4` this replaced) is honoured by
+    // scrollIntoView and scroll-snap, not by a manual scrollTo — so the 16px
+    // gap is subtracted here instead, where it actually takes effect.
+    root.scrollTo?.({ top: section.offsetTop - root.offsetTop - 16, behavior });
+
+    // A deep link or a rail tap moves the viewport, but Radix leaves focus
+    // wherever it put it on open (the first rail button) — a keyboard or
+    // screen-reader user needs focus to agree with what they're now seeing.
+    section.querySelector<HTMLElement>('h3')?.focus();
+  }, []);
+
+  // Scroll to the claimed section. Runs on every `step` change (a rail tap
+  // and a URL arriving with ?step=6 take the same path) and on scrollNonce
+  // (a rail tap that doesn't change `step` at all).
+  useEffect(() => {
+    if (!open) {
+      hasArrivedRef.current = false;
+      return;
+    }
+    if (step === null) return;
+
+    // The first scroll of an opening jumps straight there; animating past
+    // several sections' worth of pixels on arrival is a self-inflicted
+    // layout shift. A later rail tap, within the same opening, animates.
+    scrollToStep(step, hasArrivedRef.current ? 'smooth' : 'auto');
+    hasArrivedRef.current = true;
+  }, [open, step, scrollNonce, scrollToStep]);
+
+  const handleRailSelect = useCallback(
+    (target: number) => {
+      onGoToStep(target);
+      setScrollNonce(n => n + 1);
+    },
+    [onGoToStep]
+  );
 
   const handleReminder = useCallback(() => {
     openCalendarReminder(t('calendar.title'), t('calendar.details'));
@@ -107,18 +145,36 @@ export function GuideDialog({ open, step, source, onGoToStep, onClose }: GuideDi
   return (
     <Dialog open={open} onOpenChange={next => !next && onClose()}>
       <DialogContent
-        className="max-h-[90vh] w-full max-w-2xl gap-0 overflow-hidden p-0 sm:max-w-2xl"
+        // flex flex-col: the base class in ui/dialog.tsx is `grid`, and `cn()`
+        // (tailwind-merge) lets this later class win. The scroll container
+        // below then sizes itself off the header's *real* height via flex-1,
+        // instead of a hand-maintained `calc(90vh - Nrem)` that drifts every
+        // time the header's content changes (a wrapped title, the "Step N of
+        // 7" label appearing). rounded-3xl/shadow-2xl match the house style
+        // for modals (AlertDialogContent) — every card inside this one is
+        // already rounded-3xl, and the shell was the one holdout at rounded-lg.
+        className="flex max-h-[90vh] w-full max-w-2xl flex-col gap-0 overflow-hidden rounded-3xl p-0 shadow-2xl sm:max-w-2xl"
         aria-describedby={undefined}
       >
         <DialogHeader className="border-b border-border px-4 pb-3 pt-4 pe-12">
-          <DialogTitle className="text-base">{t('header.ariaLabel')}</DialogTitle>
-          <GuideRail current={step} onSelect={onGoToStep} />
+          <DialogTitle className="text-base">
+            {t('entry.accordion.trigger', { count: GUIDE_STEPS.length })}
+          </DialogTitle>
+          <GuideRail current={step} onSelect={handleRailSelect} />
         </DialogHeader>
 
         <div
           ref={scrollRef}
           data-guide-scroll
-          className="flex max-h-[calc(90vh-7rem)] flex-col gap-4 overflow-y-auto p-4"
+          // tabIndex/role/aria-label: Chrome makes an overflow container
+          // focusable by default, Firefox and Safari do not — and the seven
+          // sections inside contain no interactive elements of their own, so
+          // without this a keyboard user tabs straight past all of them to
+          // the footer buttons.
+          tabIndex={0}
+          role="group"
+          aria-label={t('entry.accordion.trigger', { count: GUIDE_STEPS.length })}
+          className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4"
         >
           {/* Only for a reader who arrived by URL — from an error screen or a
               shared link. Someone who opened this from the page scrolled past
@@ -130,7 +186,7 @@ export function GuideDialog({ open, step, source, onGoToStep, onClose }: GuideDi
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => analytics.linkClick('meta_accounts')}
-              className="inline-flex min-h-[48px] w-full cursor-pointer items-center justify-center gap-2 whitespace-normal rounded-2xl bg-primary px-6 py-3 text-center text-sm font-black text-primary-foreground shadow-lg"
+              className="inline-flex min-h-[48px] w-full shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-normal rounded-2xl bg-primary px-6 py-3 text-center text-sm font-black text-primary-foreground shadow-lg"
             >
               {t('entry.cta')} <ExternalLink size={18} className="shrink-0" aria-hidden="true" />
             </a>
@@ -148,7 +204,7 @@ export function GuideDialog({ open, step, source, onGoToStep, onClose }: GuideDi
               in 5-30 minutes and the reader has nothing to upload yet. The
               reminder is the only action available at this point, so it takes
               the primary weight and closing takes the secondary. */}
-          <div className="flex flex-col gap-3 rounded-3xl border border-border bg-card p-4">
+          <div className="flex shrink-0 flex-col gap-3 rounded-3xl border border-border bg-card p-4">
             <button
               type="button"
               onClick={handleReminder}

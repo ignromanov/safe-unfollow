@@ -54,4 +54,26 @@ describe('ResponsiveGif', () => {
     expect(screen.getByAltText('Step 1')).toHaveAttribute('src', '/wizard/step-1-600w-poster.jpg');
     expect(screen.queryByRole('img')).toBeInTheDocument();
   });
+
+  it('defaults to 600x450 for callers that pass no size', () => {
+    mockMatchMedia(false);
+
+    const { container } = render(<ResponsiveGif basePath="/wizard/step-1" alt="Step 1" />);
+
+    const video = container.querySelector('video');
+    expect(video).toHaveAttribute('width', '600');
+    expect(video).toHaveAttribute('height', '450');
+  });
+
+  it('honours an explicit size, for assets that are not 4:3', () => {
+    // The guide's first section is 600x360 (5:3), not the 600x450 every
+    // other caller's asset is.
+    mockMatchMedia(true);
+
+    render(<ResponsiveGif basePath="/wizard/step-2" alt="Step 1" width={600} height={360} />);
+
+    const poster = screen.getByAltText('Step 1');
+    expect(poster).toHaveAttribute('width', '600');
+    expect(poster).toHaveAttribute('height', '360');
+  });
 });

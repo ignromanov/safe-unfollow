@@ -112,6 +112,56 @@ describe('GuideDialog', () => {
     expect(onGoToStep).toHaveBeenCalledExactlyOnceWith(5);
   });
 
+  it('makes the scroll container reachable by keyboard in browsers that do not do this natively', () => {
+    // Chrome focuses an overflow container by default; Firefox and Safari do
+    // not, and the seven sections carry no interactive element of their own.
+    open();
+
+    const scroll = document.querySelector('[data-guide-scroll]') as HTMLElement;
+    expect(scroll).toHaveAttribute('tabindex', '0');
+    expect(scroll).toHaveAttribute('role', 'group');
+    expect(scroll).toHaveAttribute(
+      'aria-label',
+      wizardEN.entry.accordion.trigger.replace('{{count}}', String(GUIDE_STEPS.length))
+    );
+  });
+
+  it('moves focus to the newly claimed section, not just the viewport', () => {
+    // A reader deep-linked to ?step=5 (or navigating between guide links
+    // while the dialog stays open) would otherwise see section 5 while focus
+    // stayed wherever Radix's own autofocus put it.
+    //
+    // Rendered via a step *change* rather than the initial mount: Radix's
+    // Portal mounts its content in a second, layout-effect-driven commit, and
+    // in this test harness our own scroll effect can run before that second
+    // commit has attached `scrollRef` — a jsdom/testing-library ordering
+    // artifact around Radix's two-pass Portal mount, not a claim about first
+    // paint in a real browser. A step change onto an already-settled dialog
+    // exercises the exact same scrollToStep/focus code the initial arrival
+    // does, without depending on that ordering.
+    const { rerender } = open({ step: 3, source: 'url' });
+    rerender(<GuideDialog open step={5} source="url" onGoToStep={vi.fn()} onClose={vi.fn()} />);
+
+    expect(document.activeElement).toBe(document.querySelector('#guide-step-5-heading'));
+  });
+
+  it('scrolls the section the rail is tapped for, even when it is the one already claimed', async () => {
+    // Regression: tapping the rail segment for the current step used to be a
+    // no-op, because the scroll effect keyed only on `step` and a tap on the
+    // current step changes nothing in the URL.
+    const scrollSpy = vi.fn();
+    const originalScrollTo = Element.prototype.scrollTo;
+    Element.prototype.scrollTo = scrollSpy;
+    const user = userEvent.setup();
+    open({ step: 5, source: 'url', onGoToStep: vi.fn() });
+    scrollSpy.mockClear(); // drop the scroll from arrival itself
+
+    await user.click(screen.getByRole('button', { name: 'Step 5' }));
+
+    expect(scrollSpy).toHaveBeenCalled();
+    Element.prototype.scrollTo = originalScrollTo;
+  });
+
   it('renders nothing at all while closed', () => {
     render(
       <GuideDialog open={false} step={null} source="url" onGoToStep={vi.fn()} onClose={vi.fn()} />

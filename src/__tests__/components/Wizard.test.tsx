@@ -140,12 +140,16 @@ describe('Wizard', () => {
     expect(closeLink).toHaveAttribute('href', '/');
   });
 
-  it('should show warning badge on step 4', () => {
-    renderWizardAtStep(4);
+  it('should show warning badge on step 6', () => {
+    // Step 3 (old route step 4, "Followers and following") lost isWarning:
+    // two amber cards out of seven guide sections read as a colour, not a
+    // hierarchy, and step 5 (old route step 6, format) is the only step
+    // where the wrong choice makes the whole export unreadable.
+    renderWizardAtStep(6);
 
     expect(screen.getByText(wizardEN.format.warning)).toBeInTheDocument();
     expect(
-      screen.getByRole('heading', { name: new RegExp('Followers and following') })
+      screen.getByRole('heading', { name: new RegExp('Change Format to JSON') })
     ).toBeInTheDocument();
   });
 

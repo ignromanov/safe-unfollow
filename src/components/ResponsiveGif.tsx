@@ -20,6 +20,13 @@ interface ResponsiveGifProps {
    * caller keeps the behaviour it had.
    */
   isActive?: boolean;
+  /**
+   * Intrinsic size of the poster/video, so the browser reserves the right
+   * box before either loads. Defaults to 600x450 (4:3) — every existing
+   * caller's asset except the guide's first section, which is 600x360.
+   */
+  width?: number;
+  height?: number;
 }
 
 export function ResponsiveGif({
@@ -27,6 +34,8 @@ export function ResponsiveGif({
   alt,
   className = 'w-full h-auto block',
   isActive = true,
+  width = 600,
+  height = 450,
 }: ResponsiveGifProps) {
   const prefersReducedMotion = useReducedMotion();
 
@@ -45,8 +54,8 @@ export function ResponsiveGif({
       <img
         src={`${basePath}-600w-poster.jpg`}
         alt={alt}
-        width={600}
-        height={450}
+        width={width}
+        height={height}
         loading={isActive ? undefined : 'lazy'}
         className={className}
       />
@@ -68,8 +77,8 @@ export function ResponsiveGif({
       // only case where it changes anything.
       preload="none"
       poster={`${basePath}-600w-poster.jpg`}
-      width={600}
-      height={450}
+      width={width}
+      height={height}
       className={className}
       aria-label={alt}
     >

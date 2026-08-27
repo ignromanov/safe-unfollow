@@ -1,19 +1,8 @@
 import { useId, useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { AlertTriangle, ChevronDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { GUIDE_STEPS } from '@/config/wizard-steps';
-
-/**
- * Poster assets are not one aspect ratio: section 1's is 600x360 (5:3),
- * sections 2-7 are 600x450 (4:3). Real width/height attributes let the browser
- * reserve each row's box from its own intrinsic size before the image
- * loads — forcing every row into 4:3 would crop or letterbox step 2.
- */
-const DEFAULT_POSTER_SIZE = { width: 600, height: 450 };
-const POSTER_SIZE_OVERRIDES: Partial<Record<number, { width: number; height: number }>> = {
-  1: { width: 600, height: 360 },
-};
+import { GUIDE_STEPS, guideStepPosterSize } from '@/config/wizard-steps';
 
 interface StepAccordionProps {
   /** Open the guide dialog at a section. Absent on the wizard route, which is its own screen. */
@@ -87,7 +76,7 @@ export function StepAccordion({ onSelect }: StepAccordionProps = {}) {
           className="divide-y divide-zinc-200 border-t border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800"
         >
           {GUIDE_STEPS.map(step => {
-            const size = POSTER_SIZE_OVERRIDES[step.id] ?? DEFAULT_POSTER_SIZE;
+            const size = guideStepPosterSize(step.id);
 
             return (
               <li key={step.id}>
@@ -115,6 +104,16 @@ export function StepAccordion({ onSelect }: StepAccordionProps = {}) {
                     className="h-auto w-20 shrink-0 rounded-lg"
                   />
                   <span className="text-sm font-medium text-zinc-700 dark:text-zinc-200">
+                    {step.isWarning && (
+                      <>
+                        <AlertTriangle
+                          size={16}
+                          aria-hidden="true"
+                          className="me-1 inline-block shrink-0 align-[-0.2em] text-amber-600 dark:text-amber-500"
+                        />
+                        <span className="sr-only">{t('format.warning')}: </span>
+                      </>
+                    )}
                     {t(`steps.${step.id}.title` as any)}
                   </span>
                 </button>

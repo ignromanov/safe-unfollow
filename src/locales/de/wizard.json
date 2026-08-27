@@ -54,37 +54,37 @@
     "1": {
       "title": "Wähle dein Instagram-Profil",
       "description": "Wähle dein Instagram-Konto aus der Liste der verbundenen Profile.",
-      "alt": "Schritt 2: Wähle dein Instagram-Profil"
+      "alt": "Der Export-Bildschirm von Instagram mit der Liste der verbundenen Profile."
     },
     "2": {
       "title": "Wähle \"Zu Gerät exportieren\"",
       "description": "Wähle den direkten Export auf dein Gerät für maximale Privatsphäre. Deine Daten bleiben bei dir.",
-      "alt": "Schritt 3: Wähle die Option Zu Gerät exportieren"
+      "alt": "Der Bildschirm für das Ziel mit ausgewähltem \"Zu Gerät exportieren\"."
     },
     "3": {
-      "title": "⚠️ Wähle nur \"Follower und Gefolgte\"",
+      "title": "Wähle nur \"Follower und Gefolgte\"",
       "description": "Klicke auf \"Anpassen\" › Alles abwählen › NUR \"Follower und Gefolgte\" auswählen. Das hält deine Datei klein und schnell.",
-      "alt": "Schritt 4: Anpassen um nur Follower und Gefolgte auszuwählen"
+      "alt": "Das Fenster \"Anpassen\", in dem nur \"Follower und Gefolgte\" angehakt ist."
     },
     "4": {
       "title": "Setze den Zeitraum auf \"Gesamter Zeitraum\"",
       "description": "Klicke auf \"Zeitraum\" › Wähle \"Gesamter Zeitraum\" › Speichern. Das stellt sicher, dass du deine komplette Follower-Historie bekommst.",
-      "alt": "Schritt 5: Setze den Zeitraum auf Gesamter Zeitraum"
+      "alt": "Das Fenster \"Zeitraum\" mit ausgewähltem \"Gesamter Zeitraum\"."
     },
     "5": {
-      "title": "⚠️ Ändere das Format auf JSON",
+      "title": "Ändere das Format auf JSON",
       "description": "Das ist kritisch! Klicke auf \"Format\" › Wähle \"JSON\" (nicht HTML). HTML-Dateien funktionieren NICHT mit unserem Analyzer.",
-      "alt": "Schritt 6: Ändere das Format auf JSON"
+      "alt": "Das Fenster \"Format\" mit ausgewähltem \"JSON\" statt HTML."
     },
     "6": {
       "title": "Überprüfen & Export starten",
       "description": "Überprüfe, dass die Einstellungen zeigen: Follower und Gefolgte, Gesamter Zeitraum, JSON-Format. Klicke dann auf \"Export starten\".",
-      "alt": "Schritt 7: Einstellungen überprüfen und Export starten"
+      "alt": "Die Export-Übersicht mit Follower und Gefolgte, Gesamter Zeitraum und JSON über der Schaltfläche \"Export starten\"."
     },
     "7": {
       "title": "Auf E-Mail warten & herunterladen",
       "description": "Instagram schickt dir eine E-Mail, wenn es fertig ist (normalerweise 5-30 Minuten). Klicke auf den Download-Link in der E-Mail, um deine ZIP-Datei zu bekommen.",
-      "alt": "Schritt 8: Auf E-Mail warten und ZIP-Datei herunterladen"
+      "alt": "Die E-Mail von Instagram mit dem Download-Link für die ZIP-Datei."
     }
   }
 }

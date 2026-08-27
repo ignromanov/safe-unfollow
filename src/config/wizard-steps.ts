@@ -26,7 +26,7 @@ export interface GuideStep {
 export const GUIDE_STEPS: GuideStep[] = [
   { id: 1, visual: '/wizard/step-2' },
   { id: 2, visual: '/wizard/step-3' },
-  { id: 3, isWarning: true, visual: '/wizard/step-4' },
+  { id: 3, visual: '/wizard/step-4' },
   { id: 4, visual: '/wizard/step-5' },
   { id: 5, isWarning: true, visual: '/wizard/step-6' },
   { id: 6, visual: '/wizard/step-7' },
@@ -41,6 +41,28 @@ export const GUIDE_STEPS: GuideStep[] = [
  * between two files and belongs with the list they both already import.
  */
 export const guideStepAnchorId = (step: number) => `guide-step-${step}`;
+
+interface PosterSize {
+  width: number;
+  height: number;
+}
+
+/**
+ * Poster assets are not one aspect ratio: section 1's is 600x360 (5:3),
+ * sections 2-7 are 600x450 (4:3). Real width/height attributes let the browser
+ * reserve each row's box from its own intrinsic size before the image
+ * loads — forcing every row into 4:3 would crop or letterbox step 1.
+ *
+ * Shared by StepAccordion (the /upload disclosure) and GuideStepSection (the
+ * dialog) — both render the same seven posters and both need the same sizes.
+ */
+const DEFAULT_POSTER_SIZE: PosterSize = { width: 600, height: 450 };
+const POSTER_SIZE_OVERRIDES: Partial<Record<number, PosterSize>> = {
+  1: { width: 600, height: 360 },
+};
+
+export const guideStepPosterSize = (step: number): PosterSize =>
+  POSTER_SIZE_OVERRIDES[step] ?? DEFAULT_POSTER_SIZE;
 
 /**
  * The eight live `/wizard/step/N` URLs, which outnumber the seven guide

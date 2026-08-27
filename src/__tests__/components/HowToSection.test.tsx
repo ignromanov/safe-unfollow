@@ -7,6 +7,7 @@ import { createI18nMock } from '@/__tests__/utils/mockI18n';
 vi.mock('react-i18next', () => createI18nMock(howtoEN));
 
 import { HowToSection } from '@/components/HowToSection';
+import { GUIDE_STEPS } from '@/config/wizard-steps';
 
 // Step titles indexed by step number (1-9), avoiding a computed-key lookup on the
 // narrowly-typed `howtoEN.steps` object.
@@ -82,11 +83,16 @@ describe('HowToSection', () => {
       expect(screen.getByText(/Critical step! Click "Format"/)).toBeInTheDocument();
     });
 
-    it('should show Critical badge for warning steps', () => {
+    it('should show one Critical badge per warning step and no more', () => {
       renderWithRouter(<HowToSection />);
 
-      const criticalBadges = screen.getAllByText('Critical');
-      expect(criticalBadges.length).toBeGreaterThanOrEqual(1);
+      // Derived from GUIDE_STEPS, because this section's step list is now
+      // built from it — a badge count that drifts from the config is the
+      // defect being asserted. The previous `toBeGreaterThanOrEqual(1)` was
+      // green throughout the period when this page marked two steps critical
+      // and wizard-steps.ts marked one.
+      const warningCount = GUIDE_STEPS.filter(step => step.isWarning).length;
+      expect(screen.getAllByText('Critical')).toHaveLength(warningCount);
     });
 
     it('should render step videos with poster images', () => {

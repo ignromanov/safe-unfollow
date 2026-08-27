@@ -10,7 +10,7 @@ import { GuideStepSection } from '@/components/guide/GuideStepSection';
 import { GUIDE_STEPS } from '@/config/wizard-steps';
 
 const PLAIN = GUIDE_STEPS[3]!; // id 4, no warning
-const WARNING = GUIDE_STEPS[2]!; // id 3, the "Followers and following" step
+const WARNING = GUIDE_STEPS[4]!; // id 5, the only step still marked isWarning
 
 describe('GuideStepSection', () => {
   it('renders a lazy image, not a video, while off-screen', () => {
@@ -33,22 +33,30 @@ describe('GuideStepSection', () => {
     expect(video).toHaveAttribute('preload', 'none');
   });
 
-  it('strips the warning prefix from the heading', () => {
-    // The amber card and the amber number already carry the signal here —
-    // three carriers of one message. The string itself keeps the prefix,
-    // because StepAccordion's row on /upload is a plain row with no amber at
-    // all, and that is the surface where a scanning reader decides what to
-    // read.
-    render(<GuideStepSection step={WARNING} isInView={false} />);
+  it('renders the warning marker for a step marked isWarning, and nothing for one that is not', () => {
+    // isWarning is the single owner of "this step is a warning" — no bundle
+    // carries a ⚠️ literal any more. A test that could no longer fail (the
+    // old ⚠️-stripping assertion, vacuous once the copy dropped the emoji) is
+    // exactly the shape that kept a dead constant alive through GH#34.
+    const { unmount } = render(<GuideStepSection step={WARNING} isInView={false} />);
+    expect(screen.getByText(wizardEN.format.warning, { exact: false })).toBeInTheDocument();
+    unmount();
 
-    const heading = screen.getByRole('heading', { level: 3 });
-    expect(heading.textContent).not.toContain('⚠️');
-    expect(heading.textContent).toContain('Followers and following');
+    render(<GuideStepSection step={PLAIN} isInView={false} />);
+    expect(screen.queryByText(wizardEN.format.warning, { exact: false })).toBeNull();
   });
 
   it('anchors itself so the dialog can scroll to it', () => {
     const { container } = render(<GuideStepSection step={WARNING} isInView={false} />);
 
-    expect(container.querySelector('#guide-step-3')).not.toBeNull();
+    expect(container.querySelector('#guide-step-5')).not.toBeNull();
+  });
+
+  it('gives its heading a programmatic focus target', () => {
+    // Not in the tab order (-1) — a deep link or rail tap focuses it directly,
+    // so the viewport and focus agree on where the reader landed.
+    render(<GuideStepSection step={PLAIN} isInView={false} />);
+
+    expect(screen.getByRole('heading', { level: 3 })).toHaveAttribute('tabindex', '-1');
   });
 });

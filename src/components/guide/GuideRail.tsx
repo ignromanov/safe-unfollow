@@ -49,7 +49,12 @@ export function GuideRail({ current, onSelect }: GuideRailProps) {
             <span
               aria-hidden="true"
               className={`block h-1.5 w-full rounded-full transition-all duration-300 ${
-                current !== null && step.id <= current ? 'bg-primary' : 'bg-border'
+                // bg-border measures 1.27:1 light / 1.18:1 dark against the
+                // card — nowhere near the 3:1 WCAG 1.4.11 floor for a UI
+                // component. bg-muted-foreground is the only option that
+                // clears it in both themes (4.85:1 / 8.45:1); any alpha on it
+                // washes back out against the card's near-white background.
+                current !== null && step.id <= current ? 'bg-primary' : 'bg-muted-foreground'
               }`}
             />
           </button>
