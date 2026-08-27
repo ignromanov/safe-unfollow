@@ -47,3 +47,15 @@ public/fo-verify.html
 # prettier's line breaks into a project this repo does not own. Same reason as
 # .design-sync/overrides above: fidelity beats formatting.
 designs/claude-design-project
+
+# Instagram exports captured verbatim, and the fixture's own README says so:
+# "Not changed: everything else. Class names, record order, date strings, the
+# <base> tag, the 14.5 KB of inline CSS, whitespace". Handles were substituted;
+# nothing else was. Prettier reflows markup, which moves where a text node
+# splits — and `readRecords` accumulates text across nodes precisely because a
+# parser may split anywhere, so a reformatted fixture would stop being evidence
+# that the real bytes parse. Same rule as public/fo-verify.html above: these
+# are captured evidence, not source. The pre-commit hook never saw them —
+# lint-staged covers *.{ts,tsx} and *.{json,md}, not *.html — which is how they
+# reached CI unformatted.
+src/__tests__/fixtures/instagram-html/*.html
