@@ -1,4 +1,5 @@
 import { fireEvent, renderWithRouter, screen } from '@/__tests__/test-utils';
+import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import uploadEN from '@/locales/en/upload.json';
 import wizardEN from '@/locales/en/wizard.json';
@@ -16,6 +17,7 @@ vi.mock('@/lib/analytics', () => ({
   analytics: {
     uploadClick: vi.fn(),
     diagnosticErrorView: vi.fn(),
+    linkClick: vi.fn(),
   },
 }));
 
@@ -259,6 +261,22 @@ describe('UploadZone', () => {
     const firstTip = screen.getByText(uploadEN.loadingTips.localProcessing.title);
     expect(block).not.toBeNull();
     expect(block.compareDocumentPosition(firstTip) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('offers the waiting state after the Accounts Center click, without hiding the drop zone', async () => {
+    // The CTA opens a new tab, so this page survives the click — which is the
+    // only reason a waiting state can exist here at all.
+    const user = userEvent.setup();
+    renderWithRouter(<UploadZone onUploadStart={vi.fn()} />);
+
+    expect(screen.queryByText(uploadEN.waiting.title)).toBeNull();
+
+    await user.click(screen.getAllByRole('link', { name: /accounts center/i })[0]!);
+
+    expect(screen.getByText(uploadEN.waiting.title)).toBeInTheDocument();
+    // Someone who clicks through and then finds the file in their email must
+    // not have to undo a state to upload it.
+    expect(document.querySelector('input[type="file"]')).toBeInTheDocument();
   });
 
   it('keeps the paid block above the guide', () => {

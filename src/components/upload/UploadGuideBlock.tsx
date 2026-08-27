@@ -67,8 +67,12 @@ export function UploadGuideBlock({ onOpenGuide, onAskedInstagram }: UploadGuideB
           target="_blank"
           rel="noopener noreferrer"
           onClick={() => {
-            analytics.linkClick('meta_accounts');
+            // The reader's effect first, the count second. A _blank click
+            // unloads nothing, so nothing is racing the navigation here — but
+            // a throw from the analytics call would otherwise cost them the
+            // waiting state, which is the half of this handler they can see.
             onAskedInstagram?.();
+            analytics.linkClick('meta_accounts');
           }}
           className="inline-flex min-h-[48px] w-full cursor-pointer items-center justify-center gap-3 whitespace-normal rounded-2xl bg-primary px-8 py-3 text-center text-sm font-black text-primary-foreground shadow-xl transition-all hover:scale-105 active:scale-95 sm:w-auto md:text-base"
         >
