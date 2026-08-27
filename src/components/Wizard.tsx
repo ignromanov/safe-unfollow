@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import FocusTrap from 'focus-trap-react';
 
 import { analytics } from '@/lib/analytics';
+import { openCalendarReminder } from '@/lib/calendar-reminder';
 import { PrefixedLink } from '@/components/PrefixedLink';
 import { ResponsiveGif } from '@/components/ResponsiveGif';
 import { UploadGuideBlock } from '@/components/upload/UploadGuideBlock';
@@ -83,22 +84,7 @@ export function Wizard({ initialStep = 1 }: WizardProps) {
   };
 
   const handleCalendarReminder = useCallback(() => {
-    const startDate = new Date();
-    startDate.setHours(startDate.getHours() + 1);
-    const endDate = new Date(startDate);
-    endDate.setMinutes(endDate.getMinutes() + 30);
-
-    const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
-      t('calendar.title')
-    )}&dates=${startDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z/${
-      endDate.toISOString().replace(/[-:]/g, '').split('.')[0]
-    }Z&details=${encodeURIComponent(t('calendar.details'))}`;
-
-    // Before window.open, not after: a popup blocker can cancel the open, but
-    // the reader's intent happened either way. This counts intent, and it will
-    // never be the denominator of a funnel.
-    analytics.calendarReminderClick();
-    window.open(calendarUrl, '_blank', 'noopener,noreferrer');
+    openCalendarReminder(t('calendar.title'), t('calendar.details'));
   }, [t]);
 
   return (
