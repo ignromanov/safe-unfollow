@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { GUIDE_STEPS } from '@/config/wizard-steps';
@@ -30,6 +30,11 @@ function parseStep(raw: string | null): number | null {
  * the Back button — and so an error screen can deep-link into a section
  * without the page having to hold state across a navigation.
  *
+ * That is true of `isOpen` and `step`, and not of `source`: the URL never
+ * encodes which gesture opened the dialog, because it is not state to be
+ * shared or restored. It is component-instance memory, and it is reported as
+ * `'url'` whenever the URL alone opened the dialog.
+ *
  * Query, not path: `vite-react-ssg` prerenders paths. `?step=N` creates no
  * page, needs no canonical tag and adds nothing to the 160 prerendered files.
  *
@@ -43,8 +48,10 @@ export function useGuideDialog(): GuideDialogState {
 
   // The source of the current opening. A URL that already carried ?step on
   // arrival was not opened by any gesture of ours, so it reads as 'url' until
-  // one of our own entry points says otherwise.
-  const sourceRef = useRef<GuideSource>('url');
+  // one of our own entry points says otherwise. State, not a ref: it is read
+  // during render, and every write is followed by a navigation that re-renders
+  // anyway, so a ref would buy nothing and cost the render-time read.
+  const [source, setSource] = useState<GuideSource>('url');
 
   const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const hasStepParam = params.has('step');
@@ -62,8 +69,8 @@ export function useGuideDialog(): GuideDialogState {
   );
 
   const open = useCallback(
-    (source: GuideSource, target?: number) => {
-      sourceRef.current = source;
+    (nextSource: GuideSource, target?: number) => {
+      setSource(nextSource);
       // Push exactly once, on opening. Back is how a modal is dismissed on
       // Android; with replace here the hardware Back would leave the site
       // from under someone mid-instruction. With push-once, the first Back
@@ -94,7 +101,7 @@ export function useGuideDialog(): GuideDialogState {
   );
 
   const close = useCallback(() => {
-    sourceRef.current = 'url';
+    setSource('url');
     navigateWith(next => {
       next.delete('step');
       next.delete('guide');
@@ -104,7 +111,7 @@ export function useGuideDialog(): GuideDialogState {
   return {
     isOpen,
     step,
-    source: isOpen ? sourceRef.current : 'url',
+    source: isOpen ? source : 'url',
     open,
     goToStep,
     close,

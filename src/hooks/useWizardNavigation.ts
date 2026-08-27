@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
-import { GUIDE_STEPS } from '@/config/wizard-steps';
+import { WIZARD_ROUTE_COUNT } from '@/config/wizard-steps';
 
 export function useWizardNavigation(initialStep: number = 1) {
   const location = useLocation();
@@ -14,9 +14,7 @@ export function useWizardNavigation(initialStep: number = 1) {
     const match = location.pathname.match(/\/wizard\/step\/(\d+)/);
     if (match?.[1]) {
       const step = parseInt(match[1], 10);
-      // Seven sections plus the entry screen's own URL: the routes are one
-      // ahead of GUIDE_STEPS until PR 3 removes them (see Wizard.tsx).
-      if (step >= 1 && step <= GUIDE_STEPS.length + 1) {
+      if (step >= 1 && step <= WIZARD_ROUTE_COUNT) {
         return step;
       }
     }

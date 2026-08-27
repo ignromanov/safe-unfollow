@@ -9,15 +9,10 @@ import { openCalendarReminder } from '@/lib/calendar-reminder';
 import { PrefixedLink } from '@/components/PrefixedLink';
 import { ResponsiveGif } from '@/components/ResponsiveGif';
 import { UploadGuideBlock } from '@/components/upload/UploadGuideBlock';
-import { GUIDE_STEPS } from '@/config/wizard-steps';
+import { GUIDE_STEPS, WIZARD_ROUTE_COUNT } from '@/config/wizard-steps';
 import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
 import { useWizardNavigation } from '@/hooks/useWizardNavigation';
 
-/**
- * The eight live `/wizard/step/N` URLs, which outnumber the seven guide
- * sections by exactly the entry screen that became a document block.
- */
-const WIZARD_ROUTE_COUNT = GUIDE_STEPS.length + 1;
 const WIZARD_ROUTE_IDS = Array.from({ length: WIZARD_ROUTE_COUNT }, (_, i) => i + 1);
 
 interface WizardProps {

@@ -34,6 +34,25 @@ export const GUIDE_STEPS: GuideStep[] = [
 ];
 
 /**
+ * The DOM anchor a section carries, and the one `?step=N` scrolls to.
+ *
+ * Stated here rather than in either component: GuideStepSection writes the id
+ * and GuideDialog queries and observes it, so the format is a contract
+ * between two files and belongs with the list they both already import.
+ */
+export const guideStepAnchorId = (step: number) => `guide-step-${step}`;
+
+/**
+ * The eight live `/wizard/step/N` URLs, which outnumber the seven guide
+ * sections by exactly the entry screen that became a document block.
+ *
+ * Stated once, here, because two consumers need it and neither owns it:
+ * `Wizard.tsx` renders one dot per route and `useWizardNavigation.ts`
+ * validates the route param against it. Both die together in PR 3.
+ */
+export const WIZARD_ROUTE_COUNT = GUIDE_STEPS.length + 1;
+
+/**
  * Meta's export entry point. It used to be derived from step 1's
  * `externalLink`; step 1 is no longer a step, so the link stands on its own
  * rather than hiding inside a list it is not a member of. Typed `string`, not

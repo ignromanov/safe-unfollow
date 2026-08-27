@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { GuideRail } from '@/components/guide/GuideRail';
 import { GuideStepSection } from '@/components/guide/GuideStepSection';
-import { ACCOUNTS_CENTER_URL, GUIDE_STEPS } from '@/config/wizard-steps';
+import { ACCOUNTS_CENTER_URL, GUIDE_STEPS, guideStepAnchorId } from '@/config/wizard-steps';
 import type { GuideSource } from '@/hooks/useGuideDialog';
 import { analytics } from '@/lib/analytics';
 import { openCalendarReminder } from '@/lib/calendar-reminder';
@@ -34,27 +34,37 @@ function useSectionsInView(scrollRef: React.RefObject<HTMLDivElement | null>, en
     const root = scrollRef.current;
     if (!enabled || !root || typeof IntersectionObserver === 'undefined') return;
 
+    // The node-to-step map is built once, from the same helper that wrote the
+    // ids, so the callback never parses a step number back out of a DOM
+    // attribute — the observer already knows which section it is looking at.
+    const stepOf = new Map<Element, number>();
+    for (const step of GUIDE_STEPS) {
+      const node = root.querySelector(`#${guideStepAnchorId(step.id)}`);
+      if (node) stepOf.set(node, step.id);
+    }
+
     const observer = new IntersectionObserver(
       entries => {
         setInView(previous => {
-          const next = new Set(previous);
+          let next: Set<number> | null = null;
           for (const entry of entries) {
-            const id = Number(entry.target.getAttribute('id')?.replace('guide-step-', ''));
-            if (!Number.isInteger(id)) continue;
+            const id = stepOf.get(entry.target);
             // Additive: a section that has been seen keeps its video rather
             // than tearing it down and paying for it again on the way back.
-            if (entry.isIntersecting) next.add(id);
+            if (id === undefined || !entry.isIntersecting || previous.has(id)) continue;
+            next ??= new Set(previous);
+            next.add(id);
           }
-          return next;
+          // Same set when nothing was added: the observer fires on every
+          // scroll past a boundary, and a fresh Set each time would re-render
+          // seven sections to say nothing changed.
+          return next ?? previous;
         });
       },
       { root, rootMargin: '200px 0px' }
     );
 
-    for (const step of GUIDE_STEPS) {
-      const node = root.querySelector(`#guide-step-${step.id}`);
-      if (node) observer.observe(node);
-    }
+    for (const node of stepOf.keys()) observer.observe(node);
     return () => observer.disconnect();
   }, [scrollRef, enabled]);
 
@@ -84,7 +94,7 @@ export function GuideDialog({ open, step, source, onGoToStep, onClose }: GuideDi
   useEffect(() => {
     if (!open || step === null) return;
     const root = scrollRef.current;
-    const target = root?.querySelector<HTMLElement>(`#guide-step-${step}`);
+    const target = root?.querySelector<HTMLElement>(`#${guideStepAnchorId(step)}`);
     if (!root || !target) return;
 
     root.scrollTo?.({ top: target.offsetTop - root.offsetTop, behavior: 'smooth' });

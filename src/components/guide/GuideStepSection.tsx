@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
 import { ResponsiveGif } from '@/components/ResponsiveGif';
-import type { GuideStep } from '@/config/wizard-steps';
+import { guideStepAnchorId, type GuideStep } from '@/config/wizard-steps';
 
 /**
  * The heading strips the warning prefix; the copy key keeps it.
@@ -28,11 +28,12 @@ interface GuideStepSectionProps {
 export function GuideStepSection({ step, isInView }: GuideStepSectionProps) {
   const { t } = useTranslation('wizard');
   const title = t(`steps.${step.id}.title` as any).replace(WARNING_PREFIX, '');
+  const anchorId = guideStepAnchorId(step.id);
 
   return (
     <section
-      id={`guide-step-${step.id}`}
-      aria-labelledby={`guide-step-${step.id}-heading`}
+      id={anchorId}
+      aria-labelledby={`${anchorId}-heading`}
       className={`scroll-mt-4 overflow-hidden rounded-3xl border ${
         step.isWarning
           ? 'border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-950/20'
@@ -52,7 +53,7 @@ export function GuideStepSection({ step, isInView }: GuideStepSectionProps) {
         </span>
         <div>
           <h3
-            id={`guide-step-${step.id}-heading`}
+            id={`${anchorId}-heading`}
             className={`text-base font-bold leading-tight md:text-lg ${
               step.isWarning
                 ? 'text-amber-800 dark:text-amber-500'

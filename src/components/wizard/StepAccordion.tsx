@@ -15,12 +15,6 @@ const POSTER_SIZE_OVERRIDES: Partial<Record<number, { width: number; height: num
   1: { width: 600, height: 360 },
 };
 
-// Every section is a row now. The filter that used to drop step 1 went with
-// the entry screen it excluded: step 1 is an in-app instruction like the rest.
-const REMAINING_STEPS = GUIDE_STEPS;
-
-const TRIGGER_ID = 'step-accordion-trigger';
-
 interface StepAccordionProps {
   /** Open the guide dialog at a section. Absent on the wizard route, which is its own screen. */
   onSelect?: (step: number) => void;
@@ -35,7 +29,14 @@ interface StepAccordionProps {
 export function StepAccordion({ onSelect }: StepAccordionProps = {}) {
   const { t } = useTranslation('wizard');
   const [isOpen, setIsOpen] = useState(false);
-  const listId = useId();
+  // Both ids come from useId, because UploadZone mounts this block twice —
+  // once for mobile, once for the desktop sidebar, both always in the DOM and
+  // toggled by `display`. A module-level constant id would put two elements
+  // with the same id in one document, and the second `aria-labelledby` would
+  // resolve to the first accordion's trigger.
+  const baseId = useId();
+  const triggerId = `${baseId}-trigger`;
+  const listId = `${baseId}-list`;
 
   // Derived from the row list itself, not hardcoded — stays correct if a
   // step is ever added or removed. `entry.accordion.trigger` is a single,
@@ -48,7 +49,7 @@ export function StepAccordion({ onSelect }: StepAccordionProps = {}) {
   // every real count, and — unlike a `_one`/`_other` split — it can never
   // land on a CLDR category (Russian "few"/"many", Arabic "few"/"many", ...)
   // that has no matching key.
-  const stepCount = REMAINING_STEPS.length;
+  const stepCount = GUIDE_STEPS.length;
 
   return (
     <div className="rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
@@ -61,7 +62,7 @@ export function StepAccordion({ onSelect }: StepAccordionProps = {}) {
         replace.
       */}
       <button
-        id={TRIGGER_ID}
+        id={triggerId}
         type="button"
         aria-expanded={isOpen}
         aria-controls={listId}
@@ -82,10 +83,10 @@ export function StepAccordion({ onSelect }: StepAccordionProps = {}) {
       {isOpen && (
         <ul
           id={listId}
-          aria-labelledby={TRIGGER_ID}
+          aria-labelledby={triggerId}
           className="divide-y divide-zinc-200 border-t border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800"
         >
-          {REMAINING_STEPS.map(step => {
+          {GUIDE_STEPS.map(step => {
             const size = POSTER_SIZE_OVERRIDES[step.id] ?? DEFAULT_POSTER_SIZE;
 
             return (
