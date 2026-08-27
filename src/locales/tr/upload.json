@@ -1,7 +1,7 @@
 {
   "zone": {
     "title": "Instagram ZIP Yükle",
-    "description": "Verilerin %100 gizli kalır. Instagram ZIP dosyanı tarayıcında yerel olarak analiz ediyoruz.",
+    "description": "Kimlerin takibi bıraktığını gör. Giriş yok, hesap yok.",
     "dropHere": "Instagram ZIP dosyanı buraya bırak",
     "orBrowse": "Veya yerel depolamana göz atmak için dokun.",
     "jsonOnly": "Sadece JSON Formatı",

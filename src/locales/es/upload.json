@@ -1,7 +1,7 @@
 {
   "zone": {
     "title": "Sube tu ZIP de Instagram",
-    "description": "Tus datos permanecen 100% privados. Analizamos tu archivo ZIP de Instagram localmente en tu navegador.",
+    "description": "Descubre quién dejó de seguirte. Sin login, sin cuenta.",
     "dropHere": "Arrastra tu archivo ZIP de Instagram aquí",
     "orBrowse": "O toca para buscar en tu almacenamiento local.",
     "jsonOnly": "Solo formato JSON",

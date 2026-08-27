@@ -20,8 +20,7 @@
     "close": "Close guide",
     "cancel": "Cancel",
     "trySample": "Try with sample data",
-    "uploadFile": "Upload My File",
-    "alreadyHaveFile": "I already have my ZIP file"
+    "uploadFile": "Upload My File"
   },
   "format": {
     "warning": "CRITICAL STEP"

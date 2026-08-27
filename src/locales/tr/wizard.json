@@ -20,8 +20,7 @@
     "close": "Rehberi kapat",
     "cancel": "İptal",
     "trySample": "Örnek verilerle deneyin",
-    "uploadFile": "Dosyamı Yükle",
-    "alreadyHaveFile": "ZIP dosyam zaten var"
+    "uploadFile": "Dosyamı Yükle"
   },
   "format": {
     "warning": "KRİTİK ADIM"

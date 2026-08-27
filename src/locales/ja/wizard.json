@@ -20,8 +20,7 @@
     "close": "ガイドを閉じる",
     "cancel": "キャンセル",
     "trySample": "サンプルデータで試す",
-    "uploadFile": "ファイルをアップロード",
-    "alreadyHaveFile": "ZIPファイルを持っています"
+    "uploadFile": "ファイルをアップロード"
   },
   "format": {
     "warning": "重要なステップ"

@@ -20,8 +20,7 @@
     "close": "إغلاق الدليل",
     "cancel": "إلغاء",
     "trySample": "جرّب مع بيانات العينة",
-    "uploadFile": "رفع ملفي",
-    "alreadyHaveFile": "لدي بالفعل ملف ZIP"
+    "uploadFile": "رفع ملفي"
   },
   "format": {
     "warning": "خطوة حاسمة"

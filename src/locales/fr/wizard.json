@@ -20,8 +20,7 @@
     "close": "Fermer le guide",
     "cancel": "Annuler",
     "trySample": "Essayer avec des données exemple",
-    "uploadFile": "Téléverser mon fichier",
-    "alreadyHaveFile": "J'ai déjà mon fichier ZIP"
+    "uploadFile": "Téléverser mon fichier"
   },
   "format": {
     "warning": "ÉTAPE CRITIQUE"

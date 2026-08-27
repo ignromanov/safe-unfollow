@@ -1,9 +1,15 @@
 import { fireEvent, renderWithRouter, screen } from '@/__tests__/test-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import uploadEN from '@/locales/en/upload.json';
+import wizardEN from '@/locales/en/wizard.json';
 import { createI18nMock } from '@/__tests__/utils/mockI18n';
 
-vi.mock('react-i18next', () => createI18nMock(uploadEN));
+// Two namespaces, one mock: UploadZone reads `upload`, the guide block it
+// renders reads `wizard`, and createI18nMock ignores the namespace argument
+// entirely — a single bundle would make every guide string resolve to its own
+// key. `upload` is spread last so no assertion in this file changes meaning;
+// the two bundles share no top-level key today.
+vi.mock('react-i18next', () => createI18nMock({ ...wizardEN, ...uploadEN }));
 
 // Mock analytics (V9: uploadDrop/filePickerCancel removed)
 vi.mock('@/lib/analytics', () => ({
@@ -245,5 +251,19 @@ describe('UploadZone', () => {
     const firstTip = screen.getByText(uploadEN.loadingTips.localProcessing.title);
     expect(block).not.toBeNull();
     expect(block.compareDocumentPosition(firstTip) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('keeps the paid block above the guide', () => {
+    // The order is the decision: drop zone -> offer -> guide. Putting the
+    // guide above the offer was proposed and ruled against by the operator
+    // (2026-08-25) — this is the page's only revenue surface. DOM order is
+    // also the only part of that ruling anything here can check: jsdom
+    // performs no layout, so the fold position is unmeasurable in this repo.
+    const { container } = renderWithRouter(<UploadZone onUploadStart={vi.fn()} />);
+
+    const block = container.querySelector('aside') as HTMLElement;
+    const guide = screen.getByRole('heading', { level: 2, name: wizardEN.entry.title });
+    expect(block).not.toBeNull();
+    expect(block.compareDocumentPosition(guide) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 });
