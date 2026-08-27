@@ -473,7 +473,7 @@ describe('Layout', () => {
   });
 
   describe('navigation handlers', () => {
-    it('should call handleClearData and navigate to home when Clear is clicked', async () => {
+    it('should call handleClearData and navigate to /upload when Clear is clicked', async () => {
       const { userEvent } = await import('@testing-library/user-event');
       const user = userEvent.setup();
 
@@ -487,11 +487,12 @@ describe('Layout', () => {
       // Verify handleClearData was called
       expect(mockHandleClearData).toHaveBeenCalledTimes(1);
 
-      // Verify navigation to home (the component should navigate to '/')
+      // Verify navigation to /upload (the reader who just cleared their data
+      // is about to load another export, not headed back to the home page)
       // Since we use MemoryRouter, we can check if the page changes
       await waitFor(() => {
-        // The activeScreen should change to HERO after navigation
-        expect(screen.getByText(`activeScreen: ${AppState.HERO}`)).toBeInTheDocument();
+        // The activeScreen should change to UPLOAD after navigation
+        expect(screen.getByText(`activeScreen: ${AppState.UPLOAD}`)).toBeInTheDocument();
       });
     });
 
