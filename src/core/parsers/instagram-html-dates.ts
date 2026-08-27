@@ -110,14 +110,25 @@ const CANDIDATE_LOCALES = [
 ] as const;
 
 /**
- * How a month name might have been abbreviated.
+ * How a month name might have been abbreviated: which `Intl` month option
+ * produces it, and how many characters of that to keep.
  *
- * Ordered cheapest-first only for readability; every form is tried. `numeric`
- * is here for locales that write the month as a bare number, and costs nothing
- * to include.
+ * A table rather than a pair of conditionals. The two facts about a form were
+ * two nested ternaries in two places, so adding one meant finding both — and
+ * `.claude/rules/code-style.md` bans the nesting anyway. Ordered cheapest-first
+ * only for readability; every form is tried. `numeric` is here for locales that
+ * write the month as a bare number, and costs nothing to include.
  */
-const FORMS = ['cldr-short', 'cldr-long', 'prefix3', 'prefix4', 'numeric'] as const;
-type Form = (typeof FORMS)[number];
+const FORM_SPECS = {
+  'cldr-short': { option: 'short', keep: null },
+  'cldr-long': { option: 'long', keep: null },
+  prefix3: { option: 'long', keep: 3 },
+  prefix4: { option: 'long', keep: 4 },
+  numeric: { option: 'numeric', keep: null },
+} as const;
+
+type Form = keyof typeof FORM_SPECS;
+const FORMS = Object.keys(FORM_SPECS) as Form[];
 
 /**
  * The 15th, deliberately, and this is the defence rather than a test.
@@ -185,7 +196,7 @@ function normalizeToken(token: string): string {
 
 /** One candidate's twelve tokens, or `null` when they are not all distinct. */
 function buildCandidate(locale: string, form: Form): Map<string, number> | null {
-  const option = form === 'numeric' ? 'numeric' : form === 'cldr-short' ? 'short' : 'long';
+  const { option, keep } = FORM_SPECS[form];
 
   let formatter: Intl.DateTimeFormat;
   try {
@@ -199,9 +210,7 @@ function buildCandidate(locale: string, form: Form): Map<string, number> | null 
   const table = new Map<string, number>();
   for (let month = 0; month < 12; month++) {
     const full = formatter.format(new Date(Date.UTC(PROBE_YEAR, month, PROBE_DAY)));
-    const token =
-      form === 'prefix3' ? full.slice(0, 3) : form === 'prefix4' ? full.slice(0, 4) : full;
-    const key = normalizeToken(token);
+    const key = normalizeToken(keep === null ? full : full.slice(0, keep));
     // Not injective: two months would answer to one token, so this candidate
     // cannot read a date unambiguously and is discarded rather than ranked.
     if (!key || table.has(key)) return null;
