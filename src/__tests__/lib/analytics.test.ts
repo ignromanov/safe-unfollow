@@ -274,6 +274,17 @@ describe('Analytics', () => {
         });
       });
 
+      // trackEvent-class, not enqueueEvent: the handler calls window.open, which
+      // unloads nothing in this tab, so no navigation races the request.
+      it('reports the calendar reminder without a payload', () => {
+        analytics.calendarReminderClick();
+
+        expect(windowSpy.umami.track).toHaveBeenCalledWith(
+          AnalyticsEvents.CALENDAR_REMINDER_CLICK,
+          undefined
+        );
+      });
+
       // The CTA events themselves are batched — transport is asserted in
       // stats/impression-batching.test.ts. What belongs here is the attribution
       // side effect, which is independent of how the event travels.

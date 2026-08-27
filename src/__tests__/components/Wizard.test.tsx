@@ -36,6 +36,7 @@ vi.mock('react-i18next', () => createI18nMock(wizardEN));
 
 import { Wizard } from '@/components/Wizard';
 import { analytics } from '@/lib/analytics';
+import { WIZARD_STEPS } from '@/config/wizard-steps';
 
 // Mock analytics module
 vi.mock('@/lib/analytics', () => ({
@@ -43,6 +44,7 @@ vi.mock('@/lib/analytics', () => ({
     guideEntryView: vi.fn(),
     wizardStepView: vi.fn(),
     linkClick: vi.fn(),
+    calendarReminderClick: vi.fn(),
   },
 }));
 
@@ -509,6 +511,20 @@ describe('Wizard', () => {
       expect(within(bar).getByText('Next Step')).toBeInTheDocument();
       expect(within(bar).queryByText(wizardEN.entry.cta)).not.toBeInTheDocument();
       expect(screen.getAllByRole('link', { name: /accounts center/i })).toHaveLength(1);
+    });
+  });
+
+  describe('calendar reminder', () => {
+    // The control renders only on the last step (isLastStep, Wizard.tsx:218).
+    it('reports the click before window.open, which a popup blocker may cancel', () => {
+      // jsdom does not implement window.open and logs "Not implemented" noise.
+      const open = vi.spyOn(window, 'open').mockReturnValue(null);
+      renderWizardAtStep(WIZARD_STEPS.length);
+
+      fireEvent.click(screen.getByRole('button', { name: wizardEN.calendar.addReminder }));
+
+      expect(analytics.calendarReminderClick).toHaveBeenCalledTimes(1);
+      expect(open).toHaveBeenCalledTimes(1);
     });
   });
 });

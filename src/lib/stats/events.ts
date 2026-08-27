@@ -176,6 +176,14 @@ export const analytics = {
     });
   },
 
+  // trackEvent-class, not enqueueEvent: the handler calls window.open, which
+  // unloads nothing in this tab, so there is no navigation racing the beacon.
+  // No payload — the control has one call site per surface and the surface is
+  // recoverable from url_path.
+  calendarReminderClick: () => {
+    trackEvent(AnalyticsEvents.CALENDAR_REMINDER_CLICK);
+  },
+
   // Loading Tips (shown during ZIP parsing)
   // Impressions are batched: three of these land inside the first second of a
   // parse, and one invocation for the set is as good as three.

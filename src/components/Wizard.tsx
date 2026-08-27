@@ -108,6 +108,10 @@ export function Wizard({ initialStep = 1 }: WizardProps) {
       endDate.toISOString().replace(/[-:]/g, '').split('.')[0]
     }Z&details=${encodeURIComponent(t('calendar.details'))}`;
 
+    // Before window.open, not after: a popup blocker can cancel the open, but
+    // the reader's intent happened either way. This counts intent, and it will
+    // never be the denominator of a funnel.
+    analytics.calendarReminderClick();
     window.open(calendarUrl, '_blank', 'noopener,noreferrer');
   }, [t]);
 
