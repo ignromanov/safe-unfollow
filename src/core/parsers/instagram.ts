@@ -135,8 +135,11 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
   // came to be wrong without any of them looking wrong.
   const format: FileDiscovery['format'] = analysis.format;
 
-  // Check if this is an Instagram export
-  const isInstagramExport = analysis.hasConnections || analysis.hasFollowersFolder;
+  // Decided in `analyzeZipStructure` for the same reason `format` is: this
+  // expression also lived in `createCriticalError` as its own negation, and the
+  // two had to stay in step for an arbitrary ZIP of `.html` to keep out of the
+  // `HTML_FORMAT` bucket.
+  const isInstagramExport = analysis.isInstagramExport;
 
   // If not a valid Instagram export, return early with error.
   //

@@ -85,7 +85,7 @@ function interpretFollowingPayload(payload: unknown): {
  *
  * Takes the read result rather than the ZIP, unlike its followers counterpart:
  * following.json is a single named file whose lookup shares
- * `parseInstagramZipFile`'s `readJsonFromZip` closure — that closure also
+ * `parseInstagramZipFile`'s `readRelationshipFileFromZip` closure — that closure also
  * records JSON_PARSE_ERROR warnings, and duplicating it here would duplicate
  * that reporting too.
  *

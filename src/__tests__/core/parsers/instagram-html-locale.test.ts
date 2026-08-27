@@ -3,7 +3,7 @@ import EN from '../../fixtures/instagram-html/following.en.html?raw';
 import ES from '../../fixtures/instagram-html/following.es.html?raw';
 import JA from '../../fixtures/instagram-html/following.ja.html?raw';
 import { transcodeRelationshipHtml } from '@/core/parsers/instagram-html';
-import { resolveEntries, resolveEntryList } from '@/core/parsers/instagram-utils';
+import { extractUsernames, resolveEntryList } from '@/core/parsers/instagram-utils';
 
 /**
  * The same account's `following.html`, exported three times minutes apart in
@@ -27,12 +27,11 @@ import { resolveEntries, resolveEntryList } from '@/core/parsers/instagram-utils
  * rendered text. What is NOT: every class name, every href, and the per-row
  * date's field order.
  */
+/** As in the transcode suite: the production reduction, not a copy of it. */
 const usernames = (html: string): string[] =>
-  resolveEntries(
-    resolveEntryList(transcodeRelationshipHtml(html), ['relationships_following']) ?? []
-  )
-    .items.map(i => i.username)
-    .sort();
+  extractUsernames(
+    resolveEntryList(transcodeRelationshipHtml(html), ['relationships_following']) ?? undefined
+  ).sort();
 
 describe('one account, one day, three UI languages', () => {
   it('reads the same accounts out of the English and Spanish exports', () => {

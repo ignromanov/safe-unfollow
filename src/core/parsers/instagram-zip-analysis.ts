@@ -4,10 +4,9 @@
  */
 
 import type { ParseWarning } from '@/core/types';
+import { RELATIONSHIP_EXTENSIONS } from './instagram-file-specs';
 
 export interface ZipAnalysis {
-  hasHtmlFiles: boolean;
-  hasJsonFiles: boolean;
   hasConnections: boolean;
   hasFollowersFolder: boolean;
   basePath: string | undefined;
@@ -20,6 +19,18 @@ export interface ZipAnalysis {
    * and two copies of a rule are two rules as soon as one of them is fixed.
    */
   format: 'json' | 'html' | 'unknown';
+  /**
+   * Whether this archive is an Instagram export at all, decided once and here.
+   *
+   * Derived for the same reason `format` is, and it became load-bearing with
+   * the same change: `createCriticalError` now asks this question BEFORE it
+   * names a format, which is what keeps an arbitrary ZIP of `.html` out of the
+   * `HTML_FORMAT` bucket. That fix holds only while the two readers agree, and
+   * they were two hand-written expressions in two files — one the negation of
+   * the other. Widen the test in one and the contamination returns silently, in
+   * the very metric the HTML work is justified by.
+   */
+  isInstagramExport: boolean;
 }
 
 /**
@@ -30,7 +41,10 @@ export interface ZipAnalysis {
  * on the whole name after the last slash so that a `following.json.bak` or a
  * `my-following.json` cannot vote.
  */
-const RELATIONSHIP_FILE = /(^|\/)(following|followers_\d+)\.(json|html)$/i;
+const RELATIONSHIP_FILE = new RegExp(
+  `(^|/)(following|followers_\\d+)\\.${RELATIONSHIP_EXTENSIONS}$`,
+  'i'
+);
 
 /**
  * Analyze ZIP file structure to determine format and validity
@@ -64,12 +78,16 @@ export function analyzeZipStructure(allFiles: string[]): ZipAnalysis {
     else relationshipHtml = true;
   }
 
-  const format = resolveFormat({
-    relationshipJson,
-    relationshipHtml,
-    hasJsonFiles,
-    hasHtmlFiles,
-  });
+  // The relationship files decide; the archive-wide extension counts are the
+  // fallback for an archive that has no relationship file at all, where the old
+  // answer is still the best available one and is what every existing
+  // diagnostic was written against. Written as two applications of one rule
+  // rather than four guards in a row, so that the two-tier priority is the
+  // shape of the expression instead of a note about the order of the tests.
+  const format =
+    pickFormat(relationshipJson, relationshipHtml) ??
+    pickFormat(hasJsonFiles, hasHtmlFiles) ??
+    'unknown';
 
   // Determine base path
   let basePath: string | undefined;
@@ -84,46 +102,27 @@ export function analyzeZipStructure(allFiles: string[]): ZipAnalysis {
   ].slice(0, 5);
 
   return {
-    hasHtmlFiles,
-    hasJsonFiles,
     hasConnections,
     hasFollowersFolder,
     basePath,
     topLevelFolders,
     format,
+    isInstagramExport: hasConnections || hasFollowersFolder,
   };
 }
 
 /**
- * The relationship files decide; the archive-wide extension counts are the
- * fallback for an archive that has no relationship file at all, where the old
- * answer is still the best available one and is what every existing diagnostic
- * was written against.
+ * One evidence source's verdict, or `null` when it has nothing to say.
  *
- * Written as guard clauses rather than a ternary chain because there are four
- * of them and a nested ternary of that depth is the shape this project's style
- * rules forbid, for the reason on display here: the order of the tests IS the
- * rule, and it has to be readable to be reviewable.
+ * JSON wins a genuinely mixed set: it is the format this tool has always read,
+ * so a half-merged archive degrades to today's behaviour rather than to a newer
+ * path. `null` rather than `'unknown'` so the caller can fall through to the
+ * next source — `'unknown'` is an answer, and only the last source may give it.
  */
-function resolveFormat({
-  relationshipJson,
-  relationshipHtml,
-  hasJsonFiles,
-  hasHtmlFiles,
-}: {
-  relationshipJson: boolean;
-  relationshipHtml: boolean;
-  hasJsonFiles: boolean;
-  hasHtmlFiles: boolean;
-}): ZipAnalysis['format'] {
-  // JSON wins a genuinely mixed set of relationship files: it is the format
-  // this tool has always read, so a half-merged archive degrades to today's
-  // behaviour rather than to a newer path.
-  if (relationshipJson) return 'json';
-  if (relationshipHtml) return 'html';
-  if (hasJsonFiles) return 'json';
-  if (hasHtmlFiles) return 'html';
-  return 'unknown';
+function pickFormat(json: boolean, html: boolean): 'json' | 'html' | null {
+  if (json) return 'json';
+  if (html) return 'html';
+  return null;
 }
 
 /**
@@ -141,7 +140,7 @@ export function createCriticalError(analysis: ZipAnalysis): ParseWarning {
   // in the 30 days to 2026-08-25 are an upper bound on "chose the wrong format"
   // rather than a count of it, and why anything sized from that number is an
   // upper bound too.
-  if (!analysis.hasConnections && !analysis.hasFollowersFolder) {
+  if (!analysis.isInstagramExport) {
     return {
       code: 'NOT_INSTAGRAM_EXPORT',
       message: "This doesn't appear to be an Instagram data export.",

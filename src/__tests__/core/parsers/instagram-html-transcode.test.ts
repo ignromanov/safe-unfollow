@@ -7,7 +7,7 @@ import FOLLOWING_ES from '../../fixtures/instagram-html/following.es.html?raw';
 import FOLLOWING_JA from '../../fixtures/instagram-html/following.ja.html?raw';
 import FOLLOWING_JSON from '../../fixtures/instagram-html/following.json?raw';
 import { transcodeRelationshipHtml } from '@/core/parsers/instagram-html';
-import { resolveEntries, resolveEntryList } from '@/core/parsers/instagram-utils';
+import { extractUsernames, resolveEntries, resolveEntryList } from '@/core/parsers/instagram-utils';
 
 /**
  * The HTML transcoder against a golden pair — one real account's `following`
@@ -36,12 +36,17 @@ import { resolveEntries, resolveEntryList } from '@/core/parsers/instagram-utils
  * JSON", so a test that reads the transcoder's output its own way would not
  * test that contract.
  */
-/** Usernames as the app would end up with them, sorted for set comparison. */
+/**
+ * Usernames as the app would end up with them, sorted for set comparison.
+ *
+ * `extractUsernames` rather than a local `resolveEntries(...).items.map(...)`,
+ * because that IS `extractUsernames` — and it is what `instagram.ts` and
+ * `instagram-followers.ts` actually call. A hand-rolled equivalent would keep
+ * passing if the production reduction ever changed underneath it, which defeats
+ * the point of asserting through the production path at all.
+ */
 function usernames(doc: unknown, wrapperKeys: string[]): string[] {
-  const entries = resolveEntryList(doc, wrapperKeys);
-  return resolveEntries(entries ?? [])
-    .items.map(i => i.username)
-    .sort();
+  return extractUsernames(resolveEntryList(doc, wrapperKeys) ?? undefined).sort();
 }
 
 const FOLLOWING_KEYS = ['relationships_following'];

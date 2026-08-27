@@ -4,7 +4,7 @@
  */
 
 import type { FileExpectation, InstagramExportEntry, ParseWarning, RawItem } from '@/core/types';
-import { FILE_SPECS } from './instagram-file-specs';
+import { FILE_SPECS, RELATIONSHIP_EXTENSIONS } from './instagram-file-specs';
 import {
   UNREADABLE_ENTRIES_FIX,
   describeUnreadableEntries,
@@ -156,8 +156,8 @@ export async function parseFollowersFromZip(
   // `fileNames` on purpose: an export sharded into `followers_4` and beyond is
   // read today and must keep being read, in either format.
   const followersGlobs = baseCandidates
-    .map(b => `${b}/followers_.*\\.(json|html)`)
-    .concat(['followers_.*\\.(json|html)']);
+    .map(b => `${b}/followers_.*\\.${RELATIONSHIP_EXTENSIONS}`)
+    .concat([`followers_.*\\.${RELATIONSHIP_EXTENSIONS}`]);
   const followersRaw: RawItem[] = [];
   const followersSeen = new Set<string>();
   const followersFilesByName = new Map<string, ZipEntry>();
@@ -184,7 +184,8 @@ export async function parseFollowersFromZip(
   }
 
   if (followersFilesByName.size === 0) {
-    for (const f of archive.find(/followers_\d+\.(json|html)$/i)) {
+    const shardFallback = new RegExp(`followers_\\d+\\.${RELATIONSHIP_EXTENSIONS}$`, 'i');
+    for (const f of archive.find(shardFallback)) {
       if (!followersFilesByName.has(f.name)) {
         followersFilesByName.set(f.name, f);
         foundFollowerPaths.push(f.name);

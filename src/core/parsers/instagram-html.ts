@@ -91,7 +91,12 @@
  */
 
 import { Parser } from 'htmlparser2';
-import { fitMonthTable, readRowDate, splitRowDate } from './instagram-html-dates';
+import {
+  fitMonthTable,
+  readRowDate,
+  splitRowDate,
+  type RowDateParts,
+} from './instagram-html-dates';
 
 /**
  * Read one relationship file's text into records, whatever markup it is in.
@@ -160,13 +165,23 @@ interface TranscodedLabelEntry {
 
 /** A record as read from the markup, before the file's month table is known. */
 interface RawRecord {
-  /** Grammar A/B: the handle read out of the profile anchor. */
-  username: string | null;
-  /** Grammar A/B: the profile anchor itself. */
-  href: string | null;
+  /**
+   * Grammar A/B: the profile anchor. One field rather than two, because the
+   * handle and the href are read from the same match and are never separately
+   * present — a pair of nullable siblings would let a state exist that the
+   * markup cannot produce, and would have to be null-checked twice downstream
+   * to prove it does not.
+   */
+  profile: { username: string; href: string } | null;
   /** Grammar C: the record's label/value rows, in document order. */
   labelValues: { label: string; value: string }[];
-  dateText: string | null;
+  /**
+   * The row date already split. Stored parsed rather than as text because
+   * deciding a string IS a date is the same act as reading it: keeping the raw
+   * text made `splitRowDate` run three times per dated record, and let the two
+   * readings drift apart across two modules.
+   */
+  date: RowDateParts | null;
 }
 
 /**
@@ -188,25 +203,35 @@ export function transcodeRelationshipHtml(html: string): unknown {
   // is fitted to the tokens of the WHOLE file, so no row can be dated until
   // every row has been seen. That is the point of fitting rather than choosing
   // — a per-row guess is exactly what a table nobody chose protects against.
-  const tokens = records
-    .map(r => (r.dateText === null ? null : splitRowDate(r.dateText)?.monthToken))
-    .filter((t): t is string => typeof t === 'string');
+  //
+  // A Set rather than an array, because there are at most twelve distinct month
+  // tokens however many records the file holds. `fitMonthTable` deduplicates
+  // anyway, so an array only decided WHERE the dedup happened — and a
+  // 1M-account `following.html` would have materialised a million strings to
+  // reach the same twelve.
+  const tokens = new Set<string>();
+  for (const { date } of records) {
+    if (date !== null) tokens.add(date.monthToken);
+  }
   const monthTable = fitMonthTable(tokens);
 
-  return records.map(({ username, href, labelValues, dateText }) => {
-    const timestamp = dateText === null ? undefined : readRowDate(dateText, monthTable);
+  return records.map(({ profile, labelValues, date }) => {
+    const timestamp = date === null ? undefined : readRowDate(date, monthTable);
 
     // The anchor grammar first, because it is the one the two required files
     // use and the one whose `href` is worth keeping. A record never carries
     // both — measured, the anchor files hold zero tables and the table files
     // zero anchors — so the order is a preference, not a tiebreak.
-    if (username !== null && href !== null) {
+    if (profile !== null) {
       // Omitted rather than zeroed when unreadable. `resolveEntry` reads
       // `item?.timestamp` and the parsers store `?? 0`, so the zero is applied
       // one layer down where it already means "Instagram gave no date" —
       // writing it here would make an unreadable date indistinguishable from an
       // absent one at the only layer that can still tell them apart.
-      const entry: TranscodedEntry = { title: username, string_list_data: [{ href }] };
+      const entry: TranscodedEntry = {
+        title: profile.username,
+        string_list_data: [{ href: profile.href }],
+      };
       if (timestamp !== undefined) entry.string_list_data[0].timestamp = timestamp;
       return entry;
     }
@@ -231,14 +256,25 @@ function readRecords(html: string): RawRecord[] {
   // Counted rather than matched on the closing tag, because the close carries
   // no class and the wrapper legitimately contains further divs.
   let depth = 0;
-  let href: string | null = null;
-  let username: string | null = null;
-  let dateText: string | null = null;
+  let profile: { username: string; href: string } | null = null;
+  let date: RowDateParts | null = null;
   let text = '';
   // Grammar C. `cells` accumulates one row's `<td>` texts; `labelValues` the
   // rows of the record currently open.
   let cells: string[] = [];
   let labelValues: { label: string; value: string }[] = [];
+
+  // One function rather than the same assignments at both the open and the
+  // close of a wrapper. The two copies were provably equivalent — none of these
+  // fields is written while `depth === 0` — but a field added later gets added
+  // to whichever copy the author found, and two resets that disagree is a
+  // record inheriting the previous record's data.
+  const resetRecord = () => {
+    profile = null;
+    date = null;
+    cells = [];
+    labelValues = [];
+  };
 
   const closeRecord = () => {
     // EVERY closed wrapper is a record, including one that yielded neither a
@@ -255,44 +291,32 @@ function readRecords(html: string): RawRecord[] {
     //
     // A file with no records at all still yields nothing, because both grammars
     // leave one outermost wrapper per record and none when there are none.
-    records.push({ username, href, labelValues, dateText });
-    href = null;
-    username = null;
-    dateText = null;
-    cells = [];
-    labelValues = [];
+    records.push({ profile, labelValues, date });
+    resetRecord();
   };
 
   const parser = new Parser(
     {
       onopentag(name, attribs) {
+        text = '';
+
         if (name === 'div') {
           if (depth > 0) {
             depth++;
           } else if ((attribs.class ?? '').split(/\s+/).includes(RECORD_CLASS)) {
             depth = 1;
-            href = null;
-            username = null;
-            dateText = null;
-            cells = [];
-            labelValues = [];
+            resetRecord();
           }
-          text = '';
           return;
         }
-
-        text = '';
 
         // First profile link wins. A record holds one account; a second
         // instagram.com anchor would be something else, and taking the last
         // would let it overwrite the answer.
-        if (depth === 0 || name !== 'a' || username !== null) return;
+        if (depth === 0 || name !== 'a' || profile !== null) return;
         const candidate = attribs.href ?? '';
         const match = PROFILE_HREF.exec(candidate);
-        if (match?.[1]) {
-          username = match[1];
-          href = candidate;
-        }
+        if (match?.[1]) profile = { username: match[1], href: candidate };
       },
 
       ontext(chunk) {
@@ -316,9 +340,7 @@ function readRecords(html: string): RawRecord[] {
         // table. Positional reading would be a second thing to break when Meta
         // rearranges a record, and it has rearranged records before without
         // touching a single class name.
-        if (dateText === null && splitRowDate(captured) !== null) {
-          dateText = captured;
-        }
+        if (date === null) date = splitRowDate(captured);
 
         if (name === 'td') {
           cells.push(captured);

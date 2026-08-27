@@ -183,6 +183,22 @@ export const OPTIONAL_FILE_DRIFT_CODES: ReadonlySet<string> = new Set(
 );
 
 /**
+ * The markups a relationship file can be written in, as a regex alternation.
+ *
+ * One home for a fact the HTML work otherwise spelled out in three syntaxes
+ * across three files. Widening the set has to be one edit, because every miss
+ * is silent and each is silent differently: miss `RELEVANT_FILE_PATTERN` and
+ * `openZipArchive` keeps no object for the entry, so the parser reports the
+ * file MISSING rather than failing; miss `RELATIONSHIP_FILE` and the archive is
+ * handed the wrong diagnostic code; miss a followers glob and a shard vanishes
+ * from a required list.
+ *
+ * `htmlTwin` below is deliberately NOT derived from this: it maps one name to
+ * one other name, which a set of alternatives cannot express.
+ */
+export const RELATIONSHIP_EXTENSIONS = '(json|html)';
+
+/**
  * The same file's name in an HTML export.
  *
  * Derived rather than listed, on a measurement: the nine relationship files of
@@ -246,6 +262,6 @@ const KEPT_FILE_NAMES = [...FILE_SPECS, PERMANENT_REQUESTS_SPEC]
   .map(escapeRegExp);
 
 export const RELEVANT_FILE_PATTERN = new RegExp(
-  `(^|/)(followers_[^/]*\\.(json|html)|${KEPT_FILE_NAMES.join('|')})$`,
+  `(^|/)(followers_[^/]*\\.${RELATIONSHIP_EXTENSIONS}|${KEPT_FILE_NAMES.join('|')})$`,
   'i'
 );

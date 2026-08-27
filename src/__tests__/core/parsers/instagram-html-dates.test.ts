@@ -127,20 +127,32 @@ describe('fitting a month table to the tokens a file actually contains', () => {
 describe('turning a row into an instant', () => {
   const table = fitMonthTable(['Aug', 'Jan', 'Dec']);
 
+  /**
+   * `readRowDate` takes the already-split parts, because every caller has split
+   * the row before it gets there. These cases are all well-formed rows, so a
+   * failed split is a broken test rather than a case under test — it throws
+   * here instead of collapsing into the `undefined` the assertions look for.
+   */
+  const read = (text: string, months: Map<string, number> | null) => {
+    const parts = splitRowDate(text);
+    if (parts === null) throw new Error(`test row is not a row date: ${text}`);
+    return readRowDate(parts, months);
+  };
+
   it('reads a full row', () => {
     // Seconds, not milliseconds — `RawItem.timestamp` is what the JSON export
     // carries and that is epoch seconds.
-    const ts = readRowDate('Aug 10, 2026 6:32 pm', table);
+    const ts = read('Aug 10, 2026 6:32 pm', table);
     expect(ts).toBe(Date.UTC(2026, 7, 10, 18, 32) / 1000);
   });
 
   it('reads a morning row', () => {
-    expect(readRowDate('Aug 10, 2026 6:32 am', table)).toBe(Date.UTC(2026, 7, 10, 6, 32) / 1000);
+    expect(read('Aug 10, 2026 6:32 am', table)).toBe(Date.UTC(2026, 7, 10, 6, 32) / 1000);
   });
 
   it('reads midnight and noon the way the 12-hour clock means them', () => {
-    expect(readRowDate('Jan 01, 2026 12:00 am', table)).toBe(Date.UTC(2026, 0, 1, 0, 0) / 1000);
-    expect(readRowDate('Jan 01, 2026 12:00 pm', table)).toBe(Date.UTC(2026, 0, 1, 12, 0) / 1000);
+    expect(read('Jan 01, 2026 12:00 am', table)).toBe(Date.UTC(2026, 0, 1, 0, 0) / 1000);
+    expect(read('Jan 01, 2026 12:00 pm', table)).toBe(Date.UTC(2026, 0, 1, 12, 0) / 1000);
   });
 
   it('accepts an uppercase meridiem, because Japanese writes one', () => {
@@ -149,16 +161,14 @@ describe('turning a row into an instant', () => {
     // Japanese writes `AM`/`PM`: 401 and 400 of its 801 rows. The claim was
     // true of the four samples it was drawn from and false of the fifth, so a
     // case-sensitive `(am|pm)` fails on 100% of Japanese rows.
-    expect(readRowDate('Aug 10, 2026 6:32 PM', table)).toBe(
-      readRowDate('Aug 10, 2026 6:32 pm', table)
-    );
+    expect(read('Aug 10, 2026 6:32 PM', table)).toBe(read('Aug 10, 2026 6:32 pm', table));
   });
 
   it('gives up on a row whose month is not in the table', () => {
-    expect(readRowDate('Mai 10, 2026 6:32 pm', table)).toBeUndefined();
+    expect(read('Mai 10, 2026 6:32 pm', table)).toBeUndefined();
   });
 
   it('gives up on every row when there is no table at all', () => {
-    expect(readRowDate('Aug 10, 2026 6:32 pm', null)).toBeUndefined();
+    expect(read('Aug 10, 2026 6:32 pm', null)).toBeUndefined();
   });
 });
