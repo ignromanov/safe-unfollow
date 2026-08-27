@@ -195,8 +195,13 @@ export const OPTIONAL_FILE_DRIFT_CODES: ReadonlySet<string> = new Set(
  *
  * `htmlTwin` below is deliberately NOT derived from this: it maps one name to
  * one other name, which a set of alternatives cannot express.
+ *
+ * Non-capturing on purpose. Every consumer either `.test()`s the pattern or
+ * hands it to `archive.find`, and the one that reads the extension back names
+ * its own group — so no caller's group indices depend on how many alternatives
+ * are spelled out here, and adding one cannot silently shift them.
  */
-export const RELATIONSHIP_EXTENSIONS = '(json|html)';
+export const RELATIONSHIP_EXTENSIONS = '(?:json|html)';
 
 /**
  * The same file's name in an HTML export.

@@ -42,7 +42,7 @@ export interface ZipAnalysis {
  * `my-following.json` cannot vote.
  */
 const RELATIONSHIP_FILE = new RegExp(
-  `(^|/)(following|followers_\\d+)\\.${RELATIONSHIP_EXTENSIONS}$`,
+  `(?:^|/)(?:following|followers_\\d+)\\.(?<ext>${RELATIONSHIP_EXTENSIONS})$`,
   'i'
 );
 
@@ -74,7 +74,7 @@ export function analyzeZipStructure(allFiles: string[]): ZipAnalysis {
   for (const name of allFiles) {
     const match = RELATIONSHIP_FILE.exec(name);
     if (!match) continue;
-    if (match[3]?.toLowerCase() === 'json') relationshipJson = true;
+    if (match.groups?.ext?.toLowerCase() === 'json') relationshipJson = true;
     else relationshipHtml = true;
   }
 
