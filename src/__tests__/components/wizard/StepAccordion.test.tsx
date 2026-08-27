@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event';
 import wizardEN from '@/locales/en/wizard.json';
 import { createI18nMock } from '@/__tests__/utils/mockI18n';
 import { renderWithRouter as render } from '@/__tests__/test-utils';
-import { WIZARD_STEPS } from '@/config/wizard-steps';
+import { GUIDE_STEPS } from '@/config/wizard-steps';
 
 vi.mock('react-i18next', () => createI18nMock(wizardEN));
 
@@ -88,7 +88,7 @@ describe('StepAccordion', () => {
     render(<StepAccordion />);
 
     const trigger = screen.getByRole('button', { name: /step-by-step/i });
-    const expectedCount = WIZARD_STEPS.length - 1;
+    const expectedCount = GUIDE_STEPS.length;
     // Proves the count is read from config, not a copied literal: it has
     // to equal the number of rows the same click actually reveals.
     expect(trigger).toHaveTextContent(String(expectedCount));
@@ -104,10 +104,10 @@ describe('StepAccordion', () => {
     await user.click(screen.getByRole('button', { name: /step-by-step/i }));
 
     const firstRow = screen.getAllByRole('link')[0];
-    expect(within(firstRow).getByText(wizardEN.steps['2'].title)).toBeInTheDocument();
+    expect(within(firstRow).getByText(wizardEN.steps['1'].title)).toBeInTheDocument();
     // And names it once: the poster is decorative, so the row's accessible
     // name is the visible label alone, not that label preceded by a near
     // paraphrase of itself from the poster's alt.
-    expect(firstRow).toHaveAccessibleName(wizardEN.steps['2'].title);
+    expect(firstRow).toHaveAccessibleName(wizardEN.steps['1'].title);
   });
 });

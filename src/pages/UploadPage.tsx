@@ -2,7 +2,7 @@ import { PageLoader } from '@/components/PageLoader';
 import { UploadZone } from '@/components/UploadZone';
 import { useInstagramData } from '@/hooks/useInstagramData';
 import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
-import { wizardHrefForError } from '@/lib/errors/wizard-routing';
+import { guideStepForError } from '@/lib/errors/wizard-routing';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -36,7 +36,10 @@ export function Component() {
   };
 
   const handleOpenWizard = () => {
-    navigate(wizardHrefForError(prefix));
+    // Still a route, still the old numbering: +1 because GUIDE_STEPS renumbered
+    // and these URLs did not. This whole handler is replaced by opening the
+    // dialog in place, at which point neither the navigate nor the +1 remains.
+    navigate(`${prefix}/wizard/step/${(guideStepForError() ?? 0) + 1}`);
   };
 
   return (

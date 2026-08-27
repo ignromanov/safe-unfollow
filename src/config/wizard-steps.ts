@@ -1,52 +1,44 @@
-export interface WizardStep {
+export interface GuideStep {
   id: number;
-  externalLink?: string;
   isWarning?: boolean;
-  visual?: string;
+  /**
+   * Base path of this step's assets in public/wizard/ — a hyphen, not a slash.
+   * Deliberately NOT derived from `id`: these files keep the names they had
+   * when the guide was eight routes, so the 30-day asset cache
+   * (vercel.json "/wizard/(.*)") keeps hitting. guide-steps.test.ts pins the
+   * mapping.
+   */
+  visual: string;
 }
 
-export const WIZARD_STEPS: WizardStep[] = [
-  {
-    id: 1,
-    externalLink:
-      'https://accountscenter.instagram.com/info_and_permissions/dyi/?entry_point=app_settings',
-    visual: '/wizard/step-1',
-  },
-  {
-    id: 2,
-    visual: '/wizard/step-2',
-  },
-  {
-    id: 3,
-    visual: '/wizard/step-3',
-  },
-  {
-    id: 4,
-    isWarning: true,
-    visual: '/wizard/step-4',
-  },
-  {
-    id: 5,
-    visual: '/wizard/step-5',
-  },
-  {
-    id: 6,
-    isWarning: true,
-    visual: '/wizard/step-6',
-  },
-  {
-    id: 7,
-    visual: '/wizard/step-7',
-  },
-  {
-    id: 8,
-    visual: '/wizard/step-8',
-  },
+/**
+ * The seven instructions, numbered as the reader sees them.
+ *
+ * Old ids 2..8 became 1..7 when the entry screen stopped being step 1 and
+ * became a block of the /upload document (GH#102). The old scheme had the URL
+ * saying 6 next to a heading saying 5 — and `steps.1` never existed in any
+ * locale, because step 1 was the entry screen and used `entry.*`.
+ *
+ * The `/wizard/step/N` routes are still live until PR 3 and still carry the
+ * old numbering in their URLs; Wizard.tsx maps one onto the other rather than
+ * renaming eight indexed pages twice.
+ */
+export const GUIDE_STEPS: GuideStep[] = [
+  { id: 1, visual: '/wizard/step-2' },
+  { id: 2, visual: '/wizard/step-3' },
+  { id: 3, isWarning: true, visual: '/wizard/step-4' },
+  { id: 4, visual: '/wizard/step-5' },
+  { id: 5, isWarning: true, visual: '/wizard/step-6' },
+  { id: 6, visual: '/wizard/step-7' },
+  { id: 7, visual: '/wizard/step-8' },
 ];
 
-// Step 1's external link, derived once here rather than recomputed in each
-// consumer, so no copy can drift from the step list (see "no copied facts" in
-// CLAUDE.md). Both consumers this comment used to name are gone: the wizard
-// bar's swapped-in copy and GuideEntry's in-flow CTA. UploadGuideBlock is the
-// one that remains.
-export const ACCOUNTS_CENTER_URL = WIZARD_STEPS.find(step => step.id === 1)?.externalLink;
+/**
+ * Meta's export entry point. It used to be derived from step 1's
+ * `externalLink`; step 1 is no longer a step, so the link stands on its own
+ * rather than hiding inside a list it is not a member of. Typed `string`, not
+ * `string | undefined` — the `.find()` that produced it could return nothing,
+ * and every consumer had to pretend that was impossible.
+ */
+export const ACCOUNTS_CENTER_URL =
+  'https://accountscenter.instagram.com/info_and_permissions/dyi/?entry_point=app_settings';

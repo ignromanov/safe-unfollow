@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { SUPPORTED_LANGUAGES } from '@/config/languages';
-import { WIZARD_STEPS } from '@/config/wizard-steps';
+import { GUIDE_STEPS } from '@/config/wizard-steps';
 
 const BUNDLES = import.meta.glob<Record<string, unknown>>('../../locales/*/wizard.json', {
   eager: true,
@@ -49,7 +49,9 @@ function resolveAsRealI18nextWould(
 // `_other`, so it cannot see this bug — this test resolves against the real
 // locale JSON instead.
 describe('wizard entry accordion trigger — plural resolution', () => {
-  const REAL_STEP_COUNT = WIZARD_STEPS.length - 1; // StepAccordion excludes step 1
+  // Every section is a row now — the entry screen that used to be excluded
+  // is a block of the /upload document and not a step at all.
+  const REAL_STEP_COUNT = GUIDE_STEPS.length;
 
   it('resolves entry.accordion.trigger for every supported language at the real step count', () => {
     for (const language of SUPPORTED_LANGUAGES) {

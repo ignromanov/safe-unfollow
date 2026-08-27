@@ -51,45 +51,40 @@
     }
   },
   "steps": {
-    "2": {
+    "1": {
       "title": "Choose Your Instagram Profile",
       "description": "Select your Instagram account from the list of connected profiles.",
       "alt": "Step 2: Choose your Instagram profile"
     },
-    "3": {
+    "2": {
       "title": "Select \"Export to device\"",
       "description": "Choose to export directly to your device for maximum privacy. Your data stays with you.",
       "alt": "Step 3: Select Export to device option"
     },
-    "4": {
+    "3": {
       "title": "⚠️ Select Only \"Followers and following\"",
       "description": "Click \"Customize\" › Clear all checkboxes › Check ONLY \"Followers and following\". This keeps your file small and fast.",
       "alt": "Step 4: Customize to select only Followers and following"
     },
-    "5": {
+    "4": {
       "title": "Set Date Range to \"All time\"",
       "description": "Click \"Date range\" › Select \"All time\" › Save. This ensures you get your complete follower history.",
       "alt": "Step 5: Set date range to All time"
     },
-    "6": {
+    "5": {
       "title": "⚠️ Change Format to JSON",
       "description": "This is critical! Click \"Format\" › Select \"JSON\" (not HTML). HTML files will NOT work with our analyzer.",
       "alt": "Step 6: Change format to JSON"
     },
-    "7": {
+    "6": {
       "title": "Review & Start Export",
       "description": "Verify your settings show: Followers and following, All time, JSON format. Then click \"Start export\".",
       "alt": "Step 7: Review settings and start export"
     },
-    "8": {
+    "7": {
       "title": "Wait for Email & Download",
       "description": "Instagram will email you when ready (usually 5-30 minutes). Click the download link in the email to get your ZIP file.",
       "alt": "Step 8: Wait for email and download ZIP file"
-    },
-    "9": {
-      "title": "Upload Your File",
-      "description": "You're ready! Click the button below to upload your Instagram data and see who unfollowed you.",
-      "alt": "Step 9: Upload your Instagram data file"
     }
   }
 }

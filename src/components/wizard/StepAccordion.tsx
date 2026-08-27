@@ -3,22 +3,22 @@ import { ChevronDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { PrefixedLink } from '@/components/PrefixedLink';
-import { WIZARD_STEPS } from '@/config/wizard-steps';
+import { GUIDE_STEPS } from '@/config/wizard-steps';
 
 /**
- * Poster assets are not one aspect ratio: step 2's is 600x360 (5:3), steps
- * 3-8 are 600x450 (4:3). Real width/height attributes let the browser
+ * Poster assets are not one aspect ratio: section 1's is 600x360 (5:3),
+ * sections 2-7 are 600x450 (4:3). Real width/height attributes let the browser
  * reserve each row's box from its own intrinsic size before the image
  * loads — forcing every row into 4:3 would crop or letterbox step 2.
  */
 const DEFAULT_POSTER_SIZE = { width: 600, height: 450 };
 const POSTER_SIZE_OVERRIDES: Partial<Record<number, { width: number; height: number }>> = {
-  2: { width: 600, height: 360 },
+  1: { width: 600, height: 360 },
 };
 
-// Step 1 opens Meta's Accounts Center externally; the accordion covers the
-// remaining in-app steps only.
-const REMAINING_STEPS = WIZARD_STEPS.filter(step => step.id !== 1);
+// Every section is a row now. The filter that used to drop step 1 went with
+// the entry screen it excluded: step 1 is an in-app instruction like the rest.
+const REMAINING_STEPS = GUIDE_STEPS;
 
 const TRIGGER_ID = 'step-accordion-trigger';
 
@@ -87,7 +87,10 @@ export function StepAccordion() {
             return (
               <li key={step.id}>
                 <PrefixedLink
-                  to={`/wizard/step/${step.id}`}
+                  // +1 bridges the guide's numbering to the route numbering
+                  // these eight indexed URLs still carry. Both the link and
+                  // the arithmetic go away when the rows open the dialog.
+                  to={`/wizard/step/${step.id + 1}`}
                   className="flex items-center gap-3 p-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
                 >
                   {/* Decorative here, hence the empty alt: the row's whole

@@ -13,7 +13,7 @@ import {
   getColorScheme,
   isRecoverable,
 } from '@/lib/errors/diagnostic-utils';
-import { wizardStepForError } from '@/lib/errors/wizard-routing';
+import { guideStepForError } from '@/lib/errors/wizard-routing';
 
 export interface DiagnosticErrorScreenProps {
   /** Error code for direct error display */
@@ -163,7 +163,7 @@ export function DiagnosticErrorScreen({
         >
           {onOpenWizard && (
             <PrefixedLink
-              to={`/wizard/step/${wizardStepForError(diagnosticError.code)}`}
+              to={`/wizard/step/${(guideStepForError(diagnosticError.code) ?? 0) + 1}`}
               onClick={handleOpenWizard}
               className={recoverable ? PRIMARY_ACTION_CLASS : SECONDARY_ACTION_CLASS(colors)}
             >

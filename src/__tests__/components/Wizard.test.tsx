@@ -36,7 +36,7 @@ vi.mock('react-i18next', () => createI18nMock(wizardEN));
 
 import { Wizard } from '@/components/Wizard';
 import { analytics } from '@/lib/analytics';
-import { WIZARD_STEPS } from '@/config/wizard-steps';
+import { GUIDE_STEPS } from '@/config/wizard-steps';
 
 // Mock analytics module
 vi.mock('@/lib/analytics', () => ({
@@ -157,11 +157,12 @@ describe('Wizard', () => {
   });
 
   it('should render step video with alt text as aria-label', () => {
-    // Step 1 is the guide block now, which carries no video — step 2 still
-    // uses the generic step card this behavior belongs to.
+    // Step 1 is the guide block now, which carries no video — route 2 still
+    // uses the generic step card this behavior belongs to. Its copy key is
+    // `steps.1`: the routes kept their numbering, the sections did not.
     renderWizardAtStep(2);
 
-    const video = screen.getByLabelText(wizardEN.steps['2'].alt);
+    const video = screen.getByLabelText(wizardEN.steps['1'].alt);
     expect(video).toBeInTheDocument();
   });
 
@@ -295,7 +296,7 @@ describe('Wizard', () => {
     it('reports the click before window.open, which a popup blocker may cancel', () => {
       // jsdom does not implement window.open and logs "Not implemented" noise.
       const open = vi.spyOn(window, 'open').mockReturnValue(null);
-      renderWizardAtStep(WIZARD_STEPS.length);
+      renderWizardAtStep(GUIDE_STEPS.length + 1);
 
       fireEvent.click(screen.getByRole('button', { name: wizardEN.calendar.addReminder }));
 

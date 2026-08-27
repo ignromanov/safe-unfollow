@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event';
 import wizardEN from '@/locales/en/wizard.json';
 import { createI18nMock } from '@/__tests__/utils/mockI18n';
 import { renderWithRouter as render } from '@/__tests__/test-utils';
-import { WIZARD_STEPS } from '@/config/wizard-steps';
+import { ACCOUNTS_CENTER_URL } from '@/config/wizard-steps';
 
 vi.mock('react-i18next', () => createI18nMock(wizardEN));
 
@@ -33,7 +33,7 @@ describe('UploadGuideBlock', () => {
     const cta = links[0];
     expect(cta).toHaveAttribute('target', '_blank');
     expect(cta).toHaveAttribute('rel', expect.stringContaining('noopener'));
-    expect(cta).toHaveAttribute('href', WIZARD_STEPS[0].externalLink);
+    expect(cta).toHaveAttribute('href', ACCOUNTS_CENTER_URL);
   });
 
   it('reports the click as meta_accounts', async () => {
