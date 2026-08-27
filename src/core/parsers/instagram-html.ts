@@ -126,9 +126,13 @@ export function parseRelationshipFile(name: string, text: string): unknown {
  * The wrapper every record sits in, in every file, in every sample held.
  *
  * Matched as a whitespace-delimited class rather than a substring, so that a
- * future `uiBoxWhiteSomething` cannot be mistaken for it.
+ * future `uiBoxWhiteSomething` cannot be mistaken for it — and as a regex
+ * rather than `split(/\s+/).includes(...)`, which allocated an array per
+ * record to look for one constant string. At the 1M-account scale this parser
+ * is built for that is a million allocations to answer a question a test
+ * answers without any.
  */
-const RECORD_CLASS = 'uiBoxWhite';
+const RECORD_CLASS = /(?:^|\s)uiBoxWhite(?:\s|$)/;
 
 /**
  * An Instagram profile link, and nothing else.
@@ -303,7 +307,7 @@ function readRecords(html: string): RawRecord[] {
         if (name === 'div') {
           if (depth > 0) {
             depth++;
-          } else if ((attribs.class ?? '').split(/\s+/).includes(RECORD_CLASS)) {
+          } else if (RECORD_CLASS.test(attribs.class ?? '')) {
             depth = 1;
             resetRecord();
           }
