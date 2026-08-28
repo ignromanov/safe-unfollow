@@ -59,11 +59,20 @@
  * someone can read this site in English and have exported in Portuguese — so
  * this list is deliberately wider than `SUPPORTED_LANGUAGES`.
  *
- * Cross-locale token collisions are not a practical risk at this size: over a
- * comparable sweep only three tokens collided at all (`lip`, `lis`, `srp`,
- * Polish/Czech against Croatian), and a collision only matters if two
- * candidates both fit every token in one file and then disagree — which the
- * agreement check below catches rather than resolves.
+ * **Cross-locale token collisions were called "not a practical risk at this
+ * size" here, and that was measured at the wrong size.** The sweep behind it
+ * found three colliding tokens (`lip`, `lis`, `srp`, Polish/Czech against
+ * Croatian) over files holding many months. A collision only bites when two
+ * candidates both fit EVERY token in one file and then disagree, and the fewer
+ * tokens a file holds the easier that is — at one token, eight of English's
+ * twelve months collided, all of them against forms this module invents by
+ * truncation. A one-token file is the date-range export, 26.5% of parses.
+ *
+ * Two things follow, and both are load-bearing. `fitMonthTable` consults real
+ * spellings before invented ones, which removes every collision that was an
+ * artefact of truncation. And a claimed-negligible risk gets measured at the
+ * input size the product actually sees, not at the size that makes it look
+ * negligible.
  */
 const CANDIDATE_LOCALES = [
   'en',
@@ -111,21 +120,34 @@ const CANDIDATE_LOCALES = [
 
 /**
  * How a month name might have been abbreviated: which `Intl` month option
- * produces it, and how many characters of that to keep.
+ * produces it, how many characters of that to keep, and whether the result is
+ * a spelling the locale actually writes.
  *
  * A table rather than a pair of conditionals. The two facts about a form were
  * two nested ternaries in two places, so adding one meant finding both — and
- * `.claude/rules/code-style.md` bans the nesting anyway. Ordered cheapest-first
- * only for readability; every form is tried. `numeric` is here for locales that
- * write the month as a bare number, and costs nothing to include.
+ * `.claude/rules/code-style.md` bans the nesting anyway. `numeric` is here for
+ * locales that write the month as a bare number, and costs nothing to include.
+ *
+ * `exact` is the tier, and it exists because the two kinds of form are not
+ * equally trustworthy. A CLDR short or long name is a spelling some language
+ * really uses; a prefix is one this module INVENTED by truncation, on the
+ * hypothesis that Meta abbreviates that way. Finnish `marraskuu` (November)
+ * truncated to three characters is `mar`, which is how a token no Finn ever
+ * wrote came to outvote English March — see `fitMonthTable`.
  */
+interface FormSpec {
+  option: Intl.DateTimeFormatOptions['month'];
+  keep: number | null;
+  exact: boolean;
+}
+
 const FORM_SPECS = {
-  'cldr-short': { option: 'short', keep: null },
-  'cldr-long': { option: 'long', keep: null },
-  prefix3: { option: 'long', keep: 3 },
-  prefix4: { option: 'long', keep: 4 },
-  numeric: { option: 'numeric', keep: null },
-} as const;
+  'cldr-short': { option: 'short', keep: null, exact: true },
+  'cldr-long': { option: 'long', keep: null, exact: true },
+  numeric: { option: 'numeric', keep: null, exact: true },
+  prefix3: { option: 'long', keep: 3, exact: false },
+  prefix4: { option: 'long', keep: 4, exact: false },
+} as const satisfies Record<string, FormSpec>;
 
 type Form = keyof typeof FORM_SPECS;
 const FORMS = Object.keys(FORM_SPECS) as Form[];
@@ -196,7 +218,7 @@ function normalizeToken(token: string): string {
 
 /** One candidate's twelve tokens, or `null` when they are not all distinct. */
 function buildCandidate(locale: string, form: Form): Map<string, number> | null {
-  const { option, keep } = FORM_SPECS[form];
+  const { option, keep }: FormSpec = FORM_SPECS[form];
 
   let formatter: Intl.DateTimeFormat;
   try {
@@ -236,17 +258,59 @@ function buildCandidate(locale: string, form: Form): Map<string, number> | null 
  * whose twelve tokens are not distinct — are filtered here rather than skipped
  * on every call.
  */
-let candidateTables: Map<string, number>[] | null = null;
+let candidateTables: { exact: Map<string, number>[]; all: Map<string, number>[] } | null = null;
 
-function monthTableCandidates(): Map<string, number>[] {
+function monthTableCandidates(): { exact: Map<string, number>[]; all: Map<string, number>[] } {
   if (!candidateTables) {
-    candidateTables = CANDIDATE_LOCALES.flatMap(locale =>
-      FORMS.map(form => buildCandidate(locale, form)).filter(
-        (table): table is Map<string, number> => table !== null
+    const built = CANDIDATE_LOCALES.flatMap(locale =>
+      FORMS.map(form => ({ form, table: buildCandidate(locale, form) })).filter(
+        (c): c is { form: Form; table: Map<string, number> } => c.table !== null
       )
     );
+    candidateTables = {
+      exact: built.filter(c => FORM_SPECS[c.form].exact).map(c => c.table),
+      all: built.map(c => c.table),
+    };
   }
   return candidateTables;
+}
+
+/** What a set of candidates had to say about one file's tokens. */
+type Fit =
+  | { kind: 'fitted'; table: Map<string, number> }
+  /** Two candidates explain every token and disagree about one of them. */
+  | { kind: 'ambiguous' }
+  /** No candidate explains every token. */
+  | { kind: 'unexplained' };
+
+function fitOver(candidates: Map<string, number>[], observed: ObservedToken[]): Fit {
+  const agreed = new Map<string, number>();
+
+  for (const candidate of candidates) {
+    const reading = new Map<string, number>();
+    for (const { token, key } of observed) {
+      const month = candidate.get(key);
+      if (month === undefined) break;
+      reading.set(token, month);
+    }
+    // Partial coverage is no coverage: a candidate that explains some tokens
+    // and not others is the wrong language, not a nearly-right one.
+    if (reading.size !== observed.length) continue;
+
+    for (const [token, month] of reading) {
+      const already = agreed.get(token);
+      if (already !== undefined && already !== month) return { kind: 'ambiguous' };
+      agreed.set(token, month);
+    }
+  }
+
+  if (agreed.size !== observed.length) return { kind: 'unexplained' };
+  return { kind: 'fitted', table: agreed };
+}
+
+interface ObservedToken {
+  token: string;
+  key: string;
 }
 
 /**
@@ -268,30 +332,37 @@ export function fitMonthTable(tokens: Iterable<string>): Map<string, number> | n
   // table returned here would be asserted against rows this file does not have.
   if (observed.length === 0) return null;
 
-  const agreed = new Map<string, number>();
+  const { exact, all } = monthTableCandidates();
 
-  for (const candidate of monthTableCandidates()) {
-    const reading = new Map<string, number>();
-    for (const { token, key } of observed) {
-      const month = candidate.get(key);
-      if (month === undefined) break;
-      reading.set(token, month);
-    }
-    // Partial coverage is no coverage: a candidate that explains some tokens
-    // and not others is the wrong language, not a nearly-right one.
-    if (reading.size !== observed.length) continue;
+  // Spellings a language really writes are consulted first, and this is not an
+  // optimization — it decides answers.
+  //
+  // Injectivity is checked per candidate over twelve months, but agreement is
+  // checked over the tokens this FILE holds, so on a small token set a form
+  // invented by truncation can shadow a real one. Measured over all 41 locales
+  // and 5 forms: for the single token `Mar`, every candidate answers March
+  // except Finnish `prefix3`, whose `marraskuu` truncates to `mar` and answers
+  // November. Both cover the token, they disagree, and the file went undated.
+  //
+  // A one-token file is not a corner case, it is the date-range export — the
+  // population `relationship_file_truncated` counts at 26.5% of parses. An
+  // English export dated only in March lost every date it had, and eight of the
+  // twelve English months collide this way.
+  //
+  // A prefix is still consulted, because Spanish `sep` appears in no CLDR table
+  // and only `prefix3` explains it. It is consulted SECOND, which is the whole
+  // change: a truncation may supply an answer nothing else has, and may not
+  // overrule one that a real spelling already gave.
+  const byExact = fitOver(exact, observed);
+  if (byExact.kind === 'fitted') return byExact.table;
+  // Two real spellings that disagree — `lip`/`lis`/`srp` across pl, cs and hr —
+  // is a genuine ambiguity, unresolvable from inside the file. Widening the
+  // candidate set can only add more of it, so it is reported as unreadable
+  // here rather than settled by candidate order.
+  if (byExact.kind === 'ambiguous') return null;
 
-    for (const [token, month] of reading) {
-      const already = agreed.get(token);
-      // Two languages that both explain every token and disagree about one.
-      // Unresolvable from inside the file, so it is reported as unreadable
-      // rather than settled by candidate order.
-      if (already !== undefined && already !== month) return null;
-      agreed.set(token, month);
-    }
-  }
-
-  return agreed.size === observed.length ? agreed : null;
+  const byAll = fitOver(all, observed);
+  return byAll.kind === 'fitted' ? byAll.table : null;
 }
 
 /**

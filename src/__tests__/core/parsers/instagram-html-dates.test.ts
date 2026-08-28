@@ -122,6 +122,36 @@ describe('fitting a month table to the tokens a file actually contains', () => {
   it('refuses an empty token set rather than inventing a table', () => {
     expect(fitMonthTable([])).toBeNull();
   });
+
+  /**
+   * The single-token file, which is not a corner case: it is the date-range
+   * export, the population `relationship_file_truncated` counts at 26.5% of
+   * parses. A whole file can hold one month.
+   *
+   * `Mar` was undated until 2026-08-28. Every candidate answered March except
+   * Finnish `prefix3` — `marraskuu` (November) truncated to three characters —
+   * so two candidates covered the only token, disagreed, and the file lost
+   * every date it had. Eight of the twelve English months collided this way.
+   *
+   * Asserted over all twelve months of a language rather than on `Mar` alone,
+   * because naming the token that broke pins the token and not the rule.
+   */
+  it('dates a file that holds a single month, in a language that writes real names', () => {
+    for (let month = 0; month < 12; month++) {
+      const token = new Intl.DateTimeFormat('en', { month: 'short', timeZone: 'UTC' }).format(
+        new Date(Date.UTC(2026, month, 15))
+      );
+      expect(fitMonthTable([token]), token).toEqual(new Map([[token, month]]));
+    }
+  });
+
+  it('still refuses a single token that two real spellings disagree about', () => {
+    // Polish `lipiec` is July and Croatian `lipanj` is June, and both are the
+    // CLDR short form their language actually writes. Preferring real
+    // spellings does not make an ambiguity between two of them resolvable —
+    // and this is the case the tier above must not paper over.
+    expect(fitMonthTable(['lip'])).toBeNull();
+  });
 });
 
 describe('turning a row into an instant', () => {
