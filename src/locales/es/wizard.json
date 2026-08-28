@@ -42,7 +42,7 @@
       "rows": {
         "destination": "Exportar al dispositivo",
         "range": "Todo el tiempo",
-        "format": "JSON — no HTML",
+        "format": "JSON o HTML",
         "quality": "Cualquier calidad de medios",
         "content": "Seguidores y seguidos"
       }
@@ -73,8 +73,8 @@
       "alt": "Paso 5: Configura el rango de fechas a Todo el tiempo"
     },
     "6": {
-      "title": "⚠️ Cambia el formato a JSON",
-      "description": "¡Esto es crítico! Haz clic en \"Formato\" › Selecciona \"JSON\" (no HTML). Los archivos HTML NO funcionarán con nuestro analizador.",
+      "title": "Cambia el formato a JSON",
+      "description": "Haz clic en \"Formato\" › Selecciona \"JSON\". Las exportaciones en HTML también funcionan, pero JSON es el formato que leemos de forma más confiable.",
       "alt": "Paso 6: Cambia el formato a JSON"
     },
     "7": {

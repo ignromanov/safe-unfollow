@@ -7,7 +7,7 @@
     "processing": "Analizando localmente...",
     "processingHint": "Procesar conjuntos de datos grandes (hasta 1M+) puede tomar un momento.",
     "ariaLabel": "Subir archivo ZIP de datos de Instagram",
-    "jsonShort": "La exportación debe ser en JSON, no en HTML.",
+    "jsonShort": "Cualquiera de los dos formatos funciona, JSON o HTML.",
     "seeGuide": "Ver la guía paso a paso",
     "privacyMicro": "Tu archivo nunca sale de tu dispositivo",
     "notSureLink": "¿No sabes qué subir? Consulta la guía",
@@ -17,14 +17,14 @@
   },
   "checklist": {
     "title": "Lista de verificación",
-    "format": "Formato: JSON (no HTML)",
+    "format": "Formato: JSON o HTML",
     "includes": "Incluye: 'Seguidores y seguidos'",
     "timeframe": "Período: 'Todo el tiempo'",
     "fileType": "Tipo de archivo: .zip"
   },
   "errors": {
     "commonTitle": "Error más común",
-    "commonHint": "Si tu exportación tiene 0 seguidores, probablemente exportaste en formato <strong>HTML</strong> o no seleccionaste la categoría de información \"Seguidores y seguidos\".",
+    "commonHint": "Si tu exportación tiene 0 seguidores, lo más probable es que no hayas seleccionado la categoría de información <strong>Seguidores y seguidos</strong>.",
     "learnFix": "Aprende cómo solucionarlo"
   },
   "diagnostic": {
@@ -45,9 +45,9 @@
         "fix": "Busca un archivo que termine en .zip en tu carpeta de Descargas. Debería llamarse algo como \"instagram-usuario-fecha.zip\"."
       },
       "HTML_FORMAT": {
-        "title": "Formato incorrecto: HTML",
-        "message": "Descargaste tus datos en formato HTML, pero esta herramienta requiere formato JSON para funcionar.",
-        "fix": "Ve al Centro de cuentas de Meta › Crear exportación › Exportar al dispositivo › elige el formato \"JSON\" (no HTML) › inicia la exportación de nuevo."
+        "title": "No pudimos leer esta exportación",
+        "message": "Esta es una exportación en HTML, y no encontramos tus listas de seguidores dentro de ella.",
+        "fix": "Pide a Instagram la misma exportación en JSON: Centro de cuentas de Meta › Crear exportación › Exportar al dispositivo › Formato: JSON. Esa versión es la que leemos de forma más confiable."
       },
       "NOT_INSTAGRAM_EXPORT": {
         "title": "No es una exportación de Instagram",
