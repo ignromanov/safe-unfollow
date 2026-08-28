@@ -7,7 +7,7 @@
     "processing": "ローカルで分析中...",
     "processingHint": "大規模データセット（100万件以上）の処理には少し時間がかかることがあります。",
     "ariaLabel": "InstagramデータのZIPファイルをアップロード",
-    "jsonShort": "エクスポートは JSON 形式が必要です（HTML は不可）。",
+    "jsonShort": "JSON でも HTML でも、どちらの形式でもアップロードできます。",
     "seeGuide": "ステップバイステップガイドを見る",
     "privacyMicro": "ファイルはデバイスから外に出ません",
     "notSureLink": "何をアップロードすればいいかわからない？ガイドを見る",
@@ -17,14 +17,14 @@
   },
   "checklist": {
     "title": "アップロード前チェックリスト",
-    "format": "形式: JSON（HTMLではない）",
+    "format": "形式: JSON または HTML",
     "includes": "含む: 「フォロワーとフォロー中」",
     "timeframe": "期間: 「全期間」",
     "fileType": "ファイル形式: .zip"
   },
   "errors": {
     "commonTitle": "よくあるエラー",
-    "commonHint": "エクスポートのフォロワー数が0の場合、<strong>HTML</strong>形式でエクスポートしたか、「フォロワーとフォロー中」カテゴリを選択していない可能性があります。",
+    "commonHint": "エクスポートのフォロワー数が0の場合、<strong>フォロワーとフォロー中</strong>カテゴリを選択していない可能性が高いです。",
     "learnFix": "修正方法を見る"
   },
   "diagnostic": {
@@ -45,9 +45,9 @@
         "fix": "ダウンロードフォルダ内の.zipで終わるファイルを探してください。「instagram-ユーザー名-日付.zip」のような名前になっているはずです。"
       },
       "HTML_FORMAT": {
-        "title": "形式が違います: HTML",
-        "message": "データをHTML形式でダウンロードしましたが、このツールはJSON形式が必要です。",
-        "fix": "Metaアカウントセンター › エクスポートを作成 › デバイスにエクスポート › 形式を「JSON」に設定（HTMLではない）› もう一度エクスポートをリクエストしてください。"
+        "title": "このエクスポートを読み取れませんでした",
+        "message": "これはHTML形式のエクスポートで、その中にフォロワーリストが見つかりませんでした。",
+        "fix": "同じエクスポートをJSON形式でInstagramにリクエストしてください：Metaアカウントセンター › エクスポートを作成 › デバイスにエクスポート › 形式：JSON。この形式が最も確実に読み取れます。"
       },
       "NOT_INSTAGRAM_EXPORT": {
         "title": "Instagramのエクスポートではありません",
