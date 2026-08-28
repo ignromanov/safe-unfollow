@@ -42,7 +42,12 @@ export function GuideStepSection({ step, isInView }: GuideStepSectionProps) {
           aria-hidden="true"
           className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm font-black ${
             step.isWarning
-              ? 'bg-amber-400 text-black'
+              ? // Solid in dark mode too, one step down the ramp to match the
+                // heading and icon. Measured: every dimmed variant fails the
+                // 4.5:1 this 14px text needs against the warning card
+                // (amber-400/20 = 3.42:1, /30 = 4.52:1 only with black text),
+                // while solid amber-500 on black is 9.79:1.
+                'bg-amber-400 text-black dark:bg-amber-500'
               : 'bg-primary/10 text-primary dark:bg-primary/20'
           }`}
         >

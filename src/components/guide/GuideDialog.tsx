@@ -27,11 +27,10 @@ export interface GuideDialogProps {
  * expensive one. Where IntersectionObserver is missing the dialog is all
  * lazy images, which is a degradation nobody can see and everybody can afford.
  */
-function useSectionsInView(scrollRef: React.RefObject<HTMLDivElement | null>, enabled: boolean) {
+function useSectionsInView(root: HTMLDivElement | null, enabled: boolean) {
   const [inView, setInView] = useState<ReadonlySet<number>>(new Set());
 
   useEffect(() => {
-    const root = scrollRef.current;
     if (!enabled || !root || typeof IntersectionObserver === 'undefined') return;
 
     // The node-to-step map is built once, from the same helper that wrote the
@@ -66,9 +65,72 @@ function useSectionsInView(scrollRef: React.RefObject<HTMLDivElement | null>, en
 
     for (const node of stepOf.keys()) observer.observe(node);
     return () => observer.disconnect();
-  }, [scrollRef, enabled]);
+  }, [root, enabled]);
 
   return inView;
+}
+
+/**
+ * Which section the reader is actually in, for the rail's fill and "Step N
+ * of 7" label — a different question from `useSectionsInView` above, which
+ * asks what to preload. That one uses a 200px margin because video wants
+ * advance notice; this one shrinks the root to a thin band near its top edge
+ * (`-70%` off the bottom) because a section 200px below the fold is not the
+ * one being read. Sharing one observer's tuning between the two questions
+ * would make either the preload late or the rail wrong.
+ *
+ * Deliberately not written to the URL (an earlier design did this and was
+ * rejected — the scroll-to-`step` effect above depends on `step`, so an
+ * observer-driven write would re-enter it and fight the reader's own
+ * scrolling). This is component state; the URL's `step` is only the fallback
+ * for the frame before the first callback arrives.
+ */
+function useActiveStep(root: HTMLDivElement | null, enabled: boolean) {
+  const [active, setActive] = useState<number | null>(null);
+  // The full set of sections currently inside the band — the callback only
+  // ever reports what *changed*, so the running total has to be kept here.
+  const intersectingRef = useRef<Set<number>>(new Set());
+
+  useEffect(() => {
+    if (!enabled || !root || typeof IntersectionObserver === 'undefined') {
+      // Reset on close: the next opening should show the URL's `step` for
+      // its first frame, not whatever section a previous visit ended on.
+      intersectingRef.current = new Set();
+      setActive(null);
+      return;
+    }
+
+    const stepOf = new Map<Element, number>();
+    for (const step of GUIDE_STEPS) {
+      const node = root.querySelector(`#${guideStepAnchorId(step.id)}`);
+      if (node) stepOf.set(node, step.id);
+    }
+
+    const observer = new IntersectionObserver(
+      entries => {
+        for (const entry of entries) {
+          const id = stepOf.get(entry.target);
+          if (id === undefined) continue;
+          if (entry.isIntersecting) intersectingRef.current.add(id);
+          else intersectingRef.current.delete(id);
+        }
+        // Several sections can share the band for a frame (a short one, or
+        // a fast scroll); the topmost — lowest id — is the one the reader's
+        // attention is on. An empty set (between sections, or the observer's
+        // startup batch) keeps the last known section rather than blanking
+        // the rail.
+        if (intersectingRef.current.size > 0) {
+          setActive(Math.min(...intersectingRef.current));
+        }
+      },
+      { root, rootMargin: '0px 0px -70% 0px', threshold: 0 }
+    );
+
+    for (const node of stepOf.keys()) observer.observe(node);
+    return () => observer.disconnect();
+  }, [root, enabled]);
+
+  return active;
 }
 
 /**
@@ -84,10 +146,32 @@ function useSectionsInView(scrollRef: React.RefObject<HTMLDivElement | null>, en
  * Exactly one DialogTitle (GH#140). No second close button: the primitive
  * renders its own, labelled from `common:buttons.close`.
  */
-export function GuideDialog({ open, step, source, onGoToStep, onClose }: GuideDialogProps) {
+// `source` is still part of the props contract but no longer read here: it
+// was only ever consumed by the entry-CTA gate this component used to have,
+// removed because it hid the guide's one link to Meta's profile picker
+// behind four of the six ways into this dialog. Kept on the interface (not
+// renamed away, not deleted) for PR 4 of this series, which is scheduled to
+// emit a `guide_open` event carrying it — see progress.md.
+export function GuideDialog({
+  open,
+  step,
+  source: _source,
+  onGoToStep,
+  onClose,
+}: GuideDialogProps) {
   const { t } = useTranslation('wizard');
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const inView = useSectionsInView(scrollRef, open);
+  // A callback ref, not `useRef` + `.current`: Radix's Portal (the thing that
+  // actually mounts this div) gates on its own `useState(false)`, flipped by
+  // a `useLayoutEffect` on its first render — so on the very commit this div
+  // is born, an effect elsewhere in this component that reads a plain ref's
+  // `.current` synchronously would still see null, and (with no dependency
+  // that ever changes again) would never get a second chance to look. A
+  // callback ref turns "the node exists" into a value React hands the
+  // hooks below at the exact commit it becomes true, instead of a timing
+  // assumption every reader of this file has to hold in their head.
+  const [scrollEl, setScrollEl] = useState<HTMLDivElement | null>(null);
+  const inView = useSectionsInView(scrollEl, open);
+  const activeStep = useActiveStep(scrollEl, open);
   // Whether this opening has already scrolled once. Reset on close, so the
   // next opening arrives with the same 'auto' jump rather than inheriting
   // the 'smooth' behaviour a rail tap earns later in the same session.
@@ -97,21 +181,23 @@ export function GuideDialog({ open, step, source, onGoToStep, onClose }: GuideDi
   // the URL's account) would otherwise be a no-op scroll.
   const [scrollNonce, setScrollNonce] = useState(0);
 
-  const scrollToStep = useCallback((target: number, behavior: ScrollBehavior) => {
-    const root = scrollRef.current;
-    const section = root?.querySelector<HTMLElement>(`#${guideStepAnchorId(target)}`);
-    if (!root || !section) return;
+  const scrollToStep = useCallback(
+    (target: number, behavior: ScrollBehavior) => {
+      const section = scrollEl?.querySelector<HTMLElement>(`#${guideStepAnchorId(target)}`);
+      if (!scrollEl || !section) return;
 
-    // scroll-margin-top (the `scroll-mt-4` this replaced) is honoured by
-    // scrollIntoView and scroll-snap, not by a manual scrollTo — so the 16px
-    // gap is subtracted here instead, where it actually takes effect.
-    root.scrollTo?.({ top: section.offsetTop - root.offsetTop - 16, behavior });
+      // scroll-margin-top (the `scroll-mt-4` this replaced) is honoured by
+      // scrollIntoView and scroll-snap, not by a manual scrollTo — so the 16px
+      // gap is subtracted here instead, where it actually takes effect.
+      scrollEl.scrollTo?.({ top: section.offsetTop - scrollEl.offsetTop - 16, behavior });
 
-    // A deep link or a rail tap moves the viewport, but Radix leaves focus
-    // wherever it put it on open (the first rail button) — a keyboard or
-    // screen-reader user needs focus to agree with what they're now seeing.
-    section.querySelector<HTMLElement>('h3')?.focus();
-  }, []);
+      // A deep link or a rail tap moves the viewport, but Radix leaves focus
+      // wherever it put it on open (the first rail button) — a keyboard or
+      // screen-reader user needs focus to agree with what they're now seeing.
+      section.querySelector<HTMLElement>('h3')?.focus();
+    },
+    [scrollEl]
+  );
 
   // Scroll to the claimed section. Runs on every `step` change (a rail tap
   // and a URL arriving with ?step=6 take the same path) and on scrollNonce
@@ -121,14 +207,22 @@ export function GuideDialog({ open, step, source, onGoToStep, onClose }: GuideDi
       hasArrivedRef.current = false;
       return;
     }
-    if (step === null) return;
+    // `!scrollEl` is what keeps hasArrivedRef honest. The callback ref makes
+    // this effect run TWICE per opening — once on the commit where Radix's
+    // Portal has not attached the container yet, once when it has — and the
+    // first of those scrolls nothing. Without this guard the flag would be
+    // set by the run that did nothing, so the run that actually scrolls
+    // would read `true` and animate: `?step=6` would smooth-scroll past five
+    // sections on arrival, which is the exact layout shift the line below
+    // exists to avoid.
+    if (step === null || !scrollEl) return;
 
     // The first scroll of an opening jumps straight there; animating past
     // several sections' worth of pixels on arrival is a self-inflicted
     // layout shift. A later rail tap, within the same opening, animates.
     scrollToStep(step, hasArrivedRef.current ? 'smooth' : 'auto');
     hasArrivedRef.current = true;
-  }, [open, step, scrollNonce, scrollToStep]);
+  }, [open, step, scrollNonce, scrollEl, scrollToStep]);
 
   const handleRailSelect = useCallback(
     (target: number) => {
@@ -153,18 +247,32 @@ export function GuideDialog({ open, step, source, onGoToStep, onClose }: GuideDi
         // 7" label appearing). rounded-3xl/shadow-2xl match the house style
         // for modals (AlertDialogContent) — every card inside this one is
         // already rounded-3xl, and the shell was the one holdout at rounded-lg.
-        className="flex max-h-[90vh] w-full max-w-2xl flex-col gap-0 overflow-hidden rounded-3xl p-0 shadow-2xl sm:max-w-2xl"
+        // 90svh, not 90vh: iOS resolves a bare vh to the LARGE viewport (URL
+        // bar hidden), so while the bar is showing the cap is taller than
+        // what's actually visible and a dialog centred in that space loses
+        // content at both ends. svh tracks the space that's really there.
+        //
+        // max-w-[calc(100%-2rem)] has to be restated here, not dropped: it is
+        // ui/dialog.tsx's own base value for exactly this gutter, but cn()
+        // (tailwind-merge) resolves the whole max-w group to whichever class
+        // comes last, and an unconditional max-w-2xl here silently replaced
+        // it — edge to edge at a 390px width, no gutter for shadow-2xl's
+        // shadow or the rounded-3xl corners to sit inside.
+        className="flex max-h-[90svh] w-full max-w-[calc(100%-2rem)] flex-col gap-0 overflow-hidden rounded-3xl p-0 shadow-2xl sm:max-w-2xl"
         aria-describedby={undefined}
       >
         <DialogHeader className="border-b border-border px-4 pb-3 pt-4 pe-12">
           <DialogTitle className="text-base">
             {t('entry.accordion.trigger', { count: GUIDE_STEPS.length })}
           </DialogTitle>
-          <GuideRail current={step} onSelect={handleRailSelect} />
+          {/* activeStep is what the observer has actually seen; step (the
+              URL's claim) only covers the one frame before its first
+              callback arrives. */}
+          <GuideRail current={activeStep ?? step} onSelect={handleRailSelect} />
         </DialogHeader>
 
         <div
-          ref={scrollRef}
+          ref={setScrollEl}
           data-guide-scroll
           // tabIndex/role/aria-label: Chrome makes an overflow container
           // focusable by default, Firefox and Safari do not — and the seven
@@ -176,21 +284,21 @@ export function GuideDialog({ open, step, source, onGoToStep, onClose }: GuideDi
           aria-label={t('entry.accordion.trigger', { count: GUIDE_STEPS.length })}
           className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4"
         >
-          {/* Only for a reader who arrived by URL — from an error screen or a
-              shared link. Someone who opened this from the page scrolled past
-              the same CTA moments ago, and repeating it at full width is the
-              second entry screen this whole move exists to remove. */}
-          {source === 'url' && (
-            <a
-              href={ACCOUNTS_CENTER_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => analytics.linkClick('meta_accounts')}
-              className="inline-flex min-h-[48px] w-full shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-normal rounded-2xl bg-primary px-6 py-3 text-center text-sm font-black text-primary-foreground shadow-lg"
-            >
-              {t('entry.cta')} <ExternalLink size={18} className="shrink-0" aria-hidden="true" />
-            </a>
-          )}
+          {/* Unconditional: this is the step before step 1, and nothing else
+              in the guide says where Meta's profile picker lives — sections
+              1..7 walk the export flow once the reader is already inside it.
+              Four of the six ways into this dialog (the StepAccordion row,
+              and all three UploadZone triggers) used to open here with no
+              way to reach Accounts Center at all. */}
+          <a
+            href={ACCOUNTS_CENTER_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => analytics.linkClick('meta_accounts')}
+            className="inline-flex min-h-[48px] w-full shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-normal rounded-2xl bg-primary px-6 py-3 text-center text-sm font-black text-primary-foreground shadow-lg"
+          >
+            {t('entry.cta')} <ExternalLink size={18} className="shrink-0" aria-hidden="true" />
+          </a>
 
           {GUIDE_STEPS.map(guideStep => (
             <GuideStepSection
@@ -201,14 +309,33 @@ export function GuideDialog({ open, step, source, onGoToStep, onClose }: GuideDi
           ))}
 
           {/* The guide cannot end in "upload it now": Instagram sends the file
-              in 5-30 minutes and the reader has nothing to upload yet. The
-              reminder is the only action available at this point, so it takes
-              the primary weight and closing takes the secondary. */}
+              in 5-30 minutes and the reader has nothing to upload yet — but
+              it also can't end in a reminder for a request the reader has
+              not sent, so Accounts Center is what takes the primary weight
+              here, same as at the top of the scroll. The reminder is real
+              and useful, just second: a reader who has just finished reading
+              hasn't asked Instagram for anything yet, and a reminder set
+              before that ask fires against an empty inbox. */}
           <div className="flex shrink-0 flex-col gap-3 rounded-3xl border border-border bg-card p-4">
+            <a
+              href={ACCOUNTS_CENTER_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => analytics.linkClick('meta_accounts')}
+              className="inline-flex min-h-[48px] cursor-pointer items-center justify-center gap-2 rounded-2xl bg-primary px-6 py-3 text-center text-sm font-black text-primary-foreground shadow-lg"
+            >
+              {t('entry.cta')} <ExternalLink size={18} className="shrink-0" aria-hidden="true" />
+            </a>
+            {/* Secondary weight, still plainly a control — same bordered
+                treatment as InlineDonationCard's "Buy me a coffee": a
+                bordered surface above the card, a brand-tinted hover, no
+                fill. Not `variant="outline"` from ui/button.tsx — that
+                variant's hover pairs near-black text on a near-black fill in
+                dark mode; see InlineDonationCard's own note. */}
             <button
               type="button"
               onClick={handleReminder}
-              className="inline-flex min-h-[48px] cursor-pointer items-center justify-center gap-2 rounded-2xl bg-primary px-6 py-3 text-sm font-black text-primary-foreground shadow-lg"
+              className="inline-flex min-h-[48px] cursor-pointer items-center justify-center gap-2 rounded-2xl border border-border bg-card px-6 py-3 text-sm font-bold text-foreground transition-colors hover:bg-primary/10"
             >
               <Calendar size={18} aria-hidden="true" />
               {t('calendar.addReminder')}

@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { screen, within } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { act, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import wizardEN from '@/locales/en/wizard.json';
@@ -14,7 +14,37 @@ vi.mock('@/lib/analytics', () => ({
 
 import { GuideDialog } from '@/components/guide/GuideDialog';
 import { analytics } from '@/lib/analytics';
-import { ACCOUNTS_CENTER_URL, GUIDE_STEPS } from '@/config/wizard-steps';
+import { ACCOUNTS_CENTER_URL, GUIDE_STEPS, guideStepAnchorId } from '@/config/wizard-steps';
+
+// The band useActiveStep narrows its root to, for telling its observer apart
+// from useSectionsInView's 200px preload one — both watch the same anchors.
+const ACTIVE_STEP_ROOT_MARGIN = '0px 0px -70% 0px';
+
+/**
+ * A minimal IntersectionObserver stub, recording each instance's `rootMargin`
+ * alongside its observed elements. Two hooks in GuideDialog run an observer
+ * over the same anchors for two different questions (what to preload vs.
+ * where the reader is); a test driving one must not also fire the other.
+ */
+let observed: Array<{
+  element: Element;
+  callback: IntersectionObserverCallback;
+  rootMargin?: string;
+}>;
+let realObserver: typeof IntersectionObserver;
+
+function reportActiveSection(step: number) {
+  const target = document.querySelector(`#${guideStepAnchorId(step)}`) as Element;
+  const entries = observed.filter(entry => entry.rootMargin === ACTIVE_STEP_ROOT_MARGIN);
+  act(() => {
+    for (const { element, callback } of entries) {
+      callback(
+        [{ isIntersecting: element === target, target: element } as IntersectionObserverEntry],
+        {} as IntersectionObserver
+      );
+    }
+  });
+}
 
 function open(props: Partial<React.ComponentProps<typeof GuideDialog>> = {}) {
   return render(
@@ -30,7 +60,34 @@ function open(props: Partial<React.ComponentProps<typeof GuideDialog>> = {}) {
 }
 
 describe('GuideDialog', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    observed = [];
+    realObserver = globalThis.IntersectionObserver;
+    globalThis.IntersectionObserver = class {
+      private rootMargin?: string;
+      constructor(
+        private callback: IntersectionObserverCallback,
+        options?: IntersectionObserverInit
+      ) {
+        this.rootMargin = options?.rootMargin;
+      }
+      observe(element: Element): void {
+        observed.push({ element, callback: this.callback, rootMargin: this.rootMargin });
+      }
+      disconnect(): void {
+        observed = observed.filter(entry => entry.callback !== this.callback);
+      }
+      unobserve(): void {}
+      takeRecords(): IntersectionObserverEntry[] {
+        return [];
+      }
+    } as unknown as typeof IntersectionObserver;
+  });
+
+  afterEach(() => {
+    globalThis.IntersectionObserver = realObserver;
+  });
 
   it('has exactly one DialogTitle', () => {
     // GH#140: two DialogTitles in one DialogContent make aria-labelledby
@@ -56,17 +113,29 @@ describe('GuideDialog', () => {
     expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(GUIDE_STEPS.length);
   });
 
-  it('shows the entry strip only when opened from a URL', () => {
-    // Opened from the page, the reader scrolled past the same CTA ~200px ago;
-    // a full-width primary repeat of it is the second entry screen this whole
-    // move exists to remove.
-    const { unmount } = open({ source: 'accordion' });
-    expect(screen.queryByRole('link', { name: /accounts center/i })).toBeNull();
-    unmount();
+  it('links to Accounts Center regardless of how the dialog was opened', () => {
+    // Regression: this used to render only for source === 'url'. Four of six
+    // entry points — the StepAccordion row and all three UploadZone triggers
+    // — produce 'accordion' or 'zone', and none of steps.1..7 ever says where
+    // Meta's profile picker lives, so those readers had no way to reach it
+    // from inside the dialog at all.
+    open({ source: 'accordion' });
 
-    open({ source: 'url', step: 3 });
-    const cta = screen.getByRole('link', { name: /accounts center/i });
+    const cta = screen.getAllByRole('link', { name: /accounts center/i })[0];
     expect(cta).toHaveAttribute('href', ACCOUNTS_CENTER_URL);
+  });
+
+  it('links to Accounts Center a second time, from the footer', () => {
+    // The footer used to end on the reminder alone. Instagram takes 5-30
+    // minutes to prepare the export, so a reader who just finished reading
+    // hasn't asked for anything yet — the reminder is secondary, this is not.
+    open({ source: 'accordion' });
+
+    const links = screen.getAllByRole('link', { name: /accounts center/i });
+    expect(links).toHaveLength(2);
+    for (const link of links) {
+      expect(link).toHaveAttribute('href', ACCOUNTS_CENTER_URL);
+    }
   });
 
   it('states the privacy promise inside the dialog', () => {
@@ -131,18 +200,45 @@ describe('GuideDialog', () => {
     // while the dialog stays open) would otherwise see section 5 while focus
     // stayed wherever Radix's own autofocus put it.
     //
-    // Rendered via a step *change* rather than the initial mount: Radix's
-    // Portal mounts its content in a second, layout-effect-driven commit, and
-    // in this test harness our own scroll effect can run before that second
-    // commit has attached `scrollRef` — a jsdom/testing-library ordering
-    // artifact around Radix's two-pass Portal mount, not a claim about first
-    // paint in a real browser. A step change onto an already-settled dialog
-    // exercises the exact same scrollToStep/focus code the initial arrival
-    // does, without depending on that ordering.
+    // Rendered via a step *change* rather than the initial mount only because
+    // that is what the assertion needs — a *second* claimed section, to prove
+    // focus follows it rather than having landed there some other way. It is
+    // no longer a workaround for anything: the scroll container attaches via
+    // a callback ref (`setScrollEl`), so the arrival effect below sees a real
+    // node on the commit it is born, not on a later one it has already missed
+    // — see 'scrolls to the URL-claimed step on the very first open' for that
+    // path tested directly.
     const { rerender } = open({ step: 3, source: 'url' });
     rerender(<GuideDialog open step={5} source="url" onGoToStep={vi.fn()} onClose={vi.fn()} />);
 
     expect(document.activeElement).toBe(document.querySelector('#guide-step-5-heading'));
+  });
+
+  it('scrolls to the URL-claimed step on the very first open', () => {
+    // Regression: with the scroll container behind a `useRef` instead of a
+    // callback ref, this never fired. Radix's Portal (the thing that actually
+    // mounts this container) gates its first render on its own internal
+    // `useState(false)`, flipped by a `useLayoutEffect` — so on the commit
+    // this dialog first opens, an effect reading `scrollRef.current`
+    // synchronously still saw null, and — with `[scrollRef, enabled]` as its
+    // only deps, both already stable — never got a second chance to look.
+    // `?step=N` had, in effect, never scrolled on open; only a later rail tap
+    // worked, because it bumps `scrollNonce` well after the dialog settles.
+    const scrollSpy = vi.fn();
+    const originalScrollTo = Element.prototype.scrollTo;
+    Element.prototype.scrollTo = scrollSpy;
+
+    open({ step: 5, source: 'url' });
+
+    // `behavior: 'auto'`, not merely "was called": the callback ref makes the
+    // arrival effect run twice per opening, and the first run has no
+    // container to scroll. If it still flips `hasArrivedRef`, the run that
+    // does scroll reads it as a repeat visit and animates — the jump becomes
+    // a smooth crawl past four sections, and a bare toHaveBeenCalled() is
+    // green either way.
+    expect(scrollSpy).toHaveBeenCalledWith(expect.objectContaining({ behavior: 'auto' }));
+    expect(scrollSpy).toHaveBeenCalledTimes(1);
+    Element.prototype.scrollTo = originalScrollTo;
   });
 
   it('scrolls the section the rail is tapped for, even when it is the one already claimed', async () => {
@@ -168,5 +264,44 @@ describe('GuideDialog', () => {
     );
 
     expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
+  it('shows the URL-claimed step in the rail before anything has been observed', () => {
+    // GuideRail's `current` is `activeStep ?? step` — the observer's report
+    // takes over once it has one, but the URL's claim is what shows first,
+    // in the one frame before the observer's first callback arrives.
+    open({ step: 4, source: 'url' });
+
+    expect(screen.getByText('Step 4 of 7')).toBeInTheDocument();
+  });
+
+  it('attaches its observer to all seven anchors on a plain mount, no rerender workaround', () => {
+    // Rendered exactly like `open()` always has — `open` already true from
+    // the first commit, no step-change or open-transition rerender. Radix's
+    // Portal (the thing that actually mounts the scroll container) gates its
+    // own first render on a `useState(false)`, so a plain ref's `.current`
+    // read stayed null forever on this exact path; the callback ref is what
+    // makes there be anything to assert here at all.
+    open({ step: 2, source: 'url' });
+
+    const entries = observed.filter(entry => entry.rootMargin === ACTIVE_STEP_ROOT_MARGIN);
+    expect(entries).toHaveLength(GUIDE_STEPS.length);
+    const anchored = new Set(entries.map(entry => entry.element.id));
+    for (const step of GUIDE_STEPS) {
+      expect(anchored.has(guideStepAnchorId(step.id))).toBe(true);
+    }
+  });
+
+  it('tracks the reader via the observer, not the URL, once it has reported', () => {
+    open({ step: 2, source: 'url' });
+    expect(screen.getByText('Step 2 of 7')).toBeInTheDocument();
+
+    reportActiveSection(5);
+
+    expect(screen.getByText('Step 5 of 7')).toBeInTheDocument();
+    const fillOf = (id: number) =>
+      screen.getByRole('button', { name: `Step ${id}` }).querySelector('[data-slot="rail-fill"]');
+    expect(fillOf(5)).toHaveClass('bg-primary');
+    expect(fillOf(6)).toHaveClass('bg-muted-foreground');
   });
 });
