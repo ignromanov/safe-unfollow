@@ -4,13 +4,11 @@
     "description": "Your data remains 100% private. We analyze your Instagram ZIP file locally in your browser.",
     "dropHere": "Drop your Instagram ZIP file here",
     "orBrowse": "Or tap to browse your local storage.",
-    "jsonOnly": "JSON Format Only",
     "processing": "Analyzing locally...",
     "processingHint": "Processing large datasets (up to 1M+) can take a moment.",
     "ariaLabel": "Upload Instagram data ZIP file",
-    "jsonShort": "You need the JSON export, not HTML.",
+    "jsonShort": "Either export format works, JSON or HTML.",
     "seeGuide": "See the step-by-step guide",
-    "jsonRequired": "Requires JSON format export",
     "privacyMicro": "Your file never leaves your device",
     "notSureLink": "Not sure what to upload? See the guide",
     "processingAria": "Processing your file, please wait...",
@@ -19,14 +17,14 @@
   },
   "checklist": {
     "title": "Pre-upload Checklist",
-    "format": "Format: JSON (not HTML)",
+    "format": "Format: JSON or HTML",
     "includes": "Includes: 'Followers and following'",
     "timeframe": "Timeframe: 'All Time'",
     "fileType": "File type: .zip"
   },
   "errors": {
     "commonTitle": "Most Common Error",
-    "commonHint": "If your export has 0 followers, you likely exported in <strong>HTML</strong> format or didn't select the \"Followers and following\" information category.",
+    "commonHint": "If your export has 0 followers, you most likely didn't select the <strong>Followers and following</strong> information category.",
     "learnFix": "Learn how to fix"
   },
   "diagnostic": {
@@ -47,9 +45,9 @@
         "fix": "Look for a file ending in .zip in your Downloads folder. It should be named something like \"instagram-username-date.zip\"."
       },
       "HTML_FORMAT": {
-        "title": "Wrong Format: HTML",
-        "message": "You downloaded your data in HTML format, but this tool requires JSON format to work.",
-        "fix": "Go back to Meta Accounts Center › Create export › Export to device › set the format to \"JSON\" (not HTML) › start the export again."
+        "title": "We couldn't read this export",
+        "message": "This is an HTML export, and we couldn't find your follower lists inside it.",
+        "fix": "Ask Instagram for the same export in JSON: Meta Accounts Center › Create export › Export to device › Format: JSON. That version is the one we read most reliably."
       },
       "NOT_INSTAGRAM_EXPORT": {
         "title": "Not an Instagram Export",

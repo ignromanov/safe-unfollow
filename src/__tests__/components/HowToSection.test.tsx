@@ -79,7 +79,7 @@ describe('HowToSection', () => {
       renderWithRouter(<HowToSection />);
 
       expect(screen.getByText(/Click the button to open Meta Accounts Center/)).toBeInTheDocument();
-      expect(screen.getByText(/Critical step! Click "Format"/)).toBeInTheDocument();
+      expect(screen.getByText(howtoEN.steps['6'].description)).toBeInTheDocument();
     });
 
     it('should show Critical badge for warning steps', () => {

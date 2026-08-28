@@ -28,7 +28,7 @@
     },
     "6": {
       "title": "Change Format to JSON",
-      "description": "Critical step! Click \"Format\" › Select \"JSON\" (not HTML). HTML files will NOT work."
+      "description": "Click \"Format\" › Select \"JSON\". HTML exports also work, but JSON is the format we read most reliably."
     },
     "7": {
       "title": "Review & Start Export",
