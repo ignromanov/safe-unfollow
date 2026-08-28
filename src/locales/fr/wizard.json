@@ -42,7 +42,7 @@
       "rows": {
         "destination": "Exporter sur mon appareil",
         "range": "Tout",
-        "format": "JSON — pas HTML",
+        "format": "JSON ou HTML",
         "quality": "Toute qualité de média",
         "content": "Abonnés et abonnements"
       }
@@ -73,8 +73,8 @@
       "alt": "Étape 5 : Définissez la plage de dates sur Tout"
     },
     "6": {
-      "title": "⚠️ Changez le format en JSON",
-      "description": "C'est crucial ! Cliquez sur « Format » › Sélectionnez « JSON » (pas HTML). Les fichiers HTML NE fonctionneront PAS avec notre analyseur.",
+      "title": "Changez le format en JSON",
+      "description": "Cliquez sur « Format » › Sélectionnez « JSON ». Les exports HTML fonctionnent aussi, mais JSON est le format que nous lisons de la manière la plus fiable.",
       "alt": "Étape 6 : Changez le format en JSON"
     },
     "7": {
