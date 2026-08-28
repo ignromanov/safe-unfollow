@@ -42,7 +42,7 @@
       "rows": {
         "destination": "Zu Gerät exportieren",
         "range": "Gesamter Zeitraum",
-        "format": "JSON — nicht HTML",
+        "format": "JSON oder HTML",
         "quality": "Beliebige Medienqualität",
         "content": "Follower und Gefolgte"
       }
@@ -73,8 +73,8 @@
       "alt": "Schritt 5: Setze den Zeitraum auf Gesamter Zeitraum"
     },
     "6": {
-      "title": "⚠️ Ändere das Format auf JSON",
-      "description": "Das ist kritisch! Klicke auf \"Format\" › Wähle \"JSON\" (nicht HTML). HTML-Dateien funktionieren NICHT mit unserem Analyzer.",
+      "title": "Ändere das Format auf JSON",
+      "description": "Klicke auf \"Format\" › Wähle \"JSON\". HTML-Exporte funktionieren auch, aber JSON ist das Format, das wir am zuverlässigsten lesen können.",
       "alt": "Schritt 6: Ändere das Format auf JSON"
     },
     "7": {
