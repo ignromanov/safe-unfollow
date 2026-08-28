@@ -37,52 +37,33 @@ export function GuideRail({ current, onSelect }: GuideRailProps) {
         </span>
       )}
       <nav className="flex" aria-label={t('header.stepNavigation')}>
-        {GUIDE_STEPS.map(step => {
-          const reached = current !== null && step.id <= current;
-          return (
-            <button
-              key={step.id}
-              type="button"
-              onClick={() => onSelect(step.id)}
-              aria-current={step.id === current ? 'step' : undefined}
-              aria-label={t('header.stepLabel', { step: step.id })}
-              className="flex min-h-11 flex-1 cursor-pointer flex-col items-center justify-center gap-1 px-0.5"
-            >
-              {/* The numeral is what makes this read as seven steps rather
-                  than one progress bar: the bar alone is 6px of a 44px tap
-                  target, with no border, fill or pressed state to say it is a
-                  control. aria-hidden because the button is already named
-                  "Step N" — a screen reader would otherwise hear the number
-                  twice. text-primary is NOT available here: it measures
-                  4.06:1 on the card in light mode, which clears the 3:1 a UI
-                  component needs but not the 4.5:1 this text does. */}
-              <span
-                aria-hidden="true"
-                className={`text-xs font-bold leading-none ${
-                  reached ? 'text-foreground' : 'text-muted-foreground'
-                }`}
-              >
-                {step.id}
-              </span>
-              <span
-                aria-hidden="true"
-                // Named, because the numeral above is also a span and every
-                // test that reached for the fill did it with
-                // `button.querySelector('span')` — which now returns the
-                // numeral instead, silently asserting against the wrong node.
-                data-slot="rail-fill"
-                className={`block h-1.5 w-full rounded-full transition-all duration-300 ${
-                  // bg-border measures 1.27:1 light / 1.18:1 dark against the
-                  // card — nowhere near the 3:1 WCAG 1.4.11 floor for a UI
-                  // component. bg-muted-foreground is the only option that
-                  // clears it in both themes (4.85:1 / 8.45:1); any alpha on it
-                  // washes back out against the card's near-white background.
-                  reached ? 'bg-primary' : 'bg-muted-foreground'
-                }`}
-              />
-            </button>
-          );
-        })}
+        {GUIDE_STEPS.map(step => (
+          <button
+            key={step.id}
+            type="button"
+            onClick={() => onSelect(step.id)}
+            aria-current={step.id === current ? 'step' : undefined}
+            aria-label={t('header.stepLabel', { step: step.id })}
+            className="flex min-h-11 flex-1 cursor-pointer items-center justify-center px-0.5"
+          >
+            <span
+              aria-hidden="true"
+              // Named rather than left as the button's only child: a test
+              // reaching for the fill with `querySelector('span')` binds to
+              // "there happens to be one span here", which stops being true
+              // the moment anything else is added inside the button.
+              data-slot="rail-fill"
+              className={`block h-1.5 w-full rounded-full transition-all duration-300 ${
+                // bg-border measures 1.27:1 light / 1.18:1 dark against the
+                // card — nowhere near the 3:1 WCAG 1.4.11 floor for a UI
+                // component. bg-muted-foreground is the only option that
+                // clears it in both themes (4.85:1 / 8.45:1); any alpha on it
+                // washes back out against the card's near-white background.
+                current !== null && step.id <= current ? 'bg-primary' : 'bg-muted-foreground'
+              }`}
+            />
+          </button>
+        ))}
       </nav>
     </div>
   );

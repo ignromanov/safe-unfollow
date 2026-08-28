@@ -71,32 +71,14 @@ describe('GuideRail', () => {
     // modifier washing it back out against the near-white card.
     render(<GuideRail current={3} onSelect={vi.fn()} />);
 
-    // [data-slot=rail-fill], not querySelector('span'): each button now
-    // holds a numeral span before the fill, and the bare tag query
-    // returns that one.
+    // [data-slot=rail-fill], not querySelector('span'): the fill is named,
+    // so this keeps pointing at it if anything else is ever added inside
+    // the button.
     const segments = screen
       .getAllByRole('button')
       .map(button => button.querySelector('[data-slot="rail-fill"]'));
     expect(segments[6]!.className).toContain('bg-muted-foreground');
     expect(segments[6]!.className).not.toContain('bg-border');
     expect(segments[0]!.className).toContain('bg-primary');
-  });
-
-  it('numbers every segment, and does not read the number twice', () => {
-    // The fill alone is 6px of a 44px tap target with no border, background
-    // or pressed state — the numeral is what says "seven steps" rather than
-    // "one progress bar". It is aria-hidden because the button is already
-    // named "Step N"; without that a screen reader hears the number, then
-    // the name that repeats it.
-    render(<GuideRail current={3} onSelect={vi.fn()} />);
-
-    for (const step of GUIDE_STEPS) {
-      const numeral = screen
-        .getByRole('button', { name: `Step ${step.id}` })
-        .querySelector('span:not([data-slot="rail-fill"])');
-      expect(numeral).not.toBeNull();
-      expect(numeral!.textContent).toBe(String(step.id));
-      expect(numeral!.getAttribute('aria-hidden')).toBe('true');
-    }
   });
 });
