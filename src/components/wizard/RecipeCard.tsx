@@ -13,9 +13,12 @@ const TITLE_ID = 'recipe-card-title';
 /**
  * The one row that is not a checklist item.
  *
- * `html_format` is 55.2% of every upload failure on the site — readers get
- * four of these five settings right and this one wrong, because Instagram's
- * dialog defaults to HTML. Five identical green checks say all five are
+ * It used to be `format`, because HTML was the failure that dominated the
+ * site. The transcoder reads HTML, so that row is now a preference and the
+ * marker follows the setting that still decides whether there is an answer at
+ * all: `content`. Step 4 carries the same marker in `wizard-steps.ts` and in
+ * `HowToSection`, and did so before this change — this row is catching up with
+ * them, not making a new claim. Five identical green checks say all five are
  * equally easy; the marked row is the only thing on this screen that says
  * otherwise.
  *
@@ -31,7 +34,7 @@ const TITLE_ID = 'recipe-card-title';
  * indented warning row would break the checklist's left edge, which is the
  * thing that makes it read as a list at all.
  */
-const WARNING_ROW_KEY = 'format';
+const WARNING_ROW_KEY = 'content';
 
 /**
  * The recipe card is a reference, not a second set of instructions: it is the
@@ -62,6 +65,7 @@ export function RecipeCard() {
       <ul className="space-y-2">
         {ROW_KEYS.map(key => {
           const isWarning = key === WARNING_ROW_KEY;
+          const isFormat = key === 'format';
 
           return (
             <li
@@ -73,8 +77,8 @@ export function RecipeCard() {
               }
             >
               {/* Both icons are aria-hidden: the row's text already carries
-                  the whole message ("JSON — not HTML"), so nothing here is
-                  conveyed by colour or glyph alone. */}
+                  the whole message ("Followers and following"), so nothing here
+                  is conveyed by colour or glyph alone. */}
               {isWarning ? (
                 <AlertTriangle
                   size={16}
@@ -85,7 +89,7 @@ export function RecipeCard() {
                 <Check size={16} className="mt-0.5 shrink-0 text-emerald-500" aria-hidden="true" />
               )}
               <span>
-                {isWarning
+                {isFormat
                   ? renderFormatRow(t('entry.recipe.rows.format'))
                   : t(`entry.recipe.rows.${key}`)}
               </span>
