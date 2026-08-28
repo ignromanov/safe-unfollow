@@ -4,7 +4,12 @@
  */
 
 import type { FileExpectation, InstagramExportEntry, ParseWarning, RawItem } from '@/core/types';
-import { FILE_SPECS, RELATIONSHIP_EXTENSIONS } from './instagram-file-specs';
+import {
+  FILE_SPECS,
+  RELATIONSHIP_EXTENSIONS,
+  relationshipFileBase,
+  relationshipFormatOf,
+} from './instagram-file-specs';
 import {
   UNREADABLE_ENTRIES_FIX,
   describeUnreadableEntries,
@@ -160,8 +165,23 @@ export async function parseFollowersFromZip(
     .concat([`followers_.*\\.${RELATIONSHIP_EXTENSIONS}`]);
   const followersRaw: RawItem[] = [];
   const followersSeen = new Set<string>();
+  /**
+   * One shard per base name, not per file name.
+   *
+   * `followers_1.json` and `followers_1.html` are the same shard written twice,
+   * and both match the globs above — so a half-merged archive used to have its
+   * followers read from BOTH and unioned. Harmless when the two are the same
+   * export; a wrong answer when they are not, because the union of two
+   * snapshots taken weeks apart contains people who have since unfollowed, and
+   * every one of them then deflates `notFollowingBack` and inflates `mutuals`
+   * with no warning attached.
+   *
+   * The rule is the one `readRelationshipFileFromZip` already applies to
+   * `following.json`: at each base, JSON first, and read exactly one. Keeping
+   * the two required files on different rules is what made this invisible —
+   * `following` came from one export and `followers` from two.
+   */
   const followersFilesByName = new Map<string, ZipEntry>();
-  const foundFollowerPaths: string[] = [];
   const warnings: ParseWarning[] = [];
   // Names of shards whose top-level shape didn't resolve via `resolveEntryList`
   // (GH#21) — neither a bare array, `{ relationships_followers: [...] }`, nor a
@@ -173,25 +193,31 @@ export async function parseFollowersFromZip(
   // files each came from is not something they can act on.
   let unresolvedEntries = 0;
 
+  const keepShard = (f: ZipEntry) => {
+    const base = relationshipFileBase(f.name);
+    const kept = followersFilesByName.get(base);
+    // First match wins, except that JSON outranks HTML however they were found.
+    if (
+      kept &&
+      (relationshipFormatOf(f.name) !== 'json' || relationshipFormatOf(kept.name) === 'json')
+    )
+      return;
+    followersFilesByName.set(base, f);
+  };
+
   for (const g of followersGlobs) {
     const regex = new RegExp('^' + g + '$', 'i');
-    for (const f of archive.find(regex)) {
-      if (!followersFilesByName.has(f.name)) {
-        followersFilesByName.set(f.name, f);
-        foundFollowerPaths.push(f.name);
-      }
-    }
+    for (const f of archive.find(regex)) keepShard(f);
   }
 
   if (followersFilesByName.size === 0) {
     const shardFallback = new RegExp(`followers_\\d+\\.${RELATIONSHIP_EXTENSIONS}$`, 'i');
-    for (const f of archive.find(shardFallback)) {
-      if (!followersFilesByName.has(f.name)) {
-        followersFilesByName.set(f.name, f);
-        foundFollowerPaths.push(f.name);
-      }
-    }
+    for (const f of archive.find(shardFallback)) keepShard(f);
   }
+
+  // Reported after the choice, so what the reader is told was found is what was
+  // actually read — a discarded twin is not a missing file and not a read one.
+  const foundFollowerPaths = [...followersFilesByName.values()].map(f => f.name);
 
   for (const f of followersFilesByName.values()) {
     if (!f) continue;

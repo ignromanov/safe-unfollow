@@ -3,6 +3,7 @@
  * Describes all files we look for in Instagram data export
  */
 
+import { RELATIONSHIP_FORMATS, type RelationshipFormat } from '@/core/types';
 import { escapeRegExp } from './instagram-utils';
 
 export interface FileSpec {
@@ -201,7 +202,36 @@ export const OPTIONAL_FILE_DRIFT_CODES: ReadonlySet<string> = new Set(
  * its own group — so no caller's group indices depend on how many alternatives
  * are spelled out here, and adding one cannot silently shift them.
  */
-export const RELATIONSHIP_EXTENSIONS = '(?:json|html)';
+export const RELATIONSHIP_EXTENSIONS = `(?:${RELATIONSHIP_FORMATS.join('|')})`;
+
+/** The extension alone, for reading one name's format rather than matching it. */
+const RELATIONSHIP_EXTENSION = new RegExp(`\\.(?<ext>${RELATIONSHIP_EXTENSIONS})$`, 'i');
+
+/**
+ * Which markup this file name says it is written in, or `null` for a name that
+ * is not a relationship file at all.
+ *
+ * The single dispatch point, and the reason it is a function rather than a
+ * comparison at each call site: a caller that asks "is it html?" has silently
+ * decided what everything else is. Adding a format here is a compile error at
+ * `parseRelationshipFile`'s switch, which is where the decision belongs.
+ */
+export function relationshipFormatOf(fileName: string): RelationshipFormat | null {
+  const ext = RELATIONSHIP_EXTENSION.exec(fileName)?.groups?.ext?.toLowerCase();
+  return RELATIONSHIP_FORMATS.find(format => format === ext) ?? null;
+}
+
+/**
+ * A relationship file's name without its format — what `following.json` and
+ * `following.html` have in common, and the key under which they are the same
+ * file written twice.
+ *
+ * Lowercased, because the pattern that found them is case-insensitive and two
+ * spellings of one shard are not two shards.
+ */
+export function relationshipFileBase(fileName: string): string {
+  return fileName.replace(RELATIONSHIP_EXTENSION, '').toLowerCase();
+}
 
 /**
  * The same file's name in an HTML export.

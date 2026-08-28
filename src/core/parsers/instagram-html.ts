@@ -129,6 +129,7 @@
  */
 
 import { Parser } from 'htmlparser2';
+import { relationshipFormatOf } from './instagram-file-specs';
 import {
   fitMonthTable,
   readRowDate,
@@ -158,7 +159,23 @@ import {
  *   JSON, and reaches the same `INVALID_*_FORMAT` / drift reporting.
  */
 export function parseRelationshipFile(name: string, text: string): unknown {
-  return /\.html$/i.test(name) ? transcodeRelationshipHtml(text) : JSON.parse(text);
+  // A switch over the format, not a test for one of them. `/\.html$/i ? ... :
+  // JSON.parse` treated every name that is not HTML as JSON, including names
+  // that are neither — so a third extension added to `RELATIONSHIP_EXTENSIONS`
+  // would have reached `JSON.parse` with nobody editing this line. Here it is a
+  // compile error instead.
+  //
+  // `null` — a name with no recognized extension — reads as JSON, which is what
+  // it did before this switch existed. It is a caller bug rather than an input:
+  // `RELEVANT_FILE_PATTERN` is what put the entry here. Keeping the old
+  // behaviour keeps the failure the throw the caller already handles.
+  switch (relationshipFormatOf(name)) {
+    case 'html':
+      return transcodeRelationshipHtml(text);
+    case 'json':
+    case null:
+      return JSON.parse(text);
+  }
 }
 
 /**

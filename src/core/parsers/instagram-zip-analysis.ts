@@ -3,8 +3,8 @@
  * Detects format and provides diagnostic information
  */
 
-import type { ParseWarning } from '@/core/types';
-import { RELATIONSHIP_EXTENSIONS } from './instagram-file-specs';
+import type { FileDiscovery, ParseWarning, RelationshipFormat } from '@/core/types';
+import { RELATIONSHIP_EXTENSIONS, relationshipFormatOf } from './instagram-file-specs';
 
 export interface ZipAnalysis {
   hasConnections: boolean;
@@ -18,7 +18,7 @@ export interface ZipAnalysis {
    * `hasJsonFiles`/`hasHtmlFiles` in two places with the same nested ternary,
    * and two copies of a rule are two rules as soon as one of them is fixed.
    */
-  format: 'json' | 'html' | 'unknown';
+  format: FileDiscovery['format'];
   /**
    * Whether this archive is an Instagram export at all, decided once and here.
    *
@@ -69,13 +69,15 @@ export function analyzeZipStructure(allFiles: string[]): ZipAnalysis {
   // It matters more from here on than it did: once HTML is parsed rather than
   // refused, this predicate stops choosing an error message and starts choosing
   // a parser.
-  let relationshipJson = false;
-  let relationshipHtml = false;
+  // A set of the formats actually seen, rather than "json, else html". The
+  // `else` decided what every non-JSON extension is, so it answered for
+  // extensions nobody has added yet — and would have answered wrongly and
+  // silently. `relationshipFormatOf` reads the name instead of assuming.
+  const relationshipFormats = new Set<RelationshipFormat>();
   for (const name of allFiles) {
-    const match = RELATIONSHIP_FILE.exec(name);
-    if (!match) continue;
-    if (match.groups?.ext?.toLowerCase() === 'json') relationshipJson = true;
-    else relationshipHtml = true;
+    if (!RELATIONSHIP_FILE.test(name)) continue;
+    const format = relationshipFormatOf(name);
+    if (format !== null) relationshipFormats.add(format);
   }
 
   // The relationship files decide; the archive-wide extension counts are the
@@ -85,7 +87,7 @@ export function analyzeZipStructure(allFiles: string[]): ZipAnalysis {
   // rather than four guards in a row, so that the two-tier priority is the
   // shape of the expression instead of a note about the order of the tests.
   const format =
-    pickFormat(relationshipJson, relationshipHtml) ??
+    pickFormat(relationshipFormats.has('json'), relationshipFormats.has('html')) ??
     pickFormat(hasJsonFiles, hasHtmlFiles) ??
     'unknown';
 

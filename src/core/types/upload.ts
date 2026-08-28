@@ -150,10 +150,25 @@ export interface FileExpectation {
   formatUnreadable?: boolean;
 }
 
+/**
+ * The markups a relationship file can be written in, and the ONE place the set
+ * is spelled out.
+ *
+ * A tuple rather than a union so that the regex alternation, the type, and the
+ * reader that dispatches on a file's extension are all derived from it. Those
+ * three were three hand-written copies of the same two-element set, and the
+ * third was the dangerous one: `parseRelationshipFile` asked `/\.html$/i` and
+ * treated everything else as JSON, so a third extension added to the pattern
+ * would have been handed to `JSON.parse` without anyone editing that line.
+ */
+export const RELATIONSHIP_FORMATS = ['json', 'html'] as const;
+
+export type RelationshipFormat = (typeof RELATIONSHIP_FORMATS)[number];
+
 /** Discovery status of expected files */
 export interface FileDiscovery {
-  /** Format of the export (json or html) */
-  format: 'json' | 'html' | 'unknown';
+  /** Format of the export, or `unknown` when no relationship file was found. */
+  format: RelationshipFormat | 'unknown';
   /** Is this a valid Instagram data export? */
   isInstagramExport: boolean;
   /** Base path where data was found */

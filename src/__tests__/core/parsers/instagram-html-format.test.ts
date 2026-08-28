@@ -318,4 +318,39 @@ describe('an archive holding both formats', () => {
     expect(result.discovery?.format).toBe('json');
     expect(result.warnings.find(w => w.severity === 'error')?.code).not.toBe('HTML_FORMAT');
   });
+
+  /**
+   * The twin pair, pinned. `following.json` and `following.html` are the same
+   * file written twice, and so are `followers_1.json` and `followers_1.html`.
+   *
+   * `following` has always read one of them — first existing, JSON first.
+   * `followers` did not: both twins match the shard glob, so both were read and
+   * their accounts unioned. Identical twins made that invisible, and two
+   * exports taken weeks apart made it a wrong answer with no warning — the
+   * stale followers deflate `notFollowingBack` and inflate `mutuals`.
+   *
+   * So the twins here hold DIFFERENT people. A union would be detectable in no
+   * other way, and asserting on identical content would pass on either rule.
+   */
+  it('reads one file per twin pair, the same way for both required files', async () => {
+    const zip = new JSZip();
+    zip.file(`${BASE}/following.json`, JSON.stringify({ relationships_following: [] }));
+    zip.file(
+      `${BASE}/following.html`,
+      htmlDocument('Following', record('ghost', 'Aug 10, 2026 6:32 pm', true))
+    );
+    zip.file(
+      `${BASE}/followers_1.json`,
+      JSON.stringify([{ title: '', string_list_data: [{ value: 'kept', href: '', timestamp: 1 }] }])
+    );
+    zip.file(
+      `${BASE}/followers_1.html`,
+      htmlDocument('Followers', record('stale', 'Jul 28, 2026 11:30 am', false))
+    );
+
+    const result = await parseInstagramZipFile(asFile(await zip.generateAsync({ type: 'blob' })));
+
+    expect([...result.data.followers]).toEqual(['kept']);
+    expect([...result.data.following]).toEqual([]);
+  });
 });
