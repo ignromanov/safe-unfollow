@@ -129,10 +129,17 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
   const warnings: ParseWarning[] = [];
   const fileExpectations: FileExpectation[] = [];
 
-  // Decided in `analyzeZipStructure`, not here. This was a second copy of the
-  // same nested ternary, and `createCriticalError` held a third variant of the
-  // rule; the three disagreed about a mixed archive, which is how one of them
-  // came to be wrong without any of them looking wrong.
+  // Decided in `analyzeZipStructure`, not here. The rule used to live in two
+  // places — this nested ternary and `createCriticalError`'s
+  // `hasHtmlFiles && !hasJsonFiles` — and on `main` those two AGREE: a mixed
+  // archive is json to both, and neither raises `HTML_FORMAT` for it.
+  //
+  // Said differently until 2026-08-28, as "three variants that disagreed about
+  // a mixed archive". Neither half was true, and the true defect is the one the
+  // next comment describes: `createCriticalError` asked what format the archive
+  // was before asking whether it was an Instagram export at all, so any ZIP of
+  // `.html` was told to go and re-request JSON. That is an ordering fault, not
+  // a disagreement, and one copy of the rule cannot have it.
   const format: FileDiscovery['format'] = analysis.format;
 
   // Decided in `analyzeZipStructure` for the same reason `format` is: this

@@ -3,10 +3,19 @@
  *
  * Meta's export dialog offers HTML or JSON, and roughly a fifth of the people
  * who reach this tool pick HTML. Today they are refused: `upload_error_html_format`
- * is 53.4% of all upload errors, and 60.2% of the sessions that hit it never
- * succeed at all. Nothing about the archive is unreadable — it holds the same
- * people, in the same order, with the same dates. It is written in a different
- * markup.
+ * is 53.4% of all upload errors and 60.2% of the sessions that hit it never
+ * succeed at all — measured over the 30 days to 2026-08-25. Nothing about the
+ * archive is unreadable: it holds the same people, in the same order, with the
+ * same dates, written in different markup.
+ *
+ * ⚠️ **That share is an UPPER BOUND on "picked the wrong format", not a count
+ * of it.** `createCriticalError` tested the format before asking whether the
+ * archive was an Instagram export at all, so every ZIP of `.html` — any
+ * website, any unrelated download — landed in the same bucket. Fixed on this
+ * branch, but every number derived from the bucket inherits the contamination,
+ * and it cannot be sized after the fact: no dimension in the database separates
+ * the two populations. Other documents quote 55.2% and 48% for neighbouring
+ * windows; none of the three is a floor.
  *
  * So this is an adapter, not a second pipeline. The format difference lives on
  * exactly one stretch — bytes to records — and everything downstream
@@ -48,13 +57,22 @@
  * pair: `following` 413 = 413 and `followers_1` 364 = 364 against their JSON
  * twins, symmetric difference 0 in both.
  *
- * A third grammar ships in the seven OPTIONAL files: a `<table>` of label/value
- * rows — `Name`, `Username`, and `URL` when the account has a bio link — with
- * the date in a trailing div. Measured across the whole 2026-08-11 export: the
- * two required files hold 413 and 364 profile anchors and **zero tables**; the
- * optional ones hold nine, six, two and one tables and **zero profile
- * anchors**. The two never mix, so the reader tries the anchor and falls back
- * to the table rather than choosing between them.
+ * A third grammar ships in the SIX optional files — six, not seven: count the
+ * specs in `instagram-file-specs.ts`, which is where that number is decided. A
+ * `<table>` of label/value rows — `Name`, `Username`, and `URL` when the
+ * account has a bio link — with the date in a trailing div.
+ *
+ * The property the reader depends on, measured across the whole 2026-08-11
+ * export: the two required files hold profile anchors and **zero tables**, the
+ * optional files hold tables and **zero profile anchors**. The two never mix,
+ * so the reader tries the anchor and falls back to the table rather than
+ * choosing between them.
+ *
+ * A per-file table count used to stand here, and it listed four numbers for six
+ * files. It is not restored, corrected: the archives it counts are gitignored,
+ * so nobody reading this can recompute it, and a number in that position goes
+ * stale without ever looking wrong. The invariant above is what the code rests
+ * on, and `instagram-html-optional.test.ts` executes it.
  *
  * That table is not a model to invent a reader for: it is the `label_values`
  * shape the 2026-08 JSON export already carries, rendered as markup — same
@@ -66,9 +84,13 @@
  * `pending_follow_requests` and `recent_follow_requests` are SUBTRACTED from
  * `following` to compute `notFollowingBack` (`core/badges/index.ts`), and both
  * are grammar C. A reader that returned nothing from them would not empty a
- * badge, it would inflate the app's most-used one — silently, because an unread
- * file and an empty one are the same empty array, so `followRequestsUnreadable`
- * (GH#41) would stay false.
+ * badge, it would inflate the app's most-used one — and in silence, if an
+ * unread file and an empty one were the same empty array, because
+ * `followRequestsUnreadable` (GH#41) is raised by the first and not the second.
+ *
+ * They are not the same value here, and making them different is what the
+ * `null` below is for. They WERE the same until 2026-08-28, which is how this
+ * module came to carry that risk in its own header while shipping it.
  *
  * Nothing here reads a class name that could be localised, a heading, a label,
  * or a file name. The class names ARE stable — byte-identical across five
@@ -472,8 +494,12 @@ function readRecords(html: string): RawRecord[] | null {
         text = '';
       },
     },
-    // Entities matter: a handle cannot contain one, but the surrounding markup
-    // can, and a decoder that is off changes where tags are seen to end.
+    // htmlparser2 12 decodes entities by default, so this is explicit rather
+    // than load-bearing — and it is written down because the comment here used
+    // to claim a decoder that is off "changes where tags are seen to end",
+    // which is not what entity decoding does. What it actually buys: a `&amp;`
+    // in a display name reaches `label_values` as `&`, the same character the
+    // JSON export carries, so the two formats compare equal.
     { decodeEntities: true }
   );
 

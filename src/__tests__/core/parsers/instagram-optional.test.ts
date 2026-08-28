@@ -27,7 +27,7 @@ import {
  *
  * Tested directly against parseOptionalFiles — the actual function
  * parseInstagramZipFile calls — rather than through a full ZIP mock, since it
- * takes a plain readJsonFromZip callback and is a pure unit under test.
+ * takes a plain `readFirstExistingJson` callback and is a pure unit under test.
  */
 
 // pending_follow_requests.json — first of the FILE_SPECS optional entries

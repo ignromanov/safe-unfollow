@@ -16,8 +16,8 @@ import { extractUsernames, resolveEntries, resolveEntryList } from '@/core/parse
  * **Why a real pair and not a synthetic one.** A fixture I generate proves only
  * that my generator agrees with my parser. These four files are Meta's own
  * bytes with the handles substituted and nothing else touched: every class
- * name, every date string, the record order, the `<base>` tag, the 14.5 KB of
- * inline CSS, and the header `<time>` whose visible text disagrees with its own
+ * name, every date string, the record order, the `<base>` tag, the 13 817 bytes
+ * of inline CSS, and the header `<time>` whose visible text disagrees with its own
  * `datetime` attribute by seven hours. That last one is not a defect in the
  * fixture — it is in the export, and it is why nothing here reads the header.
  *

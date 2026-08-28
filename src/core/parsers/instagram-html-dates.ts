@@ -36,8 +36,15 @@
  *
  * Verified across the three locales we hold: `en` fits `cldr-short`, `es` needs
  * `prefix3` (CLDR would say `sept`, Meta writes `sep`), `ja` fits `cldr-short`
- * (`1月`…`12月`). **No single form covers all three**, which is the whole
- * argument for fitting rather than choosing.
+ * (`1月`…`12月`).
+ *
+ * The argument for fitting is that **no single form covers every LANGUAGE**,
+ * not that none covers these three — `prefix3` does cover all three, measured,
+ * and the sentence claiming otherwise was the argument's own counterexample.
+ * `prefix3` fails elsewhere and fails hard: `fr` juin/juillet, `cs`
+ * červen/červenec and `el` Ιουνίου/Ιουλίου each collide at three characters,
+ * and `vi` collapses all twelve to `thá`. `cldr-short` covers those and misses
+ * Spanish. Every form is wrong somewhere, which is why the file picks.
  *
  * ⛔ **Add forms, never locales.** A locale we have never seen is covered iff
  * one of the forms fits its tokens. A per-locale branch — a "CJK case", say —

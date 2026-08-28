@@ -9,7 +9,7 @@ import { resolveEntries, resolveEntryList } from '@/core/parsers/instagram-utils
  * The optional files, whose records Meta writes in a different grammar.
  *
  * `following.html` and `followers_1.html` write an anchor to an Instagram
- * profile. The seven optional files write a `<table>` of label/value rows —
+ * profile. The six optional files write a `<table>` of label/value rows —
  * `Name`, `Username`, and `URL` when the account has a bio link — with the date
  * in a trailing div. Measured across the whole 2026-08-11 HTML export: 413 and
  * 364 profile anchors in the two required files and **zero tables**; nine, six,

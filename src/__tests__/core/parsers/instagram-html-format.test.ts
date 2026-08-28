@@ -176,8 +176,9 @@ describe('an Instagram export downloaded in HTML format', () => {
     // The correctness stake, and the one a set of followers cannot show.
     // `pending_follow_requests` is SUBTRACTED from `following` to compute the
     // app's most-used badge. Left unread it does not empty that badge, it
-    // inflates it — and silently, because an unread file and an empty one are
-    // the same empty array.
+    // inflates it — and it would do so in silence if an unread file and an
+    // empty one were the same empty array. The test below this one is the pair
+    // to this one: it makes sure they are not.
     const result = await parseInstagramZipFile(
       asFile(
         await buildHtmlExport({
@@ -279,7 +280,8 @@ describe('an archive that is not an Instagram export at all', () => {
 
 describe('an archive holding both formats', () => {
   it('takes its format from the relationship files, not from a stray one', async () => {
-    // `hasJsonFiles` is an `endsWith` over every entry name with no content
+    // `hasJsonFiles` — the field `ZipAnalysis` carried on `main`, before
+    // `format` replaced it — was an `endsWith` over every entry name with no content
     // inspection, so a single unrelated `.json` anywhere used to outvote every
     // HTML relationship file in the archive: the export resolved to 'json',
     // found no relationship data, and reported a code the reader could not act
