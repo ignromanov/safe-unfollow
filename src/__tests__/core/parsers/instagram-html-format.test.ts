@@ -71,8 +71,12 @@ function record(username: string, date: string, withProfileHref: boolean): strin
  *
  * Nested exactly as Meta nests it — an outer record wrapper holding an inner
  * one — because that nesting is what makes one outermost wrapper equal one
- * record in BOTH grammars, which is what lets an empty file stay
- * distinguishable from a drifted one.
+ * record in BOTH grammars, so a record count is a record count in either.
+ *
+ * It is NOT what tells an empty file from a drifted one; that was the claim
+ * until 2026-08-28 and it was wrong in the direction that hurts. Both come back
+ * with zero wrappers, and the transcoder separates them by the record payload
+ * left lying outside every wrapper — see `instagram-html.ts`, `readRecords`.
  */
 function tableRecord(name: string, username: string, date: string): string {
   return (
@@ -205,6 +209,47 @@ describe('an Instagram export downloaded in HTML format', () => {
     );
 
     expect(result.followRequestsUnreadable).toBe(true);
+  });
+
+  it('reports an optional file whose WRAPPER moved, not just its contents', async () => {
+    // One layer out from the test above, and the layer that used to be silent.
+    // There the wrapper was found and its contents were not understood, so the
+    // record was counted as unresolved. Here the wrapper class itself moves, so
+    // the file yields no records at all — and zero records used to be the same
+    // empty array a user with no pending requests produces. GH#41 exactly:
+    // nothing subtracted from `following`, `notFollowingBack` inflated by every
+    // request the file held, `followRequestsUnreadable` false.
+    const drifted = htmlDocument(
+      'Pending follow requests',
+      tableRecord('Alpha Person', 'alpha', 'Aug 09, 2026 1:15 pm')
+    )
+      .split('uiBoxWhite')
+      .join('uiBoxSnow');
+
+    const result = await parseInstagramZipFile(
+      asFile(await buildHtmlExport({ [`${BASE}/pending_follow_requests.html`]: drifted }))
+    );
+
+    expect(result.followRequestsUnreadable).toBe(true);
+    expect([...result.data.pendingSent.keys()]).toEqual([]);
+  });
+
+  it('raises an error when a REQUIRED file\u2019s wrapper moved, not an empty-list notice', async () => {
+    // The same drift on `followers_1.html`. The reader found the file, read no
+    // records, and the archive still had a following list — so the parse
+    // "succeeded" with an account that follows 2 people and is followed by
+    // nobody, carrying an informational EMPTY_FOLLOWERS notice that neither
+    // screen renders (both filter `severity === 'error'`). Every one of those
+    // 2 followers would have been accused of not following back.
+    const zip = new JSZip();
+    zip.file('start_here.html', htmlDocument('Your Instagram activity', ''));
+    zip.file(`${BASE}/following.html`, followingHtml);
+    zip.file(`${BASE}/followers_1.html`, followersHtml.split('uiBoxWhite').join('uiBoxSnow'));
+
+    const result = await parseInstagramZipFile(asFile(await zip.generateAsync({ type: 'blob' })));
+
+    expect(result.warnings.map(w => w.code)).toContain('INVALID_FOLLOWERS_FORMAT');
+    expect(result.warnings.some(w => w.severity === 'error')).toBe(true);
   });
 });
 

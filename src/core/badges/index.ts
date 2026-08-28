@@ -110,6 +110,30 @@ function computeDerivedRelationships(parsed: ParsedAll) {
   return { notFollowingBack, notFollowedBack, mutuals };
 }
 
+/**
+ * A badge's value is the account's timestamp when we know it, `true` when we
+ * do not. Zero must never reach the map, and that is what this function is for.
+ *
+ * Every consumer of `BadgeMap` reads the value for truthiness, not for
+ * presence: `bitset-store.ts` and `indexeddb-service.ts` decide from it whether
+ * to set the account's bit, `csv.ts` writes the column from it, and
+ * `filterAccountsByBadges` below matches the chip from it. So a badge stored as
+ * `0` is a badge the reader never sees, on an upload that reported success.
+ *
+ * The producers make that reachable. All three parsers store `r.timestamp ?? 0`
+ * (`instagram-following.ts`, `instagram-followers.ts`, `instagram-optional.ts`)
+ * because `relationship-skew.ts` wants a dense `Map<string, number>` and skips
+ * the zeros itself. On JSON that default is nearly unreachable — every real
+ * record carries a timestamp. On HTML it is a whole-file property: if
+ * `fitMonthTable` cannot resolve the export's month names, NO row in the file
+ * has a date, and every account in it would arrive here as `0`.
+ *
+ * "We know they follow, we do not know when" is `true`, not absent.
+ */
+function presence(timestamp: number | undefined): number | true {
+  return timestamp ? timestamp : true;
+}
+
 // Helper function to build badges for a single account
 function buildAccountBadges(
   username: string,
@@ -120,19 +144,21 @@ function buildAccountBadges(
 
   // Core relationship badges (with timestamps when available)
   if (parsed.following.has(username))
-    badges.following = parsed.followingTimestamps.get(username) ?? true;
+    badges.following = presence(parsed.followingTimestamps.get(username));
   if (parsed.followers.has(username))
-    badges.followers = parsed.followersTimestamps.get(username) ?? true;
+    badges.followers = presence(parsed.followersTimestamps.get(username));
 
   // Special relationship badges (with timestamps)
-  if (parsed.pendingSent.has(username)) badges.pending = parsed.pendingSent.get(username) ?? 0;
+  if (parsed.pendingSent.has(username)) badges.pending = presence(parsed.pendingSent.get(username));
   if (parsed.permanentRequests.has(username))
-    badges.permanent = parsed.permanentRequests.get(username) ?? 0;
-  if (parsed.restricted.has(username)) badges.restricted = parsed.restricted.get(username) ?? 0;
-  if (parsed.closeFriends.has(username)) badges.close = parsed.closeFriends.get(username) ?? 0;
-  if (parsed.unfollowed.has(username)) badges.unfollowed = parsed.unfollowed.get(username) ?? 0;
+    badges.permanent = presence(parsed.permanentRequests.get(username));
+  if (parsed.restricted.has(username))
+    badges.restricted = presence(parsed.restricted.get(username));
+  if (parsed.closeFriends.has(username)) badges.close = presence(parsed.closeFriends.get(username));
+  if (parsed.unfollowed.has(username))
+    badges.unfollowed = presence(parsed.unfollowed.get(username));
   if (parsed.dismissedSuggestions.has(username))
-    badges.dismissed = parsed.dismissedSuggestions.get(username) ?? 0;
+    badges.dismissed = presence(parsed.dismissedSuggestions.get(username));
 
   // Computed relationship badges (boolean flags)
   if (derived.notFollowingBack.has(username)) badges.notFollowingBack = true;

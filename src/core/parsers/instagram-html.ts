@@ -79,15 +79,31 @@
  * record, and a change to either produces zero records rather than a partial
  * read presented as a whole one.
  *
- * ## The one thing an empty answer must not mean
+ * ## Why an unreadable file is `null` and not an empty list
  *
- * Zero records is reported as zero records, never as a partial read. Both
- * grammars leave exactly one outermost record wrapper per record and NONE when
- * there are no records — measured: grammar C nests wrappers at div depths 3 and
- * 5, N at each for N records, with no outer collection wrapper to survive an
- * empty list. So a file whose wrapper class changed and a file belonging to a
- * user with no close friends both come back empty, and the layer above tells
- * them apart the way it already does for JSON: by whether the file was found.
+ * Both grammars leave exactly one outermost record wrapper per record and NONE
+ * when there are no records — measured: grammar C nests wrappers at div depths
+ * 3 and 5, N at each for N records, with no outer collection wrapper to survive
+ * an empty list. So a file whose wrapper class changed and a file belonging to
+ * a user with no close friends produce the same markup as far as this reader is
+ * concerned, and NOTHING downstream can tell them apart: the layer above knows
+ * only that the file was found, not that it was read.
+ *
+ * This module returned `[]` for both until 2026-08-28, and the difference is
+ * the whole GH#41 failure it was written to prevent — a renamed wrapper class
+ * in `pending_follow_requests.html` came back as "you have no pending
+ * requests", `followRequestsUnreadable` stayed false, and `notFollowingBack`
+ * silently absorbed every request the file held. Meanwhile the JSON path
+ * reports the same drift as `INVALID_*_FORMAT`, so this reader was strictly the
+ * weaker of the two on exactly the case it names as its reason to exist.
+ *
+ * So the answer is `resolveEntryList`'s, whose contract this one now matches
+ * word for word: `null` means "shape not recognized", an empty array means
+ * "shape recognized, genuinely no records", and the two must never collapse
+ * into one value. A document HTML gives us no way to recognize positively is
+ * unreadable, and that includes the genuinely-empty list. The cost of being
+ * wrong in this direction is a drift warning on a file that held nothing; the
+ * cost of being wrong in the other is a wrong number with no warning at all.
  */
 
 import { Parser } from 'htmlparser2';
@@ -115,8 +131,9 @@ import {
  *
  * @param name the entry's path in the archive, used only for its extension.
  * @throws whatever `JSON.parse` throws for malformed JSON. The HTML side does
- *   not throw — an unreadable document yields no records, which the layer above
- *   reports as an empty or drifted file.
+ *   not throw — an unreadable document yields `null`, which is the same
+ *   "shape not recognized" value `resolveEntryList` returns for unreadable
+ *   JSON, and reaches the same `INVALID_*_FORMAT` / drift reporting.
  */
 export function parseRelationshipFile(name: string, text: string): unknown {
   return /\.html$/i.test(name) ? transcodeRelationshipHtml(text) : JSON.parse(text);
@@ -197,11 +214,13 @@ interface RawRecord {
  * same no-branch property the href anchor buys, one layer up.
  *
  * @param html one file's full text, as `zip.js` hands it back decoded.
- * @returns the file's entries; empty when the record wrapper is not found,
- *   which is the drift signal rather than an answer.
+ * @returns the file's entries, or `null` when the document could not be
+ *   recognized as a relationship file at all — see the module header for why
+ *   that is not an empty array.
  */
-export function transcodeRelationshipHtml(html: string): unknown {
+export function transcodeRelationshipHtml(html: string): unknown[] | null {
   const records = readRecords(html);
+  if (records === null) return null;
 
   // Two passes, and the second cannot be folded into the first: the month table
   // is fitted to the tokens of the WHOLE file, so no row can be dated until
@@ -252,8 +271,28 @@ export function transcodeRelationshipHtml(html: string): unknown {
  * Separated from dating so that "what the file says" and "what that means" stay
  * apart — the first is a fact about the bytes, the second depends on a table
  * fitted across all of them.
+ *
+ * @returns the records, or `null` when the document is not one this reader
+ *   recognizes. Three things make it unrecognizable, and all three are answered
+ *   the same way, because each produces a number nobody can check:
+ *
+ *   1. **The document did not close its own tags.** A truncated download or an
+ *      unclosed `<div>` makes every following record nest inside the first, and
+ *      htmlparser2 closes them all in one burst at EOF: N accounts arrive as
+ *      ONE record, with nothing counted as unresolved. Measured on all four
+ *      real fixtures, a well-formed export closes nothing during `end()`, so
+ *      "a tag closed after the input ran out" is a truncation signal that costs
+ *      one boolean and depends on no class name.
+ *   2. **No tag at all.** Not a markup document — JSON bytes in a `.html`
+ *      entry, or an empty file.
+ *   3. **Markup, no wrappers, but record payload lying outside every wrapper.**
+ *      The wrapper class moved out from under records that are still in the
+ *      file. A profile anchor or a `<table>` at wrapper depth 0 is that
+ *      evidence, and it is the only thing separating this case from a list that
+ *      is genuinely empty, which returns `[]` and must keep doing so — a user
+ *      with no close friends is not a drifted export.
  */
-function readRecords(html: string): RawRecord[] {
+function readRecords(html: string): RawRecord[] | null {
   const records: RawRecord[] = [];
 
   // Depth of `<div>` nesting inside the record currently open; 0 means none is.
@@ -262,7 +301,36 @@ function readRecords(html: string): RawRecord[] {
   let depth = 0;
   let profile: { username: string; href: string } | null = null;
   let date: RowDateParts | null = null;
+
+  // The text of the element currently open, and one frame per ancestor still
+  // open inside the record. A stack rather than a single string because the
+  // single string was reset by EVERY open tag, so it never held more than the
+  // innermost element's own text: `<td><span>alice</span></td>` read as an
+  // empty value, and the comment below claiming accumulation "across an
+  // element" was true only when the element had no children. Meta wrapping one
+  // value in a `<span>` is a template change it has made before, and would have
+  // turned every optional file into drift.
+  //
+  // A parent inherits its children's text, so every element is tested against
+  // the date shape with its full contents — and the innermost element holding
+  // exactly a date still closes first, so it is still the one that matches.
   let text = '';
+  const ancestors: string[] = [];
+
+  // Depth of `<table>` nesting, used only to keep grammar C's anchors out of
+  // the grammar A/B reading below.
+  let tables = 0;
+
+  // Whether the document is markup at all, and whether it holds record payload
+  // that belongs to no wrapper. Together these separate the three ways a file
+  // can yield no records — see this function's `@returns`.
+  let tagsSeen = 0;
+  let orphanPayload = false;
+
+  // Set between the last `write` and `end`, so that a close tag arriving after
+  // the input ran out can be told from one the document actually contained.
+  let inputEnded = false;
+  let closedAfterInput = false;
   // Grammar C. `cells` accumulates one row's `<td>` texts; `labelValues` the
   // rows of the record currently open.
   let cells: string[] = [];
@@ -302,7 +370,16 @@ function readRecords(html: string): RawRecord[] {
   const parser = new Parser(
     {
       onopentag(name, attribs) {
+        ancestors.push(text);
         text = '';
+        tagsSeen++;
+
+        if (name === 'table') {
+          tables++;
+          // A table outside every wrapper is a grammar-C record this reader
+          // could not attribute to one — the wrapper class moved, not the list.
+          if (depth === 0) orphanPayload = true;
+        }
 
         if (name === 'div') {
           if (depth > 0) {
@@ -317,10 +394,26 @@ function readRecords(html: string): RawRecord[] {
         // First profile link wins. A record holds one account; a second
         // instagram.com anchor would be something else, and taking the last
         // would let it overwrite the answer.
-        if (depth === 0 || name !== 'a' || profile !== null) return;
+        //
+        // Never inside a `<table>`: that is grammar C, whose username is a
+        // labelled row and whose `URL` row holds whatever the account put in
+        // its bio. An account whose bio links to another instagram.com profile
+        // would otherwise be read as that profile — a wrong handle, counted as
+        // resolved, on a record whose real handle is sitting one row above.
+        if (name !== 'a') return;
         const candidate = attribs.href ?? '';
         const match = PROFILE_HREF.exec(candidate);
-        if (match?.[1]) profile = { username: match[1], href: candidate };
+        if (!match?.[1]) return;
+
+        // Same reasoning as the orphan table above: a profile link belonging to
+        // no wrapper is a grammar-A/B record we could not attribute.
+        if (depth === 0) {
+          orphanPayload = true;
+          return;
+        }
+
+        if (tables > 0 || profile !== null) return;
+        profile = { username: match[1], href: candidate };
       },
 
       ontext(chunk) {
@@ -328,13 +421,21 @@ function readRecords(html: string): RawRecord[] {
       },
 
       onclosetag(name) {
-        // Captured before the reset, because both readings below need it: the
-        // date, and a table cell.
+        if (inputEnded) closedAfterInput = true;
+        if (name === 'table' && tables > 0) tables--;
+
+        // Captured before the frame is popped, because both readings below need
+        // it: the date, and a table cell.
         //
         // Accumulated across an element rather than read per text node, because
         // a parser may split text at any boundary it likes.
-        const captured = text.trim();
-        text = '';
+        const own = text;
+        const captured = own.trim();
+        // Inside a record the parent inherits what this element held; outside
+        // one nothing accumulates, or the page-level element would end up
+        // holding every record in the file at once.
+        const parent = ancestors.pop() ?? '';
+        text = depth > 0 ? parent + own : '';
         if (depth === 0) return;
 
         // The date is found by SHAPE, not by position — the first text inside
@@ -366,6 +467,9 @@ function readRecords(html: string): RawRecord[] {
         depth--;
         if (depth > 0) return;
         closeRecord();
+        // The wrapper's own text was just inherited by the page level, which is
+        // outside every record and must not carry it into the next one.
+        text = '';
       },
     },
     // Entities matter: a handle cannot contain one, but the surrounding markup
@@ -374,7 +478,24 @@ function readRecords(html: string): RawRecord[] {
   );
 
   parser.write(html);
+  inputEnded = true;
   parser.end();
 
-  return records;
+  // A document that did not close its own tags is unreadable however many
+  // records it appeared to yield — the collapse produces ONE record holding the
+  // first account, which is a number, not an error.
+  if (closedAfterInput) return null;
+  if (records.length > 0) return records;
+
+  // Nothing opened a tag: this is not a markup document. JSON bytes in a
+  // `.html` entry land here, and so does an empty file.
+  if (tagsSeen === 0) return null;
+
+  // Markup, no wrappers. Either the wrapper class moved out from under records
+  // that are still in the file, or the list is genuinely empty — and the
+  // payload left lying outside every wrapper is what tells those apart.
+  // Measured on the real fixtures: a well-formed export has zero orphan
+  // anchors and zero orphan tables, an export with `uiBoxWhite` renamed has 25
+  // and 9 respectively, and an export whose record list is emptied has none.
+  return orphanPayload ? null : [];
 }

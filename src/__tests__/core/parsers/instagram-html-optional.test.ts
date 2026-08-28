@@ -122,3 +122,56 @@ describe('an optional file with nothing in it', () => {
     expect(resolveEntryList(transcodeRelationshipHtml(empty), KEYS)).toEqual([]);
   });
 });
+
+/**
+ * Grammar C's two ways of being misread, both of which used to produce a
+ * plausible number instead of an error.
+ *
+ * These files are the GH#41 files. `pending_follow_requests` and
+ * `recent_follow_requests` are SUBTRACTED from `following`, so a reader that
+ * loses their records inflates `notFollowingBack` by everything it lost —
+ * silently, because `followRequestsUnreadable` is raised by an unreadable file
+ * and not by an empty one.
+ */
+describe('grammar C read wrong', () => {
+  it('reports a moved wrapper class as unreadable, not as an empty list', () => {
+    // The distinction this module's header is written around. Records are still
+    // in the file; only the wrapper this reader finds them by has moved. An
+    // empty array here is the wrong answer with no warning attached — `null` is
+    // the value `resolveEntryList` already turns into `INVALID_*_FORMAT`.
+    const renamed = CLOSE_FRIENDS_HTML.split('uiBoxWhite').join('uiBoxSnow');
+
+    expect(transcodeRelationshipHtml(renamed)).toBeNull();
+  });
+
+  it('does not read a bio link as the account', () => {
+    // A `URL` row holds whatever the account put in its bio, and an account may
+    // link to another Instagram profile. Read as an anchor record it replaces
+    // the real `Username` row — a wrong handle, counted as resolved, with the
+    // right one sitting one row above it.
+    const withBioLink = CLOSE_FRIENDS_HTML.replace(
+      '<tr><td class="_a6_q">Username</td><td class="_2piu _a6_r">user001</td></tr>',
+      '<tr><td class="_a6_q">Username</td><td class="_2piu _a6_r">user001</td></tr>' +
+        '<tr><td class="_a6_q">URL</td><td class="_2piu _a6_r">' +
+        '<a href="https://www.instagram.com/brandpage">brandpage</a></td></tr>'
+    );
+
+    const names = accounts(transcodeRelationshipHtml(withBioLink)).items.map(i => i.username);
+    expect(names).toContain('user001');
+    expect(names).not.toContain('brandpage');
+  });
+
+  it('reads a value that Meta wrapped in an inline element', () => {
+    // Meta changed this file's record model once already without touching a
+    // class name. A `<span>` around the value is the same kind of change, and
+    // it used to empty every value in the file: the reader kept only the
+    // INNERMOST element's own text, so `<td><span>x</span></td>` read as ''.
+    const wrapped = CLOSE_FRIENDS_HTML.replace(
+      /(<td class="_2piu _a6_r">)([^<]*)(<\/td>)/g,
+      '$1<span>$2</span>$3'
+    );
+
+    const names = accounts(transcodeRelationshipHtml(wrapped)).items.map(i => i.username);
+    expect(names).toContain('user001');
+  });
+});

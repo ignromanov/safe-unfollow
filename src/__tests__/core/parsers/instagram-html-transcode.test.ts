@@ -155,16 +155,36 @@ describe('the dates, against the same rows in the JSON twin', () => {
 });
 
 describe('what the transcoder refuses to guess', () => {
-  it('reads nothing from a document whose record wrapper is gone', () => {
+  it('reports a document whose record wrapper is gone as unreadable', () => {
     // Drift resistance. Meta changed the optional files' record model between
     // 2026-03 and 2026-08 without notice, and `following`/`followers` are the
     // two that have never drifted — which is a fact about the past, not a
-    // guarantee. If the record wrapper changes, the honest answer is zero
-    // records and a caller that can see it, never a partial read presented as
-    // a whole one.
+    // guarantee. If the record wrapper changes, the honest answer is `null`,
+    // never a partial read presented as a whole one and never an empty list:
+    // 25 profile anchors are still sitting in this document, and a reader that
+    // returned `[]` would be reporting an account that follows nobody.
     const gutted = FOLLOWING_HTML.split('uiBoxWhite').join('uiBoxSomethingElse');
 
+    expect(transcodeRelationshipHtml(gutted)).toBeNull();
     expect(usernames(transcodeRelationshipHtml(gutted), FOLLOWING_KEYS)).toEqual([]);
+  });
+
+  it('reports a truncated document as unreadable, not as one account', () => {
+    // A download that stopped mid-file leaves every record after the cut nested
+    // inside the one that was open, and htmlparser2 closes them all in a single
+    // burst when the input runs out. The reader saw ONE wrapper close, so it
+    // produced one record — the first account, with nothing counted as
+    // unresolved and no way for any caller to know the other 24 existed.
+    const cut = FOLLOWING_HTML.slice(0, FOLLOWING_HTML.length - 400);
+
+    expect(transcodeRelationshipHtml(cut)).toBeNull();
+  });
+
+  it('reports bytes that are not markup as unreadable', () => {
+    // A `.html` entry holding JSON opens no tag at all. Reading that as an
+    // empty list would report a successful parse of a file nothing read.
+    expect(transcodeRelationshipHtml(FOLLOWING_JSON)).toBeNull();
+    expect(transcodeRelationshipHtml('')).toBeNull();
   });
 
   it('ignores links that are not Instagram profiles', () => {
