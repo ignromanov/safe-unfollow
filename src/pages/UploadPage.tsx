@@ -1,3 +1,4 @@
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { PageLoader } from '@/components/PageLoader';
 import { UploadZone } from '@/components/UploadZone';
 import { useInstagramData } from '@/hooks/useInstagramData';
@@ -71,15 +72,33 @@ export function Component() {
           tearing the subtree out instead would make the dialog vanish. The
           chunk is already downloaded by then, so this costs nothing. */}
       {everOpened && (
-        <Suspense fallback={null}>
-          <GuideDialog
-            open={guide.isOpen}
-            step={guide.step}
-            source={guide.source}
-            onGoToStep={guide.goToStep}
-            onClose={guide.close}
-          />
-        </Suspense>
+        /* Suspense does NOT catch a rejected lazy import — React re-throws it
+           on the next render, and without a boundary here the nearest one is
+           the route's `errorElement` in routes.tsx. A guide chunk that 404s
+           (a stale service-worker precache after a deploy is the ordinary
+           case, not an exotic one) would then replace the whole /upload route
+           — UploadZone, file picker and all — with a generic error page,
+           taking down the product's actual function because a modal failed to
+           download. This branch is what makes that reachable at scale:
+           /docs/* and the FAQ now point at /upload?guide=1, so the chunk
+           loads at hydration for cold external arrivals.
+
+           fallback={null} rather than a message: a message needs copy in ten
+           locales and this branch ships none, and an uploader that still
+           works is worth more than telling someone the guide did not open.
+           Not silent either — ErrorBoundary.componentDidCatch reports it
+           through analytics.errorBoundary. */
+        <ErrorBoundary fallback={null}>
+          <Suspense fallback={null}>
+            <GuideDialog
+              open={guide.isOpen}
+              step={guide.step}
+              source={guide.source}
+              onGoToStep={guide.goToStep}
+              onClose={guide.close}
+            />
+          </Suspense>
+        </ErrorBoundary>
       )}
     </>
   );

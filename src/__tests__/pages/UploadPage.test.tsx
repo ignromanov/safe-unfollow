@@ -32,13 +32,26 @@ vi.mock('@/components/PageLoader', () => ({
   PageLoader: () => <div data-testid="page-loader">Loading...</div>,
 }));
 
+// A guide chunk that will not load. The factory throws, so the dynamic import
+// inside `lazy()` rejects — which is what a 404'd chunk does, and it is a
+// different failure from a component that throws while rendering: Suspense
+// handles the pending promise and then has nothing to do with the rejection.
+// Only the tests that actually open the guide reach this; every other test in
+// this file leaves `search` empty, so `lazy()` is never invoked.
+vi.mock('@/components/guide/GuideDialog', () => {
+  throw new Error('Failed to fetch dynamically imported module: GuideDialog');
+});
+
 // Mock react-router-dom
 const mockNavigate = vi.fn();
+// useGuideDialog reads the dialog's state off the URL, so the page needs a
+// location as well as a navigate. Mutable because `search` is what decides
+// whether the guide is open on arrival — the deep-link case the /docs/* pages
+// and the FAQ now send readers into.
+const mockLocation = { pathname: '/upload', search: '', hash: '', state: null, key: 'test' };
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
-  // useGuideDialog reads the dialog's state off the URL, so the page needs a
-  // location as well as a navigate.
-  useLocation: () => ({ pathname: '/upload', search: '', hash: '', state: null, key: 'test' }),
+  useLocation: () => mockLocation,
 }));
 
 // Mock hooks with vi.fn() for dynamic returns
@@ -60,6 +73,7 @@ vi.mock('@/hooks/useInstagramData', () => ({
 describe('UploadPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockLocation.search = '';
     mockUseLanguagePrefix.mockReturnValue('');
     mockUseInstagramData.mockReturnValue({
       uploadState: { status: 'idle', error: null, fileName: null },
@@ -245,6 +259,40 @@ describe('UploadPage', () => {
 
       // A push, and onto the same path: the guide is a query on /upload now.
       expect(mockNavigate).toHaveBeenCalledWith('/upload?guide=1', { replace: false });
+    });
+  });
+
+  describe('a guide chunk that fails to load', () => {
+    it('leaves the uploader mounted instead of taking down the route', async () => {
+      // The whole point of the ErrorBoundary around the lazy guide. Without it
+      // the rejection travels past Suspense (which does not catch it) to the
+      // route's errorElement, and a modal that failed to download replaces
+      // /upload entirely — file picker included. The product's function must
+      // outlive its instructions.
+      //
+      // ?guide=1 rather than a click: that is how the deep link arrives, and it
+      // is the path this branch made primary by repointing /docs/* and the FAQ
+      // at it.
+      mockLocation.search = '?guide=1';
+      // React logs the caught error, and so does ErrorBoundary. Expected here,
+      // and noise that would otherwise look like a real failure in the run.
+      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      try {
+        render(<UploadPage />);
+
+        // Wait for the rejection to be re-thrown on the render after the lazy
+        // promise settles, and be caught.
+        await waitFor(() => expect(consoleError).toHaveBeenCalled());
+
+        expect(screen.getByTestId('upload-zone')).toBeInTheDocument();
+        // Not the route error page, and not a half-rendered dialog either.
+        expect(screen.queryByTestId('page-loader')).not.toBeInTheDocument();
+        // The uploader is still usable, not merely present.
+        expect(screen.getByText(commonEN.buttons.uploadFile)).toBeInTheDocument();
+      } finally {
+        consoleError.mockRestore();
+      }
     });
   });
 
