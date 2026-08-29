@@ -1,12 +1,8 @@
 {
   "header": {
-    "ariaLabel": "Assistent für den Instagram-Datenexport",
     "stepOf": "Schritt {{current}} von {{total}}",
     "stepNavigation": "Schrittnavigation",
     "stepLabel": "Schritt {{step}}"
-  },
-  "footer": {
-    "navigation": "Wizard-Aktionen"
   },
   "calendar": {
     "addReminder": "Erinnerung zum Kalender hinzufügen",
@@ -14,11 +10,7 @@
     "details": "Prüfe deine E-Mail für den Instagram-Datenexport und lade ihn bei Unfollow Tracker auf safeunfollow.app hoch"
   },
   "buttons": {
-    "back": "Zurück",
-    "next": "Nächster Schritt",
-    "done": "Fertig, los geht's!",
     "close": "Anleitung schließen",
-    "cancel": "Abbrechen",
     "trySample": "Mit Beispieldaten ausprobieren",
     "uploadFile": "Meine Datei hochladen"
   },

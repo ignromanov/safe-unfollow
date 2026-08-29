@@ -1,12 +1,8 @@
 {
   "header": {
-    "ariaLabel": "Instagram veri dışa aktarma sihirbazı",
     "stepOf": "Adım {{current}} / {{total}}",
     "stepNavigation": "Adım gezinmesi",
     "stepLabel": "Adım {{step}}"
-  },
-  "footer": {
-    "navigation": "Sihirbaz eylemleri"
   },
   "calendar": {
     "addReminder": "Takvime hatırlatıcı ekle",
@@ -14,11 +10,7 @@
     "details": "Instagram veri dışa aktarımı için e-postanı kontrol et ve safeunfollow.app'teki Unfollow Tracker'a yükle"
   },
   "buttons": {
-    "back": "Geri",
-    "next": "Sonraki Adım",
-    "done": "Tamam, başlayalım!",
     "close": "Rehberi kapat",
-    "cancel": "İptal",
     "trySample": "Örnek verilerle deneyin",
     "uploadFile": "Dosyamı Yükle"
   },

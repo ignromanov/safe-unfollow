@@ -1,12 +1,8 @@
 {
   "header": {
-    "ariaLabel": "معالج تصدير بيانات Instagram",
     "stepOf": "الخطوة {{current}} من {{total}}",
     "stepNavigation": "التنقل بين الخطوات",
     "stepLabel": "الخطوة {{step}}"
-  },
-  "footer": {
-    "navigation": "إجراءات المعالج"
   },
   "calendar": {
     "addReminder": "إضافة تذكير للتقويم",
@@ -14,11 +10,7 @@
     "details": "تحقق من بريدك الإلكتروني لتصدير بيانات انستغرام وارفعه إلى متتبع إلغاء المتابعة على safeunfollow.app"
   },
   "buttons": {
-    "back": "رجوع",
-    "next": "الخطوة التالية",
-    "done": "انتهيت، هيا بنا!",
     "close": "إغلاق الدليل",
-    "cancel": "إلغاء",
     "trySample": "جرّب مع بيانات العينة",
     "uploadFile": "رفع ملفي"
   },

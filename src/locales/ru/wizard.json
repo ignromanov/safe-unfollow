@@ -1,12 +1,8 @@
 {
   "header": {
-    "ariaLabel": "Мастер экспорта данных Instagram",
     "stepOf": "Шаг {{current}} из {{total}}",
     "stepNavigation": "Навигация по шагам",
     "stepLabel": "Шаг {{step}}"
-  },
-  "footer": {
-    "navigation": "Действия мастера"
   },
   "calendar": {
     "addReminder": "Добавить напоминание в календарь",
@@ -14,11 +10,7 @@
     "details": "Проверь почту на наличие экспорта данных Instagram и загрузи его в Unfollow Tracker на safeunfollow.app"
   },
   "buttons": {
-    "back": "Назад",
-    "next": "Следующий шаг",
-    "done": "Готово, поехали!",
     "close": "Закрыть руководство",
-    "cancel": "Отмена",
     "trySample": "Попробуйте с тестовыми данными",
     "uploadFile": "Загрузить мой файл"
   },

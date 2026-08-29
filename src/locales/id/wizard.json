@@ -1,12 +1,8 @@
 {
   "header": {
-    "ariaLabel": "Wizard ekspor data Instagram",
     "stepOf": "Langkah {{current}} dari {{total}}",
     "stepNavigation": "Navigasi langkah",
     "stepLabel": "Langkah {{step}}"
-  },
-  "footer": {
-    "navigation": "Aksi wizard"
   },
   "calendar": {
     "addReminder": "Tambah pengingat ke kalender",
@@ -14,11 +10,7 @@
     "details": "Cek email untuk ekspor data Instagram dan upload ke Unfollow Tracker di safeunfollow.app"
   },
   "buttons": {
-    "back": "Kembali",
-    "next": "Langkah Berikutnya",
-    "done": "Selesai, ayo mulai!",
     "close": "Tutup panduan",
-    "cancel": "Batal",
     "trySample": "Coba dengan data sampel",
     "uploadFile": "Unggah File Saya"
   },

@@ -1,12 +1,8 @@
 {
   "header": {
-    "ariaLabel": "Assistente de exportação de dados do Instagram",
     "stepOf": "Passo {{current}} de {{total}}",
     "stepNavigation": "Navegação de passos",
     "stepLabel": "Passo {{step}}"
-  },
-  "footer": {
-    "navigation": "Ações do assistente"
   },
   "calendar": {
     "addReminder": "Adicionar lembrete ao calendário",
@@ -14,11 +10,7 @@
     "details": "Verifique seu email para a exportação de dados do Instagram e faça upload no Unfollow Tracker em safeunfollow.app"
   },
   "buttons": {
-    "back": "Voltar",
-    "next": "Próximo Passo",
-    "done": "Pronto, vamos lá!",
     "close": "Fechar guia",
-    "cancel": "Cancelar",
     "trySample": "Experimente com dados de exemplo",
     "uploadFile": "Enviar meu arquivo"
   },

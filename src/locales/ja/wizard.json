@@ -1,12 +1,8 @@
 {
   "header": {
-    "ariaLabel": "Instagram データエクスポートウィザード",
     "stepOf": "ステップ {{current}} / {{total}}",
     "stepNavigation": "ステップナビゲーション",
     "stepLabel": "ステップ {{step}}"
-  },
-  "footer": {
-    "navigation": "ウィザードの操作"
   },
   "calendar": {
     "addReminder": "カレンダーにリマインダーを追加",
@@ -14,11 +10,7 @@
     "details": "Instagramデータエクスポートのメールを確認し、safeunfollow.appのUnfollow Trackerにアップロード"
   },
   "buttons": {
-    "back": "戻る",
-    "next": "次のステップ",
-    "done": "完了、始めましょう！",
     "close": "ガイドを閉じる",
-    "cancel": "キャンセル",
     "trySample": "サンプルデータで試す",
     "uploadFile": "ファイルをアップロード"
   },

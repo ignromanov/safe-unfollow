@@ -1,12 +1,8 @@
 {
   "header": {
-    "ariaLabel": "Instagram data export wizard",
     "stepOf": "Step {{current}} of {{total}}",
     "stepNavigation": "Step navigation",
     "stepLabel": "Step {{step}}"
-  },
-  "footer": {
-    "navigation": "Wizard actions"
   },
   "calendar": {
     "addReminder": "Add Reminder to Calendar",
@@ -14,11 +10,7 @@
     "details": "Check your email for Instagram data export and upload to Unfollow Tracker at safeunfollow.app"
   },
   "buttons": {
-    "back": "Back",
-    "next": "Next Step",
-    "done": "Done, let's go!",
     "close": "Close guide",
-    "cancel": "Cancel",
     "trySample": "Try with sample data",
     "uploadFile": "Upload My File"
   },
