@@ -197,9 +197,10 @@ describe.runIf(built)('built font assets resolve', () => {
     const ranges = shippedRanges(pkg!);
     const pages = readdirSync(dist, { recursive: true } as never) as unknown as string[];
     const html = pages.filter(f => typeof f === 'string' && f.endsWith('.html'));
-    // A floor, not a count: 72 pages today — 70 prerendered routes plus dist/404.html
-    // and the search-console verification file. It was 162 until the eight /wizard
-    // routes went (GH#102), which is why the floor moved rather than the invariant.
+    // A floor, not a count: 72 pages today — the 70 prerendered routes (dist/404.html is
+    // English's, one of the 70) plus fo-verify.html and a Search Console file. It was 162
+    // until the eight /wizard routes went (GH#102), which is why the floor moved rather
+    // than the invariant.
     // Guards against a readdir change quietly reducing this to the handful at the top
     // level and passing on a partial scan.
     expect(html.length, 'too few prerendered pages — is the scan still recursive?').toBeGreaterThan(
