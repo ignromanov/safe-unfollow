@@ -225,6 +225,18 @@ describe('HowToSection', () => {
       const link = screen.getByRole('link', { name: stepAriaLabel(1, STEP_TITLES[0]) });
       expect(link).toHaveAttribute('href', '/id/upload?guide=1');
     });
+
+    // `?guide=1` above and `?step=N` here are two different query shapes through the
+    // same PrefixedLink, and only the first was pinned. Seven of the nine rows on every
+    // localized page now use the `?step=` form, so a prefixing regression that spared
+    // `?guide=1` would drop nine locales' worth of section links into the English funnel
+    // with no runtime symptom.
+    it('should carry the language prefix on a step-section link too', () => {
+      renderWithRouter(<HowToSection />, { initialEntries: ['/id'] });
+
+      const link = screen.getByRole('link', { name: stepAriaLabel(2, STEP_TITLES[1]) });
+      expect(link).toHaveAttribute('href', '/id/upload?step=1');
+    });
   });
 
   describe('keyboard accessibility', () => {
