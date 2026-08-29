@@ -100,7 +100,7 @@
       ]
     },
     {
-      "source": "/wizard/step-:file*",
+      "source": "/wizard/step-(.*)",
       "headers": [
         {
           "key": "Cache-Control",
