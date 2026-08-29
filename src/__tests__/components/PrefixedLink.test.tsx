@@ -20,13 +20,13 @@ describe('PrefixedLink', () => {
   });
 
   it('prefixes the path with the current language', () => {
-    renderWithRouter(<PrefixedLink to="/wizard/step/1">Guide</PrefixedLink>, {
+    renderWithRouter(<PrefixedLink to="/upload?guide=1">Guide</PrefixedLink>, {
       initialEntries: ['/id/upload'],
     });
 
     expect(screen.getByRole('link', { name: 'Guide' })).toHaveAttribute(
       'href',
-      '/id/wizard/step/1'
+      '/id/upload?guide=1'
     );
   });
 

@@ -19,9 +19,9 @@ export interface GuideStep {
  * saying 6 next to a heading saying 5 — and `steps.1` never existed in any
  * locale, because step 1 was the entry screen and used `entry.*`.
  *
- * The `/wizard/step/N` routes are still live until PR 3 and still carry the
- * old numbering in their URLs; Wizard.tsx maps one onto the other rather than
- * renaming eight indexed pages twice.
+ * The old numbering survived in the `/wizard/step/N` URLs until PR 3 removed
+ * those routes; the ids below are now the only numbering there is, and they
+ * are what `?step=N` names.
  */
 export const GUIDE_STEPS: GuideStep[] = [
   { id: 1, visual: '/wizard/step-2' },
@@ -63,16 +63,6 @@ const POSTER_SIZE_OVERRIDES: Partial<Record<number, PosterSize>> = {
 
 export const guideStepPosterSize = (step: number): PosterSize =>
   POSTER_SIZE_OVERRIDES[step] ?? DEFAULT_POSTER_SIZE;
-
-/**
- * The eight live `/wizard/step/N` URLs, which outnumber the seven guide
- * sections by exactly the entry screen that became a document block.
- *
- * Stated once, here, because two consumers need it and neither owns it:
- * `Wizard.tsx` renders one dot per route and `useWizardNavigation.ts`
- * validates the route param against it. Both die together in PR 3.
- */
-export const WIZARD_ROUTE_COUNT = GUIDE_STEPS.length + 1;
 
 /**
  * Meta's export entry point. It used to be derived from step 1's

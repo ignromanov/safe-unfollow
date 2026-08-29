@@ -10,11 +10,6 @@
       "description": "Instagram veri dışa aktarımını (ZIP) yükle, takipten çıkanları ücretsiz gör. Giriş yok, şifre yok: dosya tarayıcında okunur ve cihazından hiç çıkmaz.",
       "ogTitle": "Instagram ZIP yükle: takipten çıkanları ücretsiz gör"
     },
-    "/wizard": {
-      "title": "Instagram verilerini JSON olarak indirme rehberi",
-      "description": "Instagram verilerini JSON formatında indirmek için adım adım rehber. Meta Hesaplar Merkezi'nden veri dışa aktarımını talep et, e-postana gelsin, buraya yükle.",
-      "ogTitle": "Instagram verilerini JSON olarak indirme rehberi"
-    },
     "/sample": {
       "title": "Instagram Unfollow Tracker'ı dene: ücretsiz demo",
       "description": "Örnek verilerle Instagram Unfollow Tracker'ı dene. Rozetlerin, filtrelerin ve aramanın nasıl çalıştığını gör, hiçbir dosya yüklemeden ve hesap açmadan.",

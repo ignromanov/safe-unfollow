@@ -19,7 +19,7 @@ function updateHtmlLang(lang: SupportedLanguage): void {
 
 /**
  * Removes language prefix from path
- * E.g., /es/wizard -> /wizard, /ru/ -> /
+ * E.g., /es/upload -> /upload, /ru/ -> /
  */
 function getPathWithoutLang(pathname: string): string {
   for (const lang of NON_ENGLISH_LANGUAGES) {

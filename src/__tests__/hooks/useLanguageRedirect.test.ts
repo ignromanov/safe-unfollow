@@ -55,7 +55,7 @@ describe('useLanguageRedirect', () => {
   describe('hydration', () => {
     it('should not sync when store is not hydrated', () => {
       mockStoreState._hasHydrated = false;
-      mockLocation.pathname = '/ru/wizard';
+      mockLocation.pathname = '/ru/sample';
 
       renderHook(() => useLanguageRedirect());
       act(() => {
@@ -68,7 +68,7 @@ describe('useLanguageRedirect', () => {
     it('should sync after store is hydrated', () => {
       mockStoreState._hasHydrated = true;
       mockStoreState.language = 'en';
-      mockLocation.pathname = '/ru/wizard';
+      mockLocation.pathname = '/ru/sample';
 
       renderHook(() => useLanguageRedirect());
       act(() => {
@@ -94,7 +94,7 @@ describe('useLanguageRedirect', () => {
 
     it('should not call setLanguage when URL matches store', () => {
       mockStoreState.language = 'ru';
-      mockLocation.pathname = '/ru/wizard';
+      mockLocation.pathname = '/ru/sample';
 
       renderHook(() => useLanguageRedirect());
       act(() => {
@@ -106,7 +106,7 @@ describe('useLanguageRedirect', () => {
 
     it('should detect English from root path', () => {
       mockStoreState.language = 'ru';
-      mockLocation.pathname = '/wizard';
+      mockLocation.pathname = '/sample';
 
       renderHook(() => useLanguageRedirect());
       act(() => {
@@ -133,11 +133,11 @@ describe('useLanguageRedirect', () => {
     it.each([
       ['/es', 'es'],
       ['/es/', 'es'],
-      ['/es/wizard', 'es'],
+      ['/es/sample', 'es'],
       ['/ru/upload', 'ru'],
       ['/de/results', 'de'],
       ['/fr/privacy', 'fr'],
-      ['/ja/wizard/step/3', 'ja'],
+      ['/ja/sample', 'ja'],
       ['/ar', 'ar'],
     ])('should detect %s as %s', (pathname, expectedLang) => {
       mockStoreState.language = 'en';
@@ -153,7 +153,7 @@ describe('useLanguageRedirect', () => {
 
     it.each([
       ['/', 'en'],
-      ['/wizard', 'en'],
+      ['/sample', 'en'],
       ['/upload', 'en'],
       ['/results', 'en'],
     ])('should detect %s as English', (pathname, expectedLang) => {

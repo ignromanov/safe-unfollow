@@ -6,7 +6,7 @@
       "answer": "Öffne in der Meta-Kontenübersicht „Deine Informationen exportieren“ › Export erstellen › Wähle dein Profil › „Zu Gerät exportieren“ › Nur „Follower und Folge ich“ › Format JSON. Lade die ZIP herunter (normalerweise 5-30 Minuten) und lade sie hier hoch. Das Tool vergleicht deine Listen im Browser, der Export wird also nirgendwohin hochgeladen. Keine Anmeldung nötig.",
       "relatedLink": {
         "text": "Export-Anleitung starten",
-        "href": "/wizard"
+        "href": "/upload?guide=1"
       }
     },
     "withoutDownload": {
@@ -14,7 +14,7 @@
       "answer": "Nein. Instagram bietet keine native Entfolger-Liste. Die einzigen sicheren Methoden sind: (1) Manuelles Prüfen von gefolgten Konten vs. Followern, oder (2) Deinen offiziellen Daten-Download mit diesem Tool verwenden. Dieser Tracker erledigt Methode 2 für dich, kostenlos: kein Passwort, keine Anmeldung, kein Kontorisiko.",
       "relatedLink": {
         "text": "Erfahre, wie du deine Daten bekommst",
-        "href": "/wizard"
+        "href": "/upload?guide=1"
       }
     },
     "privacy": {
@@ -42,7 +42,7 @@
       "answer": "Instagram-Daten-Download (über die Meta-Kontenübersicht) ist das offizielle Tool zum Exportieren deiner Kontoinformationen einschließlich Follower- und Following-Listen. Es ist der einzige sichere, autorisierte Weg, auf diese Daten zuzugreifen, ohne dein Konto zu gefährden. Apps, die nach deinem Passwort fragen, verstoßen gegen Instagrams Nutzungsbedingungen.",
       "relatedLink": {
         "text": "Folge unserer Schritt-für-Schritt-Anleitung",
-        "href": "/wizard"
+        "href": "/upload?guide=1"
       }
     },
     "accountSafety": {
@@ -58,7 +58,7 @@
       "answer": "Meta sendet deine Daten normalerweise innerhalb von 5-30 Minuten per E-Mail. Größere Konten oder hohe Serverlast können bis zu einigen Stunden dauern. Sobald du die ZIP hast, läuft die Analyse in deinem eigenen Browser statt auf einem Server: keine Warteschlange, kein Warten auf einen Upload. Größere Exporte brauchen naturgemäß länger zum Einlesen als kleine.",
       "relatedLink": {
         "text": "Kalender-Erinnerung hinzufügen",
-        "href": "/wizard/step/8"
+        "href": "/upload?step=7"
       }
     },
     "scale": {
@@ -94,7 +94,7 @@
       "answer": "SafeUnfollow nutzt die offizielle Datenexport-Funktion von Instagram (in der Meta-Kontenübersicht) statt deinem Passwort. Du lädst deine Daten als ZIP-Datei direkt von Instagram herunter und lädst sie hier hoch. Die App liest die JSON-Dateien im ZIP, um Follower zu vergleichen, alles wird in deinem Browser verarbeitet.",
       "relatedLink": {
         "text": "Exportanleitung ansehen",
-        "href": "/wizard"
+        "href": "/upload?guide=1"
       }
     },
     "betterThanPaid": {

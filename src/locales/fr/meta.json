@@ -10,11 +10,6 @@
       "description": "Téléversez votre export Instagram (ZIP) pour une analyse gratuite des désabonnements. Sans identifiants ni mot de passe : le fichier est lu dans le navigateur.",
       "ogTitle": "Téléverser un ZIP Instagram : analyse des désabonnements"
     },
-    "/wizard": {
-      "title": "Comment télécharger vos données Instagram en JSON",
-      "description": "Guide étape par étape pour télécharger vos données Instagram au format JSON. Comment demander votre export de données à Meta et le recevoir par e-mail.",
-      "ogTitle": "Comment télécharger vos données Instagram en JSON"
-    },
     "/sample": {
       "title": "Essayer Instagram Unfollow Tracker : démo gratuite",
       "description": "Essayez Instagram Unfollow Tracker avec des données d'exemple. Voyez les badges, les filtres et la recherche en action, sans rien téléverser ni créer de compte.",

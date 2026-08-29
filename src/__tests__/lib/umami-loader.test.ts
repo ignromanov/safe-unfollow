@@ -218,8 +218,8 @@ describe('umami-loader', () => {
       ['/results'],
       ['/id/results'],
       ['/upload'],
-      ['/wizard'],
-      ['/ru/wizard/step/1'],
+      ['/sample'],
+      ['/ru/sample'],
       ['/privacy'],
     ])('rejects %s', async pathname => {
       const { isLandingPath } = await import('@/lib/umami-loader');
@@ -303,7 +303,7 @@ describe('umami-loader', () => {
       expect(appendChildSpy).toHaveBeenCalledWith(mockScript);
     });
 
-    it.each(['/results', '/id/results', '/upload', '/wizard'])(
+    it.each(['/results', '/id/results', '/upload', '/sample'])(
       'never attaches a listener on %s',
       async pathname => {
         window.history.pushState({}, '', pathname);

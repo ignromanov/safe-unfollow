@@ -28,9 +28,19 @@ const STEP_META: Array<{ isWarning?: boolean; visual?: string }> = [
   {}, // Step 9: no visual, navigates to upload page
 ];
 
-/** Step 9 is the hand-off to upload; the rest open their wizard step. */
+/**
+ * Where each of the nine rows sends a reader, now that the guide is a dialog on
+ * /upload rather than eight routes (GH#102).
+ *
+ * The three cases are not one formula. Row 0 is the entry screen the guide
+ * stopped carrying, so it has no section to deep-link and opens the guide at
+ * its start. Rows 1..7 are `GUIDE_STEPS` — the same seven the dialog renders,
+ * in the same order — so the row index IS the section number. Row 8 is the
+ * hand-off, and was already /upload.
+ */
 function stepHref(stepIndex: number): string {
-  return stepIndex === 8 ? '/upload' : `/wizard/step/${stepIndex + 1}`;
+  if (stepIndex === 8) return '/upload';
+  return stepIndex === 0 ? '/upload?guide=1' : `/upload?step=${stepIndex}`;
 }
 
 export function HowToSection() {
@@ -156,7 +166,7 @@ export function HowToSection() {
               </p>
             </div>
             <PrefixedLink
-              to="/wizard/step/1"
+              to="/upload?guide=1"
               className="cursor-pointer w-full md:w-auto px-10 py-5 bg-white text-primary font-black rounded-3xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3 text-lg shadow-xl"
             >
               {t('cta.button')} <Play size={22} fill="currentColor" />

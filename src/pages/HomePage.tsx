@@ -1,5 +1,3 @@
-import { useEffect } from 'react';
-
 import { AdSlot } from '@/components/ads/AdSlot';
 import { FAQSection } from '@/components/FAQSection';
 import { FooterCTA } from '@/components/FooterCTA';
@@ -22,24 +20,12 @@ import { useHasResults } from '@/hooks/useHasResults';
 export function Component() {
   const hasResults = useHasResults();
 
-  // Prefetch wizard chunk on idle for instant navigation
-  useEffect(() => {
-    const prefetchWizard = () => {
-      import('./WizardPage').catch(() => {
-        // Ignore prefetch errors (network, etc.)
-      });
-    };
-
-    // Use requestIdleCallback for non-blocking prefetch
-    if ('requestIdleCallback' in window) {
-      const id = window.requestIdleCallback(prefetchWizard, { timeout: 3000 });
-      return () => window.cancelIdleCallback(id);
-    } else {
-      // Fallback: setTimeout after 2 seconds
-      const id = setTimeout(prefetchWizard, 2000);
-      return () => clearTimeout(id);
-    }
-  }, []);
+  // There was an idle prefetch of WizardPage here. That page is gone (GH#102):
+  // every guide CTA on this screen now points at /upload, whose chunk this
+  // page does not own. The guide itself is lazy inside UploadPage, so a
+  // reader arriving at /upload?guide=1 pays a chunk fetch at hydration — worth
+  // a preload, but one that belongs next to the measurement of that arrival
+  // path, not to a hook this page keeps for a module it no longer imports.
 
   return (
     <>

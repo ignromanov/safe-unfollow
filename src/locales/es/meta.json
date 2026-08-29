@@ -10,11 +10,6 @@
       "description": "Sube tu exportación de datos de Instagram (ZIP) y ve gratis quién dejó de seguirte. Sin iniciar sesión y sin contraseña: el archivo se lee en tu navegador.",
       "ogTitle": "Sube tu ZIP de Instagram: quién dejó de seguirte, gratis"
     },
-    "/wizard": {
-      "title": "Cómo descargar tus datos de Instagram en formato JSON",
-      "description": "Guía paso a paso para pedirle a Meta la exportación de tus datos de Instagram en formato JSON, descargar el ZIP y dejarlo listo para analizar. Sin contraseña.",
-      "ogTitle": "Cómo descargar tus datos de Instagram en formato JSON"
-    },
     "/sample": {
       "title": "Prueba la demo gratis del rastreador de unfollowers",
       "description": "Mira con datos de ejemplo cómo funcionan las insignias, los filtros y la búsqueda. No hace falta subir nada tuyo. La demo es gratis y no pide iniciar sesión.",

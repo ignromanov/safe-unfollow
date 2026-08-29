@@ -173,14 +173,15 @@ export async function injectLocalizedMeta(
   // vite-react-ssg may pass routes without leading slash (e.g., "results" instead of "/results")
   const normalizedRoute = route.startsWith('/') ? route : `/${route}`;
 
-  // Canonicalize wizard steps to /wizard (they share the same page content)
-  const isWizardStep = normalizedRoute.match(/\/wizard\/step\/\d+/);
-  const canonicalBasePath = isWizardStep
-    ? normalizedRoute.replace(/\/wizard\/step\/\d+/, '/wizard')
-    : normalizedRoute;
-
-  // Normalize route for canonical URL
-  const canonicalPath = canonicalBasePath === '/' ? '' : canonicalBasePath.replace(/\/$/, '');
+  // Normalize route for canonical URL.
+  //
+  // Eight `/wizard/step/N` pages per language used to be canonicalized back to
+  // `/wizard` here, because they were one page behind eight addresses. The
+  // guide is a dialog on /upload now (GH#102) and those routes no longer
+  // exist, so there is nothing to collapse: every prerendered route is its own
+  // canonical. `?guide=1` and `?step=N` never reach this hook — vite-react-ssg
+  // renders paths, not query strings.
+  const canonicalPath = normalizedRoute === '/' ? '' : normalizedRoute.replace(/\/$/, '');
   const canonicalUrl = `${BASE_URL}${canonicalPath || '/'}`;
 
   // Get base path without language prefix for hreflang

@@ -5,7 +5,6 @@ import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '@/locales';
 
 // Direct imports for parallel loading (no lazy waterfall)
 import HomePage from './pages/HomePage';
-import WizardPage from './pages/WizardPage';
 import UploadPage from './pages/UploadPage';
 import ResultsPage from './pages/ResultsPage';
 import SamplePage from './pages/SamplePage';
@@ -20,8 +19,6 @@ import NotFoundPage from './pages/NotFoundPage';
 function createPageChildren(): RouteRecord[] {
   return [
     { index: true, element: <HomePage /> },
-    { path: 'wizard', element: <WizardPage /> },
-    { path: 'wizard/step/:stepId', element: <WizardPage /> },
     { path: 'upload', element: <UploadPage /> },
     { path: 'results', element: <ResultsPage /> },
     { path: 'sample', element: <SamplePage /> },
@@ -35,20 +32,25 @@ function createPageChildren(): RouteRecord[] {
 /**
  * Route definitions for SSG prerendering
  *
- * Structure (8 prerendered routes per language):
+ * Structure (7 prerendered routes per language):
  * - / (hero)
- * - /wizard (step-by-step export guide)
- * - /upload (file upload)
+ * - /upload (file upload, and the export guide it opens as a dialog)
  * - /results
  * - /sample
  * - /privacy
  * - /terms
  * - /404
  *
- * `wizard/step/:stepId` and the `*` catch-all are stripped by vite-react-ssg
- * (it skips any path containing ':' or '*'). The eight concrete wizard steps are
- * added back per language in vite.config.ts `includedRoutes`, so the real build
- * emits 10 languages x (8 + 8) = 160 prerendered routes — not 8 per language.
+ * The `*` catch-all is stripped by vite-react-ssg (it skips any path containing
+ * ':' or '*'), so the real build emits 10 languages x 7 = 70 prerendered routes.
+ *
+ * Eight of these used to be `/wizard` and `/wizard/step/1..8`, prerendered per
+ * language by an `includedRoutes` hook — 90 of the sitemap's 163 entries, 80 of
+ * them canonicalized away to a single page. The guide is a dialog on /upload
+ * now (GH#102) and those addresses are 301s in vercel.json. The guide's own
+ * deep links are `?guide=1` and `?step=N`, which are query strings:
+ * vite-react-ssg prerenders paths, so they add no route here and no sitemap
+ * entry.
  *
  * /results IS prerendered, despite needing user data: it is a static child route,
  * so nothing excludes it and dist/<lang>/results.html ships for all 10 languages.
@@ -57,8 +59,8 @@ function createPageChildren(): RouteRecord[] {
  * meta tags and hydration safety apply to it. See GH#44.
  *
  * Each route also has language variants:
- * - /es, /es/wizard, /es/upload, etc.
- * - /ru, /ru/wizard, /ru/upload, etc.
+ * - /es, /es/upload, /es/results, etc.
+ * - /ru, /ru/upload, /ru/results, etc.
  */
 export const routes: RouteRecord[] = [
   {

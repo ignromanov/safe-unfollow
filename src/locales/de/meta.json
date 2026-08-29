@@ -10,11 +10,6 @@
       "description": "Lade deinen Instagram-Export (ZIP) hoch für eine kostenlose Entfolger-Analyse. Ohne Login, ohne Passwort: die Datei wird im Browser gelesen und bleibt bei dir.",
       "ogTitle": "Instagram-ZIP hochladen: kostenlose Entfolger-Analyse"
     },
-    "/wizard": {
-      "title": "Instagram-Daten als JSON herunterladen: Anleitung",
-      "description": "Schritt-für-Schritt-Anleitung zum Export deiner Instagram-Daten als JSON. So forderst du in der Meta-Kontenübersicht „Deine Informationen exportieren“ an.",
-      "ogTitle": "Instagram-Daten als JSON herunterladen: Anleitung"
-    },
     "/sample": {
       "title": "Instagram Unfollow Tracker testen: kostenlose Demo",
       "description": "Teste Instagram Unfollow Tracker mit Beispieldaten. Sieh, wie Abzeichen, Filter und Suche funktionieren, ohne etwas hochzuladen und ohne Konto.",

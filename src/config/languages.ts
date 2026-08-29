@@ -114,9 +114,9 @@ export const LANGUAGE_REGEX_PATTERN = NON_ENGLISH_LANGUAGES.join('|');
  *
  * @example
  * const pattern = createLanguagePrefixRegex();
- * pattern.test('/es/wizard'); // true
- * pattern.test('/en/wizard'); // false
- * pattern.test('/wizard');    // false
+ * pattern.test('/es/upload'); // true
+ * pattern.test('/en/upload'); // false
+ * pattern.test('/upload');    // false
  */
 export function createLanguagePrefixRegex(flags?: string): RegExp {
   return new RegExp(`^\\/(${LANGUAGE_REGEX_PATTERN})(\\/|$)`, flags);
@@ -128,13 +128,13 @@ export function createLanguagePrefixRegex(flags?: string): RegExp {
  * Extracts language code from the first path segment.
  * Returns DEFAULT_LANGUAGE if no valid language prefix found.
  *
- * @param pathname - URL pathname (e.g., '/es/wizard', '/ru/', '/')
+ * @param pathname - URL pathname (e.g., '/es/upload', '/ru/', '/')
  * @returns Detected language code
  *
  * @example
- * detectLanguageFromPathname('/es/wizard'); // 'es'
+ * detectLanguageFromPathname('/es/upload'); // 'es'
  * detectLanguageFromPathname('/ru/');       // 'ru'
- * detectLanguageFromPathname('/wizard');    // 'en' (default)
+ * detectLanguageFromPathname('/upload');    // 'en' (default)
  * detectLanguageFromPathname('/');          // 'en' (default)
  */
 export function detectLanguageFromPathname(pathname: string): SupportedLanguage {

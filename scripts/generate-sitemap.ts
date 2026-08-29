@@ -38,7 +38,6 @@ const EXCLUDE_PATTERNS = [
 // Per-route SEO settings
 const ROUTE_CONFIG: Record<string, { priority: number; changefreq: string }> = {
   "/": { priority: 1.0, changefreq: "weekly" },
-  "/wizard": { priority: 0.8, changefreq: "monthly" },
   "/upload": { priority: 0.8, changefreq: "monthly" },
   "/waiting": { priority: 0.6, changefreq: "monthly" },
   "/results": { priority: 0.6, changefreq: "monthly" },
@@ -101,8 +100,8 @@ function scanHtmlFiles(dir: string, files: string[] = []): string[] {
 /**
  * Convert HTML file path to URL path
  * dist/index.html -> /
- * dist/wizard.html -> /wizard
- * dist/es/wizard.html -> /es/wizard
+ * dist/upload.html -> /upload
+ * dist/es/upload.html -> /es/upload
  * dist/es.html -> /es/
  */
 function htmlPathToUrlPath(htmlPath: string): string {
@@ -119,7 +118,7 @@ function htmlPathToUrlPath(htmlPath: string): string {
     return `/${langMatch[1]}`;
   }
 
-  // Handle nested paths: es/wizard.html -> /es/wizard
+  // Handle nested paths: es/upload.html -> /es/upload
   // Remove .html extension
   const withoutExt = relativePath.replace(/\.html$/, "");
 
@@ -141,8 +140,8 @@ function shouldExclude(htmlPath: string): boolean {
 
 /**
  * Extract language and base path from URL path
- * /es/wizard -> { lang: 'es', basePath: '/wizard' }
- * /wizard -> { lang: 'en', basePath: '/wizard' }
+ * /es/upload -> { lang: 'es', basePath: '/upload' }
+ * /upload -> { lang: 'en', basePath: '/upload' }
  * /es/ -> { lang: 'es', basePath: '/' }
  */
 function parseUrlPath(urlPath: string): { lang: Language; basePath: string } {
@@ -166,7 +165,7 @@ function buildUrl(basePath: string, lang: Language): string {
   if (lang === "en") {
     return `${BASE_URL}${basePath}`;
   }
-  // /wizard -> /es/wizard, / -> /es
+  // /upload -> /es/upload, / -> /es
   if (basePath === "/") {
     return `${BASE_URL}/${lang}`;
   }

@@ -184,13 +184,24 @@ describe('HowToSection', () => {
   });
 
   describe('step links', () => {
-    it('should link step cards 1-8 to their wizard step', () => {
+    // The nine rows are three destinations, not one formula (GH#102). Card 1 is the
+    // entry screen the guide stopped carrying, so it has no section of its own and
+    // opens the guide at its start; cards 2-8 are the guide's seven sections, in order,
+    // so card N opens section N-1; card 9 is the hand-off to /upload.
+    it('should link the first step card to the guide with no section', () => {
       renderWithRouter(<HowToSection />);
 
-      STEP_TITLES.slice(0, 8).forEach((title, idx) => {
-        const step = idx + 1;
-        const link = screen.getByRole('link', { name: stepAriaLabel(step, title) });
-        expect(link).toHaveAttribute('href', `/wizard/step/${step}`);
+      const link = screen.getByRole('link', { name: stepAriaLabel(1, STEP_TITLES[0]) });
+      expect(link).toHaveAttribute('href', '/upload?guide=1');
+    });
+
+    it('should link step cards 2-8 to their guide section', () => {
+      renderWithRouter(<HowToSection />);
+
+      STEP_TITLES.slice(1, 8).forEach((title, idx) => {
+        const card = idx + 2;
+        const link = screen.getByRole('link', { name: stepAriaLabel(card, title) });
+        expect(link).toHaveAttribute('href', `/upload?step=${card - 1}`);
       });
     });
 
@@ -201,18 +212,18 @@ describe('HowToSection', () => {
       expect(link).toHaveAttribute('href', '/upload');
     });
 
-    it('should link the final CTA to wizard step 1', () => {
+    it('should link the final CTA to the guide', () => {
       renderWithRouter(<HowToSection />);
 
       const cta = screen.getByRole('link', { name: /Open Analysis Guide/i });
-      expect(cta).toHaveAttribute('href', '/wizard/step/1');
+      expect(cta).toHaveAttribute('href', '/upload?guide=1');
     });
 
     it('should carry the language prefix on step links under a localized route', () => {
       renderWithRouter(<HowToSection />, { initialEntries: ['/id'] });
 
       const link = screen.getByRole('link', { name: stepAriaLabel(1, STEP_TITLES[0]) });
-      expect(link).toHaveAttribute('href', '/id/wizard/step/1');
+      expect(link).toHaveAttribute('href', '/id/upload?guide=1');
     });
   });
 

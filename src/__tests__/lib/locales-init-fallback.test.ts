@@ -36,7 +36,7 @@ describe('initI18n client fallback', () => {
 
   beforeEach(() => {
     vi.resetModules();
-    window.history.pushState({}, '', '/ru/wizard/step/1');
+    window.history.pushState({}, '', '/ru/sample');
   });
 
   afterEach(() => {

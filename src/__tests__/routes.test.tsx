@@ -16,7 +16,6 @@ describe('Routes Configuration', () => {
     const paths = children.map(c => c.path || (c.index ? 'index' : ''));
 
     expect(paths).toContain('index'); // Home
-    expect(paths).toContain('wizard');
     expect(paths).toContain('upload');
     expect(paths).toContain('results');
     expect(paths).toContain('sample');
@@ -37,7 +36,6 @@ describe('Routes Configuration', () => {
       const paths = children.map(c => c.path || (c.index ? 'index' : ''));
 
       expect(paths).toContain('index');
-      expect(paths).toContain('wizard');
       expect(paths).toContain('upload');
       expect(paths).toContain('results');
       expect(paths).toContain('sample');
@@ -63,11 +61,16 @@ describe('Routes Configuration', () => {
     });
   });
 
-  it('should include deep link for wizard steps', () => {
-    const rootRoute = routes.find(r => r.path === '/');
-    const children = rootRoute?.children || [];
+  it('defines no wizard route in any language', () => {
+    // `/wizard` and the eight `/wizard/step/N` deep links were the guide's own
+    // pages until GH#102 made it a dialog on /upload. They are 301s in
+    // vercel.json now, and a route defined here would shadow the redirect for
+    // any reader already inside the SPA: React Router would answer the
+    // navigation client-side and the redirect would never be requested.
+    const wizardPaths = routes.flatMap(route =>
+      (route.children || []).map(child => child.path).filter(path => path?.includes('wizard'))
+    );
 
-    const wizardStepRoute = children.find(c => c.path === 'wizard/step/:stepId');
-    expect(wizardStepRoute).toBeDefined();
+    expect(wizardPaths).toEqual([]);
   });
 });

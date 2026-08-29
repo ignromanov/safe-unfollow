@@ -24,7 +24,7 @@ describe('OrganizationSchema', () => {
 
     it('should not render on non-home pages', () => {
       const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/wizard'],
+        initialEntries: ['/sample'],
       });
 
       const scripts = container.querySelectorAll('script[type="application/ld+json"]');
@@ -122,7 +122,7 @@ describe('OrganizationSchema', () => {
 
     it('should not render on language-prefixed non-home pages', () => {
       const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/es/wizard'],
+        initialEntries: ['/es/sample'],
       });
 
       expect(container.querySelector('script')).not.toBeInTheDocument();
@@ -523,7 +523,7 @@ describe('OrganizationSchema', () => {
 
     it('should not render on nested routes', () => {
       const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/wizard/step-1'],
+        initialEntries: ['/upload'],
       });
 
       expect(container.querySelector('script')).not.toBeInTheDocument();

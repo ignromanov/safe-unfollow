@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { renderToString } from 'react-dom/server';
-import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { Component as HomePage } from '@/pages/HomePage';
 import { useAppStore } from '@/lib/store';
 import type { FileMetadata } from '@/core/types';
@@ -110,46 +110,6 @@ describe('HomePage', () => {
       const html = renderToString(<HomePage />);
 
       expect(html).toContain('has-data">false');
-    });
-  });
-
-  describe('wizard prefetch', () => {
-    afterEach(() => {
-      vi.unstubAllGlobals();
-      vi.useRealTimers();
-    });
-
-    it('schedules a WizardPage prefetch via requestIdleCallback when available', () => {
-      const requestIdleCallbackSpy = vi.fn(() => 1);
-      const cancelIdleCallbackSpy = vi.fn();
-      vi.stubGlobal('requestIdleCallback', requestIdleCallbackSpy);
-      vi.stubGlobal('cancelIdleCallback', cancelIdleCallbackSpy);
-
-      const { unmount } = render(<HomePage />);
-
-      expect(requestIdleCallbackSpy).toHaveBeenCalledWith(expect.any(Function), {
-        timeout: 3000,
-      });
-
-      unmount();
-
-      expect(cancelIdleCallbackSpy).toHaveBeenCalledWith(1);
-    });
-
-    it('falls back to a 2s timeout when requestIdleCallback is unavailable', () => {
-      // jsdom has no requestIdleCallback by default, so this exercises the
-      // real fallback branch rather than a simulated one.
-      vi.useFakeTimers();
-      const setTimeoutSpy = vi.spyOn(window, 'setTimeout');
-      const clearTimeoutSpy = vi.spyOn(window, 'clearTimeout');
-
-      const { unmount } = render(<HomePage />);
-
-      expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 2000);
-
-      unmount();
-
-      expect(clearTimeoutSpy).toHaveBeenCalled();
     });
   });
 

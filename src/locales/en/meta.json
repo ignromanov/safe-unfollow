@@ -10,11 +10,6 @@
       "description": "Upload your Instagram data export (ZIP) for a free unfollower analysis. No login and no password: the file is parsed in your browser and stays on your device.",
       "ogTitle": "Upload Instagram ZIP: Free Unfollower Analysis"
     },
-    "/wizard": {
-      "title": "How to Download Your Instagram Data as JSON",
-      "description": "Step-by-step guide to download your Instagram data as JSON. Learn how to request your data export from Meta for free unfollow analysis.",
-      "ogTitle": "How to Download Your Instagram Data as JSON"
-    },
     "/sample": {
       "title": "Try the Instagram Unfollow Tracker: Free Demo",
       "description": "Try Instagram Unfollow Tracker with sample data. See how badges, filters, and search work, with no upload needed. Free demo, no login required.",

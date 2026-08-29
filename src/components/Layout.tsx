@@ -121,7 +121,7 @@ export function Layout({ lang }: LayoutProps) {
     }
   }, [targetLang]);
 
-  // Sync language from URL path (e.g., /es/wizard -> Spanish)
+  // Sync language from URL path (e.g., /es/upload -> Spanish)
   useLanguageFromPath(lang);
 
   // Redirect from language-less paths to user's preferred language

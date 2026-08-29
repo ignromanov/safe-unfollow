@@ -28,7 +28,7 @@ describe('useLanguagePrefix', () => {
 
   it('should return /es for Spanish path', () => {
     vi.mocked(useLocation).mockReturnValue({
-      pathname: '/es/wizard',
+      pathname: '/es/sample',
       search: '',
       hash: '',
       state: null,
@@ -89,7 +89,7 @@ describe('useLanguagePrefix', () => {
 
   it('should return empty string for unsupported language code', () => {
     vi.mocked(useLocation).mockReturnValue({
-      pathname: '/fr/wizard',
+      pathname: '/fr/sample',
       search: '',
       hash: '',
       state: null,

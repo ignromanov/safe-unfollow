@@ -100,9 +100,9 @@ describe('useLanguageFromPath', () => {
       expect(mockSetLanguage).toHaveBeenCalledWith('es');
     });
 
-    it('should detect Russian from /ru/wizard path', () => {
+    it('should detect Russian from /ru/sample path', () => {
       mockUseLocation.mockReturnValue({
-        pathname: '/ru/wizard',
+        pathname: '/ru/sample',
         search: '',
         hash: '',
         state: null,
@@ -259,7 +259,7 @@ describe('useLanguageFromPath', () => {
   describe('language from route prop', () => {
     it('should use langFromRoute prop when provided', () => {
       mockUseLocation.mockReturnValue({
-        pathname: '/wizard',
+        pathname: '/sample',
         search: '',
         hash: '',
         state: null,
@@ -278,7 +278,7 @@ describe('useLanguageFromPath', () => {
 
     it('should prioritize langFromRoute over path detection', () => {
       mockUseLocation.mockReturnValue({
-        pathname: '/ru/wizard',
+        pathname: '/ru/sample',
         search: '',
         hash: '',
         state: null,
@@ -314,7 +314,7 @@ describe('useLanguageFromPath', () => {
 
     it('should default to English for path without language prefix', () => {
       mockUseLocation.mockReturnValue({
-        pathname: '/wizard',
+        pathname: '/sample',
         search: '',
         hash: '',
         state: null,
@@ -344,7 +344,7 @@ describe('useLanguageFromPath', () => {
 
     it('should ignore query parameters', () => {
       mockUseLocation.mockReturnValue({
-        pathname: '/es/wizard',
+        pathname: '/es/sample',
         search: '?foo=bar',
         hash: '',
         state: null,
@@ -382,7 +382,7 @@ describe('useLanguageFromPath', () => {
 
     it('should handle trailing slashes', () => {
       mockUseLocation.mockReturnValue({
-        pathname: '/es/wizard/',
+        pathname: '/es/sample/',
         search: '',
         hash: '',
         state: null,
@@ -406,7 +406,7 @@ describe('useLanguageFromPath', () => {
   describe('language persistence', () => {
     it('should always call setLanguage to persist URL language', () => {
       mockUseLocation.mockReturnValue({
-        pathname: '/es/wizard',
+        pathname: '/es/sample',
         search: '',
         hash: '',
         state: null,
@@ -426,7 +426,7 @@ describe('useLanguageFromPath', () => {
 
     it('should update store when path changes to different language', () => {
       mockUseLocation.mockReturnValue({
-        pathname: '/es/wizard',
+        pathname: '/es/sample',
         search: '',
         hash: '',
         state: null,
@@ -461,7 +461,7 @@ describe('useLanguageFromPath', () => {
   describe('HTML lang attribute', () => {
     it('should update HTML lang attribute to Spanish', () => {
       mockUseLocation.mockReturnValue({
-        pathname: '/es/wizard',
+        pathname: '/es/sample',
         search: '',
         hash: '',
         state: null,
@@ -481,7 +481,7 @@ describe('useLanguageFromPath', () => {
 
     it('should update HTML lang attribute to Russian', () => {
       mockUseLocation.mockReturnValue({
-        pathname: '/ru/wizard',
+        pathname: '/ru/sample',
         search: '',
         hash: '',
         state: null,
@@ -501,7 +501,7 @@ describe('useLanguageFromPath', () => {
 
     it('should update HTML lang attribute when URL changes', () => {
       mockUseLocation.mockReturnValue({
-        pathname: '/es/wizard',
+        pathname: '/es/sample',
         search: '',
         hash: '',
         state: null,
@@ -520,7 +520,7 @@ describe('useLanguageFromPath', () => {
 
       // Change URL to Russian (HTML lang follows URL, not store)
       mockUseLocation.mockReturnValue({
-        pathname: '/ru/wizard',
+        pathname: '/ru/sample',
         search: '',
         hash: '',
         state: null,
@@ -578,9 +578,9 @@ describe('useLanguageFromPath', () => {
       expect(xDefault?.getAttribute('href')).toBe('https://safeunfollow.app/');
     });
 
-    it('should create correct hreflang URLs for /wizard path', () => {
+    it('should create correct hreflang URLs for /sample path', () => {
       mockUseLocation.mockReturnValue({
-        pathname: '/wizard',
+        pathname: '/sample',
         search: '',
         hash: '',
         state: null,
@@ -596,18 +596,18 @@ describe('useLanguageFromPath', () => {
       vi.runAllTimers();
 
       const enLink = document.querySelector('link[hreflang="en"]');
-      expect(enLink?.getAttribute('href')).toBe('https://safeunfollow.app/wizard');
+      expect(enLink?.getAttribute('href')).toBe('https://safeunfollow.app/sample');
 
       const esLink = document.querySelector('link[hreflang="es"]');
-      expect(esLink?.getAttribute('href')).toBe('https://safeunfollow.app/es/wizard');
+      expect(esLink?.getAttribute('href')).toBe('https://safeunfollow.app/es/sample');
 
       const ruLink = document.querySelector('link[hreflang="ru"]');
-      expect(ruLink?.getAttribute('href')).toBe('https://safeunfollow.app/ru/wizard');
+      expect(ruLink?.getAttribute('href')).toBe('https://safeunfollow.app/ru/sample');
     });
 
     it('should strip language prefix from path for hreflang generation', () => {
       mockUseLocation.mockReturnValue({
-        pathname: '/es/wizard',
+        pathname: '/es/sample',
         search: '',
         hash: '',
         state: null,
@@ -623,10 +623,10 @@ describe('useLanguageFromPath', () => {
       vi.runAllTimers();
 
       const enLink = document.querySelector('link[hreflang="en"]');
-      expect(enLink?.getAttribute('href')).toBe('https://safeunfollow.app/wizard');
+      expect(enLink?.getAttribute('href')).toBe('https://safeunfollow.app/sample');
 
       const esLink = document.querySelector('link[hreflang="es"]');
-      expect(esLink?.getAttribute('href')).toBe('https://safeunfollow.app/es/wizard');
+      expect(esLink?.getAttribute('href')).toBe('https://safeunfollow.app/es/sample');
     });
 
     it('should replace existing hreflang tags with correct ones', () => {
@@ -638,7 +638,7 @@ describe('useLanguageFromPath', () => {
       document.head.appendChild(existingLink);
 
       mockUseLocation.mockReturnValue({
-        pathname: '/es/wizard',
+        pathname: '/es/sample',
         search: '',
         hash: '',
         state: null,
@@ -656,12 +656,12 @@ describe('useLanguageFromPath', () => {
       // Old tag should be replaced with correct href
       const frLink = document.querySelector('link[hreflang="fr"]');
       expect(frLink).not.toBeNull();
-      expect(frLink?.getAttribute('href')).toBe('https://safeunfollow.app/fr/wizard');
+      expect(frLink?.getAttribute('href')).toBe('https://safeunfollow.app/fr/sample');
     });
 
     it('should update hreflang tags when path changes', () => {
       mockUseLocation.mockReturnValue({
-        pathname: '/wizard',
+        pathname: '/sample',
         search: '',
         hash: '',
         state: null,
@@ -677,7 +677,7 @@ describe('useLanguageFromPath', () => {
       vi.runAllTimers();
 
       let enLink = document.querySelector('link[hreflang="en"]');
-      expect(enLink?.getAttribute('href')).toBe('https://safeunfollow.app/wizard');
+      expect(enLink?.getAttribute('href')).toBe('https://safeunfollow.app/sample');
 
       // Change path
       mockUseLocation.mockReturnValue({
@@ -845,7 +845,7 @@ describe('useLanguageFromPath', () => {
       document.head.appendChild(canonical);
 
       mockUseLocation.mockReturnValue({
-        pathname: '/es/wizard',
+        pathname: '/es/sample',
         search: '',
         hash: '',
         state: null,
@@ -860,12 +860,12 @@ describe('useLanguageFromPath', () => {
       renderHook(() => useLanguageFromPath());
       vi.runAllTimers();
 
-      expect(canonical.getAttribute('href')).toBe('https://safeunfollow.app/es/wizard');
+      expect(canonical.getAttribute('href')).toBe('https://safeunfollow.app/es/sample');
     });
 
     it('should not error if canonical tag does not exist', () => {
       mockUseLocation.mockReturnValue({
-        pathname: '/es/wizard',
+        pathname: '/es/sample',
         search: '',
         hash: '',
         state: null,
@@ -886,7 +886,7 @@ describe('useLanguageFromPath', () => {
   describe('i18next synchronization', () => {
     it('should call loadLanguage when i18n language differs from store', () => {
       mockUseLocation.mockReturnValue({
-        pathname: '/es/wizard',
+        pathname: '/es/sample',
         search: '',
         hash: '',
         state: null,
@@ -907,7 +907,7 @@ describe('useLanguageFromPath', () => {
 
     it('should not call loadLanguage when i18n language matches store', () => {
       mockUseLocation.mockReturnValue({
-        pathname: '/es/wizard',
+        pathname: '/es/sample',
         search: '',
         hash: '',
         state: null,
@@ -930,7 +930,7 @@ describe('useLanguageFromPath', () => {
   describe('dependency changes', () => {
     it('should react to pathname changes', () => {
       mockUseLocation.mockReturnValue({
-        pathname: '/es/wizard',
+        pathname: '/es/sample',
         search: '',
         hash: '',
         state: null,
@@ -964,7 +964,7 @@ describe('useLanguageFromPath', () => {
 
     it('should react to langFromRoute changes', () => {
       mockUseLocation.mockReturnValue({
-        pathname: '/wizard',
+        pathname: '/sample',
         search: '',
         hash: '',
         state: null,
@@ -999,7 +999,7 @@ describe('useLanguageFromPath', () => {
     it('should react to URL pathname changes (URL is source of truth)', () => {
       // Start with Spanish URL
       mockUseLocation.mockReturnValue({
-        pathname: '/es/wizard',
+        pathname: '/es/sample',
         search: '',
         hash: '',
         state: null,
@@ -1020,7 +1020,7 @@ describe('useLanguageFromPath', () => {
 
       // Change URL to Russian (simulating navigation)
       mockUseLocation.mockReturnValue({
-        pathname: '/ru/wizard',
+        pathname: '/ru/sample',
         search: '',
         hash: '',
         state: null,

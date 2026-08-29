@@ -10,11 +10,6 @@
       "description": "Instagramのデータエクスポート（ZIP）をアップロードすると、フォローを外された人を無料で確認できます。ログインもパスワードも不要。ファイルはブラウザの中で読み込まれ、端末から出ません。",
       "ogTitle": "Instagram ZIPをアップロード｜フォローを外された人を無料で確認"
     },
-    "/wizard": {
-      "title": "InstagramのデータをJSON形式でダウンロードする方法",
-      "description": "InstagramのデータをJSON形式でダウンロードする手順ガイド。Metaアカウントセンターでデータエクスポートを申請し、メールで受け取るまでの流れを説明します。",
-      "ogTitle": "InstagramのデータをJSON形式でダウンロードする方法"
-    },
     "/sample": {
       "title": "Instagram Unfollow Trackerを試す｜無料デモ",
       "description": "サンプルデータでInstagram Unfollow Trackerを試せます。バッジ、フィルター、検索の動きを、ファイルをアップロードせずに、アカウントも作らずに確認できます。",

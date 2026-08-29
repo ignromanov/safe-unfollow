@@ -54,7 +54,7 @@ export function Hero({ hasData }: HeroProps) {
             </PrefixedLink>
           ) : (
             <PrefixedLink
-              to="/wizard/step/1"
+              to="/upload?guide=1"
               cta="guide"
               className="cursor-pointer w-full sm:w-auto px-10 md:px-12 py-4 md:py-5 rounded-3xl bg-primary text-primary-foreground font-bold text-base md:text-lg shadow-2xl shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 group"
             >
