@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+
 import { AdSlot } from '@/components/ads/AdSlot';
 import { FAQSection } from '@/components/FAQSection';
 import { FooterCTA } from '@/components/FooterCTA';
@@ -20,12 +22,34 @@ import { useHasResults } from '@/hooks/useHasResults';
 export function Component() {
   const hasResults = useHasResults();
 
-  // There was an idle prefetch of WizardPage here. That page is gone (GH#102):
-  // every guide CTA on this screen now points at /upload, whose chunk this
-  // page does not own. The guide itself is lazy inside UploadPage, so a
-  // reader arriving at /upload?guide=1 pays a chunk fetch at hydration — worth
-  // a preload, but one that belongs next to the measurement of that arrival
-  // path, not to a hook this page keeps for a module it no longer imports.
+  // Prefetch the guide dialog on idle: it is what this page's primary CTA
+  // costs. Hero, FooterCTA and every HowTo row now point at /upload?guide=1
+  // (GH#102), and `useGuideDialog` opens the dialog straight from that query
+  // on arrival — but `GuideDialog` is lazy inside UploadPage (it is a modal,
+  // so it does not ship in the entry chunk), while UploadPage itself is a
+  // static import in routes.tsx and is already in the initial module graph.
+  // So the dialog is the one cold chunk on the path, and warming it here
+  // keeps the parity the WizardPage prefetch used to provide.
+  //
+  // The specifier must stay byte-identical to UploadPage.tsx:17's, or Vite
+  // resolves them to two chunks and this warms the wrong one.
+  useEffect(() => {
+    const prefetchGuide = () => {
+      import('@/components/guide/GuideDialog').catch(() => {
+        // Ignore prefetch errors (network, etc.)
+      });
+    };
+
+    // Use requestIdleCallback for non-blocking prefetch
+    if ('requestIdleCallback' in window) {
+      const id = window.requestIdleCallback(prefetchGuide, { timeout: 3000 });
+      return () => window.cancelIdleCallback(id);
+    } else {
+      // Fallback: setTimeout after 2 seconds
+      const id = setTimeout(prefetchGuide, 2000);
+      return () => clearTimeout(id);
+    }
+  }, []);
 
   return (
     <>
