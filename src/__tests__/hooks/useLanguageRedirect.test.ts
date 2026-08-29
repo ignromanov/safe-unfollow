@@ -137,7 +137,7 @@ describe('useLanguageRedirect', () => {
       ['/ru/upload', 'ru'],
       ['/de/results', 'de'],
       ['/fr/privacy', 'fr'],
-      ['/ja/sample', 'ja'],
+      ['/ja/docs/faq', 'ja'], // deeper than one segment — the regex claims this
       ['/ar', 'ar'],
     ])('should detect %s as %s', (pathname, expectedLang) => {
       mockStoreState.language = 'en';

@@ -36,7 +36,7 @@ function parseStep(raw: string | null): number | null {
  * `'url'` whenever the URL alone opened the dialog.
  *
  * Query, not path: `vite-react-ssg` prerenders paths. `?step=N` creates no
- * page, needs no canonical tag and adds nothing to the 160 prerendered files.
+ * page, needs no canonical tag and adds nothing to the 70 prerendered files.
  *
  * `?step` outside 1..7 is not an error and does not close the dialog — it is
  * someone following a link that used to mean something, and the honest answer

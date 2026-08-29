@@ -522,8 +522,12 @@ describe('OrganizationSchema', () => {
     });
 
     it('should not render on nested routes', () => {
+      // Two segments, so the name stays honest and this stops duplicating
+      // 'should not render on /upload page' above. It read '/wizard/step-1'
+      // until GH#102 — a hyphen, which was never a route; the fixture only
+      // ever needed to be "not home".
       const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/upload'],
+        initialEntries: ['/id/upload'],
       });
 
       expect(container.querySelector('script')).not.toBeInTheDocument();
