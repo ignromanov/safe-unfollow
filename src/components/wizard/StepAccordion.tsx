@@ -5,14 +5,19 @@ import { useTranslation } from 'react-i18next';
 import { GUIDE_STEPS, guideStepPosterSize } from '@/config/wizard-steps';
 
 interface StepAccordionProps {
-  /** Open the guide dialog at a section. Absent on the wizard route, which is its own screen. */
+  /**
+   * Open the guide dialog at a section. Optional because `UploadZone`'s own
+   * `onOpenGuide` is optional and forwarded straight through, so a `UploadZone`
+   * rendered without it leaves these rows inert. `/upload` always supplies it
+   * (UploadPage.tsx), which is every production render.
+   */
   onSelect?: (step: number) => void;
 }
 
 /**
  * One disclosure, seven rows. Rows are plain images pointing at each step's
- * poster (no `<video>` on this screen — the moving image lives on the step
- * route the link goes to) and stay unmounted until the row is opened, so
+ * poster (no `<video>` on this screen — the moving image lives in the guide
+ * dialog section the row opens) and stay unmounted until the row is opened, so
  * opening never shifts layout and nothing is reachable before the click.
  */
 export function StepAccordion({ onSelect }: StepAccordionProps = {}) {
@@ -94,7 +99,9 @@ export function StepAccordion({ onSelect }: StepAccordionProps = {}) {
                       poster ("Step 2: Choose your Instagram profile") would
                       be announced back to back with the visible label that
                       already names the row. `steps.N.alt` stays in the
-                      bundles — the step pages themselves still use it. */}
+                      bundles because GuideStepSection still reads it for the
+                      dialog's own images — not because of the step pages,
+                      which no longer exist. */}
                   <img
                     src={`${step.visual}-600w-poster.jpg`}
                     alt=""

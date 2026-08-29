@@ -5,8 +5,9 @@ export interface GuideStep {
    * Base path of this step's assets in public/wizard/ — a hyphen, not a slash.
    * Deliberately NOT derived from `id`: these files keep the names they had
    * when the guide was eight routes, so the 30-day asset cache
-   * (vercel.json "/wizard/(.*)") keeps hitting. guide-steps.test.ts pins the
-   * mapping.
+   * (vercel.json "/wizard/step-(.*)") keeps hitting. The hyphen is what keeps
+   * these assets out of the four "/wizard" redirect rules, which all match a
+   * slash. guide-steps.test.ts pins the mapping.
    */
   visual: string;
 }
