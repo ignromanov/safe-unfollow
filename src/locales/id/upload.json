@@ -4,13 +4,11 @@
     "description": "Lihat siapa yang berhenti mengikuti. Tanpa login, tanpa akun.",
     "dropHere": "Letakkan file ZIP Instagram Anda di sini",
     "orBrowse": "Atau ketuk untuk menjelajahi penyimpanan lokal Anda.",
-    "jsonOnly": "Format JSON Saja",
     "processing": "Menganalisis secara lokal...",
     "processingHint": "Memproses dataset besar (hingga 1 juta+) bisa memakan waktu sebentar.",
     "ariaLabel": "Unggah file ZIP data Instagram",
-    "jsonShort": "Perlu ekspor dengan format JSON, bukan HTML.",
+    "jsonShort": "Kedua format ekspor bisa dipakai, JSON atau HTML.",
     "seeGuide": "Lihat panduan langkah demi langkah",
-    "jsonRequired": "Memerlukan ekspor format JSON",
     "privacyMicro": "File Anda tidak pernah meninggalkan perangkat Anda",
     "notSureLink": "Tidak yakin apa yang harus diunggah? Lihat panduan",
     "processingAria": "Memproses file Anda, mohon tunggu...",
@@ -19,14 +17,14 @@
   },
   "checklist": {
     "title": "Checklist Sebelum Unggah",
-    "format": "Format: JSON (bukan HTML)",
+    "format": "Format: JSON atau HTML",
     "includes": "Berisi: 'Pengikut dan mengikuti'",
     "timeframe": "Rentang waktu: 'Sepanjang Waktu'",
     "fileType": "Tipe file: .zip"
   },
   "errors": {
     "commonTitle": "Kesalahan Paling Umum",
-    "commonHint": "Jika ekspor Anda memiliki 0 pengikut, kemungkinan Anda mengekspor dalam format <strong>HTML</strong> atau tidak memilih kategori informasi \"Pengikut dan mengikuti\".",
+    "commonHint": "Jika ekspor Anda memiliki 0 pengikut, kemungkinan besar Anda tidak memilih kategori informasi <strong>Pengikut dan mengikuti</strong>.",
     "learnFix": "Pelajari cara memperbaiki"
   },
   "diagnostic": {
@@ -47,9 +45,9 @@
         "fix": "Cari file berakhiran .zip di folder Unduhan Anda. Biasanya bernama seperti \"instagram-username-tanggal.zip\"."
       },
       "HTML_FORMAT": {
-        "title": "Format Salah: HTML",
-        "message": "Anda mengunduh data dalam format HTML, namun alat ini memerlukan format JSON.",
-        "fix": "Buka Pusat Akun Meta › Buat ekspor › Ekspor ke perangkat › pilih format \"JSON\" (bukan HTML) › mulai ekspor lagi."
+        "title": "Kami Tidak Dapat Membaca Ekspor Ini",
+        "message": "Ini adalah ekspor HTML, dan kami tidak dapat menemukan daftar pengikut Anda di dalamnya.",
+        "fix": "Minta ekspor yang sama dalam format JSON ke Instagram: Pusat Akun Meta › Buat ekspor › Ekspor ke perangkat › Format: JSON. Versi itu yang paling andal kami baca."
       },
       "NOT_INSTAGRAM_EXPORT": {
         "title": "Bukan Ekspor Instagram",

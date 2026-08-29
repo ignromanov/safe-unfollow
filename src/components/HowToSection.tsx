@@ -19,7 +19,7 @@ const STEP_META: Array<{ isWarning?: boolean; visual?: string }> = [
   { visual: '/wizard/step-3' },
   { isWarning: true, visual: '/wizard/step-4' },
   { visual: '/wizard/step-5' },
-  { isWarning: true, visual: '/wizard/step-6' },
+  { visual: '/wizard/step-6' },
   { visual: '/wizard/step-7' },
   { visual: '/wizard/step-8' },
   {}, // Step 9: no visual, navigates to upload page

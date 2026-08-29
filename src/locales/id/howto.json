@@ -28,7 +28,7 @@
     },
     "6": {
       "title": "Ubah Format ke JSON",
-      "description": "Langkah penting! Klik \"Format\" › Pilih \"JSON\" (bukan HTML). File HTML TIDAK berfungsi."
+      "description": "Klik \"Format\" › Pilih \"JSON\". Ekspor HTML juga berfungsi, tetapi JSON adalah format yang paling andal untuk kami baca."
     },
     "7": {
       "title": "Tinjau & Mulai Ekspor",

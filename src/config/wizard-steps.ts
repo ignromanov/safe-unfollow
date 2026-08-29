@@ -31,7 +31,6 @@ export const WIZARD_STEPS: WizardStep[] = [
   },
   {
     id: 6,
-    isWarning: true,
     visual: '/wizard/step-6',
   },
   {

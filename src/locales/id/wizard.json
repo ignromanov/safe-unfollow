@@ -41,7 +41,7 @@
       "rows": {
         "destination": "Ekspor ke perangkat",
         "range": "Sepanjang waktu",
-        "format": "JSON — bukan HTML",
+        "format": "JSON atau HTML",
         "quality": "Kualitas media apa pun",
         "content": "Pengikut dan mengikuti"
       }
@@ -72,8 +72,8 @@
       "alt": "Langkah 5: Atur rentang tanggal ke Sepanjang waktu"
     },
     "6": {
-      "title": "⚠️ Ubah Format ke JSON",
-      "description": "Ini penting! Klik \"Format\" › Pilih \"JSON\" (bukan HTML). File HTML TIDAK akan berfungsi dengan alat analisis kami.",
+      "title": "Ubah Format ke JSON",
+      "description": "Klik \"Format\" › Pilih \"JSON\". Ekspor HTML juga berfungsi, tetapi JSON adalah format yang paling andal untuk kami baca.",
       "alt": "Langkah 6: Ubah format ke JSON"
     },
     "7": {

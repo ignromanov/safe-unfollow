@@ -183,8 +183,14 @@ describe('useFileUpload', () => {
       await result.current.handleZipUpload(mockFile);
     });
 
-    expect(analytics.optionalFileFormatDrift).toHaveBeenCalledWith('INVALID_UNFOLLOWED_FORMAT');
-    expect(analytics.optionalFileFormatDrift).toHaveBeenCalledWith('INVALID_DISMISSED_FORMAT');
+    expect(analytics.optionalFileFormatDrift).toHaveBeenCalledWith(
+      'INVALID_UNFOLLOWED_FORMAT',
+      'json'
+    );
+    expect(analytics.optionalFileFormatDrift).toHaveBeenCalledWith(
+      'INVALID_DISMISSED_FORMAT',
+      'json'
+    );
     expect(analytics.optionalFileFormatDrift).toHaveBeenCalledTimes(2);
   });
 
@@ -232,7 +238,8 @@ describe('useFileUpload', () => {
     });
 
     expect(analytics.optionalFileFormatDrift).toHaveBeenCalledWith(
-      'UNRESOLVED_ENTRIES_CLOSE_FRIENDS'
+      'UNRESOLVED_ENTRIES_CLOSE_FRIENDS',
+      'json'
     );
     expect(analytics.optionalFileFormatDrift).toHaveBeenCalledTimes(1);
   });
@@ -380,7 +387,7 @@ describe('useFileUpload', () => {
     it('counts a parse it could not judge, instead of passing it off as clean', async () => {
       await parseYielding('insufficient-data');
 
-      expect(analytics.relationshipSkewVerdict).toHaveBeenCalledWith('insufficient-data');
+      expect(analytics.relationshipSkewVerdict).toHaveBeenCalledWith('insufficient-data', 'json');
       // And emphatically not as a truncation: nothing is known about this
       // export's shape, which is a different claim from "no file was short".
       expect(analytics.relationshipFileTruncated).not.toHaveBeenCalled();
@@ -389,15 +396,56 @@ describe('useFileUpload', () => {
     it('reports the verdict on a clean parse too, so the event has a denominator', async () => {
       await parseYielding('no-skew');
 
-      expect(analytics.relationshipSkewVerdict).toHaveBeenCalledWith('no-skew');
+      expect(analytics.relationshipSkewVerdict).toHaveBeenCalledWith('no-skew', 'json');
       expect(analytics.relationshipSkewVerdict).toHaveBeenCalledTimes(1);
     });
 
     it('reports both events when a file really is short', async () => {
       await parseYielding('followers');
 
-      expect(analytics.relationshipSkewVerdict).toHaveBeenCalledWith('followers');
+      expect(analytics.relationshipSkewVerdict).toHaveBeenCalledWith('followers', 'json');
       expect(analytics.relationshipFileTruncated).toHaveBeenCalledWith('followers');
+    });
+
+    /**
+     * GH#156, the blocked half: `datesFitted` reaching the analytics call.
+     * Threaded as a third, OMITTABLE argument rather than always present —
+     * the JSON-format tests above assert a two-argument call and must keep
+     * doing so, because `datesFitted` genuinely does not apply to them.
+     */
+    it('passes datesFitted through when the parse says a month table failed to fit', async () => {
+      const { parseInstagramZipFile } = await import('@/core/parsers/instagram');
+      vi.mocked(parseInstagramZipFile).mockResolvedValue({
+        data: {
+          following: new Set(['user1']),
+          followers: new Set(['user2']),
+          pendingSent: new Map(),
+          permanentRequests: new Map(),
+          restricted: new Map(),
+          closeFriends: new Map(),
+          unfollowed: new Map(),
+          dismissedSuggestions: new Map(),
+          followingTimestamps: new Map(),
+          followersTimestamps: new Map(),
+        },
+        warnings: [],
+        discovery: { format: 'html', isInstagramExport: true, basePath: '', files: [] },
+        hasMinimalData: true,
+        labelResolutionMode: 'fast-path',
+        truncatedRelationshipFile: 'insufficient-data',
+        datesFitted: false,
+      } as any);
+
+      const { result } = renderHook(() => useFileUpload());
+      await act(async () => {
+        await result.current.handleZipUpload(mockFile);
+      });
+
+      expect(analytics.relationshipSkewVerdict).toHaveBeenCalledWith(
+        'insufficient-data',
+        'html',
+        false
+      );
     });
 
     it('does not report a resolution mode on the cached path — nothing was parsed', async () => {
@@ -418,6 +466,99 @@ describe('useFileUpload', () => {
       });
 
       expect(analytics.usernameLabelResolution).not.toHaveBeenCalled();
+    });
+  });
+
+  /**
+   * GH#156 — after PR #152 an HTML markup drift and a JSON schema drift raise
+   * the same `upload_error_*` / `file_upload_success` series with nothing to
+   * tell the two populations apart. `discovery.format` already crosses the
+   * worker boundary; these tests are what makes it reach the two events that
+   * previously stopped short of it.
+   */
+  describe('export format field (GH#156)', () => {
+    const parseFailingWithFormat = async (format: 'html' | 'json') => {
+      const { parseInstagramZipFile } = await import('@/core/parsers/instagram');
+      vi.mocked(parseInstagramZipFile).mockResolvedValue({
+        data: {
+          following: new Set(),
+          followers: new Set(),
+          pendingSent: new Map(),
+          permanentRequests: new Map(),
+          restricted: new Map(),
+          closeFriends: new Map(),
+          unfollowed: new Map(),
+          dismissedSuggestions: new Map(),
+          followingTimestamps: new Map(),
+          followersTimestamps: new Map(),
+        },
+        warnings: [{ code: 'NOT_INSTAGRAM_EXPORT', message: 'not an export', severity: 'error' }],
+        discovery: { format, isInstagramExport: false, basePath: '', files: [] },
+        hasMinimalData: false,
+        labelResolutionMode: 'not-applicable',
+      } as any);
+
+      const { result } = renderHook(() => useFileUpload());
+      await act(async () => {
+        try {
+          await result.current.handleZipUpload(mockFile);
+        } catch {
+          // Expected — the hook rethrows for the caller's error UI
+        }
+      });
+    };
+
+    it('carries html on an upload error discovered in an HTML export', async () => {
+      await parseFailingWithFormat('html');
+
+      expect(analytics.uploadErrorByCode).toHaveBeenCalledWith(
+        'NOT_INSTAGRAM_EXPORT',
+        expect.any(String),
+        expect.any(Number),
+        'html'
+      );
+    });
+
+    it('carries json the same way, so the two populations are comparable', async () => {
+      await parseFailingWithFormat('json');
+
+      expect(analytics.uploadErrorByCode).toHaveBeenCalledWith(
+        'NOT_INSTAGRAM_EXPORT',
+        expect.any(String),
+        expect.any(Number),
+        'json'
+      );
+    });
+
+    it('carries the format on fileUploadSuccess for a freshly parsed export', async () => {
+      // beforeEach's default mock resolves discovery.format: 'json'.
+      const { result } = renderHook(() => useFileUpload());
+
+      await act(async () => {
+        await result.current.handleZipUpload(mockFile);
+      });
+
+      expect(analytics.fileUploadSuccess).toHaveBeenCalledWith(2, false, 'json');
+    });
+
+    it('omits the format on the cache-hit path — nothing was parsed this call', async () => {
+      mockDbCache.get.mockResolvedValue({
+        metadata: {
+          name: 'test.zip',
+          size: 1024,
+          uploadDate: new Date('2023-01-01'),
+          fileHash: mockFileHash,
+          accountCount: 100,
+        },
+      } as any);
+
+      const { result } = renderHook(() => useFileUpload());
+
+      await act(async () => {
+        await result.current.handleZipUpload(mockFile);
+      });
+
+      expect(analytics.fileUploadSuccess).toHaveBeenCalledWith(100, true);
     });
   });
 
@@ -752,10 +893,13 @@ describe('useFileUpload', () => {
       });
 
       expect(analytics.uploadErrorByCode).toHaveBeenCalledTimes(1);
+      // No `format`: NOT_ZIP is thrown by the pre-parse guard, before any
+      // discovery of the export's shape exists to report (GH#156).
       expect(analytics.uploadErrorByCode).toHaveBeenCalledWith(
         'NOT_ZIP',
         expect.any(String),
-        expect.any(Number)
+        expect.any(Number),
+        undefined
       );
     });
 

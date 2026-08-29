@@ -41,7 +41,7 @@
       "rows": {
         "destination": "Export to device",
         "range": "All time",
-        "format": "JSON — not HTML",
+        "format": "JSON or HTML",
         "quality": "Any media quality",
         "content": "Followers and following"
       }
@@ -72,8 +72,8 @@
       "alt": "Step 5: Set date range to All time"
     },
     "6": {
-      "title": "⚠️ Change Format to JSON",
-      "description": "This is critical! Click \"Format\" › Select \"JSON\" (not HTML). HTML files will NOT work with our analyzer.",
+      "title": "Change Format to JSON",
+      "description": "Click \"Format\" › Select \"JSON\". HTML exports also work, but JSON is the format we read most reliably.",
       "alt": "Step 6: Change format to JSON"
     },
     "7": {

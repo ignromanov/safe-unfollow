@@ -175,12 +175,13 @@ export function UploadZone({
               viewport that cost ~110px directly above the call to action and
               pushed the paid block past the fold. The reason now lives behind
               the link; what stays here is the instruction and the contrast,
-              because HTML is what Instagram hands you by default and is 48% of
-              all failed uploads. */}
+              because HTML is what Instagram hands you by default. It no longer
+              says HTML is refused: since the transcoder both formats parse, so
+              this line states the choice rather than a requirement. */}
           <p className="text-center text-xs font-medium text-zinc-500 dark:text-zinc-400 md:text-start md:text-sm">
             <Info size={14} className="me-1.5 inline shrink-0 text-zinc-400" aria-hidden="true" />
             {t('zone.jsonShort', {
-              defaultValue: 'You need the JSON export, not HTML.',
+              defaultValue: 'Either export format works, JSON or HTML.',
             })}
             {onOpenWizard && (
               <>

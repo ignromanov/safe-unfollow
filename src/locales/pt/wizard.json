@@ -41,7 +41,7 @@
       "rows": {
         "destination": "Exportar para o dispositivo",
         "range": "Todo o período",
-        "format": "JSON — não HTML",
+        "format": "JSON ou HTML",
         "quality": "Qualquer qualidade de mídia",
         "content": "Seguidores e seguindo"
       }
@@ -72,8 +72,8 @@
       "alt": "Passo 5: Defina o período para Todo o período"
     },
     "6": {
-      "title": "⚠️ Mude o formato para JSON",
-      "description": "Isso é crítico! Clique em \"Formato\" › Selecione \"JSON\" (não HTML). Arquivos HTML NÃO funcionarão com nosso analisador.",
+      "title": "Mude o formato para JSON",
+      "description": "Clique em \"Formato\" › Selecione \"JSON\". Exportações em HTML também funcionam, mas o JSON é o formato que lemos com mais confiabilidade.",
       "alt": "Passo 6: Mude o formato para JSON"
     },
     "7": {

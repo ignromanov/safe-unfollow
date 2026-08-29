@@ -41,7 +41,7 @@
       "rows": {
         "destination": "Cihaza aktar",
         "range": "Tüm zamanlar",
-        "format": "JSON — HTML değil",
+        "format": "JSON veya HTML",
         "quality": "Herhangi bir medya kalitesi",
         "content": "Takipçiler ve takip edilenler"
       }
@@ -72,8 +72,8 @@
       "alt": "Adım 5: Tarih aralığını Tüm zamanlar olarak ayarla"
     },
     "6": {
-      "title": "⚠️ Formatı JSON Olarak Değiştir",
-      "description": "Bu kritik! \"Format\" tıkla › \"JSON\" seç (HTML değil). HTML dosyaları analizörümüzle ÇALIŞMAZ.",
+      "title": "Formatı JSON Olarak Değiştir",
+      "description": "\"Format\" tıkla › \"JSON\" seç. HTML dışa aktarımları da çalışır, ancak en güvenilir şekilde JSON formatını okuruz.",
       "alt": "Adım 6: Formatı JSON olarak değiştir"
     },
     "7": {
