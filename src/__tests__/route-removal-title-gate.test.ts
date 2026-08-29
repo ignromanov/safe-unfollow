@@ -12,17 +12,19 @@ import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '@/config/languages'
  * The route removal (GH#102, PR 3) has two halves, and the plan says they must
  * land in the same commit:
  *
- *   1. the four `/wizard` 301s in `vercel.json`, which this branch ships; and
+ *   1. the four `/wizard` permanent redirects in `vercel.json`, which this
+ *      branch ships (the status they emit is 308, not 301 —
+ *      `vercel-redirects.test.ts:98` is what decides that); and
  *   2. a rewritten `/upload` meta TRIPLE — `title`, `description`, `ogTitle` —
  *      in each of ten locales, which this branch deliberately does NOT ship.
  *
  * Half 2 is blocked on a Google Search Console export the operator has not
  * delivered, by the growth advisor's explicit decision, and deferring it is the
  * right call: the 80 indexed `/wizard` URLs rank for "how to download your
- * Instagram data as JSON", a 301 re-evaluates the TARGET against those queries,
- * and `/upload`'s copy says nothing about downloading data. Nobody can size
- * that cost without the export, and "we cannot measure it" is an argument for
- * waiting rather than for guessing.
+ * Instagram data as JSON", a permanent redirect re-evaluates the TARGET against
+ * those queries, and `/upload`'s copy says nothing about downloading data.
+ * Nobody can size that cost without the export, and "we cannot measure it" is
+ * an argument for waiting rather than for guessing.
  *
  * What this file fixes is the ENFORCEMENT, not the decision. Until it existed
  * the only thing holding the branch was a note in a PR description, while
@@ -184,7 +186,7 @@ describe('the /wizard route removal ships with its meta rewrite', () => {
   });
 
   it.each(SLOTS)(
-    'does not 301 indexed URLs into $lang /upload while its $field still carries the pre-redirect value',
+    'does not redirect indexed URLs into $lang /upload while its $field still carries the pre-redirect value',
     ({ lang, field }) => {
       const tripwire = PRE_REDIRECT_UPLOAD_META[lang][field];
       const current = uploadMeta(lang)[field];
@@ -211,7 +213,7 @@ describe('the /wizard route removal ships with its meta rewrite', () => {
       // first, or reporting a whole locale when one field is left.
       expect(
         shipsRedirects && valueIsUntouched,
-        `vercel.json ships the /wizard 301s while src/locales/${lang}/meta.json still ` +
+        `vercel.json ships the /wizard redirects while src/locales/${lang}/meta.json still ` +
           `carries routes["/upload"].${field} = ${JSON.stringify(tripwire)}. The plan ` +
           'requires the whole triple (title, description, ogTitle) in all ten locales, in ' +
           'the same commit as the redirects. This gate has no opinion about what the new ' +

@@ -120,8 +120,8 @@ describe('vercel.json wizard redirects', () => {
 
     for (const rule of wizardRedirects) {
       expect(rule.destination, `${rule.source} must not carry a query string`).not.toContain('?');
-      // The locale must be carried through: an Indonesian reader 301'd to the
-      // English `/upload` is dropped out of their own funnel silently.
+      // The locale must be carried through: an Indonesian reader redirected to
+      // the English `/upload` is dropped out of their own funnel silently.
       expect(rule.destination).toBe(alternationOf(rule.source) ? '/:lang/upload' : '/upload');
     }
   });
