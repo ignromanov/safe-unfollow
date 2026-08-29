@@ -39,7 +39,7 @@ A privacy-focused, local web application that analyzes Instagram Data Download (
 | **React 18** | UI framework with hooks and functional components |
 | **TypeScript** | Strict mode, zero `any` types |
 | **Vite** | Build tool and development server |
-| **vite-react-ssg** | Static Site Generation (80+ pre-rendered pages) |
+| **vite-react-ssg** | Static Site Generation (70 pre-rendered pages) |
 | **shadcn/ui** | Composable UI components built on Radix UI |
 | **Tailwind CSS** | Utility-first styling with OKLCH color system |
 | **Zustand** | Lightweight state management (<1KB UI state only) |
@@ -215,8 +215,8 @@ useAccountDataSource: lazy load accounts by indices
 | Français | fr | — | fr_FR |
 
 ### SSG Architecture
-- **80+ pre-rendered pages**: 11 languages × 8 routes
-- **Path-based routing**: `/es/wizard`, `/ar/upload`, etc.
+- **70 pre-rendered pages**: 10 languages × 7 routes
+- **Path-based routing**: `/es/upload`, `/ar/results`, etc.
 - **Localized meta tags**: Dynamic title/description per language
 - **hreflang tags**: SEO optimization for language variants
 - **Full page reload on language change**: Ensures correct SSG meta
@@ -249,10 +249,9 @@ src/
 │   └── filter-worker.ts  # IndexedDBFilterEngine (Comlink)
 ├── pages/                # SSG page components
 │   ├── HomePage.tsx      # / route
-│   ├── WizardPage.tsx    # /wizard route
 │   ├── UploadPage.tsx    # /upload route
 │   ├── ResultsPage.tsx   # /results route
-│   └── ...               # 8 pages total
+│   └── ...               # 7 pages total
 ├── components/           # UI components
 │   ├── ui/               # shadcn/ui primitives
 │   ├── Layout.tsx        # Root layout (ThemeProvider, Header, Footer)

@@ -62,6 +62,6 @@ Followers App provides a native iOS/Android experience. SafeUnfollow works in an
 
 ## Try SafeUnfollow
 
-1. **[Step-by-step export guide](https://safeunfollow.app/wizard)** — Get your data in 5 minutes
+1. **[Step-by-step export guide](https://safeunfollow.app/upload?guide=1)** — Get your data in 5 minutes
 2. **[Upload your ZIP](https://safeunfollow.app/upload)** — Instant analysis
 3. **[Try with sample data](https://safeunfollow.app/sample)** — No upload needed

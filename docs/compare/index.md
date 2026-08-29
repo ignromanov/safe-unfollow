@@ -45,4 +45,4 @@ No subscriptions, and no login — ever. Finding your unfollowers is free in ful
 
 - **[Try with sample data](https://safeunfollow.app/sample)** — No upload needed
 - **[Upload your ZIP](https://safeunfollow.app/upload)** — If you have your export ready
-- **[Get your data first](https://safeunfollow.app/wizard)** — Step-by-step guide
+- **[Get your data first](https://safeunfollow.app/upload?guide=1)** — Step-by-step guide

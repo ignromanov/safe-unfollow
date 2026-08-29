@@ -1,8 +1,8 @@
 import { StepAccordion } from 'safe-unfollow';
 
 // The disclosure at the foot of GuideEntry: one trigger over seven links to
-// /wizard/step/2..8. Seven, not eight — step 1 is this screen itself, and
-// StepAccordion.tsx:21 filters it out. The count in the trigger label is
+// the guide sections 1..7 (once /wizard/step/2..8). Seven, not eight — step 1
+// was the entry screen itself, and StepAccordion.tsx:21 filters it out. The count in the trigger label is
 // derived from that filtered list rather than written down, so it stays true
 // if a step is ever added or removed.
 //

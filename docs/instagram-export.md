@@ -210,5 +210,5 @@ Your Instagram data export contains personal information. Here's how we handle i
 ## Ready to Analyze?
 
 1. **Already have your JSON ZIP?** → [Upload it now](https://safeunfollow.app/upload)
-2. **Need help downloading?** → [Follow our step-by-step wizard](https://safeunfollow.app/wizard)
+2. **Need help downloading?** → [Follow our step-by-step guide](https://safeunfollow.app/upload?guide=1)
 3. **Want to try first?** → [Load sample data](https://safeunfollow.app/sample)
