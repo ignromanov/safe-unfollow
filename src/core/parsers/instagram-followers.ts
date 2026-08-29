@@ -17,7 +17,7 @@ import {
   resolveEntries,
   resolveEntryList,
 } from './instagram-utils';
-import { parseRelationshipFile } from './instagram-html';
+import { combineDatesFitted, parseRelationshipFile } from './instagram-html';
 import { describeUnreadableZipEntry, type ZipArchive, type ZipEntry } from './zip-archive';
 
 export interface FollowersParsed {
@@ -53,6 +53,12 @@ export interface FollowersParsed {
    * loss of unknown size.
    */
   unreadable: boolean;
+  /**
+   * The shards' `datesFitted` facts (GH#156), combined with
+   * `combineDatesFitted`: `undefined` when no shard had a date to fit,
+   * `false` when any shard's own dates failed to fit, `true` otherwise.
+   */
+  datesFitted?: boolean;
 }
 
 /** Parse a single followers JSON text */
@@ -192,6 +198,9 @@ export async function parseFollowersFromZip(
   // "40 of your followers could not be read" is the fact, and which of three
   // files each came from is not something they can act on.
   let unresolvedEntries = 0;
+  // One `datesFitted` per shard that actually got parsed (GH#156), combined
+  // below with `combineDatesFitted` once every shard has been read.
+  const shardDatesFitted: (boolean | undefined)[] = [];
 
   const keepShard = (f: ZipEntry) => {
     const base = relationshipFileBase(f.name);
@@ -243,12 +252,19 @@ export async function parseFollowersFromZip(
     try {
       // By the entry's own extension, not by the archive's format: the first is
       // a fact about this file, the second an aggregate over the whole ZIP.
-      json = parseRelationshipFile(f.name, text);
+      const parsed = parseRelationshipFile(f.name, text);
+      json = parsed.data;
+      shardDatesFitted.push(parsed.datesFitted);
     } catch (error) {
+      // Error severity, matching the read failure above: a shard we found but
+      // could not parse — JSON.parse throwing, or the HTML transcoder throwing
+      // on genuinely malformed markup — is exactly as unreadable as one we
+      // could not open, and `unreadable` below must pick both up the same way
+      // (GH#157).
       warnings.push({
         code: 'JSON_PARSE_ERROR',
         message: `Failed to parse ${f.name}: ${error instanceof Error ? error.message : 'Invalid JSON'}`,
-        severity: 'warning',
+        severity: 'error',
       });
       continue;
     }
@@ -296,8 +312,13 @@ export async function parseFollowersFromZip(
   warnings.push(...outcome);
 
   // Derived from the warnings rather than recomputed alongside them, so the
-  // two cannot disagree. See FollowersParsed.unreadable.
-  const unreadable = outcome.some(w => w.severity === 'error');
+  // two cannot disagree. See FollowersParsed.unreadable. Read from the full
+  // `warnings` accumulated above, not only `outcome`: a shard whose read or
+  // parse threw (GH#157) pushes its error-severity warning directly into
+  // `warnings` before `describeFollowersOutcome` ever runs, and deriving from
+  // `outcome` alone missed it — the shard vanished silently instead of marking
+  // the followers set unreadable.
+  const unreadable = warnings.some(w => w.severity === 'error');
 
   return {
     followersRaw,
@@ -308,5 +329,6 @@ export async function parseFollowersFromZip(
     warnings,
     fileExpectation,
     unreadable,
+    datesFitted: combineDatesFitted(shardDatesFitted),
   };
 }

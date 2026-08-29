@@ -11,7 +11,7 @@ import {
   RELEVANT_FILE_PATTERN,
   htmlTwin,
 } from './instagram-file-specs';
-import { parseRelationshipFile } from './instagram-html';
+import { combineDatesFitted, parseRelationshipFile } from './instagram-html';
 import { escapeRegExp, extractUsernames } from './instagram-utils';
 import { analyzeZipStructure, createCriticalError } from './instagram-zip-analysis';
 import { parseFollowersFromZip } from './instagram-followers';
@@ -208,7 +208,7 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
   const readRelationshipFileFromZip = async (
     patterns: string[],
     required = false
-  ): Promise<{ data: unknown; path: string } | null> => {
+  ): Promise<{ data: unknown; path: string; datesFitted?: boolean } | null> => {
     // Each candidate path is tried in both formats, JSON first. Expanded here
     // rather than at every call site so that the caller keeps naming files the
     // way it always has, and so that one archive holding both formats reads
@@ -232,12 +232,19 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
       }
 
       try {
-        return { data: parseRelationshipFile(f.name, text), path: f.name };
+        const parsed = parseRelationshipFile(f.name, text);
+        return { data: parsed.data, path: f.name, datesFitted: parsed.datesFitted };
       } catch (error) {
+        if (required) unreadableRequiredPath = f.name;
+        // Same distinction as the read failure above: a required file we found
+        // but could not parse — JSON.parse throwing, or the HTML transcoder
+        // throwing on genuinely malformed markup — is unreadable, not missing
+        // (GH#157). An optional file we cannot parse still costs a badge, not
+        // the answer.
         warnings.push({
           code: 'JSON_PARSE_ERROR',
           message: `Failed to parse ${f.name}: ${error instanceof Error ? error.message : 'Invalid JSON'}`,
-          severity: 'warning',
+          severity: required ? 'error' : 'warning',
         });
         return null;
       }
@@ -333,6 +340,14 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
     followers: followersParsed.followersTimestamps,
   });
 
+  // The two files that feed the comparison above, and only those: an optional
+  // file's dates (GH#156) don't reach `detectRelationshipSkew` at all, so
+  // whether THEY fit would answer a question this verdict was never asked.
+  const datesFitted = combineDatesFitted([
+    followingParsed.datesFitted,
+    followersParsed.datesFitted,
+  ]);
+
   return {
     data: {
       following: new Set(followingUsers),
@@ -352,6 +367,7 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
     labelResolutionMode: optionalParsed.labelResolutionMode,
     followRequestsUnreadable: optionalParsed.followRequestsUnreadable,
     truncatedRelationshipFile,
+    datesFitted,
   };
 }
 

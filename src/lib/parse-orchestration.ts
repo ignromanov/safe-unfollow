@@ -20,6 +20,7 @@ export interface ParseErrorData {
   discovery?: FileDiscovery;
   labelResolutionMode?: LabelResolutionMode;
   truncatedRelationshipFile?: RelationshipSkew;
+  datesFitted?: boolean;
 }
 
 // Worker timeout constant (ms)
@@ -32,6 +33,7 @@ export interface ParseResult {
   discovery?: FileDiscovery;
   labelResolutionMode?: LabelResolutionMode;
   truncatedRelationshipFile?: RelationshipSkew;
+  datesFitted?: boolean;
 }
 
 export interface ProgressCallback {
@@ -78,6 +80,7 @@ export async function parseWithWorker(
           discovery,
           labelResolutionMode,
           truncatedRelationshipFile,
+          datesFitted,
         } = e.data;
         worker.removeEventListener('message', handleMessage);
         resolve({
@@ -87,6 +90,7 @@ export async function parseWithWorker(
           discovery,
           labelResolutionMode,
           truncatedRelationshipFile,
+          datesFitted,
         });
       } else if (e.data?.type === 'error') {
         clearTimeout(timeoutId);
@@ -98,6 +102,7 @@ export async function parseWithWorker(
         error.discovery = e.data.discovery;
         error.labelResolutionMode = e.data.labelResolutionMode;
         error.truncatedRelationshipFile = e.data.truncatedRelationshipFile;
+        error.datesFitted = e.data.datesFitted;
 
         reject(error);
       }
@@ -145,6 +150,7 @@ export async function parseOnMainThread(
     error.discovery = parseResult.discovery;
     error.labelResolutionMode = parseResult.labelResolutionMode;
     error.truncatedRelationshipFile = parseResult.truncatedRelationshipFile;
+    error.datesFitted = parseResult.datesFitted;
     throw error;
   }
 
@@ -194,5 +200,6 @@ export async function parseOnMainThread(
     discovery: parseResult.discovery,
     labelResolutionMode: parseResult.labelResolutionMode,
     truncatedRelationshipFile: parseResult.truncatedRelationshipFile,
+    datesFitted: parseResult.datesFitted,
   };
 }

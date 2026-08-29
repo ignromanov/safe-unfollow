@@ -158,7 +158,20 @@ import {
  *   "shape not recognized" value `resolveEntryList` returns for unreadable
  *   JSON, and reaches the same `INVALID_*_FORMAT` / drift reporting.
  */
-export function parseRelationshipFile(name: string, text: string): unknown {
+export interface ParsedRelationshipFile {
+  /** What `resolveEntryList`/`JSON.parse` would have returned for this file. */
+  data: unknown;
+  /**
+   * This file's `HtmlTranscodeResult.datesFitted` (GH#156), carried up so a
+   * caller can aggregate it across the several files one parse reads without
+   * re-transcoding. `undefined` for a `.json` entry — the question does not
+   * apply — as well as for the `.html` cases `HtmlTranscodeResult` itself
+   * calls `undefined`.
+   */
+  datesFitted?: boolean;
+}
+
+export function parseRelationshipFile(name: string, text: string): ParsedRelationshipFile {
   // A switch over the format, not a test for one of them. `/\.html$/i ? ... :
   // JSON.parse` treated every name that is not HTML as JSON, including names
   // that are neither — so a third extension added to `RELATIONSHIP_EXTENSIONS`
@@ -170,11 +183,13 @@ export function parseRelationshipFile(name: string, text: string): unknown {
   // `RELEVANT_FILE_PATTERN` is what put the entry here. Keeping the old
   // behaviour keeps the failure the throw the caller already handles.
   switch (relationshipFormatOf(name)) {
-    case 'html':
-      return transcodeRelationshipHtml(text);
+    case 'html': {
+      const { entries, datesFitted } = transcodeRelationshipHtmlDetailed(text);
+      return datesFitted === undefined ? { data: entries } : { data: entries, datesFitted };
+    }
     case 'json':
     case null:
-      return JSON.parse(text);
+      return { data: JSON.parse(text) };
   }
 }
 
@@ -258,8 +273,43 @@ interface RawRecord {
  *   that is not an empty array.
  */
 export function transcodeRelationshipHtml(html: string): unknown[] | null {
+  return transcodeRelationshipHtmlDetailed(html).entries;
+}
+
+/**
+ * One HTML relationship file's transcoded records, plus what fitting its
+ * dates told us (GH#156).
+ */
+export interface HtmlTranscodeResult {
+  /** Same value `transcodeRelationshipHtml` returns. */
+  entries: unknown[] | null;
+  /**
+   * Whether this file's month-name table fit its own date tokens.
+   *
+   * `undefined` — not "no evidence either way", but genuinely no question to
+   * answer — when the file was unreadable (`entries === null`, so no records
+   * were ever collected to look for a date in) or when every record it did
+   * yield carried no date text `splitRowDate` could recognize. `false` is the
+   * locale-driven failure this field exists to surface: real date text was
+   * present and `fitMonthTable` still could not read it, most plausibly
+   * because no candidate table explains this export's language.
+   */
+  datesFitted: boolean | undefined;
+}
+
+/**
+ * The full transcode, `transcodeRelationshipHtml` plus the one fact its
+ * return type has no room for: whether the file's own dates fit.
+ *
+ * Split out rather than folded into `transcodeRelationshipHtml` itself so
+ * that function's contract — `unknown[] | null`, matched against `resolveEntryList`
+ * by every existing caller and test — never had to change. `parseRelationshipFile`
+ * is the only caller that needs the extra fact, so it is the only one that pays
+ * for a wider return shape.
+ */
+export function transcodeRelationshipHtmlDetailed(html: string): HtmlTranscodeResult {
   const records = readRecords(html);
-  if (records === null) return null;
+  if (records === null) return { entries: null, datesFitted: undefined };
 
   // Two passes, and the second cannot be folded into the first: the month table
   // is fitted to the tokens of the WHOLE file, so no row can be dated until
@@ -276,8 +326,15 @@ export function transcodeRelationshipHtml(html: string): unknown[] | null {
     if (date !== null) tokens.add(date.monthToken);
   }
   const monthTable = fitMonthTable(tokens);
+  // `fitMonthTable` returns `null` both for "no tokens to check" and for "tokens
+  // present, nothing explains them" (see its own doc comment) — one value for
+  // two different facts. Told apart here, the only place that still has
+  // `tokens` in scope: no tokens means this file has nothing to say about
+  // GH#156, tokens with no table means it is the locale-driven failure the
+  // field exists to report.
+  const datesFitted = tokens.size === 0 ? undefined : monthTable !== null;
 
-  return records.map(({ profile, labelValues, date }) => {
+  const entries = records.map(({ profile, labelValues, date }) => {
     const timestamp = date === null ? undefined : readRowDate(date, monthTable);
 
     // The anchor grammar first, because it is the one the two required files
@@ -302,6 +359,32 @@ export function transcodeRelationshipHtml(html: string): unknown[] | null {
     if (timestamp !== undefined) entry.timestamp = timestamp;
     return entry;
   });
+
+  return { entries, datesFitted };
+}
+
+/**
+ * Combine per-file `datesFitted` facts into one verdict for the parse (GH#156).
+ *
+ * `undefined` inputs — a JSON file, an unreadable HTML file, or an HTML file
+ * whose rows carried no date text — are skipped rather than counted as
+ * failures: they are not evidence either way, and letting them win would make
+ * a parse that mixed one dateless optional file with a well-dated required one
+ * report a failure it never had. `false` beats any number of `true`s: one file
+ * that lost its dates is enough to have skewed the timestamps the reader relies
+ * on, whatever its siblings managed.
+ *
+ * @returns `undefined` when every input was `undefined` — no HTML file in this
+ *   parse had anything to say about GH#156 at all.
+ */
+export function combineDatesFitted(values: Iterable<boolean | undefined>): boolean | undefined {
+  let sawEvidence = false;
+  for (const value of values) {
+    if (value === undefined) continue;
+    sawEvidence = true;
+    if (value === false) return false;
+  }
+  return sawEvidence ? true : undefined;
 }
 
 /**

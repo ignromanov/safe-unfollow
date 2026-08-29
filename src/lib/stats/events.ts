@@ -8,7 +8,7 @@ import { trackEvent } from './core';
 import { recordCTA } from './cta-capture';
 import { enqueueEvent, flushEvents, trackNavigating } from './queue';
 import { getStoredUTM, getEntryCTA } from './utm';
-import type { LabelResolutionMode, RelationshipSkew } from '@/core/types';
+import type { LabelResolutionMode, RelationshipFormat, RelationshipSkew } from '@/core/types';
 import type { LicenseFailureReason } from '@/lib/export/license';
 
 /**
@@ -62,6 +62,18 @@ function roundMb(sizeMb: number): number {
 }
 
 /**
+ * The export's shape (GH#156), same alphabet `FileDiscovery.format` uses.
+ *
+ * Optional and omitted rather than defaulted on every caller: PR #152 pooled
+ * an HTML markup drift with a JSON schema drift into the same error series
+ * with no way to tell which population moved. A fact about the export's
+ * shape is admissible on the same line `relationshipFileTruncated` and
+ * `usernameLabelResolution` already draw — never a value read from the
+ * archive's bytes.
+ */
+type ExportFormat = RelationshipFormat | 'unknown';
+
+/**
  * Analytics helper object with typed methods
  */
 export const analytics = {
@@ -82,12 +94,17 @@ export const analytics = {
   },
 
   // V10: Simplified — removed file_hash, processing_time_ms. Kept UTM for conversion attribution.
-  fileUploadSuccess: (accountCount: number, fromCache: boolean) => {
+  //
+  // `format` (GH#156) is undefined on the cache-hit path by design — nothing was
+  // parsed this call, so the export's shape was not observed by it, and sending
+  // 'unknown' there would read as a measurement rather than the omission it is.
+  fileUploadSuccess: (accountCount: number, fromCache: boolean, format?: ExportFormat) => {
     const utm = getStoredUTM();
     const entryCta = getEntryCTA();
     enqueueEvent(AnalyticsEvents.FILE_UPLOAD_SUCCESS, {
       account_count: accountCount,
       from_cache: fromCache,
+      ...(format === undefined ? {} : { format }),
       ...(utm.utm_source && { utm_source: utm.utm_source }),
       ...(utm.utm_medium && { utm_medium: utm.utm_medium }),
       ...(utm.utm_campaign && { utm_campaign: utm.utm_campaign }),
@@ -428,7 +445,8 @@ export const analytics = {
   uploadErrorByCode: (
     code: import('@/core/types').DiagnosticErrorCode,
     errorMessage?: string,
-    fileSizeMb?: number
+    fileSizeMb?: number,
+    format?: ExportFormat
   ) => {
     const eventMap: Record<
       import('@/core/types').DiagnosticErrorCode,
@@ -473,6 +491,9 @@ export const analytics = {
       // thing in a column decisions get made from. Rounded the way
       // fileUploadStart rounds it, so two events about one file agree.
       ...(fileSizeMb === undefined ? {} : { file_size_mb: roundMb(fileSizeMb) }),
+      // GH#156 — undefined when the failure happened before anything was
+      // discovered about the export's shape (e.g. NOT_ZIP, UPLOAD_CANCELLED).
+      ...(format === undefined ? {} : { format }),
     });
     // Drained here rather than left to `pagehide`: unlike the success path, a
     // failed upload navigates nowhere, so nothing else would trigger a flush
@@ -524,9 +545,10 @@ export const analytics = {
   // instagram-file-specs.ts driftCode). Immediate, not batched: this is a
   // rare diagnostic signal about an upstream format change, not a high-volume
   // impression where losing a few events to a dropped batch is acceptable.
-  optionalFileFormatDrift: (fileCode: string) => {
+  optionalFileFormatDrift: (fileCode: string, format?: ExportFormat) => {
     trackEvent(AnalyticsEvents.OPTIONAL_FILE_FORMAT_DRIFT, {
       file_code: fileCode,
+      ...(format === undefined ? {} : { format }),
     });
   },
 
@@ -560,8 +582,24 @@ export const analytics = {
   //
   // The verdict is a fixed four-way enum plus `not-applicable`, not a value
   // derived from the archive's bytes — same line the two events above draw.
-  relationshipSkewVerdict: (verdict: RelationshipSkew) => {
-    trackEvent(AnalyticsEvents.RELATIONSHIP_SKEW_VERDICT, { verdict });
+  //
+  // `datesFitted` (GH#156) separates one cause of `insufficient-data` from the
+  // other two: an HTML `following`/`followers` file whose month-name table
+  // failed to fit, which is locale-driven, from too few timestamps or rows
+  // that never matched the date shape at all. A boolean fact about parse
+  // mechanics, never a locale string or anything else derived from the
+  // archive's bytes — same line `usernameLabelResolution` draws for the
+  // resolved label.
+  relationshipSkewVerdict: (
+    verdict: RelationshipSkew,
+    format?: ExportFormat,
+    datesFitted?: boolean
+  ) => {
+    trackEvent(AnalyticsEvents.RELATIONSHIP_SKEW_VERDICT, {
+      verdict,
+      ...(format === undefined ? {} : { format }),
+      ...(datesFitted === undefined ? {} : { dates_fitted: datesFitted }),
+    });
   },
 
   // Pro Export
