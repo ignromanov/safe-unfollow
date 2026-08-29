@@ -36,6 +36,26 @@
       "source": "/hi/:path*",
       "destination": "/:path*",
       "permanent": true
+    },
+    {
+      "source": "/wizard/step/:step",
+      "destination": "/upload",
+      "permanent": true
+    },
+    {
+      "source": "/:lang(ar|de|es|fr|id|ja|pt|ru|tr)/wizard/step/:step",
+      "destination": "/:lang/upload",
+      "permanent": true
+    },
+    {
+      "source": "/wizard",
+      "destination": "/upload",
+      "permanent": true
+    },
+    {
+      "source": "/:lang(ar|de|es|fr|id|ja|pt|ru|tr)/wizard",
+      "destination": "/:lang/upload",
+      "permanent": true
     }
   ],
   "rewrites": [
@@ -80,7 +100,7 @@
       ]
     },
     {
-      "source": "/wizard/(.*)",
+      "source": "/wizard/step-:file*",
       "headers": [
         {
           "key": "Cache-Control",
