@@ -3,6 +3,8 @@ import { join, resolve } from 'node:path';
 
 import { describe, it, expect } from 'vitest';
 
+import { SUPPORTED_LANGUAGES } from '@/config/languages';
+
 /**
  * The one SEO invariant of the route removal (GH#102, PR 3) a unit test can prove.
  *
@@ -39,9 +41,19 @@ describe.runIf(built)('sitemap after the wizard routes were removed', () => {
     expect(locations.filter(loc => loc.includes('wizard'))).toEqual([]);
   });
 
-  it('still lists /upload, which is where the guide now lives', () => {
-    // The removal must shrink the sitemap, not empty it: the destination of all four
-    // 301s has to stay crawlable.
-    expect(locations).toContain('https://safeunfollow.app/upload');
-  });
+  // Derived from SUPPORTED_LANGUAGES rather than hand-listed: the ten redirect
+  // destinations are one per locale, and pinning only the English one let a regression
+  // that dropped the nine localized `/upload` pages from the sitemap pass green — while
+  // nine of the ten sets of 301s pointed at pages Google had never been asked to crawl.
+  const uploadUrl = (lang: string) =>
+    lang === 'en' ? 'https://safeunfollow.app/upload' : `https://safeunfollow.app/${lang}/upload`;
+
+  it.each(SUPPORTED_LANGUAGES)(
+    "still lists the %s /upload, which is where that locale's 301s land",
+    lang => {
+      // The removal must shrink the sitemap, not empty it: the destination of every
+      // redirect rule has to stay crawlable.
+      expect(locations).toContain(uploadUrl(lang));
+    }
+  );
 });
