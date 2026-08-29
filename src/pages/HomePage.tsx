@@ -31,8 +31,15 @@ export function Component() {
   // So the dialog is the one cold chunk on the path, and warming it here
   // keeps the parity the WizardPage prefetch used to provide.
   //
-  // The specifier must stay byte-identical to UploadPage.tsx:17's, or Vite
-  // resolves them to two chunks and this warms the wrong one.
+  // This import must RESOLVE to the same module as UploadPage's lazy one, or
+  // the prefetch warms a chunk nobody needs — no error, no failed test, only
+  // the latency this exists to remove, and invisible without a build.
+  //
+  // Resolve, not match character for character: Rollup deduplicates by
+  // resolved module id, so '@/components/guide/GuideDialog' and a relative
+  // path to the same file are ONE chunk, and a path refactor that rewrites
+  // both is fine. What breaks it is the two files naming different modules.
+  // Pinned by HomePage.test.tsx, "prefetches the module UploadPage lazy-loads".
   useEffect(() => {
     const prefetchGuide = () => {
       import('@/components/guide/GuideDialog').catch(() => {
