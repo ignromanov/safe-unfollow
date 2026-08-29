@@ -20,9 +20,15 @@ import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '@/config/languages'
  *
  * Half 2 is blocked on a Google Search Console export the operator has not
  * delivered, by the growth advisor's explicit decision, and deferring it is the
- * right call: the 80 indexed `/wizard` URLs rank for "how to download your
+ * right call: the indexed `/wizard` URLs rank for "how to download your
  * Instagram data as JSON", a permanent redirect re-evaluates the TARGET against
  * those queries, and `/upload`'s copy says nothing about downloading data.
+ * (How many of them are indexed is not derivable from this repo — it is in the
+ * missing export. This note said "the 80 indexed URLs", which collides with a
+ * DIFFERENT 80 in `sitemap-no-wizard.test.ts:12`: the 80 step pages that were
+ * canonicalized away to the 10 base pages, i.e. precisely the set that does
+ * not serve as an indexing target. Two unrelated eighties, one of them
+ * uncheckable — exactly the shape CLAUDE.md's "no copied facts" warns about.)
  * Nobody can size that cost without the export, and "we cannot measure it" is
  * an argument for waiting rather than for guessing.
  *
@@ -79,7 +85,9 @@ type MetaField = (typeof META_FIELDS)[number];
  * identical at `103173d`, at `origin/main` and at `HEAD` on 2026-08-28 — so
  * every one is genuinely a pre-PR value and not something this branch already
  * moved. (Its only edit to any `meta.json` was deleting the `/wizard` route
- * entry from `en`.)
+ * entry, and it did that in all ten — 10 files, 50 deletions. An earlier
+ * draft of this note said "from `en`", wrong by a factor of ten in the one
+ * file whose purpose is precision about what this branch touched.)
  *
  * Note for whoever rewrites these: `title` and `ogTitle` are currently
  * IDENTICAL in all ten locales. That is a convention, not a rule, and this gate

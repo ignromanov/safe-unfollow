@@ -36,7 +36,10 @@ function parseStep(raw: string | null): number | null {
  * `'url'` whenever the URL alone opened the dialog.
  *
  * Query, not path: `vite-react-ssg` prerenders paths. `?step=N` creates no
- * page, needs no canonical tag and adds nothing to the 70 prerendered files.
+ * page, needs no canonical tag and adds nothing to the prerendered files —
+ * 70 of them, a count `architecture-facts.test.ts` derives and asserts rather
+ * than a number to copy. It read "160" here until this branch corrected it,
+ * which is why it now cites its source instead of restating one.
  *
  * `?step` outside 1..7 is not an error and does not close the dialog — it is
  * someone following a link that used to mean something, and the honest answer
