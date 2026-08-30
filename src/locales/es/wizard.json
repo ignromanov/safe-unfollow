@@ -73,7 +73,7 @@
     },
     "5": {
       "title": "Cambia el formato a JSON",
-      "description": "¡Esto es crítico! Haz clic en \"Formato\" › Selecciona \"JSON\" (no HTML). Los archivos HTML NO funcionarán con nuestro analizador.",
+      "description": "Haz clic en \"Formato\" › Selecciona \"JSON\". Las exportaciones en HTML también funcionan, pero JSON es el formato que leemos de forma más confiable.",
       "alt": "El panel \"Formato\" con \"JSON\" seleccionado en lugar de HTML."
     },
     "6": {

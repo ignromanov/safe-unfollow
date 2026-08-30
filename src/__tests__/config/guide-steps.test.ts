@@ -25,12 +25,13 @@ describe('GUIDE_STEPS', () => {
     ]);
   });
 
-  it('marks step 5 as the only warning in the guide', () => {
-    // Step 3 used to carry isWarning too, but two amber cards out of seven is
-    // a colour, not a hierarchy — and step 3's own description promises a
-    // smaller file, while step 5's says HTML will not work at all. Step 5
-    // (format) is the one warning worth singling out.
-    expect(GUIDE_STEPS.filter(s => s.isWarning).map(s => s.id)).toEqual([5]);
+  it('marks step 3 as the only warning in the guide', () => {
+    // Two amber cards out of seven are a colour, not a hierarchy, so exactly
+    // one step carries the flag. It is step 3 rather than step 5 (format)
+    // because #152 made an HTML export readable: the wrong format now costs
+    // reliability, while clearing the wrong checkboxes on step 3 leaves no
+    // follower data in the export at all.
+    expect(GUIDE_STEPS.filter(s => s.isWarning).map(s => s.id)).toEqual([3]);
   });
 
   it('keeps the Accounts Center URL reachable without a step', () => {

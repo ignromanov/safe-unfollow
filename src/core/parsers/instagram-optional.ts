@@ -53,7 +53,13 @@ export interface OptionalFilesParsed {
   followRequestsUnreadable: boolean;
 }
 
-type ReadJsonFromZip = (patterns: string[]) => Promise<{ data: unknown; path: string } | null>;
+/**
+ * Reads one relationship file by candidate path, in whichever markup it is
+ * written in — the caller expands each name to its HTML twin. Named for the
+ * file rather than for JSON because it stopped being JSON-only, and this type
+ * is the only formal description of that seam.
+ */
+type ReadRelationshipFile = (patterns: string[]) => Promise<{ data: unknown; path: string } | null>;
 
 /**
  * One optional file after reading and top-level shape resolution, but before
@@ -138,14 +144,16 @@ function toOptionalFileResult(
  */
 export async function parseOptionalFiles(
   baseCandidates: string[],
-  readJsonFromZip: ReadJsonFromZip,
+  readRelationshipFile: ReadRelationshipFile,
   readKnownUsernames: () => ReadonlySet<string> = () => new Set()
 ): Promise<OptionalFilesParsed> {
   const readFirstExistingJson = async (
     fileNames: string[]
   ): Promise<{ data: unknown; path: string } | null> => {
     for (const name of fileNames) {
-      const result = await readJsonFromZip(baseCandidates.map(b => `${b}/${name}`).concat([name]));
+      const result = await readRelationshipFile(
+        baseCandidates.map(b => `${b}/${name}`).concat([name])
+      );
       if (result) return result;
     }
     return null;

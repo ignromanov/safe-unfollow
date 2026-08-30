@@ -384,3 +384,67 @@ describe('Badge Logic', () => {
     });
   });
 });
+
+/**
+ * The badge map's one invariant, stated where the map is built rather than
+ * where it is read.
+ *
+ * Four places read a badge value, and every one of them reads it for TRUTH, not
+ * for presence: `bitset-store.ts` and `indexeddb-service.ts` decide from it
+ * whether to set the account's bit, `csv.ts` writes the column from it, and
+ * `filterAccountsByBadges` matches the chip from it. So `0` is a value the type
+ * admits and the product cannot represent — an account with the badge that no
+ * consumer will ever show.
+ *
+ * It was reachable. All three parsers store `r.timestamp ?? 0`, and an HTML
+ * export whose month names no candidate table explains has no date on ANY row,
+ * so a whole file would have arrived as zeros: the upload reports success, the
+ * Following chip returns nobody, and nothing anywhere says why.
+ *
+ * Asserted as a property over every badge of every account rather than as a
+ * value on one, because the failure was one badge in a list of eight written
+ * with `?? 0` where its two neighbours used `?? true` — a test naming badges by
+ * hand is a test that agrees with whichever list its author was reading.
+ */
+describe('a file whose dates could not be read', () => {
+  const undated = (): ParsedAll => {
+    const whole = createTestParsedData();
+    const zeroed = <T>(map: Map<T, number>) => new Map([...map].map(([k]) => [k, 0] as const));
+    return {
+      ...whole,
+      followingTimestamps: zeroed(whole.followingTimestamps),
+      followersTimestamps: zeroed(whole.followersTimestamps),
+      pendingSent: zeroed(whole.pendingSent),
+      permanentRequests: zeroed(whole.permanentRequests),
+      restricted: zeroed(whole.restricted),
+      closeFriends: zeroed(whole.closeFriends),
+      unfollowed: zeroed(whole.unfollowed),
+      dismissedSuggestions: zeroed(whole.dismissedSuggestions),
+    };
+  };
+
+  it('still carries every badge it would have carried with dates', () => {
+    const dated = buildAccountBadgeIndex(createTestParsedData());
+    const undatedIndex = buildAccountBadgeIndex(undated());
+
+    const keysOf = (index: ReturnType<typeof buildAccountBadgeIndex>) =>
+      index.map(a => `${a.username}:${Object.keys(a.badges).sort().join(',')}`);
+
+    expect(keysOf(undatedIndex)).toEqual(keysOf(dated));
+  });
+
+  it('writes no badge a consumer would read as absent', () => {
+    for (const account of buildAccountBadgeIndex(undated())) {
+      for (const [key, value] of Object.entries(account.badges)) {
+        expect(value, `${account.username}.${key}`).toBeTruthy();
+      }
+    }
+  });
+
+  it('says "we do not know when" rather than 1970', () => {
+    // `true`, not a placeholder timestamp. Anything numeric would date the
+    // relationship to the Unix epoch everywhere a date is shown.
+    const account = buildAccountBadgeIndex(undated()).find(a => a.badges.following);
+    expect(account?.badges.following).toBe(true);
+  });
+});

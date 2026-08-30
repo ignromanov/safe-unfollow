@@ -51,6 +51,12 @@ export interface FollowingParsed {
    * of the other makes that state unreachable rather than merely absent today.
    */
   unreadable: boolean;
+  /**
+   * `following.html`'s own `datesFitted` fact (GH#156), carried through
+   * unaggregated — this is a single file, not several shards. `undefined` for
+   * a `.json` file, an absent file, or one we could not read at all.
+   */
+  datesFitted?: boolean;
 }
 
 /**
@@ -85,7 +91,7 @@ function interpretFollowingPayload(payload: unknown): {
  *
  * Takes the read result rather than the ZIP, unlike its followers counterpart:
  * following.json is a single named file whose lookup shares
- * `parseInstagramZipFile`'s `readJsonFromZip` closure — that closure also
+ * `parseInstagramZipFile`'s `readRelationshipFileFromZip` closure — that closure also
  * records JSON_PARSE_ERROR warnings, and duplicating it here would duplicate
  * that reporting too.
  *
@@ -96,7 +102,7 @@ function interpretFollowingPayload(payload: unknown): {
  *   be told both "we could not read it" and "we did not find it".
  */
 export function parseFollowingPayload(
-  readResult: { data: unknown; path: string } | null,
+  readResult: { data: unknown; path: string; datesFitted?: boolean } | null,
   unreadablePath?: string
 ): FollowingParsed {
   const { raw, formatInvalid, unresolved } = interpretFollowingPayload(readResult?.data);
@@ -167,5 +173,6 @@ export function parseFollowingPayload(
     // ...and a read that threw, whose warning the caller holds rather than
     // this array, so deriving from `warnings` alone would miss it.
     unreadable: unreadablePath !== undefined || warnings.some(w => w.severity === 'error'),
+    datesFitted: readResult?.datesFitted,
   };
 }

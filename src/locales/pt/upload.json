@@ -4,13 +4,11 @@
     "description": "Veja quem deixou de te seguir. Sem login, sem conta.",
     "dropHere": "Arraste seu arquivo ZIP do Instagram aqui",
     "orBrowse": "Ou toque para procurar no seu armazenamento local.",
-    "jsonOnly": "Apenas Formato JSON",
     "processing": "Analisando localmente...",
     "processingHint": "O processamento de grandes conjuntos de dados (até 1M+) pode levar um momento.",
     "ariaLabel": "Enviar arquivo ZIP de dados do Instagram",
-    "jsonShort": "O export precisa ser em JSON, não em HTML.",
+    "jsonShort": "Os dois formatos de exportação funcionam, JSON ou HTML.",
     "seeGuide": "Ver o guia passo a passo",
-    "jsonRequired": "Requer exportação em formato JSON",
     "privacyMicro": "Seu arquivo nunca sai do seu dispositivo",
     "notSureLink": "Não sabe o que enviar? Veja o guia",
     "processingAria": "Processando seu arquivo, aguarde...",
@@ -19,14 +17,14 @@
   },
   "checklist": {
     "title": "Checklist Pré-envio",
-    "format": "Formato: JSON (não HTML)",
+    "format": "Formato: JSON ou HTML",
     "includes": "Inclui: 'Seguidores e seguindo'",
     "timeframe": "Período: 'Todo o período'",
     "fileType": "Tipo de arquivo: .zip"
   },
   "errors": {
     "commonTitle": "Erro Mais Comum",
-    "commonHint": "Se sua exportação mostra 0 seguidores, você provavelmente exportou no formato <strong>HTML</strong> ou não selecionou a categoria de informações \"Seguidores e seguindo\".",
+    "commonHint": "Se sua exportação mostra 0 seguidores, você provavelmente não selecionou a categoria de informações <strong>Seguidores e seguindo</strong>.",
     "learnFix": "Saiba como corrigir"
   },
   "diagnostic": {
@@ -47,9 +45,9 @@
         "fix": "Procure um arquivo terminado em .zip na sua pasta de Downloads. O nome deve ser algo como \"instagram-usuario-data.zip\"."
       },
       "HTML_FORMAT": {
-        "title": "Formato incorreto: HTML",
-        "message": "Você baixou seus dados no formato HTML, mas esta ferramenta precisa do formato JSON para funcionar.",
-        "fix": "Volte para a Central de Contas da Meta › Criar exportação › Exportar para o dispositivo › selecione o formato \"JSON\" (não HTML) › inicie a exportação novamente."
+        "title": "Não conseguimos ler esta exportação",
+        "message": "Esta é uma exportação em HTML, e não conseguimos encontrar suas listas de seguidores dentro dela.",
+        "fix": "Peça ao Instagram a mesma exportação em JSON: Central de Contas da Meta › Criar exportação › Exportar para o dispositivo › Formato: JSON. Essa versão é a que lemos com mais confiabilidade."
       },
       "NOT_INSTAGRAM_EXPORT": {
         "title": "Não é uma exportação do Instagram",

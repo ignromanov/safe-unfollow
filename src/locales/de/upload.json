@@ -4,13 +4,11 @@
     "description": "Sieh, wer dir entfolgt ist. Ohne Login, ohne Konto.",
     "dropHere": "Instagram ZIP-Datei hier ablegen",
     "orBrowse": "Oder tippen, um deine Dateien zu durchsuchen.",
-    "jsonOnly": "Nur JSON-Format",
     "processing": "Lokal analysieren...",
     "processingHint": "Die Verarbeitung großer Datensätze (bis zu 1M+) kann einen Moment dauern.",
     "ariaLabel": "Instagram-Daten-ZIP-Datei hochladen",
-    "jsonShort": "Der Export muss im JSON-Format sein, nicht HTML.",
+    "jsonShort": "Beide Exportformate funktionieren, JSON oder HTML.",
     "seeGuide": "Schritt-für-Schritt-Anleitung ansehen",
-    "jsonRequired": "Erfordert Export im JSON-Format",
     "privacyMicro": "Deine Datei verlässt nie dein Gerät",
     "notSureLink": "Nicht sicher, was du hochladen sollst? Siehe Anleitung",
     "processingAria": "Datei wird verarbeitet, bitte warten...",
@@ -19,14 +17,14 @@
   },
   "checklist": {
     "title": "Checkliste vor dem Upload",
-    "format": "Format: JSON (nicht HTML)",
+    "format": "Format: JSON oder HTML",
     "includes": "Enthält: 'Follower und Gefolgte'",
     "timeframe": "Zeitraum: 'Gesamter Zeitraum'",
     "fileType": "Dateityp: .zip"
   },
   "errors": {
     "commonTitle": "Häufigster Fehler",
-    "commonHint": "Wenn dein Export 0 Follower zeigt, hast du wahrscheinlich im <strong>HTML</strong>-Format exportiert oder die Kategorie \"Follower und Gefolgte\" nicht ausgewählt.",
+    "commonHint": "Wenn dein Export 0 Follower zeigt, hast du höchstwahrscheinlich die Kategorie <strong>Follower und Gefolgte</strong> nicht ausgewählt.",
     "learnFix": "So behebst du das"
   },
   "diagnostic": {
@@ -47,9 +45,9 @@
         "fix": "Suche in deinem Download-Ordner nach einer Datei mit der Endung .zip. Sie sollte etwa so heißen: \"instagram-benutzername-datum.zip\"."
       },
       "HTML_FORMAT": {
-        "title": "Falsches Format: HTML",
-        "message": "Du hast deine Daten im HTML-Format heruntergeladen, dieses Tool benötigt jedoch das JSON-Format.",
-        "fix": "Gehe zurück zur Meta-Kontenübersicht › Export erstellen › Zu Gerät exportieren › wähle das Format \"JSON\" (nicht HTML) › starte den Export erneut."
+        "title": "Wir konnten diesen Export nicht lesen",
+        "message": "Das ist ein HTML-Export, und wir konnten deine Follower-Listen darin nicht finden.",
+        "fix": "Frag Instagram nach demselben Export als JSON: Meta-Kontenübersicht › Export erstellen › Zu Gerät exportieren › Format: JSON. Diese Version lesen wir am zuverlässigsten."
       },
       "NOT_INSTAGRAM_EXPORT": {
         "title": "Kein Instagram-Export",

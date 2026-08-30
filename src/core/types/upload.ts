@@ -150,10 +150,25 @@ export interface FileExpectation {
   formatUnreadable?: boolean;
 }
 
+/**
+ * The markups a relationship file can be written in, and the ONE place the set
+ * is spelled out.
+ *
+ * A tuple rather than a union so that the regex alternation, the type, and the
+ * reader that dispatches on a file's extension are all derived from it. Those
+ * three were three hand-written copies of the same two-element set, and the
+ * third was the dangerous one: `parseRelationshipFile` asked `/\.html$/i` and
+ * treated everything else as JSON, so a third extension added to the pattern
+ * would have been handed to `JSON.parse` without anyone editing that line.
+ */
+export const RELATIONSHIP_FORMATS = ['json', 'html'] as const;
+
+export type RelationshipFormat = (typeof RELATIONSHIP_FORMATS)[number];
+
 /** Discovery status of expected files */
 export interface FileDiscovery {
-  /** Format of the export (json or html) */
-  format: 'json' | 'html' | 'unknown';
+  /** Format of the export, or `unknown` when no relationship file was found. */
+  format: RelationshipFormat | 'unknown';
   /** Is this a valid Instagram data export? */
   isInstagramExport: boolean;
   /** Base path where data was found */
@@ -230,6 +245,31 @@ export interface ParseResult {
    * against and why a false positive is the cheaper mistake here.
    */
   truncatedRelationshipFile: RelationshipSkew;
+  /**
+   * Whether the HTML relationship files behind `truncatedRelationshipFile`
+   * (GH#156) fit their own month-name tables — see
+   * `core/parsers/instagram-html-dates.ts` for what "fit" means and why no
+   * fixed table covers every language.
+   *
+   * `insufficient-data` above has at least three different causes — too few
+   * timestamps, rows that never matched the date shape at all, and a month
+   * table that failed to fit — and only the last is locale-driven and only
+   * the last is what this field answers. `false` means real date text was
+   * present in an HTML `following` or `followers` file and could not be read,
+   * which is the population `insufficient-data` alone cannot separate from a
+   * small account.
+   *
+   * Optional rather than a `RelationshipSkew`-style enum with its own
+   * `'not-applicable'` member: unlike that field, every exit does NOT know an
+   * answer here. A JSON-only parse never asks the question, and fabricating
+   * a value for it would send a fact to analytics that never existed — the
+   * same omission `analytics.fileUploadSuccess` already makes for `format`
+   * on its cache-hit path. `undefined` covers a JSON export, an early exit
+   * that read no relationship file, and an HTML file whose rows carried no
+   * date text at all; `combineDatesFitted` (`instagram-html.ts`) is what
+   * turns per-file facts into this one.
+   */
+  datesFitted?: boolean;
 }
 
 /**

@@ -58,12 +58,14 @@ const LAST_UPLOAD_KEY = 'analytics_last_upload';
  */
 function reportParseDiagnostics({
   warnings,
+  discovery,
   labelResolutionMode,
   truncatedRelationshipFile,
+  datesFitted,
 }: ParseErrorData): void {
   for (const warning of warnings ?? []) {
     if (OPTIONAL_FILE_DRIFT_CODES.has(warning.code)) {
-      analytics.optionalFileFormatDrift(warning.code);
+      analytics.optionalFileFormatDrift(warning.code, discovery?.format);
     }
   }
 
@@ -88,7 +90,18 @@ function reportParseDiagnostics({
   // the least excuse for it, since telemetry is the one thing here that costs
   // the reader nothing and is the only record that outlives the session.
   if (truncatedRelationshipFile) {
-    analytics.relationshipSkewVerdict(truncatedRelationshipFile);
+    // `datesFitted` (GH#156) is passed only when it exists, rather than as an
+    // explicit `undefined` third argument — `analytics.relationshipSkewVerdict`
+    // reads it the same way either way, but a call with an explicit `undefined`
+    // is a DIFFERENT call than one with two arguments as far as a spy recording
+    // it is concerned, and every JSON-only test in this file asserts a two-
+    // argument call. Omitting keeps those honest instead of forcing them to
+    // assert a fact ("no HTML file was involved") they were never about.
+    analytics.relationshipSkewVerdict(
+      truncatedRelationshipFile,
+      discovery?.format,
+      ...(datesFitted === undefined ? [] : [datesFitted])
+    );
 
     // Deliberately not `!== 'no-skew'`. Only these two name a file, and the
     // value is sent as an event field: a verdict that slipped through would
@@ -253,7 +266,10 @@ export function useFileUpload() {
             accountCount: cachedData.metadata.accountCount,
           });
 
-          // Track success from cache
+          // Track success from cache. `format` is omitted (GH#156): nothing was
+          // parsed this call — the cache holds no discovery to report, and a
+          // fabricated 'unknown' would read as a measurement rather than the
+          // omission it is.
           analytics.fileUploadSuccess(cachedData.metadata.accountCount, true);
 
           outcome = 'cached';
@@ -263,6 +279,9 @@ export function useFileUpload() {
         // Use Web Worker for file parsing if available, otherwise fallback to main thread
         let accountCount: number = 0;
         let resultFileHash: string = fileHash;
+        // GH#156: hoisted the same way accountCount/resultFileHash are, so
+        // fileUploadSuccess can report the export's shape below.
+        let discovery: FileDiscovery | undefined;
 
         const handleProgress = (progress: number, processed: number, total: number) => {
           setUploadProgress(progress);
@@ -283,6 +302,7 @@ export function useFileUpload() {
 
             accountCount = result.accountCount;
             resultFileHash = result.fileHash;
+            discovery = result.discovery;
 
             // Store warnings and discovery from worker
             if (result.warnings || result.discovery) {
@@ -314,6 +334,7 @@ export function useFileUpload() {
 
           accountCount = result.accountCount;
           resultFileHash = result.fileHash;
+          discovery = result.discovery;
 
           // Store warnings and discovery from main thread parsing
           setUploadInfo({
@@ -336,7 +357,7 @@ export function useFileUpload() {
         });
 
         // Track successful processing
-        analytics.fileUploadSuccess(accountCount, false);
+        analytics.fileUploadSuccess(accountCount, false, discovery?.format);
 
         // Track return upload (user uploading new data)
         trackReturnUploadIfApplicable(resultFileHash);
@@ -359,7 +380,7 @@ export function useFileUpload() {
         const warnings = (err as { warnings?: ParseWarning[] }).warnings;
         const discovery = (err as { discovery?: FileDiscovery }).discovery;
 
-        analytics.uploadErrorByCode(errorCode, errorMessage, fileSizeMb);
+        analytics.uploadErrorByCode(errorCode, errorMessage, fileSizeMb, discovery?.format);
 
         setUploadInfo({
           currentFileName: file.name,
