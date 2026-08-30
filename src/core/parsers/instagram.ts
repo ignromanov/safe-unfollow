@@ -5,7 +5,13 @@ import type {
   ParseResult,
   ParseWarning,
 } from '@/core/types';
-import { BASE_PATH_CANDIDATES, FILE_SPECS, RELEVANT_FILE_PATTERN } from './instagram-file-specs';
+import {
+  BASE_PATH_CANDIDATES,
+  FILE_SPECS,
+  RELEVANT_FILE_PATTERN,
+  htmlTwin,
+} from './instagram-file-specs';
+import { combineDatesFitted, parseRelationshipFile } from './instagram-html';
 import { escapeRegExp, extractUsernames } from './instagram-utils';
 import { analyzeZipStructure, createCriticalError } from './instagram-zip-analysis';
 import { parseFollowersFromZip } from './instagram-followers';
@@ -123,18 +129,33 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
   const warnings: ParseWarning[] = [];
   const fileExpectations: FileExpectation[] = [];
 
-  // Determine format
-  const format: FileDiscovery['format'] = analysis.hasJsonFiles
-    ? 'json'
-    : analysis.hasHtmlFiles
-      ? 'html'
-      : 'unknown';
+  // Decided in `analyzeZipStructure`, not here. The rule used to live in two
+  // places — this nested ternary and `createCriticalError`'s
+  // `hasHtmlFiles && !hasJsonFiles` — and on `main` those two AGREE: a mixed
+  // archive is json to both, and neither raises `HTML_FORMAT` for it.
+  //
+  // Said differently until 2026-08-28, as "three variants that disagreed about
+  // a mixed archive". Neither half was true, and the true defect is the one the
+  // next comment describes: `createCriticalError` asked what format the archive
+  // was before asking whether it was an Instagram export at all, so any ZIP of
+  // `.html` was told to go and re-request JSON. That is an ordering fault, not
+  // a disagreement, and one copy of the rule cannot have it.
+  const format: FileDiscovery['format'] = analysis.format;
 
-  // Check if this is an Instagram export
-  const isInstagramExport = analysis.hasConnections || analysis.hasFollowersFolder;
+  // Decided in `analyzeZipStructure` for the same reason `format` is: this
+  // expression also lived in `createCriticalError` as its own negation, and the
+  // two had to stay in step for an arbitrary ZIP of `.html` to keep out of the
+  // `HTML_FORMAT` bucket.
+  const isInstagramExport = analysis.isInstagramExport;
 
-  // If not a valid Instagram export, return early with error
-  if (!isInstagramExport || format === 'html') {
+  // If not a valid Instagram export, return early with error.
+  //
+  // `format === 'html'` used to sit in this condition, and removing it is the
+  // whole feature: an HTML export is now read rather than refused. HTML_FORMAT
+  // is still reachable, but only from the `!hasMinimalData` exit below — where
+  // it means "we found an Instagram export, tried to read it, and got nothing",
+  // and where "request JSON instead" is still the most effective advice we have.
+  if (!isInstagramExport) {
     const error = createCriticalError(analysis);
     warnings.push(error);
 
@@ -184,11 +205,18 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
   // follower badged notFollowedBack and no error anywhere.
   let unreadableRequiredPath: string | undefined;
 
-  const readJsonFromZip = async (
+  const readRelationshipFileFromZip = async (
     patterns: string[],
     required = false
-  ): Promise<{ data: unknown; path: string } | null> => {
-    for (const p of patterns) {
+  ): Promise<{ data: unknown; path: string; datesFitted?: boolean } | null> => {
+    // Each candidate path is tried in both formats, JSON first. Expanded here
+    // rather than at every call site so that the caller keeps naming files the
+    // way it always has, and so that one archive holding both formats reads
+    // each file the way that file is written.
+    //
+    // JSON first at each base rather than JSON everywhere first: a base path
+    // that holds the export is the one to read from, whatever markup it used.
+    for (const p of patterns.flatMap(name => [name, htmlTwin(name)])) {
       const f = archive.find(new RegExp('^' + escapeRegExp(p) + '$', 'i'))[0];
       if (!f) continue;
 
@@ -204,12 +232,19 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
       }
 
       try {
-        return { data: JSON.parse(text), path: f.name };
+        const parsed = parseRelationshipFile(f.name, text);
+        return { data: parsed.data, path: f.name, datesFitted: parsed.datesFitted };
       } catch (error) {
+        if (required) unreadableRequiredPath = f.name;
+        // Same distinction as the read failure above: a required file we found
+        // but could not parse — JSON.parse throwing, or the HTML transcoder
+        // throwing on genuinely malformed markup — is unreadable, not missing
+        // (GH#157). An optional file we cannot parse still costs a badge, not
+        // the answer.
         warnings.push({
           code: 'JSON_PARSE_ERROR',
           message: `Failed to parse ${f.name}: ${error instanceof Error ? error.message : 'Invalid JSON'}`,
-          severity: 'warning',
+          severity: required ? 'error' : 'warning',
         });
         return null;
       }
@@ -222,7 +257,7 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
     .map(b => `${b}/following.json`)
     .concat(['following.json']);
   const followingParsed = parseFollowingPayload(
-    await readJsonFromZip(followingFilePatterns, true),
+    await readRelationshipFileFromZip(followingFilePatterns, true),
     unreadableRequiredPath
   );
   const followingUsers = followingParsed.followingUsers;
@@ -245,7 +280,7 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
   };
   const optionalParsed = await parseOptionalFiles(
     baseCandidates,
-    readJsonFromZip,
+    readRelationshipFileFromZip,
     readKnownUsernames
   );
   warnings.push(...optionalParsed.warnings);
@@ -305,6 +340,14 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
     followers: followersParsed.followersTimestamps,
   });
 
+  // The two files that feed the comparison above, and only those: an optional
+  // file's dates (GH#156) don't reach `detectRelationshipSkew` at all, so
+  // whether THEY fit would answer a question this verdict was never asked.
+  const datesFitted = combineDatesFitted([
+    followingParsed.datesFitted,
+    followersParsed.datesFitted,
+  ]);
+
   return {
     data: {
       following: new Set(followingUsers),
@@ -324,6 +367,7 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
     labelResolutionMode: optionalParsed.labelResolutionMode,
     followRequestsUnreadable: optionalParsed.followRequestsUnreadable,
     truncatedRelationshipFile,
+    datesFitted,
   };
 }
 

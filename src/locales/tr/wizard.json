@@ -65,7 +65,7 @@
     },
     "5": {
       "title": "Formatı JSON Olarak Değiştir",
-      "description": "Bu kritik! \"Format\" tıkla › \"JSON\" seç (HTML değil). HTML dosyaları analizörümüzle ÇALIŞMAZ.",
+      "description": "\"Format\" tıkla › \"JSON\" seç. HTML dışa aktarımları da çalışır, ancak en güvenilir şekilde JSON formatını okuruz.",
       "alt": "HTML yerine \"JSON\" seçeneğinin işaretli olduğu \"Format\" paneli."
     },
     "6": {

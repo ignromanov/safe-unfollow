@@ -23,13 +23,20 @@ export interface GuideStep {
  * The old numbering survived in the `/wizard/step/N` URLs until PR 3 removed
  * those routes; the ids below are now the only numbering there is, and they
  * are what `?step=N` names.
+ *
+ * Exactly one step is a warning, and it is step 3, not the format step. Until
+ * #152 an HTML export could not be read at all, so format was the one choice
+ * that made the whole export useless; now it parses, and the step that still
+ * ruins the export is the one where clearing the wrong checkboxes leaves no
+ * follower data to read. Two amber cards out of seven were a colour rather
+ * than a hierarchy, so the count stays at one.
  */
 export const GUIDE_STEPS: GuideStep[] = [
   { id: 1, visual: '/wizard/step-2' },
   { id: 2, visual: '/wizard/step-3' },
-  { id: 3, visual: '/wizard/step-4' },
+  { id: 3, isWarning: true, visual: '/wizard/step-4' },
   { id: 4, visual: '/wizard/step-5' },
-  { id: 5, isWarning: true, visual: '/wizard/step-6' },
+  { id: 5, visual: '/wizard/step-6' },
   { id: 6, visual: '/wizard/step-7' },
   { id: 7, visual: '/wizard/step-8' },
 ];

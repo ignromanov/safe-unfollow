@@ -65,7 +65,7 @@
     },
     "5": {
       "title": "Change Format to JSON",
-      "description": "This is critical! Click \"Format\" › Select \"JSON\" (not HTML). HTML files will NOT work with our analyzer.",
+      "description": "Click \"Format\" › Select \"JSON\". HTML exports also work, but JSON is the format we read most reliably.",
       "alt": "The \"Format\" panel with \"JSON\" selected instead of HTML."
     },
     "6": {

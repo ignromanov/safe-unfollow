@@ -28,7 +28,7 @@
     },
     "6": {
       "title": "Formatı JSON Olarak Değiştir",
-      "description": "Kritik adım! \"Format\" tıkla › \"JSON\" seç (HTML değil). HTML dosyaları ÇALIŞMAZ."
+      "description": "\"Format\" tıkla › \"JSON\" seç. HTML dışa aktarımları da çalışır, ancak en güvenilir şekilde JSON formatını okuruz."
     },
     "7": {
       "title": "Kontrol Et ve Dışa Aktarmayı Başlat",

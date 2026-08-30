@@ -44,12 +44,8 @@ describe('DiagnosticErrorScreen', () => {
     it('should render HTML_FORMAT error', () => {
       renderWithRouter(<DiagnosticErrorScreen errorCode="HTML_FORMAT" />);
 
-      expect(screen.getByText('Wrong Format: HTML')).toBeInTheDocument();
-      expect(
-        screen.getByText(
-          'You downloaded your data in HTML format, but this tool requires JSON format to work.'
-        )
-      ).toBeInTheDocument();
+      expect(screen.getByText(uploadEN.diagnostic.errors.HTML_FORMAT.title)).toBeInTheDocument();
+      expect(screen.getByText(uploadEN.diagnostic.errors.HTML_FORMAT.message)).toBeInTheDocument();
     });
 
     it('should render NOT_INSTAGRAM_EXPORT error', () => {
@@ -123,7 +119,7 @@ describe('DiagnosticErrorScreen', () => {
       renderWithRouter(<DiagnosticErrorScreen errorCode="HTML_FORMAT" />);
 
       const heading = screen.getByRole('heading', { level: 2 });
-      expect(heading).toHaveTextContent('Wrong Format: HTML');
+      expect(heading).toHaveTextContent(uploadEN.diagnostic.errors.HTML_FORMAT.title);
     });
 
     it('should display "How to fix this" section', () => {
@@ -263,7 +259,7 @@ describe('DiagnosticErrorScreen', () => {
 
       renderWithRouter(<DiagnosticErrorScreen parseWarnings={parseWarnings} />);
 
-      expect(screen.getByText('Wrong Format: HTML')).toBeInTheDocument();
+      expect(screen.getByText(uploadEN.diagnostic.errors.HTML_FORMAT.title)).toBeInTheDocument();
       // Message is now translated via i18n, so the JSON translation is shown instead of raw parser message
       expect(screen.getByText(uploadEN.diagnostic.errors.HTML_FORMAT.message)).toBeInTheDocument();
     });
@@ -280,7 +276,9 @@ describe('DiagnosticErrorScreen', () => {
       renderWithRouter(<DiagnosticErrorScreen errorCode="NOT_ZIP" parseWarnings={parseWarnings} />);
 
       expect(screen.getByText('Not a ZIP File')).toBeInTheDocument();
-      expect(screen.queryByText('Wrong Format: HTML')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(uploadEN.diagnostic.errors.HTML_FORMAT.title)
+      ).not.toBeInTheDocument();
     });
 
     it('should fallback to UNKNOWN when no error in parseWarnings', () => {

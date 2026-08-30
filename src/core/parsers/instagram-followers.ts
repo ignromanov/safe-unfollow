@@ -4,7 +4,12 @@
  */
 
 import type { FileExpectation, InstagramExportEntry, ParseWarning, RawItem } from '@/core/types';
-import { FILE_SPECS } from './instagram-file-specs';
+import {
+  FILE_SPECS,
+  RELATIONSHIP_EXTENSIONS,
+  relationshipFileBase,
+  relationshipFormatOf,
+} from './instagram-file-specs';
 import {
   UNREADABLE_ENTRIES_FIX,
   describeUnreadableEntries,
@@ -12,6 +17,7 @@ import {
   resolveEntries,
   resolveEntryList,
 } from './instagram-utils';
+import { combineDatesFitted, parseRelationshipFile } from './instagram-html';
 import { describeUnreadableZipEntry, type ZipArchive, type ZipEntry } from './zip-archive';
 
 export interface FollowersParsed {
@@ -47,6 +53,12 @@ export interface FollowersParsed {
    * loss of unknown size.
    */
   unreadable: boolean;
+  /**
+   * The shards' `datesFitted` facts (GH#156), combined with
+   * `combineDatesFitted`: `undefined` when no shard had a date to fit,
+   * `false` when any shard's own dates failed to fit, `true` otherwise.
+   */
+  datesFitted?: boolean;
 }
 
 /** Parse a single followers JSON text */
@@ -151,13 +163,31 @@ export async function parseFollowersFromZip(
   archive: ZipArchive,
   baseCandidates: string[]
 ): Promise<FollowersParsed> {
+  // Both extensions, because both are readable, and wider than any spec's
+  // `fileNames` on purpose: an export sharded into `followers_4` and beyond is
+  // read today and must keep being read, in either format.
   const followersGlobs = baseCandidates
-    .map(b => `${b}/followers_.*\\.json`)
-    .concat(['followers_.*\\.json']);
+    .map(b => `${b}/followers_.*\\.${RELATIONSHIP_EXTENSIONS}`)
+    .concat([`followers_.*\\.${RELATIONSHIP_EXTENSIONS}`]);
   const followersRaw: RawItem[] = [];
   const followersSeen = new Set<string>();
+  /**
+   * One shard per base name, not per file name.
+   *
+   * `followers_1.json` and `followers_1.html` are the same shard written twice,
+   * and both match the globs above — so a half-merged archive used to have its
+   * followers read from BOTH and unioned. Harmless when the two are the same
+   * export; a wrong answer when they are not, because the union of two
+   * snapshots taken weeks apart contains people who have since unfollowed, and
+   * every one of them then deflates `notFollowingBack` and inflates `mutuals`
+   * with no warning attached.
+   *
+   * The rule is the one `readRelationshipFileFromZip` already applies to
+   * `following.json`: at each base, JSON first, and read exactly one. Keeping
+   * the two required files on different rules is what made this invisible —
+   * `following` came from one export and `followers` from two.
+   */
   const followersFilesByName = new Map<string, ZipEntry>();
-  const foundFollowerPaths: string[] = [];
   const warnings: ParseWarning[] = [];
   // Names of shards whose top-level shape didn't resolve via `resolveEntryList`
   // (GH#21) — neither a bare array, `{ relationships_followers: [...] }`, nor a
@@ -168,25 +198,35 @@ export async function parseFollowersFromZip(
   // "40 of your followers could not be read" is the fact, and which of three
   // files each came from is not something they can act on.
   let unresolvedEntries = 0;
+  // One `datesFitted` per shard that actually got parsed (GH#156), combined
+  // below with `combineDatesFitted` once every shard has been read.
+  const shardDatesFitted: (boolean | undefined)[] = [];
+
+  const keepShard = (f: ZipEntry) => {
+    const base = relationshipFileBase(f.name);
+    const kept = followersFilesByName.get(base);
+    // First match wins, except that JSON outranks HTML however they were found.
+    if (
+      kept &&
+      (relationshipFormatOf(f.name) !== 'json' || relationshipFormatOf(kept.name) === 'json')
+    )
+      return;
+    followersFilesByName.set(base, f);
+  };
 
   for (const g of followersGlobs) {
     const regex = new RegExp('^' + g + '$', 'i');
-    for (const f of archive.find(regex)) {
-      if (!followersFilesByName.has(f.name)) {
-        followersFilesByName.set(f.name, f);
-        foundFollowerPaths.push(f.name);
-      }
-    }
+    for (const f of archive.find(regex)) keepShard(f);
   }
 
   if (followersFilesByName.size === 0) {
-    for (const f of archive.find(/followers_\d+\.json$/i)) {
-      if (!followersFilesByName.has(f.name)) {
-        followersFilesByName.set(f.name, f);
-        foundFollowerPaths.push(f.name);
-      }
-    }
+    const shardFallback = new RegExp(`followers_\\d+\\.${RELATIONSHIP_EXTENSIONS}$`, 'i');
+    for (const f of archive.find(shardFallback)) keepShard(f);
   }
+
+  // Reported after the choice, so what the reader is told was found is what was
+  // actually read — a discarded twin is not a missing file and not a read one.
+  const foundFollowerPaths = [...followersFilesByName.values()].map(f => f.name);
 
   for (const f of followersFilesByName.values()) {
     if (!f) continue;
@@ -210,12 +250,21 @@ export async function parseFollowersFromZip(
     }
     let json: unknown;
     try {
-      json = JSON.parse(text);
+      // By the entry's own extension, not by the archive's format: the first is
+      // a fact about this file, the second an aggregate over the whole ZIP.
+      const parsed = parseRelationshipFile(f.name, text);
+      json = parsed.data;
+      shardDatesFitted.push(parsed.datesFitted);
     } catch (error) {
+      // Error severity, matching the read failure above: a shard we found but
+      // could not parse — JSON.parse throwing, or the HTML transcoder throwing
+      // on genuinely malformed markup — is exactly as unreadable as one we
+      // could not open, and `unreadable` below must pick both up the same way
+      // (GH#157).
       warnings.push({
         code: 'JSON_PARSE_ERROR',
         message: `Failed to parse ${f.name}: ${error instanceof Error ? error.message : 'Invalid JSON'}`,
-        severity: 'warning',
+        severity: 'error',
       });
       continue;
     }
@@ -263,8 +312,13 @@ export async function parseFollowersFromZip(
   warnings.push(...outcome);
 
   // Derived from the warnings rather than recomputed alongside them, so the
-  // two cannot disagree. See FollowersParsed.unreadable.
-  const unreadable = outcome.some(w => w.severity === 'error');
+  // two cannot disagree. See FollowersParsed.unreadable. Read from the full
+  // `warnings` accumulated above, not only `outcome`: a shard whose read or
+  // parse threw (GH#157) pushes its error-severity warning directly into
+  // `warnings` before `describeFollowersOutcome` ever runs, and deriving from
+  // `outcome` alone missed it — the shard vanished silently instead of marking
+  // the followers set unreadable.
+  const unreadable = warnings.some(w => w.severity === 'error');
 
   return {
     followersRaw,
@@ -275,5 +329,6 @@ export async function parseFollowersFromZip(
     warnings,
     fileExpectation,
     unreadable,
+    datesFitted: combineDatesFitted(shardDatesFitted),
   };
 }

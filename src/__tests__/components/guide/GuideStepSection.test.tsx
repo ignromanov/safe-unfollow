@@ -10,7 +10,7 @@ import { GuideStepSection } from '@/components/guide/GuideStepSection';
 import { GUIDE_STEPS } from '@/config/wizard-steps';
 
 const PLAIN = GUIDE_STEPS[3]!; // id 4, no warning
-const WARNING = GUIDE_STEPS[4]!; // id 5, the only step still marked isWarning
+const WARNING = GUIDE_STEPS[2]!; // id 3, the only step marked isWarning
 
 describe('GuideStepSection', () => {
   it('renders a lazy image, not a video, while off-screen', () => {
@@ -47,9 +47,13 @@ describe('GuideStepSection', () => {
   });
 
   it('anchors itself so the dialog can scroll to it', () => {
-    const { container } = render(<GuideStepSection step={WARNING} isInView={false} />);
+    // The `guide-step-` prefix is the contract GuideDialog queries, so it
+    // stays a literal here; the number is interpolated because this test does
+    // not care which step it renders, and hardcoding one silently coupled it
+    // to whichever step happened to be the warning.
+    const { container } = render(<GuideStepSection step={PLAIN} isInView={false} />);
 
-    expect(container.querySelector('#guide-step-5')).not.toBeNull();
+    expect(container.querySelector(`#guide-step-${PLAIN.id}`)).not.toBeNull();
   });
 
   it('gives its heading a programmatic focus target', () => {

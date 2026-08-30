@@ -3,6 +3,7 @@
  * Describes all files we look for in Instagram data export
  */
 
+import { RELATIONSHIP_FORMATS, type RelationshipFormat } from '@/core/types';
 import { escapeRegExp } from './instagram-utils';
 
 export interface FileSpec {
@@ -183,6 +184,78 @@ export const OPTIONAL_FILE_DRIFT_CODES: ReadonlySet<string> = new Set(
 );
 
 /**
+ * The markups a relationship file can be written in, as a regex alternation.
+ *
+ * One home for a fact the HTML work otherwise spelled out in three syntaxes
+ * across three files. Widening the set has to be one edit, because every miss
+ * is silent and each is silent differently: miss `RELEVANT_FILE_PATTERN` and
+ * `openZipArchive` keeps no object for the entry, so the parser reports the
+ * file MISSING rather than failing; miss `RELATIONSHIP_FILE` and the archive is
+ * handed the wrong diagnostic code; miss a followers glob and a shard vanishes
+ * from a required list.
+ *
+ * `htmlTwin` below is deliberately NOT derived from this: it maps one name to
+ * one other name, which a set of alternatives cannot express.
+ *
+ * Non-capturing on purpose. Every consumer either `.test()`s the pattern or
+ * hands it to `archive.find`, and the one that reads the extension back names
+ * its own group — so no caller's group indices depend on how many alternatives
+ * are spelled out here, and adding one cannot silently shift them.
+ */
+export const RELATIONSHIP_EXTENSIONS = `(?:${RELATIONSHIP_FORMATS.join('|')})`;
+
+/** The extension alone, for reading one name's format rather than matching it. */
+const RELATIONSHIP_EXTENSION = new RegExp(`\\.(?<ext>${RELATIONSHIP_EXTENSIONS})$`, 'i');
+
+/**
+ * Which markup this file name says it is written in, or `null` for a name that
+ * is not a relationship file at all.
+ *
+ * The single dispatch point, and the reason it is a function rather than a
+ * comparison at each call site: a caller that asks "is it html?" has silently
+ * decided what everything else is. Adding a format here is a compile error at
+ * `parseRelationshipFile`'s switch, which is where the decision belongs.
+ */
+export function relationshipFormatOf(fileName: string): RelationshipFormat | null {
+  const ext = RELATIONSHIP_EXTENSION.exec(fileName)?.groups?.ext?.toLowerCase();
+  return RELATIONSHIP_FORMATS.find(format => format === ext) ?? null;
+}
+
+/**
+ * A relationship file's name without its format — what `following.json` and
+ * `following.html` have in common, and the key under which they are the same
+ * file written twice.
+ *
+ * Lowercased, because the pattern that found them is case-insensitive and two
+ * spellings of one shard are not two shards.
+ */
+export function relationshipFileBase(fileName: string): string {
+  return fileName.replace(RELATIONSHIP_EXTENSION, '').toLowerCase();
+}
+
+/**
+ * The same file's name in an HTML export.
+ *
+ * Derived rather than listed, on a measurement: the nine relationship files of
+ * `raw/real/2026-08-11-en-html-x9g96b0A` are each the JSON name with the
+ * extension swapped — `close_friends.html`, `recently_unfollowed_profiles.html`,
+ * `recent_follow_requests.html` and the rest. Not one base name differs, and the
+ * folder layout is the same `connections/followers_and_following`.
+ *
+ * A second hand-written `htmlFileNames` beside `fileNames` would restate nine
+ * facts that already have a home, and the two lists would disagree the first
+ * time either changed. Stating it once means an alternative added to
+ * `fileNames` — the way `friends.json` sits beside `close_friends.json` — is
+ * covered on both sides without anyone remembering to do it twice.
+ *
+ * Case-insensitive because the pattern below is, and a `.JSON` alternative that
+ * silently produced `.JSON.html` would be findable in neither format.
+ */
+export function htmlTwin(fileName: string): string {
+  return fileName.replace(/\.json$/i, '.html');
+}
+
+/**
  * Common base paths where Instagram data might be located
  */
 export const BASE_PATH_CANDIDATES = [
@@ -209,13 +282,21 @@ export const BASE_PATH_CANDIDATES = [
  * that list: `instagram-followers.ts` looks up `followers_.*\.json`, so an
  * export sharded into `followers_4.json` and beyond is read today and must
  * keep being read.
+ *
+ * Both extensions, because both are readable. An entry this pattern does not
+ * name keeps no object, so the parser cannot open it however correctly
+ * everything downstream is written — it reports the file MISSING, which is a
+ * silent wrong answer rather than a crash. That makes this the first seam an
+ * HTML export passes through, and the reason it is widened before anything that
+ * reads one.
  */
 const KEPT_FILE_NAMES = [...FILE_SPECS, PERMANENT_REQUESTS_SPEC]
   .filter(spec => spec.name !== 'followers_*.json')
   .flatMap(spec => spec.fileNames)
+  .flatMap(name => [name, htmlTwin(name)])
   .map(escapeRegExp);
 
 export const RELEVANT_FILE_PATTERN = new RegExp(
-  `(^|/)(followers_[^/]*\\.json|${KEPT_FILE_NAMES.join('|')})$`,
+  `(^|/)(followers_[^/]*\\.${RELATIONSHIP_EXTENSIONS}|${KEPT_FILE_NAMES.join('|')})$`,
   'i'
 );

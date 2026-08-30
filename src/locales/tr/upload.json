@@ -4,13 +4,11 @@
     "description": "Kimlerin takibi bıraktığını gör. Giriş yok, hesap yok.",
     "dropHere": "Instagram ZIP dosyanı buraya bırak",
     "orBrowse": "Veya yerel depolamana göz atmak için dokun.",
-    "jsonOnly": "Sadece JSON Formatı",
     "processing": "Yerel olarak analiz ediliyor...",
     "processingHint": "Büyük veri setlerini (1M+'a kadar) işlemek biraz zaman alabilir.",
     "ariaLabel": "Instagram veri ZIP dosyasını yükle",
-    "jsonShort": "Dışa aktarma JSON biçiminde olmalı, HTML değil.",
+    "jsonShort": "Her iki dışa aktarma biçimi de çalışır: JSON veya HTML.",
     "seeGuide": "Adım adım kılavuzu gör",
-    "jsonRequired": "JSON formatında dışa aktarım gerektirir",
     "privacyMicro": "Dosyanız cihazınızdan asla ayrılmaz",
     "notSureLink": "Ne yükleyeceğinizi bilmiyor musunuz? Kılavuza bakın",
     "processingAria": "Dosyanız işleniyor, lütfen bekleyin...",
@@ -19,14 +17,14 @@
   },
   "checklist": {
     "title": "Yükleme Öncesi Kontrol Listesi",
-    "format": "Format: JSON (HTML değil)",
+    "format": "Format: JSON veya HTML",
     "includes": "İçerik: 'Takipçiler ve takip edilenler'",
     "timeframe": "Zaman aralığı: 'Tüm Zamanlar'",
     "fileType": "Dosya türü: .zip"
   },
   "errors": {
     "commonTitle": "En Yaygın Hata",
-    "commonHint": "Dışa aktarımında 0 takipçi varsa, muhtemelen <strong>HTML</strong> formatında dışa aktardın veya \"Takipçiler ve takip edilenler\" bilgi kategorisini seçmedin.",
+    "commonHint": "Dışa aktarımında 0 takipçi varsa, muhtemelen <strong>Takipçiler ve takip edilenler</strong> bilgi kategorisini seçmedin.",
     "learnFix": "Nasıl düzeltilir öğren"
   },
   "diagnostic": {
@@ -47,9 +45,9 @@
         "fix": "İndirilenler klasöründe .zip uzantılı bir dosya ara. Genellikle \"instagram-kullaniciadi-tarih.zip\" gibi bir ismi olur."
       },
       "HTML_FORMAT": {
-        "title": "Yanlış Format: HTML",
-        "message": "Verilerini HTML formatında indirdin, ancak bu araç çalışmak için JSON formatı gerektiriyor.",
-        "fix": "Meta Hesaplar Merkezi’ne dön › Dışa aktarma oluştur › Cihaza dışa aktar › formatı \"JSON\" seç (HTML değil) › dışa aktarmayı tekrar başlat."
+        "title": "Bu dışa aktarımı okuyamadık",
+        "message": "Bu bir HTML dışa aktarımı ve içinde takipçi listelerini bulamadık.",
+        "fix": "Instagram'dan aynı dışa aktarımı JSON olarak iste: Meta Hesaplar Merkezi › Dışa aktarma oluştur › Cihaza aktar › Format: JSON. Bu sürümü en güvenilir şekilde okuyoruz."
       },
       "NOT_INSTAGRAM_EXPORT": {
         "title": "Instagram Dışa Aktarımı Değil",

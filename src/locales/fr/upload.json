@@ -4,13 +4,11 @@
     "description": "Voyez qui s'est désabonné. Sans connexion, sans compte.",
     "dropHere": "Déposez votre fichier ZIP Instagram ici",
     "orBrowse": "Ou appuyez pour parcourir votre stockage local.",
-    "jsonOnly": "Format JSON uniquement",
     "processing": "Analyse locale en cours...",
     "processingHint": "Le traitement de grands ensembles de données (jusqu'à 1M+) peut prendre un moment.",
     "ariaLabel": "Téléverser le fichier ZIP de données Instagram",
-    "jsonShort": "L'export doit être au format JSON, pas HTML.",
+    "jsonShort": "Les deux formats d'export fonctionnent, JSON ou HTML.",
     "seeGuide": "Voir le guide étape par étape",
-    "jsonRequired": "Nécessite une exportation au format JSON",
     "privacyMicro": "Votre fichier ne quitte jamais votre appareil",
     "notSureLink": "Pas sûr de quoi envoyer ? Consultez le guide",
     "processingAria": "Traitement de votre fichier, veuillez patienter...",
@@ -19,14 +17,14 @@
   },
   "checklist": {
     "title": "Liste de vérification",
-    "format": "Format : JSON (pas HTML)",
+    "format": "Format : JSON ou HTML",
     "includes": "Inclut : « Abonnés et abonnements »",
     "timeframe": "Période : « Tout »",
     "fileType": "Type de fichier : .zip"
   },
   "errors": {
     "commonTitle": "Erreur la plus courante",
-    "commonHint": "Si votre exportation affiche 0 abonné, vous avez probablement exporté au format <strong>HTML</strong> ou n'avez pas sélectionné la catégorie « Abonnés et abonnements ».",
+    "commonHint": "Si votre exportation affiche 0 abonné, vous n'avez probablement pas sélectionné la catégorie <strong>Abonnés et abonnements</strong>.",
     "learnFix": "Apprenez comment corriger cela"
   },
   "diagnostic": {
@@ -47,9 +45,9 @@
         "fix": "Cherchez un fichier se terminant par .zip dans votre dossier Téléchargements. Il devrait s'appeler quelque chose comme « instagram-nomutilisateur-date.zip »."
       },
       "HTML_FORMAT": {
-        "title": "Mauvais format : HTML",
-        "message": "Vous avez téléchargé vos données au format HTML, mais cet outil nécessite le format JSON.",
-        "fix": "Retournez dans l’Espace Comptes Meta › Créer une exportation › Exporter vers l’appareil › choisissez le format « JSON » (pas HTML) › relancez l’exportation."
+        "title": "Nous n'avons pas pu lire cette exportation",
+        "message": "Il s’agit d’une exportation HTML, et nous n’avons pas trouvé vos listes d’abonnés à l’intérieur.",
+        "fix": "Demandez à Instagram la même exportation en JSON : Espace Comptes Meta › Créer une exportation › Exporter sur mon appareil › Format : JSON. C’est la version que nous lisons de la manière la plus fiable."
       },
       "NOT_INSTAGRAM_EXPORT": {
         "title": "Pas une exportation Instagram",

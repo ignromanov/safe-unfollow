@@ -59,6 +59,7 @@ self.onmessage = async (
         discovery: parseResult.discovery,
         labelResolutionMode: parseResult.labelResolutionMode,
         truncatedRelationshipFile: parseResult.truncatedRelationshipFile,
+        datesFitted: parseResult.datesFitted,
       });
       return;
     }
@@ -130,6 +131,7 @@ self.onmessage = async (
       discovery: parseResult.discovery,
       labelResolutionMode: parseResult.labelResolutionMode,
       truncatedRelationshipFile: parseResult.truncatedRelationshipFile,
+      datesFitted: parseResult.datesFitted,
     });
   } catch (error) {
     // Send error result with classified code

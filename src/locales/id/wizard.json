@@ -65,7 +65,7 @@
     },
     "5": {
       "title": "Ubah Format ke JSON",
-      "description": "Ini penting! Klik \"Format\" › Pilih \"JSON\" (bukan HTML). File HTML TIDAK akan berfungsi dengan alat analisis kami.",
+      "description": "Klik \"Format\" › Pilih \"JSON\". Ekspor HTML juga berfungsi, tetapi JSON adalah format yang paling andal untuk kami baca.",
       "alt": "Panel \"Format\" dengan \"JSON\" terpilih, bukan HTML."
     },
     "6": {

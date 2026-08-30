@@ -65,4 +65,132 @@ describe('uploadErrorByCode', () => {
     const [, payload] = enqueueEvent.mock.calls[0];
     expect(payload).not.toHaveProperty('file_size_mb');
   });
+
+  // GH#156 — after PR #152 an HTML markup drift and a JSON schema drift raise
+  // the same error series with nothing to tell the two populations apart.
+  it('carries the export format an HTML failure was discovered in', () => {
+    analytics.uploadErrorByCode('INVALID_DATA_STRUCTURE', 'boom', 12, 'html');
+
+    const [, payload] = enqueueEvent.mock.calls[0];
+    expect(payload).toMatchObject({ format: 'html' });
+  });
+
+  it('carries json the same way, so the two populations are comparable', () => {
+    analytics.uploadErrorByCode('INVALID_DATA_STRUCTURE', 'boom', 12, 'json');
+
+    const [, payload] = enqueueEvent.mock.calls[0];
+    expect(payload).toMatchObject({ format: 'json' });
+  });
+
+  it('omits format rather than fabricating one when nothing was discovered yet', () => {
+    analytics.uploadErrorByCode('NOT_ZIP', 'not a zip', 1.5);
+
+    const [, payload] = enqueueEvent.mock.calls[0];
+    expect(payload).not.toHaveProperty('format');
+  });
+});
+
+describe('fileUploadSuccess format field (GH#156)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('carries the format of a freshly parsed export', () => {
+    analytics.fileUploadSuccess(100, false, 'html');
+
+    const [, payload] = enqueueEvent.mock.calls[0];
+    expect(payload).toMatchObject({ format: 'html' });
+  });
+
+  it('omits format on the cache-hit path — nothing was parsed this call', () => {
+    analytics.fileUploadSuccess(100, true);
+
+    const [, payload] = enqueueEvent.mock.calls[0];
+    expect(payload).not.toHaveProperty('format');
+  });
+});
+
+describe('optionalFileFormatDrift format field (GH#156)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('carries the export format the drift was found in', () => {
+    analytics.optionalFileFormatDrift('INVALID_UNFOLLOWED_FORMAT', 'html');
+
+    expect(trackEvent).toHaveBeenCalledWith('optional_file_format_drift', {
+      file_code: 'INVALID_UNFOLLOWED_FORMAT',
+      format: 'html',
+    });
+  });
+
+  it('omits format when the caller has none to give', () => {
+    analytics.optionalFileFormatDrift('INVALID_UNFOLLOWED_FORMAT');
+
+    expect(trackEvent).toHaveBeenCalledWith('optional_file_format_drift', {
+      file_code: 'INVALID_UNFOLLOWED_FORMAT',
+    });
+  });
+});
+
+describe('relationshipSkewVerdict format field (GH#156)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('carries the export format the verdict was reached on', () => {
+    analytics.relationshipSkewVerdict('insufficient-data', 'html');
+
+    expect(trackEvent).toHaveBeenCalledWith('relationship_skew_verdict', {
+      verdict: 'insufficient-data',
+      format: 'html',
+    });
+  });
+
+  it('omits format when the caller has none to give', () => {
+    analytics.relationshipSkewVerdict('no-skew');
+
+    expect(trackEvent).toHaveBeenCalledWith('relationship_skew_verdict', {
+      verdict: 'no-skew',
+    });
+  });
+});
+
+/**
+ * GH#156, the blocked half. `insufficient-data` has at least three causes and
+ * only `dates_fitted: false` names the locale-driven one — a real date that a
+ * fitted month table still could not read, as opposed to too few timestamps
+ * or rows that never matched the date shape at all.
+ */
+describe('relationshipSkewVerdict dates_fitted field (GH#156)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('carries dates_fitted false when a required file could not date itself', () => {
+    analytics.relationshipSkewVerdict('insufficient-data', 'html', false);
+
+    expect(trackEvent).toHaveBeenCalledWith('relationship_skew_verdict', {
+      verdict: 'insufficient-data',
+      format: 'html',
+      dates_fitted: false,
+    });
+  });
+
+  it('carries dates_fitted true on a clean HTML parse, so the field has a denominator', () => {
+    analytics.relationshipSkewVerdict('no-skew', 'html', true);
+
+    expect(trackEvent).toHaveBeenCalledWith('relationship_skew_verdict', {
+      verdict: 'no-skew',
+      format: 'html',
+      dates_fitted: true,
+    });
+  });
+
+  it('omits dates_fitted for a JSON export rather than fabricating a value', () => {
+    analytics.relationshipSkewVerdict('insufficient-data', 'json');
+
+    const [, payload] = trackEvent.mock.calls[0];
+    expect(payload).not.toHaveProperty('dates_fitted');
+  });
 });
