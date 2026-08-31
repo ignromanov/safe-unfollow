@@ -6,9 +6,9 @@
   "keywords": "instagram unfollow, siapa yang unfollow instagram, unfollow tracker indonesia, instagram zip analyzer, cek unfollow tanpa login",
   "routes": {
     "/upload": {
-      "title": "Upload File ZIP Instagram: Analisis Unfollowers Gratis",
-      "description": "Upload ekspor data Instagram (ZIP) untuk analisis unfollowers gratis. Tanpa login dan tanpa password: file dibaca di browser Anda dan tetap di perangkat.",
-      "ogTitle": "Upload File ZIP Instagram: Analisis Unfollowers Gratis"
+      "title": "Sudah Punya File ZIP Instagram? Cek Unfollowers Gratis",
+      "description": "Upload ekspor data Instagram, JSON atau HTML, dan cek siapa yang unfollow Anda. Gratis, tanpa login: file dibaca di browser Anda dan tetap di perangkat.",
+      "ogTitle": "Sudah Punya File ZIP Instagram? Cek Unfollowers Gratis"
     },
     "/sample": {
       "title": "Coba Instagram Unfollow Tracker: Demo Gratis Tanpa Upload",

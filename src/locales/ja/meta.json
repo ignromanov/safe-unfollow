@@ -6,9 +6,9 @@
   "keywords": "instagram フォローを外された, インスタ フォロー解除された, 誰がフォロー外した instagram, アンフォローチェッカー, instagram zip 分析, ログイン不要 フォロー確認",
   "routes": {
     "/upload": {
-      "title": "Instagram ZIPをアップロード｜フォローを外された人を無料で確認",
-      "description": "Instagramのデータエクスポート（ZIP）をアップロードすると、フォローを外された人を無料で確認できます。ログインもパスワードも不要。ファイルはブラウザの中で読み込まれ、端末から出ません。",
-      "ogTitle": "Instagram ZIPをアップロード｜フォローを外された人を無料で確認"
+      "title": "Instagram ZIPをアップロード｜フォローを外した人を無料で確認",
+      "description": "Instagramのデータエクスポート（ZIP）をアップロードすると、フォローを外した人を無料で確認できます。JSONでもHTMLでも読み込めます。ログインもパスワードも不要。ファイルはブラウザの中だけで読み込まれ、端末から出ません。",
+      "ogTitle": "Instagram ZIPをアップロード｜フォローを外した人を無料で確認"
     },
     "/sample": {
       "title": "Instagram Unfollow Trackerを試す｜無料デモ",

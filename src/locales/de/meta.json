@@ -6,9 +6,9 @@
   "keywords": "instagram entfolger, wer hat mich entfolgt instagram, unfollow tracker ohne login, instagram zip analyzer, entfolger kostenlos prüfen",
   "routes": {
     "/upload": {
-      "title": "Instagram-ZIP hochladen: kostenlose Entfolger-Analyse",
-      "description": "Lade deinen Instagram-Export (ZIP) hoch für eine kostenlose Entfolger-Analyse. Ohne Login, ohne Passwort: die Datei wird im Browser gelesen und bleibt bei dir.",
-      "ogTitle": "Instagram-ZIP hochladen: kostenlose Entfolger-Analyse"
+      "title": "Instagram-ZIP hochladen: wer dir entfolgt ist, kostenlos",
+      "description": "Lade deinen Instagram-Export (ZIP) hoch und sieh kostenlos, wer dir entfolgt ist. JSON oder HTML, beides geht. Ohne Login: die Datei bleibt in deinem Browser.",
+      "ogTitle": "Instagram-ZIP hochladen: wer dir entfolgt ist, kostenlos"
     },
     "/sample": {
       "title": "Instagram Unfollow Tracker testen: kostenlose Demo",
