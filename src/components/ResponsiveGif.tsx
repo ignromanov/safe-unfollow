@@ -15,22 +15,48 @@ interface ResponsiveGifProps {
   alt: string;
   /** CSS class name */
   className?: string;
+  /**
+   * False while the clip is off-screen. Defaults to true, so every existing
+   * caller keeps the behaviour it had.
+   */
+  isActive?: boolean;
+  /**
+   * Intrinsic size of the poster/video, so the browser reserves the right
+   * box before either loads. Defaults to 600x450 (4:3) — every existing
+   * caller's asset except the guide's first section, which is 600x360.
+   */
+  width?: number;
+  height?: number;
 }
 
 export function ResponsiveGif({
   basePath,
   alt,
   className = 'w-full h-auto block',
+  isActive = true,
+  width = 600,
+  height = 450,
 }: ResponsiveGifProps) {
   const prefersReducedMotion = useReducedMotion();
 
-  if (prefersReducedMotion) {
+  // Two reasons to show a still image, one branch. `isActive=false` is the
+  // off-screen case, and it is not an optimisation of the video path but a
+  // replacement of it: the `poster` attribute downloads as soon as the
+  // <video> enters the DOM, regardless of preload="none", so an off-screen
+  // <video poster> costs exactly what an on-screen one does. A plain
+  // <img loading="lazy"> is the only thing that actually defers.
+  //
+  // ⚠️ The poster is 600w on both breakpoints (below, and in the video's own
+  // `poster`), so a 390px phone downloads a 600-wide still for a 400-wide
+  // clip. Pre-existing; seven sections in one scroll multiply it by seven.
+  if (prefersReducedMotion || !isActive) {
     return (
       <img
         src={`${basePath}-600w-poster.jpg`}
         alt={alt}
-        width={600}
-        height={450}
+        width={width}
+        height={height}
+        loading={isActive ? undefined : 'lazy'}
         className={className}
       />
     );
@@ -45,9 +71,14 @@ export function ResponsiveGif({
       muted
       loop
       playsInline
+      // Autoplay overrides this in every browser that implements both — the
+      // element still loads. It is here for the browsers that treat a muted
+      // autoplaying video as skippable until it is on screen, which is the
+      // only case where it changes anything.
+      preload="none"
       poster={`${basePath}-600w-poster.jpg`}
-      width={600}
-      height={450}
+      width={width}
+      height={height}
       className={className}
       aria-label={alt}
     >

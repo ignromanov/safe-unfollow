@@ -43,7 +43,9 @@ export function useLayoutNavigation(): LayoutNavigationResult {
   const handleClear = useCallback(
     (clearData: () => void) => {
       clearData();
-      navigate(`${prefix}/`);
+      // The reader who just deleted their export is about to load another one,
+      // so send them straight to /upload instead of making them navigate again.
+      navigate(`${prefix}/upload`);
     },
     [navigate, prefix]
   );

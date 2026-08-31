@@ -41,7 +41,7 @@
       "rows": {
         "destination": "Exporter sur mon appareil",
         "range": "Tout",
-        "format": "JSON ou HTML",
+        "format": "JSON — pas HTML",
         "quality": "Toute qualité de média",
         "content": "Abonnés et abonnements"
       }
@@ -51,45 +51,40 @@
     }
   },
   "steps": {
-    "2": {
+    "1": {
       "title": "Choisissez votre profil Instagram",
       "description": "Sélectionnez votre compte Instagram dans la liste des profils connectés.",
-      "alt": "Étape 2 : Choisissez votre profil Instagram"
+      "alt": "L'écran d'exportation d'Instagram avec la liste des profils connectés."
     },
-    "3": {
+    "2": {
       "title": "Sélectionnez « Exporter sur mon appareil »",
       "description": "Choisissez d'exporter directement vers votre appareil pour une confidentialité maximale. Vos données restent avec vous.",
-      "alt": "Étape 3 : Sélectionnez l'option Exporter sur mon appareil"
+      "alt": "L'écran de destination avec « Exporter sur mon appareil » sélectionné."
+    },
+    "3": {
+      "title": "Sélectionnez uniquement « Abonnés et abonnements »",
+      "description": "Cliquez sur « Personnaliser » › Décochez tout › Cochez UNIQUEMENT « Abonnés et abonnements ». Cela garde votre fichier petit et rapide.",
+      "alt": "Le panneau « Personnaliser » avec uniquement « Abonnés et abonnements » coché."
     },
     "4": {
-      "title": "⚠️ Sélectionnez uniquement « Abonnés et abonnements »",
-      "description": "Cliquez sur « Personnaliser » › Décochez tout › Cochez UNIQUEMENT « Abonnés et abonnements ». Cela garde votre fichier petit et rapide.",
-      "alt": "Étape 4 : Personnalisez pour sélectionner uniquement Abonnés et abonnements"
-    },
-    "5": {
       "title": "Définissez la plage de dates sur « Tout »",
       "description": "Cliquez sur « Plage de dates » › Sélectionnez « Tout » › Enregistrer. Cela permet d'obtenir l'historique complet de vos abonnés.",
-      "alt": "Étape 5 : Définissez la plage de dates sur Tout"
+      "alt": "Le panneau « Plage de dates » avec « Tout » sélectionné."
     },
-    "6": {
+    "5": {
       "title": "Changez le format en JSON",
       "description": "Cliquez sur « Format » › Sélectionnez « JSON ». Les exports HTML fonctionnent aussi, mais JSON est le format que nous lisons de la manière la plus fiable.",
-      "alt": "Étape 6 : Changez le format en JSON"
+      "alt": "Le panneau « Format » avec « JSON » sélectionné à la place de HTML."
     },
-    "7": {
+    "6": {
       "title": "Vérifiez et lancez l'exportation",
       "description": "Vérifiez que vos paramètres affichent : Abonnés et abonnements, Tout, format JSON. Puis cliquez sur « Démarrer l'exportation ».",
-      "alt": "Étape 7 : Vérifiez les paramètres et lancez l'exportation"
+      "alt": "Le récapitulatif de l'exportation avec Abonnés et abonnements, Tout et JSON, au-dessus du bouton « Démarrer l'exportation »."
     },
-    "8": {
+    "7": {
       "title": "Attendez l'e-mail et téléchargez",
       "description": "Instagram vous enverra un e-mail quand ce sera prêt (généralement 5-30 minutes). Cliquez sur le lien de téléchargement dans l'e-mail pour obtenir votre fichier ZIP.",
-      "alt": "Étape 8 : Attendez l'e-mail et téléchargez le fichier ZIP"
-    },
-    "9": {
-      "title": "Téléversez votre fichier",
-      "description": "Vous êtes prêt ! Cliquez sur le bouton ci-dessous pour téléverser vos données Instagram et voir qui s'est désabonné.",
-      "alt": "Étape 9 : Téléversez votre fichier de données Instagram"
+      "alt": "L'e-mail d'Instagram avec le lien de téléchargement du fichier ZIP."
     }
   }
 }

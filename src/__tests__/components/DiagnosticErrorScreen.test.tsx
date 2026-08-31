@@ -162,7 +162,7 @@ describe('DiagnosticErrorScreen', () => {
 
       // diagnostic.showMistakes translation
       const showMistakesLink = screen.getByRole('link', { name: uploadEN.diagnostic.showMistakes });
-      expect(showMistakesLink).toHaveAttribute('href', expect.stringContaining('/wizard/step/4'));
+      expect(showMistakesLink).toHaveAttribute('href', expect.stringContaining('/upload?step=3'));
 
       fireEvent.click(showMistakesLink);
       expect(analytics.diagnosticErrorHelp).toHaveBeenCalledWith('NOT_ZIP');
@@ -189,7 +189,7 @@ describe('DiagnosticErrorScreen', () => {
       const primary = within(actions).getByRole('link');
 
       expect(primary).toHaveAccessibleName(/re-export as json/i);
-      expect(primary).toHaveAttribute('href', expect.stringContaining('/wizard/step/6'));
+      expect(primary).toHaveAttribute('href', expect.stringContaining('/upload?step=5'));
     });
 
     it('offers a different file as the secondary, never as a retry', () => {
@@ -221,7 +221,7 @@ describe('DiagnosticErrorScreen', () => {
         name: uploadEN.diagnostic.showMistakes,
       });
 
-      expect(secondary).toHaveAttribute('href', expect.stringContaining('/wizard/step/6'));
+      expect(secondary).toHaveAttribute('href', expect.stringContaining('/upload?step=5'));
       expect(within(actions).getByRole('button', { name: /try again/i })).toBeInTheDocument();
     });
   });
@@ -243,7 +243,7 @@ describe('DiagnosticErrorScreen', () => {
       const actions = screen.getByRole('group', { name: /actions/i });
       const primary = within(actions).getByRole('link');
 
-      expect(primary).toHaveAttribute('href', '/ar/wizard/step/6');
+      expect(primary).toHaveAttribute('href', '/ar/upload?step=5');
     });
   });
 

@@ -41,7 +41,7 @@
       "rows": {
         "destination": "Ekspor ke perangkat",
         "range": "Sepanjang waktu",
-        "format": "JSON atau HTML",
+        "format": "JSON — bukan HTML",
         "quality": "Kualitas media apa pun",
         "content": "Pengikut dan mengikuti"
       }
@@ -51,45 +51,40 @@
     }
   },
   "steps": {
-    "2": {
+    "1": {
       "title": "Pilih Profil Instagram Anda",
       "description": "Pilih akun Instagram Anda dari daftar profil yang terhubung.",
-      "alt": "Langkah 2: Pilih profil Instagram Anda"
+      "alt": "Layar ekspor Instagram dengan daftar profil yang terhubung."
     },
-    "3": {
+    "2": {
       "title": "Pilih \"Ekspor ke perangkat\"",
       "description": "Pilih ekspor langsung ke perangkat untuk privasi maksimal. Data Anda tetap bersama Anda.",
-      "alt": "Langkah 3: Pilih opsi Ekspor ke perangkat"
+      "alt": "Layar tujuan dengan \"Ekspor ke perangkat\" terpilih."
+    },
+    "3": {
+      "title": "Pilih Hanya \"Pengikut dan mengikuti\"",
+      "description": "Klik \"Sesuaikan\" › Hapus semua › Centang HANYA \"Pengikut dan mengikuti\". Ini menjaga file tetap kecil dan cepat.",
+      "alt": "Panel \"Sesuaikan\" dengan hanya \"Pengikut dan mengikuti\" yang dicentang."
     },
     "4": {
-      "title": "⚠️ Pilih Hanya \"Pengikut dan mengikuti\"",
-      "description": "Klik \"Sesuaikan\" › Hapus semua › Centang HANYA \"Pengikut dan mengikuti\". Ini menjaga file tetap kecil dan cepat.",
-      "alt": "Langkah 4: Sesuaikan untuk memilih hanya Pengikut dan mengikuti"
-    },
-    "5": {
       "title": "Atur Rentang Tanggal ke \"Sepanjang waktu\"",
       "description": "Klik \"Rentang tanggal\" › Pilih \"Sepanjang waktu\" › Simpan. Ini memastikan riwayat pengikut lengkap.",
-      "alt": "Langkah 5: Atur rentang tanggal ke Sepanjang waktu"
+      "alt": "Panel \"Rentang tanggal\" dengan \"Sepanjang waktu\" terpilih."
     },
-    "6": {
+    "5": {
       "title": "Ubah Format ke JSON",
       "description": "Klik \"Format\" › Pilih \"JSON\". Ekspor HTML juga berfungsi, tetapi JSON adalah format yang paling andal untuk kami baca.",
-      "alt": "Langkah 6: Ubah format ke JSON"
+      "alt": "Panel \"Format\" dengan \"JSON\" terpilih, bukan HTML."
     },
-    "7": {
+    "6": {
       "title": "Tinjau & Mulai Ekspor",
       "description": "Verifikasi pengaturan: Pengikut dan mengikuti, Sepanjang waktu, format JSON. Lalu klik \"Mulai ekspor\".",
-      "alt": "Langkah 7: Tinjau pengaturan dan mulai ekspor"
+      "alt": "Ringkasan ekspor dengan Pengikut dan mengikuti, Sepanjang waktu, dan JSON, di atas tombol \"Mulai ekspor\"."
     },
-    "8": {
+    "7": {
       "title": "Tunggu Email & Unduh",
       "description": "Instagram akan mengirim email saat siap (biasanya 5-30 menit). Klik tautan unduhan di email untuk mendapatkan file ZIP.",
-      "alt": "Langkah 8: Tunggu email dan unduh file ZIP"
-    },
-    "9": {
-      "title": "Unggah File Anda",
-      "description": "Anda siap! Klik tombol di bawah untuk mengunggah data Instagram Anda dan lihat siapa yang berhenti mengikuti Anda.",
-      "alt": "Langkah 9: Unggah file data Instagram Anda"
+      "alt": "Email dari Instagram dengan tautan unduhan file ZIP."
     }
   }
 }

@@ -1,4 +1,5 @@
 import { fireEvent, renderWithRouter, screen } from '@/__tests__/test-utils';
+import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import uploadEN from '@/locales/en/upload.json';
 import wizardEN from '@/locales/en/wizard.json';
@@ -16,6 +17,7 @@ vi.mock('@/lib/analytics', () => ({
   analytics: {
     uploadClick: vi.fn(),
     diagnosticErrorView: vi.fn(),
+    linkClick: vi.fn(),
   },
 }));
 
@@ -88,14 +90,22 @@ describe('UploadZone', () => {
     expect(warning).toHaveTextContent(/HTML/);
   });
 
-  it('should display pre-upload checklist', () => {
+  it('puts the guide beside the upload, where the checklist duplicated it', () => {
+    // The desktop sidebar used to carry a four-row checklist naming what to
+    // pick in Instagram's dialog — the same rows RecipeCard renders inside
+    // the guide block, one screen apart. Direction A (operator) replaces it
+    // with the guide block itself, so the same component is mounted twice:
+    // once for mobile flow, once as the desktop column. Only one is displayed
+    // at any width, and `hidden` is display:none, so the other is out of the
+    // accessibility tree rather than duplicated in it.
+    //
+    // ⚠️ `upload.checklist.*` is orphaned by this and deliberately not
+    // deleted: `checklist.format` is one of the strings that tells readers to
+    // pick JSON, which is a copy decision (lumen-cro), not a cleanup.
     renderWithRouter(<UploadZone onUploadStart={mockOnUploadStart} />);
 
-    // checklist.title translation
-    expect(screen.getByText(uploadEN.checklist.title)).toBeInTheDocument();
-    // Checklist items from translations
-    expect(screen.getByText(uploadEN.checklist.format)).toBeInTheDocument();
-    expect(screen.getByText(uploadEN.checklist.includes)).toBeInTheDocument();
+    expect(screen.queryByText(uploadEN.checklist.title)).toBeNull();
+    expect(screen.getAllByText(wizardEN.entry.recipe.title)).toHaveLength(2);
   });
 
   it('should display common error hint section', () => {
@@ -253,6 +263,22 @@ describe('UploadZone', () => {
     expect(block.compareDocumentPosition(firstTip) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
+  it('offers the waiting state after the Accounts Center click, without hiding the drop zone', async () => {
+    // The CTA opens a new tab, so this page survives the click — which is the
+    // only reason a waiting state can exist here at all.
+    const user = userEvent.setup();
+    renderWithRouter(<UploadZone onUploadStart={vi.fn()} />);
+
+    expect(screen.queryByText(uploadEN.waiting.title)).toBeNull();
+
+    await user.click(screen.getAllByRole('link', { name: /accounts center/i })[0]!);
+
+    expect(screen.getByText(uploadEN.waiting.title)).toBeInTheDocument();
+    // Someone who clicks through and then finds the file in their email must
+    // not have to undo a state to upload it.
+    expect(document.querySelector('input[type="file"]')).toBeInTheDocument();
+  });
+
   it('keeps the paid block above the guide', () => {
     // The order is the decision: drop zone -> offer -> guide. Putting the
     // guide above the offer was proposed and ruled against by the operator
@@ -262,7 +288,10 @@ describe('UploadZone', () => {
     const { container } = renderWithRouter(<UploadZone onUploadStart={vi.fn()} />);
 
     const block = container.querySelector('aside') as HTMLElement;
-    const guide = screen.getByRole('heading', { level: 2, name: wizardEN.entry.title });
+    // The first of the two mount points: the mobile flow, which is what the
+    // ruling was about. The second is the desktop column, which sits beside
+    // the drop zone rather than under the offer.
+    const guide = screen.getAllByRole('heading', { level: 2, name: wizardEN.entry.title })[0]!;
     expect(block).not.toBeNull();
     expect(block.compareDocumentPosition(guide) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });

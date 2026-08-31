@@ -128,6 +128,23 @@ describe('Dialog Components', () => {
 
       expect(screen.getByText('translated:buttons.close')).toBeInTheDocument();
     });
+
+    // The sticky Header is z-[80] and stayed clickable, with its buttons
+    // absent from the accessibility tree, while a tall dialog rendered
+    // underneath it. z-[90] clears the header and stays below the dropdown
+    // menu's z-[100], so a menu opened from inside a dialog still wins.
+    it('renders above the sticky header and below the dropdown menu', () => {
+      render(
+        <Dialog open={true}>
+          <DialogContent>
+            <div>Content</div>
+          </DialogContent>
+        </Dialog>
+      );
+
+      expect(screen.getByTestId('dialog-overlay')).toHaveClass('z-[90]');
+      expect(screen.getByTestId('dialog-content')).toHaveClass('z-[90]');
+    });
   });
 
   describe('DialogTitle', () => {

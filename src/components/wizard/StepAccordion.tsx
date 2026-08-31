@@ -1,37 +1,31 @@
 import { useId, useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { AlertTriangle, ChevronDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { PrefixedLink } from '@/components/PrefixedLink';
-import { WIZARD_STEPS } from '@/config/wizard-steps';
+import { GUIDE_STEPS, guideStepPosterSize } from '@/config/wizard-steps';
+
+interface StepAccordionProps {
+  /** Open the guide dialog at a section. Absent on the wizard route, which is its own screen. */
+  onSelect?: (step: number) => void;
+}
 
 /**
- * Poster assets are not one aspect ratio: step 2's is 600x360 (5:3), steps
- * 3-8 are 600x450 (4:3). Real width/height attributes let the browser
- * reserve each row's box from its own intrinsic size before the image
- * loads — forcing every row into 4:3 would crop or letterbox step 2.
- */
-const DEFAULT_POSTER_SIZE = { width: 600, height: 450 };
-const POSTER_SIZE_OVERRIDES: Partial<Record<number, { width: number; height: number }>> = {
-  2: { width: 600, height: 360 },
-};
-
-// Step 1 opens Meta's Accounts Center externally; the accordion covers the
-// remaining in-app steps only.
-const REMAINING_STEPS = WIZARD_STEPS.filter(step => step.id !== 1);
-
-const TRIGGER_ID = 'step-accordion-trigger';
-
-/**
- * One disclosure, seven links. Rows are plain images pointing at each step's
+ * One disclosure, seven rows. Rows are plain images pointing at each step's
  * poster (no `<video>` on this screen — the moving image lives on the step
  * route the link goes to) and stay unmounted until the row is opened, so
  * opening never shifts layout and nothing is reachable before the click.
  */
-export function StepAccordion() {
+export function StepAccordion({ onSelect }: StepAccordionProps = {}) {
   const { t } = useTranslation('wizard');
   const [isOpen, setIsOpen] = useState(false);
-  const listId = useId();
+  // Both ids come from useId, because UploadZone mounts this block twice —
+  // once for mobile, once for the desktop sidebar, both always in the DOM and
+  // toggled by `display`. A module-level constant id would put two elements
+  // with the same id in one document, and the second `aria-labelledby` would
+  // resolve to the first accordion's trigger.
+  const baseId = useId();
+  const triggerId = `${baseId}-trigger`;
+  const listId = `${baseId}-list`;
 
   // Derived from the row list itself, not hardcoded — stays correct if a
   // step is ever added or removed. `entry.accordion.trigger` is a single,
@@ -44,7 +38,7 @@ export function StepAccordion() {
   // every real count, and — unlike a `_one`/`_other` split — it can never
   // land on a CLDR category (Russian "few"/"many", Arabic "few"/"many", ...)
   // that has no matching key.
-  const stepCount = REMAINING_STEPS.length;
+  const stepCount = GUIDE_STEPS.length;
 
   return (
     <div className="rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
@@ -57,7 +51,7 @@ export function StepAccordion() {
         replace.
       */}
       <button
-        id={TRIGGER_ID}
+        id={triggerId}
         type="button"
         aria-expanded={isOpen}
         aria-controls={listId}
@@ -78,17 +72,22 @@ export function StepAccordion() {
       {isOpen && (
         <ul
           id={listId}
-          aria-labelledby={TRIGGER_ID}
+          aria-labelledby={triggerId}
           className="divide-y divide-zinc-200 border-t border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800"
         >
-          {REMAINING_STEPS.map(step => {
-            const size = POSTER_SIZE_OVERRIDES[step.id] ?? DEFAULT_POSTER_SIZE;
+          {GUIDE_STEPS.map(step => {
+            const size = guideStepPosterSize(step.id);
 
             return (
               <li key={step.id}>
-                <PrefixedLink
-                  to={`/wizard/step/${step.id}`}
-                  className="flex items-center gap-3 p-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+                {/* A button, not a link, and that costs nothing here: the
+                    rows do not exist until the disclosure above is clicked, so
+                    they were never reachable in the pre-hydration window a
+                    real href exists to serve. */}
+                <button
+                  type="button"
+                  onClick={() => onSelect?.(step.id)}
+                  className="flex w-full items-center gap-3 p-3 text-start hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
                 >
                   {/* Decorative here, hence the empty alt: the row's whole
                       content is the link's accessible name, so a described
@@ -105,9 +104,19 @@ export function StepAccordion() {
                     className="h-auto w-20 shrink-0 rounded-lg"
                   />
                   <span className="text-sm font-medium text-zinc-700 dark:text-zinc-200">
+                    {step.isWarning && (
+                      <>
+                        <AlertTriangle
+                          size={16}
+                          aria-hidden="true"
+                          className="me-1 inline-block shrink-0 align-[-0.2em] text-amber-600 dark:text-amber-500"
+                        />
+                        <span className="sr-only">{t('format.warning')}: </span>
+                      </>
+                    )}
                     {t(`steps.${step.id}.title` as any)}
                   </span>
-                </PrefixedLink>
+                </button>
               </li>
             );
           })}

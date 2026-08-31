@@ -41,7 +41,7 @@
       "rows": {
         "destination": "Cihaza aktar",
         "range": "Tüm zamanlar",
-        "format": "JSON veya HTML",
+        "format": "JSON — HTML değil",
         "quality": "Herhangi bir medya kalitesi",
         "content": "Takipçiler ve takip edilenler"
       }
@@ -51,45 +51,40 @@
     }
   },
   "steps": {
-    "2": {
+    "1": {
       "title": "Instagram Profilini Seç",
       "description": "Bağlı profiller listesinden Instagram hesabını seç.",
-      "alt": "Adım 2: Instagram profilini seç"
+      "alt": "Bağlı profiller listesinin göründüğü Instagram dışa aktarma ekranı."
     },
-    "3": {
+    "2": {
       "title": "\"Cihaza aktar\" Seç",
       "description": "Maksimum gizlilik için doğrudan cihazına dışa aktar. Verilerin seninle kalır.",
-      "alt": "Adım 3: Cihaza aktar seçeneğini seç"
+      "alt": "\"Cihaza aktar\" seçeneğinin işaretli olduğu hedef ekranı."
+    },
+    "3": {
+      "title": "Sadece \"Takipçiler ve takip edilenler\" Seç",
+      "description": "\"Özelleştir\" tıkla › Hepsini temizle › SADECE \"Takipçiler ve takip edilenler\" işaretle. Dosyanı küçük ve hızlı tutar.",
+      "alt": "Yalnızca \"Takipçiler ve takip edilenler\" kutusunun işaretli olduğu \"Özelleştir\" paneli."
     },
     "4": {
-      "title": "⚠️ Sadece \"Takipçiler ve takip edilenler\" Seç",
-      "description": "\"Özelleştir\" tıkla › Hepsini temizle › SADECE \"Takipçiler ve takip edilenler\" işaretle. Dosyanı küçük ve hızlı tutar.",
-      "alt": "Adım 4: Özelleştirip sadece Takipçiler ve takip edilenler seç"
-    },
-    "5": {
       "title": "Tarih Aralığını \"Tüm zamanlar\" Olarak Ayarla",
       "description": "\"Tarih aralığı\" tıkla › \"Tüm zamanlar\" seç › Kaydet. Tam takipçi geçmişini alırsın.",
-      "alt": "Adım 5: Tarih aralığını Tüm zamanlar olarak ayarla"
+      "alt": "\"Tüm zamanlar\" seçeneğinin işaretli olduğu \"Tarih aralığı\" paneli."
     },
-    "6": {
+    "5": {
       "title": "Formatı JSON Olarak Değiştir",
       "description": "\"Format\" tıkla › \"JSON\" seç. HTML dışa aktarımları da çalışır, ancak en güvenilir şekilde JSON formatını okuruz.",
-      "alt": "Adım 6: Formatı JSON olarak değiştir"
+      "alt": "HTML yerine \"JSON\" seçeneğinin işaretli olduğu \"Format\" paneli."
     },
-    "7": {
+    "6": {
       "title": "Kontrol Et ve Dışa Aktarmayı Başlat",
       "description": "Ayarları kontrol et: Takipçiler ve takip edilenler, Tüm zamanlar, JSON formatı. Ardından \"Dışa aktarmayı başlat\" tıkla.",
-      "alt": "Adım 7: Ayarları kontrol et ve dışa aktarmayı başlat"
+      "alt": "Takipçiler ve takip edilenler, Tüm zamanlar ve JSON ayarlarını gösteren, \"Dışa aktarmayı başlat\" düğmesinin üstündeki dışa aktarma özeti."
     },
-    "8": {
+    "7": {
       "title": "E-postayı Bekle ve İndir",
       "description": "Instagram hazır olduğunda e-posta gönderir (genellikle 5-30 dakika). ZIP dosyasını almak için e-postadaki indirme bağlantısına tıkla.",
-      "alt": "Adım 8: E-postayı bekle ve ZIP dosyasını indir"
-    },
-    "9": {
-      "title": "Dosyanızı Yükleyin",
-      "description": "Hazırsınız! Instagram verilerinizi yüklemek ve sizi takipten çıkanları görmek için aşağıdaki butona tıklayın.",
-      "alt": "Adım 9: Instagram veri dosyanızı yükleyin"
+      "alt": "ZIP dosyasının indirme bağlantısını içeren Instagram e-postası."
     }
   }
 }

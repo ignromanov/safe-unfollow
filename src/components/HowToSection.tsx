@@ -2,6 +2,7 @@ import { useTranslation, Trans } from 'react-i18next';
 import { ChevronRight, Play, Upload } from 'lucide-react';
 import { PrefixedLink } from '@/components/PrefixedLink';
 import { ResponsiveGif } from '@/components/ResponsiveGif';
+import { GUIDE_STEPS } from '@/config/wizard-steps';
 
 interface HowToStep {
   id: number;
@@ -11,17 +12,19 @@ interface HowToStep {
   visual?: string;
 }
 
-// Step metadata (visuals and warnings are not translated)
-// Step 9 has no visual - it's the final CTA to upload
+// Step metadata (visuals and warnings are not translated).
+//
+// The seven middle steps ARE the guide's seven sections - same assets, same
+// warning flag - so they are derived from GUIDE_STEPS rather than restated.
+// Restating them is how this file came to mark two steps critical while
+// wizard-steps.ts marked one: both name the same /wizard/step-N assets and
+// neither imported the other, so the two could not disagree out loud.
+//
+// Only the ends are local: step 1 is the entry screen the guide stopped
+// carrying (GH#102), and step 9 is the hand-off to /upload with no visual.
 const STEP_META: Array<{ isWarning?: boolean; visual?: string }> = [
   { visual: '/wizard/step-1' },
-  { visual: '/wizard/step-2' },
-  { visual: '/wizard/step-3' },
-  { isWarning: true, visual: '/wizard/step-4' },
-  { visual: '/wizard/step-5' },
-  { visual: '/wizard/step-6' },
-  { visual: '/wizard/step-7' },
-  { visual: '/wizard/step-8' },
+  ...GUIDE_STEPS.map(({ isWarning, visual }) => ({ isWarning, visual })),
   {}, // Step 9: no visual, navigates to upload page
 ];
 

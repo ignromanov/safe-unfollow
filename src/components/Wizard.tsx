@@ -1,14 +1,19 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { ArrowLeft, ArrowRight, X, AlertTriangle, Calendar } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import FocusTrap from 'focus-trap-react';
 
 import { analytics } from '@/lib/analytics';
+import { openCalendarReminder } from '@/lib/calendar-reminder';
 import { PrefixedLink } from '@/components/PrefixedLink';
 import { ResponsiveGif } from '@/components/ResponsiveGif';
 import { UploadGuideBlock } from '@/components/upload/UploadGuideBlock';
-import { WIZARD_STEPS } from '@/config/wizard-steps';
+import { GUIDE_STEPS, WIZARD_ROUTE_COUNT } from '@/config/wizard-steps';
+import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
 import { useWizardNavigation } from '@/hooks/useWizardNavigation';
+
+const WIZARD_ROUTE_IDS = Array.from({ length: WIZARD_ROUTE_COUNT }, (_, i) => i + 1);
 
 interface WizardProps {
   initialStep?: number;
@@ -17,6 +22,8 @@ interface WizardProps {
 export function Wizard({ initialStep = 1 }: WizardProps) {
   const { t } = useTranslation('wizard');
   const { currentStep, goToStep, goHome } = useWizardNavigation(initialStep);
+  const navigate = useNavigate();
+  const prefix = useLanguagePrefix();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // The wizard scrolls in the container below, and WizardPage never remounts
@@ -50,13 +57,19 @@ export function Wizard({ initialStep = 1 }: WizardProps) {
     analytics.wizardStepView(currentStep);
   }, [currentStep]);
 
-  const step = WIZARD_STEPS.find(s => s.id === currentStep);
-  if (!step) {
+  // The route numbering and the guide numbering are no longer the same thing,
+  // and this is where they meet. GUIDE_STEPS renumbered its seven sections
+  // 1..7 for the popup; these eight URLs are indexed and keep the numbering
+  // they shipped with until PR 3 removes them. Route 1 is the guide block
+  // (it was the entry screen); route N>1 is section N-1. Renaming eight
+  // indexed pages twice — once here, once at removal — buys nothing.
+  const step = GUIDE_STEPS.find(s => s.id === currentStep - 1);
+  const isFirstStep = currentStep === 1;
+  if (!step && !isFirstStep) {
     return null;
   }
 
-  const isFirstStep = currentStep === 1;
-  const isLastStep = currentStep === WIZARD_STEPS.length;
+  const isLastStep = currentStep === WIZARD_ROUTE_COUNT;
 
   // Back/Next/Done/the step dots/Close guide are now plain PrefixedLinks — each
   // computes its own destination, so the browser can follow it before hydration.
@@ -70,22 +83,7 @@ export function Wizard({ initialStep = 1 }: WizardProps) {
   };
 
   const handleCalendarReminder = useCallback(() => {
-    const startDate = new Date();
-    startDate.setHours(startDate.getHours() + 1);
-    const endDate = new Date(startDate);
-    endDate.setMinutes(endDate.getMinutes() + 30);
-
-    const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
-      t('calendar.title')
-    )}&dates=${startDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z/${
-      endDate.toISOString().replace(/[-:]/g, '').split('.')[0]
-    }Z&details=${encodeURIComponent(t('calendar.details'))}`;
-
-    // Before window.open, not after: a popup blocker can cancel the open, but
-    // the reader's intent happened either way. This counts intent, and it will
-    // never be the denominator of a funnel.
-    analytics.calendarReminderClick();
-    window.open(calendarUrl, '_blank', 'noopener,noreferrer');
+    openCalendarReminder(t('calendar.title'), t('calendar.details'));
   }, [t]);
 
   return (
@@ -106,21 +104,21 @@ export function Wizard({ initialStep = 1 }: WizardProps) {
                 out of the accessibility tree for the 85% of readers who are on
                 mobile. Nothing changes visually at any width. */}
             <span className="sr-only md:not-sr-only md:block font-bold text-sm text-zinc-500 uppercase tracking-widest whitespace-nowrap">
-              {t('header.stepOf', { current: currentStep, total: WIZARD_STEPS.length })}
+              {t('header.stepOf', { current: currentStep, total: WIZARD_ROUTE_COUNT })}
             </span>
             {/* Step indicator dots — flex-1 to fill available space */}
             <nav className="flex flex-1" aria-label={t('header.stepNavigation')}>
-              {WIZARD_STEPS.map(s => (
+              {WIZARD_ROUTE_IDS.map(routeId => (
                 <PrefixedLink
-                  key={s.id}
-                  to={`/wizard/step/${s.id}`}
-                  aria-current={s.id === currentStep ? 'step' : undefined}
-                  aria-label={t('header.stepLabel', { step: s.id })}
+                  key={routeId}
+                  to={`/wizard/step/${routeId}`}
+                  aria-current={routeId === currentStep ? 'step' : undefined}
+                  aria-label={t('header.stepLabel', { step: routeId })}
                   className="flex-1 min-h-[44px] flex items-center justify-center"
                 >
                   <span
                     className={`block h-1.5 w-full max-w-8 rounded-full transition-all duration-300 ${
-                      s.id <= currentStep ? 'bg-primary' : 'bg-border'
+                      routeId <= currentStep ? 'bg-primary' : 'bg-border'
                     }`}
                   />
                 </PrefixedLink>
@@ -141,9 +139,12 @@ export function Wizard({ initialStep = 1 }: WizardProps) {
           <div className="min-h-full flex items-center justify-center p-4">
             {currentStep === 1 ? (
               <div className="w-full max-w-xl">
-                <UploadGuideBlock />
+                {/* The accordion's rows open a dialog that lives on /upload,
+                    so from this route they are a navigation. The route itself
+                    goes in PR 3 and takes this callback with it. */}
+                <UploadGuideBlock onOpenGuide={step => navigate(`${prefix}/upload?step=${step}`)} />
               </div>
-            ) : (
+            ) : step ? (
               <div
                 className={`max-w-xl w-full rounded-4xl overflow-hidden shadow-2xl border transition-all ${
                   step.isWarning
@@ -156,13 +157,13 @@ export function Wizard({ initialStep = 1 }: WizardProps) {
                   {step.visual ? (
                     <ResponsiveGif
                       basePath={step.visual}
-                      alt={t(`steps.${currentStep}.alt` as any)}
+                      alt={t(`steps.${step.id}.alt` as any)}
                       className="w-full h-auto block"
                     />
                   ) : (
                     <img
                       src={`https://picsum.photos/seed/${step.id}/800/600`}
-                      alt={t(`steps.${currentStep}.alt` as any)}
+                      alt={t(`steps.${step.id}.alt` as any)}
                       width={800}
                       height={600}
                       className="w-full h-auto block"
@@ -187,10 +188,10 @@ export function Wizard({ initialStep = 1 }: WizardProps) {
                         : 'text-zinc-900 dark:text-white'
                     }`}
                   >
-                    {t(`steps.${currentStep}.title` as any)}
+                    {t(`steps.${step.id}.title` as any)}
                   </h2>
                   <p className="text-zinc-600 dark:text-zinc-400 text-base md:text-xl leading-relaxed mb-10 font-medium">
-                    {t(`steps.${currentStep}.description` as any)}
+                    {t(`steps.${step.id}.description` as any)}
                   </p>
 
                   {/* Last step: Calendar reminder button */}
@@ -205,7 +206,7 @@ export function Wizard({ initialStep = 1 }: WizardProps) {
                   )}
                 </div>
               </div>
-            )}
+            ) : null}
           </div>
         </div>
 

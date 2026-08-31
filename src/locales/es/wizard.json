@@ -41,7 +41,7 @@
       "rows": {
         "destination": "Exportar al dispositivo",
         "range": "Todo el tiempo",
-        "format": "JSON o HTML",
+        "format": "JSON — no HTML",
         "quality": "Cualquier calidad de medios",
         "content": "Seguidores y seguidos"
       }
@@ -51,45 +51,40 @@
     }
   },
   "steps": {
-    "2": {
+    "1": {
       "title": "Elige tu perfil de Instagram",
       "description": "Selecciona tu cuenta de Instagram de la lista de perfiles conectados.",
-      "alt": "Paso 2: Elige tu perfil de Instagram"
+      "alt": "La pantalla de exportación de Instagram con la lista de perfiles conectados."
     },
-    "3": {
+    "2": {
       "title": "Selecciona \"Exportar al dispositivo\"",
       "description": "Elige exportar directamente a tu dispositivo para máxima privacidad. Tus datos se quedan contigo.",
-      "alt": "Paso 3: Selecciona la opción Exportar al dispositivo"
+      "alt": "La pantalla de destino con \"Exportar al dispositivo\" seleccionado."
+    },
+    "3": {
+      "title": "Selecciona solo \"Seguidores y seguidos\"",
+      "description": "Haz clic en \"Personalizar\" › Desmarca todo › Marca SOLO \"Seguidores y seguidos\". Esto mantiene tu archivo pequeño y rápido.",
+      "alt": "El panel \"Personalizar\" con solo \"Seguidores y seguidos\" marcado."
     },
     "4": {
-      "title": "⚠️ Selecciona solo \"Seguidores y seguidos\"",
-      "description": "Haz clic en \"Personalizar\" › Desmarca todo › Marca SOLO \"Seguidores y seguidos\". Esto mantiene tu archivo pequeño y rápido.",
-      "alt": "Paso 4: Personaliza para seleccionar solo Seguidores y seguidos"
-    },
-    "5": {
       "title": "Configura el rango de fechas a \"Todo el tiempo\"",
       "description": "Haz clic en \"Rango de fechas\" › Selecciona \"Todo el tiempo\" › Guardar. Esto asegura tu historial completo de seguidores.",
-      "alt": "Paso 5: Configura el rango de fechas a Todo el tiempo"
+      "alt": "El panel \"Rango de fechas\" con \"Todo el tiempo\" seleccionado."
     },
-    "6": {
+    "5": {
       "title": "Cambia el formato a JSON",
       "description": "Haz clic en \"Formato\" › Selecciona \"JSON\". Las exportaciones en HTML también funcionan, pero JSON es el formato que leemos de forma más confiable.",
-      "alt": "Paso 6: Cambia el formato a JSON"
+      "alt": "El panel \"Formato\" con \"JSON\" seleccionado en lugar de HTML."
     },
-    "7": {
+    "6": {
       "title": "Revisa e inicia la exportación",
       "description": "Verifica que tu configuración muestre: Seguidores y seguidos, Todo el tiempo, formato JSON. Luego haz clic en \"Iniciar exportación\".",
-      "alt": "Paso 7: Revisa la configuración e inicia la exportación"
+      "alt": "El resumen de la exportación con Seguidores y seguidos, Todo el tiempo y JSON, sobre el botón \"Iniciar exportación\"."
     },
-    "8": {
+    "7": {
       "title": "Espera el email y descarga",
       "description": "Instagram te enviará un email cuando esté listo (normalmente 5-30 minutos). Haz clic en el enlace de descarga del email para obtener tu archivo ZIP.",
-      "alt": "Paso 8: Espera el email y descarga el archivo ZIP"
-    },
-    "9": {
-      "title": "Sube tu archivo",
-      "description": "¡Estás listo! Haz clic en el botón de abajo para subir tus datos de Instagram y ver quién dejó de seguirte.",
-      "alt": "Paso 9: Sube tu archivo de datos de Instagram"
+      "alt": "El email de Instagram con el enlace de descarga del archivo ZIP."
     }
   }
 }
