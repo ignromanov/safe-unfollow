@@ -134,42 +134,6 @@ describe('IndexedDBCache', () => {
     });
   });
 
-  describe('set', () => {
-    it('should log deprecation warning', async () => {
-      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-
-      await dbCache.set({
-        fileHash: 'test-hash',
-        metadata: {
-          name: 'test.zip',
-          size: 1024,
-          uploadDate: new Date(),
-          accountCount: 100,
-        },
-        timestamp: Date.now(),
-      });
-
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('set() is deprecated'));
-
-      consoleSpy.mockRestore();
-    });
-
-    it('should not throw error', async () => {
-      await expect(
-        dbCache.set({
-          fileHash: 'test-hash',
-          metadata: {
-            name: 'test.zip',
-            size: 1024,
-            uploadDate: new Date(),
-            accountCount: 100,
-          },
-          timestamp: Date.now(),
-        })
-      ).resolves.not.toThrow();
-    });
-  });
-
   describe('clear', () => {
     it('should clear all files', async () => {
       const mockFiles = [
