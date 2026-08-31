@@ -52,7 +52,7 @@ vi.mock('comlink', () => ({
 
 // Import after mocks
 import * as Comlink from 'comlink';
-import { useFilterWorker } from '@/hooks/useFilterWorker';
+import { FILTER_WORKER_INIT_TIMEOUT_MS, useFilterWorker } from '@/hooks/useFilterWorker';
 import { logger } from '@/lib/logger';
 
 describe('useFilterWorker', () => {
@@ -507,6 +507,59 @@ describe('useFilterWorker', () => {
       await waitFor(() => {
         expect(result.current.isReady).toBe(true);
       });
+    });
+  });
+
+  /**
+   * GH#103's failure mode. A deploy replaces the chunk a still-open tab would
+   * fetch, so `new Worker()` succeeds and the script 404s afterwards. Comlink is
+   * then waiting on a reply that will never be posted: `initialize` stays pending
+   * forever, so the surrounding try/catch never runs and `hasError` stays false.
+   */
+  describe('a worker that never answers', () => {
+    it('should report an error when the worker script fails to load', async () => {
+      mockApi.initialize.mockReturnValue(new Promise(() => {}));
+
+      const { result } = renderHook(() =>
+        useFilterWorker({ fileHash: mockFileHash, totalAccounts })
+      );
+
+      await waitFor(() => {
+        expect(Comlink.wrap).toHaveBeenCalled();
+      });
+      const worker = vi.mocked(Comlink.wrap).mock.calls[0][0] as Worker;
+
+      await act(async () => {
+        worker.dispatchEvent(new ErrorEvent('error', { message: 'Failed to fetch chunk' }));
+      });
+
+      await waitFor(() => {
+        expect(result.current.hasError).toBe(true);
+      });
+      expect(result.current.isReady).toBe(false);
+      expect(result.current.error).toContain('Failed to fetch chunk');
+    });
+
+    it('should give up when initialize never settles and no error event arrives', async () => {
+      vi.useFakeTimers();
+      try {
+        mockApi.initialize.mockReturnValue(new Promise(() => {}));
+
+        const { result } = renderHook(() =>
+          useFilterWorker({ fileHash: mockFileHash, totalAccounts })
+        );
+
+        expect(result.current.hasError).toBe(false);
+
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(FILTER_WORKER_INIT_TIMEOUT_MS + 1);
+        });
+
+        expect(result.current.hasError).toBe(true);
+        expect(result.current.isReady).toBe(false);
+      } finally {
+        vi.useRealTimers();
+      }
     });
   });
 });

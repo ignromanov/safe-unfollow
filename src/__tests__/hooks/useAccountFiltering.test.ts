@@ -1280,4 +1280,60 @@ describe('useAccountFiltering', () => {
       unmount();
     });
   });
+
+  /**
+   * The worker path and the fallback path have to reach the same answer.
+   * `filteredIndices === null` means "show all" in this hook, so a fallback that
+   * is queried before `init()` resolves throws "Not initialized", lands in the
+   * catch, and puts the full unfiltered list on screen with the spinner gone —
+   * indistinguishable, on screen, from a correct answer.
+   */
+  describe('Fallback engine readiness', () => {
+    it('should not query the fallback engine before init() resolves', async () => {
+      let initialized = false;
+      let resolveInit: (() => void) | undefined;
+
+      mockEngine.init.mockReturnValue(
+        new Promise<void>(resolve => {
+          resolveInit = () => {
+            initialized = true;
+            resolve();
+          };
+        })
+      );
+      mockEngine.filterToIndices.mockImplementation(async () => {
+        if (!initialized) {
+          throw new Error('[IndexedDB Filter Engine] Not initialized');
+        }
+        return [3, 4];
+      });
+
+      mockFilters = new Set<BadgeKey>(['unfollowed']);
+
+      const { result, unmount } = renderHook(() =>
+        useAccountFiltering({
+          fileHash: mockFileMetadata.fileHash,
+          accountCount: mockFileMetadata.accountCount,
+        })
+      );
+
+      await waitFor(() => {
+        expect(mockEngine.init).toHaveBeenCalled();
+      });
+
+      expect(mockEngine.filterToIndices).not.toHaveBeenCalled();
+      expect(result.current.isFiltering).toBe(true);
+
+      await act(async () => {
+        resolveInit?.();
+      });
+
+      await waitFor(() => {
+        expect(result.current.filteredIndices).toEqual([3, 4]);
+      });
+      expect(result.current.isFiltering).toBe(false);
+
+      unmount();
+    });
+  });
 });
