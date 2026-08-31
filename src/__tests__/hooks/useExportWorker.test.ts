@@ -102,4 +102,26 @@ describe('useExportWorker', () => {
 
     expect(() => unmount()).not.toThrow();
   });
+
+  it('should fall back to the main thread when the worker script never loads', async () => {
+    // A worker that fails to load answers nothing, so Comlink's call stays
+    // pending: without the error guard this export would never settle at all
+    // and the dialog would spin forever on a path the user has paid for.
+    mockApi.buildExport.mockReturnValue(new Promise(() => {}));
+
+    const { result } = renderHook(() => useExportWorker());
+    const pending = result.current.buildExport('csv', 'hash1', null, 100);
+
+    const worker = vi.mocked(Comlink.wrap).mock.calls[0][0] as Worker;
+    worker.dispatchEvent(new ErrorEvent('error', { message: 'Failed to fetch chunk' }));
+
+    await expect(pending).resolves.toBe(fallbackBlob);
+    expect(buildExportCsv).toHaveBeenCalled();
+
+    // The dead worker must not be reused, or the next export hangs on it again
+    mockApi.buildExport.mockResolvedValue(workerBlob);
+    await result.current.buildExport('csv', 'hash1', null, 100);
+
+    expect(vi.mocked(Comlink.wrap)).toHaveBeenCalledTimes(2);
+  });
 });

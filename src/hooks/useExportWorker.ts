@@ -47,12 +47,17 @@ async function buildOnMainThread(
 export function useExportWorker(): UseExportWorkerResult {
   const workerRef = useRef<Worker | null>(null);
   const apiRef = useRef<Comlink.Remote<ExportWorkerApi> | null>(null);
+  // Rejects if the worker's script never loads. Comlink would otherwise wait
+  // forever on a reply that cannot arrive, and the catch below — the whole
+  // reason the main-thread fallback exists — would never run.
+  const loadFailureRef = useRef<Promise<never> | null>(null);
 
   useEffect(() => {
     return () => {
       workerRef.current?.terminate();
       workerRef.current = null;
       apiRef.current = null;
+      loadFailureRef.current = null;
     };
   }, []);
 
@@ -71,17 +76,36 @@ export function useExportWorker(): UseExportWorkerResult {
           });
           workerRef.current = worker;
           apiRef.current = Comlink.wrap<ExportWorkerApi>(worker);
+          loadFailureRef.current = new Promise<never>((_, reject) => {
+            worker.addEventListener('error', event => {
+              const message = (event as ErrorEvent).message;
+              reject(new Error(message || 'Export worker failed to load'));
+            });
+          });
         }
 
-        return await apiRef.current.buildExport(
+        // No deadline on the export itself: a million-account file is slow by
+        // nature, and a fixed timeout would abort the one export size this
+        // feature is sold for. Only a dead worker is raced here.
+        const running = apiRef.current.buildExport(
           format,
           fileHash,
           indices,
           totalCount,
           onProgress ? Comlink.proxy(onProgress) : undefined
         );
+
+        return await (loadFailureRef.current
+          ? Promise.race([running, loadFailureRef.current])
+          : running);
       } catch (err) {
         logger.warn('[useExportWorker] Worker export failed, falling back to main thread:', err);
+        // Do not reuse a worker that has already failed — the next export would
+        // hang on it again instead of taking this fallback.
+        workerRef.current?.terminate();
+        workerRef.current = null;
+        apiRef.current = null;
+        loadFailureRef.current = null;
         return buildOnMainThread(format, fileHash, indices, totalCount, onProgress);
       }
     },

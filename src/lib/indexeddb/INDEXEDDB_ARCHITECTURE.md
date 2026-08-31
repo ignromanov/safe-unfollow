@@ -413,10 +413,12 @@ await indexedDBService.storeAllAccounts(fileHash, unified);
 `storeAllAccounts` builds every column in one pass and commits one transaction. No batching
 constant is involved.
 
-`IndexedDBService.appendAccountsChunk()` is the chunked API this section described. It has
-**zero production callers on any branch** — `indexeddb-cache.ts`'s deprecated `set()` prints a
-warning naming it and returns without calling it. Do not wire new code into it expecting the
-documented flow; it is dead.
+`IndexedDBService.appendAccountsChunk()` was the chunked API this section described. It was
+**deleted on 2026-08-30** along with `stores/column-store.ts`, `bitsetStore.updateBadgeBitset`
+and `indexeddb-cache.ts`'s no-op `set()`, which advertised it. It had zero production callers
+on any branch and only its own tests kept it alive. Deleting it also removed one of the three
+hand-written copies of the 11-key badge list: each half of a half-finished `stores/` extraction
+was carrying its own.
 
 The only `10_000` in the parse pipeline is `MAX_ZIP_ENTRIES` in `src/core/parsers/instagram.ts`,
 a safety cap on ZIP entry count — unrelated to account batching. The only real `CHUNK_SIZE` is

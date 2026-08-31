@@ -421,11 +421,9 @@ This section used to show a `CHUNK_SIZE = 10000` loop calling `appendAccountsChu
 await indexedDBService.storeAllAccounts(fileHash, unified);
 ```
 
-`storeAllAccounts` builds every column in a single pass and commits one transaction.
-`appendAccountsChunk` still exists on `IndexedDBService`, but it has **zero production
-callers on any branch**: the only thing naming it is `indexeddb-cache.ts`'s deprecated
-`set()`, whose body prints a warning telling you to use it and then returns without
-calling it. Do not wire new code into it expecting the flow described here.
+`storeAllAccounts` builds every column in a single pass and commits one transaction. It is
+now the only write path there is: `appendAccountsChunk` was **deleted on 2026-08-30**, with
+the two store functions reachable only through it and the no-op `set()` that advertised it.
 
 There is no account-batching constant anywhere. The only `10_000` in the parse pipeline
 is `MAX_ZIP_ENTRIES` (`src/core/parsers/instagram.ts`), a cap on ZIP entry count.
