@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { currencyAmountIn } from '@/__tests__/utils/currency';
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '@/config/languages';
 
 const BUNDLES = import.meta.glob<Record<string, unknown>>('../../locales/*/results.json', {
@@ -16,21 +17,6 @@ function bundleFor(language: string): Record<string, any> {
 /** The price exactly as this locale spells it, symbol placement included. */
 function priceTokenIn(text: string): string | undefined {
   return /\d+(?:[.,]\d{2})?\s*\$|\$\s*\d+(?:[.,]\d{2})?/.exec(text)?.[0];
-}
-
-/**
- * Any amount with a currency attached, in whichever order the locale writes it.
- *
- * Wider than the dollar-only sweep this file used to run, and it has to be:
- * the amounts it guards against are no longer only dollars. The set covers
- * every symbol the price table can produce plus the ones a translator reaches
- * for unprompted — a locale that "helpfully" converts $7 into its own currency
- * is exactly the drift the interpolation exists to stop, and a dollar-only
- * regex would wave it through.
- */
-function currencyAmountIn(text: string): string | undefined {
-  const CURRENCY = '[$€£¥₹₱₺]|Rp|IDR|USD|EUR|PHP|INR';
-  return new RegExp(`(?:${CURRENCY})\\s?\\d|\\d\\s?(?:${CURRENCY})`).exec(text)?.[0];
 }
 
 /**

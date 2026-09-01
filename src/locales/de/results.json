@@ -201,7 +201,7 @@
       "errorGeneric": "Aktivierung fehlgeschlagen. Überprüfe deine Verbindung und versuche es erneut.",
       "successTitle": "Export freigeschaltet",
       "successBody": "Dieser Browser kann jetzt deine vollständige Liste als CSV oder JSON exportieren, so oft du willst.",
-      "successMeta": "7 $ bezahlt · kein Abo",
+      "successMeta": "Einmalig bezahlt · kein Abo",
       "keyLabel": "Dein Schlüssel",
       "keyNote": "In diesem Browser gespeichert. Dein Schlüssel funktioniert auf bis zu 3 Geräten — der Link in deiner Kauf-E-Mail schaltet das nächste frei.",
       "continue": "Format wählen",
@@ -209,7 +209,7 @@
       "enterManually": "Schlüssel manuell eingeben",
       "blockedTitle": "Alle 3 Geräte sind belegt",
       "blockedBody": "Dein Schlüssel ist bereits in drei Browsern aktiv. Mit deinem Kauf ist alles in Ordnung — dieser hier kann nur nicht der vierte sein.",
-      "blockedAction": "Schreib uns an {{email}} und nenne deinen Schlüssel. Wenn wir kein Gerät freigeben können, erstatten wir die 7 $ vollständig.",
+      "blockedAction": "Schreib uns an {{email}} und nenne deinen Schlüssel. Wenn wir kein Gerät freigeben können, erstatten wir dir den Kaufpreis vollständig.",
       "revokedTitle": "Dieser Schlüssel ist nicht mehr aktiv",
       "revokedBody": "Er wurde deaktiviert oder erstattet. Falls das unerwartet ist, schreib an {{email}} und nenne den Schlüssel — mehr brauchen wir nicht.",
       "emailSupport": "Support anschreiben"

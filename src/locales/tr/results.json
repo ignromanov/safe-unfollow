@@ -201,7 +201,7 @@
       "errorGeneric": "Etkinleştirme başarısız oldu. Bağlantını kontrol et ve tekrar dene.",
       "successTitle": "Dışa aktarım açıldı",
       "successBody": "Bu tarayıcı artık tüm listeni CSV veya JSON olarak istediğin kadar dışa aktarabilir.",
-      "successMeta": "7 $ ödendi · abonelik yok",
+      "successMeta": "Tek seferlik ödeme · abonelik yok",
       "keyLabel": "Anahtarın",
       "keyNote": "Bu tarayıcıya kaydedildi. Anahtarın en fazla 3 cihazda çalışır — satın alma e-postandaki bağlantı bir sonrakini açar.",
       "continue": "Bir biçim seç",
@@ -209,7 +209,7 @@
       "enterManually": "Anahtarı elle gir",
       "blockedTitle": "3 cihazın üçü de kullanımda",
       "blockedBody": "Anahtarın zaten üç tarayıcıda etkin. Satın alman sorunsuz — sadece bu tarayıcı dördüncü olamaz.",
-      "blockedAction": "Anahtarınla birlikte {{email}} adresine yaz. Bir cihazı boşaltamazsak 7 $’ın tamamını iade ederiz.",
+      "blockedAction": "Anahtarınla birlikte {{email}} adresine yaz. Bir cihazı boşaltamazsak ödediğin tutarın tamamını iade ederiz.",
       "revokedTitle": "Bu anahtar artık etkin değil",
       "revokedBody": "Devre dışı bırakıldı ya da iade edildi. Beklemiyorsan anahtarla birlikte {{email}} adresine yaz — bize bu yeterli.",
       "emailSupport": "Desteğe yaz"

@@ -201,7 +201,7 @@
       "errorGeneric": "Falha na ativação. Verifique sua conexão e tente novamente.",
       "successTitle": "Exportação desbloqueada",
       "successBody": "Este navegador já pode exportar sua lista completa, em CSV ou JSON, quantas vezes quiser.",
-      "successMeta": "US$ 7 pagos · sem assinatura",
+      "successMeta": "Pagamento único · sem assinatura",
       "keyLabel": "Sua chave",
       "keyNote": "Salva neste navegador. Sua chave funciona em até 3 dispositivos — o link do seu e-mail de compra desbloqueia o próximo.",
       "continue": "Escolher um formato",
@@ -209,7 +209,7 @@
       "enterManually": "Digitar a chave manualmente",
       "blockedTitle": "Os 3 dispositivos estão em uso",
       "blockedBody": "Sua chave já está ativa em três navegadores. Sua compra está certa — só que este não pode ser o quarto.",
-      "blockedAction": "Escreva para {{email}} com sua chave. Se não conseguirmos liberar um dispositivo, devolvemos os US$ 7 integralmente.",
+      "blockedAction": "Escreva para {{email}} com sua chave. Se não conseguirmos liberar um dispositivo, reembolsamos sua compra integralmente.",
       "revokedTitle": "Esta chave não está mais ativa",
       "revokedBody": "Ela foi desativada ou reembolsada. Se isso for inesperado, escreva para {{email}} com a chave — é só disso que precisamos.",
       "emailSupport": "Escrever ao suporte"

@@ -71,7 +71,7 @@
     },
     "free": {
       "question": "Existem rastreadores de unfollowers do Instagram gratuitos?",
-      "answer": "Sim. A análise é 100% gratuita: todos os badges, filtros e qualquer número de contas, sem cadastro e sem limite. A maioria das alternativas por assinatura cobra R$25-50/mês. Uma compra única de $7 só é necessária se você quiser exportar sua lista filtrada como arquivo; visualizá-la aqui é sempre gratuito. Código aberto (licença MIT), e sua exportação do Instagram é processada localmente no seu navegador."
+      "answer": "Sim. A análise é 100% gratuita: todos os badges, filtros e qualquer número de contas, sem cadastro e sem limite. A maioria das alternativas cobra uma assinatura mensal. Aqui, a única coisa que custa algo é exportar sua lista filtrada como arquivo: uma compra única, nunca uma assinatura, e o preço aparece no próprio botão. Visualizar a lista aqui é sempre gratuito. Código aberto (licença MIT), e sua exportação do Instagram é processada localmente no seu navegador."
     },
     "analyzeData": {
       "question": "Como analisar meu download de dados do Instagram para encontrar unfollowers?",
@@ -99,7 +99,7 @@
     },
     "betterThanPaid": {
       "question": "O SafeUnfollow é melhor que apps pagos?",
-      "answer": "Para a maioria dos usuários, sim. A análise é grátis: sem cadastro, sem assinatura, qualquer número de contas da sua exportação. Não precisa de login (sem risco de banimento), processa sua exportação localmente no seu navegador (privacidade máxima), suporta 1M+ contas e é open source. Apenas exportar sua lista filtrada como arquivo custa uma compra única de $7; tudo o que você vê na tela continua grátis. Apps pagos oferecem monitoramento em tempo real, mas isso viola os Termos de Serviço do Instagram."
+      "answer": "Para a maioria dos usuários, sim. A análise é grátis: sem cadastro, sem assinatura, qualquer número de contas da sua exportação. Não precisa de login (sem risco de banimento), processa sua exportação localmente no seu navegador (privacidade máxima), suporta 1M+ contas e é open source. Exportar sua lista filtrada como arquivo é uma compra única, paga uma vez e não todo mês; tudo o que você vê na tela continua grátis. Apps pagos oferecem monitoramento em tempo real, mas isso viola os Termos de Serviço do Instagram."
     },
     "mobileUse": {
       "question": "Posso usar o SafeUnfollow no iPhone ou Android?",
