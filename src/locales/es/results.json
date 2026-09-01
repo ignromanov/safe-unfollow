@@ -178,7 +178,7 @@
       "failed": "El pago no se abrió: inténtalo de nuevo",
       "failedCause": "La página de pago no se cargó. Revisa tu conexión e inténtalo de nuevo.",
       "dismiss": "Ahora no",
-      "subtitle": "Rastreadores similares cobran $5–10 al mes mientras quieras seguir vigilando a tus seguidores. Esto son {{price}} una sola vez, por el archivo.",
+      "subtitle": "Rastreadores similares cobran {{rivals}} al mes mientras quieras seguir vigilando a tus seguidores. Esto son {{price}} una sola vez, por el archivo.",
       "terms": "Pago único de {{price}}. Se activa en hasta 3 dispositivos.",
       "refund": "¿No es lo que esperabas? Escríbenos a {{email}} en un plazo de 30 días y te devolvemos el dinero.",
       "instantNote": "Desbloqueo instantáneo tras el pago"

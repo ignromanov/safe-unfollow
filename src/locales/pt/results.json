@@ -178,7 +178,7 @@
       "failed": "O pagamento não abriu — tente de novo",
       "failedCause": "A página de pagamento não carregou. Verifique sua conexão e tente de novo.",
       "dismiss": "Agora não",
-      "subtitle": "Rastreadores parecidos cobram $5–10 por mês enquanto você quiser continuar acompanhando seus seguidores. Aqui são {{price}} uma única vez, pelo arquivo.",
+      "subtitle": "Rastreadores parecidos cobram {{rivals}} por mês enquanto você quiser continuar acompanhando seus seguidores. Aqui são {{price}} uma única vez, pelo arquivo.",
       "terms": "Pagamento único de {{price}}. Ativa em até 3 dispositivos.",
       "refund": "Não é o que você esperava? Escreva para {{email}} em até 30 dias e devolvemos o dinheiro.",
       "instantNote": "Desbloqueio instantâneo após o pagamento"

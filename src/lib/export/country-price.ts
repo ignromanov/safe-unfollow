@@ -52,6 +52,22 @@ const PRICE_BY_COUNTRY: Record<CheckoutCountry, string> = {
 const DEFAULT_PRICE = '$7';
 
 /**
+ * The category's monthly range, spelled in the same country's currency as
+ * {@link PRICE_BY_COUNTRY} — measured rival prices, not a conversion of our
+ * own. Sources: `ops/handoffs/2026-09-01-scout-rival-prices-id.md` (ID) and
+ * `ops/handoffs/2026-09-01-scout-rival-prices-in-ph.md`, Amendment table
+ * (IN, PH).
+ */
+const RIVAL_MONTHLY_BY_COUNTRY: Record<CheckoutCountry, string> = {
+  ID: 'Rp69.000–169.000',
+  IN: '₹399–999',
+  PH: '₱249–499',
+};
+
+/** The category's monthly range everywhere the ladder does not reach. */
+const DEFAULT_RIVAL_MONTHLY = '$5–10';
+
+/**
  * The buyer's country when it is one we price locally, otherwise null.
  *
  * Never throws. `Intl` is present in every browser this product supports, but
@@ -72,4 +88,14 @@ export function resolveCheckoutCountry(): CheckoutCountry | null {
 export function getDisplayPrice(): string {
   const country = resolveCheckoutCountry();
   return country === null ? DEFAULT_PRICE : PRICE_BY_COUNTRY[country];
+}
+
+/**
+ * The rival monthly range to print, for the same country {@link getDisplayPrice}
+ * priced — so the two amounts a reader compares are never in different
+ * currencies.
+ */
+export function getRivalMonthlyRange(): string {
+  const country = resolveCheckoutCountry();
+  return country === null ? DEFAULT_RIVAL_MONTHLY : RIVAL_MONTHLY_BY_COUNTRY[country];
 }
