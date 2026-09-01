@@ -15,8 +15,8 @@ permalink: /troubleshooting/
 **Problem**: The app shows "No data found" after uploading your ZIP file.
 
 **Solutions**:
-1. **Check file format**: Ensure you downloaded JSON format (not HTML)
-2. **Verify data selection**: Confirm you selected "Followers and Following" section
+1. **Verify data selection**: Confirm you selected "Followers and following" when creating the export
+2. **Check file format**: JSON is read most reliably (HTML exports also work)
 3. **Check file structure**: Your ZIP should contain files like:
    ```
    connections/followers_and_following/
@@ -206,7 +206,7 @@ Report issues if:
 ### Best Practices
 1. **Use recent exports**: Download fresh data for accurate results
 2. **Complete data**: Select "All time" when downloading
-3. **JSON format**: Always use JSON, not HTML
+3. **JSON format**: JSON is read most reliably (HTML exports also work)
 4. **Desktop browser**: Use Chrome or Firefox on desktop
 5. **Close other tabs**: Free up memory for better performance
 

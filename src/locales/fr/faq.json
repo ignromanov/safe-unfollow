@@ -3,7 +3,7 @@
   "items": {
     "howToFind": {
       "question": "Comment voir qui s'est désabonné de vous sur Instagram sans application ?",
-      "answer": "Ouvrez l'Espace Comptes Meta › Créer une exportation › Sélectionnez votre profil › « Exporter vers l'appareil » › Uniquement « Abonnés et abonnements » › Format JSON. Téléchargez le ZIP quand il est prêt (généralement 5-30 minutes), puis téléversez-le ici. L'outil compare vos listes dans le navigateur : l'export n'est envoyé nulle part. Sans identifiants.",
+      "answer": "Ouvrez l'Espace Comptes Meta › Créer une exportation › Sélectionnez votre profil › « Exporter vers l'appareil » › Uniquement « Abonnés et abonnements » › « Tout » › Format JSON. Téléchargez le ZIP quand il est prêt (généralement 5-30 minutes), puis téléversez-le ici. L'outil compare vos listes dans le navigateur : l'export n'est envoyé nulle part. Sans identifiants.",
       "relatedLink": {
         "text": "Démarrer le guide d'exportation",
         "href": "/upload?guide=1"

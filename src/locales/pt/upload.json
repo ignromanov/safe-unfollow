@@ -47,7 +47,7 @@
       "HTML_FORMAT": {
         "title": "Não conseguimos ler esta exportação",
         "message": "Esta é uma exportação em HTML, e não conseguimos encontrar suas listas de seguidores dentro dela.",
-        "fix": "Peça ao Instagram a mesma exportação em JSON: Central de Contas da Meta › Criar exportação › Exportar para o dispositivo › Formato: JSON. Essa versão é a que lemos com mais confiabilidade."
+        "fix": "Peça ao Instagram a mesma exportação em JSON: Central de Contas da Meta › Criar exportação › Selecione seu perfil › Exportar para o dispositivo › Apenas \"Seguidores e seguindo\" › Todo o período › Formato: JSON. Essa versão é a que lemos com mais confiabilidade."
       },
       "NOT_INSTAGRAM_EXPORT": {
         "title": "Não é uma exportação do Instagram",
@@ -92,12 +92,12 @@
       "TOO_MANY_ENTRIES": {
         "title": "Arquivos demais",
         "message": "Este ZIP contém mais arquivos do que esta ferramenta consegue indexar.",
-        "fix": "Peça uma exportação menor: Meta Accounts Center › Criar exportação › selecione apenas \"Seguidores e seguindo\" › formato JSON."
+        "fix": "Peça uma exportação menor: Central de Contas da Meta › Criar exportação › Selecione seu perfil › Exportar para o dispositivo › Apenas \"Seguidores e seguindo\" › Todo o período › Formato: JSON."
       },
       "FILE_TOO_LARGE": {
         "title": "Arquivo muito grande",
         "message": "Seu navegador não conseguiu abrir esta exportação — ela é grande demais para este dispositivo.",
-        "fix": "Peça uma exportação menor: Meta Accounts Center › Criar exportação › selecione apenas \"Seguidores e seguindo\" › formato JSON. Essa exportação tem alguns MB em vez de centenas."
+        "fix": "Peça uma exportação menor: Central de Contas da Meta › Criar exportação › Selecione seu perfil › Exportar para o dispositivo › Apenas \"Seguidores e seguindo\" › Todo o período › Formato: JSON. Essa exportação tem alguns MB em vez de centenas."
       },
       "JSON_PARSE_ERROR": {
         "title": "Formato de dados inválido",

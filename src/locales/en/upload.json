@@ -47,7 +47,7 @@
       "HTML_FORMAT": {
         "title": "We couldn't read this export",
         "message": "This is an HTML export, and we couldn't find your follower lists inside it.",
-        "fix": "Ask Instagram for the same export in JSON: Meta Accounts Center › Create export › Export to device › Format: JSON. That version is the one we read most reliably."
+        "fix": "Ask Instagram for the same export in JSON: Meta Accounts Center › Create export › Select your profile › Export to device › Only \"Followers and following\" › All time › Format: JSON. That version is the one we read most reliably."
       },
       "NOT_INSTAGRAM_EXPORT": {
         "title": "Not an Instagram Export",
@@ -92,12 +92,12 @@
       "TOO_MANY_ENTRIES": {
         "title": "Too Many Files",
         "message": "This ZIP contains more files than this tool can index.",
-        "fix": "Ask Instagram for a smaller export: Meta Accounts Center › Create export › select only \"Followers and following\" › format JSON."
+        "fix": "Ask Instagram for a smaller export: Meta Accounts Center › Create export › Select your profile › Export to device › Only \"Followers and following\" › All time › Format: JSON."
       },
       "FILE_TOO_LARGE": {
         "title": "File Too Large",
         "message": "Your browser could not open this export — it is too large for this device.",
-        "fix": "Ask Instagram for a smaller export: Meta Accounts Center › Create export › select only \"Followers and following\" › format JSON. That export is a few MB instead of hundreds."
+        "fix": "Ask Instagram for a smaller export: Meta Accounts Center › Create export › Select your profile › Export to device › Only \"Followers and following\" › All time › Format: JSON. That export is a few MB instead of hundreds."
       },
       "JSON_PARSE_ERROR": {
         "title": "Invalid Data Format",

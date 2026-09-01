@@ -34,7 +34,7 @@ Instagram may split followers into multiple files (`followers_1.json`, `follower
 - Downloaded "All time" data range
 
 ### What file formats are supported?
-- **Input**: Instagram Data Download ZIP files (JSON format only, not HTML)
+- **Input**: Instagram Data Download ZIP files (JSON read most reliably; HTML exports also work)
 - **Output**: Currently display only, CSV/JSON export planned for v1.6
 
 ## Technical
@@ -76,8 +76,8 @@ Instagram doesn't provide unfollow tracking features. This tool fills that gap u
 ## Troubleshooting
 
 ### The app shows "No data found" - what should I do?
-1. Ensure you downloaded JSON format (not HTML)
-2. Check that you selected "Followers and Following" section
+1. Check that you selected "Followers and following" when creating the export
+2. Prefer JSON format — it is the one the tracker reads most reliably (HTML also works)
 3. Verify the ZIP contains files like `connections/followers_and_following/following.json`
 4. Try the "Load sample" button to test the app functionality
 

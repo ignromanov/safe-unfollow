@@ -3,7 +3,7 @@
   "items": {
     "howToFind": {
       "question": "Bagaimana cara cek siapa yang unfollow di Instagram tanpa aplikasi?",
-      "answer": "Buka Pusat Akun Meta › Buat ekspor › Pilih profil Anda › \"Ekspor ke perangkat\" › Hanya \"Pengikut dan mengikuti\" › Format JSON. Unduh ZIP saat siap (biasanya 5-30 menit), lalu unggah di sini. Alat ini membandingkan daftar Anda di dalam browser, jadi ekspornya tidak pernah diunggah ke mana pun. Tidak perlu login.",
+      "answer": "Buka Pusat Akun Meta › Buat ekspor › Pilih profil Anda › \"Ekspor ke perangkat\" › Hanya \"Pengikut dan mengikuti\" › Atur rentang tanggal ke \"Sepanjang waktu\" › Format JSON. Unduh ZIP saat siap (biasanya 5-30 menit), lalu unggah di sini. Alat ini membandingkan daftar Anda di dalam browser, jadi ekspornya tidak pernah diunggah ke mana pun. Tidak perlu login.",
       "relatedLink": {
         "text": "Mulai panduan ekspor",
         "href": "/upload?guide=1"

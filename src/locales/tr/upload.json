@@ -47,7 +47,7 @@
       "HTML_FORMAT": {
         "title": "Bu dışa aktarımı okuyamadık",
         "message": "Bu bir HTML dışa aktarımı ve içinde takipçi listelerini bulamadık.",
-        "fix": "Instagram'dan aynı dışa aktarımı JSON olarak iste: Meta Hesaplar Merkezi › Dışa aktarma oluştur › Cihaza aktar › Format: JSON. Bu sürümü en güvenilir şekilde okuyoruz."
+        "fix": "Instagram'dan aynı dışa aktarımı JSON olarak iste: Meta Hesaplar Merkezi › Dışa aktarma oluştur › Profilinizi seçin › Cihaza aktar › Yalnızca \"Takipçiler ve takip edilenler\" › Tüm zamanlar › Format: JSON. Bu sürümü en güvenilir şekilde okuyoruz."
       },
       "NOT_INSTAGRAM_EXPORT": {
         "title": "Instagram Dışa Aktarımı Değil",
@@ -92,12 +92,12 @@
       "TOO_MANY_ENTRIES": {
         "title": "Çok Fazla Dosya",
         "message": "Bu ZIP, bu aracın dizinleyebileceğinden daha fazla dosya içeriyor.",
-        "fix": "Daha küçük bir dışa aktarma isteyin: Meta Accounts Center › Dışa aktarma oluştur › yalnızca \"Takipçiler ve takip edilenler\" seçin › JSON formatı. Bu dışa aktarma yüzlerce yerine birkaç MB olur."
+        "fix": "Daha küçük bir dışa aktarma isteyin: Meta Hesaplar Merkezi › Dışa aktarma oluştur › Profilinizi seçin › Cihaza aktar › Yalnızca \"Takipçiler ve takip edilenler\" › Tüm zamanlar › Format: JSON. Bu dışa aktarma yüzlerce yerine birkaç MB olur."
       },
       "FILE_TOO_LARGE": {
         "title": "Dosya Çok Büyük",
         "message": "Tarayıcınız bu dışa aktarmayı açamadı — bu cihaz için çok büyük.",
-        "fix": "Daha küçük bir dışa aktarma isteyin: Meta Accounts Center › Dışa aktarma oluştur › yalnızca \"Takipçiler ve takip edilenler\" seçin › JSON formatı. Bu dışa aktarma yüzlerce yerine birkaç MB olur."
+        "fix": "Daha küçük bir dışa aktarma isteyin: Meta Hesaplar Merkezi › Dışa aktarma oluştur › Profilinizi seçin › Cihaza aktar › Yalnızca \"Takipçiler ve takip edilenler\" › Tüm zamanlar › Format: JSON. Bu dışa aktarma yüzlerce yerine birkaç MB olur."
       },
       "JSON_PARSE_ERROR": {
         "title": "Geçersiz Veri Formatı",

@@ -25,11 +25,11 @@ Instagram Unfollow Tracker is a privacy-focused tool that analyzes your Instagra
 ## Step-by-Step Tutorial
 
 ### Step 1: Download Your Instagram Data
-1. Go to [Meta Accounts Center](https://accountscenter.instagram.com/)
-2. Navigate to "Your information and permissions" → "Download your information"
-3. Select "Some of your information" → "Followers and Following" → "JSON" format
-4. Wait for Instagram to prepare your data (up to 48 hours)
-5. Download the ZIP file when you receive the email
+1. Open [Meta Accounts Center](https://accountscenter.instagram.com/) and click "Create export"
+2. Choose your Instagram profile › "Export to device"
+3. Select only "Followers and following" › date range "All time" › format "JSON"
+4. Review the settings and click "Start export"
+5. Wait for Instagram's email (usually 5-30 minutes; large accounts can take a few hours) and download the ZIP file
 
 **📖 Detailed instructions**: See [Instagram Export Guide](/docs/instagram-export/)
 
@@ -93,7 +93,7 @@ Instagram Unfollow Tracker is a privacy-focused tool that analyzes your Instagra
 ### Data Quality
 - **Use recent exports**: Download fresh data for accurate results
 - **Complete data**: Select "All time" when downloading
-- **JSON format**: Ensure you selected JSON, not HTML
+- **JSON format**: JSON is the format the tracker reads most reliably (HTML exports also work)
 
 ### Performance
 - **Close other tabs**: Free up memory for better performance
@@ -108,7 +108,7 @@ Instagram Unfollow Tracker is a privacy-focused tool that analyzes your Instagra
 ## Troubleshooting
 
 ### Common Issues
-- **"No data found"**: Check that you selected JSON format and "Followers and Following"
+- **"No data found"**: Check that you selected "Followers and following" when creating the export
 - **Slow processing**: Close other browser tabs and use desktop browser
 - **Missing accounts**: Instagram may split large follower lists into multiple files
 
