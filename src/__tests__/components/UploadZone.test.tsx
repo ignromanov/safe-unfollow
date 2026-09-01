@@ -133,6 +133,28 @@ describe('UploadZone', () => {
     expect(fileInput).toBeDisabled();
   });
 
+  it('should show a cancel button while processing and call onCancel on click', () => {
+    // The file input is disabled while processing, so without this button a
+    // stuck parse (dead worker, refresh mid-parse) leaves the user no way out.
+    const mockOnCancel = vi.fn();
+    renderWithRouter(
+      <UploadZone onUploadStart={mockOnUploadStart} isProcessing={true} onCancel={mockOnCancel} />
+    );
+
+    const cancelButton = screen.getByRole('button', { name: uploadEN.zone.cancelUpload });
+    fireEvent.click(cancelButton);
+
+    expect(mockOnCancel).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not show the cancel button when idle', () => {
+    renderWithRouter(<UploadZone onUploadStart={mockOnUploadStart} onCancel={vi.fn()} />);
+
+    expect(
+      screen.queryByRole('button', { name: uploadEN.zone.cancelUpload })
+    ).not.toBeInTheDocument();
+  });
+
   it('should call onUploadStart and track analytics when file is selected via input', () => {
     renderWithRouter(<UploadZone onUploadStart={mockOnUploadStart} />);
 
