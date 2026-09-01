@@ -6,6 +6,7 @@
     "orBrowse": "Oder tippen, um deine Dateien zu durchsuchen.",
     "processing": "Lokal analysieren...",
     "processingHint": "Die Verarbeitung großer Datensätze (bis zu 1M+) kann einen Moment dauern.",
+    "cancelUpload": "Upload abbrechen",
     "ariaLabel": "Instagram-Daten-ZIP-Datei hochladen",
     "jsonShort": "Beide Exportformate funktionieren, JSON oder HTML.",
     "seeGuide": "Schritt-für-Schritt-Anleitung ansehen",

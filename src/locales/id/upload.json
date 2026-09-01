@@ -6,6 +6,7 @@
     "orBrowse": "Atau ketuk untuk menjelajahi penyimpanan lokal Anda.",
     "processing": "Menganalisis secara lokal...",
     "processingHint": "Memproses dataset besar (hingga 1 juta+) bisa memakan waktu sebentar.",
+    "cancelUpload": "Batalkan unggahan",
     "ariaLabel": "Unggah file ZIP data Instagram",
     "jsonShort": "Kedua format ekspor bisa dipakai, JSON atau HTML.",
     "seeGuide": "Lihat panduan langkah demi langkah",

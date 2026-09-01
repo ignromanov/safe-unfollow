@@ -6,6 +6,7 @@
     "orBrowse": "Or tap to browse your local storage.",
     "processing": "Analyzing locally...",
     "processingHint": "Processing large datasets (up to 1M+) can take a moment.",
+    "cancelUpload": "Cancel upload",
     "ariaLabel": "Upload Instagram data ZIP file",
     "jsonShort": "Either export format works, JSON or HTML.",
     "seeGuide": "See the step-by-step guide",

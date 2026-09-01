@@ -6,6 +6,7 @@
     "orBrowse": "O toca para buscar en tu almacenamiento local.",
     "processing": "Analizando localmente...",
     "processingHint": "Procesar conjuntos de datos grandes (hasta 1M+) puede tomar un momento.",
+    "cancelUpload": "Cancelar la subida",
     "ariaLabel": "Subir archivo ZIP de datos de Instagram",
     "jsonShort": "Cualquiera de los dos formatos funciona, JSON o HTML.",
     "seeGuide": "Ver la guía paso a paso",

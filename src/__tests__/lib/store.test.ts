@@ -469,6 +469,39 @@ describe('useAppStore', () => {
       expect(state._hasHydrated).toBe(true);
     });
 
+    it('should reset a persisted loading status to idle on rehydration', () => {
+      // A page refresh mid-parse persists uploadStatus 'loading' while the
+      // worker and AbortController die with the page — nothing can ever
+      // complete or cancel it, so the upload page spins forever.
+      const state = {
+        filters: new Set<BadgeKey>(),
+        language: 'en' as const,
+        uploadStatus: 'loading' as const,
+        _hasHydrated: false,
+      };
+
+      const onRehydrate = useAppStore.persist.getOptions().onRehydrateStorage;
+      const callback = onRehydrate?.();
+      callback?.(state as any, undefined);
+
+      expect(state.uploadStatus).toBe('idle');
+    });
+
+    it('should keep a persisted success status on rehydration', () => {
+      const state = {
+        filters: new Set<BadgeKey>(),
+        language: 'en' as const,
+        uploadStatus: 'success' as const,
+        _hasHydrated: false,
+      };
+
+      const onRehydrate = useAppStore.persist.getOptions().onRehydrateStorage;
+      const callback = onRehydrate?.();
+      callback?.(state as any, undefined);
+
+      expect(state.uploadStatus).toBe('success');
+    });
+
     it('should handle null state during rehydration', () => {
       const onRehydrate = useAppStore.persist.getOptions().onRehydrateStorage;
       const callback = onRehydrate?.();
