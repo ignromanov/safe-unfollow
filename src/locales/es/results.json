@@ -173,19 +173,19 @@
       "legendSample": "Ya tuyo — las primeras {{rows}}",
       "legendRest": "El resto de tu lista",
       "gap": "Tu archivo gratuito termina en la fila {{rows}}. La exportación se lleva las {{total}} — un archivo, un pago, no es una suscripción.",
-      "cta": "Desbloquear exportación — $7",
+      "cta": "Desbloquear exportación — {{price}}",
       "opening": "Abriendo el pago…",
       "failed": "El pago no se abrió: inténtalo de nuevo",
       "failedCause": "La página de pago no se cargó. Revisa tu conexión e inténtalo de nuevo.",
       "dismiss": "Ahora no",
-      "subtitle": "Rastreadores similares cobran $5–10 al mes mientras quieras seguir vigilando a tus seguidores. Esto son $7 una sola vez, por el archivo.",
-      "terms": "Pago único de $7. Se activa en hasta 3 dispositivos.",
+      "subtitle": "Rastreadores similares cobran $5–10 al mes mientras quieras seguir vigilando a tus seguidores. Esto son {{price}} una sola vez, por el archivo.",
+      "terms": "Pago único de {{price}}. Se activa en hasta 3 dispositivos.",
       "refund": "¿No es lo que esperabas? Escríbenos a {{email}} en un plazo de 30 días y te devolvemos el dinero.",
       "instantNote": "Desbloqueo instantáneo tras el pago"
     },
     "checkout": {
       "privacy": "Tu exportación de Instagram se queda en este navegador. La página de pago nunca la ve.",
-      "summary": "{{rows}} filas · CSV + JSON · $7, una sola vez.",
+      "summary": "{{rows}} filas · CSV + JSON · {{price}}, una sola vez.",
       "methods": "Las tarjetas y los métodos locales aparecen en la página siguiente."
     },
     "license": {

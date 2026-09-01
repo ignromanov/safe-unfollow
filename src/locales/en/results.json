@@ -173,19 +173,19 @@
       "legendSample": "Yours — first {{rows}}",
       "legendRest": "The rest of your list",
       "gap": "Your free file stops at row {{rows}}. The export takes all {{total}} — one file, one payment, not a subscription.",
-      "cta": "Unlock export — $7",
+      "cta": "Unlock export — {{price}}",
       "opening": "Opening checkout…",
       "failed": "Checkout didn't open — try again",
       "failedCause": "The payment page did not load. Check your connection and try again.",
       "dismiss": "Not now",
-      "subtitle": "Similar trackers charge $5–10 a month to keep watching your followers. This is $7, once, for the file itself.",
-      "terms": "One-time $7. Unlocks on up to 3 devices.",
+      "subtitle": "Similar trackers charge $5–10 a month to keep watching your followers. This is {{price}}, once, for the file itself.",
+      "terms": "One-time {{price}}. Unlocks on up to 3 devices.",
       "refund": "Not what you expected? Email {{email}} within 30 days and we'll refund it.",
       "instantNote": "Instant unlock after checkout"
     },
     "checkout": {
       "privacy": "Your Instagram export stays in this browser. The payment page never sees it.",
-      "summary": "{{rows}} rows · CSV + JSON · $7, once.",
+      "summary": "{{rows}} rows · CSV + JSON · {{price}}, once.",
       "methods": "Cards and local methods are shown on the next page."
     },
     "license": {

@@ -59,13 +59,31 @@ describe('CheckoutHandoff', () => {
     expect(screen.queryByAltText(/visa|mastercard|qris/i)).not.toBeInTheDocument();
   });
 
-  // $7 ≈ Rp 115 000 implies ~16 400 IDR/USD while id/faq.json already converts
-  // $5–10 at ~15 000. Two rates ship today and CSP forbids a runtime lookup, so
-  // a third hardcoded one would be a lie with a delivery date.
-  it('should quote no currency but the one it charges', () => {
+  // This used to read "quote no currency but dollars", and the reasoning was
+  // that a converted amount would be a third exchange rate shipping beside two
+  // others — $7 ≈ Rp 115 000 implies ~16 400 IDR/USD while id/faq.json already
+  // converts $5–10 at ~15 000. The objection was to the *conversion*, not to
+  // the currency, and it no longer applies: the local amounts are set in the
+  // processor's dashboard in their own currency and read back off the live
+  // checkout, so nothing here computes a rate.
+  //
+  // What remains worth pinning is the invariant that replaced it, and it is a
+  // stronger one: this screen quotes whatever the resolver resolved, and the
+  // checkout link is built from that same value. The timezone is stubbed rather
+  // than inherited from the host — without the stub this case would assert one
+  // thing on a machine in Berlin and the opposite on one in Jakarta, and pass
+  // in CI for a reason unrelated to what it is checking.
+  it('should quote the price its own resolver resolved, and no other', () => {
+    vi.spyOn(Intl, 'DateTimeFormat').mockReturnValue({
+      resolvedOptions: () => ({ timeZone: 'Asia/Jakarta' }),
+    } as unknown as Intl.DateTimeFormat);
+
     renderHandoff();
 
-    expect(screen.queryByText(/Rp|IDR|₹|€/)).not.toBeInTheDocument();
+    expect(screen.getByText(/Rp50\.000/)).toBeInTheDocument();
+    expect(screen.queryByText(/\$|₹|₱|€/)).not.toBeInTheDocument();
+
+    vi.restoreAllMocks();
   });
 
   // Surface ownership, pinned. The device cap and the refund are terms of the
