@@ -110,6 +110,36 @@ describe('fileUploadSuccess format field (GH#156)', () => {
   });
 });
 
+describe('fileUploadSuccess mixed_relationship_formats field (GH#160)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('reports a half-merged archive', () => {
+    analytics.fileUploadSuccess(100, false, 'json', true);
+
+    const [, payload] = enqueueEvent.mock.calls[0];
+    expect(payload).toMatchObject({ mixed_relationship_formats: true });
+  });
+
+  it('reports a clean archive as false rather than omitting it', () => {
+    // `false` has to travel. The rate this field exists to measure is
+    // `mixed / observed`, and a field sent only when true has no denominator —
+    // absence would mean both "clean" and "never looked".
+    analytics.fileUploadSuccess(100, false, 'json', false);
+
+    const [, payload] = enqueueEvent.mock.calls[0];
+    expect(payload).toMatchObject({ mixed_relationship_formats: false });
+  });
+
+  it('omits it on the cache-hit path, where no archive was analysed', () => {
+    analytics.fileUploadSuccess(100, true);
+
+    const [, payload] = enqueueEvent.mock.calls[0];
+    expect(payload).not.toHaveProperty('mixed_relationship_formats');
+  });
+});
+
 describe('optionalFileFormatDrift format field (GH#156)', () => {
   beforeEach(() => {
     vi.clearAllMocks();

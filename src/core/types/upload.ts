@@ -173,6 +173,15 @@ export interface FileDiscovery {
   isInstagramExport: boolean;
   /** Base path where data was found */
   basePath?: string;
+  /**
+   * True when relationship files were found in more than one format (GH#160).
+   *
+   * Optional, and the optionality is the honest part: two exits return before
+   * the archive is ever analysed — an unopenable ZIP and one with too many
+   * entries — and `false` there would claim a clean archive we never read.
+   * Same reason `datesFitted` is undefined for a parse that read no HTML.
+   */
+  mixedRelationshipFormats?: boolean;
   /** All expected files and their status */
   files: FileExpectation[];
 }
