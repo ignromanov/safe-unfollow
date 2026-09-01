@@ -88,6 +88,41 @@ describe('ExportDialog', () => {
       expect(screen.getAllByRole('heading')).toHaveLength(1);
       expect(screen.queryByText(resultsEN.export.dialog.title)).not.toBeInTheDocument();
     });
+
+    // The build screen is the state the reader looks at longest, and it was one
+    // of the two that stacked a second title before ddc5661. Nothing asserted it
+    // afterwards: the two tests above cover the states either side of it.
+    it('should replace the offer title while the file is being built', async () => {
+      buildExport.mockImplementation(() => new Promise(() => {}));
+      const user = userEvent.setup();
+      render(<ExportDialog {...defaultProps} />);
+
+      await user.click(screen.getByRole('button', { name: csvButtonName }));
+
+      await waitFor(() => {
+        expect(screen.getByRole('heading')).toHaveTextContent(
+          resultsEN.export.dialog.buildingTitle
+        );
+      });
+      expect(screen.getAllByRole('heading')).toHaveLength(1);
+    });
+
+    // The fourth view, and the only one whose title comes from another file
+    // (RevokedLicenseNotice, shared with LicenseDialog) — so a change there can
+    // break this dialog with nothing in either file to show it.
+    it('should replace the offer title with the revocation notice', async () => {
+      localStorage.clear();
+      resetUnlockCache();
+      resetValidationFlag();
+      storeLicense('38b1460a-5104-4067-a91d-77b872934d51', 'f90ec370-fd83-46a5-8bbd-44a241e78665');
+      vi.mocked(validateLicense).mockResolvedValue({ ok: false, reason: 'disabled' });
+
+      render(<ExportDialog {...defaultProps} />);
+
+      expect(await screen.findByText(resultsEN.export.license.revokedTitle)).toBeInTheDocument();
+      expect(screen.getAllByRole('heading')).toHaveLength(1);
+      expect(screen.queryByText(resultsEN.export.dialog.title)).not.toBeInTheDocument();
+    });
   });
 
   it('should download the generated file when a format is chosen', async () => {
