@@ -201,7 +201,7 @@
       "errorGeneric": "Échec de l’activation. Vérifiez votre connexion et réessayez.",
       "successTitle": "Export débloqué",
       "successBody": "Ce navigateur peut désormais exporter votre liste complète, en CSV ou JSON, autant de fois que vous le souhaitez.",
-      "successMeta": "7 $ payés · sans abonnement",
+      "successMeta": "Paiement unique · sans abonnement",
       "keyLabel": "Votre clé",
       "keyNote": "Enregistrée dans ce navigateur. Votre clé fonctionne sur 3 appareils maximum — le lien de votre e-mail d’achat débloque le suivant.",
       "continue": "Choisir un format",
@@ -209,7 +209,7 @@
       "enterManually": "Saisir la clé manuellement",
       "blockedTitle": "Les 3 appareils sont déjà utilisés",
       "blockedBody": "Votre clé est déjà active sur trois navigateurs. Votre achat est valide — celui-ci ne peut simplement pas être le quatrième.",
-      "blockedAction": "Écrivez-nous à {{email}} en indiquant votre clé. Si nous ne pouvons libérer aucun appareil, nous remboursons les 7 $ intégralement.",
+      "blockedAction": "Écrivez-nous à {{email}} en indiquant votre clé. Si nous ne pouvons libérer aucun appareil, nous remboursons votre achat intégralement.",
       "revokedTitle": "Cette clé n’est plus active",
       "revokedBody": "Elle a été désactivée ou remboursée. Si c’est inattendu, écrivez à {{email}} en indiquant la clé — c’est tout ce dont nous avons besoin.",
       "emailSupport": "Contacter le support"

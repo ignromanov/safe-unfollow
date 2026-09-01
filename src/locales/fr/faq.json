@@ -71,7 +71,7 @@
     },
     "free": {
       "question": "Existe-t-il des suivis de désabonnements Instagram gratuits ?",
-      "answer": "Oui. L'analyse est gratuite à 100 % : tous les badges, filtres et autant de comptes que vous voulez, sans inscription ni limite. La plupart des alternatives par abonnement facturent 5-10$/mois. Un paiement unique de $7 n'est nécessaire que pour exporter votre liste filtrée sous forme de fichier ; la consulter ici reste toujours gratuit. Open source (licence MIT), et votre export Instagram est traité localement dans votre navigateur."
+      "answer": "Oui. L'analyse est gratuite à 100 % : tous les badges, filtres et autant de comptes que vous voulez, sans inscription ni limite. La plupart des alternatives facturent un abonnement mensuel. Ici, la seule chose qui coûte quelque chose, c'est l'export de votre liste filtrée sous forme de fichier : un paiement unique, jamais un abonnement, dont le prix est affiché sur le bouton. Consulter la liste ici reste toujours gratuit. Open source (licence MIT), et votre export Instagram est traité localement dans votre navigateur."
     },
     "analyzeData": {
       "question": "Comment analyser mon téléchargement de données Instagram pour trouver les désabonnements ?",
@@ -99,7 +99,7 @@
     },
     "betterThanPaid": {
       "question": "SafeUnfollow est-il meilleur que les apps payantes ?",
-      "answer": "Pour la plupart des utilisateurs, oui. L'analyse est gratuite : sans inscription, sans abonnement, quel que soit le nombre de comptes dans votre export. Elle ne demande aucun identifiant (pas de risque de bannissement), traite votre export localement dans votre navigateur (confidentialité maximale), gère 1M+ comptes et est open source. Seul l'export de votre liste filtrée sous forme de fichier coûte un paiement unique de $7 ; tout ce que vous voyez à l'écran reste gratuit. Les apps payantes offrent un suivi en temps réel qui nécessite un accès API, mais cela viole les Conditions d'utilisation d'Instagram et met votre compte en danger. SafeUnfollow utilise la méthode officielle et sûre d'export de données."
+      "answer": "Pour la plupart des utilisateurs, oui. L'analyse est gratuite : sans inscription, sans abonnement, quel que soit le nombre de comptes dans votre export. Elle ne demande aucun identifiant (pas de risque de bannissement), traite votre export localement dans votre navigateur (confidentialité maximale), gère 1M+ comptes et est open source. Seul l'export de votre liste filtrée sous forme de fichier est payant : un paiement unique, réglé une fois et non chaque mois ; tout ce que vous voyez à l'écran reste gratuit. Les apps payantes offrent un suivi en temps réel qui nécessite un accès API, mais cela viole les Conditions d'utilisation d'Instagram et met votre compte en danger. SafeUnfollow utilise la méthode officielle et sûre d'export de données."
     },
     "mobileUse": {
       "question": "Puis-je utiliser SafeUnfollow sur iPhone ou Android ?",

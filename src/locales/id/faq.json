@@ -71,7 +71,7 @@
     },
     "free": {
       "question": "Apakah ada pelacak unfollower Instagram gratis?",
-      "answer": "Ya. Analisisnya 100% gratis: semua lencana, filter, dan berapa pun jumlah akunnya, tanpa pendaftaran dan tanpa batasan. Kebanyakan alternatif berlangganan mengenakan biaya Rp75.000-150.000 per bulan. Pembayaran sekali sebesar $7 hanya diperlukan jika Anda ingin mengekspor daftar terfilter sebagai file; melihatnya di sini selalu gratis. Open-source (lisensi MIT), dan ekspor Instagram Anda diproses secara lokal di browser Anda."
+      "answer": "Ya. Analisisnya 100% gratis: semua lencana, filter, dan berapa pun jumlah akunnya, tanpa pendaftaran dan tanpa batasan. Kebanyakan alternatif mengenakan biaya langganan bulanan. Di sini, satu-satunya yang berbayar adalah mengekspor daftar terfilter sebagai file — sekali bayar untuk membukanya, bukan langganan, dan harganya tertera di tombolnya. Melihat daftarnya di sini selalu gratis. Open-source (lisensi MIT), dan ekspor Instagram Anda diproses secara lokal di browser Anda."
     },
     "analyzeData": {
       "question": "Bagaimana cara menganalisis unduhan data Instagram saya untuk menemukan unfollower?",
@@ -99,7 +99,7 @@
     },
     "betterThanPaid": {
       "question": "Apakah SafeUnfollow lebih baik dari aplikasi berbayar?",
-      "answer": "Untuk sebagian besar pengguna, ya. Analisisnya gratis: tanpa pendaftaran, tanpa langganan, berapa pun jumlah akun dalam ekspor Anda. Tidak perlu login (tidak ada risiko banned), data diproses secara lokal di browser Anda (privasi maksimal), mendukung 1 juta+ akun (kebanyakan aplikasi berbayar terbatas di 100 ribu), dan open source. Mengekspor daftar terfilter sebagai file memerlukan pembayaran sekali sebesar $7; semua yang terlihat di layar tetap gratis. Aplikasi berbayar menawarkan pemantauan real-time yang memerlukan akses API, dan itu melanggar Ketentuan Layanan Instagram serta membahayakan akun Anda. SafeUnfollow menggunakan metode ekspor data resmi dan aman."
+      "answer": "Untuk sebagian besar pengguna, ya. Analisisnya gratis: tanpa pendaftaran, tanpa langganan, berapa pun jumlah akun dalam ekspor Anda. Tidak perlu login (tidak ada risiko banned), data diproses secara lokal di browser Anda (privasi maksimal), mendukung 1 juta+ akun (kebanyakan aplikasi berbayar terbatas di 100 ribu), dan open source. Mengekspor daftar terfilter sebagai file perlu dibuka dengan sekali bayar — sekali saja, bukan tiap bulan; semua yang terlihat di layar tetap gratis. Aplikasi berbayar menawarkan pemantauan real-time yang memerlukan akses API, dan itu melanggar Ketentuan Layanan Instagram serta membahayakan akun Anda. SafeUnfollow menggunakan metode ekspor data resmi dan aman."
     },
     "mobileUse": {
       "question": "Bisakah saya menggunakan SafeUnfollow di iPhone atau Android?",

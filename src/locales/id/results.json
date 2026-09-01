@@ -201,7 +201,7 @@
       "errorGeneric": "Aktivasi gagal. Periksa koneksi Anda dan coba lagi.",
       "successTitle": "Ekspor terbuka",
       "successBody": "Browser ini sekarang bisa mengekspor seluruh daftar Anda, dalam CSV atau JSON, sebanyak yang Anda mau.",
-      "successMeta": "Dibayar $7 · tanpa langganan",
+      "successMeta": "Dibayar sekali · tanpa langganan",
       "keyLabel": "Kunci Anda",
       "keyNote": "Tersimpan di browser ini. Kunci Anda berlaku di maksimal 3 perangkat — tautan di email pembelian membuka perangkat berikutnya.",
       "continue": "Pilih format",
@@ -209,7 +209,7 @@
       "enterManually": "Masukkan kunci secara manual",
       "blockedTitle": "Ketiga perangkat sudah terpakai",
       "blockedBody": "Kunci Anda sudah aktif di tiga browser. Pembelian Anda tidak bermasalah — hanya saja browser ini tidak bisa menjadi yang keempat.",
-      "blockedAction": "Kirim email ke {{email}} beserta kunci Anda. Kalau kami tidak bisa membebaskan satu perangkat, kami kembalikan $7 sepenuhnya.",
+      "blockedAction": "Kirim email ke {{email}} beserta kunci Anda. Kalau kami tidak bisa membebaskan satu perangkat, kami kembalikan dana Anda sepenuhnya.",
       "revokedTitle": "Kunci ini sudah tidak aktif",
       "revokedBody": "Kunci ini dinonaktifkan atau dananya sudah dikembalikan. Kalau ini di luar dugaan, kirim email ke {{email}} beserta kuncinya — hanya itu yang kami perlukan.",
       "emailSupport": "Email ke dukungan"
