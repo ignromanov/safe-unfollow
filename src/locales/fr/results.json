@@ -173,19 +173,19 @@
       "legendSample": "Déjà à vous — les {{rows}} premières",
       "legendRest": "Le reste de votre liste",
       "gap": "Votre fichier gratuit s’arrête à la ligne {{rows}}. L’export prend les {{total}} — un fichier, un paiement, pas d’abonnement.",
-      "cta": "Débloquer l’export — 7 $",
+      "cta": "Débloquer l’export — {{price}}",
       "opening": "Ouverture du paiement…",
       "failed": "Le paiement ne s’est pas ouvert — réessayez",
       "failedCause": "La page de paiement ne s’est pas chargée. Vérifiez votre connexion et réessayez.",
       "dismiss": "Pas maintenant",
-      "subtitle": "Des outils de suivi comparables coûtent 5–10 $ par mois tant que vous voulez surveiller vos abonnés. Ici, c’est 7 $ une seule fois, pour le fichier.",
-      "terms": "Paiement unique de 7 $. Valable sur 3 appareils maximum.",
+      "subtitle": "Des outils de suivi comparables coûtent 5–10 $ par mois tant que vous voulez surveiller vos abonnés. Ici, c’est {{price}} une seule fois, pour le fichier.",
+      "terms": "Paiement unique de {{price}}. Valable sur 3 appareils maximum.",
       "refund": "Ce n’est pas ce que vous attendiez ? Écrivez à {{email}} sous 30 jours et nous vous remboursons.",
       "instantNote": "Déblocage instantané après paiement"
     },
     "checkout": {
       "privacy": "Votre export Instagram reste dans ce navigateur. La page de paiement ne le voit jamais.",
-      "summary": "{{rows}} lignes · CSV + JSON · 7 $, une seule fois.",
+      "summary": "{{rows}} lignes · CSV + JSON · {{price}}, une seule fois.",
       "methods": "Les cartes et les moyens de paiement locaux s’affichent sur la page suivante."
     },
     "license": {

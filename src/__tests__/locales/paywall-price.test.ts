@@ -13,13 +13,6 @@ function bundleFor(language: string): Record<string, any> {
   return entry[1] as Record<string, any>;
 }
 
-/** Every amount in a paywall string, ignoring the currency symbol's position. */
-function amountsIn(text: string): string[] {
-  return [...text.matchAll(/(\d+(?:[.,]\d{2})?)\s*\$|\$\s*(\d+(?:[.,]\d{2})?)/g)].map(
-    match => match[1] ?? match[2] ?? ''
-  );
-}
-
 /** The price exactly as this locale spells it, symbol placement included. */
 function priceTokenIn(text: string): string | undefined {
   return /\d+(?:[.,]\d{2})?\s*\$|\$\s*\d+(?:[.,]\d{2})?/.exec(text)?.[0];
@@ -31,19 +24,59 @@ function rangeIn(text: string): string[] {
   return match ? [match[1], match[2]] : [];
 }
 
-// The price lives in Dodo's dashboard, so no test can prove the copy matches
-// what the buyer is actually charged. What a test can prove is that the ten
-// locales agree with each other: the price moved $3 → $7 by a regex sweep over
-// files whose currency formats differ (`$7`, `7 $`, `7$`), and a locale
-// missed by such a sweep advertises a price this product does not sell at.
-describe('paywall price copy', () => {
-  const PRICE = '7';
+/**
+ * Any amount with a currency attached, in whichever order the locale writes it.
+ *
+ * Wider than the dollar-only sweep this file used to run, and it has to be:
+ * the amounts it guards against are no longer only dollars. The set covers
+ * every symbol the price table can produce plus the ones a translator reaches
+ * for unprompted — a locale that "helpfully" converts $7 into its own currency
+ * is exactly the drift the interpolation exists to stop, and a dollar-only
+ * regex would wave it through.
+ */
+function currencyAmountIn(text: string): string | undefined {
+  const CURRENCY = '[$€£¥₹₱₺]|Rp|IDR|USD|EUR|PHP|INR';
+  return new RegExp(`(?:${CURRENCY})\\s?\\d|\\d\\s?(?:${CURRENCY})`).exec(text)?.[0];
+}
 
-  // `subtitle` is deliberately absent from this sweep. It carries the contrast
-  // anchor, whose $5–10 is price-shaped but is not our price; folding it in
-  // would make one mutation trip two assertions and neither would then say
-  // which number moved. The anchor has its own guard below.
-  it('quotes the same amount in every supported language', () => {
+/**
+ * The names a string asks its renderer to fill.
+ *
+ * The name is taken up to the first comma so i18next's formatting suffix
+ * (`{{count, number}}`) is read as the value it names rather than as a value
+ * nothing supplies.
+ */
+function placeholdersIn(text: string): string[] {
+  return [...text.matchAll(/\{\{\s*([^}]+?)\s*\}\}/g)]
+    .map(match => (match[1] ?? '').split(',')[0]?.trim() ?? '')
+    .sort();
+}
+
+// The price lives in Dodo's dashboard, so no test can prove the copy matches
+// what the buyer is actually charged. What a test can prove is that no locale
+// drifts away from the others — which is what this file has always done, and
+// what it still does. Only the shape of agreement changed.
+//
+// It used to be "all ten quote $7". That premise died when the price stopped
+// being one number: a buyer in Jakarta is charged Rp50.000 and one in Manila
+// ₱150, resolved from the browser's timezone at render time (country-price.ts).
+// A bundle that spelled any of those out would be right for one country and a
+// false advertisement in the other nine, so the amount left the bundles
+// entirely and `{{price}}` took its place. The invariant is now the stronger
+// one: the copy states the price it is *given*, and states no other.
+//
+// The original risk is unchanged and is why the sweep is still ten-wide. The
+// price moved $3 → $7 by a regex over files whose currency formats differ
+// (`$7`, `7 $`, `7$`); a locale missed by such a sweep advertises a price this
+// product does not sell at. A locale missed by this change does something
+// worse — it quotes dollars to a reader being charged rupiah.
+describe('paywall price copy', () => {
+  // `subtitle` is absent from *this* sweep, and for the same reason as before:
+  // it carries the contrast anchor, whose $5–10 is price-shaped but is not our
+  // price, so a no-hardcoded-amount rule cannot be applied to that string as a
+  // whole. It is not absent from the change — its own price interpolates like
+  // the other three, and the anchor guard below is what pins the split.
+  it('interpolates the price rather than spelling it out, in every language', () => {
     for (const language of SUPPORTED_LANGUAGES) {
       const paywall = bundleFor(language).export?.paywall;
 
@@ -51,11 +84,11 @@ describe('paywall price copy', () => {
       expect(paywall?.cta, `${language} cta`).toBeTruthy();
 
       for (const text of [paywall.terms, paywall.cta]) {
-        const amounts = amountsIn(String(text));
-        expect(amounts, `${language} states a price in "${text}"`).not.toHaveLength(0);
-        for (const amount of amounts) {
-          expect(amount, `${language} "${text}"`).toBe(PRICE);
-        }
+        expect(String(text), `${language} takes the price as a value`).toContain('{{price}}');
+        expect(
+          currencyAmountIn(String(text)),
+          `${language} hardcodes an amount in "${text}"`
+        ).toBeUndefined();
       }
     }
   });
@@ -121,21 +154,37 @@ describe('paywall sample-size copy', () => {
   // pair, and i18next leaves an unknown placeholder in the output verbatim. A
   // locale left on the old string therefore shows a buyer literal `{{rows}}` on
   // the screen that asks for money — valid JSON, valid string, visible bug.
-  // Only `refund` still takes a value, so the rule is stated as a whitelist:
-  // anything else carrying `{{` is copy nobody will fill. `instantNote` is in
-  // the sweep too — it lives in this namespace but is rendered by
-  // `LicenseDialog`, and it takes no values either.
-  it('leaves no placeholder its renderer does not fill', () => {
-    const INTERPOLATED = ['refund', 'gap', 'legendSample'];
+  // `instantNote` is in the sweep too: it lives in this namespace but is
+  // rendered by `LicenseDialog`, and it takes no values either.
+  //
+  // Stated per key rather than as a flat whitelist of key names, which is a
+  // change the price forced and would have been worth making anyway. A
+  // whitelist answers "may this key interpolate?" — and once `cta` and `terms`
+  // are on it, a locale that drops `{{price}}` and leaves `{{rows}}` in its
+  // place passes, as does one that drops the placeholder from `cta` entirely
+  // while another key on the list still has one. Naming the values each key
+  // takes answers the question the renderer actually asks, in both directions:
+  // nothing unfilled reaches the screen, and nothing the renderer supplies goes
+  // unstated. An empty list is a real entry — it says this key takes no values.
+  it('takes exactly the values its renderer supplies, and no others', () => {
+    const VALUES: Record<string, string[]> = {
+      cta: ['price'],
+      terms: ['price'],
+      // The contrast anchor's own $5–10 stays a literal — it is the category's
+      // price, not ours, and it moves on different evidence. Only the second
+      // amount in that sentence is interpolated.
+      subtitle: ['price'],
+      refund: ['email'],
+      gap: ['rows', 'total'],
+      legendSample: ['rows'],
+    };
 
     for (const language of SUPPORTED_LANGUAGES) {
       const paywall = bundleFor(language).export.paywall as Record<string, string>;
 
       for (const [key, value] of Object.entries(paywall)) {
-        const hasPlaceholder = /\{\{/.test(String(value));
-
-        expect(hasPlaceholder, `${language} paywall.${key}: "${value}"`).toBe(
-          INTERPOLATED.includes(key)
+        expect(placeholdersIn(String(value)), `${language} paywall.${key}: "${value}"`).toEqual(
+          VALUES[key] ?? []
         );
       }
     }
@@ -156,8 +205,8 @@ describe('paywall sample-size copy', () => {
   });
 });
 
-// The subtitle is the only place the buyer is given something to compare $7
-// against. The comparison is to what the category charges — App Store pricing
+// The subtitle is the only place the buyer is given something to compare our
+// price against. The comparison is to what the category charges — App Store pricing
 // measured 2026-08-08: modal Pro tier $4.99/month, advanced tiers $9.99/month.
 // It is a comparison of pricing *models*, because none of those trackers sells
 // a data export at all; a locale that turned it into a feature comparison would
@@ -201,11 +250,25 @@ describe('paywall contrast anchor', () => {
   // Separate assertion from the range: the anchor only works if our own price
   // stands next to it. A subtitle that quotes the category and forgets to say
   // what we charge is an advert for the competition.
-  it('states our one-time price beside the range', () => {
+  //
+  // The two amounts in this sentence have different owners, which is what the
+  // first version of this change got wrong. The range belongs to the category
+  // and is still stated in dollars, because moving it needs rival prices
+  // sourced in each currency and only the Indonesian one has a source. Our own
+  // price belongs to the resolver and was never gated on anything — left
+  // hardcoded, it had the button saying Rp50.000 while the sentence two lines
+  // above said $7, to every reader in the three priced markets.
+  it('takes our one-time price as a value, beside the literal range', () => {
     for (const language of SUPPORTED_LANGUAGES) {
       const subtitle = String(bundleFor(language).export.paywall.subtitle);
 
-      expect(amountsIn(subtitle), `${language} subtitle quotes our price`).toContain('7');
+      expect(subtitle, `${language} subtitle takes our price as a value`).toContain('{{price}}');
+      // Exactly one: a second placeholder would mean the anchor moved too, and
+      // the anchor is not this pass's to move.
+      expect(
+        subtitle.match(/\{\{price\}\}/g)?.length,
+        `${language} subtitle interpolates our price once`
+      ).toBe(1);
     }
   });
 });
@@ -259,17 +322,22 @@ describe('paywall device-limit copy', () => {
 // checks: a dropped `{{rows}}` renders the literal braces to the buyer, and no
 // locale gate catches a lost interpolation (GH#70's neighbour).
 describe('checkout handoff summary', () => {
-  const PRICE = '7';
-
-  it('quotes our price and no other in every supported language', () => {
+  // This is the last screen we own before the reader is on the processor's
+  // domain, so it is also the last place our number can be checked against
+  // theirs — and the two are now the same number by construction, both read off
+  // one resolved country. A hardcoded amount here would be the one place the
+  // buyer could catch us contradicting the page they are about to land on.
+  it('interpolates the price rather than spelling it out, in every language', () => {
     for (const language of SUPPORTED_LANGUAGES) {
       const summary = String(bundleFor(language).export.checkout.summary);
-      const amounts = amountsIn(summary).filter(amount => amount !== '{{rows}}');
 
-      expect(amounts, `${language} handoff summary quotes our price`).toContain(PRICE);
-      for (const amount of amounts) {
-        expect(amount, `${language} handoff summary quotes only ${PRICE}`).toBe(PRICE);
-      }
+      expect(summary, `${language} handoff summary takes the price as a value`).toContain(
+        '{{price}}'
+      );
+      expect(
+        currencyAmountIn(summary),
+        `${language} handoff summary hardcodes an amount: "${summary}"`
+      ).toBeUndefined();
     }
   });
 

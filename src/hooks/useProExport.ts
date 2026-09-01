@@ -89,7 +89,10 @@ export function useProExport(): UseProExportResult {
   const startCheckout = (locale: string, rowCount: number): void => {
     if (isOpeningRef.current) return;
 
-    const checkoutUrl = buildCheckoutUrl();
+    // The same two dimensions `checkout_start` carries, handed to the processor
+    // as metadata so a settled payment can be joined back to the paywall view
+    // that produced it.
+    const checkoutUrl = buildCheckoutUrl(locale, rowCount);
     if (!checkoutUrl) {
       // Unreachable from the UI, and still not a bare `return`. `getApiBase`
       // and `getCheckoutUrl` read the same VITE_DODO_CHECKOUT_URL

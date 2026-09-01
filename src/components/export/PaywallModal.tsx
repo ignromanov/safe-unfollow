@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { CheckoutHandoff } from '@/components/export/CheckoutHandoff';
 import { ExportSheet } from '@/components/export/ExportSheet';
 import type { CheckoutState } from '@/hooks/useProExport';
+import { getDisplayPrice } from '@/lib/export/country-price';
 import { FREE_EXPORT_ROWS } from '@/lib/export/free-tier';
 import { SUPPORT_EMAIL } from '@/lib/export/support-email';
 import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -70,6 +71,10 @@ export function PaywallModal({
   checkoutState,
 }: PaywallModalProps) {
   const { t, i18n } = useTranslation('results');
+
+  // The same resolved country the checkout link is built from, so the amount on
+  // this button and the amount on the processor's page cannot disagree.
+  const price = getDisplayPrice();
 
   // Split on the address rather than reaching for <Trans>: the address has to
   // sit mid-sentence in languages that put a postposition after it (Turkish
@@ -317,7 +322,7 @@ export function PaywallModal({
               <Loader2 className="h-4 w-4" />
             </div>
           ) : null}
-          {t(CTA_KEY[checkoutState])}
+          {t(CTA_KEY[checkoutState], { price })}
         </Button>
 
         {/* A named cause, not a silent return to `idle`. It sits with the
@@ -349,7 +354,7 @@ export function PaywallModal({
             above. The dialog's own `gap-4` is what puts 16px above this border,
             and that gap is the whole point of the rule. */}
       <div className="flex flex-col gap-1.5 border-t pt-3.5">
-        {/* The only place the buyer is given something to compare $7
+        {/* The only place the buyer is given something to compare our price
                 against. Category pricing measured on the App Store 2026-08-08:
                 modal Pro tiers $4.99/mo, advanced tiers $9.99/mo. A dated
                 observation, not a standing fact. It compares the pricing *model*
@@ -360,7 +365,7 @@ export function PaywallModal({
                 the argument this screen makes is the proportion above. The
                 anchor is the answer to a question the reader may not ask. */}
         <p className="text-center text-xs leading-normal text-muted-foreground">
-          {t('export.paywall.subtitle')}
+          {t('export.paywall.subtitle', { price })}
         </p>
 
         {/* The device cap. Stated because it is real and used to be stated
@@ -368,7 +373,7 @@ export function PaywallModal({
                 error on their fourth device, which is a dispute at roughly five
                 sales each. */}
         <p className="text-center text-xs leading-normal text-muted-foreground">
-          {t('export.paywall.terms')}
+          {t('export.paywall.terms', { price })}
         </p>
 
         {/* Risk reversal belongs next to the action it de-risks, not among

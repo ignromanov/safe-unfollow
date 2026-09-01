@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
+import { getDisplayPrice } from '@/lib/export/country-price';
 import { DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 export interface CheckoutHandoffProps {
@@ -58,7 +59,10 @@ export function CheckoutHandoff({ rows }: CheckoutHandoffProps) {
           raw: 8930 reads as "8,930" here and "8.930" in de, and the number is
           the part the buyer checks. */}
       <DialogDescription className="text-sm leading-normal text-foreground">
-        {t('export.checkout.summary', { rows: rows.toLocaleString(i18n.language) })}
+        {t('export.checkout.summary', {
+          rows: rows.toLocaleString(i18n.language),
+          price: getDisplayPrice(),
+        })}
       </DialogDescription>
 
       {/* A stated absence. We do not verify which methods the processor offers
