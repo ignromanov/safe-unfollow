@@ -18,12 +18,6 @@ function priceTokenIn(text: string): string | undefined {
   return /\d+(?:[.,]\d{2})?\s*\$|\$\s*\d+(?:[.,]\d{2})?/.exec(text)?.[0];
 }
 
-/** Both ends of a "$5–10" range, whichever dash the locale sets it with. */
-function rangeIn(text: string): string[] {
-  const match = /(\d+)\s*[-–—−~〜～]\s*(\d+)/.exec(text);
-  return match ? [match[1], match[2]] : [];
-}
-
 /**
  * Any amount with a currency attached, in whichever order the locale writes it.
  *
@@ -71,19 +65,22 @@ function placeholdersIn(text: string): string[] {
 // product does not sell at. A locale missed by this change does something
 // worse — it quotes dollars to a reader being charged rupiah.
 describe('paywall price copy', () => {
-  // `subtitle` is absent from *this* sweep, and for the same reason as before:
-  // it carries the contrast anchor, whose $5–10 is price-shaped but is not our
-  // price, so a no-hardcoded-amount rule cannot be applied to that string as a
-  // whole. It is not absent from the change — its own price interpolates like
-  // the other three, and the anchor guard below is what pins the split.
+  // `subtitle` used to be excluded from this sweep: it carried the contrast
+  // anchor, whose $5–10 was price-shaped but not our price, so a
+  // no-hardcoded-amount rule could not be applied to the string as a whole.
+  // That reason expired when the anchor itself became a value — it now
+  // resolves from the same per-country table as `price`
+  // (`getRivalMonthlyRange`), so a locale hardcoding either amount is exactly
+  // the drift this sweep exists to catch, and `subtitle` rejoins it.
   it('interpolates the price rather than spelling it out, in every language', () => {
     for (const language of SUPPORTED_LANGUAGES) {
       const paywall = bundleFor(language).export?.paywall;
 
       expect(paywall?.terms, `${language} terms`).toBeTruthy();
       expect(paywall?.cta, `${language} cta`).toBeTruthy();
+      expect(paywall?.subtitle, `${language} subtitle`).toBeTruthy();
 
-      for (const text of [paywall.terms, paywall.cta]) {
+      for (const text of [paywall.terms, paywall.cta, paywall.subtitle]) {
         expect(String(text), `${language} takes the price as a value`).toContain('{{price}}');
         expect(
           currencyAmountIn(String(text)),
@@ -170,10 +167,10 @@ describe('paywall sample-size copy', () => {
     const VALUES: Record<string, string[]> = {
       cta: ['price'],
       terms: ['price'],
-      // The contrast anchor's own $5–10 stays a literal — it is the category's
-      // price, not ours, and it moves on different evidence. Only the second
-      // amount in that sentence is interpolated.
-      subtitle: ['price'],
+      // Both amounts in this sentence are now values: `price` is ours,
+      // `rivals` is the category's monthly range, and both resolve from the
+      // same per-country table so they can never disagree on currency.
+      subtitle: ['price', 'rivals'],
       refund: ['email'],
       gap: ['rows', 'total'],
       legendSample: ['rows'],
@@ -206,22 +203,25 @@ describe('paywall sample-size copy', () => {
 });
 
 // The subtitle is the only place the buyer is given something to compare our
-// price against. The comparison is to what the category charges — App Store pricing
-// measured 2026-08-08: modal Pro tier $4.99/month, advanced tiers $9.99/month.
-// It is a comparison of pricing *models*, because none of those trackers sells
-// a data export at all; a locale that turned it into a feature comparison would
-// be making a false claim, and that a test cannot catch. What it can catch is
-// the numeric drift: a translator who writes $5–15, or drops "a month" and
-// leaves "$5–10" reading as a one-off cheaper than ours — an anchor pointing
-// the wrong way is worse than no anchor.
+// price against. The comparison is to what the category charges, resolved
+// per country (`country-price.ts`'s `RIVAL_MONTHLY_BY_COUNTRY` /
+// `DEFAULT_RIVAL_MONTHLY`) rather than restated here — see that file's own
+// comment for sources. It is a comparison of pricing *models*, because none
+// of those trackers sells a data export at all; a locale that turned it into
+// a feature comparison would be making a false claim, and that a test cannot
+// catch. The range invariants (currency agreement, low < high) live in
+// `country-price.test.ts`, where both halves of the comparison are computed
+// and can be checked against each other. What this file still owns is the
+// locale copy: that the recurrence word is present, and that both amounts
+// are values, not literals.
 describe('paywall contrast anchor', () => {
   /**
    * Proof, per language, that the range is a *monthly* rate.
    *
-   * A numeral-only check passes "$5–10 once", which inverts the comparison, so
-   * each entry pins the recurrence word this locale's copy actually uses.
-   * Substrings are chosen long enough not to hit by accident: Turkish "ayda"
-   * rather than the bare "ay", Japanese "月額" rather than "月".
+   * A numeral-only check passes "{{rivals}} once", which inverts the
+   * comparison, so each entry pins the recurrence word this locale's copy
+   * actually uses. Substrings are chosen long enough not to hit by accident:
+   * Turkish "ayda" rather than the bare "ay", Japanese "月額" rather than "月".
    */
   const MONTHLY: Record<SupportedLanguage, string> = {
     ar: 'شهريًا',
@@ -240,35 +240,31 @@ describe('paywall contrast anchor', () => {
     for (const language of SUPPORTED_LANGUAGES) {
       const subtitle = String(bundleFor(language).export.paywall.subtitle);
 
-      expect(rangeIn(subtitle), `${language} subtitle anchors a range`).toEqual(['5', '10']);
       expect(subtitle, `${language} subtitle says the range is monthly`).toContain(
         MONTHLY[language]
       );
     }
   });
 
-  // Separate assertion from the range: the anchor only works if our own price
-  // stands next to it. A subtitle that quotes the category and forgets to say
-  // what we charge is an advert for the competition.
-  //
-  // The two amounts in this sentence have different owners, which is what the
-  // first version of this change got wrong. The range belongs to the category
-  // and is still stated in dollars, because moving it needs rival prices
-  // sourced in each currency and only the Indonesian one has a source. Our own
-  // price belongs to the resolver and was never gated on anything — left
-  // hardcoded, it had the button saying Rp50.000 while the sentence two lines
-  // above said $7, to every reader in the three priced markets.
-  it('takes our one-time price as a value, beside the literal range', () => {
+  // Separate assertion from the recurrence word: the anchor only works if our
+  // own price stands next to it. A subtitle that quotes the category and
+  // forgets to say what we charge is an advert for the competition. Each
+  // placeholder is checked for exactly-once, the same way — a second
+  // occurrence of either would mean a locale duplicated the sentence rather
+  // than translating it.
+  it('takes our price and the rival range as values, each exactly once', () => {
     for (const language of SUPPORTED_LANGUAGES) {
       const subtitle = String(bundleFor(language).export.paywall.subtitle);
 
-      expect(subtitle, `${language} subtitle takes our price as a value`).toContain('{{price}}');
-      // Exactly one: a second placeholder would mean the anchor moved too, and
-      // the anchor is not this pass's to move.
-      expect(
-        subtitle.match(/\{\{price\}\}/g)?.length,
-        `${language} subtitle interpolates our price once`
-      ).toBe(1);
+      for (const placeholder of ['price', 'rivals']) {
+        expect(subtitle, `${language} subtitle takes ${placeholder} as a value`).toContain(
+          `{{${placeholder}}}`
+        );
+        expect(
+          subtitle.match(new RegExp(`\\{\\{${placeholder}\\}\\}`, 'g'))?.length,
+          `${language} subtitle interpolates ${placeholder} once`
+        ).toBe(1);
+      }
     }
   });
 });

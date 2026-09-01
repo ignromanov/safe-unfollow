@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { CheckoutHandoff } from '@/components/export/CheckoutHandoff';
 import { ExportSheet } from '@/components/export/ExportSheet';
 import type { CheckoutState } from '@/hooks/useProExport';
-import { getDisplayPrice } from '@/lib/export/country-price';
+import { getDisplayPrice, getRivalMonthlyRange } from '@/lib/export/country-price';
 import { FREE_EXPORT_ROWS } from '@/lib/export/free-tier';
 import { SUPPORT_EMAIL } from '@/lib/export/support-email';
 import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -75,6 +75,11 @@ export function PaywallModal({
   // The same resolved country the checkout link is built from, so the amount on
   // this button and the amount on the processor's page cannot disagree.
   const price = getDisplayPrice();
+
+  // Read from the same resolver as `price`, so the two amounts the subtitle
+  // compares are always in one currency — never our rupiah beside a dollar
+  // rival, which is the defect this anchor exists to close.
+  const rivals = getRivalMonthlyRange();
 
   // Split on the address rather than reaching for <Trans>: the address has to
   // sit mid-sentence in languages that put a postposition after it (Turkish
@@ -355,17 +360,19 @@ export function PaywallModal({
             and that gap is the whole point of the rule. */}
       <div className="flex flex-col gap-1.5 border-t pt-3.5">
         {/* The only place the buyer is given something to compare our price
-                against. Category pricing measured on the App Store 2026-08-08:
-                modal Pro tiers $4.99/mo, advanced tiers $9.99/mo. A dated
-                observation, not a standing fact. It compares the pricing *model*
-                only: none of those trackers sells a data export, so claiming to
-                undercut them on this feature would be false.
+                against. Both amounts now come from `country-price.ts`, resolved
+                from the same country: the anchor's provenance is the table
+                there (`RIVAL_MONTHLY_BY_COUNTRY`), not a number restated here —
+                App Store pricing for the default pair, measured rival prices
+                for ID/IN/PH. It compares the pricing *model* only: none of
+                those trackers sells a data export, so claiming to undercut them
+                on this feature would be false.
 
                 Quiet, and below the CTA rather than under the headline, because
                 the argument this screen makes is the proportion above. The
                 anchor is the answer to a question the reader may not ask. */}
         <p className="text-center text-xs leading-normal text-muted-foreground">
-          {t('export.paywall.subtitle', { price })}
+          {t('export.paywall.subtitle', { price, rivals })}
         </p>
 
         {/* The device cap. Stated because it is real and used to be stated

@@ -178,7 +178,7 @@
       "failed": "Checkout didn't open — try again",
       "failedCause": "The payment page did not load. Check your connection and try again.",
       "dismiss": "Not now",
-      "subtitle": "Similar trackers charge $5–10 a month to keep watching your followers. This is {{price}}, once, for the file itself.",
+      "subtitle": "Similar trackers charge {{rivals}} a month to keep watching your followers. This is {{price}}, once, for the file itself.",
       "terms": "One-time {{price}}. Unlocks on up to 3 devices.",
       "refund": "Not what you expected? Email {{email}} within 30 days and we'll refund it.",
       "instantNote": "Instant unlock after checkout"
