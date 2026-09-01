@@ -66,6 +66,25 @@ describe('PaywallModal checkout states', () => {
   });
 });
 
+// The one title-swap that spans two files: the offer's header lives here, the
+// handoff's in CheckoutHandoff. Either side can grow a header without the other
+// noticing, and the result is the ambiguous `aria-labelledby` of GH#140 — two
+// nodes carrying the id Radix points the dialog at.
+describe('PaywallModal one title per state', () => {
+  it('should name the dialog from the offer while idle', () => {
+    renderModal();
+
+    expect(screen.getAllByRole('heading')).toHaveLength(1);
+  });
+
+  it('should hand the title to the handoff while opening, not stack them', () => {
+    renderModal({ checkoutState: 'opening' });
+
+    expect(screen.getAllByRole('heading')).toHaveLength(1);
+    expect(screen.getByRole('heading')).toHaveTextContent(resultsEN.export.checkout.privacy);
+  });
+});
+
 describe('PaywallModal handoff', () => {
   it('should replace the sales argument with the handoff while opening', () => {
     renderModal({ checkoutState: 'opening' });
