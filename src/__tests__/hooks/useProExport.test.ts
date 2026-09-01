@@ -171,6 +171,99 @@ describe('useProExport', () => {
       expect(result.current.checkoutState).toBe('idle');
     });
 
+    // The redirect leaves the page, but it does not necessarily destroy it: the
+    // project keeps the back/forward cache eligible on purpose (see
+    // useEventQueueFlush's docstring, which declines `beforeunload`/`unload` for
+    // exactly this reason). A reader who reaches the checkout host, changes
+    // their mind and presses Back gets this component tree restored with its
+    // state, its refs and its pending timer intact — frozen, not cancelled.
+    //
+    // So the timer resumes against a redirect that is no longer in flight, and
+    // the reader watches a handoff screen for a checkout they abandoned before
+    // it accuses the payment page of failing to load.
+    describe('a restore from the back/forward cache', () => {
+      const restoreFromBfcache = (persisted: boolean): void => {
+        const event = new Event('pageshow');
+        Object.defineProperty(event, 'persisted', { value: persisted });
+        window.dispatchEvent(event);
+      };
+
+      it('should return the control to the reader instead of leaving it busy', () => {
+        const { result } = renderHook(() => useProExport());
+
+        act(() => {
+          result.current.startCheckout('id', 8930);
+        });
+        act(() => {
+          restoreFromBfcache(true);
+        });
+
+        expect(result.current.checkoutState).toBe('idle');
+      });
+
+      // Distinct from the assertion above: overwriting the state without
+      // cancelling the timer passes that one and fails this one, and the
+      // failure the reader actually reports is this one — a red alert claiming
+      // the payment page did not load, arriving seconds after they chose to
+      // come back.
+      it('should not accuse the payment page of failing after the reader came back', () => {
+        vi.useFakeTimers();
+        try {
+          const { result } = renderHook(() => useProExport());
+
+          act(() => {
+            result.current.startCheckout('id', 8930);
+          });
+          act(() => {
+            restoreFromBfcache(true);
+          });
+          act(() => {
+            vi.advanceTimersByTime(8_000);
+          });
+
+          expect(result.current.checkoutState).toBe('idle');
+        } finally {
+          vi.useRealTimers();
+        }
+      });
+
+      // The re-press guard is a ref, so clearing the state is not enough to make
+      // the button work again — `startCheckout` would return early forever.
+      it('should accept a fresh press after the reader came back', () => {
+        const { result } = renderHook(() => useProExport());
+
+        act(() => {
+          result.current.startCheckout('id', 8930);
+        });
+        act(() => {
+          restoreFromBfcache(true);
+        });
+        act(() => {
+          result.current.startCheckout('id', 8930);
+        });
+
+        expect(result.current.checkoutState).toBe('opening');
+        expect(vi.mocked(analytics.checkoutStart)).toHaveBeenCalledTimes(2);
+      });
+
+      // `pageshow` also fires on an ordinary load, where `persisted` is false —
+      // including the load that brings a paying reader back with `?license_key=`.
+      // Only a restore says the reader navigated back; a plain load says nothing
+      // about an in-flight redirect and must not cancel one.
+      it('should leave an in-flight checkout alone when the page was not restored', () => {
+        const { result } = renderHook(() => useProExport());
+
+        act(() => {
+          result.current.startCheckout('id', 8930);
+        });
+        act(() => {
+          restoreFromBfcache(false);
+        });
+
+        expect(result.current.checkoutState).toBe('opening');
+      });
+    });
+
     // Unreachable through the UI, and deliberately still covered. `getApiBase`
     // and `getCheckoutUrl` read the same VITE_DODO_CHECKOUT_URL
     // (license.ts:101, unlock.ts:118), so an unset value disables the feature
