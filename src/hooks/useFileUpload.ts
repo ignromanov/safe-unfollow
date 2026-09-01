@@ -357,7 +357,12 @@ export function useFileUpload() {
         });
 
         // Track successful processing
-        analytics.fileUploadSuccess(accountCount, false, discovery?.format);
+        analytics.fileUploadSuccess(
+          accountCount,
+          false,
+          discovery?.format,
+          discovery?.mixedRelationshipFormats
+        );
 
         // Track return upload (user uploading new data)
         trackReturnUploadIfApplicable(resultFileHash);

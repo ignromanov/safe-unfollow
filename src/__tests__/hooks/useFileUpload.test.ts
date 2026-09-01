@@ -538,7 +538,26 @@ describe('useFileUpload', () => {
         await result.current.handleZipUpload(mockFile);
       });
 
-      expect(analytics.fileUploadSuccess).toHaveBeenCalledWith(2, false, 'json');
+      expect(analytics.fileUploadSuccess).toHaveBeenCalledWith(2, false, 'json', undefined);
+    });
+
+    it('carries the mixed-format verdict on fileUploadSuccess (GH#160)', async () => {
+      // Read beforeEach's fixture and change one field of it, rather than
+      // rebuilding a twenty-line `ParseResult` that would then drift from it.
+      const { parseInstagramZipFile } = await import('@/core/parsers/instagram');
+      const parsed = await vi.mocked(parseInstagramZipFile)(mockFile);
+      vi.mocked(parseInstagramZipFile).mockResolvedValue({
+        ...parsed,
+        discovery: { ...parsed.discovery, mixedRelationshipFormats: true },
+      });
+
+      const { result } = renderHook(() => useFileUpload());
+
+      await act(async () => {
+        await result.current.handleZipUpload(mockFile);
+      });
+
+      expect(analytics.fileUploadSuccess).toHaveBeenCalledWith(2, false, 'json', true);
     });
 
     it('omits the format on the cache-hit path — nothing was parsed this call', async () => {
