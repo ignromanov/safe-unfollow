@@ -30,7 +30,7 @@ handful of third parties, and the canonical policy names what each one receives:
 | Google AdSense | ad requests and advertising cookies, subject to your consent choice | `/` and `/results` |
 | Google (Funding Choices) | your consent choice, stored so the banner stops asking | consent regions |
 | Affiliate networks | only what a link click sends, and only if you click | `/upload` |
-| Dodo Payments | your licence key, and your email if you buy the export | export only |
+| Dodo Payments | your licence key, your email if you buy the export, and — attached to the checkout link — whether you are on a phone or a big screen, the language you are reading in, and your country | export only |
 | Tally | the feedback you type, plus your language, the page you sent it from and the site version — and only if you open the form | `/results`, on click |
 
 Ads run on this site, and `/upload` carries one affiliate link. That is how the free analysis

@@ -192,7 +192,7 @@
       "title": "Activa tu exportación",
       "activating": "Desbloqueando…",
       "manualDescription": "Introduce la clave de licencia de tu correo de compra para desbloquear la exportación en este dispositivo.",
-      "placeholder": "38b1460a-5104-4067-a91d-77b872934d51",
+      "placeholder": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
       "submit": "Desbloquear este dispositivo",
       "retry": "Inténtalo de nuevo",
       "havePurchase": "¿Ya compraste? Introduce tu clave",

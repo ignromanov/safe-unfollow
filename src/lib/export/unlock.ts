@@ -114,12 +114,23 @@ const DESKTOP_MIN_WIDTH_PX = 768;
  * timezone resolves to no priced market, because an absent parameter is what
  * lets the processor fall back to its own detection.
  *
- * The three `metadata_*` values are the join our own funnel has never had.
+ * The two `metadata_*` values are the join our own funnel has never had.
  * Every settled and failed payment on the processor's side has so far been
  * unattributable to the paywall view that produced it, which is why "mobile:
  * 303 views, 0 sales" has stayed a fact with no cause attached.
+ *
+ * The row count is deliberately not among them, and re-adding it needs a new
+ * ruling rather than a rebuild of this comment. It is derived from the reader's
+ * Instagram export — the size of their follower graph — and it would land on a
+ * record that already carries their email address and card country, where an
+ * exact following count is public on the profile it belongs to and close enough
+ * to an identifier to match a paying customer to a named account. A bucket is
+ * no answer: it is still derived from the export. The device class is what
+ * answers "mobile converts at zero"; row size joins on our own side instead,
+ * via `row_count` on `paywall_view` plus device, locale, country and time.
+ * Ruled 2026-09-03 (velum-cdpo), GH#176.
  */
-export function buildCheckoutUrl(locale: string, rowCount: number): string | null {
+export function buildCheckoutUrl(locale: string): string | null {
   const configured = getCheckoutUrl();
   if (configured === null || typeof window === 'undefined') return configured;
 
@@ -140,7 +151,6 @@ export function buildCheckoutUrl(locale: string, rowCount: number): string | nul
       window.innerWidth >= DESKTOP_MIN_WIDTH_PX ? 'desktop' : 'mobile'
     );
     url.searchParams.set('metadata_locale', locale);
-    url.searchParams.set('metadata_rows', String(rowCount));
 
     return url.toString();
   } catch {
