@@ -63,6 +63,8 @@ This is the list we would want you to run on us.
 
 Point five needs no trust in anybody, which is why it is the one worth doing.
 
+Running it on a specific tool? [We compare SafeUnfollow with four trackers you are likely to meet in the same search results](/docs/compare/) — prices and limits taken from their own pages, each with the date it was checked.
+
 **[Run the check on us — open your export](/upload?guide=1)**
 
 No account. Nothing to cancel. The file stays on this device.
