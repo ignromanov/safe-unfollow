@@ -1,8 +1,9 @@
 ---
 layout: default
-title: SafeUnfollow vs followsback.com — Which Unfollower Tracker To Use
+title: SafeUnfollow vs followsback.com: Price and Limits
 description: Both read your official Instagram export and neither asks for your password. The differences are the 2,500-follower cap, the weekly price, and whether you can read the code. Checked 2026-09-02.
 permalink: /compare/vs-followsback/
+last_updated: 2026-09-03
 ---
 
 # SafeUnfollow vs followsback.com
@@ -43,7 +44,7 @@ SafeUnfollow has no account-size limit. It stores usernames in packed columns an
 
 followsback says processing happens on your own device. So do we, in almost the same words. Neither claim can be verified from the outside by a visitor — and only one of the two can be verified at all: **SafeUnfollow's client is published under the MIT license**, so the code that touches your export is code you or anyone else can read. followsback does not publish its source.
 
-This is the difference we would ask you to weigh, because it is the only one on this page that does not depend on trusting either of us. If you want to run the check yourself rather than take it on faith, [here is how to check any tracker in two minutes](/docs/is-it-safe/).
+This is the difference we would ask you to weigh, because it is the only one on this page that does not depend on trusting either of us. If you want to run the check yourself rather than take it on faith, [here is how to check any tracker in two minutes](/docs/is-it-safe).
 
 ## Where followsback Is The Better Choice
 

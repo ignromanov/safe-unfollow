@@ -3,6 +3,7 @@ layout: default
 title: Instagram Unfollow Tracker Alternatives — Free Comparison
 description: How SafeUnfollow compares with the unfollower trackers you actually meet in search — followsback, FollowMeter, unfollowchecker and UnfollowersTracker. Prices and limits checked on their own pages.
 permalink: /compare/
+last_updated: 2026-09-03
 ---
 
 # Instagram Unfollow Tracker — Alternatives Compared
@@ -11,7 +12,7 @@ permalink: /compare/
 
 Below is how SafeUnfollow compares with the four trackers you are most likely to meet in the same search results.
 
-Not sure whether any unfollowers tracker — including this one — is trustworthy? [See the five checkable facts, and the test you can run yourself](/docs/is-it-safe/).
+Not sure whether any unfollowers tracker — including this one — is trustworthy? [See the five checkable facts, and the test you can run yourself](/docs/is-it-safe).
 
 ## Quick Comparison
 
@@ -34,7 +35,7 @@ The row that matters most is the third one. Three of the four price by account s
 Most unfollow trackers need your Instagram password or an account connection. SafeUnfollow uses Instagram's **official data export** (ZIP file) — no credentials, no account link. Two of the four above take the same route; the difference between us and them is further down the page, not here.
 
 ### The Export Stays In Your Browser
-Your Instagram export is parsed, stored and filtered in your own browser, using IndexedDB and Web Workers. It is never uploaded anywhere. The site itself does load anonymous page analytics, and the results page carries ads — [what the rest of the site loads is set out on the privacy page](/docs/privacy/).
+Your Instagram export is parsed, stored and filtered in your own browser, using IndexedDB and Web Workers. It is never uploaded anywhere. The site itself does load anonymous page analytics, and the results page carries ads — [what the rest of the site loads is set out on the privacy page](/docs/privacy).
 
 ### Built For Large Accounts
 SafeUnfollow uses columnar storage and bitset filtering, and is built and unit-tested for over 1,000,000 accounts, with no network round-trip — filtering runs locally in your browser.
@@ -44,9 +45,9 @@ The entire client is [open source on GitHub](https://github.com/ignromanov/safe-
 
 ## Detailed Comparisons
 
-- [SafeUnfollow vs followsback.com](/docs/compare/vs-followsback/) — the closest rival: same export method, priced weekly and capped at 2,500 followers
-- [SafeUnfollow vs Unfollowgram](/docs/compare/vs-unfollowgram/) — the long-running paid alternative
-- [SafeUnfollow vs Followers App](/docs/compare/vs-followers-app/) — the login-based mobile apps
+- [SafeUnfollow vs followsback.com](/docs/compare/vs-followsback) — the closest rival: same export method, priced weekly and capped at 2,500 followers
+- [SafeUnfollow vs Unfollowgram](/docs/compare/vs-unfollowgram) — the long-running paid alternative
+- [SafeUnfollow vs Followers App](/docs/compare/vs-followers-app) — the login-based mobile apps
 
 ## Ready to Try?
 

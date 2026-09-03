@@ -45,6 +45,25 @@ defaults:
     values:
       layout: "default"
 
+  # One page keeps the old, over-long title on purpose.
+  #
+  # `/docs/instagram-export` is the second-largest object on the property — 34 568
+  # impressions in the 91 days to 2026-09-02, at CTR 0.19% — and it is mid-recovery from an
+  # unexplained W34 (Aug 17-23) collapse to position 48.6. The position-content plan
+  # (.claude/plans/2026-09-02-position-content/, constraint 8 and task 05) holds it closed
+  # until the W37 chart is readable, ~2026-09-15, so a copy change does not land on a
+  # ranking that is still moving and make the recovery unattributable.
+  #
+  # The suffix lives in the shared layout, so dropping it would change that page's SERP
+  # presentation without anyone editing the page. This freezes it instead. ⛔ Delete this
+  # entry when task 05 ships — the title gate asserts the exception set holds exactly one
+  # page, so leaving it behind fails the build.
+  - scope:
+      path: "instagram-export.md"
+      type: "pages"
+    values:
+      title_suffix: true
+
 # Kramdown settings
 kramdown:
   input: GFM

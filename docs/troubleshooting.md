@@ -1,8 +1,9 @@
 ---
 layout: default
-title: Fix Instagram Upload Errors — JSON vs HTML, Wrong File & More
+title: Fix Instagram Upload Errors: JSON, HTML and Wrong File
 description: Solve common Instagram data upload errors. Fix JSON vs HTML format issues, wrong file structure, and "no data found" errors step by step.
 permalink: /troubleshooting/
+last_updated: 2026-09-03
 ---
 
 # Troubleshooting Guide - Instagram Unfollow Tracker
@@ -15,7 +16,7 @@ permalink: /troubleshooting/
 **Problem**: The app shows "No data found" after uploading your ZIP file.
 
 **Solutions**:
-1. **Check file format**: Ensure you downloaded JSON format (not HTML)
+1. **The format is not the cause**: both JSON and HTML exports have been read since August 2026. If you already have an export, upload it — do not request a new one to change its format.
 2. **Verify data selection**: Confirm you selected "Followers and Following" section
 3. **Check file structure**: Your ZIP should contain files like:
    ```
@@ -198,15 +199,15 @@ Report issues if:
 
 ### Community Support
 - **GitHub Discussions**: [Ask questions](https://github.com/ignromanov/safe-unfollow/discussions)
-- **FAQ**: Check [Frequently Asked Questions](/docs/faq/)
-- **User Guide**: See [User Guide](/docs/user-guide/)
+- **FAQ**: Check [Frequently Asked Questions](/docs/faq)
+- **User Guide**: See [User Guide](/docs/user-guide)
 
 ## Prevention Tips
 
 ### Best Practices
 1. **Use recent exports**: Download fresh data for accurate results
 2. **Complete data**: Select "All time" when downloading
-3. **JSON format**: Always use JSON, not HTML
+3. **Either format**: JSON and HTML exports are both read; JSON is what the export guide selects
 4. **Desktop browser**: Use Chrome or Firefox on desktop
 5. **Close other tabs**: Free up memory for better performance
 

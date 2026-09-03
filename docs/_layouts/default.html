@@ -3,7 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% if page.title %}{{ page.title }} - {% endif %}Instagram Unfollow Tracker</title>
+    {%- comment -%}
+      The page owns its whole title. This used to append " - Instagram Unfollow Tracker"
+      unconditionally, which put every one of the fourteen pages here between 79 and 101
+      characters — Google shows about 60 — and made six of them say the brand twice.
+      `title_suffix` restores the old behaviour for a page that must keep its current SERP
+      presentation; see _config.yml defaults for the only page that sets it, and why.
+    {%- endcomment -%}
+    {%- capture head_title -%}
+      {%- if page.title -%}{{ page.title }}{%- if page.title_suffix -%} - Instagram Unfollow Tracker{%- endif -%}
+      {%- else -%}Instagram Unfollow Tracker{%- endif -%}
+    {%- endcapture -%}
+    <title>{{ head_title }}</title>
     <meta name="description" content="{% if page.description %}{{ page.description }}{% else %}Free Instagram unfollow tracker - analyze your followers and following{% endif %}">
     
     {%- comment -%}
@@ -19,13 +30,13 @@
     {%- endif -%}
 
     <!-- SEO and social meta tags -->
-    <meta property="og:title" content="{% if page.title %}{{ page.title }} - {% endif %}Instagram Unfollow Tracker">
+    <meta property="og:title" content="{{ head_title }}">
     <meta property="og:description" content="{% if page.description %}{{ page.description }}{% else %}Free Instagram unfollow tracker - analyze your followers and following{% endif %}">
     <meta property="og:url" content="{{ site.url }}{{ canonical_path }}">
     <meta property="og:type" content="website">
     
     <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="{% if page.title %}{{ page.title }} - {% endif %}Instagram Unfollow Tracker">
+    <meta name="twitter:title" content="{{ head_title }}">
     <meta name="twitter:description" content="{% if page.description %}{{ page.description }}{% else %}Free Instagram unfollow tracker - analyze your followers and following{% endif %}">
 
     <link rel="canonical" href="{{ site.url }}{{ canonical_path }}"/>
@@ -109,6 +120,12 @@
             color: #666;
         }
         
+        .last-updated {
+            margin-top: 3em;
+            font-size: 0.85em;
+            color: #6c757d;
+        }
+
         .footer {
             margin-top: 40px;
             padding-top: 20px;
@@ -122,20 +139,30 @@
 <body>
     <div class="container">
         <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-            <a href="{{ site.baseurl }}/" class="back-link">← Documentation Home</a>
+            <a href="{{ site.baseurl }}" class="back-link">← Documentation Home</a>
             <a href="/" class="back-link">🚀 Try the App</a>
         </div>
         
         <main>
             {{ content }}
+
+            {%- comment -%}
+              Seven of the fourteen pages here set `last_updated` in front matter and no
+              template read it, so the freshness signal reached neither a reader nor a
+              crawler. Rendered once, here, rather than written into each page's body,
+              where it would drift from the front matter that sets it.
+            {%- endcomment -%}
+            {%- if page.last_updated %}
+            <p class="last-updated">Last updated: <time datetime="{{ page.last_updated }}">{{ page.last_updated }}</time></p>
+            {%- endif %}
         </main>
         
         <div class="footer">
             <p>
-                <a href="{{ site.baseurl }}/">Documentation Home</a> |
+                <a href="{{ site.baseurl }}">Documentation Home</a> |
                 <a href="/">Instagram Unfollow Tracker</a> |
                 <a href="https://github.com/ignromanov/safe-unfollow">GitHub</a> |
-                <a href="{{ site.baseurl }}/privacy/">Privacy</a>
+                <a href="{{ site.baseurl }}/privacy">Privacy</a>
             </p>
         </div>
     </div>
