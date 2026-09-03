@@ -1,7 +1,7 @@
 ---
 layout: default
-title: Instagram Unfollow Tracker Roadmap: Planned Features
-description: See what's coming next for Instagram Unfollow Tracker. Historical comparison, CSV export, Chrome extension, and more planned features.
+title: "Instagram Unfollow Tracker Roadmap: Planned Features"
+description: 'See what''s coming next for Instagram Unfollow Tracker. Historical comparison, CSV export, Chrome extension, and more planned features.'
 permalink: /roadmap/
 last_updated: 2026-09-03
 ---

@@ -1,7 +1,7 @@
 ---
 layout: default
-title: Instagram Unfollow Tracker Alternatives — Free Comparison
-description: How SafeUnfollow compares with the unfollower trackers you actually meet in search — followsback, FollowMeter, unfollowchecker and UnfollowersTracker. Prices and limits checked on their own pages.
+title: "Instagram Unfollow Tracker Alternatives — Free Comparison"
+description: 'How SafeUnfollow compares with the unfollower trackers you actually meet in search — followsback, FollowMeter, unfollowchecker and UnfollowersTracker. Prices and limits checked on their own pages.'
 permalink: /compare/
 last_updated: 2026-09-03
 ---

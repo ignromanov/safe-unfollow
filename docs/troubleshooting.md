@@ -1,7 +1,7 @@
 ---
 layout: default
-title: Fix Instagram Upload Errors: JSON, HTML and Wrong File
-description: Solve common Instagram data upload errors. Fix JSON vs HTML format issues, wrong file structure, and "no data found" errors step by step.
+title: 'Fix Instagram Upload Errors: JSON, HTML and Wrong File'
+description: 'Solve common Instagram data upload errors. Fix JSON vs HTML format issues, wrong file structure, and "no data found" errors step by step.'
 permalink: /troubleshooting/
 last_updated: 2026-09-03
 ---

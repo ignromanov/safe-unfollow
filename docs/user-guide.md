@@ -1,7 +1,7 @@
 ---
 layout: default
-title: How to Use Instagram Unfollow Tracker — Complete Guide
-description: Complete guide to using Instagram Unfollow Tracker. Upload your ZIP file, filter unfollowers, search accounts, and understand badges. Free and private.
+title: "How to Use Instagram Unfollow Tracker — Complete Guide"
+description: 'Complete guide to using Instagram Unfollow Tracker. Upload your ZIP file, filter unfollowers, search accounts, and understand badges. Free and private.'
 permalink: /user-guide/
 last_updated: 2026-09-03
 ---

@@ -1,7 +1,7 @@
 ---
 layout: default
-title: SafeUnfollow vs Followers App: Login vs the Export File
-description: "Followers App" names several products, so this page states no prices for it. What it does compare is the structural difference: an app that watches your account needs access to it; SafeUnfollow reads a file you download yourself.
+title: "SafeUnfollow vs Followers App: Login vs the Export File"
+description: '"Followers App" names several products, so this page states no prices for it. What it does compare is the structural difference: an app that watches your account needs access to it; SafeUnfollow reads a file you download yourself.'
 permalink: /compare/vs-followers-app/
 last_updated: 2026-09-03
 ---

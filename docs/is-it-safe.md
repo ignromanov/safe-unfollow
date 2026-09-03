@@ -1,7 +1,7 @@
 ---
 layout: default
-title: Is an Unfollowers Tracker Safe? What to Check First
-description: No login, no password. Your export stays in the browser, and the code that reads it is open source on GitHub.
+title: "Is an Unfollowers Tracker Safe? What to Check First"
+description: 'No login, no password. Your export stays in the browser, and the code that reads it is open source on GitHub.'
 permalink: /is-it-safe/
 last_updated: 2026-09-03
 ---

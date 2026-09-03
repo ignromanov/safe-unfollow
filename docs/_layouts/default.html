@@ -11,7 +11,7 @@
       presentation; see _config.yml defaults for the only page that sets it, and why.
     {%- endcomment -%}
     {%- capture head_title -%}
-      {%- if page.title -%}{{ page.title }}{%- if page.title_suffix -%} - Instagram Unfollow Tracker{%- endif -%}
+      {%- if page.title -%}{{ page.title }}{%- if page.title_suffix -%}{{ " - Instagram Unfollow Tracker" }}{%- endif -%}
       {%- else -%}Instagram Unfollow Tracker{%- endif -%}
     {%- endcapture -%}
     <title>{{ head_title }}</title>

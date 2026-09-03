@@ -1,7 +1,7 @@
 ---
 layout: default
-title: Privacy Policy — Your Data Never Leaves Your Device
-description: Where to read the Instagram Unfollow Tracker privacy policy, and the short version — your Instagram export is processed in your browser and never uploaded.
+title: "Privacy Policy — Your Data Never Leaves Your Device"
+description: 'Where to read the Instagram Unfollow Tracker privacy policy, and the short version — your Instagram export is processed in your browser and never uploaded.'
 permalink: /privacy/
 last_updated: 2026-08-09
 ---

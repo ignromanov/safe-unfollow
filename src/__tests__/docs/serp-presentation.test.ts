@@ -52,8 +52,43 @@ function frontMatter(text: string): Record<string, string> {
       .split('\n')
       .map(line => /^([a-z_]+):\s*(.*)$/.exec(line))
       .filter((m): m is RegExpExecArray => m !== null)
-      .map(m => [m[1], m[2].trim().replace(/^"|"$/g, '')]),
+      .map(m => [m[1], unquote(m[2].trim())]),
   );
+}
+
+/** A double- or single-quoted YAML scalar, with the quotes taken off. */
+function unquote(value: string): string {
+  const quoted = /^"(.*)"$|^'(.*)'$/.exec(value);
+  return quoted ? (quoted[1] ?? quoted[2]).replace(/''/g, "'") : value;
+}
+
+/**
+ * Whether YAML would read this value as the string it looks like.
+ *
+ * The reason this exists is a bug this file's first version shipped to a preview
+ * and did not catch. Seven titles were rewritten to use a colon — `title:
+ * Instagram Unfollow Tracker FAQ: No Login, Free, Private` — and an unquoted YAML
+ * scalar containing ": " is not a string, so Jekyll parsed no front matter and
+ * every one of those pages rendered the site-wide fallback title instead.
+ *
+ * The gate passed anyway, because a regex reads `title:` in places YAML does not.
+ * That is the same defect class the corpus decision of 2026-09-03 names: a check
+ * that keys on the shape of the text rather than on the fact it stands for.
+ *
+ * ⚠️ It was already live. `compare/vs-followers-app.md` merged in #183 with a
+ * description opening on a double quote, and production served the fallback title
+ * and fallback description for that page until this branch.
+ *
+ * Requiring the quotes, rather than reimplementing YAML's plain-scalar rules,
+ * makes the whole class impossible without adding a parser dependency.
+ */
+function isQuoted(raw: string): boolean {
+  return /^".*"$/.test(raw) || /^'.*'$/.test(raw);
+}
+
+function rawField(text: string, field: string): string {
+  const m = new RegExp(`^${field}:\\s*(.*)$`, 'm').exec(text);
+  return m ? m[1].trim() : '';
 }
 
 describe('every published page fits the search result it appears in', () => {
@@ -92,6 +127,22 @@ describe('every published page fits the search result it appears in', () => {
         rendered.length,
         `${doc.name} renders <title> as ${rendered.length} chars: "${rendered}"`,
       ).toBeLessThanOrEqual(frozen ? 90 : TITLE_BUDGET);
+    });
+
+    it(`${doc.name} quotes the two front-matter fields that carry prose`, () => {
+      // The frozen page is skipped for the same reason it keeps its title: the
+      // position-content plan holds the file closed until the W37 chart, and adding
+      // quotes would be an edit to it. Its front matter parses today — checked
+      // 2026-09-03 — and task 05 brings it under this rule when it opens the file.
+      if (frozen) return;
+      for (const field of ['title', 'description']) {
+        const raw = rawField(doc.text, field);
+        expect(raw, `${doc.name} declares no ${field}`).not.toBe('');
+        expect(
+          isQuoted(raw),
+          `${doc.name}'s ${field} is unquoted: ${raw}. A colon, or a leading quote, makes YAML read it as something other than a string, and Jekyll then renders the fallback.`,
+        ).toBe(true);
+      }
     });
 
     it(`${doc.name} dates itself`, () => {
