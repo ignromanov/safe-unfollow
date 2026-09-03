@@ -192,7 +192,7 @@
       "title": "エクスポートを有効化",
       "activating": "解除中…",
       "manualDescription": "購入時のメールに記載されたライセンスキーを入力すると、このデバイスでエクスポートが利用できます。",
-      "placeholder": "38b1460a-5104-4067-a91d-77b872934d51",
+      "placeholder": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
       "submit": "このデバイスで有効にする",
       "retry": "もう一度お試しください",
       "havePurchase": "すでに購入済みの方はキーを入力",

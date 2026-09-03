@@ -192,7 +192,7 @@
       "title": "Export aktivieren",
       "activating": "Wird freigeschaltet…",
       "manualDescription": "Gib den Lizenzschlüssel aus deiner Kauf-E-Mail ein, um den Export auf diesem Gerät freizuschalten.",
-      "placeholder": "38b1460a-5104-4067-a91d-77b872934d51",
+      "placeholder": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
       "submit": "Dieses Gerät freischalten",
       "retry": "Erneut versuchen",
       "havePurchase": "Bereits gekauft? Gib deinen Schlüssel ein",

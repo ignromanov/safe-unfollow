@@ -230,6 +230,13 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             .
           </p>
           <p className="text-muted-foreground mt-4">
+            The link that takes you there carries three things about the visit, so that a completed
+            payment can be matched to the page it started from: whether you are on a phone or a big
+            screen, the language you are reading in, and your country. The country is worked out
+            from your device's own time zone setting — we never ask anyone else where you are. The
+            number of accounts in your export is not among them and never leaves your browser.
+          </p>
+          <p className="text-muted-foreground mt-4">
             After a successful payment, Dodo Payments sends you back to this site with your license
             key, a payment reference and the email address you used at checkout attached to the web
             address. We remove all of them from the address bar on the first render, so they do not

@@ -192,7 +192,7 @@
       "title": "Activate your export",
       "activating": "Unlocking…",
       "manualDescription": "Enter the license key from your purchase email to unlock the export on this device.",
-      "placeholder": "38b1460a-5104-4067-a91d-77b872934d51",
+      "placeholder": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
       "submit": "Unlock this device",
       "retry": "Try again",
       "havePurchase": "Already purchased? Enter your key",
