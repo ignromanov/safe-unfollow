@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "SafeUnfollow vs followsback.com: Price and Limits"
+title: 'SafeUnfollow vs followsback.com: Price and Limits'
 description: 'Both read your official Instagram export, neither asks for a password. What differs: a 2,500-follower cap, a weekly price, open code. Checked 2026-09-02.'
 permalink: /compare/vs-followsback/
 last_updated: 2026-09-03
