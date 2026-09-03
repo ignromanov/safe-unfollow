@@ -14,8 +14,8 @@
       {%- if page.title -%}{{ page.title }}{%- if page.title_suffix -%}{{ " - Instagram Unfollow Tracker" }}{%- endif -%}
       {%- else -%}Instagram Unfollow Tracker{%- endif -%}
     {%- endcapture -%}
-    <title>{{ head_title }}</title>
-    <meta name="description" content="{% if page.description %}{{ page.description }}{% else %}Free Instagram unfollow tracker - analyze your followers and following{% endif %}">
+    <title>{{ head_title | escape }}</title>
+    <meta name="description" content="{% if page.description %}{{ page.description | escape }}{% else %}Free Instagram unfollow tracker - analyze your followers and following{% endif %}">
     
     {%- comment -%}
       Vercel serves this site with trailingSlash: false, so /docs/faq/ 308-redirects
@@ -30,14 +30,14 @@
     {%- endif -%}
 
     <!-- SEO and social meta tags -->
-    <meta property="og:title" content="{{ head_title }}">
-    <meta property="og:description" content="{% if page.description %}{{ page.description }}{% else %}Free Instagram unfollow tracker - analyze your followers and following{% endif %}">
+    <meta property="og:title" content="{{ head_title | escape }}">
+    <meta property="og:description" content="{% if page.description %}{{ page.description | escape }}{% else %}Free Instagram unfollow tracker - analyze your followers and following{% endif %}">
     <meta property="og:url" content="{{ site.url }}{{ canonical_path }}">
     <meta property="og:type" content="website">
     
     <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="{{ head_title }}">
-    <meta name="twitter:description" content="{% if page.description %}{{ page.description }}{% else %}Free Instagram unfollow tracker - analyze your followers and following{% endif %}">
+    <meta name="twitter:title" content="{{ head_title | escape }}">
+    <meta name="twitter:description" content="{% if page.description %}{{ page.description | escape }}{% else %}Free Instagram unfollow tracker - analyze your followers and following{% endif %}">
 
     <link rel="canonical" href="{{ site.url }}{{ canonical_path }}"/>
 

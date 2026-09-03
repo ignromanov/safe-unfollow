@@ -101,7 +101,21 @@ describe('every published page fits the search result it appears in', () => {
   it('appends the brand suffix only for a page that opts in', () => {
     expect(LAYOUT).toMatch(/if page\.title_suffix/);
     expect(LAYOUT, 'og:title and twitter:title reuse the one computed title').toMatch(
-      /og:title" content="\{\{ head_title \}\}"/,
+      /og:title" content="\{\{ head_title \| escape \}\}"/,
+    );
+  });
+
+  /**
+   * A front-matter value reaching an HTML attribute unescaped is not a style
+   * question here: `compare/vs-followers-app.md`'s description opens on a double
+   * quote, and the first build that parsed it emitted `content=""` because the
+   * attribute closed on the page's own text. Nothing escaped anything until then,
+   * which stayed invisible only while no page's prose contained a quote.
+   */
+  it('escapes every front-matter value it puts into the page head', () => {
+    expect(LAYOUT, 'an unescaped title reaches the head').not.toMatch(/\{\{\s*head_title\s*\}\}/);
+    expect(LAYOUT, 'an unescaped description reaches the head').not.toMatch(
+      /\{\{\s*page\.description\s*\}\}/,
     );
   });
 
