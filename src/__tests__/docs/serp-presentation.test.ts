@@ -32,6 +32,9 @@ const TITLE_BUDGET = 60;
 /** The suffix the layout appends for a page that opts in via `title_suffix`. */
 const SUFFIX = ' - Instagram Unfollow Tracker';
 
+/** What Google renders of a meta description before it truncates — about 160 characters. */
+const DESCRIPTION_BUDGET = 160;
+
 /**
  * Pages `_config.yml` exempts, read from the config rather than listed here, so
  * the exemption cannot be granted in one file and forgotten in the other.
@@ -141,6 +144,18 @@ describe('every published page fits the search result it appears in', () => {
         rendered.length,
         `${doc.name} renders <title> as ${rendered.length} chars: "${rendered}"`,
       ).toBeLessThanOrEqual(frozen ? 90 : TITLE_BUDGET);
+    });
+
+    it(`${doc.name} writes a description the snippet can show whole`, () => {
+      // Same defect one field over, and it was on five pages when this was added —
+      // one at 240 characters. Measured on the source string, not the rendered
+      // attribute: `escape` turns an apostrophe into `&#39;` and inflates the
+      // count by four, while the reader sees one character.
+      expect(meta.description, `${doc.name} declares no description`).toBeTruthy();
+      expect(
+        meta.description.length,
+        `${doc.name} writes a ${meta.description.length}-character description`,
+      ).toBeLessThanOrEqual(DESCRIPTION_BUDGET);
     });
 
     it(`${doc.name} quotes the two front-matter fields that carry prose`, () => {

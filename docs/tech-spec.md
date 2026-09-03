@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "How the Instagram Unfollow Tracker Works: Architecture"
-description: 'Technical deep-dive into Instagram Unfollow Tracker. Learn about 100% local processing, IndexedDB columnar storage, BitSet filtering, and how we handle 1M+ accounts privately.'
+description: 'How the tracker works: 100% local processing, IndexedDB columnar storage, BitSet filtering, and how it is built to hold 1M+ accounts.'
 permalink: /tech-spec/
 last_updated: 2026-09-03
 ---

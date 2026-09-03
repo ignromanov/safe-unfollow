@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "SafeUnfollow vs Unfollowgram: Unfollow Tracker Compared"
-description: 'Unfollowgram''s site is serving a maintenance page as of 2026-09-03. Here is an unfollower tracker that needs no Instagram login and reads the official export instead.'
+description: 'Unfollowgram''s site was serving a maintenance page on 2026-09-03. Here is a tracker that needs no Instagram login and reads the official export instead.'
 permalink: /compare/vs-unfollowgram/
 last_updated: 2026-09-03
 ---
