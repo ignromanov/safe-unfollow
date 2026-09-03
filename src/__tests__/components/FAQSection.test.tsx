@@ -7,7 +7,7 @@ import { createI18nMock } from '@/__tests__/utils/mockI18n';
 vi.mock('react-i18next', () => createI18nMock(faqEN));
 
 import { renderWithRouter } from '../test-utils';
-import { FAQSection } from '@/components/FAQSection';
+import { FAQ_KEYS, FAQSection } from '@/components/FAQSection';
 
 describe('FAQSection Component', () => {
   describe('rendering', () => {
@@ -126,7 +126,13 @@ describe('FAQSection Component', () => {
       const script = container.querySelector('script[type="application/ld+json"]');
       const schema = JSON.parse(script!.textContent!);
 
-      expect(schema.mainEntity).toHaveLength(15);
+      // Derived, not counted by hand. This read `15` until a sixteenth FAQ key was
+      // added, and a hand count reset to `16` would only move the same landmine one
+      // entry further out — the class in progress.md P1 row 14, where a test that
+      // enumerates its own subjects passes green while an un-enumerated one ships
+      // broken. FAQ_KEYS is the array the schema is built from, so it is the only
+      // honest denominator.
+      expect(schema.mainEntity).toHaveLength(FAQ_KEYS.length);
       schema.mainEntity.forEach(
         (item: { '@type': string; acceptedAnswer: { '@type': string } }) => {
           expect(item['@type']).toBe('Question');
