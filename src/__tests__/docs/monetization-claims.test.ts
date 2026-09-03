@@ -3,6 +3,8 @@ import { join, relative } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { SUPPORTED_LANGUAGES } from '@/config/languages';
+
 const DOCS_ROOT = join(process.cwd(), 'docs');
 
 function markdownFiles(dir: string): string[] {
@@ -271,6 +273,37 @@ const CANONICAL_PRIVACY_URL = /safeunfollow\.app\/privacy/;
 const DOCS_PRIVACY_MAX_BYTES = 3500;
 
 /**
+ * The published docs escaped both of `product.md`'s standing bans: a performance figure
+ * stated as measured, and a language count that drifts from `SUPPORTED_LANGUAGES`.
+ *
+ * Neither is hypothetical — `docs/faq.md` told readers the app was "tested and verified
+ * with 1M+ accounts" and quoted "<5ms filtering" as an achieved result, while the only
+ * 1M-scale test in the repo mocks IndexedDB entirely and asserts a 500ms ceiling; no
+ * benchmark harness exists. Ten `docs/*.md` files independently said "11 languages" (some
+ * naming Hindi, retired 2026-08-08) against the real, current count of ten. Both drifted
+ * the same way this file's opening comment describes: true when written, false the moment
+ * nobody updated the sentence.
+ *
+ * `PERFORMANCE_BANNED` is a literal-phrase list, not a `NEGATION`-style pattern — there is
+ * no true way to say "tested and verified" or "<5ms" as an achieved result on this project,
+ * so no `qualifiedBy` exemption exists for it the way `free forever` has one.
+ *
+ * One page is exempted rather than fixed: `docs/instagram-export.md` is frozen until
+ * ~2026-09-15 pending a GSC-driven rewrite (`.claude/plans/2026-09-02-position-content/`
+ * task 05) and carries `~5ms` in a table at line 192 — a design target already phrased
+ * with `~`, not `<`, so it would not match `<5ms` today, but it is listed here explicitly
+ * so the exemption is visible rather than an accident of the regex, and so whoever runs
+ * task 05 knows to remove this line in the same change that rewrites the page.
+ */
+const PERFORMANCE_BANNED_DOCS_EXEMPT = new Set(['instagram-export.md']);
+
+const PERFORMANCE_BANNED: BannedEntry[] = [
+  { pattern: /tested and verified/i, why: 'no benchmark harness exists; the 1M-scale test mocks IndexedDB' },
+  { pattern: /<\s*5\s*ms/i, why: '<5ms is a design target, not a measurement (product.md → Performance Targets)' },
+  { pattern: /sub-5ms/i, why: 'same target, same ban, the marketing-shorthand spelling' },
+];
+
+/**
  * Gap-3 vocabulary — see the block comment above for why these four exist and
  * why `cloud` and `upload` don't. Scoped to `src/locales/en/*.json` only, not
  * `docs/*.md`, for the branch reason stated there. All four take
@@ -420,14 +453,51 @@ describe('docs monetization claims', () => {
   // The comparison pages are the ones that put a number in a Price row next to a
   // competitor's monthly fee. A reader comparing prices there must be able to
   // see ours, not discover it at a checkout.
-  it('discloses the export price on every page that compares prices', () => {
+  //
+  // This assertion used to require `/\$7/` — a fact that stopped being true when #165/#166
+  // made the export price per-country, and the ruling of 2026-09-01 bans a numeral for our
+  // own price in published copy (an Indonesian or Indian reader is never shown "$7"). That
+  // old assertion is exactly the failure this file's own opening comment describes, one
+  // level up: a gate that holds a stale fact in place is indistinguishable from a correct
+  // gate until you know the fact moved, and it is *worse* than a missing gate because it
+  // actively blocks the correction — `docs/roadmap.md` and two `docs/compare/*.md` pages
+  // could not be fixed until this line was.
+  it('discloses the export price on every page that compares prices, without naming our own numeral', () => {
     const priceTables = DOCS.filter(doc => /\|\s*\*\*Price\*\*\s*\|/.test(doc.text));
 
-    expect(priceTables.length, 'comparison pages with a Price row').toBe(3);
+    // >= , not ===: task 04 of the same plan adds more comparison pages, and a hand count
+    // here would fail on that growth the same way the `$7` literal failed on a price change.
+    expect(priceTables.length, 'comparison pages with a Price row').toBeGreaterThanOrEqual(3);
     for (const doc of priceTables) {
-      expect(doc.text, `${doc.name} states the export price`).toMatch(/\$7/);
+      expect(doc.text, `${doc.name} discloses the export is a one-time purchase`).toMatch(/one-time/i);
+      expect(doc.text, `${doc.name} must not name our own price as a numeral`).not.toMatch(/\$\s?7\b/);
     }
   });
+
+  it('never states a language count other than SUPPORTED_LANGUAGES.length', () => {
+    const pattern = /\b(\d+)\s+languages?\b/gi;
+    const offenders = DOCS.flatMap(doc => {
+      const badCounts = [...doc.text.matchAll(pattern)]
+        .map(match => Number(match[1]))
+        .filter(count => count !== SUPPORTED_LANGUAGES.length);
+      return badCounts.length > 0 ? [`${doc.name} (${[...new Set(badCounts)].join(', ')})`] : [];
+    });
+
+    expect(
+      offenders,
+      `${offenders.join(', ')} — the real count is ${SUPPORTED_LANGUAGES.length} (src/config/languages.ts)`,
+    ).toEqual([]);
+  });
+
+  for (const entry of PERFORMANCE_BANNED) {
+    it(`never claims ${String(entry.pattern)} in docs/*.md — ${entry.why}`, () => {
+      const offenders = DOCS.filter(
+        doc => !PERFORMANCE_BANNED_DOCS_EXEMPT.has(doc.name) && entry.pattern.test(doc.text),
+      ).map(doc => doc.name);
+
+      expect(offenders, `${offenders.join(', ')} — ${entry.why}`).toEqual([]);
+    });
+  }
 });
 
 describe('shipped UI copy monetization claims — English locale', () => {

@@ -45,6 +45,14 @@
         "href": "/wizard"
       }
     },
+    "htmlExport": {
+      "question": "J'ai exporté en HTML au lieu de JSON. Dois-je exporter à nouveau ?",
+      "answer": "Non. SafeUnfollow lit désormais les deux formats. Les exports HTML fonctionnent aussi, mais JSON est le format que nous lisons de la manière la plus fiable, c'est donc celui que le guide recommande toujours. Importez le ZIP que vous avez déjà.",
+      "relatedLink": {
+        "text": "Comment obtenir votre export",
+        "href": "/upload?guide=1"
+      }
+    },
     "accountSafety": {
       "question": "Mon compte Instagram sera-t-il en sécurité en utilisant ce suivi ?",
       "answer": "Oui, 100% sûr. Contrairement aux applications qui demandent votre mot de passe et « extraient » des données (ce qui viole les Conditions d'utilisation), cet outil utilise votre exportation officielle de données. Aucun identifiant requis : vous téléchargez le ZIP directement depuis Instagram et le téléversez localement dans votre navigateur. Nous n'accédons jamais à votre compte.",

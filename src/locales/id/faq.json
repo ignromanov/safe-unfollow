@@ -45,6 +45,14 @@
         "href": "/wizard"
       }
     },
+    "htmlExport": {
+      "question": "Saya mengekspor HTML, bukan JSON. Apakah saya perlu mengekspor ulang?",
+      "answer": "Tidak. SafeUnfollow kini membaca kedua format. Ekspor HTML juga berfungsi, tetapi JSON adalah format yang paling andal untuk kami baca, jadi itu yang tetap direkomendasikan panduan. Cukup unggah ZIP yang sudah Anda miliki.",
+      "relatedLink": {
+        "text": "Pelajari cara mendapatkan ekspor Anda",
+        "href": "/upload?guide=1"
+      }
+    },
     "accountSafety": {
       "question": "Apakah akun Instagram saya akan aman menggunakan pelacak ini?",
       "answer": "Ya, 100% aman. Berbeda dengan aplikasi yang meminta kata sandi Anda dan 'scrape' data (yang melanggar Ketentuan Layanan), alat ini menggunakan ekspor data resmi Anda. Tidak perlu login: Anda mengunduh ZIP langsung dari Instagram, lalu mengunggahnya secara lokal ke browser Anda. Kami tidak pernah mengakses akun Anda.",

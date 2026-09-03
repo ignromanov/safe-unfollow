@@ -45,6 +45,14 @@
         "href": "/wizard"
       }
     },
+    "htmlExport": {
+      "question": "Exportei em HTML em vez de JSON. Preciso exportar de novo?",
+      "answer": "Não. O SafeUnfollow já lê os dois formatos. Exportações em HTML também funcionam, mas o JSON é o formato que lemos com mais confiabilidade, por isso continua sendo o que o guia recomenda. Envie o ZIP que você já tem.",
+      "relatedLink": {
+        "text": "Como obter sua exportação",
+        "href": "/upload?guide=1"
+      }
+    },
     "accountSafety": {
       "question": "Minha conta do Instagram estará segura usando este rastreador?",
       "answer": "Sim, 100% seguro. Diferente de apps que pedem sua senha e 'raspam' dados (o que viola os Termos de Serviço), esta ferramenta usa sua exportação oficial de dados. Não precisa de login: você baixa o ZIP diretamente do Instagram e o envia localmente para seu navegador. Nunca acessamos sua conta.",

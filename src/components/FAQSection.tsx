@@ -17,13 +17,14 @@ interface FAQItem {
 }
 
 // Reordered: high-intent questions first for better SEO
-const FAQ_KEYS = [
+export const FAQ_KEYS = [
   'howToFind', // "How to check who unfollowed" - highest intent
   'withoutDownload', // NEW: "Can I check without download" - captures "no app" searches
   'privacy', // "How does it work without login" - trust + method
   'safety', // "Is it safe to use" - trust signal
   'dataIncluded', // NEW: "What data is included" - educational
   'zipFile', // "What is data download" - educational
+  'htmlExport', // "Do I need to re-export as JSON" - format question, beside zipFile
   'accountSafety', // "Is account safe" - trust
   'downloadTime', // NEW: "How long to receive" - practical
   'scale', // "How many accounts" - differentiator

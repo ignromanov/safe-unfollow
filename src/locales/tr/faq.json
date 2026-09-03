@@ -45,6 +45,14 @@
         "href": "/wizard"
       }
     },
+    "htmlExport": {
+      "question": "JSON yerine HTML dışa aktardım. Tekrar dışa aktarmam gerekiyor mu?",
+      "answer": "Hayır. SafeUnfollow artık her iki formatı da okuyor. HTML dışa aktarımları da çalışır, ancak en güvenilir şekilde JSON formatını okuruz, bu yüzden kılavuz hâlâ JSON'u önerir. Zaten elindeki ZIP dosyasını yükle.",
+      "relatedLink": {
+        "text": "Dışa aktarımınızı nasıl alacağınızı öğrenin",
+        "href": "/upload?guide=1"
+      }
+    },
     "accountSafety": {
       "question": "Bu izleyiciyi kullanırken Instagram hesabım güvende olacak mı?",
       "answer": "Evet, %100 güvenli. Şifrenizi isteyen ve veri 'kazıyan' uygulamaların aksine (Hizmet Koşullarını ihlal eder), bu araç resmi veri dışa aktarımınızı kullanır. Giriş gerekmez: ZIP'i doğrudan Instagram'dan indirirsiniz, ardından tarayıcınıza yerel olarak yüklersiniz. Hesabınıza asla erişmiyoruz.",
