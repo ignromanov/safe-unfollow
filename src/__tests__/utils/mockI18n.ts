@@ -24,9 +24,17 @@ import type { ReactNode } from 'react';
  * ```
  */
 export function createI18nMockFactory(translationObject: unknown) {
-  // Navigate nested keys like 'buttons.next'
+  // Navigate nested keys like 'buttons.next'.
+  //
+  // A leading `ns:` is read as one more level, so a component that calls
+  // `useTranslation(['howto', 'wizard'])` and asks for `wizard:entry.cta`
+  // resolves against `{ ...howtoEN, wizard: wizardEN }`. Only the FIRST colon
+  // is rewritten, and a key without one behaves exactly as it did — real
+  // i18next treats `ns:` as a namespace rather than a path segment, and this
+  // is the smallest thing that makes a two-namespace component testable
+  // without merging two bundles that both define `steps`.
   const lookup = (key: string): string | undefined => {
-    const keys = key.split('.');
+    const keys = key.replace(':', '.').split('.');
     let value: unknown = translationObject;
 
     for (const k of keys) {

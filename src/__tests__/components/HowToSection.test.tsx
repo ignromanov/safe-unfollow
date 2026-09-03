@@ -1,13 +1,16 @@
 import { vi, beforeEach } from 'vitest';
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import { renderWithRouter } from '@/__tests__/test-utils';
 import howtoEN from '@/locales/en/howto.json';
+import wizardEN from '@/locales/en/wizard.json';
 import { createI18nMock } from '@/__tests__/utils/mockI18n';
 
-vi.mock('react-i18next', () => createI18nMock(howtoEN));
+// Two namespaces, nested rather than merged: both bundles define `steps`, and a
+// flat spread would let wizard's eight silently replace howto's nine.
+vi.mock('react-i18next', () => createI18nMock({ ...howtoEN, wizard: wizardEN }));
 
 import { HowToSection } from '@/components/HowToSection';
-import { GUIDE_STEPS } from '@/config/wizard-steps';
+import { ACCOUNTS_CENTER_URL, GUIDE_STEPS } from '@/config/wizard-steps';
 
 // Step titles indexed by step number (1-9), avoiding a computed-key lookup on the
 // narrowly-typed `howtoEN.steps` object.
@@ -23,10 +26,15 @@ const STEP_TITLES = [
   howtoEN.steps['9'].title,
 ];
 
-// Mirrors the mockI18n interpolation used for openStepAria, which becomes the accessible
-// name of each step's PrefixedLink via its aria-label.
-function stepAriaLabel(step: number, title: string): string {
-  return howtoEN.openStepAria.replace('{{step}}', String(step)).replace('{{title}}', title);
+/** The card carrying a heading, for a section whose rows are no longer links. */
+function card(title: string): HTMLElement {
+  return screen
+    .getByRole('heading', { level: 3, name: new RegExp(escapeRe(title)) })
+    .closest('li')!;
+}
+
+function escapeRe(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 describe('HowToSection', () => {
@@ -183,38 +191,51 @@ describe('HowToSection', () => {
     });
   });
 
-  describe('step links', () => {
-    // The number on the card IS the section number in its URL, for every card
-    // that has a section. That is what this block exists to hold, and it did
-    // not hold: while "Open Accounts Center" sat outside the guide's
-    // numbering, card 6 linked to `?step=5` and the reader arrived at a dialog
-    // headed "Step 5 of 7" for the instruction they had just seen numbered 6.
-    // The version of this test that shipped asserted `?step=${card - 1}` and
-    // passed — a gate can hold a wrong fact in place, and it looks exactly
-    // like a correct gate until you know the fact moved.
+  describe('actions', () => {
+    // The rows stopped being links. Every card used to be an anchor into the
+    // guide dialog on /upload — nine links to one screen, from a section that
+    // already renders the same eight posters and the same eight instructions.
+    // The page has to answer the question by itself, so the only links left in
+    // the list are the two things a reader can actually do from here.
     it('should give the how-to one card per guide section, plus the hand-off', () => {
-      // Derived from GUIDE_STEPS so the two lists cannot drift apart again.
-      // The extra card is ours, not Meta's: "Upload Your File" is the only
-      // step of the nine that does not happen inside Instagram.
+      // Derived from GUIDE_STEPS so the two lists cannot drift apart. The extra
+      // card is ours, not Meta's: "Upload Your File" is the only step of the
+      // nine that does not happen inside Instagram.
       expect(STEP_TITLES).toHaveLength(GUIDE_STEPS.length + 1);
     });
 
-    it('should link every card but the last to the section that shares its number', () => {
+    it('should send step 1 to Accounts Center, in a new tab', () => {
       renderWithRouter(<HowToSection />);
 
-      STEP_TITLES.slice(0, -1).forEach((title, idx) => {
-        const card = idx + 1;
-        const link = screen.getByRole('link', { name: stepAriaLabel(card, title) });
-        expect(link, `card ${card}`).toHaveAttribute('href', `/upload?step=${card}`);
-      });
+      const link = within(card(STEP_TITLES[0]!)).getByRole('link');
+      expect(link).toHaveAttribute('href', ACCOUNTS_CENTER_URL);
+      expect(link).toHaveAttribute('target', '_blank');
+      expect(link).toHaveAttribute('rel', expect.stringContaining('noopener'));
     });
 
-    it('should link the last step card to the upload page', () => {
+    it('should send the last step to the upload page', () => {
       renderWithRouter(<HowToSection />);
 
-      const last = STEP_TITLES.length;
-      const link = screen.getByRole('link', { name: stepAriaLabel(last, STEP_TITLES[last - 1]) });
+      const link = within(card(STEP_TITLES[STEP_TITLES.length - 1]!)).getByRole('link');
       expect(link).toHaveAttribute('href', '/upload');
+    });
+
+    it('should leave every step between them without a link', () => {
+      renderWithRouter(<HowToSection />);
+
+      for (const title of STEP_TITLES.slice(1, -1)) {
+        expect(within(card(title!)).queryAllByRole('link'), title).toHaveLength(0);
+      }
+    });
+
+    it('should not open the guide dialog from any step card', () => {
+      // The guard this block exists for. `?step=` was on nine anchors here;
+      // the CTA below is the one deliberate way into the dialog from this page,
+      // and it opens the guide at its start rather than at a section.
+      const { container } = renderWithRouter(<HowToSection />);
+
+      const hrefs = [...container.querySelectorAll('a')].map(a => a.getAttribute('href'));
+      expect(hrefs.filter(href => href?.includes('step='))).toEqual([]);
     });
 
     it('should link the final CTA to the guide', () => {
@@ -224,40 +245,41 @@ describe('HowToSection', () => {
       expect(cta).toHaveAttribute('href', '/upload?guide=1');
     });
 
-    // `?guide=1` and `?step=N` are two different query shapes through the same
-    // PrefixedLink, and only the first was pinned. Eight of the nine rows on
-    // every localized page use the `?step=` form, so a prefixing regression
-    // that spared `?guide=1` would drop nine locales' worth of section links
-    // into the English funnel with no runtime symptom.
-    it('should carry the language prefix on the guide CTA', () => {
+    it('should carry the language prefix on both internal links', () => {
+      // `?guide=1` and a bare path are two shapes through the same
+      // PrefixedLink. The Accounts Center link is deliberately absent from this
+      // assertion: it is external and must NOT be prefixed.
       renderWithRouter(<HowToSection />, { initialEntries: ['/id'] });
 
-      const cta = screen.getByRole('link', { name: /Open Analysis Guide/i });
-      expect(cta).toHaveAttribute('href', '/id/upload?guide=1');
+      expect(screen.getByRole('link', { name: /Open Analysis Guide/i })).toHaveAttribute(
+        'href',
+        '/id/upload?guide=1'
+      );
+      const last = within(card(STEP_TITLES[STEP_TITLES.length - 1]!)).getByRole('link');
+      expect(last).toHaveAttribute('href', '/id/upload');
     });
 
-    it('should carry the language prefix on a step-section link too', () => {
+    it('should not prefix the external Accounts Center link with a locale', () => {
       renderWithRouter(<HowToSection />, { initialEntries: ['/id'] });
 
-      const link = screen.getByRole('link', { name: stepAriaLabel(1, STEP_TITLES[0]) });
-      expect(link).toHaveAttribute('href', '/id/upload?step=1');
+      const link = within(card(STEP_TITLES[0]!)).getByRole('link');
+      expect(link).toHaveAttribute('href', ACCOUNTS_CENTER_URL);
     });
   });
 
   describe('keyboard accessibility', () => {
-    // The hand-rolled onKeyDown handler (Enter/Space) that these tests used to assert is
-    // gone — each step card is now a PrefixedLink, i.e. a real <a href>, which browsers
-    // make keyboard-operable natively. Asserting the anchor tag is the accessibility
-    // property that actually matters post-refactor; there is no custom key handling left
-    // to test.
-    it('should render every step card as a native anchor', () => {
+    // The hand-rolled onKeyDown handler these tests used to assert is long
+    // gone, and so is the anchor that replaced it on every card: the rows are
+    // content, and content is not something to operate. What remains keyboard-
+    // operable is what is actually actionable, and it is native <a> in both
+    // cases rather than a div with a click handler.
+    it('should expose exactly the two step actions as native anchors', () => {
       renderWithRouter(<HowToSection />);
 
-      STEP_TITLES.forEach((title, idx) => {
-        const step = idx + 1;
-        const link = screen.getByRole('link', { name: stepAriaLabel(step, title) });
-        expect(link.tagName).toBe('A');
-      });
+      const first = within(card(STEP_TITLES[0]!)).getByRole('link');
+      const last = within(card(STEP_TITLES[STEP_TITLES.length - 1]!)).getByRole('link');
+      expect(first.tagName).toBe('A');
+      expect(last.tagName).toBe('A');
     });
   });
 });
