@@ -15,8 +15,17 @@
       {%- else -%}Instagram Unfollow Tracker{%- endif -%}
     {%- endcapture -%}
     <title>{{ head_title | escape }}</title>
-    <meta name="description" content="{% if page.description %}{{ page.description | escape }}{% else %}Free Instagram unfollow tracker - analyze your followers and following{% endif %}">
-    
+    {%- comment -%}
+      Same reasoning as head_title: this used to be four copies of one if/else,
+      pasted into the description meta, og:description and twitter:description.
+      A change to the fallback text or the escaping could land on one tag and
+      miss the other three. One capture, three readers.
+    {%- endcomment -%}
+    {%- capture head_description -%}
+      {%- if page.description -%}{{ page.description }}{%- else -%}Free Instagram unfollow tracker - analyze your followers and following{%- endif -%}
+    {%- endcapture -%}
+    <meta name="description" content="{{ head_description | escape }}">
+
     {%- comment -%}
       Vercel serves this site with trailingSlash: false, so /docs/faq/ 308-redirects
       to /docs/faq. Jekyll's pretty permalinks end in a slash, so page.url alone would
@@ -31,13 +40,13 @@
 
     <!-- SEO and social meta tags -->
     <meta property="og:title" content="{{ head_title | escape }}">
-    <meta property="og:description" content="{% if page.description %}{{ page.description | escape }}{% else %}Free Instagram unfollow tracker - analyze your followers and following{% endif %}">
+    <meta property="og:description" content="{{ head_description | escape }}">
     <meta property="og:url" content="{{ site.url }}{{ canonical_path }}">
     <meta property="og:type" content="website">
     
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="{{ head_title | escape }}">
-    <meta name="twitter:description" content="{% if page.description %}{{ page.description | escape }}{% else %}Free Instagram unfollow tracker - analyze your followers and following{% endif %}">
+    <meta name="twitter:description" content="{{ head_description | escape }}">
 
     <link rel="canonical" href="{{ site.url }}{{ canonical_path }}"/>
 
@@ -153,7 +162,7 @@
               where it would drift from the front matter that sets it.
             {%- endcomment -%}
             {%- if page.last_updated %}
-            <p class="last-updated">Last updated: <time datetime="{{ page.last_updated }}">{{ page.last_updated }}</time></p>
+            <p class="last-updated">Last updated: <time datetime="{{ page.last_updated | escape }}">{{ page.last_updated | escape }}</time></p>
             {%- endif %}
         </main>
         
