@@ -1,5 +1,6 @@
+import { execSync } from 'node:child_process';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { basename, join, relative } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
@@ -93,11 +94,11 @@ const DOCS = markdownFiles(DOCS_ROOT).map(path => ({
  * from an inventory of what the product actually runs. It will always be
  * blind to a vendor nobody has thought to name yet. The instruction that
  * follows from that, for whoever ships the next revenue surface or the next
- * data-leaving-the-browser integration: add the noun it falsifies to `LOCALE_ONLY_BANNED`
+ * data-leaving-the-browser integration: add the noun it falsifies to `BANNED`
  * below in the same change that ships it. Nothing else will prompt that later —
  * this file cannot invent a noun it has never been told about.
  *
- * Three things intentionally not in `LOCALE_ONLY_BANNED`, each rejected on
+ * Three things intentionally not in `BANNED`, each rejected on
  * stated grounds rather than left uncounted:
  *
  * - `login` is not a noun: "No login" is true everywhere it appears (this
@@ -121,16 +122,35 @@ const DOCS = markdownFiles(DOCS_ROOT).map(path => ({
  *   keeping a noun that fires on instructional copy trains readers to ignore
  *   the file, which is a worse outcome than the coverage gap it would close.
  *
- * `LOCALE_ONLY_BANNED`, not `BANNED`: these four patterns run over
- * `src/locales/en/*.json` only, not `docs/*.md`, on this branch specifically.
- * `docs/privacy.md` alone holds four claims of this exact shape on `main`
- * (one on `fix/docs-deny-live-third-parties`, which is already rewriting them
- * and carries its own `BANNED_PRIVACY` list) — fixing them here would rewrite
- * lines that branch is already rewriting, and the conflict would be resolved
- * by hand for no gain. When `fix/docs-deny-live-third-parties` merges, the
- * next step is one line: fold `LOCALE_ONLY_BANNED` back into `BANNED` and let
- * the assertions run over `DOCS` too — they will go green, or reveal whatever
- * that branch didn't cover.
+ * The last four entries (`servers`, `logs`, `databases`, `data sent
+ * anywhere`) spent six weeks in a separate `LOCALE_ONLY_BANNED` list that ran
+ * over `src/locales/en/*.json` only, deferred until
+ * `fix/docs-deny-live-third-parties` had finished rewriting `docs/privacy.md`.
+ * That branch merged as `ee6b92d` (#67) and the exemption outlived its own
+ * stated condition — `docs/index.md` went on saying "No data collection, no
+ * tracking, no servers" while the file that bans that sentence skipped the
+ * corpus it was written for. Folded back 2026-09-03; the exemption is gone and
+ * these run over `DOCS` like everything else.
+ *
+ * What the fold-back flagged, and what each one turned out to be, because the
+ * two kinds are not the same defect:
+ *
+ * - **False claims, rewritten**: `docs/index.md`'s "No data collection, no
+ *   tracking, no servers" and `docs/faq.md`'s "nothing is sent to any server
+ *   or stored anywhere" — both blanket, both false since Umami and AdSense
+ *   shipped, both narrowed to the claim that is actually true (the Instagram
+ *   export is never uploaded).
+ * - **A qualifier lost to a line break**: `docs/privacy.md` already said "no
+ *   server that receives **your Instagram export**", correctly bounded — but
+ *   `qualificationWindow` reads one line, and the noun phrase had wrapped onto
+ *   the next one. Fixed by reflowing the source line, not by loosening the
+ *   window: widening it would hand every pattern here a longer reach,
+ *   including the ones that have been guarding `docs/*.md` all along. Hard
+ *   wrapping is why this only bites markdown — a JSON locale string has no
+ *   newline to hide the qualifier behind. That fix survives `prettier` only
+ *   because `.prettierrc`'s `proseWrap` is left at its default of `preserve`;
+ *   setting it to `always` would rewrap these files and could turn a correctly
+ *   bounded sentence red. If that ever happens, the sentence is not the bug.
  */
 const NEGATION = '\\b(?:no|not|without|zero|never)\\b';
 const GAP = '[^.\\n]{0,60}';
@@ -232,6 +252,31 @@ const BANNED: BannedEntry[] = [
     why: 'true of the analysis, read as true of everything',
     qualifiedBy: QUALIFIER_BOUND,
   },
+  // Gap-3 vocabulary — see the block comment above for why these four exist, why
+  // `cloud` and `upload` don't, and why they ran over locales only until 2026-09-03.
+  // All four take `qualifiedBy: QUALIFIER_BOUND` for the same reason `free forever`
+  // does: a claim that names its subject — "no servers store or access **your ZIP
+  // file**" — is a different claim from one that doesn't.
+  {
+    pattern: new RegExp(`${NEGATION}${GAP}\\bservers?\\b`, 'i'),
+    why: 'Vercel serves the site end to end — there is a server',
+    qualifiedBy: QUALIFIER_BOUND,
+  },
+  {
+    pattern: new RegExp(`${NEGATION}${GAP}\\blogs?\\b`, 'i'),
+    why: 'Vercel keeps access logs and Umami logs every event',
+    qualifiedBy: QUALIFIER_BOUND,
+  },
+  {
+    pattern: new RegExp(`${NEGATION}${GAP}\\bdatabases?\\b`, 'i'),
+    why: "Umami's events land in a Supabase database",
+    qualifiedBy: QUALIFIER_BOUND,
+  },
+  {
+    pattern: new RegExp(`${NEGATION}${GAP}\\bdata\\b${PHRASE_GAP}\\bsent\\b${PHRASE_GAP}\\b(?:anywhere|to)\\b`, 'i'),
+    why: 'Umami events and AdSense ad requests are data, and they are sent off-device',
+    qualifiedBy: QUALIFIER_BOUND,
+  },
 ];
 
 /**
@@ -301,38 +346,6 @@ const PERFORMANCE_BANNED: BannedEntry[] = [
   { pattern: /tested and verified/i, why: 'no benchmark harness exists; the 1M-scale test mocks IndexedDB' },
   { pattern: /<\s*5\s*ms/i, why: '<5ms is a design target, not a measurement (product.md → Performance Targets)' },
   { pattern: /sub-5ms/i, why: 'same target, same ban, the marketing-shorthand spelling' },
-];
-
-/**
- * Gap-3 vocabulary — see the block comment above for why these four exist and
- * why `cloud` and `upload` don't. Scoped to `src/locales/en/*.json` only, not
- * `docs/*.md`, for the branch reason stated there. All four take
- * `qualifiedBy: QUALIFIER_BOUND` for the same reason `free forever` does: a
- * claim that names its subject — "no servers store or access **your ZIP
- * file**" — is a different claim from one that doesn't, and the difference
- * is not a coincidence of phrasing this list should flag anyway.
- */
-const LOCALE_ONLY_BANNED: BannedEntry[] = [
-  {
-    pattern: new RegExp(`${NEGATION}${GAP}\\bservers?\\b`, 'i'),
-    why: 'Vercel serves the site end to end — there is a server',
-    qualifiedBy: QUALIFIER_BOUND,
-  },
-  {
-    pattern: new RegExp(`${NEGATION}${GAP}\\blogs?\\b`, 'i'),
-    why: 'Vercel keeps access logs and Umami logs every event',
-    qualifiedBy: QUALIFIER_BOUND,
-  },
-  {
-    pattern: new RegExp(`${NEGATION}${GAP}\\bdatabases?\\b`, 'i'),
-    why: "Umami's events land in a Supabase database",
-    qualifiedBy: QUALIFIER_BOUND,
-  },
-  {
-    pattern: new RegExp(`${NEGATION}${GAP}\\bdata\\b${PHRASE_GAP}\\bsent\\b${PHRASE_GAP}\\b(?:anywhere|to)\\b`, 'i'),
-    why: 'Umami events and AdSense ad requests are data, and they are sent off-device',
-    qualifiedBy: QUALIFIER_BOUND,
-  },
 ];
 
 /**
@@ -439,6 +452,45 @@ describe('docs monetization claims', () => {
     });
   }
 
+  /**
+   * `docs/is-it-safe.md` tells the reader "We do not publish a browser extension."
+   * That sentence is the third of three velum-cdpo approved on 2026-09-03
+   * (`decisions/2026-09-03-velum-cdpo-we-license-the-checklist-and-refuse-the-named-claim.md`),
+   * deliberately split off from the two permanent ones because it is the
+   * reversible one: shipping an extension later falsifies this clause alone. The
+   * ruling asks for it to be gated structurally rather than merely written, which
+   * is what this is — the day a `manifest_version` artifact lands, this test goes
+   * red and whoever added it has to edit the sentence in the same change.
+   *
+   * The inventory comes from `git ls-files`, not a directory walk, because "in
+   * the repo" is what the claim is about and a walk finds vendored copies that
+   * are not ours — `.ds-sync/node_modules` alone carries a `manifest.webmanifest`
+   * belonging to playwright. The length assertion is not decoration: an empty
+   * list from a failed `git` call would otherwise pass this test silently, which
+   * is the failure mode the rest of this file exists to prevent.
+   */
+  it('publishes no browser extension, which is what lets the docs say so', () => {
+    const tracked = execSync('git ls-files -z', { cwd: process.cwd(), encoding: 'utf-8' })
+      .split('\0')
+      .filter(Boolean);
+
+    expect(tracked.length, 'git ls-files returned nothing — the gate could not run').toBeGreaterThan(100);
+
+    const manifests = tracked.filter(file => {
+      const name = basename(file);
+      return /^manifest.*\.json$/i.test(name) || name.endsWith('.webmanifest');
+    });
+
+    const extensionManifests = manifests.filter(file =>
+      /"manifest_version"/.test(readFileSync(join(process.cwd(), file), 'utf-8')),
+    );
+
+    expect(
+      extensionManifests,
+      'an extension manifest ships in this repo — docs/is-it-safe.md says we publish none',
+    ).toEqual([]);
+  });
+
   it('keeps exactly one privacy policy, and it is not this one', () => {
     const doc = DOCS.find(entry => entry.name === 'privacy.md');
 
@@ -505,7 +557,7 @@ describe('shipped UI copy monetization claims — English locale', () => {
     expect(EN_LOCALE_FILES.length).toBeGreaterThan(0);
   });
 
-  for (const entry of [...BANNED, ...LOCALE_ONLY_BANNED]) {
+  for (const entry of BANNED) {
     it(`never claims ${String(entry.pattern)} in src/locales/en — ${entry.why}`, () => {
       const offenders = EN_LOCALE_FILES.flatMap(file =>
         file.values

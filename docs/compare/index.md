@@ -9,6 +9,8 @@ permalink: /compare/
 
 Looking for the best way to check who unfollowed you on Instagram? Here's how SafeUnfollow compares to popular alternatives.
 
+Not sure whether any unfollowers tracker — including this one — is trustworthy? [See the five checkable facts, and the test you can run yourself](/docs/is-it-safe/).
+
 ## Quick Comparison
 
 | Feature | **SafeUnfollow** | Unfollowgram | Followers App | FollowMeter |

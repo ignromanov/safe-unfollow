@@ -198,7 +198,7 @@ If your archive has a different folder structure, the tracker will try to locate
 Your Instagram data export contains personal information. Here's how we handle it:
 
 - **100% local processing** — Your ZIP file is analyzed entirely in your browser
-- **No server uploads** — Data never leaves your device
+- **No server uploads** — your export never leaves your device
 - **No login required** — We never ask for your Instagram password
 - **No tracking** — We don't track individual users or store any data
 - **Open source** — [View the code on GitHub](https://github.com/ignromanov/safe-unfollow)
