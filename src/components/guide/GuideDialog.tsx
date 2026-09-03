@@ -330,10 +330,18 @@ export function GuideDialog({
               <Calendar size={18} aria-hidden="true" />
               {t('calendar.addReminder')}
             </button>
+            {/* Ghost, but the same 48px box as the two above it. It used to
+                be a bare line of text: the only one of the three controls
+                without a min-height, so a reader at the bottom of the scroll
+                saw two buttons and a grey caption. Same size, less ink, is
+                what keeps it readable as a control without making it compete
+                with the CTA — and the hover is neutral (`bg-muted`) rather
+                than brand-tinted, because leaving is not one of the two
+                things this card is asking for. */}
             <button
               type="button"
               onClick={onClose}
-              className="cursor-pointer text-sm font-bold text-muted-foreground hover:text-foreground"
+              className="inline-flex min-h-[48px] cursor-pointer items-center justify-center rounded-2xl px-6 py-3 text-sm font-bold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
               {t('buttons.close')}
             </button>

@@ -173,6 +173,33 @@ describe('GuideDialog', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  it('gives every control in its closing card the same target height', () => {
+    // The close control used to be a bare line of text - the only one of the
+    // three without a min-height, so the card ended in two 48px buttons and a
+    // grey caption under them. Weight in this card is carried by fill, not by
+    // size, and a control the reader cannot recognise as one is not a quieter
+    // control.
+    //
+    // The subjects are read out of the DOM rather than named one by one: a
+    // fourth control added to this card is bound by this the day it appears.
+    // Naming them by hand is the shape `upload-affiliate-keys.test.ts` ships
+    // (progress.md P1 row 14) - green on the nine it lists, silent on the
+    // tenth. jsdom computes no layout, so what is pinned is the class that
+    // produces the height, not the height.
+    open();
+
+    const scroll = document.querySelector('[data-guide-scroll]') as HTMLElement;
+    const card = within(scroll)
+      .getByRole('button', { name: wizardEN.buttons.close })
+      .closest('div') as HTMLElement;
+    const controls = card.querySelectorAll('a, button');
+
+    expect(controls).toHaveLength(3);
+    for (const control of controls) {
+      expect(control.className).toContain('min-h-[48px]');
+    }
+  });
+
   it('asks the rail for a section rather than navigating', async () => {
     const onGoToStep = vi.fn();
     const user = userEvent.setup();
