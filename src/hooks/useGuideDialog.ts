@@ -41,7 +41,8 @@ function parseStep(raw: string | null): number | null {
  * than a number to copy. It read "160" here until this branch corrected it,
  * which is why it now cites its source instead of restating one.
  *
- * `?step` outside 1..7 is not an error and does not close the dialog — it is
+ * `?step` outside the guide's numbering is not an error and does not close
+ * the dialog — it is
  * someone following a link that used to mean something, and the honest answer
  * is the guide from the start.
  */

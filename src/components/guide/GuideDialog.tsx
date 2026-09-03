@@ -284,22 +284,12 @@ export function GuideDialog({
           aria-label={t('entry.accordion.trigger', { count: GUIDE_STEPS.length })}
           className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4"
         >
-          {/* Unconditional: this is the step before step 1, and nothing else
-              in the guide says where Meta's profile picker lives — sections
-              1..7 walk the export flow once the reader is already inside it.
-              Four of the six ways into this dialog (the StepAccordion row,
-              and all three UploadZone triggers) used to open here with no
-              way to reach Accounts Center at all. */}
-          <a
-            href={ACCOUNTS_CENTER_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => analytics.linkClick('meta_accounts')}
-            className="inline-flex min-h-[48px] w-full shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-normal rounded-2xl bg-primary px-6 py-3 text-center text-sm font-black text-primary-foreground shadow-lg"
-          >
-            {t('entry.cta')} <ExternalLink size={18} className="shrink-0" aria-hidden="true" />
-          </a>
-
+          {/* No standalone Accounts Center button above the sections any more:
+              it was here because "go to Accounts Center" was not a step, and
+              four of the six ways into this dialog opened with no way to reach
+              it. It is section 1 now, first in this scroll and numbered, so a
+              button repeating it here would be the third copy of one link in
+              one dialog. */}
           {GUIDE_STEPS.map(guideStep => (
             <GuideStepSection
               key={guideStep.id}

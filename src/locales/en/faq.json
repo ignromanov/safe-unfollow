@@ -66,7 +66,7 @@
       "answer": "Meta typically sends your data within 5-30 minutes via email. Larger accounts or high server load may take up to a few hours. Once you have the ZIP, the analysis runs in your own browser rather than on a server, so there is no queue and no upload wait. Bigger exports naturally take longer to read than small ones.",
       "relatedLink": {
         "text": "Set a calendar reminder",
-        "href": "/upload?step=7"
+        "href": "/upload?step=8"
       }
     },
     "scale": {

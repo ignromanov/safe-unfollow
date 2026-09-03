@@ -9,8 +9,12 @@ vi.mock('react-i18next', () => createI18nMock(wizardEN));
 import { GuideStepSection } from '@/components/guide/GuideStepSection';
 import { GUIDE_STEPS } from '@/config/wizard-steps';
 
-const PLAIN = GUIDE_STEPS[3]!; // id 4, no warning
-const WARNING = GUIDE_STEPS[2]!; // id 3, the only step marked isWarning
+// Found by the flag, not by index. The warning has moved with the numbering
+// twice now — step 4, then 3, then 4 again — and an index chosen to match it
+// becomes a second plain step, which makes the assertion below vacuous rather
+// than failing.
+const WARNING = GUIDE_STEPS.find(step => step.isWarning)!;
+const PLAIN = GUIDE_STEPS.find(step => !step.isWarning)!;
 
 describe('GuideStepSection', () => {
   it('renders a lazy image, not a video, while off-screen', () => {

@@ -6,6 +6,11 @@ import type { DiagnosticErrorCode } from '@/core/types';
  * Was one hardcoded 6 for every code, threaded to five call sites: a reader
  * whose ZIP was not an Instagram export landed on the page about choosing JSON.
  *
+ * The two numbers below moved by one when "Open Accounts Center" became step 1
+ * of the guide instead of a button standing outside its numbering. They are
+ * section ids, so they follow `GUIDE_STEPS`, and `wizard-routing.test.ts`
+ * bounds them against its length rather than trusting these literals.
+ *
  * `undefined` and `'UNKNOWN'` are not the same input. `undefined` means no code
  * was ever produced (a caller that never diagnosed the failure) and keeps the
  * long-standing fallback to the format step. `'UNKNOWN'` means a diagnosis ran
@@ -29,11 +34,11 @@ export function guideStepForError(code?: DiagnosticErrorCode): number | null {
     case 'NO_DATA_FILES':
     case 'MISSING_FOLLOWING':
     case 'MISSING_FOLLOWERS':
-      return 3;
+      return 4;
     case 'UNKNOWN':
       return null;
     default:
-      return 5;
+      return 6;
   }
 }
 
@@ -44,7 +49,7 @@ export function guideStepForError(code?: DiagnosticErrorCode): number | null {
  * rather than read via a hook so this stays a pure function callable from
  * non-component code.
  *
- * ⚠️ `default: return 5` lives on borrowed time. `HTML_FORMAT` has no case of
+ * ⚠️ `default: return 6` lives on borrowed time. `HTML_FORMAT` has no case of
  * its own — it rides the default, and when the parser accepts HTML it is not
  * one case that goes but the justification for the default arm itself.
  */

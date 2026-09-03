@@ -11,7 +11,7 @@ import { GuideRail } from '@/components/guide/GuideRail';
 import { GUIDE_STEPS } from '@/config/wizard-steps';
 
 describe('GuideRail', () => {
-  it('exposes seven controls, not seven decorations', () => {
+  it('exposes one control per section, not a row of decorations', () => {
     // A segmented bar at the top of a mobile modal is one of the most tapped
     // non-controls in onboarding. A dead affordance is a defect, not
     // neutrality — and the anchors it needs exist already, for ?step.
@@ -21,7 +21,7 @@ describe('GuideRail', () => {
   });
 
   it('meets the touch target floor', () => {
-    // 44px is the floor. These seven sit side by side across a 390px
+    // 44px is the floor. These sit side by side across a 390px
     // viewport: max-w-[calc(100%-2rem)] gives 358px, minus the header's
     // px-4 (16) and pe-12 (48) leaves a 294px content box, i.e. ~42px each
     // horizontally (37.7px at 360px) — narrower than the 44px floor, but
@@ -52,15 +52,15 @@ describe('GuideRail', () => {
   it('says where the reader is, in words as well as fill', () => {
     render(<GuideRail current={4} onSelect={vi.fn()} />);
 
-    expect(screen.getByText(/step 4 of 7/i)).toBeInTheDocument();
+    expect(screen.getByText(`Step 4 of ${GUIDE_STEPS.length}`)).toBeInTheDocument();
   });
 
   it('counts nothing when no section is claimed', () => {
     // ?guide=1 opens the dialog with no claim to a section. A rail that
-    // asserted "Step 1 of 7" there would be inventing a position.
+    // asserted "Step 1 of N" there would be inventing a position.
     render(<GuideRail current={null} onSelect={vi.fn()} />);
 
-    expect(screen.queryByText(/step \d+ of 7/i)).toBeNull();
+    expect(screen.queryByText(new RegExp(`step \\d+ of ${GUIDE_STEPS.length}`, 'i'))).toBeNull();
     expect(screen.queryByRole('button', { current: 'step' })).toBeNull();
   });
 

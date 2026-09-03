@@ -66,7 +66,7 @@
       "answer": "Meta envoie généralement vos données en 5-30 minutes par e-mail. Les grands comptes ou une charge serveur élevée peuvent prendre jusqu'à quelques heures. Une fois le ZIP en main, l'analyse tourne dans votre propre navigateur plutôt que sur un serveur : ni file d'attente, ni attente de téléversement. Un export volumineux met naturellement plus de temps à être lu qu'un petit.",
       "relatedLink": {
         "text": "Ajouter un rappel au calendrier",
-        "href": "/upload?step=7"
+        "href": "/upload?step=8"
       }
     },
     "scale": {

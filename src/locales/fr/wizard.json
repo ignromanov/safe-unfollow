@@ -44,36 +44,41 @@
   },
   "steps": {
     "1": {
+      "title": "Ouvrez la page d'exportation Instagram",
+      "description": "Cliquez sur le bouton pour ouvrir l'Espace Comptes Meta. Ensuite, cliquez sur « Créer une exportation ».",
+      "alt": "La fenêtre « Exporter vos informations » de l'Espace Comptes, avec le bouton bleu « Créer une exportation »."
+    },
+    "2": {
       "title": "Choisissez votre profil Instagram",
       "description": "Sélectionnez votre compte Instagram dans la liste des profils connectés.",
       "alt": "L'écran d'exportation d'Instagram avec la liste des profils connectés."
     },
-    "2": {
+    "3": {
       "title": "Sélectionnez « Exporter sur mon appareil »",
       "description": "Choisissez d'exporter directement vers votre appareil pour une confidentialité maximale. Vos données restent avec vous.",
       "alt": "L'écran de destination avec « Exporter sur mon appareil » sélectionné."
     },
-    "3": {
+    "4": {
       "title": "Sélectionnez uniquement « Abonnés et abonnements »",
       "description": "Cliquez sur « Personnaliser » › Décochez tout › Cochez UNIQUEMENT « Abonnés et abonnements ». Cela garde votre fichier petit et rapide.",
       "alt": "Le panneau « Personnaliser » avec uniquement « Abonnés et abonnements » coché."
     },
-    "4": {
+    "5": {
       "title": "Définissez la plage de dates sur « Tout »",
       "description": "Cliquez sur « Plage de dates » › Sélectionnez « Tout » › Enregistrer. Cela permet d'obtenir l'historique complet de vos abonnés.",
       "alt": "Le panneau « Plage de dates » avec « Tout » sélectionné."
     },
-    "5": {
+    "6": {
       "title": "Changez le format en JSON",
       "description": "Cliquez sur « Format » › Sélectionnez « JSON ». Les exports HTML fonctionnent aussi, mais JSON est le format que nous lisons de la manière la plus fiable.",
       "alt": "Le panneau « Format » avec « JSON » sélectionné à la place de HTML."
     },
-    "6": {
+    "7": {
       "title": "Vérifiez et lancez l'exportation",
       "description": "Vérifiez que vos paramètres affichent : Abonnés et abonnements, Tout, format JSON. Puis cliquez sur « Démarrer l'exportation ».",
       "alt": "Le récapitulatif de l'exportation avec Abonnés et abonnements, Tout et JSON, au-dessus du bouton « Démarrer l'exportation »."
     },
-    "7": {
+    "8": {
       "title": "Attendez l'e-mail et téléchargez",
       "description": "Instagram vous enverra un e-mail quand ce sera prêt (généralement 5-30 minutes). Cliquez sur le lien de téléchargement dans l'e-mail pour obtenir votre fichier ZIP.",
       "alt": "L'e-mail d'Instagram avec le lien de téléchargement du fichier ZIP."

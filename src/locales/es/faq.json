@@ -66,7 +66,7 @@
       "answer": "Meta normalmente envía tus datos en 5-30 minutos por email. Las cuentas grandes o una carga alta del servidor pueden tardar hasta unas horas. Cuando ya tienes el ZIP, el análisis ocurre en tu propio navegador y no en un servidor, así que no hay cola ni espera de subida. Una exportación grande tarda más en leerse que una pequeña.",
       "relatedLink": {
         "text": "Añadir recordatorio al calendario",
-        "href": "/upload?step=7"
+        "href": "/upload?step=8"
       }
     },
     "scale": {

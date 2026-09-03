@@ -47,7 +47,7 @@ describe('useGuideDialog', () => {
     expect(guide).toMatchObject({ isOpen: true, step: null, source: 'url' });
   });
 
-  it.each(['0', '8', 'x', ''])('treats ?step=%s as ?guide=1', raw => {
+  it.each(['0', '9', 'x', ''])('treats ?step=%s as ?guide=1', raw => {
     // Out of range is not an error and not a closed dialog: someone followed a
     // link that once meant something. Opening from the start answers them.
     at(`/upload?step=${raw}`);

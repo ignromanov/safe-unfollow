@@ -14,40 +14,44 @@ interface HowToStep {
 
 // Step metadata (visuals and warnings are not translated).
 //
-// The seven middle steps ARE the guide's seven sections - same assets, same
+// The first eight steps ARE the guide's eight sections - same assets, same
 // warning flag - so they are derived from GUIDE_STEPS rather than restated.
 // Restating them is how this file came to mark two steps critical while
 // wizard-steps.ts marked one: both name the same /wizard/step-N assets and
 // neither imported the other, so the two could not disagree out loud.
 //
-// Only the ends are local: step 1 is the entry screen the guide stopped
-// carrying (GH#102), and step 9 is the hand-off to /upload with no visual.
+// Only the tail is local: the last step is the hand-off to /upload, which is
+// ours rather than Meta's and has no visual. `/wizard/step-1` used to be local
+// too, because the guide had stopped carrying the entry screen; it carries it
+// again, so the row derives like the other seven.
 const STEP_META: Array<{ isWarning?: boolean; visual?: string }> = [
-  { visual: '/wizard/step-1' },
   ...GUIDE_STEPS.map(({ isWarning, visual }) => ({ isWarning, visual })),
-  {}, // Step 9: no visual, navigates to upload page
+  {}, // The hand-off: no visual, navigates to the upload page
 ];
 
+const STEP_COUNT = STEP_META.length;
+
 /**
- * Where each of the nine rows sends a reader, now that the guide is a dialog on
- * /upload rather than eight routes (GH#102).
+ * Where each row sends a reader, now that the guide is a dialog on /upload
+ * rather than eight routes (GH#102).
  *
- * The three cases are not one formula. Row 0 is the entry screen the guide
- * stopped carrying, so it has no section to deep-link and opens the guide at
- * its start. Rows 1..7 are `GUIDE_STEPS` — the same seven the dialog renders,
- * in the same order — so the row index IS the section number. Row 8 is the
+ * Two cases, and they used to be three. Rows 0..7 are `GUIDE_STEPS` in order,
+ * so row N opens section N+1 — the +1 is the difference between a zero-based
+ * array index and the section number the reader sees, and nothing else. It was
+ * `?step=${stepIndex}` with no offset while the entry screen sat outside the
+ * guide: the card numbered 6 opened a dialog headed "Step 5 of 7", and the
+ * test for this function asserted `card - 1` and passed. The last row is the
  * hand-off, and was already /upload.
  */
 function stepHref(stepIndex: number): string {
-  if (stepIndex === 8) return '/upload';
-  return stepIndex === 0 ? '/upload?guide=1' : `/upload?step=${stepIndex}`;
+  return stepIndex === STEP_COUNT - 1 ? '/upload' : `/upload?step=${stepIndex + 1}`;
 }
 
 export function HowToSection() {
   const { t } = useTranslation('howto');
 
   // Build steps from translations (using 'as any' for dynamic keys)
-  const steps: HowToStep[] = Array.from({ length: 9 }, (_, i) => ({
+  const steps: HowToStep[] = Array.from({ length: STEP_COUNT }, (_, i) => ({
     id: i + 1,
     title: t(`steps.${i + 1}.title` as any),
     description: t(`steps.${i + 1}.description` as any),
@@ -136,16 +140,16 @@ export function HowToSection() {
                         />
                       </div>
                     )}
-                    {/* Step 9: upload call-to-action instead of a visual. Presentational
+                    {/* The last step: upload call-to-action instead of a visual. Presentational
                         only — the whole card is already the link to the same place, and a
                         nested anchor would be invalid HTML. */}
-                    {idx === 8 && (
+                    {idx === STEP_COUNT - 1 && (
                       <span className="mt-6 inline-flex items-center justify-center gap-3 px-8 py-4 bg-primary text-primary-foreground rounded-2xl font-black shadow-xl group-hover:scale-105 transition-all text-sm md:text-base">
                         <Upload size={20} />
                         {t('uploadButton')}
                       </span>
                     )}
-                    {idx !== 8 && (
+                    {idx !== STEP_COUNT - 1 && (
                       <div className="flex items-center gap-2 text-primary font-black text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
                         {t('openStep')} <ChevronRight size={14} />
                       </div>

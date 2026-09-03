@@ -44,36 +44,41 @@
   },
   "steps": {
     "1": {
+      "title": "Open Instagram Export Page",
+      "description": "Click the button to open Meta Accounts Center. Then click \"Create export\" to begin the process.",
+      "alt": "The \"Export your information\" dialog in the Accounts Center, with the blue \"Create export\" button."
+    },
+    "2": {
       "title": "Choose Your Instagram Profile",
       "description": "Select your Instagram account from the list of connected profiles.",
       "alt": "Instagram's export screen showing the list of connected profiles."
     },
-    "2": {
+    "3": {
       "title": "Select \"Export to device\"",
       "description": "Choose to export directly to your device for maximum privacy. Your data stays with you.",
       "alt": "The destination screen with \"Export to device\" selected."
     },
-    "3": {
+    "4": {
       "title": "Select Only \"Followers and following\"",
       "description": "Click \"Customize\" › Clear all checkboxes › Check ONLY \"Followers and following\". This keeps your file small and fast.",
       "alt": "The \"Customize\" panel with only \"Followers and following\" checked."
     },
-    "4": {
+    "5": {
       "title": "Set Date Range to \"All time\"",
       "description": "Click \"Date range\" › Select \"All time\" › Save. This ensures you get your complete follower history.",
       "alt": "The \"Date range\" panel with \"All time\" selected."
     },
-    "5": {
+    "6": {
       "title": "Change Format to JSON",
       "description": "Click \"Format\" › Select \"JSON\". HTML exports also work, but JSON is the format we read most reliably.",
       "alt": "The \"Format\" panel with \"JSON\" selected instead of HTML."
     },
-    "6": {
+    "7": {
       "title": "Review & Start Export",
       "description": "Verify your settings show: Followers and following, All time, JSON format. Then click \"Start export\".",
       "alt": "The export summary showing Followers and following, All time and JSON, above the \"Start export\" button."
     },
-    "7": {
+    "8": {
       "title": "Wait for Email & Download",
       "description": "Instagram will email you when ready (usually 5-30 minutes). Click the download link in the email to get your ZIP file.",
       "alt": "Instagram's email with the download link for the ZIP file."

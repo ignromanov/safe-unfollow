@@ -107,7 +107,7 @@ describe('GuideDialog', () => {
     expect(document.querySelector('[data-guide-scroll]')).not.toBeNull();
   });
 
-  it('renders all seven sections in one scroll', () => {
+  it('renders one section per step in a single scroll', () => {
     open();
 
     expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(GUIDE_STEPS.length);
@@ -116,9 +116,11 @@ describe('GuideDialog', () => {
   it('links to Accounts Center regardless of how the dialog was opened', () => {
     // Regression: this used to render only for source === 'url'. Four of six
     // entry points — the StepAccordion row and all three UploadZone triggers
-    // — produce 'accordion' or 'zone', and none of steps.1..7 ever says where
-    // Meta's profile picker lives, so those readers had no way to reach it
-    // from inside the dialog at all.
+    // — produce 'accordion' or 'zone', and no step said where Meta's profile
+    // picker lives, so those readers had no way to reach it from inside the
+    // dialog at all. The fix was a button above the sections belonging to no
+    // step; it is section 1's own control now, which is why this still finds
+    // a link and why the count below is still two.
     open({ source: 'accordion' });
 
     const cta = screen.getAllByRole('link', { name: /accounts center/i })[0];
@@ -272,10 +274,10 @@ describe('GuideDialog', () => {
     // in the one frame before the observer's first callback arrives.
     open({ step: 4, source: 'url' });
 
-    expect(screen.getByText('Step 4 of 7')).toBeInTheDocument();
+    expect(screen.getByText(`Step 4 of ${GUIDE_STEPS.length}`)).toBeInTheDocument();
   });
 
-  it('attaches its observer to all seven anchors on a plain mount, no rerender workaround', () => {
+  it('attaches its observer to every section anchor on a plain mount, no rerender workaround', () => {
     // Rendered exactly like `open()` always has — `open` already true from
     // the first commit, no step-change or open-transition rerender. Radix's
     // Portal (the thing that actually mounts the scroll container) gates its
@@ -294,11 +296,11 @@ describe('GuideDialog', () => {
 
   it('tracks the reader via the observer, not the URL, once it has reported', () => {
     open({ step: 2, source: 'url' });
-    expect(screen.getByText('Step 2 of 7')).toBeInTheDocument();
+    expect(screen.getByText(`Step 2 of ${GUIDE_STEPS.length}`)).toBeInTheDocument();
 
     reportActiveSection(5);
 
-    expect(screen.getByText('Step 5 of 7')).toBeInTheDocument();
+    expect(screen.getByText(`Step 5 of ${GUIDE_STEPS.length}`)).toBeInTheDocument();
     const fillOf = (id: number) =>
       screen.getByRole('button', { name: `Step ${id}` }).querySelector('[data-slot="rail-fill"]');
     expect(fillOf(5)).toHaveClass('bg-primary');
