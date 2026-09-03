@@ -9,7 +9,6 @@
  *
  * Store-specific logic is extracted into:
  * - stores/file-store.ts    (file metadata CRUD)
- * - stores/column-store.ts  (columnar data append)
  * - stores/bitset-store.ts  (badge bitset operations)
  * - stores/search-store.ts  (search index persistence)
  * - cache-manager.ts        (in-memory caching)
@@ -19,6 +18,7 @@ import type { AccountBadges, BadgeKey } from '@/core/types';
 import { BitSet, StringColumnBuilder, StringColumnReader } from './bitset';
 import { CacheManager } from './cache-manager';
 import {
+  ALL_BADGES,
   DB_CONFIG,
   STORES,
   STORE_CONFIGS,
@@ -34,7 +34,6 @@ import {
   waitForTransaction,
 } from './transaction-helpers';
 import * as fileStore from './stores/file-store';
-import * as columnStore from './stores/column-store';
 import * as bitsetStore from './stores/bitset-store';
 import * as searchStore from './stores/search-store';
 
@@ -191,20 +190,8 @@ export class IndexedDBService {
     const usernameColumn = usernameBuilder.build();
     const displayNameColumn = displayNameBuilder.build();
 
-    // Build all bitsets at once
-    const badges: BadgeKey[] = [
-      'following',
-      'followers',
-      'mutuals',
-      'notFollowingBack',
-      'notFollowedBack',
-      'pending',
-      'permanent',
-      'restricted',
-      'close',
-      'unfollowed',
-      'dismissed',
-    ];
+    // Build all bitsets at once. Read as a set, never positionally.
+    const badges = ALL_BADGES;
 
     const bitsets = new Map<BadgeKey, { bitset: BitSet; count: number }>();
 
@@ -288,63 +275,6 @@ export class IndexedDBService {
   }
 
   /**
-   * Append account chunk (called during streaming ingestion)
-   */
-  async appendAccountsChunk(
-    fileHash: string,
-    accounts: AccountBadges[],
-    startIndex: number
-  ): Promise<void> {
-    const db = await this.init();
-
-    // Use single transaction for all stores - faster with proper batching
-    const tx = db.transaction([STORES.COLUMNS, STORES.BITSETS], 'readwrite');
-
-    // Build username column
-    const usernameBuilder = new StringColumnBuilder();
-    const displayNameBuilder = new StringColumnBuilder();
-
-    for (const account of accounts) {
-      usernameBuilder.push(account.username.toLowerCase());
-      displayNameBuilder.push(account.username);
-    }
-
-    const usernameColumn = usernameBuilder.build();
-    const displayNameColumn = displayNameBuilder.build();
-
-    // Store columns first (sequential writes, no blocking)
-    const columnsPromise = Promise.all([
-      columnStore.appendColumn(tx, fileHash, 'usernames', usernameColumn, startIndex),
-      columnStore.appendColumn(tx, fileHash, 'displayNames', displayNameColumn, startIndex),
-    ]);
-
-    // Update badge bitsets in parallel (read-modify-write operations)
-    const badges: BadgeKey[] = [
-      'following',
-      'followers',
-      'mutuals',
-      'notFollowingBack',
-      'notFollowedBack',
-      'pending',
-      'permanent',
-      'restricted',
-      'close',
-      'unfollowed',
-      'dismissed',
-    ];
-
-    const bitsetsPromise = Promise.all(
-      badges.map(badge => bitsetStore.updateBadgeBitset(tx, fileHash, badge, accounts, startIndex))
-    );
-
-    // Wait for both columns and bitsets to complete
-    await Promise.all([columnsPromise, bitsetsPromise]);
-
-    // Wait for transaction to complete
-    await waitForTransaction(tx);
-  }
-
-  /**
    * Get accounts by index range (for virtualization)
    * Loads both usernames and badges for the specified range
    */
@@ -374,24 +304,10 @@ export class IndexedDBService {
     const actualEnd = Math.min(end, reader.length);
     const usernames = reader.getRange(start, actualEnd);
 
-    // Load all badge bitsets (they are cached after first load)
-    const allBadgeKeys: BadgeKey[] = [
-      'following',
-      'followers',
-      'pending',
-      'permanent',
-      'restricted',
-      'close',
-      'unfollowed',
-      'dismissed',
-      'notFollowingBack',
-      'notFollowedBack',
-      'mutuals',
-    ];
-
-    // Load bitsets in parallel (uses cache if already loaded)
+    // Load bitsets in parallel (uses cache if already loaded). Collected into a
+    // Map below, so order does not matter here either.
     const bitsetEntries = await Promise.all(
-      allBadgeKeys.map(async badge => {
+      ALL_BADGES.map(async badge => {
         const bitset = await this.getBadgeBitset(fileHash, badge);
         return [badge, bitset] as const;
       })

@@ -82,21 +82,38 @@ export function useAccountFiltering(options: UseAccountFilteringOptions) {
   const abortControllerRef = useRef<AbortController | null>(null);
 
   // Initialize fallback filter engine when fileHash changes (only if worker fails)
+  // `init()` is async, so the engine existing is not the engine being usable:
+  // querying it early throws "Not initialized", which lands in the catch below
+  // and sets filteredIndices to null — the sentinel this hook reads as "show
+  // all". Readiness is therefore state, not the presence of the ref.
+  const [isFallbackReady, setIsFallbackReady] = useState(false);
+
   useEffect(() => {
     // Only initialize fallback engine if worker has error or not supported
-    if (workerHasError && fileHash && totalCount > 0) {
-      const engine = new IndexedDBFilterEngine();
-      engine.init(fileHash, totalCount).catch(error => {
-        console.error('[useAccountFiltering] Failed to initialize fallback engine:', error);
-      });
-      filterEngineRef.current = engine;
+    if (!workerHasError || !fileHash || totalCount === 0) {
+      return;
     }
 
+    let isActive = true;
+    const engine = new IndexedDBFilterEngine();
+    filterEngineRef.current = engine;
+
+    engine
+      .init(fileHash, totalCount)
+      .then(() => {
+        if (isActive) {
+          setIsFallbackReady(true);
+        }
+      })
+      .catch(error => {
+        console.error('[useAccountFiltering] Failed to initialize fallback engine:', error);
+      });
+
     return () => {
-      if (filterEngineRef.current) {
-        filterEngineRef.current.clear();
-        filterEngineRef.current = null;
-      }
+      isActive = false;
+      setIsFallbackReady(false);
+      engine.clear();
+      filterEngineRef.current = null;
     };
   }, [fileHash, totalCount, workerHasError]);
 
@@ -130,9 +147,9 @@ export function useAccountFiltering(options: UseAccountFilteringOptions) {
       return;
     }
 
-    // Wait for worker to be ready (or fallback if worker failed)
-    if (!isWorkerReady && !workerHasError) {
-      // Worker still initializing, wait
+    // Wait for whichever engine will answer to be ready. `workerHasError` only
+    // says the worker is gone, not that anything can answer in its place.
+    if (!isWorkerReady && !isFallbackReady) {
       return;
     }
 
@@ -221,7 +238,7 @@ export function useAccountFiltering(options: UseAccountFilteringOptions) {
     filtersKey,
     debouncedQuery,
     isWorkerReady,
-    workerHasError,
+    isFallbackReady,
     workerFilterToIndices,
     filtersArray,
   ]);

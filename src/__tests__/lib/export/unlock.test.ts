@@ -30,6 +30,10 @@ describe('export/unlock', () => {
 
   afterEach(() => {
     vi.unstubAllEnvs();
+    // The checkout-URL cases spy on `Intl.DateTimeFormat` and `window.innerWidth`.
+    // Both are globals every later case reads, so a leaked spy would give some
+    // unrelated test a phantom timezone.
+    vi.restoreAllMocks();
   });
 
   describe('isExportFeatureEnabled', () => {
@@ -84,7 +88,7 @@ describe('export/unlock', () => {
       vi.stubEnv('VITE_DODO_CHECKOUT_URL', CHECKOUT);
       window.history.replaceState({}, '', '/results');
 
-      const built = new URL(buildCheckoutUrl() ?? '');
+      const built = new URL(buildCheckoutUrl('en') ?? '');
 
       expect(built.searchParams.get('redirect_url')).toBe(`${window.location.origin}/results`);
     });
@@ -96,7 +100,7 @@ describe('export/unlock', () => {
       vi.stubEnv('VITE_DODO_CHECKOUT_URL', CHECKOUT);
       window.history.replaceState({}, '', '/ru/results');
 
-      const built = new URL(buildCheckoutUrl() ?? '');
+      const built = new URL(buildCheckoutUrl('en') ?? '');
 
       expect(built.searchParams.get('redirect_url')).toBe(`${window.location.origin}/ru/results`);
     });
@@ -111,7 +115,7 @@ describe('export/unlock', () => {
       );
       window.history.replaceState({}, '', '/results');
 
-      const built = new URL(buildCheckoutUrl() ?? '');
+      const built = new URL(buildCheckoutUrl('en') ?? '');
 
       expect(built.searchParams.getAll('redirect_url')).toEqual([
         `${window.location.origin}/results`,
@@ -122,7 +126,131 @@ describe('export/unlock', () => {
     it('should return null when checkout is not configured', () => {
       vi.stubEnv('VITE_DODO_CHECKOUT_URL', '');
 
-      expect(buildCheckoutUrl()).toBeNull();
+      expect(buildCheckoutUrl('en')).toBeNull();
+    });
+
+    /** What the browser reports as its timezone — the only country signal we take. */
+    function stubTimeZone(timeZone: string): void {
+      vi.spyOn(Intl, 'DateTimeFormat').mockReturnValue({
+        resolvedOptions: () => ({ timeZone }),
+      } as unknown as Intl.DateTimeFormat);
+    }
+
+    function stubViewportWidth(width: number): void {
+      vi.spyOn(window, 'innerWidth', 'get').mockReturnValue(width);
+    }
+
+    // The whole point of resolving a country in this module rather than reading
+    // one off the checkout page: the amount on our button and the amount the
+    // processor charges come from the same value, so they cannot disagree.
+    it('should prefill the country the timezone resolves to', () => {
+      vi.stubEnv('VITE_DODO_CHECKOUT_URL', CHECKOUT);
+      stubTimeZone('Asia/Jakarta');
+
+      const built = new URL(buildCheckoutUrl('id') ?? '');
+
+      expect(built.searchParams.get('country')).toBe('ID');
+    });
+
+    // Omitted, not sent empty. An absent parameter is what lets the processor
+    // fall back to its own detection; `country=` would override it with
+    // nothing, which is worse than never having asked.
+    it('should omit the country outside the priced markets', () => {
+      vi.stubEnv('VITE_DODO_CHECKOUT_URL', CHECKOUT);
+      stubTimeZone('Europe/Berlin');
+
+      const built = new URL(buildCheckoutUrl('de') ?? '');
+
+      expect(built.searchParams.has('country')).toBe(false);
+    });
+
+    // A prefill, never `disableCountry`. An Indonesian speaker in the
+    // Netherlands has to be able to correct it, and the price recomputes when
+    // they do — a locked field would charge the wrong price with no way out.
+    it('should leave the country field correctable', () => {
+      vi.stubEnv('VITE_DODO_CHECKOUT_URL', CHECKOUT);
+      stubTimeZone('Asia/Manila');
+
+      const built = new URL(buildCheckoutUrl('en') ?? '');
+
+      expect(built.searchParams.has('disableCountry')).toBe(false);
+    });
+
+    // We run no discount codes. The field is pure friction on the one form
+    // where 69% of arrivals leave before choosing a payment method at all.
+    it('should hide the discount field', () => {
+      vi.stubEnv('VITE_DODO_CHECKOUT_URL', CHECKOUT);
+
+      const built = new URL(buildCheckoutUrl('en') ?? '');
+
+      expect(built.searchParams.get('showDiscounts')).toBe('false');
+    });
+
+    // The join our funnel has never had: every settled and failed payment so
+    // far has been unattributable to the paywall view that produced it, which
+    // is why "mobile: 303 views, 0 sales" is a fact with no cause attached.
+    // These are the same two dimensions `checkout_start` already carries, so
+    // the two sides of the funnel can be lined up on equal terms.
+    it('should carry the device and locale as metadata', () => {
+      vi.stubEnv('VITE_DODO_CHECKOUT_URL', CHECKOUT);
+      stubViewportWidth(390);
+
+      const built = new URL(buildCheckoutUrl('id') ?? '');
+
+      expect(built.searchParams.get('metadata_device')).toBe('mobile');
+      expect(built.searchParams.get('metadata_locale')).toBe('id');
+    });
+
+    // Stated as an absence because that is the only shape that fails when the
+    // field comes back. A row count is derived from the reader's export and
+    // would land on a record carrying their email and card country, so it is
+    // ruled off this link (GH#176, velum-cdpo 2026-09-03) — and the ruling has
+    // to outlive the memory of whoever removed it. `checkout_start` still
+    // carries the count on our own side, which is where the size question is
+    // answered.
+    it('should send no row count, and nothing else derived from the export', () => {
+      vi.stubEnv('VITE_DODO_CHECKOUT_URL', CHECKOUT);
+
+      const built = new URL(buildCheckoutUrl('id') ?? '');
+
+      // An allow-list rather than an exact set: `country` is omitted when the
+      // time zone resolves to no priced market, so an equality assertion would
+      // pin the test to the runner's zone instead of to the rule.
+      const allowed = [
+        'country',
+        'metadata_device',
+        'metadata_locale',
+        'redirect_url',
+        'showDiscounts',
+      ];
+      const sent = [...built.searchParams.keys()];
+
+      expect(sent).not.toContain('metadata_rows');
+      expect(sent.filter(key => !allowed.includes(key))).toEqual([]);
+    });
+
+    it('should call a wide viewport desktop', () => {
+      vi.stubEnv('VITE_DODO_CHECKOUT_URL', CHECKOUT);
+      stubViewportWidth(1280);
+
+      const built = new URL(buildCheckoutUrl('en') ?? '');
+
+      expect(built.searchParams.get('metadata_device')).toBe('desktop');
+    });
+
+    // None of the above may cost us the return address. A malformed configured
+    // value already falls back to the raw string (the catch below the try), and
+    // the parameter that carries the licence key home is the one thing whose
+    // loss is unrecoverable — the buyer pays and never gets the file.
+    it('should keep the return address alongside the new parameters', () => {
+      vi.stubEnv('VITE_DODO_CHECKOUT_URL', CHECKOUT);
+      stubTimeZone('Asia/Kolkata');
+      window.history.replaceState({}, '', '/ru/results');
+
+      const built = new URL(buildCheckoutUrl('ru') ?? '');
+
+      expect(built.searchParams.get('redirect_url')).toBe(`${window.location.origin}/ru/results`);
+      expect(built.searchParams.get('country')).toBe('IN');
     });
   });
 

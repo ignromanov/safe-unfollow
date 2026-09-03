@@ -45,6 +45,14 @@
         "href": "/upload?guide=1"
       }
     },
+    "htmlExport": {
+      "question": "JSON yerine HTML dışa aktardım. Tekrar dışa aktarmam gerekiyor mu?",
+      "answer": "Hayır. SafeUnfollow artık her iki formatı da okuyor. HTML dışa aktarımları da çalışır, ancak en güvenilir şekilde JSON formatını okuruz, bu yüzden kılavuz hâlâ JSON'u önerir. Zaten elindeki ZIP dosyasını yükle.",
+      "relatedLink": {
+        "text": "Dışa aktarımınızı nasıl alacağınızı öğrenin",
+        "href": "/upload?guide=1"
+      }
+    },
     "accountSafety": {
       "question": "Bu izleyiciyi kullanırken Instagram hesabım güvende olacak mı?",
       "answer": "Evet, %100 güvenli. Şifrenizi isteyen ve veri 'kazıyan' uygulamaların aksine (Hizmet Koşullarını ihlal eder), bu araç resmi veri dışa aktarımınızı kullanır. Giriş gerekmez: ZIP'i doğrudan Instagram'dan indirirsiniz, ardından tarayıcınıza yerel olarak yüklersiniz. Hesabınıza asla erişmiyoruz.",
@@ -71,7 +79,7 @@
     },
     "free": {
       "question": "Ücretsiz Instagram takipten çıkan izleyicileri var mı?",
-      "answer": "Evet. Analiz %100 ücretsiz: tüm rozetler, filtreler ve istediğiniz kadar hesap, kayıt ve sınır olmadan. Çoğu abonelik tabanlı alternatif aylık 5-10$ ücret alır. Tek seferlik $7 ödeme, yalnızca filtrelenmiş listenizi dosya olarak dışa aktarmak istediğinizde gereklidir; burada görüntülemek her zaman ücretsizdir. Açık kaynak (MIT lisansı) ve Instagram dışa aktarımınız tarayıcınızda yerel olarak işlenir."
+      "answer": "Evet. Analiz %100 ücretsiz: tüm rozetler, filtreler ve istediğiniz kadar hesap, kayıt ve sınır olmadan. Çoğu alternatif aylık abonelik ister. Burada ücretli olan tek şey, filtrelenmiş listenizi dosya olarak dışa aktarmak: kilidi tek seferlik bir ödemeyle açılır, asla abonelikle değil; fiyatını düğmenin üzerinde görürsünüz. Listeyi burada görüntülemek her zaman ücretsizdir. Açık kaynak (MIT lisansı) ve Instagram dışa aktarımınız tarayıcınızda yerel olarak işlenir."
     },
     "analyzeData": {
       "question": "Takipten çıkanları bulmak için Instagram veri indirmemi nasıl analiz ederim?",
@@ -99,7 +107,7 @@
     },
     "betterThanPaid": {
       "question": "SafeUnfollow ücretli uygulamalardan daha mı iyi?",
-      "answer": "Çoğu kullanıcı için evet. Analiz ücretsizdir: kayıt yok, abonelik yok, dışa aktarımınızdaki hesap sayısında sınır yok. Giriş gerektirmez (hesap engelleme riski yok), verileri tarayıcınızda yerel olarak işler (maksimum gizlilik), 1M+ hesabı destekler (çoğu ücretli uygulama 100K ile sınırlıdır) ve açık kaynaklıdır. Filtrelenmiş listenizi dosya olarak dışa aktarmak tek seferlik $7 ödeme gerektirir; ekranda gördüğünüz her şey ücretsiz kalır. Ücretli uygulamalar API erişimi gerektiren gerçek zamanlı izleme sunar, ancak bu Instagram'ın Kullanım Koşulları'nı ihlal eder ve hesabınızı riske atar. SafeUnfollow resmi ve güvenli veri dışa aktarma yöntemini kullanır."
+      "answer": "Çoğu kullanıcı için evet. Analiz ücretsizdir: kayıt yok, abonelik yok, dışa aktarımınızdaki hesap sayısında sınır yok. Giriş gerektirmez (hesap engelleme riski yok), verileri tarayıcınızda yerel olarak işler (maksimum gizlilik), 1M+ hesabı destekler (çoğu ücretli uygulama 100K ile sınırlıdır) ve açık kaynaklıdır. Filtrelenmiş listenizi dosya olarak dışa aktarmak tek seferlik bir ödeme gerektirir — her ay değil, yalnızca bir kez; ekranda gördüğünüz her şey ücretsiz kalır. Ücretli uygulamalar API erişimi gerektiren gerçek zamanlı izleme sunar, ancak bu Instagram'ın Kullanım Koşulları'nı ihlal eder ve hesabınızı riske atar. SafeUnfollow resmi ve güvenli veri dışa aktarma yöntemini kullanır."
     },
     "mobileUse": {
       "question": "SafeUnfollow'u iPhone veya Android'da kullanabilir miyim?",

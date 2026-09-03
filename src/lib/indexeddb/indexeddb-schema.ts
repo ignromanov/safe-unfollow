@@ -216,23 +216,42 @@ export interface SearchIndexRecord {
   expiresAt: number; // TTL for eviction
 }
 
+/**
+ * How each badge is stored: time-based badges carry a Unix timestamp, boolean
+ * badges carry `true`.
+ *
+ * The lists below are derived from this map rather than written out, and the
+ * map is typed `Record<BadgeKey, ...>` so that a twelfth `BadgeKey` fails to
+ * compile until it appears here. Without that, a new badge is simply absent
+ * from every list: created nowhere, written nowhere, read nowhere, and empty
+ * for every account with no error anywhere — which is the shape of GH#34.
+ */
+const BADGE_STORAGE: Record<BadgeKey, 'time' | 'boolean'> = {
+  following: 'time',
+  followers: 'time',
+  pending: 'time',
+  permanent: 'time',
+  restricted: 'time',
+  close: 'time',
+  unfollowed: 'time',
+  dismissed: 'time',
+  mutuals: 'boolean',
+  notFollowingBack: 'boolean',
+  notFollowedBack: 'boolean',
+};
+
+// All supported badges, in declaration order
+export const ALL_BADGES: BadgeKey[] = Object.keys(BADGE_STORAGE) as BadgeKey[];
+
 // Badge keys that support timestamps
-export const TIME_BASED_BADGES: BadgeKey[] = [
-  'following',
-  'followers',
-  'pending',
-  'permanent',
-  'restricted',
-  'close',
-  'unfollowed',
-  'dismissed',
-];
+export const TIME_BASED_BADGES: BadgeKey[] = ALL_BADGES.filter(
+  badge => BADGE_STORAGE[badge] === 'time'
+);
 
 // Badge keys that are boolean (computed)
-export const BOOLEAN_BADGES: BadgeKey[] = ['mutuals', 'notFollowingBack', 'notFollowedBack'];
-
-// All supported badges
-export const ALL_BADGES: BadgeKey[] = [...TIME_BASED_BADGES, ...BOOLEAN_BADGES];
+export const BOOLEAN_BADGES: BadgeKey[] = ALL_BADGES.filter(
+  badge => BADGE_STORAGE[badge] === 'boolean'
+);
 
 // Cache TTL configs
 export const CACHE_CONFIG = {

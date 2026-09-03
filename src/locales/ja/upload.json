@@ -6,6 +6,7 @@
     "orBrowse": "またはタップしてローカルストレージを参照",
     "processing": "ローカルで分析中...",
     "processingHint": "大規模データセット（100万件以上）の処理には少し時間がかかることがあります。",
+    "cancelUpload": "アップロードをキャンセル",
     "ariaLabel": "InstagramデータのZIPファイルをアップロード",
     "jsonShort": "JSON でも HTML でも、どちらの形式でもアップロードできます。",
     "seeGuide": "ステップバイステップガイドを見る",

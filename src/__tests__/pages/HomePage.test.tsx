@@ -41,6 +41,14 @@ vi.mock('@/components/FAQSection', () => ({
   FAQSection: () => <div data-testid="faq-section">FAQ Section</div>,
 }));
 
+// Rendered unconditionally, unlike the real AdSlot, which returns null unless
+// both VITE_ADSENSE_CLIENT and its slot id are set. The landing page's no-ads
+// guard must fail when a unit comes back, not when someone forgets to stub an
+// env var — so the mock ignores configuration entirely.
+vi.mock('@/components/ads/AdSlot', () => ({
+  AdSlot: ({ name }: { name: string }) => <div data-ad-name={name} />,
+}));
+
 vi.mock('@/components/FooterCTA', () => ({
   FooterCTA: () => <div data-testid="footer-cta" />,
 }));
@@ -198,54 +206,31 @@ describe('HomePage', () => {
   });
 
   describe('ad placements', () => {
-    const withAdEnv = (fn: () => void) => {
-      vi.stubEnv('VITE_ADSENSE_CLIENT', 'ca-pub-test');
-      vi.stubEnv('VITE_ADSENSE_SLOT_HOME', '111');
-      try {
-        fn();
-      } finally {
-        vi.unstubAllEnvs();
-      }
-    };
-
-    it('should render no ads when the slot env vars are unset', () => {
+    // The landing page carries no ad unit, and the choice is not about this
+    // unit's own earnings. `adsbygoogle.js` is injected once per SPA session by
+    // whichever AdSlot first nears the viewport (ads/loader.ts, AdSlot.tsx), and
+    // from then on Google's Auto ads — the full-screen vignette included — may
+    // render on any route, including `/upload`, which declares no slot. So a
+    // modest banner here is not on the menu: igniting the script on `/` opts the
+    // landing page into the whole auto suite before a visitor has decided to
+    // trust the tool.
+    //
+    // What was given up is real: this unit reached 0.52% of `/` visits (35 of
+    // 6,684 in a week) where the results units reach 72.4%, and placing it where
+    // it would serve projected roughly +$20-30/month against an August AdSense
+    // total of $10.33. It was declined because the gain is measurable within a
+    // week and the cost — export-sale conversions on a rail that netted ~$11 in
+    // its last seven days, n = 2 — is not measurable at all.
+    // See .conclave/.claude/analytics/2026-08-31-adsense-ignition-and-the-vignette-date.md
+    //
+    // The `home_footer` multiplex went the same way earlier, on its own
+    // measurement: 725 impressions, $0.03, 2.49% viewability. Asserting the
+    // count rather than the absence of a name means neither can reappear here
+    // unnoticed. AdSlot is mocked above so this holds regardless of env.
+    it('should mount no AdSlot at all', () => {
       const { container } = render(<HomePage />);
 
       expect(container.querySelectorAll('[data-ad-name]')).toHaveLength(0);
-    });
-
-    it('should place the in-content ad between HowTo and FAQ', () => {
-      withAdEnv(() => {
-        render(<HomePage />);
-
-        const ad = document.querySelector('[data-ad-name="home"]') as HTMLElement;
-        expect(ad).not.toBeNull();
-        expect(
-          screen.getByTestId('how-to-section').compareDocumentPosition(ad) &
-            Node.DOCUMENT_POSITION_FOLLOWING
-        ).toBeTruthy();
-        expect(
-          screen.getByTestId('faq-section').compareDocumentPosition(ad) &
-            Node.DOCUMENT_POSITION_PRECEDING
-        ).toBeTruthy();
-      });
-    });
-
-    it('should carry exactly one ad unit, and nothing below the footer CTA', () => {
-      // The end-of-page multiplex was removed after measurement: 725 impressions
-      // returned $0.03 at 2.49% viewability. Asserting the count rather than the
-      // absence of one name means a second unit cannot reappear here unnoticed.
-      withAdEnv(() => {
-        const { container } = render(<HomePage />);
-
-        const ads = container.querySelectorAll('[data-ad-name]');
-        expect(ads).toHaveLength(1);
-        expect(ads[0]?.getAttribute('data-ad-name')).toBe('home');
-        expect(
-          screen.getByTestId('footer-cta').compareDocumentPosition(ads[0] as HTMLElement) &
-            Node.DOCUMENT_POSITION_PRECEDING
-        ).toBeTruthy();
-      });
     });
   });
 

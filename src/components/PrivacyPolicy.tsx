@@ -230,6 +230,13 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             .
           </p>
           <p className="text-muted-foreground mt-4">
+            The link that takes you there carries three things about the visit, so that a completed
+            payment can be matched to the page it started from: whether you are on a phone or a big
+            screen, the language you are reading in, and your country. The country is worked out
+            from your device's own time zone setting — we never ask anyone else where you are. The
+            number of accounts in your export is not among them and never leaves your browser.
+          </p>
+          <p className="text-muted-foreground mt-4">
             After a successful payment, Dodo Payments sends you back to this site with your license
             key, a payment reference and the email address you used at checkout attached to the web
             address. We remove all of them from the address bar on the first render, so they do not
@@ -268,8 +275,17 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             </p>
           </div>
           <p className="text-muted-foreground mt-4">
-            AdSense units are not shown on the sample-data page, and there are none on the upload
-            screen. The upload screen does carry one partner link, described in 5.5.
+            Two of those ad units are ours, and both sit on the results screen. Google also serves
+            placements of its own choosing, which can appear on any screen once its script is
+            running — including a full-screen ad shown between pages. We do not select those and
+            cannot list them here.
+          </p>
+          <p className="text-muted-foreground mt-4">
+            We never start Google's ad script on the sample-data page, so opening it directly leaves
+            it free of ads. If you have already opened the results screen in the same visit, the
+            script is loaded and Google's own placements can follow you to any screen, including
+            that one; reloading the tab clears it. The upload screen carries one partner link, which
+            is ours and is described in 5.5.
           </p>
           <p className="text-muted-foreground mt-4">
             If you are in the EEA, UK or Switzerland, a consent dialog from Google's certified

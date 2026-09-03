@@ -8,6 +8,7 @@
  * which the per-session validate call then acts on.
  */
 
+import { resolveCheckoutCountry } from './country-price';
 import { getApiBase } from './license';
 
 const UNLOCK_STORAGE_KEY = 'su-pro-export';
@@ -85,7 +86,15 @@ export function isExportFeatureEnabled(): boolean {
 }
 
 /**
- * The checkout URL with the return address attached, or null if not configured.
+ * Where the split between the two populations the paywall data is read at
+ * falls. Not a device class — a viewport width, which is all the buyer's
+ * browser can honestly tell us and all the funnel is ever split by.
+ */
+const DESKTOP_MIN_WIDTH_PX = 768;
+
+/**
+ * The checkout URL with the return address and the buyer's context attached,
+ * or null if not configured.
  *
  * `redirect_url` is built from the live location rather than baked into the
  * configured value, for two reasons found the hard way. Without the parameter,
@@ -98,8 +107,30 @@ export function isExportFeatureEnabled(): boolean {
  * The current pathname is the results route in the buyer's own language, so
  * this also returns them to /ru/results rather than bouncing them through the
  * language redirect with their key in tow.
+ *
+ * `country` is a prefill and never `disableCountry`: an Indonesian speaker in
+ * the Netherlands has to be able to correct it, and the processor recomputes
+ * the price when they do. It is omitted rather than sent empty when the
+ * timezone resolves to no priced market, because an absent parameter is what
+ * lets the processor fall back to its own detection.
+ *
+ * The two `metadata_*` values are the join our own funnel has never had.
+ * Every settled and failed payment on the processor's side has so far been
+ * unattributable to the paywall view that produced it, which is why "mobile:
+ * 303 views, 0 sales" has stayed a fact with no cause attached.
+ *
+ * The row count is deliberately not among them, and re-adding it needs a new
+ * ruling rather than a rebuild of this comment. It is derived from the reader's
+ * Instagram export — the size of their follower graph — and it would land on a
+ * record that already carries their email address and card country, where an
+ * exact following count is public on the profile it belongs to and close enough
+ * to an identifier to match a paying customer to a named account. A bucket is
+ * no answer: it is still derived from the export. The device class is what
+ * answers "mobile converts at zero"; row size joins on our own side instead,
+ * via `row_count` on `paywall_view` plus device, locale, country and time.
+ * Ruled 2026-09-03 (velum-cdpo), GH#176.
  */
-export function buildCheckoutUrl(): string | null {
+export function buildCheckoutUrl(locale: string): string | null {
   const configured = getCheckoutUrl();
   if (configured === null || typeof window === 'undefined') return configured;
 
@@ -107,6 +138,20 @@ export function buildCheckoutUrl(): string | null {
     const url = new URL(configured);
     // set(), not append(): a dashboard-issued link already carries one.
     url.searchParams.set('redirect_url', window.location.origin + window.location.pathname);
+
+    const country = resolveCheckoutCountry();
+    if (country !== null) url.searchParams.set('country', country);
+
+    // We run no discount codes, so the field is pure friction on the one form
+    // where 69% of arrivals leave before choosing a payment method at all.
+    url.searchParams.set('showDiscounts', 'false');
+
+    url.searchParams.set(
+      'metadata_device',
+      window.innerWidth >= DESKTOP_MIN_WIDTH_PX ? 'desktop' : 'mobile'
+    );
+    url.searchParams.set('metadata_locale', locale);
+
     return url.toString();
   } catch {
     return configured;

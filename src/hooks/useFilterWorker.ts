@@ -14,6 +14,15 @@ import type { FilterWorkerApi } from '@/workers/filter-worker';
 import type { BadgeKey } from '@/core/types';
 import { logger } from '@/lib/logger';
 
+/**
+ * How long to wait for the worker to answer before declaring it dead.
+ *
+ * A worker whose script fails to load never replies to the message Comlink
+ * posted, so nothing rejects the pending call. Generous enough that a cold
+ * IndexedDB open on a slow phone is not mistaken for a dead worker.
+ */
+export const FILTER_WORKER_INIT_TIMEOUT_MS = 15_000;
+
 interface UseFilterWorkerOptions {
   fileHash: string | null;
   totalAccounts: number;
@@ -65,6 +74,8 @@ export function useFilterWorker(options: UseFilterWorkerOptions): UseFilterWorke
     let isActive = true;
 
     const initWorker = async () => {
+      let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
       try {
         // Create new worker
         const worker = new Worker(new URL('../workers/filter-worker.ts', import.meta.url), {
@@ -75,8 +86,29 @@ export function useFilterWorker(options: UseFilterWorkerOptions): UseFilterWorke
         const api = Comlink.wrap<FilterWorkerApi>(worker);
         apiRef.current = api;
 
+        // A worker whose script fails to load never answers the message Comlink
+        // posts, so `initialize` alone would stay pending forever and the catch
+        // below would never run. Both races turn that silence into a rejection:
+        // the error event covers a script that fails to load or throws at the
+        // top level, the timeout covers a worker that simply stops answering.
+        const loadFailure = new Promise<never>((_, reject) => {
+          worker.addEventListener('error', event => {
+            const message = (event as ErrorEvent).message;
+            reject(new Error(message || 'Filter worker failed to load'));
+          });
+        });
+        const initTimeout = new Promise<never>((_, reject) => {
+          timeoutId = setTimeout(() => {
+            reject(
+              new Error(
+                `Filter worker did not initialize within ${FILTER_WORKER_INIT_TIMEOUT_MS}ms`
+              )
+            );
+          }, FILTER_WORKER_INIT_TIMEOUT_MS);
+        });
+
         // Initialize the engine in the worker
-        await api.initialize(fileHash, totalAccounts);
+        await Promise.race([api.initialize(fileHash, totalAccounts), loadFailure, initTimeout]);
 
         if (isActive) {
           setIsReady(true);
@@ -88,6 +120,8 @@ export function useFilterWorker(options: UseFilterWorkerOptions): UseFilterWorke
           setError(err instanceof Error ? err.message : 'Worker initialization failed');
           setIsReady(false);
         }
+      } finally {
+        clearTimeout(timeoutId);
       }
     };
 

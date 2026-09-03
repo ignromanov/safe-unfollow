@@ -25,7 +25,7 @@ const GuideDialog = lazy(() =>
 export function Component() {
   const navigate = useNavigate();
   const prefix = useLanguagePrefix();
-  const { uploadState, handleZipUpload, parseWarnings } = useInstagramData();
+  const { uploadState, handleZipUpload, handleClearData, parseWarnings } = useInstagramData();
   const guide = useGuideDialog();
   // Latches on the first open and never clears. Set during render rather
   // than from an effect: React re-runs this component before committing, so
@@ -64,6 +64,7 @@ export function Component() {
         onUploadStart={handleUploadStart}
         onOpenWizard={handleOpenWizard}
         onOpenGuide={step => guide.open('accordion', step)}
+        onCancel={handleClearData}
         isProcessing={uploadState.status === 'loading'}
         parseWarnings={parseWarnings}
       />

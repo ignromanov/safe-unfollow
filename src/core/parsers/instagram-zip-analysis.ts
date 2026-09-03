@@ -31,6 +31,22 @@ export interface ZipAnalysis {
    * the very metric the HTML work is justified by.
    */
   isInstagramExport: boolean;
+  /**
+   * Whether the archive carries relationship files in more than one format
+   * (GH#160).
+   *
+   * The set below already knows this and `pickFormat` throws it away — the
+   * input is richer than the output, and only the output leaves this function.
+   * That is defensible as a parsing decision and indefensible as the only thing
+   * we report: a half-merged export reaches the dashboard as plain `json`,
+   * indistinguishable from a clean one, while its two base paths are both read
+   * and unioned into one answer.
+   *
+   * Observation only. It changes no byte of `format` and no byte of the parse —
+   * deliberately, because the repair in step 2 changes which files are read for
+   * some archives, and doing that without a rate is a guess with a diff.
+   */
+  mixedRelationshipFormats: boolean;
 }
 
 /**
@@ -110,6 +126,7 @@ export function analyzeZipStructure(allFiles: string[]): ZipAnalysis {
     topLevelFolders,
     format,
     isInstagramExport: hasConnections || hasFollowersFolder,
+    mixedRelationshipFormats: relationshipFormats.size > 1,
   };
 }
 

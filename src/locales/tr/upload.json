@@ -6,6 +6,7 @@
     "orBrowse": "Veya yerel depolamana göz atmak için dokun.",
     "processing": "Yerel olarak analiz ediliyor...",
     "processingHint": "Büyük veri setlerini (1M+'a kadar) işlemek biraz zaman alabilir.",
+    "cancelUpload": "Yüklemeyi iptal et",
     "ariaLabel": "Instagram veri ZIP dosyasını yükle",
     "jsonShort": "Her iki dışa aktarma biçimi de çalışır: JSON veya HTML.",
     "seeGuide": "Adım adım kılavuzu gör",

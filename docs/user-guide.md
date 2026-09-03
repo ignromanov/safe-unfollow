@@ -18,9 +18,9 @@ Instagram Unfollow Tracker is a privacy-focused tool that analyzes your Instagra
 - **No Login Required**: Uses official Instagram data export
 - **Completely Free**: No subscriptions or hidden costs
 - **Open Source**: Transparent and auditable code
-- **11 Languages**: Including Arabic with RTL support
+- **10 Languages**: Including Arabic with RTL support
 - **PWA Ready**: Install as app, works offline
-- **Handles 1M+ accounts**: Tested with massive datasets
+- **Handles 1M+ accounts**: Built and unit-tested for exports of 1,000,000+ accounts
 
 ## Step-by-Step Tutorial
 
@@ -136,12 +136,12 @@ Instagram Unfollow Tracker is a privacy-focused tool that analyzes your Instagra
 
 ### Already Live (v1.5.0)
 - ✅ **PWA Support**: Install as app, works fully offline
-- ✅ **11 Languages**: EN, ES, RU, DE, PT, TR, HI, ID, JA, AR (RTL), FR
+- ✅ **10 Languages**: EN, ES, RU, DE, PT, TR, ID, JA, AR (RTL), FR
 - ✅ **3-way Theme**: Light / Dark / System
-- ✅ **1M+ Accounts**: Handles massive datasets with <5ms filtering
+- ✅ **1M+ Accounts**: Filtering stays interactive as the list grows — built and unit-tested at 1M accounts
+- ✅ **File Export**: Free 10-row sample, then a one-time unlock (price shown on the button in your currency) for the full CSV/JSON file
 
 ### Upcoming Features
-- 🔄 **CSV/JSON Export**: Save filtered results (v1.6)
 - 🔄 **Historical Tracking**: Compare multiple exports (v1.7)
 
 **📖 Full roadmap**: See [Project Roadmap](/docs/roadmap/)

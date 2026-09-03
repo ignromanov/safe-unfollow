@@ -98,13 +98,27 @@ export const analytics = {
   // `format` (GH#156) is undefined on the cache-hit path by design — nothing was
   // parsed this call, so the export's shape was not observed by it, and sending
   // 'unknown' there would read as a measurement rather than the omission it is.
-  fileUploadSuccess: (accountCount: number, fromCache: boolean, format?: ExportFormat) => {
+  // `mixedRelationshipFormats` (GH#160) is omitted on the same path and for the
+  // same reason as `format`, and it is spread on `=== undefined` rather than on
+  // truthiness for a reason the boolean makes sharper than `format` ever could:
+  // the whole point of the field is the rate `mixed / observed`, so `false` is
+  // the denominator and must travel. Dropped when falsy, absence would mean
+  // both "clean archive" and "never looked", which is not a rate.
+  fileUploadSuccess: (
+    accountCount: number,
+    fromCache: boolean,
+    format?: ExportFormat,
+    mixedRelationshipFormats?: boolean
+  ) => {
     const utm = getStoredUTM();
     const entryCta = getEntryCTA();
     enqueueEvent(AnalyticsEvents.FILE_UPLOAD_SUCCESS, {
       account_count: accountCount,
       from_cache: fromCache,
       ...(format === undefined ? {} : { format }),
+      ...(mixedRelationshipFormats === undefined
+        ? {}
+        : { mixed_relationship_formats: mixedRelationshipFormats }),
       ...(utm.utm_source && { utm_source: utm.utm_source }),
       ...(utm.utm_medium && { utm_medium: utm.utm_medium }),
       ...(utm.utm_campaign && { utm_campaign: utm.utm_campaign }),

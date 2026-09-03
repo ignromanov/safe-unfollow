@@ -12,6 +12,7 @@ import { DesktopDropZone } from './upload/DesktopDropZone';
 import { DevErrorSelector } from './upload/DevErrorSelector';
 import { LoadingTips } from './upload/LoadingTips';
 import { UploadAffiliateBlock } from './upload/UploadAffiliateBlock';
+import { CancelUploadButton } from './upload/CancelUploadButton';
 import { UploadGuideBlock } from './upload/UploadGuideBlock';
 import { UploadWaitingState } from './upload/UploadWaitingState';
 
@@ -22,6 +23,7 @@ export interface UploadZoneProps {
   onOpenWizard?: () => void;
   /** Open the guide dialog at a section. Absent where no dialog is mounted (ResultsPage). */
   onOpenGuide?: (step: number) => void;
+  onCancel?: () => void;
   isProcessing?: boolean;
   parseWarnings?: ParseWarning[];
 }
@@ -30,6 +32,7 @@ export function UploadZone({
   onUploadStart,
   onOpenWizard,
   onOpenGuide,
+  onCancel,
   isProcessing = false,
   parseWarnings,
 }: UploadZoneProps) {
@@ -228,6 +231,8 @@ export function UploadZone({
                 onDragLeave={handleDragLeave}
               />
             )}
+
+            <CancelUploadButton isProcessing={isProcessing} onCancel={onCancel} />
 
             {hasAskedInstagram && (
               <UploadWaitingState

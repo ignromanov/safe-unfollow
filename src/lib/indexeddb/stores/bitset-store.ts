@@ -1,60 +1,12 @@
 /**
- * Bitset Store - Badge bitset read/write operations with caching support
+ * Bitset Store - Badge bitset read operations with caching support
  */
 
-import type { AccountBadges, BadgeKey } from '@/core/types';
+import type { BadgeKey } from '@/core/types';
 import { BitSet } from '../bitset';
 import type { BitsetRecord } from '../indexeddb-schema';
 import { STORES } from '../indexeddb-schema';
-import { executeRead, executeWrite } from '../transaction-helpers';
-
-/**
- * Update badge bitset for a chunk of accounts (read-modify-write within transaction)
- */
-export async function updateBadgeBitset(
-  tx: IDBTransaction,
-  fileHash: string,
-  badge: BadgeKey,
-  accounts: AccountBadges[],
-  startIndex: number
-): Promise<void> {
-  const store = tx.objectStore(STORES.BITSETS);
-
-  // Get existing bitset or create new
-  const existing = await executeRead<BitsetRecord>(store, [fileHash, badge]);
-
-  let bitset: BitSet;
-  let count = existing?.accountCount ?? 0;
-
-  if (existing) {
-    bitset = BitSet.fromUint8Array(existing.data);
-  } else {
-    // Estimate total size (will grow as needed)
-    bitset = new BitSet(startIndex + accounts.length);
-  }
-
-  // Update bits for this chunk
-  for (let i = 0; i < accounts.length; i++) {
-    const account = accounts[i];
-    if (!account) continue;
-
-    const accountIndex = startIndex + i;
-
-    if (account.badges[badge]) {
-      bitset.set(accountIndex);
-      count++;
-    }
-  }
-
-  const record: BitsetRecord = {
-    fileHash,
-    badge,
-    data: bitset.toUint8Array(),
-    accountCount: count,
-  };
-
-  await executeWrite(store, record);
-}
+import { executeRead } from '../transaction-helpers';
 
 /**
  * Get badge bitset with in-memory caching

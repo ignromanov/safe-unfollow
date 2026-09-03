@@ -2,6 +2,7 @@ import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { getDisplayPrice } from '@/lib/export/country-price';
 import resultsEN from '@/locales/en/results.json';
 import { createI18nMock } from '@/__tests__/utils/mockI18n';
 
@@ -45,6 +46,14 @@ const defaultProps = {
 };
 
 const triggerLabel = resultsEN.export.trigger;
+
+// The paywall states the price it is handed, and the value is resolved from the
+// browser's timezone (country-price.ts). jsdom's is not one of the three priced
+// markets, so these render at the base amount — read from the resolver rather
+// than written out, so a test looking for a label the component never rendered
+// cannot outlive a change to either side.
+const ctaLabel = resultsEN.export.paywall.cta.replace('{{price}}', getDisplayPrice());
+const termsLabel = resultsEN.export.paywall.terms.replace('{{price}}', getDisplayPrice());
 
 /** Observed elements, in observe() order, with their observer callbacks. */
 let observed: Array<{ element: Element; callback: IntersectionObserverCallback }>;
@@ -415,7 +424,7 @@ describe('ResultsExportControls', () => {
       render(<ResultsExportControls {...defaultProps} />);
       await user.click(screen.getByRole('button', { name: triggerLabel }));
 
-      const cta = await screen.findByRole('button', { name: resultsEN.export.paywall.cta });
+      const cta = await screen.findByRole('button', { name: ctaLabel });
       expect(cta.className).toMatch(/\bmin-h-12\b/);
     });
 
@@ -434,7 +443,7 @@ describe('ResultsExportControls', () => {
       render(<ResultsExportControls {...defaultProps} />);
       await user.click(screen.getByRole('button', { name: triggerLabel }));
 
-      const cta = await screen.findByRole('button', { name: resultsEN.export.paywall.cta });
+      const cta = await screen.findByRole('button', { name: ctaLabel });
       expect(cta.className).toMatch(/\btext-base\b/);
       expect(cta.className).toMatch(/\bfont-bold\b/);
       expect(cta.className).not.toMatch(/\btext-sm\b/);
@@ -459,7 +468,7 @@ describe('ResultsExportControls', () => {
         name: resultsEN.export.paywall.dismiss,
       });
       const footer = dismiss.closest('[data-slot="dialog-footer"]');
-      const terms = screen.getByText(resultsEN.export.paywall.terms);
+      const terms = screen.getByText(termsLabel);
 
       expect(footer).not.toBeNull();
       expect(footer?.contains(terms)).toBe(false);
@@ -804,7 +813,7 @@ describe('ResultsExportControls', () => {
       render(<ResultsExportControls {...defaultProps} />);
       await user.click(screen.getByRole('button', { name: triggerLabel }));
       await screen.findByText(paywallLabel);
-      await user.click(screen.getByRole('button', { name: resultsEN.export.paywall.cta }));
+      await user.click(screen.getByRole('button', { name: ctaLabel }));
 
       // The count handed to checkout is the one the headline showed, not a
       // freshly recomputed selection: what is recorded must be what was seen.

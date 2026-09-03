@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import resultsEN from '@/locales/en/results.json';
 import { createI18nMock } from '@/__tests__/utils/mockI18n';
@@ -66,6 +66,25 @@ describe('PaywallModal checkout states', () => {
   });
 });
 
+// The one title-swap that spans two files: the offer's header lives here, the
+// handoff's in CheckoutHandoff. Either side can grow a header without the other
+// noticing, and the result is the ambiguous `aria-labelledby` of GH#140 — two
+// nodes carrying the id Radix points the dialog at.
+describe('PaywallModal one title per state', () => {
+  it('should name the dialog from the offer while idle', () => {
+    renderModal();
+
+    expect(screen.getAllByRole('heading')).toHaveLength(1);
+  });
+
+  it('should hand the title to the handoff while opening, not stack them', () => {
+    renderModal({ checkoutState: 'opening' });
+
+    expect(screen.getAllByRole('heading')).toHaveLength(1);
+    expect(screen.getByRole('heading')).toHaveTextContent(resultsEN.export.checkout.privacy);
+  });
+});
+
 describe('PaywallModal handoff', () => {
   it('should replace the sales argument with the handoff while opening', () => {
     renderModal({ checkoutState: 'opening' });
@@ -97,5 +116,49 @@ describe('PaywallModal handoff', () => {
     renderModal({ checkoutState: 'opening' });
 
     expect(screen.getByRole('button', { name: /not now/i })).toBeEnabled();
+  });
+});
+
+// The subtitle states two amounts side by side — our price and the category's
+// monthly range — and both must come from the same country or the sentence
+// tells the reader to convert currencies in their head. The timezone is
+// stubbed rather than inherited from the host, per the note on
+// CheckoutHandoff's equivalent case: without the stub this passes on a
+// machine in Berlin and fails on one in Jakarta.
+describe('PaywallModal contrast anchor', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  function stubTimeZone(timeZone: string): void {
+    vi.spyOn(Intl, 'DateTimeFormat').mockReturnValue({
+      resolvedOptions: () => ({ timeZone }),
+    } as unknown as Intl.DateTimeFormat);
+  }
+
+  // Both amounts recur across the screen (the price is on the CTA and the
+  // terms line too), so this asserts against the rendered document rather
+  // than a single element — `getByText` would throw on the intentional
+  // duplication of `price`.
+  it.each([
+    ['Asia/Jakarta', 'Rp50.000', 'Rp69.000–169.000'],
+    ['Asia/Kolkata', '₹200', '₹399–999'],
+    ['Asia/Manila', '₱150', '₱249–499'],
+  ])('should show both amounts in the same currency for %s', (timeZone, price, rivals) => {
+    stubTimeZone(timeZone);
+
+    renderModal();
+
+    expect(document.body.textContent).toContain(price);
+    expect(document.body.textContent).toContain(rivals);
+  });
+
+  it('should show both amounts in dollars outside the priced markets', () => {
+    stubTimeZone('America/New_York');
+
+    renderModal();
+
+    expect(document.body.textContent).toContain('$7');
+    expect(document.body.textContent).toContain('$5–10');
   });
 });

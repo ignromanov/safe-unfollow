@@ -185,6 +185,14 @@ export const useAppStore = create<AppState>()(
           state._hasHydrated = true;
           // Language IS restored from localStorage for redirect purposes
           // But URL remains the source of truth for current rendering (i18n)
+
+          // A persisted 'loading' can only mean the page died mid-parse: the
+          // worker and AbortController live in refs and did not survive the
+          // reload, so nothing can ever complete or cancel this status. Left
+          // as-is it renders an eternal spinner with the file input disabled.
+          if (state.uploadStatus === 'loading') {
+            state.uploadStatus = 'idle';
+          }
         }
       },
       storage: {

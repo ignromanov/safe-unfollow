@@ -61,15 +61,6 @@ class IndexedDBCache {
   }
 
   /**
-   * Set cached data (legacy API)
-   * Note: This is now handled by chunked ingestion
-   */
-  async set(_data: CachedData): Promise<void> {
-    // Legacy method - data is now stored via appendAccountsChunk
-    console.warn('[IndexedDB] set() is deprecated - use indexedDBService.appendAccountsChunk()');
-  }
-
-  /**
    * Clear all cached data
    */
   async clear(): Promise<void> {

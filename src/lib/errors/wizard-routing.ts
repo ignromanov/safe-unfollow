@@ -15,14 +15,20 @@ import type { DiagnosticErrorCode } from '@/core/types';
  */
 export function guideStepForError(code?: DiagnosticErrorCode): number | null {
   switch (code) {
-    // Four failures with one answer: request the export again, selecting only
+    // Eight failures with one answer: request the export again, selecting only
     // "Followers and following". The first two because the file is not an
-    // export at all; the second two because it is one, and too big to hold —
-    // and their `fix` copy already says exactly that, in ten locales.
+    // export at all; the next two because it is one, and too big to hold; the
+    // last four because it is one and the follower lists are not in it — and
+    // every one of their `fix` strings already says exactly that, in ten
+    // locales.
     case 'NOT_INSTAGRAM_EXPORT':
     case 'NOT_ZIP':
     case 'TOO_MANY_ENTRIES':
     case 'FILE_TOO_LARGE':
+    case 'INCOMPLETE_EXPORT':
+    case 'NO_DATA_FILES':
+    case 'MISSING_FOLLOWING':
+    case 'MISSING_FOLLOWERS':
       return 3;
     case 'UNKNOWN':
       return null;

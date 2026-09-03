@@ -166,7 +166,12 @@ describe('architecture facts — derived, not copied', () => {
   });
 
   it('no shipped document states a stale prerendered page count', () => {
-    const stale = /(\d+)\s+(?:prerendered|pre-rendered)\s+(?:HTML\s+)?pages?/gi;
+    // `\+?` is load-bearing. "80+ pre-rendered pages" escaped this scanner for months on
+    // punctuation alone — the digits are followed by a plus, not by the whitespace the
+    // pattern demanded, so the one document that hedged its stale number was the one
+    // document the guard could not read. A hedge is not a disclaimer; `80+` still asserts
+    // a floor, and the floor was wrong.
+    const stale = /(\d+)\+?\s+(?:prerendered|pre-rendered)\s+(?:HTML\s+)?pages?/gi;
 
     const offenders = TRACKED_DOCS.flatMap(doc =>
       [...doc.text.matchAll(stale)]

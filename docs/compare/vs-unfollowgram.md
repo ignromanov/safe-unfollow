@@ -13,7 +13,7 @@ Looking for a free alternative to Unfollowgram? Here's a detailed comparison.
 
 | Feature | **SafeUnfollow** | **Unfollowgram** |
 |---------|-----------------|-----------------|
-| **Price** | Free — optional $7 one-time export | $4.99/month |
+| **Price** | Free — optional one-time unlock, price shown on the button in your currency | $4.99/month |
 | **Login required** | No | Yes (Instagram password) |
 | **Data method** | Official Instagram ZIP export | API scraping |
 | **Privacy** | 100% local browser processing | Data uploaded to their servers |

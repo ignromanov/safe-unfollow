@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 
-import { AdSlot } from '@/components/ads/AdSlot';
 import { FAQSection } from '@/components/FAQSection';
 import { FooterCTA } from '@/components/FooterCTA';
 import { Hero } from '@/components/Hero';
@@ -63,7 +62,6 @@ export function Component() {
       <Hero hasData={hasResults} />
       <div className="animate-in fade-in duration-1000">
         <HowToSection />
-        <AdSlot name="home" slot={import.meta.env.VITE_ADSENSE_SLOT_HOME} className="my-8" />
         <FAQSection />
         <FooterCTA />
       </div>

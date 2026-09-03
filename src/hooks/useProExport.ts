@@ -86,10 +86,40 @@ export function useProExport(): UseProExportResult {
   // The timer outlives the component when the reader dismisses mid-redirect.
   useEffect(() => clearPendingTimeout, []);
 
+  // A page restored from the back/forward cache is, by definition, one the
+  // reader navigated back to — so nothing this hook believes about an in-flight
+  // redirect is still true. The timer was frozen rather than cancelled (the
+  // project keeps bfcache eligible on purpose: useEventQueueFlush declines
+  // `beforeunload`/`unload` for exactly this reason), and on resume it would
+  // tell a reader who chose to come back that the payment page failed to load.
+  //
+  // `persisted` is the whole condition. `pageshow` also fires on an ordinary
+  // load — including the one that brings a paying reader back with
+  // `?license_key=` — and there the redirect did happen, so there is nothing to
+  // take back.
+  useEffect(() => {
+    const handlePageShow = (event: PageTransitionEvent): void => {
+      if (!event.persisted) return;
+      clearPendingTimeout();
+      // The ref, not only the state: `startCheckout` returns early while it is
+      // set, so clearing the state alone would leave the button drawn as
+      // pressable and refusing to act.
+      isOpeningRef.current = false;
+      setCheckoutState('idle');
+    };
+
+    window.addEventListener('pageshow', handlePageShow);
+    return () => window.removeEventListener('pageshow', handlePageShow);
+  }, []);
+
   const startCheckout = (locale: string, rowCount: number): void => {
     if (isOpeningRef.current) return;
 
-    const checkoutUrl = buildCheckoutUrl();
+    // The locale and device class `checkout_start` also carries, handed to the
+    // processor as metadata so a settled payment can be joined back to the
+    // paywall view that produced it. `rowCount` stays out of that link and
+    // reaches only our own event below — see buildCheckoutUrl's note.
+    const checkoutUrl = buildCheckoutUrl(locale);
     if (!checkoutUrl) {
       // Unreachable from the UI, and still not a bare `return`. `getApiBase`
       // and `getCheckoutUrl` read the same VITE_DODO_CHECKOUT_URL

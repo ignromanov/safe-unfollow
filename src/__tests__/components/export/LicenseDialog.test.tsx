@@ -90,6 +90,19 @@ describe('LicenseDialog', () => {
       expect(await screen.findByText(resultsEN.export.license.revokedTitle)).toBeInTheDocument();
       expect(screen.getAllByRole('heading')).toHaveLength(1);
     });
+
+    // `limit_reached` is a different branch from the one above: TerminalErrorBody
+    // draws its own header rather than delegating to RevokedLicenseNotice, so the
+    // test that covers `disabled` says nothing about it.
+    it('should replace the activation title when the key is out of activations', async () => {
+      vi.mocked(activateLicense).mockResolvedValue({ ok: false, reason: 'limit_reached' });
+
+      render(<LicenseDialog open initialKey={KEY} source="redirect" onOpenChange={vi.fn()} />);
+
+      expect(await screen.findByText(resultsEN.export.license.blockedTitle)).toBeInTheDocument();
+      expect(screen.getAllByRole('heading')).toHaveLength(1);
+      expect(screen.queryByText(resultsEN.export.license.title)).not.toBeInTheDocument();
+    });
   });
 
   it('should show the activation-limit message and report the reason', async () => {

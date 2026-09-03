@@ -20,7 +20,7 @@ A privacy-focused, local web application that analyzes Instagram Data Download (
 - **Follower analysis**: Find users who follow you but you don't follow back
 - **Smart badges**: Categorize accounts (mutuals, close friends, restricted, etc.)
 - **Lightning search**: <2ms search with trigram/prefix indexes (1M+ accounts)
-- **Advanced filtering**: <5ms BitSet-based filtering for any badge combination
+- **Advanced filtering**: BitSet-based filtering designed to stay interactive for any badge combination
 - **Direct profile links**: Click to open Instagram profiles in new tabs
 
 ### Privacy Principles
@@ -39,11 +39,11 @@ A privacy-focused, local web application that analyzes Instagram Data Download (
 | **React 18** | UI framework with hooks and functional components |
 | **TypeScript** | Strict mode, zero `any` types |
 | **Vite** | Build tool and development server |
-| **vite-react-ssg** | Static Site Generation (70 pre-rendered pages) |
+| **vite-react-ssg** | Static Site Generation (page count derived in `src/routes.tsx`) |
 | **shadcn/ui** | Composable UI components built on Radix UI |
 | **Tailwind CSS** | Utility-first styling with OKLCH color system |
 | **Zustand** | Lightweight state management (<1KB UI state only) |
-| **i18next** | Internationalization (11 languages) |
+| **i18next** | Internationalization (10 languages) |
 
 ### Data Storage & Processing
 | Technology | Purpose |
@@ -110,12 +110,12 @@ interface AppState {
 ### Language Detection (URL as Source of Truth)
 ```typescript
 // src/config/languages.ts
-export const SUPPORTED_LANGUAGES = ['en', 'es', 'ru', 'de', 'pt', 'tr', 'hi', 'id', 'ja', 'ar', 'fr'];
+export const SUPPORTED_LANGUAGES = ['en', 'ar', 'de', 'es', 'fr', 'id', 'ja', 'pt', 'ru', 'tr'];
 export const RTL_LANGUAGES = ['ar'];
 
 export function detectLanguageFromUrl(): SupportedLanguage {
   const pathname = window.location.pathname;
-  const match = pathname.match(/^\/(en|es|ru|de|pt|tr|hi|id|ja|ar|fr)(\/|$)/);
+  const match = pathname.match(/^\/(ar|de|es|fr|id|ja|pt|ru|tr)(\/|$)/);
   return match ? match[1] as SupportedLanguage : 'en';
 }
 ```
@@ -176,15 +176,20 @@ useAccountDataSource: lazy load accounts by indices
 
 ### Benchmarks (1M accounts)
 
-| Metric | Target | Achieved |
-|--------|--------|----------|
-| Filter (single badge) | <10ms | ~3ms |
-| Filter (3 badges) | <10ms | ~5ms |
-| Search (indexed) | <5ms | ~2ms |
-| Storage | <20MB | ~5MB |
-| Memory (runtime) | <20MB | ~5MB |
-| INP | <200ms | 180ms |
-| LCP | <2.5s | ~1.3s |
+These are design targets, not measurements: no benchmark harness exists in this repository,
+and the only 1M-scale test (`IndexedDBFilterEngine.test.ts`) mocks the whole IndexedDB layer
+and asserts a 500ms ceiling — it measures in-memory bitset iteration, not storage. What IS
+true: the engine is built and unit-tested against a 1M-account bitset.
+
+| Metric | Target |
+|--------|--------|
+| Filter (single badge) | under 10 ms |
+| Filter (3 badges) | under 10 ms |
+| Search (indexed) | under 5 ms |
+| Storage | under 20 MB |
+| Memory (runtime) | under 20 MB |
+| INP | under 200 ms |
+| LCP | under 2.5 s |
 
 ### Optimization Strategies
 - **Columnar storage**: 40x space reduction vs row-based
@@ -198,7 +203,7 @@ useAccountDataSource: lazy load accounts by indices
 
 ## 6. Internationalization (i18n)
 
-### Supported Languages (11)
+### Supported Languages (10)
 
 | Language | Code | RTL | Locale |
 |----------|------|-----|--------|
@@ -208,14 +213,17 @@ useAccountDataSource: lazy load accounts by indices
 | Deutsch | de | — | de_DE |
 | Português | pt | — | pt_BR |
 | Türkçe | tr | — | tr_TR |
-| हिन्दी | hi | — | hi_IN |
 | Bahasa Indonesia | id | — | id_ID |
 | 日本語 | ja | — | ja_JP |
 | العربية | ar | ✅ | ar_SA |
 | Français | fr | — | fr_FR |
 
 ### SSG Architecture
-- **70 pre-rendered pages**: 10 languages × 7 routes
+- **Pre-rendered pages**: derived, never written down on this page. `src/routes.tsx` states the
+  shape — the static routes, once per supported language — and
+  `src/__tests__/docs/architecture-facts.test.ts` computes the number from it. The last audit found
+  this count copied into six documents with four different values, and it halved when the wizard
+  step routes stopped being pages (GH#102)
 - **Path-based routing**: `/es/upload`, `/ar/results`, etc.
 - **Localized meta tags**: Dynamic title/description per language
 - **hreflang tags**: SEO optimization for language variants
@@ -259,7 +267,7 @@ src/
 ├── locales/              # i18n translations
 │   ├── en/               # English
 │   ├── es/               # Spanish
-│   └── ...               # 11 languages
+│   └── ...               # 10 languages
 ├── routes.tsx            # SSG route definitions
 ├── main.tsx              # ViteReactSSG entry point
 └── __tests__/            # Tests (mirror structure)

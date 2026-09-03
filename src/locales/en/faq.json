@@ -45,6 +45,14 @@
         "href": "/upload?guide=1"
       }
     },
+    "htmlExport": {
+      "question": "I exported HTML instead of JSON. Do I need to export again?",
+      "answer": "No. SafeUnfollow already reads both formats. HTML exports also work, but JSON is the format we read most reliably, so it's still what the guide recommends. Upload the ZIP you already have.",
+      "relatedLink": {
+        "text": "How to get your export",
+        "href": "/upload?guide=1"
+      }
+    },
     "accountSafety": {
       "question": "Will my Instagram account be safe using this tracker?",
       "answer": "Yes, 100% safe. Unlike apps that ask for your password and 'scrape' data (which violates Terms of Service), this tool uses your official data export. No login required: you download the ZIP directly from Instagram, then upload it locally to your browser. We never access your account.",
@@ -71,7 +79,7 @@
     },
     "free": {
       "question": "Are there free Instagram unfollower trackers?",
-      "answer": "Yes. The analysis is 100% free: every badge, filter and account, with no signup and no limit. Most subscription alternatives charge $5-10/month. A one-time $7 unlock applies only if you want to export your filtered list as a file; viewing it here is always free. Open-source (MIT), and your Instagram export is processed locally in your browser."
+      "answer": "Yes. The analysis is 100% free: every badge, filter and account, with no signup and no limit. Most alternatives charge a monthly subscription. Here, the only thing that costs anything is exporting your filtered list as a file — a one-time unlock, never a subscription, with the price shown on the button. Viewing the list here is always free. Open-source (MIT), and your Instagram export is processed locally in your browser."
     },
     "analyzeData": {
       "question": "How do I analyze my Instagram data download to find unfollowers?",
@@ -99,7 +107,7 @@
     },
     "betterThanPaid": {
       "question": "Is SafeUnfollow better than paid Instagram unfollow apps?",
-      "answer": "For most users, yes. The analysis is free: no signup, no subscription, every account in your export. It needs no login (so no account ban risk), processes your export locally in your browser (maximum privacy), handles 1,000,000+ accounts (most paid apps cap at 100,000), and is open source. Exporting your filtered list as a file is a one-time $7 unlock; everything you can see on screen stays free. Paid apps offer real-time monitoring, which requires API access, but that violates Instagram's Terms of Service and risks your account. SafeUnfollow uses the official, safe data export method."
+      "answer": "For most users, yes. The analysis is free: no signup, no subscription, every account in your export. It needs no login (so no account ban risk), processes your export locally in your browser (maximum privacy), handles 1,000,000+ accounts (most paid apps cap at 100,000), and is open source. Exporting your filtered list as a file is a one-time unlock — paid once, not every month; everything you can see on screen stays free. Paid apps offer real-time monitoring, which requires API access, but that violates Instagram's Terms of Service and risks your account. SafeUnfollow uses the official, safe data export method."
     },
     "mobileUse": {
       "question": "Can I use SafeUnfollow on iPhone or Android?",

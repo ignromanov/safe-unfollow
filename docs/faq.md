@@ -11,7 +11,7 @@ last_updated: 2026-01-16
 ## Privacy & Security
 
 ### Is it safe? Where do my data go?
-**100% safe and private.** All processing happens locally in your browser. Your Instagram data never leaves your device - nothing is sent to any server or stored anywhere.
+**Your Instagram export never leaves your browser.** The ZIP is opened, parsed and stored on your own device, and no server receives your export. What the rest of the site loads is answered on [the privacy page](/docs/privacy/).
 
 ### Do I need my Instagram login/password?
 **No, absolutely not.** You only need the ZIP file from Instagram's official Data Download feature (JSON format). No login credentials required.
@@ -34,8 +34,8 @@ Instagram may split followers into multiple files (`followers_1.json`, `follower
 - Downloaded "All time" data range
 
 ### What file formats are supported?
-- **Input**: Instagram Data Download ZIP files (JSON read most reliably; HTML exports also work)
-- **Output**: Currently display only, CSV/JSON export planned for v1.6
+- **Input**: Instagram Data Download ZIP files (JSON or HTML; JSON is what the guide recommends)
+- **Output**: Free 10-row sample, then a one-time unlock (price shown on the button in your currency) for the full CSV/JSON file
 
 ## Technical
 
@@ -54,9 +54,9 @@ Modern browsers with JavaScript enabled:
 
 ### How many accounts can it handle?
 The app is optimized for massive scale:
-- **1,000,000+ accounts** — tested and verified with 1M+ accounts
-- **Filter speed**: <5ms for any badge combination (even 1M accounts)
-- **Search speed**: <2ms with trigram/prefix indexes
+- **1,000,000+ accounts** — built and unit-tested for exports of 1,000,000+ accounts
+- **Filter speed**: stays interactive for any badge combination, even at 1M accounts
+- **Search speed**: near-instant with trigram/prefix indexes
 - **Storage**: ~5 MB for 1M accounts (40x compression)
 - **Memory**: ~5 MB runtime usage
 
@@ -110,7 +110,7 @@ This is normal and expected:
 ### Is there a roadmap for new features?
 Yes! See [Project Roadmap](/docs/roadmap/) for upcoming features. Already live:
 - ✅ **PWA support** — install as app, works offline
-- ✅ **11 languages** — including Arabic with RTL support
+- ✅ **10 languages** — including Arabic with RTL support
 - ✅ **3-way theme** — light/dark/system
 
 ## Advanced Usage
@@ -122,7 +122,7 @@ Currently, the app analyzes one export at a time. Historical tracking with multi
 Results are 100% accurate based on your Instagram data export. The app shows the exact state of your followers/following at the time you downloaded the data.
 
 ### Can I export my results?
-CSV/JSON export functionality is planned for v1.6. You'll be able to save filtered results for external analysis.
+Yes. CSV/JSON export ships today: download a free 10-row sample, then unlock the full file with a one-time payment (price shown on the button in your currency).
 
 ### Does the app work with private accounts?
 Yes, the app works with any Instagram account type (public, private, business). It only processes the follower/following data from your export.
@@ -142,7 +142,7 @@ The app is designed to handle various Instagram export formats. If Instagram cha
 Your Instagram data is stored locally in your browser's IndexedDB for fast access. It never leaves your device. You can clear data anytime by clearing browser data or uploading a new file.
 
 ### What languages are supported?
-The app is available in **11 languages**: English, Spanish, Russian, German, Portuguese, Turkish, Hindi, Indonesian, Japanese, Arabic (with RTL support), and French. The app auto-detects your browser language.
+The app is available in **10 languages**: English, Spanish, Russian, German, Portuguese, Turkish, Indonesian, Japanese, Arabic (with RTL support), and French. The app auto-detects your browser language.
 
 ### Can I install it as an app?
 **Yes!** The app is a PWA (Progressive Web App). Click "Install" in your browser to add it to your home screen. It works fully offline after installation.
