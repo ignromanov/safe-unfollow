@@ -22,6 +22,7 @@ Welcome to the complete documentation for Instagram Unfollow Tracker, a privacy-
 - **[Troubleshooting](/docs/troubleshooting/)** - Problem-solving guide for common issues
 - **[Privacy Policy](/docs/privacy/)** - Data handling principles and privacy commitment
 - **[Accessibility](/docs/accessibility/)** - Accessibility features and support
+- **[Is It Safe?](/docs/is-it-safe/)** - Five checkable facts, and a two-minute test for any tracker
 
 ## Technical Information
 
@@ -40,7 +41,7 @@ Instagram Unfollow Tracker is a **100% private** tool that analyzes your Instagr
 
 ### Key Features
 
-- **Privacy First**: No data collection, no tracking, no servers
+- **Privacy First**: Your Instagram export is read in the browser and never uploaded
 - **No Login Required**: Uses official Instagram data export
 - **Completely Free**: No subscriptions or hidden costs
 - **Open Source**: Transparent and auditable code

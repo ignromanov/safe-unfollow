@@ -11,7 +11,7 @@ last_updated: 2026-01-16
 ## Privacy & Security
 
 ### Is it safe? Where do my data go?
-**100% safe and private.** All processing happens locally in your browser. Your Instagram data never leaves your device - nothing is sent to any server or stored anywhere.
+**Your Instagram export never leaves your browser.** The ZIP is opened, parsed and stored on your own device, and no server receives your export. What the rest of the site loads is answered on [the privacy page](/docs/privacy/).
 
 ### Do I need my Instagram login/password?
 **No, absolutely not.** You only need the ZIP file from Instagram's official Data Download feature (JSON format). No login credentials required.
