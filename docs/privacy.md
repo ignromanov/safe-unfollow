@@ -27,7 +27,7 @@ handful of third parties, and the canonical policy names what each one receives:
 |-----|---------------|-------|
 | Vercel | standard web server logs (IP, timestamp, requested URL) | every page |
 | Umami | anonymous page views and product events, no personal identifiers | every page |
-| Google AdSense | ad requests and advertising cookies, subject to your consent choice | `/` and `/results` |
+| Google AdSense | ad requests and advertising cookies, subject to your consent choice | the units we place are on `/results`; Google's own automatic placements can appear on any screen once its script has started |
 | Google (Funding Choices) | your consent choice, stored so the banner stops asking | consent regions |
 | Affiliate networks | only what a link click sends, and only if you click | `/upload` |
 | Dodo Payments | your licence key, your email if you buy the export, and — attached to the checkout link — whether you are on a phone or a big screen, the language you are reading in, and your country | export only |

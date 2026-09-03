@@ -275,8 +275,17 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             </p>
           </div>
           <p className="text-muted-foreground mt-4">
-            AdSense units are not shown on the sample-data page, and there are none on the upload
-            screen. The upload screen does carry one partner link, described in 5.5.
+            Two of those ad units are ours, and both sit on the results screen. Google also serves
+            placements of its own choosing, which can appear on any screen once its script is
+            running — including a full-screen ad shown between pages. We do not select those and
+            cannot list them here.
+          </p>
+          <p className="text-muted-foreground mt-4">
+            We never start Google's ad script on the sample-data page, so opening it directly leaves
+            it free of ads. If you have already opened the results screen in the same visit, the
+            script is loaded and Google's own placements can follow you to any screen, including
+            that one; reloading the tab clears it. The upload screen carries one partner link, which
+            is ours and is described in 5.5.
           </p>
           <p className="text-muted-foreground mt-4">
             If you are in the EEA, UK or Switzerland, a consent dialog from Google's certified
