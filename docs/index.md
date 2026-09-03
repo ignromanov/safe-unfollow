@@ -23,6 +23,7 @@ Welcome to the complete documentation for Instagram Unfollow Tracker, a privacy-
 - **[Privacy Policy](/docs/privacy/)** - Data handling principles and privacy commitment
 - **[Accessibility](/docs/accessibility/)** - Accessibility features and support
 - **[Is It Safe?](/docs/is-it-safe/)** - Five checkable facts, and a two-minute test for any tracker
+- **[Alternatives Compared](/docs/compare/)** - How SafeUnfollow differs from the trackers you meet in the same search results
 
 ## Technical Information
 

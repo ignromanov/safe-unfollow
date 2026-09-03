@@ -57,6 +57,7 @@ const ROUTE_CONFIG: Record<string, { priority: number; changefreq: string }> = {
   "/docs/accessibility": { priority: 0.5, changefreq: "yearly" },
   "/docs/is-it-safe": { priority: 0.7, changefreq: "monthly" },
   "/docs/compare": { priority: 0.6, changefreq: "monthly" },
+  "/docs/compare/vs-followsback": { priority: 0.6, changefreq: "monthly" },
   "/docs/compare/vs-unfollowgram": { priority: 0.6, changefreq: "monthly" },
   "/docs/compare/vs-followers-app": { priority: 0.6, changefreq: "monthly" },
 };
@@ -74,6 +75,7 @@ const ENGLISH_ONLY_PATHS = [
   "/docs/accessibility",
   "/docs/is-it-safe",
   "/docs/compare",
+  "/docs/compare/vs-followsback",
   "/docs/compare/vs-unfollowgram",
   "/docs/compare/vs-followers-app",
 ];

@@ -315,6 +315,8 @@ const BANNED_PRIVACY = [
  * to be a decision, not a side effect.
  */
 const CANONICAL_PRIVACY_URL = /safeunfollow\.app\/privacy/;
+const COMPARE_DOCS = DOCS.filter(doc => /^compare[\\/]/.test(doc.name));
+
 const DOCS_PRIVACY_MAX_BYTES = 3500;
 
 /**
@@ -514,13 +516,16 @@ describe('docs monetization claims', () => {
   // gate until you know the fact moved, and it is *worse* than a missing gate because it
   // actively blocks the correction — `docs/roadmap.md` and two `docs/compare/*.md` pages
   // could not be fixed until this line was.
-  it('discloses the export price on every page that compares prices, without naming our own numeral', () => {
-    const priceTables = DOCS.filter(doc => /\|\s*\*\*Price\*\*\s*\|/.test(doc.text));
-
-    // >= , not ===: task 04 of the same plan adds more comparison pages, and a hand count
-    // here would fail on that growth the same way the `$7` literal failed on a price change.
-    expect(priceTables.length, 'comparison pages with a Price row').toBeGreaterThanOrEqual(3);
-    for (const doc of priceTables) {
+  //
+  // The subject set was `/\|\s*\*\*Price\*\*\s*\|/` until 2026-09-03 and broke on task 04, which
+  // split that row into "Free" and "Paid" on three pages. A row label is a proxy for "this page
+  // presents our offer", and a proxy fails on a copy reshape while the claim it guards is still
+  // there — the same shape as the stale fact above, one level milder. The directory is the real
+  // subject: every page under `docs/compare/` sells the comparison, so every one of them owes the
+  // reader our terms. Derived, so a new page is covered the day it lands.
+  it('discloses the export price on every comparison page, without naming our own numeral', () => {
+    expect(COMPARE_DOCS.length, 'comparison pages found').toBeGreaterThan(1);
+    for (const doc of COMPARE_DOCS) {
       expect(doc.text, `${doc.name} discloses the export is a one-time purchase`).toMatch(/one-time/i);
       expect(doc.text, `${doc.name} must not name our own price as a numeral`).not.toMatch(/\$\s?7\b/);
     }
@@ -587,6 +592,56 @@ describe('shipped UI copy monetization claims — archived-claim regression guar
       expect(answer, `${locale}/faq.json items.free.answer regressed to the archived claim`).not.toBe(
         ARCHIVED_FALSE_FAQ_FREE_ANSWER[locale],
       );
+    });
+  }
+});
+
+/**
+ * Comparison pages carry facts about other companies, and those facts expire
+ * without notice — the day a rival edits a pricing page, ours is wrong and
+ * nothing tells us. velum-cdpo's 2026-09-03 ruling made two rules binding on
+ * this directory; both are structural here rather than remembered:
+ *
+ * 1. A price on the page requires a check date on the page. Without the date a
+ *    reader cannot tell a figure read last week from one read last year.
+ * 2. No HTML comments. A withheld claim about a named competitor left in a
+ *    comment is still served to the client and still findable in view-source,
+ *    which is worse than either publishing it or never writing it. The rule is
+ *    blanket rather than content-aware on purpose: a gate that tried to judge
+ *    which comments are safe would be the recollection this replaces.
+ *
+ * The subject list is derived from the directory, not enumerated — the class of
+ * defect in `progress.md` P1 row 14, where a hand-listed gate passed green while
+ * an un-enumerated subject shipped broken.
+ */
+// `[^\n]`, not `[^.\n]`: the sentence that carries the date usually names the domain it was
+// checked on, and a domain contains a period. The stricter class silently failed to match
+// "checked on followsback.com's own pages on 2026-09-02" — found by proving this red.
+const CHECK_DATE = /checked[^\n]{0,60}?\b\d{4}-\d{2}-\d{2}\b/i;
+const CURRENCY_AMOUNT = /[$€£]\s?\d/;
+
+describe('comparison pages state facts about others with an expiry', () => {
+  it('finds the comparison pages', () => {
+    expect(COMPARE_DOCS.length).toBeGreaterThan(1);
+  });
+
+  for (const doc of COMPARE_DOCS) {
+    it(`${doc.name} dates any price it states`, () => {
+      // The body, not the frontmatter: a date visible only in the `description`
+      // meta tag dates the search snippet and not the table the reader is
+      // reading. Found the first time this gate was proved red — it passed on a
+      // page whose visible copy carried no date at all.
+      const body = doc.text.replace(/^---\n[\s\S]*?\n---\n/, '');
+      if (!CURRENCY_AMOUNT.test(body)) return;
+
+      expect(
+        CHECK_DATE.test(body),
+        `${doc.name} names a price but carries no "checked … YYYY-MM-DD" line in its body`,
+      ).toBe(true);
+    });
+
+    it(`${doc.name} holds no HTML comment`, () => {
+      expect(doc.text, `${doc.name} carries an HTML comment, which is served to the client`).not.toMatch(/<!--/);
     });
   }
 });
