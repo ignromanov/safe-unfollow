@@ -13,7 +13,7 @@ Followers App is one of the most popular Instagram analytics apps on iOS and And
 
 | Feature | **SafeUnfollow** | **Followers App** |
 |---------|-----------------|-------------------|
-| **Price** | Free — optional $7 one-time export | $5.99/month (free tier limited) |
+| **Price** | Free — optional one-time unlock, price shown on the button in your currency | $5.99/month (free tier limited) |
 | **Login required** | No | Yes (Instagram password) |
 | **Data method** | Official Instagram ZIP export | API scraping |
 | **Privacy** | 100% local browser processing | Data on their servers |
@@ -37,7 +37,7 @@ Followers App's free tier is heavily limited (shows only a few unfollowers, has 
 Followers App uploads your data to their cloud servers for processing. SafeUnfollow processes everything locally in your browser — your data never leaves your device.
 
 ### Massive Scale
-SafeUnfollow handles 1,000,000+ accounts with sub-5ms filtering thanks to IndexedDB columnar storage and FastBitSet operations. Followers App struggles with large accounts due to Instagram API rate limits.
+SafeUnfollow handles 1,000,000+ accounts with no network round-trip — filtering runs locally in your browser — thanks to IndexedDB columnar storage and FastBitSet operations. Followers App struggles with large accounts due to Instagram API rate limits.
 
 ## Where Followers App Wins
 
@@ -62,6 +62,6 @@ Followers App provides a native iOS/Android experience. SafeUnfollow works in an
 
 ## Try SafeUnfollow
 
-1. **[Step-by-step export guide](https://safeunfollow.app/wizard)** — Get your data in 5 minutes
+1. **[Step-by-step export guide](https://safeunfollow.app/upload?guide=1)** — Get your data in 5 minutes
 2. **[Upload your ZIP](https://safeunfollow.app/upload)** — Instant analysis
 3. **[Try with sample data](https://safeunfollow.app/sample)** — No upload needed

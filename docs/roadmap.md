@@ -16,7 +16,7 @@ last_updated: 2026-01-16
 - ✅ **Unfollow tracking** — Find who unfollowed you and who you don't follow back
 - ✅ **Smart badges** — Following, Followers, Mutuals, Not following back, Not followed back, Pending, Restricted, Close friends, Unfollowed, Dismissed
 - ✅ **Lightning search** — Trigram/prefix indexes for <2ms search (even with 1M+ accounts)
-- ✅ **Advanced filtering** — BitSet-based filtering <5ms for any badge combination
+- ✅ **Advanced filtering** — BitSet-based filtering designed to stay interactive for any badge combination
 - ✅ **Direct profile links** — Click to open Instagram profiles in new tabs
 
 ### User Experience
@@ -28,9 +28,9 @@ last_updated: 2026-01-16
 - ✅ **Error recovery** — ErrorBoundary with graceful error handling and recovery UI
 
 ### Internationalization (i18n)
-- ✅ **11 languages** — English, Spanish, Russian, German, Portuguese, Turkish, Hindi, Indonesian, Japanese, Arabic, French
+- ✅ **10 languages** — English, Spanish, Russian, German, Portuguese, Turkish, Indonesian, Japanese, Arabic, French
 - ✅ **Arabic RTL support** — Full right-to-left layout for Arabic
-- ✅ **80+ pre-rendered pages** — SSG with vite-react-ssg for instant load
+- ✅ **Pre-rendered pages** — every route, in every language, built ahead of time with vite-react-ssg for instant load
 - ✅ **Localized meta tags** — Dynamic title/description per language for SEO
 - ✅ **Browser language detection** — Auto-redirects to preferred language
 
@@ -61,8 +61,7 @@ last_updated: 2026-01-16
 ## v1.6 (Next Priority) 🔄
 
 ### Data Export
-- 🔄 **CSV export** — Save filtered results to CSV file for external analysis
-- 🔄 **JSON export** — Export data in JSON format
+- ✅ **CSV/JSON export** — ships today: free 10-row sample, then a one-time unlock (price shown on the button in your currency) for the full file
 - 🔄 **Export customization** — Choose which columns to include
 
 ### Upload UX Improvements
@@ -118,7 +117,7 @@ last_updated: 2026-01-16
   third parties do receive is spelled out below and in the Privacy Policy
 
 ### Commercial Features
-- ❌ **Subscriptions** — Finding your unfollowers is free in full, forever. The only paid item is a one-time $7 unlock for downloading the list as a file, and the download gives you a free sample first
+- ❌ **Subscriptions** — Finding your unfollowers is free in full, forever. The only paid item is a one-time unlock (price shown on the button in your currency) for downloading the list as a file, and the download gives you a free sample first
 - ❌ **Paywalling the analysis** — Every badge, filter and account stays free however large your export is
 - ❌ **Data monetization** — No selling or monetizing user data, and no advertiser ever receives it
 
@@ -149,7 +148,7 @@ each third party does and does not receive.
 - **Dynamic OG Images** — @vercel/og for social sharing
 
 ### v1.2.0 (January 10, 2026)
-- **9 Languages** — ES, RU, DE, PT, TR, HI, ID, JA
+- **Eight more languages** — ES, RU, DE, PT, TR, HI, ID, JA
 - **FAQ Section** — Schema.org FAQPage structured data
 - **HowTo Section** — Schema.org HowTo markup
 
@@ -166,17 +165,21 @@ each third party does and does not receive.
 
 ---
 
-## Performance Achievements
+## Performance Targets
 
-| Metric | v0.9 | v1.5.0 | Improvement |
+| Metric | v0.9 | v1.5.0 target | Improvement |
 |--------|------|--------|-------------|
 | Accounts supported | 50k | 1M+ | 20x |
-| Filter speed (1M) | 150ms | <5ms | 30x |
-| Search speed | 3000ms | <2ms | 1500x |
+| Filter speed (1M) | 150ms | ~5ms | 30x |
+| Search speed | 3000ms | ~2ms | 1500x |
 | Storage (1M) | 200 MB | 5 MB | 40x |
 | Memory (1M) | 100 MB | 5 MB | 20x |
-| Languages | 1 | 11 | 11x |
+| Languages | 1 | 10 | 10x |
 | Tests | 175 | 1,601 | 9x |
+
+⚠️ Filter speed and search speed are design targets, not measurements — no benchmark harness
+exists in this repo, and the only 1M-scale test mocks IndexedDB entirely and asserts a 500ms
+ceiling. Languages and Tests are real, measured counts.
 
 ---
 

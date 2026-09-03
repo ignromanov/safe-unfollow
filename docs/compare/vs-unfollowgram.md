@@ -13,7 +13,7 @@ Looking for a free alternative to Unfollowgram? Here's a detailed comparison.
 
 | Feature | **SafeUnfollow** | **Unfollowgram** |
 |---------|-----------------|-----------------|
-| **Price** | Free — optional $7 one-time export | $4.99/month |
+| **Price** | Free — optional one-time unlock, price shown on the button in your currency | $4.99/month |
 | **Login required** | No | Yes (Instagram password) |
 | **Data method** | Official Instagram ZIP export | API scraping |
 | **Privacy** | 100% local browser processing | Data uploaded to their servers |
@@ -55,6 +55,6 @@ The core question is: **Do you value privacy and safety, or convenience?**
 
 ## Switch to SafeUnfollow
 
-1. **[Follow our export guide](https://safeunfollow.app/wizard)** — Takes 5 minutes
+1. **[Follow our export guide](https://safeunfollow.app/upload?guide=1)** — Takes 5 minutes
 2. **[Upload your ZIP](https://safeunfollow.app/upload)** — Analysis is instant
 3. **[Try sample data first](https://safeunfollow.app/sample)** — See it in action

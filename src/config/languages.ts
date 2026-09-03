@@ -99,11 +99,17 @@ export const NON_ENGLISH_LANGUAGES = SUPPORTED_LANGUAGES.filter(lang => lang !==
 
 /**
  * Language regex pattern for URL matching (without 'en')
- * Format: (es|pt|hi|id|tr|ja|ru|de|ar)
+ *
+ * The alternation is built from NON_ENGLISH_LANGUAGES, so it is never written out here.
+ * It used to be, three times over, and all three copies still named `hi` — retired
+ * 2026-08-08 — while omitting `fr`. A comment in the file that decides a fact is the
+ * worst place to keep a stale copy of it, because it is the copy every other document
+ * gets transcribed from: `docs/tech-spec.md` carried both errors verbatim until
+ * 2026-09-02.
  *
  * Usage examples:
- * - Vercel rewrites: /:lang(es|pt|hi|id|tr|ja|ru|de|ar)/:path*
- * - Route matching: /^\/(es|pt|hi|id|tr|ja|ru|de|ar)(\/|$)/
+ * - Vercel rewrites: `/:lang(${LANGUAGE_REGEX_PATTERN})/:path*`
+ * - Route matching: see createLanguagePrefixRegex() below, which builds it
  */
 export const LANGUAGE_REGEX_PATTERN = NON_ENGLISH_LANGUAGES.join('|');
 
