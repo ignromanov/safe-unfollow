@@ -61,6 +61,39 @@ describe('PrivacyPolicy Component', () => {
       expect(screen.getByText(/consent management platform/i)).toBeInTheDocument();
     });
 
+    // Google's Auto ads have served since 2026-08-18 and follow the reader off
+    // the routes that declare an `<ins>`, because `adsbygoogle.js` is injected
+    // once and survives client-side navigation (lib/ads/loader.ts). §5.4 used
+    // to say there were no units on the upload screen; literally true of what
+    // we declare, false about what the reader sees, and the database held
+    // `/upload#google_vignette` while it said so. The claim is therefore about
+    // the mechanism — what we place versus what Google places — because an
+    // inventory sentence goes stale the next time somebody opens a console we
+    // do not own.
+    it('should say Google places ads we do not choose, rather than listing where ads appear', () => {
+      render(<PrivacyPolicy onBack={mockOnBack} />);
+
+      expect(screen.getByText(/placements of its own choosing/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/We do not select those and cannot list them here/i)
+      ).toBeInTheDocument();
+      expect(screen.queryByText(/there are none on the upload\s+screen/i)).not.toBeInTheDocument();
+    });
+
+    // The one absolute left in §5.4, and it is narrower than it reads: nothing
+    // starts the ad script on /sample (AdSlot is the sole injector and refuses
+    // there), but nothing unloads it either, so a reader arriving from
+    // /results in the same visit carries a live script onto that page. The
+    // sentence must survive a reader who checks it by pressing Back.
+    it('should qualify the sample-page promise instead of stating it absolutely', () => {
+      render(<PrivacyPolicy onBack={mockOnBack} />);
+
+      expect(
+        screen.getByText(/never start Google's ad script on the sample-data page/i)
+      ).toBeInTheDocument();
+      expect(screen.getByText(/can follow you to any screen/i)).toBeInTheDocument();
+    });
+
     // Pro Export sends the buyer to a payment processor and calls its license
     // API from the browser (see lib/export/license.ts). §5.2 had no guard while
     // §5.3 and §5.4 did, which is how the whole section could be rewritten from

@@ -2,8 +2,13 @@
  * AdSense runtime helper.
  *
  * The `adsbygoogle.js` script is injected lazily — only when an eligible ad
- * slot approaches the viewport (see AdSlot). This keeps Google's ad script off
- * the page entirely for sample-route visitors. For EEA/UK/CH visitors the
+ * slot approaches the viewport (see AdSlot). That keeps it off the page for a
+ * visitor who lands on `/sample` directly — and only for them. Injection is
+ * idempotent by tag id and there is no teardown, so once any eligible slot has
+ * fired, the script survives client-side navigation to every route, including
+ * `/sample` and `/upload`, which declare no slot of their own. Google's Auto
+ * ads then serve there too; the privacy policy §5.4 is worded around this
+ * rather than around the slots we declare. For EEA/UK/CH visitors the
  * script still loads, and Google's certified CMP gates ad serving on the
  * user's consent choice.
  * Ownership verification for Google's site review
