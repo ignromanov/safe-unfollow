@@ -27,7 +27,11 @@ export function UploadWaitingState({ onUploadNow, onDismiss }: UploadWaitingStat
   return (
     <section className="flex flex-col gap-4 rounded-3xl border border-primary/30 bg-primary/5 p-5">
       <div>
-        <h3 className="text-base font-bold text-zinc-900 dark:text-white">{t('waiting.title')}</h3>
+        {/* h2, not h3: the only heading above this on /upload is the page's
+            own h1 (UploadZone), and the guide block's h2 comes after it in
+            DOM order - so an h3 here skipped a level in the middle of the
+            document. It is a sibling section, not a child of anything. */}
+        <h2 className="text-base font-bold text-zinc-900 dark:text-white">{t('waiting.title')}</h2>
         <p className="mt-1.5 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
           {t('waiting.description')}
         </p>
@@ -63,18 +67,30 @@ export function UploadWaitingState({ onUploadNow, onDismiss }: UploadWaitingStat
         <p className="text-xs leading-relaxed text-zinc-600 dark:text-zinc-400">
           {t('waiting.haveFileHint')}
         </p>
-        <div className="mt-1 flex flex-wrap items-center gap-3">
+        {/* Both are controls and neither was drawn as one: "Upload Now" opens
+            the file picker and was 14px of underlined text, "Skip for now"
+            12px of grey. Same 48px box for both, and the tiers the guide's
+            closing card already uses - the filled slot in this block belongs
+            to the reminder above, so this is bordered, then ghost.
+
+            Stacked rather than a row, and the reason is measured rather
+            than assumed: `fr` carries the longest pair of the ten at 21 and
+            21 characters ("Téléverser maintenant" / "Passer pour l'instant"),
+            with `id` at 21 for the second. Two side-by-side boxes wrap inside
+            themselves at that length, which costs more height than the column
+            does and does it in only some locales. */}
+        <div className="mt-1 flex flex-col gap-2">
           <button
             type="button"
             onClick={onUploadNow}
-            className="cursor-pointer text-sm font-black text-primary hover:underline"
+            className="inline-flex min-h-[48px] cursor-pointer items-center justify-center rounded-2xl border border-border bg-card px-6 py-3 text-sm font-black text-primary transition-colors hover:bg-primary/10"
           >
             {t('waiting.uploadNow')}
           </button>
           <button
             type="button"
             onClick={onDismiss}
-            className="cursor-pointer text-xs font-semibold text-muted-foreground hover:text-foreground"
+            className="inline-flex min-h-[48px] cursor-pointer items-center justify-center rounded-2xl px-6 py-3 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             {t('waiting.skip')}
           </button>
