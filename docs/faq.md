@@ -6,6 +6,8 @@ permalink: /faq/
 last_updated: 2026-09-03
 ---
 
+{% include faq-page-schema.html %}
+
 # FAQ - Instagram Unfollow Tracker
 
 ## Privacy & Security
@@ -57,8 +59,8 @@ The app is optimized for massive scale:
 - **1,000,000+ accounts** — built and unit-tested for exports of 1,000,000+ accounts
 - **Filter speed**: stays interactive for any badge combination, even at 1M accounts
 - **Search speed**: near-instant with trigram/prefix indexes
-- **Storage**: ~5 MB for 1M accounts (40x compression)
-- **Memory**: ~5 MB runtime usage
+- **Storage**: ~5 MB for 1M accounts (design target, ~40x compression)
+- **Memory**: ~5 MB runtime usage (design target)
 
 ## Comparison
 
@@ -66,7 +68,7 @@ The app is optimized for massive scale:
 - **Privacy**: 100% local processing, no data collection
 - **Transparency**: Open source, you can see exactly what it does
 - **No login required**: Uses official Instagram data export
-- **Free**: No subscriptions or hidden costs
+- **Free to analyze**: Every badge, filter and account — the one paid item is a $7 one-time export unlock
 - **Customizable**: Modify the code for your needs
 - **Offline**: Works without internet connection
 

@@ -8,7 +8,7 @@ last_updated: 2026-09-03
 
 # Technical Specification - Instagram Unfollow Tracker
 
-**Version:** 1.5.0 | **Last Updated:** January 16, 2026
+**Version:** 1.5.0
 
 ## 1. Project Overview
 
@@ -19,7 +19,7 @@ A privacy-focused, local web application that analyzes Instagram Data Download (
 - **Unfollow tracking**: Identify users you follow who don't follow back
 - **Follower analysis**: Find users who follow you but you don't follow back
 - **Smart badges**: Categorize accounts (mutuals, close friends, restricted, etc.)
-- **Lightning search**: <2ms search with trigram/prefix indexes (1M+ accounts)
+- **Lightning search**: trigram/prefix indexes, designed for sub-2ms search at 1M+ accounts (design target — see §5)
 - **Advanced filtering**: BitSet-based filtering designed to stay interactive for any badge combination
 - **Direct profile links**: Click to open Instagram profiles in new tabs
 
@@ -49,10 +49,10 @@ A privacy-focused, local web application that analyzes Instagram Data Download (
 | Technology | Purpose |
 |------------|---------|
 | **IndexedDB v2** | Columnar storage with 40x compression |
-| **FastBitSet.js** | Bitwise filtering operations (75x faster) |
+| **FastBitSet.js** | Bitwise filtering, 1 bit per account per badge (design target: ~32x vs boolean arrays) |
 | **Comlink** | Type-safe Web Worker communication |
-| **TanStack Virtual** | Virtual scrolling for 1M+ items at 60 FPS |
-| **Web Workers** | Off-thread filtering (INP: 180ms) |
+| **TanStack Virtual** | Virtual scrolling, renders only the visible window (design target: 60 FPS at 1M+ items) |
+| **Web Workers** | Filtering runs off the main thread via Comlink |
 
 ### Build & Deployment
 | Technology | Purpose |
@@ -90,10 +90,12 @@ interface AppState {
 
   // File metadata (NOT account data)
   fileMetadata: FileMetadata | null;
+  fileDiscovery: FileDiscovery | null;
+  parseWarnings: ParseWarning[];
 
-  // Theme (3-way toggle)
-  theme: 'light' | 'dark' | 'system';
-  setTheme: (theme: 'light' | 'dark' | 'system') => void;
+  // Language (persisted; the URL stays the rendering source of truth)
+  language: SupportedLanguage;
+  setLanguage: (language: SupportedLanguage) => void;
 
   // Hydration
   _hasHydrated: boolean;
@@ -224,7 +226,7 @@ true: the engine is built and unit-tested against a 1M-account bitset.
   `src/__tests__/docs/architecture-facts.test.ts` computes the number from it. The last audit found
   this count copied into six documents with four different values, and it halves again when the
   wizard step routes are removed
-- **Path-based routing**: `/es/wizard`, `/ar/upload`, etc.
+- **Path-based routing**: `/es/upload`, `/ar/results`, etc.
 - **Localized meta tags**: Dynamic title/description per language
 - **hreflang tags**: SEO optimization for language variants
 - **Full page reload on language change**: Ensures correct SSG meta
@@ -257,7 +259,7 @@ src/
 │   └── filter-worker.ts  # IndexedDBFilterEngine (Comlink)
 ├── pages/                # SSG page components
 │   ├── HomePage.tsx      # / route
-│   ├── WizardPage.tsx    # /wizard route
+│   ├── UploadPage.tsx    # /upload route (the guide opens here)
 │   ├── UploadPage.tsx    # /upload route
 │   ├── ResultsPage.tsx   # /results route
 │   └── ...               # 8 pages total

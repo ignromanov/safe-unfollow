@@ -91,12 +91,12 @@
         }
         
         h1 {
-            border-bottom: 3px solid #3498db;
+            border-bottom: 3px solid #2176ad;
             padding-bottom: 10px;
         }
         
         a {
-            color: #3498db;
+            color: #2176ad;
             text-decoration: none;
         }
         
@@ -108,14 +108,14 @@
             display: inline-block;
             margin-bottom: 20px;
             padding: 8px 16px;
-            background: #3498db;
+            background: #2176ad;
             color: white;
             border-radius: 4px;
             text-decoration: none;
         }
         
         .back-link:hover {
-            background: #2980b9;
+            background: #17629b;
             text-decoration: none;
         }
         
@@ -133,8 +133,45 @@
             overflow-x: auto;
         }
         
+        /*
+          `body { max-width: 800px }` bounds the container, not the replaced
+          element inside it, so the two 2950px screenshots on /user-guide laid
+          out at 2950px and took the document with them. Measured on the served
+          page before this rule: documentElement.scrollWidth 3295px against a
+          1411px viewport — 1884px of horizontal overflow on a desktop window,
+          not only on a phone. After: 0px at 375, 768 and 1411.
+
+          ⛔ The site-wide "85% mobile" figure does not apply here and must not
+          be cited for it. Umami sees no /docs page at all — the layout loads no
+          tracker — so this property has no device split, no bounce rate and no
+          before/after (.conclave analytics/measurement-boundaries.md). The
+          overflow above is unconditional, which is why it needed no such claim.
+        */
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /*
+          Eight of these pages carry tables of up to five columns whose cells
+          hold prose. A table cannot be told to respect a width, so the choice is
+          between the table scrolling and the document scrolling.
+        */
+        table {
+            display: block;
+            overflow-x: auto;
+            max-width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 6px 10px;
+            border: 1px solid #e1e4e8;
+            text-align: left;
+        }
+
         blockquote {
-            border-left: 4px solid #3498db;
+            border-left: 4px solid #2176ad;
             margin: 0;
             padding-left: 20px;
             color: #666;
@@ -144,6 +181,27 @@
             margin-top: 3em;
             font-size: 0.85em;
             color: #6c757d;
+        }
+
+
+        /*
+          20px of body padding and 40px of container padding, on both sides, is
+          120px of chrome. On a 375px viewport that left a 255px text column;
+          halving both leaves 315px. Measured, not estimated — a 24% wider line
+          for the same page.
+        */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            h1, h2, h3, h4, h5, h6 {
+                margin-top: 1.5em;
+            }
         }
 
         .footer {

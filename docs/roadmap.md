@@ -15,14 +15,14 @@ last_updated: 2026-09-03
 ### Core Functionality
 - ✅ **Unfollow tracking** — Find who unfollowed you and who you don't follow back
 - ✅ **Smart badges** — Following, Followers, Mutuals, Not following back, Not followed back, Pending, Restricted, Close friends, Unfollowed, Dismissed
-- ✅ **Lightning search** — Trigram/prefix indexes for <2ms search (even with 1M+ accounts)
+- ✅ **Lightning search** — Trigram/prefix indexes, designed for sub-2ms search even at 1M+ accounts
 - ✅ **Advanced filtering** — BitSet-based filtering designed to stay interactive for any badge combination
 - ✅ **Direct profile links** — Click to open Instagram profiles in new tabs
 
 ### User Experience
 - ✅ **Modern UI** — shadcn/ui components with Tailwind CSS and OKLCH colors
 - ✅ **Drag & drop upload** — Easy ZIP file upload with visual feedback
-- ✅ **Responsive design** — Works on desktop, tablet, and mobile (81% mobile users)
+- ✅ **Responsive design** — Works on desktop, tablet, and mobile (85% of visits are mobile)
 - ✅ **3-way theme toggle** — Light / Dark / System with OS preference detection
 - ✅ **Accessibility** — ARIA labels, keyboard navigation, screen reader support, skip links
 - ✅ **Error recovery** — ErrorBoundary with graceful error handling and recovery UI
@@ -40,10 +40,10 @@ last_updated: 2026-09-03
 - ✅ **Service worker** — Full offline functionality after first load
 
 ### Performance & Quality
-- ✅ **IndexedDB v2** — Columnar storage with 40x space reduction (1M accounts: ~5 MB)
-- ✅ **FastBitSet.js** — 75x faster filtering with bitwise operations
-- ✅ **Web Workers** — Filter operations off main thread via Comlink (INP: 180ms)
-- ✅ **TanStack Virtual** — Lazy loading with 60 FPS scrolling for 1M+ items
+- ✅ **IndexedDB v2** — Columnar storage, designed for ~40x space reduction (~5 MB at 1M accounts)
+- ✅ **FastBitSet.js** — Bitwise filtering, 1 bit per account per badge
+- ✅ **Web Workers** — Filter operations off the main thread via Comlink
+- ✅ **TanStack Virtual** — Lazy loading, designed for 60 FPS scrolling at 1M+ items
 - ✅ **Search indexes** — Trigram/prefix for O(1) lookups
 - ✅ **1,601 tests** — 98% coverage with comprehensive test suite
 - ✅ **TypeScript strict mode** — Full type safety with zero `any` types
