@@ -1,18 +1,25 @@
 import type { ComponentProps } from 'react';
 import { describe, expect, it } from 'vitest';
 import { act, render, screen } from '@testing-library/react';
-import { MemoryRouter, useLocation, useNavigationType } from 'react-router-dom';
+import { MemoryRouter, useLocation, useNavigate, useNavigationType } from 'react-router-dom';
 
 import { SAME_PATH_PUSH, useGuideDialog } from '@/hooks/useGuideDialog';
 
 type Guide = ReturnType<typeof useGuideDialog>;
 
 let guide: Guide;
+/** A hardware/browser Back: pops the entry directly, running none of our own code. */
+let goBack: () => void;
+/** What an anchor does — a push carrying arbitrary router state, no handler of ours involved. */
+let pushLikeAnchor: (search: string, state: unknown) => void;
 
 function Probe() {
   guide = useGuideDialog();
   const location = useLocation();
   const navigationType = useNavigationType();
+  const navigate = useNavigate();
+  goBack = () => navigate(-1);
+  pushLikeAnchor = (search, state) => navigate(`${location.pathname}${search}`, { state });
 
   return (
     <div>
@@ -249,5 +256,54 @@ describe('useGuideDialog', () => {
     at(PUSHED_BY_ERROR_SCREEN);
 
     expect(guide.source).toBe('url');
+  });
+
+  describe('a stale pushedRef must not shadow a later arrival', () => {
+    // Regression: pushedRef was cleared only inside close(), and close()'s own
+    // comment says a hardware/browser Back never reaches it. Back-dismissing
+    // an open('accordion') left pushedRef.current true for the rest of the
+    // mount, so a later anchor arrival naming 'error' in location.state was
+    // shadowed by the stale 'accordion' — reported as a plausible value, not
+    // an obviously broken one, which is why nothing short of walking the
+    // sequence would have caught it.
+    it('reads the error source after a Back dismissed a prior open()', () => {
+      const page = at('/upload');
+
+      act(() => guide.open('accordion'));
+      expect(page.url()).toBe('/upload?guide=1');
+
+      act(() => goBack());
+      expect(guide.isOpen).toBe(false);
+
+      act(() => pushLikeAnchor('?step=6', { ...SAME_PATH_PUSH, source: 'error' }));
+
+      expect(guide).toMatchObject({ isOpen: true, step: 6, source: 'error' });
+    });
+
+    it('keeps the named source across a section change within the same opening', () => {
+      const page = at('/upload?utm_source=x');
+
+      act(() => pushLikeAnchor('?step=6', { ...SAME_PATH_PUSH, source: 'error' }));
+      expect(guide.source).toBe('error');
+
+      act(() => guide.goToStep(3));
+
+      expect(page.url()).toBe('/upload?step=3');
+      expect(guide.source).toBe('error');
+    });
+
+    it('reports the fresh gesture, not one inherited from the entry close() left behind', () => {
+      at('/upload');
+
+      act(() => pushLikeAnchor('?step=6', { ...SAME_PATH_PUSH, source: 'error' }));
+      expect(guide.source).toBe('error');
+
+      act(() => guide.close());
+      expect(guide.isOpen).toBe(false);
+
+      act(() => guide.open('accordion'));
+
+      expect(guide.source).toBe('accordion');
+    });
   });
 });

@@ -109,6 +109,11 @@ export function useGuideDialog(): GuideDialogState {
   const isOpen = hasStepParam || params.get('guide') === '1';
   const step = parseStep(params.get('step'));
 
+  // `isOpen` as of the last render, for detecting the true "was open, now is
+  // not" transition below — see pushedRef's reset for why a plain `!isOpen`
+  // check is not safe here.
+  const wasOpenRef = useRef(isOpen);
+
   const navigateWith = useCallback(
     (mutate: (next: URLSearchParams) => void, replace: boolean) => {
       const next = new URLSearchParams(location.search);
@@ -200,10 +205,35 @@ export function useGuideDialog(): GuideDialogState {
     }, true);
   }, [location, navigate, navigateWith]);
 
+  // pushedRef is the only thing that tells the source below to trust `source`
+  // state over whatever the entry carries — and a hardware or browser Back
+  // never runs close(), the only place that used to clear it. Without this,
+  // open('accordion') followed by a Back left pushedRef.current true for the
+  // life of the mount, so a later arrival on an anchor that names 'error' in
+  // location.state was shadowed by the stale 'accordion' — a real defect
+  // (reproduced and fixed in this branch), not a hypothetical one, because it
+  // fails to a plausible value rather than a broken one.
+  //
+  // Reset on the wasOpenRef.current -> !isOpen TRANSITION, not on plain
+  // `!isOpen` — open()'s own push does not land in the same render as its
+  // `setSource`/`pushedRef.current = true`: `setSource` can commit one render
+  // ahead of the router's own location update, and that intermediate render
+  // still has the OLD (closed) `isOpen`. A bare `if (!isOpen)` fired on that
+  // intermediate render too, undoing the flag `open()` had just set moments
+  // earlier — for `source` and, worse, for close()'s pop-vs-replace decision,
+  // which reads the same ref. Gating on "was open, and now is not" ignores
+  // that render, because it was never open to begin with: `wasOpenRef` is
+  // still `false` there, so `false && true` does not fire.
+  if (wasOpenRef.current && !isOpen) {
+    pushedRef.current = false;
+  }
+  wasOpenRef.current = isOpen;
+
   // An anchor push (DiagnosticErrorScreen's CTA) never runs open(), so
   // pushedRef stays false and `source` state is stale — the arrival's own
   // location.state is what names the gesture, when it names one at all.
-  // pushedRef.current true means open() itself set `source`, which takes
+  // pushedRef.current true means open() itself set `source`, and that this
+  // opening has not since been closed — see the reset above — which takes
   // precedence over whatever the entry happens to carry.
   const effectiveSource = pushedRef.current
     ? source
