@@ -1,60 +1,48 @@
 ---
 layout: default
-title: SafeUnfollow vs Unfollowgram — Free Instagram Unfollow Tracker Comparison
-description: Compare SafeUnfollow with Unfollowgram. Free vs $4.99/month, no login vs password required, local vs cloud. See which Instagram unfollow tracker is better.
+title: 'SafeUnfollow vs Unfollowgram: Unfollow Tracker Compared'
+description: 'Unfollowgram''s site was serving a maintenance page on 2026-09-03. Here is a tracker that needs no Instagram login and reads the official export instead.'
 permalink: /compare/vs-unfollowgram/
+last_updated: 2026-09-03
 ---
 
 # SafeUnfollow vs Unfollowgram
 
-Looking for a free alternative to Unfollowgram? Here's a detailed comparison.
+**Checked 2026-09-03:** `unfollowgram.com` redirects to a maintenance page reading "Service Unavailable — this service is currently unavailable." We cannot see its current features, plans or prices, so this page does not state them. Check the site yourself before relying on anything written about it anywhere, including here.
 
-## At a Glance
+If you arrived looking for Unfollowgram, what follows is what SafeUnfollow does and how to verify it.
 
-| Feature | **SafeUnfollow** | **Unfollowgram** |
-|---------|-----------------|-----------------|
-| **Price** | Free — optional one-time unlock, price shown on the button in your currency | $4.99/month |
-| **Login required** | No | Yes (Instagram password) |
-| **Data method** | Official Instagram ZIP export | API scraping |
-| **Privacy** | 100% local browser processing | Data uploaded to their servers |
-| **Account ban risk** | Zero | Medium (violates TOS) |
-| **Account limit** | 1,000,000+ | ~50,000 |
-| **Open source** | Yes (MIT license) | No |
-| **Real-time tracking** | No (snapshot-based) | Yes |
-| **Works offline** | Yes | No |
-| **Mobile support** | Yes (any browser + PWA) | iOS/Android app |
+## What SafeUnfollow Does Instead
 
-## Where SafeUnfollow Wins
+You download your data from Instagram yourself — the official export, in JSON, over All time — and upload that ZIP file here. The analysis runs in your browser: who unfollowed you, who never followed back, who is mutual, filterable and searchable.
 
-### Privacy
-SafeUnfollow processes your Instagram data entirely in your browser. Nothing is uploaded to any server. Unfollowgram requires your Instagram login and stores your data on their servers — you're trusting a third party with your account credentials.
+There is no login step, so there is nothing to give away and nothing to revoke afterwards.
 
-### Cost
-SafeUnfollow is completely free with no limits. Unfollowgram charges $4.99/month ($59.88/year) for full features. Over 2 years, that's nearly $120 for functionality SafeUnfollow provides for free.
+| | **SafeUnfollow** |
+|---|---|
+| **How it gets your data** | You upload Instagram's official export file |
+| **Instagram login** | Not required |
+| **Free** | The whole analysis — every badge, every filter, the complete list, at any account size |
+| **Paid** | A one-time unlock for downloading your list as a file; price shown on the button in your currency, with a free sample of the first rows before you pay |
+| **Account size limit** | None — built and unit-tested for 1,000,000 accounts |
+| **Source code** | Published under the MIT license |
 
-### Account Safety
-By giving Unfollowgram your Instagram password, you're violating Instagram's Terms of Service. Instagram actively detects and bans accounts that use third-party login services. SafeUnfollow never touches your account — it only reads a ZIP file you download yourself.
+## Why We Do Not Rate Other Trackers Here
 
-### Scale
-SafeUnfollow handles over 1,000,000 accounts using columnar storage and bitset indexing. Unfollowgram's API-based approach is limited by Instagram's rate limits, typically capping at ~50,000 accounts.
+Any claim we made about a competitor's price, limits or data handling would be a claim made by the company competing with them, and it would go stale the day they change a page. So instead of asking you to trust our summary of somebody else, here is the check to run on them — and on us.
 
-## Where Unfollowgram Wins
+[How to check any unfollowers tracker in two minutes](/docs/is-it-safe) — five questions, the last of which needs no trust in anybody: open your browser's network panel, load your file, and watch whether your archive appears in any request.
 
-### Real-Time Monitoring
-Unfollowgram can notify you when someone unfollows you in real-time. SafeUnfollow shows a snapshot based on your data export — you'd need to re-export and re-upload to see changes.
+## Common Questions
 
-### Convenience
-Unfollowgram's app-based approach is simpler: install, login, done. SafeUnfollow requires downloading your data from Instagram first (takes 5-30 minutes the first time).
+**Is there a free alternative to Unfollowgram that does not need my password?**
+Yes. SafeUnfollow reads Instagram's official data export, so there is no login. The analysis is free at any account size; only the file download is a paid one-time unlock.
 
-## The Trade-Off
+**Do I need to install anything?**
+No. It runs in your browser. There is no browser extension, and nothing runs inside your Instagram session.
 
-The core question is: **Do you value privacy and safety, or convenience?**
+## Try It
 
-- If you want **zero risk** to your account and **maximum privacy**, choose SafeUnfollow
-- If you want **real-time** monitoring and don't mind the privacy/safety trade-offs, Unfollowgram is an option
+**[Upload your export](https://safeunfollow.app/upload)** — the analysis runs in your browser and the file stays on your device.
 
-## Switch to SafeUnfollow
-
-1. **[Follow our export guide](https://safeunfollow.app/upload?guide=1)** — Takes 5 minutes
-2. **[Upload your ZIP](https://safeunfollow.app/upload)** — Analysis is instant
-3. **[Try sample data first](https://safeunfollow.app/sample)** — See it in action
+Not ready? **[Try it with sample data](https://safeunfollow.app/sample)** — nothing to upload. Or **[get your export first](https://safeunfollow.app/upload?guide=1)** — step-by-step.

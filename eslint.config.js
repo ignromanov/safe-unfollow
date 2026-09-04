@@ -15,6 +15,10 @@ export default tseslint.config(
     'designs',
     'raw',
     'docs',
+    // A sibling session's checkout. `eslint .` walks into it and fails this repo's
+    // lint with ENOENT on a file that session just deleted — a failure with no
+    // relation to the tree being linted. Flat config does not read .gitignore.
+    'worktrees',
     // design-sync working state. Gitignoring it is not enough: flat config does not
     // read .gitignore, so a resync leaves ds-bundle/_vendor in scope and lint:strict
     // fails on bundled React with 34 errors that have nothing to do with this app.

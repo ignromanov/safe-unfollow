@@ -1,9 +1,9 @@
 ---
 layout: default
-title: How to Use Instagram Unfollow Tracker — Complete Guide
-description: Complete guide to using Instagram Unfollow Tracker. Upload your ZIP file, filter unfollowers, search accounts, and understand badges. Free and private.
+title: "How to Use Instagram Unfollow Tracker — Complete Guide"
+description: 'Complete guide to using Instagram Unfollow Tracker. Upload your ZIP file, filter unfollowers, search accounts, and understand badges. Free and private.'
 permalink: /user-guide/
-last_updated: 2026-01-16
+last_updated: 2026-09-03
 ---
 
 # User Guide - Instagram Unfollow Tracker
@@ -16,7 +16,7 @@ Instagram Unfollow Tracker is a privacy-focused tool that analyzes your Instagra
 ### Key Benefits
 - **100% Private**: All processing happens in your browser
 - **No Login Required**: Uses official Instagram data export
-- **Completely Free**: No subscriptions or hidden costs
+- **Free to analyze**: Every badge, filter and account, at any export size — the one paid item is a $7 one-time export unlock
 - **Open Source**: Transparent and auditable code
 - **10 Languages**: Including Arabic with RTL support
 - **PWA Ready**: Install as app, works offline
@@ -31,7 +31,7 @@ Instagram Unfollow Tracker is a privacy-focused tool that analyzes your Instagra
 4. Review the settings and click "Start export"
 5. Wait for Instagram's email (usually 5-30 minutes; large accounts can take a few hours) and download the ZIP file
 
-**📖 Detailed instructions**: See [Instagram Export Guide](/docs/instagram-export/)
+**📖 Detailed instructions**: See [Instagram Export Guide](/docs/instagram-export)
 
 ### Step 2: Upload Your Data
 1. Open [Instagram Unfollow Tracker](https://safeunfollow.app)
@@ -39,7 +39,7 @@ Instagram Unfollow Tracker is a privacy-focused tool that analyzes your Instagra
 3. Wait for processing to complete (usually 1-3 seconds)
 4. Your data is now ready for analysis!
 
-![Upload your Instagram data](/docs/assets/upload-zip.png)
+![Upload your Instagram data](/docs/assets/upload-zip.png){: width="2950" height="1890" loading="lazy" decoding="async"}
 *Drag and drop your Instagram ZIP file to get started*
 
 ### Step 3: Explore Your Results
@@ -48,7 +48,7 @@ Instagram Unfollow Tracker is a privacy-focused tool that analyzes your Instagra
 - **Search**: Type usernames to find specific accounts
 - **Click profiles**: Open Instagram profiles in new tabs
 
-![Explore your results](/docs/assets/analysis-result.png)
+![Explore your results](/docs/assets/analysis-result.png){: width="2950" height="1966" loading="lazy" decoding="async"}
 *Full interface with filtering, search, and detailed account information*
 
 ## Understanding the Results
@@ -93,7 +93,7 @@ Instagram Unfollow Tracker is a privacy-focused tool that analyzes your Instagra
 ### Data Quality
 - **Use recent exports**: Download fresh data for accurate results
 - **Complete data**: Select "All time" when downloading
-- **JSON format**: JSON is the format the tracker reads most reliably (HTML exports also work)
+- **Either format**: JSON and HTML exports are both read; JSON is what the export guide selects
 
 ### Performance
 - **Close other tabs**: Free up memory for better performance
@@ -113,7 +113,7 @@ Instagram Unfollow Tracker is a privacy-focused tool that analyzes your Instagra
 - **Missing accounts**: Instagram may split large follower lists into multiple files
 
 ### Getting Help
-- **FAQ**: Check [Frequently Asked Questions](/docs/faq/)
+- **FAQ**: Check [Frequently Asked Questions](/docs/faq)
 - **Issues**: Report bugs on [GitHub Issues](https://github.com/ignromanov/safe-unfollow/issues)
 - **Discussions**: Ask questions in [GitHub Discussions](https://github.com/ignromanov/safe-unfollow/discussions)
 
@@ -130,7 +130,7 @@ Instagram Unfollow Tracker is a privacy-focused tool that analyzes your Instagra
 - **Regular cleanup**: Delete old exports when no longer needed
 - **Browser security**: Use updated browsers and clear data regularly
 
-**📖 More details**: See [Privacy Policy](/docs/privacy/)
+**📖 More details**: See [Privacy Policy](/docs/privacy)
 
 ## What's Next?
 
@@ -144,7 +144,7 @@ Instagram Unfollow Tracker is a privacy-focused tool that analyzes your Instagra
 ### Upcoming Features
 - 🔄 **Historical Tracking**: Compare multiple exports (v1.7)
 
-**📖 Full roadmap**: See [Project Roadmap](/docs/roadmap/)
+**📖 Full roadmap**: See [Project Roadmap](/docs/roadmap)
 
 ### Contributing
 - **Report bugs**: Help improve the tool
@@ -155,4 +155,4 @@ Instagram Unfollow Tracker is a privacy-focused tool that analyzes your Instagra
 
 ---
 
-*This user guide is designed to help you get the most out of Instagram Unfollow Tracker. For technical details, see [Technical Specification](/docs/tech-spec/).*
+*This user guide is designed to help you get the most out of Instagram Unfollow Tracker. For technical details, see [Technical Specification](/docs/tech-spec).*

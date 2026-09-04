@@ -1,0 +1,54 @@
+version: 2
+
+# 993 packages sit behind 76 direct dependencies, so an ungrouped weekly run
+# would open more pull requests than anyone reads, and a queue nobody reads is a
+# claim about priorities rather than a measurement of them. Minor and patch
+# updates are therefore batched into two pull requests; majors stay separate,
+# because a major is the one that needs a human to look at the changelog.
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '06:00'
+      timezone: America/Asuncion
+    open-pull-requests-limit: 5
+    labels:
+      - tech-debt
+      - p2
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      prod-minor-patch:
+        dependency-type: production
+        update-types:
+          - minor
+          - patch
+      dev-minor-patch:
+        dependency-type: development
+        update-types:
+          - minor
+          - patch
+
+  # The workflows pin actions by major tag, which floats within the major and so
+  # updates silently; this is the only thing that reports when one moves. Kept
+  # separate from npm because a bad action update breaks the gate itself.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '06:00'
+      timezone: America/Asuncion
+    open-pull-requests-limit: 3
+    labels:
+      - tech-debt
+      - p2
+    commit-message:
+      prefix: chore
+    groups:
+      actions:
+        patterns:
+          - '*'
