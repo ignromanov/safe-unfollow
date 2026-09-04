@@ -87,13 +87,37 @@ describe('useGuideDialog', () => {
     expect(guide).toMatchObject({ isOpen: true, step: 2, source: 'accordion' });
   });
 
-  it('closes without adding a history entry', () => {
+  it('closes an arrival without adding a history entry', () => {
+    // Arrived on ?step=5 from the landing page, the docs or an error screen:
+    // the dialog sits on the entry the reader came in on, so there is nothing
+    // of ours to pop and popping would leave the site.
     const page = at('/upload?step=5');
 
     act(() => guide.close());
 
     expect(page.url()).toBe('/upload');
     expect(page.nav()).toBe('REPLACE');
+    expect(guide.isOpen).toBe(false);
+  });
+
+  it('gives one Back press one meaning, whichever control closed the dialog', () => {
+    // open() pushes, on the reasoning at its own call site: on Android the
+    // hardware Back is how a modal is dismissed. Closing by replace instead of
+    // popping leaves two adjacent entries for the same /upload, so the reader's
+    // next Back lands on a page that looks identical and appears to do nothing.
+    // Every non-Back dismissal reaches close() — the X, the ghost button,
+    // Escape and an overlay click all arrive through Dialog's onOpenChange.
+    const page = at('/upload');
+
+    act(() => guide.open('accordion', 5));
+
+    expect(page.url()).toBe('/upload?step=5');
+    expect(page.nav()).toBe('PUSH');
+
+    act(() => guide.close());
+
+    expect(page.url()).toBe('/upload');
+    expect(page.nav()).toBe('POP');
     expect(guide.isOpen).toBe(false);
   });
 

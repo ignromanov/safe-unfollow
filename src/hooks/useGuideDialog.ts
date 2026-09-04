@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { GUIDE_STEPS } from '@/config/wizard-steps';
@@ -57,6 +57,11 @@ export function useGuideDialog(): GuideDialogState {
   // anyway, so a ref would buy nothing and cost the render-time read.
   const [source, setSource] = useState<GuideSource>('url');
 
+  // Whether our own open() pushed the entry the dialog is standing on. A ref,
+  // not state: nothing renders from it, and it must survive the navigation
+  // that follows the write.
+  const pushedRef = useRef(false);
+
   const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const hasStepParam = params.has('step');
   const isOpen = hasStepParam || params.get('guide') === '1';
@@ -79,6 +84,7 @@ export function useGuideDialog(): GuideDialogState {
       // Android; with replace here the hardware Back would leave the site
       // from under someone mid-instruction. With push-once, the first Back
       // closes the dialog and the second leaves the page.
+      pushedRef.current = true;
       navigateWith(next => {
         if (target === undefined) {
           next.delete('step');
@@ -94,8 +100,9 @@ export function useGuideDialog(): GuideDialogState {
 
   const goToStep = useCallback(
     (target: number) => {
-      // Replace: seven sections in one scroll would otherwise leave seven
-      // history entries between the reader and the page they came from.
+      // Replace: one scroll holding every section would otherwise leave a
+      // history entry per section between the reader and the page they came
+      // from.
       navigateWith(next => {
         next.delete('guide');
         next.set('step', String(target));
@@ -106,11 +113,25 @@ export function useGuideDialog(): GuideDialogState {
 
   const close = useCallback(() => {
     setSource('url');
+    // Pop what open() pushed, rather than replacing it. A replace would leave
+    // two adjacent entries for the same page — the one below, without the
+    // dialog, and the one on top with the query stripped — so the reader's
+    // next Back would land on a visually identical page and appear to do
+    // nothing. Dismissing with the hardware Back never reaches here: that
+    // pops the entry itself and the URL closes the dialog.
+    if (pushedRef.current) {
+      pushedRef.current = false;
+      navigate(-1);
+      return;
+    }
+    // Nothing of ours pushed: the reader arrived on ?guide=1 or ?step=N from
+    // the landing page, the docs or an error screen, so the dialog is on the
+    // entry they came in on and popping it would leave the site.
     navigateWith(next => {
       next.delete('step');
       next.delete('guide');
     }, true);
-  }, [navigateWith]);
+  }, [navigate, navigateWith]);
 
   return {
     isOpen,

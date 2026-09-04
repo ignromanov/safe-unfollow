@@ -14,9 +14,24 @@ import { useNavigate } from 'react-router-dom';
  * see it. Lazy, and mounted only once it has been opened, so a reader who
  * never opens it never downloads it.
  */
-const GuideDialog = lazy(() =>
-  import('@/components/guide/GuideDialog').then(m => ({ default: m.GuideDialog }))
-);
+const importGuideDialog = () =>
+  import('@/components/guide/GuideDialog').then(m => ({ default: m.GuideDialog }));
+
+/**
+ * One retry, because React never calls the factory a second time on its own:
+ * `lazyInitializer` runs it only while the payload is Uninitialized, and a
+ * payload that rejected re-throws its stored error for the life of the module
+ * (react 18.3.1). Without this, one flaky fetch leaves every entrance to the
+ * guide — the accordion rows, the drop zone's button, the diagnostic error
+ * screen's primary CTA — pushing `?step=N` into the URL and rendering nothing
+ * until the reader reloads by hand, and `?guide=1` sticks because the only
+ * control that clears it lives inside the dialog that did not mount.
+ *
+ * It buys back the transient case and only that one. A stale HTML document
+ * naming a chunk the deploy removed (`pages-cache` is NetworkFirst) fails both
+ * attempts; that case needs a reload, not a retry.
+ */
+const GuideDialog = lazy(() => importGuideDialog().catch(importGuideDialog));
 
 /**
  * Upload page
