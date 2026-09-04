@@ -13,30 +13,40 @@ const NO_NAME_BOUND = Number.MAX_SAFE_INTEGER;
 /**
  * Every byte that changes hands, whoever asks for it.
  *
- * `FileReader.prototype.readAsArrayBuffer` is jsdom's only route from a Blob to
- * its bytes — its Blob has `slice` and nothing else, and `vitest/blob-polyfill`
- * builds `arrayBuffer()` on top of exactly this. Instrumenting the prototype
- * therefore sees every read by every caller, including reads of slices, and it
- * sees them the same way whichever ZIP library is underneath.
+ * `Blob.prototype.arrayBuffer` is the one funnel every byte passes through in
+ * this environment. jsdom 30 implements it natively; on a jsdom that does not,
+ * `vitest/blob-polyfill` supplies it, and `text` and `stream` are built on top
+ * of it either way. Instrumenting the prototype therefore sees every read by
+ * every caller, slices included, and it sees them the same way whichever ZIP
+ * library is underneath.
  *
- * Watching a single Blob instance would not: JSZip reads the whole archive
+ * Exactly one method may be instrumented, or reads are counted twice: where the
+ * polyfill supplies `arrayBuffer`, it calls `FileReader.readAsArrayBuffer`, so
+ * an instrument on both records each read once per layer and "reads far less
+ * than the archive" would be asserted against a doubled total.
+ *
+ * Watching a single Blob instance would not do: JSZip reads the whole archive
  * through a FileReader and never touches the Blob's own methods, so an
  * instrument on the instance recorded nothing at all and its silence looked
- * exactly like restraint.
+ * exactly like restraint. That is what the `sizes.length` guard in each test is
+ * for, and it is not decoration: it fired when jsdom 30 gave Blob a native
+ * `arrayBuffer`, which stopped the polyfill installing and made
+ * `readAsArrayBuffer` — what this instrument used to hook — a route nothing
+ * takes. It would fire again the same way if jsdom ever ships `stream`.
  */
 function instrumentReads() {
   const sizes: number[] = [];
-  const original = FileReader.prototype.readAsArrayBuffer;
+  const original = Blob.prototype.arrayBuffer;
 
-  FileReader.prototype.readAsArrayBuffer = function (blob: Blob) {
-    sizes.push(blob.size);
-    return original.call(this, blob);
+  Blob.prototype.arrayBuffer = function (this: Blob): Promise<ArrayBuffer> {
+    sizes.push(this.size);
+    return original.call(this);
   };
 
   return {
     sizes,
     restore: () => {
-      FileReader.prototype.readAsArrayBuffer = original;
+      Blob.prototype.arrayBuffer = original;
     },
   };
 }
