@@ -23,7 +23,12 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: '20'
+          # Must match ci.yml. This job runs the same suite, so a version the
+          # suite cannot run on makes it a gate that reports on nothing: on
+          # Node 20 jsdom 30's undici calls `webidl.util.markAsUncloneable`,
+          # which that runtime does not have, and every one of the 185 test
+          # files failed to load while coverage read 0 of 12 536 statements.
+          node-version: 22
           cache: 'npm'
 
       - name: Install dependencies

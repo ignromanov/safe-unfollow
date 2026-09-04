@@ -1,16 +1,21 @@
 /**
- * jsdom's Blob is missing the byte-producing half of the platform's Blob.
+ * jsdom's Blob is missing part of the byte-producing half of the platform's Blob.
  *
- * jsdom 26.1 implements `slice` and nothing else — no `arrayBuffer`, no `text`,
- * no `stream`. Browsers have had all three since 2020 (Chrome 76, Firefox 69,
+ * jsdom 26.1 implemented `slice` and nothing else — no `arrayBuffer`, no `text`,
+ * no `stream`. jsdom 30 supplies `arrayBuffer`, `text` and `bytes`, and still no
+ * `stream`. Browsers have had all of them since 2020 (Chrome 76, Firefox 69,
  * Safari 14), and this project's floor is already later than that: the ZIP
  * reader needs `DecompressionStream('deflate-raw')`, which is Safari 16.4.
  *
  * So this is a gap in the test environment, not in the product. Without it the
  * ZIP reader cannot read anything under Vitest, while working in every browser
- * we support. `FileReader` is jsdom's only route from a Blob to its bytes, which
- * is also why the random-access test instruments `readAsArrayBuffer`: it is the
- * one place bytes actually change hands here.
+ * we support.
+ *
+ * Each branch below is guarded on the method being absent, which is what lets a
+ * newer jsdom take over one at a time — and is also why a test that measures
+ * reads must hook `Blob.prototype.arrayBuffer` rather than whatever this file
+ * happens to build it out of today. See the docblock in
+ * `src/__tests__/core/parsers/zip-archive-random-access.test.ts`.
  */
 export function setupBlobPolyfill() {
   if (typeof Blob === 'undefined') return;
