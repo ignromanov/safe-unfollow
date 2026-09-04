@@ -23,10 +23,12 @@ const importGuideDialog = () =>
  *
  * A second `import()` of the same specifier does not re-fetch. The browser's
  * module map records a failed fetch against the (url, type) pair, and later
- * imports of that specifier settle from the map without a request going out —
- * so the retry re-delivered the stored rejection. Nor could it have reached a
- * second fetch by another route: Vite's preload helper makes only CSS deps
- * rejectable (a `modulepreload` link for a JS chunk resolves to `undefined`),
+ * imports of that specifier settle from the map without a request going out
+ * (normative specification behaviour, reasoned about here rather than
+ * measured: no browser test was run against a failing chunk) — so the retry
+ * re-delivered the stored rejection. Nor could it have reached a second fetch
+ * by another route: Vite's preload helper makes only CSS deps rejectable (a
+ * `modulepreload` link for a JS chunk resolves to `undefined`),
  * this chunk's deps are all JS because the single stylesheet is imported from
  * `main.tsx` and lands in the entry, and the helper's `seen` map means a repeat
  * call creates no link either. React asks once regardless: `lazyInitializer`
@@ -37,7 +39,10 @@ const importGuideDialog = () =>
  * `vite:preloadError` for exactly that. It is not wired up, because nothing
  * here has measured how often the case arises, and the failure is already
  * handled rather than merely dropped: see the ErrorBoundary below, which keeps
- * the uploader working while the guide stays shut.
+ * the uploader working while the guide stays shut. The `?step=N` / `?guide=1`
+ * the reader clicked stays in the URL through all of it — the only control
+ * that clears it is `guide.close`, wired below into the dialog that did not
+ * mount — which is also what makes a reload of that URL the recovery.
  */
 const GuideDialog = lazy(importGuideDialog);
 
