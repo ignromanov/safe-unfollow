@@ -51,6 +51,18 @@ function siteOrigin(): string {
 }
 
 /**
+ * The last-resort <title> the injector substitutes when meta.json carries none. Read out of
+ * the module that decides it for the same reason siteOrigin() is: it is the tail of the title
+ * chain modelled below, and a copy here would be the second place it is written down.
+ */
+function injectorTitleFallback(): string {
+  const source = readFileSync(join(root, 'vite', 'ssg-meta-injector.ts'), 'utf8');
+  const declared = /const escapedTitle = escapeHtml\(metaTags\.title \|\| '([^']*)'\)/.exec(source);
+  if (!declared) throw new Error('ssg-meta-injector.ts no longer inlines a <title> fallback');
+  return declared[1];
+}
+
+/**
  * Files under public/ are copied into dist verbatim — search-console and domain
  * verification stubs that carry no head at all. Derived by walking public/, so adding
  * another one does not need an edit here.
@@ -115,6 +127,33 @@ function metaFor(lang: SupportedLanguage): MetaFile {
 }
 
 /**
+ * meta.json resolved the way `vite/ssg-meta-injector.ts` resolves it — its two steps, in its
+ * order, and no third step of our own:
+ *
+ *   1. `:156` merges the route override over the locale defaults as ONE record,
+ *      `{ ...defaults, ...routes[basePath] }`. It does not fall back slot by slot.
+ *   2. `:198`, `:199` and `:201` then apply a `||` chain to that merged record:
+ *      `title || <fallback>`, `description || ''`, `ogTitle || title || ''`.
+ *
+ * Both halves have been re-derived wrongly here before, and each error is silent. A per-slot
+ * `route.ogTitle ?? route.title` reads the override's own title where step 1 has already kept
+ * the locale default — so the page ships the site-wide ogTitle and this file calls it a
+ * defect. And `??` is not `||`: they part company on the empty string, which the injector
+ * treats as absent. Check those three lines rather than an expression that looks equivalent.
+ *
+ * `twitterDescription` (`:202`) is deliberately not modelled: no locale overrides it per
+ * route, so nothing here would read it.
+ */
+function resolveSlots(defaults: MetaSlots, route?: Partial<MetaSlots>): Required<MetaSlots> {
+  const merged = { ...defaults, ...route };
+  return {
+    title: merged.title || injectorTitleFallback(),
+    description: merged.description || '',
+    ogTitle: merged.ogTitle || merged.title || '',
+  };
+}
+
+/**
  * What meta.json says this page should carry, and whether the page has an entry of its
  * own. Pages with no entry — the /404 set, which the injector serves from its own
  * NOT_FOUND_META constant — return null and are only checked for being non-empty.
@@ -124,24 +163,11 @@ function expectedMeta(
 ): { slots: MetaSlots; fallback: MetaSlots; ownEntry: boolean } | null {
   const lang = localeOf(urlPath);
   const file = metaFor(lang);
-  const fallback: MetaSlots = {
-    title: file.title,
-    description: file.description,
-    ogTitle: file.ogTitle ?? file.title,
-  };
+  const { routes: _routes, ...defaults } = file;
+  const fallback = resolveSlots(defaults);
   const base = basePathOf(urlPath, lang);
   const route = file.routes?.[base];
-  if (route) {
-    return {
-      slots: {
-        title: route.title ?? fallback.title,
-        description: route.description ?? fallback.description,
-        ogTitle: route.ogTitle ?? route.title ?? fallback.ogTitle,
-      },
-      fallback,
-      ownEntry: true,
-    };
-  }
+  if (route) return { slots: resolveSlots(defaults, route), fallback, ownEntry: true };
   if (base === '/') return { slots: fallback, fallback, ownEntry: false };
   return null;
 }
@@ -230,5 +256,53 @@ describe.runIf(built)('prerendered meta', () => {
       }
     }
     expect(wrong).toEqual([]);
+  });
+});
+
+/**
+ * The model above, exercised on the two shapes today's meta.json cannot produce.
+ *
+ * Not gated on `built`, deliberately: the walk is only as good as the resolution it compares
+ * against, and every route override in all ten locales currently sets `title`, `description`
+ * and `ogTitle` together — so the whole suite above can be green while the model is wrong.
+ * These two cases are the ones that separate a merge from a per-slot fallback chain, and
+ * they run on a dist-less CI as well.
+ */
+describe('the injector model the expectations are built on', () => {
+  const defaults: MetaSlots = {
+    title: 'Site title',
+    description: 'Site description',
+    ogTitle: 'Site og:title',
+  };
+
+  it('keeps the locale ogTitle when a route override sets only a title', () => {
+    // ssg-meta-injector.ts:156 merges, so `ogTitle` is still the locale's. A per-slot
+    // `route.ogTitle ?? route.title` would answer 'Route title' and redden a build that
+    // shipped exactly what the injector was asked for.
+    expect(resolveSlots(defaults, { title: 'Route title' })).toEqual({
+      title: 'Route title',
+      description: 'Site description',
+      ogTitle: 'Site og:title',
+    });
+  });
+
+  it('sends an empty override to the injector tail, not back to the locale default', () => {
+    // JSON carries "" where it cannot carry undefined, so this is the reachable half of the
+    // || / ?? difference at :198 and :201 — and the answer is not the intuitive one. The
+    // merge at :156 has already replaced the locale value, so `||` has nothing to fall back
+    // to but the injector's own tail: the hardcoded title, and '' for og:title. `??` would
+    // keep the "" for both. Neither is the locale default, and a model that returned one
+    // would call a correct build wrong.
+    expect(resolveSlots(defaults, { title: '', ogTitle: '' })).toEqual({
+      title: injectorTitleFallback(),
+      description: 'Site description',
+      ogTitle: '',
+    });
+  });
+
+  it('falls from ogTitle to the merged title, not to the resolved one', () => {
+    // :201 reads `metaTags.title`, which is the merged value before :198's own fallback.
+    const noOg: MetaSlots = { title: 'Site title', description: 'Site description' };
+    expect(resolveSlots(noOg, { title: 'Route title' }).ogTitle).toBe('Route title');
   });
 });
