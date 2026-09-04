@@ -122,8 +122,22 @@ describe('docs layout — the page fits the viewport it is read on', () => {
   });
 });
 
-/** The `.container` these pages render their prose inside. */
-const PROSE_BACKDROP = '#ffffff';
+/**
+ * The backdrop prose is actually rendered on, read from the stylesheet rather
+ * than assumed. It was hardcoded `#ffffff` and happened to be right, because
+ * `.container` declares the keyword `white` — a coincidence of agreement, not a
+ * check. Change that declaration and a hardcoded constant keeps reporting green.
+ * Found by a sibling session reviewing this gate.
+ */
+const NAMED_COLOURS: Record<string, string> = { white: '#ffffff', black: '#000000' };
+
+function declaredBackground(selector: string): string {
+  const rule = new RegExp(`\\.${selector}\\s*\\{([^}]*)\\}`, 'm').exec(CSS)?.[1] ?? '';
+  const raw = /background(?:-color)?:\s*(#[0-9a-f]{6}|\w+)/i.exec(rule)?.[1] ?? '';
+  return NAMED_COLOURS[raw.toLowerCase()] ?? raw;
+}
+
+const PROSE_BACKDROP = declaredBackground('container');
 
 /** WCAG 2.1 AA for text below 18.66px bold / 24px regular — which is all of it here. */
 const AA_TEXT = 4.5;
@@ -177,6 +191,22 @@ describe('docs layout — the palette keeps the promise the pages make', () => {
     // Hover is a state the reader can sit in, so it carries the same duty.
     expect(contrast(labelHex, restFill!)).toBeGreaterThanOrEqual(AA_TEXT);
     expect(contrast(labelHex, hoverFill!)).toBeGreaterThanOrEqual(AA_TEXT);
+  });
+
+  it('resolved a real backdrop rather than assuming one', () => {
+    // Guards the two assertions above: an unparsed background would fall back to
+    // the empty string and every contrast computation would throw or pass oddly.
+    expect(PROSE_BACKDROP).toMatch(/^#[0-9a-f]{6}$/);
+  });
+
+  it.each(DOCS)('$name puts no link on the code backdrop', doc => {
+    // `code` and `pre` declare their own background, and the link colour measures
+    // 4.41:1 against it — under the 4.5 this page promises. No page does this
+    // today, so the palette is sound as rendered; this keeps it that way rather
+    // than darkening a colour a sibling session has already verified on preview.
+    // If a link like [see `foo.ts`](/x) is ever wanted, the fix is the palette.
+    const linksWithCode = [...doc.text.matchAll(/\[[^\]]*`[^`]+`[^\]]*\]\(/g)].map(m => m[0]);
+    expect(linksWithCode).toEqual([]);
   });
 
   it('states the claim this gate is conditioned on', () => {
