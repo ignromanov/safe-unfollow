@@ -284,10 +284,11 @@ export const analytics = {
    *
    * A NEW NAME rather than a `variant` on the old wizard_step_view: a variant
    * field would leave step_id:1 meaning two different screens depending on
-   * the date, and every historical query silently wrong. Same precedent this
-   * event itself was chosen under, when it replaced GuideEntry's
-   * guide_entry_view (deleted; GuideEntry dissolved when the wizard became a
-   * dialog).
+   * the date, and every historical query silently wrong. Same precedent
+   * guide_entry_view was chosen under, when GuideEntry replaced wizard step 1
+   * — that event is deleted (GuideEntry dissolved when the wizard became a
+   * dialog) and nothing replaces it; guide_open above stands where it stood,
+   * counting a different population.
    *
    * `firstViewInTab`'s key changed with the rename, from `wizard_step_` to
    * `guide_section_`: the old key is already written into a returning
