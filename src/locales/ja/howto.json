@@ -2,9 +2,7 @@
   "title": "<gradient>Instagramアンフォロワー</gradient>の確認方法",
   "subtitle": "パスワードを共有せずにアカウントを安全に分析する9つの簡単なステップ。",
   "important": "重要",
-  "openStep": "ガイドでステップを開く",
   "uploadButton": "ファイルをアップロード",
-  "openStepAria": "ステップ{{step}}: {{title}}。クリックして開く",
   "steps": {
     "1": {
       "title": "Instagramエクスポートページを開く",

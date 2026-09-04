@@ -3,10 +3,10 @@
   "items": {
     "howToFind": {
       "question": "Uygulama olmadan Instagram'da kimin takipten çıktığını nasıl kontrol ederim?",
-      "answer": "Meta Hesaplar Merkezi'ni açın › Dışa aktarma oluştur › Profilinizi seçin › \"Cihaza aktar\" › Yalnızca \"Takipçiler ve takip edilenler\" › JSON formatı. ZIP'i indirin (genellikle 5-30 dakika) ve buraya yükleyin. Araç listelerinizi tarayıcıda karşılaştırır, yani dışa aktarım hiçbir yere yüklenmez. Giriş yok.",
+      "answer": "Meta Hesaplar Merkezi'ni açın › Dışa aktarma oluştur › Profilinizi seçin › \"Cihaza aktar\" › Yalnızca \"Takipçiler ve takip edilenler\" › \"Tüm zamanlar\" › JSON formatı. ZIP'i indirin (genellikle 5-30 dakika) ve buraya yükleyin. Araç listelerinizi tarayıcıda karşılaştırır, yani dışa aktarım hiçbir yere yüklenmez. Giriş yok.",
       "relatedLink": {
         "text": "Dışa aktarma kılavuzunu başlat",
-        "href": "/wizard"
+        "href": "/upload?guide=1"
       }
     },
     "withoutDownload": {
@@ -14,7 +14,7 @@
       "answer": "Hayır. Instagram yerel bir takipten çıkan listesi sağlamaz. Tek güvenli yöntemler: (1) Takip edilen hesapları takipçilerle manuel olarak karşılaştırmak, veya (2) Bu araçla resmi veri indirmenizi kullanmak. Bu izleyici yöntem 2'yi senin için ücretsiz yapar: şifre yok, giriş yok, hesap riski yok.",
       "relatedLink": {
         "text": "Verilerinizi nasıl alacağınızı öğrenin",
-        "href": "/wizard"
+        "href": "/upload?guide=1"
       }
     },
     "privacy": {
@@ -42,7 +42,7 @@
       "answer": "Instagram Veri İndirme (Meta Hesaplar Merkezi üzerinden) takipçi ve takip listeleri dahil hesap bilgilerinizi dışa aktarmak için resmi araçtır. Hesabınızı riske atmadan bu verilere erişmenin tek güvenli, yetkili yoludur. Şifrenizi isteyen uygulamalar Instagram'ın Hizmet Koşullarını ihlal eder.",
       "relatedLink": {
         "text": "Adım adım kılavuzumuzu takip edin",
-        "href": "/wizard"
+        "href": "/upload?guide=1"
       }
     },
     "htmlExport": {
@@ -66,7 +66,7 @@
       "answer": "Meta genellikle 5-30 dakika içinde e-posta ile verilerinizi gönderir. Büyük hesaplar veya yüksek sunucu yükü birkaç saat sürebilir. ZIP elinize geçtiğinde analiz bir sunucuda değil, kendi tarayıcınızda çalışır: ne sıra beklersiniz ne de yükleme. Büyük dışa aktarımların okunması doğal olarak küçüklerden daha uzun sürer.",
       "relatedLink": {
         "text": "Takvim hatırlatıcısı ekle",
-        "href": "/wizard/step/8"
+        "href": "/upload?step=8"
       }
     },
     "scale": {
@@ -102,7 +102,7 @@
       "answer": "SafeUnfollow, şifreniz yerine Instagram'ın resmi veri dışa aktarma özelliğini (Meta Hesaplar Merkezi'nde) kullanır. Verilerinizi doğrudan Instagram'dan ZIP dosyası olarak indirip buraya yüklersiniz. Uygulama, takipçi ve takip listelerini karşılaştırmak için ZIP içindeki JSON dosyalarını okur. Tüm işlem tarayıcınızda gerçekleşir. API erişimi yok, veri kazıma yok, giriş bilgisi gerekmiyor.",
       "relatedLink": {
         "text": "Dışa aktarma rehberini görün",
-        "href": "/wizard"
+        "href": "/upload?guide=1"
       }
     },
     "betterThanPaid": {

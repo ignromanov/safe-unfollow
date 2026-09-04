@@ -48,7 +48,7 @@
       "HTML_FORMAT": {
         "title": "Wir konnten diesen Export nicht lesen",
         "message": "Das ist ein HTML-Export, und wir konnten deine Follower-Listen darin nicht finden.",
-        "fix": "Frag Instagram nach demselben Export als JSON: Meta-Kontenübersicht › Export erstellen › Zu Gerät exportieren › Format: JSON. Diese Version lesen wir am zuverlässigsten."
+        "fix": "Frag Instagram nach demselben Export als JSON: Meta-Kontenübersicht › Export erstellen › Wähle dein Instagram-Profil › Zu Gerät exportieren › Nur \"Follower und Folge ich\" › Gesamter Zeitraum › Format: JSON. Diese Version lesen wir am zuverlässigsten."
       },
       "NOT_INSTAGRAM_EXPORT": {
         "title": "Kein Instagram-Export",
@@ -93,12 +93,12 @@
       "TOO_MANY_ENTRIES": {
         "title": "Zu viele Dateien",
         "message": "Diese ZIP enthält mehr Dateien, als dieses Tool indexieren kann.",
-        "fix": "Fordere einen kleineren Export an: Meta Accounts Center › Export erstellen › nur \"Follower und Folge ich\" auswählen › Format JSON."
+        "fix": "Fordere einen kleineren Export an: Meta-Kontenübersicht › Export erstellen › Wähle dein Instagram-Profil › Zu Gerät exportieren › Nur \"Follower und Folge ich\" › Gesamter Zeitraum › Format: JSON."
       },
       "FILE_TOO_LARGE": {
         "title": "Datei zu groß",
         "message": "Dein Browser konnte diesen Export nicht öffnen — er ist zu groß für dieses Gerät.",
-        "fix": "Fordere einen kleineren Export an: Meta Accounts Center › Export erstellen › nur \"Follower und Folge ich\" auswählen › Format JSON. Dieser Export ist wenige MB groß statt Hunderte."
+        "fix": "Fordere einen kleineren Export an: Meta-Kontenübersicht › Export erstellen › Wähle dein Instagram-Profil › Zu Gerät exportieren › Nur \"Follower und Folge ich\" › Gesamter Zeitraum › Format: JSON. Dieser Export ist wenige MB groß statt Hunderte."
       },
       "JSON_PARSE_ERROR": {
         "title": "Ungültiges Datenformat",

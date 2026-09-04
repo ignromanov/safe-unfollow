@@ -28,8 +28,13 @@ const LOCALES = ['ar', 'de', 'es', 'fr', 'id', 'ja', 'pt', 'ru', 'tr'];
 const ACTIONS: Record<string, string> = {
   'System Mode': 'theme toggle — cycles system/light/dark in place',
   'Disable anonymous analytics': 'analytics opt-out toggle',
-  'Add Reminder to Calendar': 'generates and downloads an .ics file',
 };
+
+// 'Add Reminder to Calendar' was here until the /wizard routes went (GH#102). It only
+// ever reached prerendered HTML because the wizard's footer was part of eight
+// server-rendered pages; the guide is a lazily-loaded dialog on /upload now, so the
+// control exists only after a click and this scan can no longer see it. Nothing about
+// the control changed — the surface it lives on did.
 
 /**
  * Controls that DO navigate and are still buttons. Every one of these is dead during the
@@ -124,9 +129,12 @@ function scan(): { pages: string[]; all: Control[] } {
 describe.runIf(built)('prerendered controls', () => {
   it('scans the English prerendered pages, and there are some to scan', () => {
     // Guards the guard: a glob that silently matched nothing would report success.
+    // Floors, not counts: 9 English pages today. This was `> 10` while /wizard and its
+    // eight step pages were prerendered in English too — the removal (GH#102) took the
+    // page count below the guard without touching what the guard is for.
     const { pages, all } = scan();
-    expect(pages.length).toBeGreaterThan(10);
-    expect(all.length).toBeGreaterThan(10);
+    expect(pages.length).toBeGreaterThan(5);
+    expect(all.length).toBeGreaterThan(5);
   });
 
   it('has no button-like control that is not accounted for', () => {
@@ -161,7 +169,7 @@ const HREF_CASES = [
 ];
 
 /** Destinations that must appear as real anchors on the landing page. */
-const LANDING_HREFS = ['/wizard/step/1', '/sample', '/upload', '/'];
+const LANDING_HREFS = ['/upload?guide=1', '/sample', '/upload', '/'];
 
 const hrefBuilt = HREF_CASES.every(c => existsSync(join(dist, c.page)));
 

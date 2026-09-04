@@ -6,14 +6,9 @@
   "keywords": "désabonnements instagram, qui s'est désabonné instagram, suivi désabonnements, voir les désabonnements sans compte, analyseur zip instagram",
   "routes": {
     "/upload": {
-      "title": "Téléverser un ZIP Instagram : analyse des désabonnements",
-      "description": "Téléversez votre export Instagram (ZIP) pour une analyse gratuite des désabonnements. Sans identifiants ni mot de passe : le fichier est lu dans le navigateur.",
-      "ogTitle": "Téléverser un ZIP Instagram : analyse des désabonnements"
-    },
-    "/wizard": {
-      "title": "Comment télécharger vos données Instagram en JSON",
-      "description": "Guide étape par étape pour télécharger vos données Instagram au format JSON. Comment demander votre export de données à Meta et le recevoir par e-mail.",
-      "ogTitle": "Comment télécharger vos données Instagram en JSON"
+      "title": "Vous avez votre ZIP Instagram ? Voyez qui s'est désabonné",
+      "description": "Téléversez votre export Instagram : JSON ou HTML fonctionnent. Voyez gratuitement qui s'est désabonné, sans mot de passe. Le fichier ne quitte pas l'appareil.",
+      "ogTitle": "Vous avez votre ZIP Instagram ? Voyez qui s'est désabonné"
     },
     "/sample": {
       "title": "Essayer Instagram Unfollow Tracker : démo gratuite",

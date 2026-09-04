@@ -2,9 +2,7 @@
   "title": "<gradient>Instagram Takibi Bırakanlarını</gradient> Nasıl Kontrol Edersin",
   "subtitle": "Şifreni paylaşmadan hesabını güvenle analiz etmek için bu 9 basit adımı izle.",
   "important": "Kritik",
-  "openStep": "Adımı rehberde aç",
   "uploadButton": "Dosyamı Yükle",
-  "openStepAria": "Adım {{step}}: {{title}}. Açmak için tıkla",
   "steps": {
     "1": {
       "title": "Instagram Dışa Aktarma Sayfasını Aç",

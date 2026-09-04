@@ -1,8 +1,9 @@
+import type { ComponentProps } from 'react';
 import { describe, expect, it } from 'vitest';
 import { act, render, screen } from '@testing-library/react';
 import { MemoryRouter, useLocation, useNavigationType } from 'react-router-dom';
 
-import { useGuideDialog } from '@/hooks/useGuideDialog';
+import { SAME_PATH_PUSH, useGuideDialog } from '@/hooks/useGuideDialog';
 
 type Guide = ReturnType<typeof useGuideDialog>;
 
@@ -21,10 +22,18 @@ function Probe() {
   );
 }
 
-function at(entry: string) {
+type InitialEntries = NonNullable<ComponentProps<typeof MemoryRouter>['initialEntries']>;
+
+/**
+ * Renders at one entry, or at a history the reader already walked — the last
+ * of the list is where they are standing. A single entry cannot tell a pop
+ * from a replace by URL alone, because both land on the same path with the
+ * query gone; the entry underneath is what makes the two distinguishable.
+ */
+function at(entries: InitialEntries[number] | InitialEntries) {
   render(
     <MemoryRouter
-      initialEntries={[entry]}
+      initialEntries={Array.isArray(entries) ? entries : [entries]}
       future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
     >
       <Probe />
@@ -35,6 +44,12 @@ function at(entry: string) {
     nav: () => screen.getByTestId('nav').textContent,
   };
 }
+
+/** The history the diagnostic error screen's CTA leaves behind on /upload. */
+const PUSHED_BY_ERROR_SCREEN: InitialEntries = [
+  '/upload?utm_source=x',
+  { pathname: '/upload', search: '?step=6', state: SAME_PATH_PUSH },
+];
 
 describe('useGuideDialog', () => {
   it('reads ?step=3 as an open dialog at section 3', () => {
@@ -47,7 +62,7 @@ describe('useGuideDialog', () => {
     expect(guide).toMatchObject({ isOpen: true, step: null, source: 'url' });
   });
 
-  it.each(['0', '8', 'x', ''])('treats ?step=%s as ?guide=1', raw => {
+  it.each(['0', '9', 'x', ''])('treats ?step=%s as ?guide=1', raw => {
     // Out of range is not an error and not a closed dialog: someone followed a
     // link that once meant something. Opening from the start answers them.
     at(`/upload?step=${raw}`);
@@ -87,7 +102,10 @@ describe('useGuideDialog', () => {
     expect(guide).toMatchObject({ isOpen: true, step: 2, source: 'accordion' });
   });
 
-  it('closes without adding a history entry', () => {
+  it('closes an arrival without adding a history entry', () => {
+    // Arrived on ?step=5 from the landing page, the docs or an error screen:
+    // the dialog sits on the entry the reader came in on, so there is nothing
+    // of ours to pop and popping would leave the site.
     const page = at('/upload?step=5');
 
     act(() => guide.close());
@@ -95,6 +113,115 @@ describe('useGuideDialog', () => {
     expect(page.url()).toBe('/upload');
     expect(page.nav()).toBe('REPLACE');
     expect(guide.isOpen).toBe(false);
+  });
+
+  it('gives one Back press one meaning, whichever control closed the dialog', () => {
+    // open() pushes, on the reasoning at its own call site: on Android the
+    // hardware Back is how a modal is dismissed. Closing by replace instead of
+    // popping leaves two adjacent entries for the same /upload, so the reader's
+    // next Back lands on a page that looks identical and appears to do nothing.
+    // Every non-Back dismissal reaches close() — the X, the ghost button,
+    // Escape and an overlay click all arrive through Dialog's onOpenChange.
+    const page = at('/upload');
+
+    act(() => guide.open('accordion', 5));
+
+    expect(page.url()).toBe('/upload?step=5');
+    expect(page.nav()).toBe('PUSH');
+
+    act(() => guide.close());
+
+    expect(page.url()).toBe('/upload');
+    expect(page.nav()).toBe('POP');
+    expect(guide.isOpen).toBe(false);
+  });
+
+  it('pops an entry a link on this same path pushed, though open() never ran', () => {
+    // The sixth entrance: DiagnosticErrorScreen's CTA is an anchor to
+    // /upload?step=N, so no handler of ours runs and pushedRef stays false.
+    // Replacing here would leave two adjacent /upload entries whose only
+    // difference is a query the reader cannot see — and the diagnostic screen
+    // is driven by in-memory upload state that a same-route POP does not
+    // clear, so the page they land on is the page they left.
+    const page = at(PUSHED_BY_ERROR_SCREEN);
+
+    expect(page.url()).toBe('/upload?step=6');
+
+    act(() => guide.close());
+
+    expect(page.url()).toBe('/upload?utm_source=x');
+    expect(page.nav()).toBe('POP');
+    expect(guide.isOpen).toBe(false);
+  });
+
+  it('pops once for two close() calls that land in the same pass', () => {
+    // The mark lives on the entry, and the entry does not change until the
+    // router commits the pop — so the condition that decided the first call is
+    // still true for a second one arriving before the commit. Two pops would
+    // take the reader an entry further back than they asked for, off the page.
+    // Reachable programmatically rather than by gesture: a StrictMode
+    // double-invoke, a test, a future caller wiring close() to two controls.
+    const page = at([
+      '/results',
+      '/upload?utm_source=x',
+      { pathname: '/upload', search: '?step=6', state: SAME_PATH_PUSH },
+    ]);
+
+    act(() => {
+      guide.close();
+      guide.close();
+    });
+
+    expect(page.url()).toBe('/upload?utm_source=x');
+    expect(page.nav()).toBe('POP');
+  });
+
+  it('pops again the next time the dialog is opened and closed', () => {
+    // The latch is scoped to the entry the pop was issued from, not to the
+    // hook's lifetime: closing once must not leave close() inert for the rest
+    // of the session.
+    const page = at(['/results', '/upload']);
+
+    act(() => guide.open('accordion', 5));
+    act(() => guide.close());
+    expect(page.url()).toBe('/upload');
+    expect(page.nav()).toBe('POP');
+
+    act(() => guide.open('accordion', 5));
+    act(() => guide.close());
+
+    expect(page.url()).toBe('/upload');
+    expect(page.nav()).toBe('POP');
+  });
+
+  it('replaces an unmarked arrival rather than popping the reader off the page', () => {
+    // Same shape, no mark: the docs link to /upload?guide=1 from another path,
+    // so the entry below is not this page and popping would undo the
+    // navigation the reader asked for.
+    const page = at(['/docs/instagram-export', '/upload?step=6']);
+
+    act(() => guide.close());
+
+    expect(page.url()).toBe('/upload');
+    expect(page.nav()).toBe('REPLACE');
+  });
+
+  it('keeps the mark across a section change, which is a replace', () => {
+    // goToStep replaces the marked entry. Carrying the state across is what
+    // stops the fix repairing one sequence and leaving its neighbour broken:
+    // pick a section in the rail first, and close() would fall back to
+    // replacing.
+    const page = at(PUSHED_BY_ERROR_SCREEN);
+
+    act(() => guide.goToStep(3));
+
+    expect(page.url()).toBe('/upload?step=3');
+    expect(page.nav()).toBe('REPLACE');
+
+    act(() => guide.close());
+
+    expect(page.url()).toBe('/upload?utm_source=x');
+    expect(page.nav()).toBe('POP');
   });
 
   it('keeps the locale prefix and any other query the page arrived with', () => {

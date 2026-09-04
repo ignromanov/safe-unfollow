@@ -12,7 +12,7 @@
  * - Generates robots.txt
  */
 
-import { readdirSync, statSync, writeFileSync } from "fs";
+import { existsSync, readdirSync, statSync, writeFileSync } from "fs";
 import { resolve, relative } from "path";
 
 // Import from shared config (single source of truth)
@@ -24,21 +24,29 @@ import {
 // Configuration
 const BASE_URL = "https://safeunfollow.app";
 const DIST_DIR = resolve(process.cwd(), "dist");
+const PUBLIC_DIR = resolve(process.cwd(), "public");
 
 // Use shared type
 type Language = SupportedLanguage;
 
-// Files to exclude from sitemap
-const EXCLUDE_PATTERNS = [
-  /^google[a-z0-9]+\.html$/, // Google verification files
-  /^404\.html$/,
-  /^500\.html$/,
-];
+// Files to exclude from sitemap.
+//
+// Only the generated error pages are named here. Verification stubs are NOT: they are
+// derived instead, by asking whether public/ ships the same file verbatim (see
+// isCopiedFromPublic). The list used to enumerate them and was one stub behind reality —
+// it filtered google[a-z0-9]+.html but not fo-verify.html, so an ownership stub with an
+// empty <title> was advertised at priority 0.7 with eleven hreflang alternates, nine of
+// them addresses no build emits. The google pattern is gone rather than kept: public/
+// ships that file too, so the derived rule already subsumes it, and a second mechanism
+// covering the same case is what let the first one look complete.
+//
+// 404.html and 500.html stay here because they are generated, not copied — nothing
+// under public/ produces them, so the derivation cannot see them.
+const EXCLUDE_PATTERNS = [/^404\.html$/, /^500\.html$/];
 
 // Per-route SEO settings
 const ROUTE_CONFIG: Record<string, { priority: number; changefreq: string }> = {
   "/": { priority: 1.0, changefreq: "weekly" },
-  "/wizard": { priority: 0.8, changefreq: "monthly" },
   "/upload": { priority: 0.8, changefreq: "monthly" },
   "/waiting": { priority: 0.6, changefreq: "monthly" },
   "/results": { priority: 0.6, changefreq: "monthly" },
@@ -105,8 +113,8 @@ function scanHtmlFiles(dir: string, files: string[] = []): string[] {
 /**
  * Convert HTML file path to URL path
  * dist/index.html -> /
- * dist/wizard.html -> /wizard
- * dist/es/wizard.html -> /es/wizard
+ * dist/upload.html -> /upload
+ * dist/es/upload.html -> /es/upload
  * dist/es.html -> /es/
  */
 function htmlPathToUrlPath(htmlPath: string): string {
@@ -123,7 +131,7 @@ function htmlPathToUrlPath(htmlPath: string): string {
     return `/${langMatch[1]}`;
   }
 
-  // Handle nested paths: es/wizard.html -> /es/wizard
+  // Handle nested paths: es/upload.html -> /es/upload
   // Remove .html extension
   const withoutExt = relativePath.replace(/\.html$/, "");
 
@@ -136,17 +144,29 @@ function htmlPathToUrlPath(htmlPath: string): string {
 }
 
 /**
+ * A file dist/ received verbatim from public/ — never a page we prerendered.
+ * Compared by path relative to each root, so a stub in a subdirectory is matched
+ * where a filename comparison would match it anywhere.
+ */
+function isCopiedFromPublic(htmlPath: string): boolean {
+  return existsSync(resolve(PUBLIC_DIR, relative(DIST_DIR, htmlPath)));
+}
+
+/**
  * Check if file should be excluded
  */
 function shouldExclude(htmlPath: string): boolean {
+  if (isCopiedFromPublic(htmlPath)) {
+    return true;
+  }
   const fileName = htmlPath.split("/").pop() || "";
   return EXCLUDE_PATTERNS.some((pattern) => pattern.test(fileName));
 }
 
 /**
  * Extract language and base path from URL path
- * /es/wizard -> { lang: 'es', basePath: '/wizard' }
- * /wizard -> { lang: 'en', basePath: '/wizard' }
+ * /es/upload -> { lang: 'es', basePath: '/upload' }
+ * /upload -> { lang: 'en', basePath: '/upload' }
  * /es/ -> { lang: 'es', basePath: '/' }
  */
 function parseUrlPath(urlPath: string): { lang: Language; basePath: string } {
@@ -170,7 +190,7 @@ function buildUrl(basePath: string, lang: Language): string {
   if (lang === "en") {
     return `${BASE_URL}${basePath}`;
   }
-  // /wizard -> /es/wizard, / -> /es
+  // /upload -> /es/upload, / -> /es
   if (basePath === "/") {
     return `${BASE_URL}/${lang}`;
   }

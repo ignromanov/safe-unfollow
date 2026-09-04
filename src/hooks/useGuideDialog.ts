@@ -1,10 +1,34 @@
-import { useCallback, useMemo, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import { useLocation, useNavigate, type Location } from 'react-router-dom';
 
 import { GUIDE_STEPS } from '@/config/wizard-steps';
 
 /** Where the reader came from. Not in the URL — it describes the gesture, not the state. */
 export type GuideSource = 'accordion' | 'error' | 'zone' | 'url';
+
+/**
+ * Router state on a history entry that a link pushed onto the path the reader
+ * was already standing on, so closing the dialog has an entry of its own to pop.
+ *
+ * The pusher has to declare it, because nothing downstream can work it out.
+ * `useNavigationType()` reports PUSH both for `/upload` -> `/upload?step=N` and
+ * for `/` -> `/upload?guide=1`, and the History API does not expose the previous
+ * entry's path; popping the second would take the reader off the site.
+ */
+export interface SamePathPushState {
+  pushedOntoSamePath: true;
+}
+
+/** What a same-path pusher hands to `<Link state>`. */
+export const SAME_PATH_PUSH: SamePathPushState = { pushedOntoSamePath: true };
+
+function wasPushedOntoSamePath(state: unknown): boolean {
+  return (
+    typeof state === 'object' &&
+    state !== null &&
+    (state as Partial<SamePathPushState>).pushedOntoSamePath === true
+  );
+}
 
 export interface GuideDialogState {
   isOpen: boolean;
@@ -36,9 +60,13 @@ function parseStep(raw: string | null): number | null {
  * `'url'` whenever the URL alone opened the dialog.
  *
  * Query, not path: `vite-react-ssg` prerenders paths. `?step=N` creates no
- * page, needs no canonical tag and adds nothing to the 160 prerendered files.
+ * page, needs no canonical tag and adds nothing to the prerendered files —
+ * 70 of them, a count `architecture-facts.test.ts` derives and asserts rather
+ * than a number to copy. It read "160" here until this branch corrected it,
+ * which is why it now cites its source instead of restating one.
  *
- * `?step` outside 1..7 is not an error and does not close the dialog — it is
+ * `?step` outside the guide's numbering is not an error and does not close
+ * the dialog — it is
  * someone following a link that used to mean something, and the honest answer
  * is the guide from the start.
  */
@@ -53,6 +81,17 @@ export function useGuideDialog(): GuideDialogState {
   // anyway, so a ref would buy nothing and cost the render-time read.
   const [source, setSource] = useState<GuideSource>('url');
 
+  // Whether our own open() pushed the entry the dialog is standing on. A ref,
+  // not state: nothing renders from it, and it must survive the navigation
+  // that follows the write.
+  const pushedRef = useRef(false);
+
+  // The entry a pop has already been issued from. The entry itself, not a
+  // boolean: it has to survive the navigation, and it has to stop being true
+  // once the reader is somewhere else — a later arrival on the same URL is a
+  // different location object and pops normally.
+  const poppedFromRef = useRef<Location | null>(null);
+
   const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const hasStepParam = params.has('step');
   const isOpen = hasStepParam || params.get('guide') === '1';
@@ -63,9 +102,15 @@ export function useGuideDialog(): GuideDialogState {
       const next = new URLSearchParams(location.search);
       mutate(next);
       const search = next.toString();
-      navigate(`${location.pathname}${search ? `?${search}` : ''}`, { replace });
+      // Carry the entry's state across. goToStep replaces, and a replace that
+      // dropped it would erase a SAME_PATH_PUSH mark: the reader picks a
+      // section in the rail, and close() quietly reverts to replacing.
+      navigate(`${location.pathname}${search ? `?${search}` : ''}`, {
+        replace,
+        state: location.state,
+      });
     },
-    [location.pathname, location.search, navigate]
+    [location.pathname, location.search, location.state, navigate]
   );
 
   const open = useCallback(
@@ -75,6 +120,7 @@ export function useGuideDialog(): GuideDialogState {
       // Android; with replace here the hardware Back would leave the site
       // from under someone mid-instruction. With push-once, the first Back
       // closes the dialog and the second leaves the page.
+      pushedRef.current = true;
       navigateWith(next => {
         if (target === undefined) {
           next.delete('step');
@@ -90,8 +136,9 @@ export function useGuideDialog(): GuideDialogState {
 
   const goToStep = useCallback(
     (target: number) => {
-      // Replace: seven sections in one scroll would otherwise leave seven
-      // history entries between the reader and the page they came from.
+      // Replace: one scroll holding every section would otherwise leave a
+      // history entry per section between the reader and the page they came
+      // from.
       navigateWith(next => {
         next.delete('guide');
         next.set('step', String(target));
@@ -102,11 +149,44 @@ export function useGuideDialog(): GuideDialogState {
 
   const close = useCallback(() => {
     setSource('url');
+    // Pop the entry the dialog stands on, rather than replacing it. A replace
+    // would leave two adjacent entries for the same page — the one below,
+    // without the dialog, and the one on top with the query stripped — so the
+    // reader's next Back would land on a visually identical page and appear to
+    // do nothing. Dismissing with the hardware Back never reaches here: that
+    // pops the entry itself and the URL closes the dialog.
+    //
+    // Two things can have pushed that entry and only one of them is ours:
+    // open(), which sets pushedRef, and a link on this same path carrying
+    // SAME_PATH_PUSH. The second is not reachable through the ref — an anchor
+    // navigates without running any handler of ours (PrefixedLink), which is
+    // why DiagnosticErrorScreen's CTA declares the push instead.
+    //
+    // One pop per entry, latched on the entry rather than on a flag that the
+    // next line clears. `pushedRef.current = false` used to be the whole
+    // guard, and it worked only while the ref was the only arm: a second
+    // close() arriving before the router commits the pop reads a
+    // location.state that still carries the mark, so both calls would pop and
+    // the reader would land two entries back, off /upload. main.tsx runs the
+    // pop inside a React transition (v7_startTransition), which is what makes
+    // that window wide enough to hit.
+    if (poppedFromRef.current === location) {
+      return;
+    }
+    if (pushedRef.current || wasPushedOntoSamePath(location.state)) {
+      poppedFromRef.current = location;
+      pushedRef.current = false;
+      navigate(-1);
+      return;
+    }
+    // Nothing pushed this entry: the reader arrived on ?guide=1 or ?step=N
+    // from another page — the landing page or the docs — so the dialog is on
+    // the entry they came in on and popping it would leave the site.
     navigateWith(next => {
       next.delete('step');
       next.delete('guide');
     }, true);
-  }, [navigateWith]);
+  }, [location, navigate, navigateWith]);
 
   return {
     isOpen,

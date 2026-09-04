@@ -3,10 +3,10 @@
   "items": {
     "howToFind": {
       "question": "How to check who unfollowed you on Instagram without app?",
-      "answer": "Open Meta Accounts Center › Create export › Select your profile › Choose \"Export to device\" › Select only \"Followers and following\" › Set format to JSON. Download the ZIP when ready (usually 5-30 minutes), then upload it here. The tool compares your lists in the browser, so the export is never uploaded anywhere. No login needed.",
+      "answer": "Open Meta Accounts Center › Create export › Select your profile › Choose \"Export to device\" › Select only \"Followers and following\" › Set date range to \"All time\" › Set format to JSON. Download the ZIP when ready (usually 5-30 minutes), then upload it here. The tool compares your lists in the browser, so the export is never uploaded anywhere. No login needed.",
       "relatedLink": {
         "text": "Start the export guide",
-        "href": "/wizard"
+        "href": "/upload?guide=1"
       }
     },
     "withoutDownload": {
@@ -14,7 +14,7 @@
       "answer": "No. Instagram doesn't provide a native unfollower list. The only safe methods are: (1) Manually checking followed accounts vs followers, or (2) Using your official data download with this tool. This tracker does method 2 for you, free: no password, no login, no account risk.",
       "relatedLink": {
         "text": "Learn how to get your data",
-        "href": "/wizard"
+        "href": "/upload?guide=1"
       }
     },
     "privacy": {
@@ -42,7 +42,7 @@
       "answer": "Instagram Data Download (via Meta Accounts Center) is the official tool for exporting your account information including followers and following lists. It's the only safe, authorized way to access this data without risking your account. Apps that ask for your password violate Instagram's Terms of Service.",
       "relatedLink": {
         "text": "Follow our step-by-step guide",
-        "href": "/wizard"
+        "href": "/upload?guide=1"
       }
     },
     "htmlExport": {
@@ -66,7 +66,7 @@
       "answer": "Meta typically sends your data within 5-30 minutes via email. Larger accounts or high server load may take up to a few hours. Once you have the ZIP, the analysis runs in your own browser rather than on a server, so there is no queue and no upload wait. Bigger exports naturally take longer to read than small ones.",
       "relatedLink": {
         "text": "Set a calendar reminder",
-        "href": "/wizard/step/8"
+        "href": "/upload?step=8"
       }
     },
     "scale": {
@@ -102,7 +102,7 @@
       "answer": "SafeUnfollow uses Instagram's official data export feature (available in Meta Accounts Center) instead of your password. You download your follower data as a ZIP file directly from Instagram, then upload that file here. The app reads the JSON files inside the ZIP to compare followers vs following lists. All processing happens in your browser. No API access, no scraping, no login credentials needed.",
       "relatedLink": {
         "text": "See the export guide",
-        "href": "/wizard"
+        "href": "/upload?guide=1"
       }
     },
     "betterThanPaid": {

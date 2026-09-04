@@ -164,7 +164,6 @@ const renderLayout = (
       <Routes>
         <Route path="*" element={<Layout lang={lang} />}>
           <Route index element={<TestOutlet />} />
-          <Route path="wizard" element={<TestOutlet />} />
           <Route path="upload" element={<TestOutlet />} />
           <Route path="results" element={<TestOutlet />} />
           <Route path="sample" element={<TestOutlet />} />
@@ -285,12 +284,6 @@ describe('Layout', () => {
       expect(screen.getByText(`activeScreen: ${AppState.HERO}`)).toBeInTheDocument();
     });
 
-    it('should pass activeScreen as WIZARD for /wizard path', () => {
-      renderLayout('/wizard');
-
-      expect(screen.getByText(`activeScreen: ${AppState.WIZARD}`)).toBeInTheDocument();
-    });
-
     it('should pass activeScreen as UPLOAD for /upload path', () => {
       renderLayout('/upload');
 
@@ -386,10 +379,10 @@ describe('Layout', () => {
 
       // Change route
       rerender(
-        <MemoryRouter initialEntries={['/wizard']}>
+        <MemoryRouter initialEntries={['/sample']}>
           <Routes>
             <Route path="*" element={<Layout />}>
-              <Route path="wizard" element={<div>Wizard</div>} />
+              <Route path="sample" element={<div>Sample</div>} />
             </Route>
           </Routes>
         </MemoryRouter>
@@ -419,7 +412,7 @@ describe('Layout', () => {
     });
 
     it('should call pageView regardless of route', () => {
-      renderLayout('/wizard');
+      renderLayout('/sample');
 
       expect(mockPageView).toHaveBeenCalledTimes(1);
       expect(mockPageView).toHaveBeenCalledWith();

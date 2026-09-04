@@ -2,9 +2,7 @@
   "title": "So prüfst du deine <gradient>Instagram-Entfolger</gradient>",
   "subtitle": "Folge diesen 9 einfachen Schritten, um dein Konto sicher zu analysieren, ohne dein Passwort zu teilen.",
   "important": "Kritisch",
-  "openStep": "Schritt in Anleitung öffnen",
   "uploadButton": "Meine Datei hochladen",
-  "openStepAria": "Schritt {{step}}: {{title}}. Klicken zum Öffnen",
   "steps": {
     "1": {
       "title": "Instagram Export-Seite öffnen",

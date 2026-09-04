@@ -59,8 +59,27 @@ const TRACKED_DOCS = [
 // --- Derivations. Each reads the file that actually decides the value. ---
 
 const routesSource = readFileSync(join(ROOT, 'src/routes.tsx'), 'utf-8');
-const viteConfigSource = readFileSync(join(ROOT, 'vite.config.ts'), 'utf-8');
 const storeSource = readFileSync(join(ROOT, 'src/lib/store.ts'), 'utf-8');
+const viteConfigSource = readFileSync(join(ROOT, 'vite.config.ts'), 'utf-8');
+
+/**
+ * The `includedRoutes` hook, whitespace-collapsed onto one line.
+ *
+ * The prerendered count has TWO sources, not one. `routes.tsx` declares the route
+ * tree, and this hook can hand vite-react-ssg pages the route tree never declares —
+ * which is precisely what it did until GH#102, adding eight `/wizard/step/N` pages per
+ * language. So `LANGUAGES x STATIC_ROUTES` is the whole count only while the hook
+ * contributes nothing of its own, and that is a fact about a second file.
+ */
+function includedRoutesHook(): string {
+  // Non-greedy to the first `}`: the body has no nested braces today, and anything
+  // that introduces one stops the match early and changes the string — which is the
+  // failure this is here to cause.
+  const hook = viteConfigSource.match(/includedRoutes\([\s\S]*?\}/);
+  if (!hook) throw new Error('includedRoutes() not found in vite.config.ts');
+
+  return hook[0].replace(/\s+/g, ' ');
+}
 
 /**
  * Routes vite-react-ssg will prerender for one language. It walks the route tree and
@@ -74,14 +93,7 @@ function prerenderableRoutesPerLanguage(): number {
   return children[1]
     .split('\n')
     .filter(line => /\bindex:\s*true|\bpath:\s*'/.test(line))
-    .filter(line => !line.includes(':stepId') && !line.includes("'*'")).length;
-}
-
-/** Concrete wizard-step pages vite.config.ts adds back, per language. */
-function wizardStepsPerLanguage(): number {
-  const match = viteConfigSource.match(/wizardSteps\s*=\s*Array\.from\(\{\s*length:\s*(\d+)/);
-  if (!match) throw new Error('wizardSteps length not found in vite.config.ts');
-  return Number(match[1]);
+    .filter(line => !/path:\s*'[^']*[:*]/.test(line)).length;
 }
 
 /** Field names declared on the Zustand `AppState` interface (state, not actions). */
@@ -101,8 +113,7 @@ function storeStateFields(): string[] {
 
 const LANGUAGES = SUPPORTED_LANGUAGES.length;
 const STATIC_ROUTES = prerenderableRoutesPerLanguage();
-const WIZARD_STEPS = wizardStepsPerLanguage();
-const PRERENDERED_ROUTES = LANGUAGES * (STATIC_ROUTES + WIZARD_STEPS);
+const PRERENDERED_ROUTES = LANGUAGES * STATIC_ROUTES;
 
 describe('architecture facts — derived, not copied', () => {
   it('finds documentation to check', () => {
@@ -114,16 +125,44 @@ describe('architecture facts — derived, not copied', () => {
   it('derives the prerendered route count from config', () => {
     expect(LANGUAGES).toBeGreaterThan(0);
     expect(STATIC_ROUTES).toBeGreaterThan(0);
-    expect(WIZARD_STEPS).toBeGreaterThan(0);
 
-    // 10 languages x (8 static + 8 wizard steps). Change a locale or a route and this
-    // fails on purpose — update .claude/architecture/*, CLAUDE.md and product.md too.
-    expect({ LANGUAGES, STATIC_ROUTES, WIZARD_STEPS, PRERENDERED_ROUTES }).toEqual({
+    // 10 languages x 7 static routes. Change a locale or a route and this fails on
+    // purpose — update .claude/architecture/*, CLAUDE.md and product.md too.
+    //
+    // There used to be a second term here: vite.config.ts `includedRoutes` added eight
+    // concrete `/wizard/step/N` pages per language, and the count was 10 x (8 + 8) =
+    // 160. Those routes are gone (GH#102) and the hook adds nothing back, so the
+    // derivation has one term again — and "adds nothing back" is asserted by the next
+    // test rather than believed, because a hook that grows a term would otherwise ship
+    // more pages than this number while every document repeating it stayed green.
+    // `?guide=1` and `?step=N` are query strings — vite-react-ssg prerenders paths, so
+    // they can never contribute a page here.
+    expect({ LANGUAGES, STATIC_ROUTES, PRERENDERED_ROUTES }).toEqual({
       LANGUAGES: 10,
-      STATIC_ROUTES: 8,
-      WIZARD_STEPS: 8,
-      PRERENDERED_ROUTES: 160,
+      STATIC_ROUTES: 7,
+      PRERENDERED_ROUTES: 70,
     });
+  });
+
+  it('the includedRoutes hook adds no route the route table does not declare', () => {
+    // The second term of the derivation above, pinned. Adding a page here is what this
+    // hook is FOR, and this repo has done it twice — so the failure to guard against is
+    // not a typo but a legitimate edit: someone appends a path, the build emits more
+    // than PRERENDERED_ROUTES files, and every "N prerendered pages" line keeps passing
+    // because the count above never learned about the new page. Both other guards on
+    // this number are floors (`font-loading.test.ts` and `sitemap-no-wizard.test.ts`
+    // both assert `> 50`), so an INCREASE is invisible to them by construction.
+    //
+    // `/404` is not a route addition: vite-react-ssg emits it for Vercel's static
+    // fallback and `routes.tsx` declares a `/404` path of its own, so it is already
+    // inside `paths`.
+    expect(
+      includedRoutesHook(),
+      'vite.config.ts includedRoutes() no longer returns only the routes routes.tsx ' +
+        'declares. If that is deliberate, PRERENDERED_ROUTES above needs the second ' +
+        'term back (count x LANGUAGES if the addition is per-language), and README.md ' +
+        'plus docs/tech-spec.md need the new number.'
+    ).toBe("includedRoutes(paths) { return [...paths, '/404']; }");
   });
 
   it('no shipped document states a stale prerendered page count', () => {
@@ -142,7 +181,7 @@ describe('architecture facts — derived, not copied', () => {
 
     expect(
       offenders,
-      `real count is ${PRERENDERED_ROUTES} (${LANGUAGES} languages x ${STATIC_ROUTES + WIZARD_STEPS} pages)`
+      `real count is ${PRERENDERED_ROUTES} (${LANGUAGES} languages x ${STATIC_ROUTES} pages)`
     ).toEqual([]);
   });
 

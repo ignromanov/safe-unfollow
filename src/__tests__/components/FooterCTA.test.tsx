@@ -63,12 +63,12 @@ describe('FooterCTA Component', () => {
   describe('CTA hrefs', () => {
     // A <button onClick={navigate}> is dead until React hydrates. FooterCTA renders real
     // anchors via PrefixedLink so the browser can follow them during that window.
-    it('renders the Get Started control as a real anchor to the wizard', () => {
+    it('renders the Get Started control as a real anchor that opens the guide', () => {
       render(<FooterCTA />);
 
       expect(screen.getByRole('link', { name: /Get Started/i })).toHaveAttribute(
         'href',
-        '/wizard/step/1'
+        '/upload?guide=1'
       );
     });
 
@@ -83,7 +83,7 @@ describe('FooterCTA Component', () => {
 
       expect(screen.getByRole('link', { name: /Get Started/i })).toHaveAttribute(
         'href',
-        '/id/wizard/step/1'
+        '/id/upload?guide=1'
       );
       expect(screen.getByRole('link', { name: /Try Sample/i })).toHaveAttribute(
         'href',

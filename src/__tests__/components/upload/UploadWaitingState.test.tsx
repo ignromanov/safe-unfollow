@@ -53,4 +53,43 @@ describe('UploadWaitingState', () => {
 
     expect(onUploadNow).toHaveBeenCalledTimes(1);
   });
+
+  it('titles itself at the level the page leaves for it', () => {
+    // /upload's heading order is h1 (UploadZone) - this - h2
+    // (UploadGuideBlock), in that DOM order. An h3 here skipped a level in
+    // the middle of the document, and nothing caught it: src/__tests__/a11y/
+    // holds two contrast tests and no axe harness, so heading order is not
+    // gated anywhere on this page.
+    //
+    // The level is pinned here rather than in UploadZone's test because
+    // reaching this block through the page means clicking a target="_blank"
+    // link, which jsdom answers with a "not implemented" navigation. What the
+    // page owns is the ORDER; what this component owns is its own level.
+    render(<UploadWaitingState onUploadNow={vi.fn()} onDismiss={vi.fn()} />);
+
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent(uploadEN.waiting.title);
+  });
+
+  it('draws both of its closing choices as controls, at one target size', () => {
+    // "Upload Now" opens the OS file picker and was 14px of underlined text;
+    // "Skip for now" was 12px of grey. Neither had a min-height, so the block
+    // ended in two things a thumb cannot reliably hit - the same defect the
+    // guide dialog's closing card had.
+    //
+    // Subjects come out of the DOM rather than being named one by one: a third
+    // choice added to this group is bound by this the day it appears. Naming
+    // them by hand is the shape progress.md P1 row 14 describes. jsdom computes
+    // no layout, so what is pinned is the class that produces the height.
+    render(<UploadWaitingState onUploadNow={vi.fn()} onDismiss={vi.fn()} />);
+
+    const group = screen
+      .getByRole('button', { name: uploadEN.waiting.uploadNow })
+      .closest('div') as HTMLElement;
+    const controls = group.querySelectorAll('button');
+
+    expect(controls).toHaveLength(2);
+    for (const control of controls) {
+      expect(control.className).toContain('min-h-[48px]');
+    }
+  });
 });

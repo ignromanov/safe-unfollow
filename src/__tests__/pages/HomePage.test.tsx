@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+
 import { render, screen } from '@testing-library/react';
 import { renderToString } from 'react-dom/server';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
@@ -121,13 +124,54 @@ describe('HomePage', () => {
     });
   });
 
-  describe('wizard prefetch', () => {
+  describe('guide prefetch', () => {
     afterEach(() => {
       vi.unstubAllGlobals();
       vi.useRealTimers();
     });
 
-    it('schedules a WizardPage prefetch via requestIdleCallback when available', () => {
+    it('prefetches the module UploadPage lazy-loads', () => {
+      // The prefetch above and UploadPage's `lazy()` are two dynamic imports in
+      // two files that must name the same module, and nothing else checks it:
+      // the assertions below pin the SCHEDULING (requestIdleCallback, 3000ms
+      // timeout) and never the module. Move GuideDialog, update one file, and
+      // this page warms a chunk the CTA does not need — no error and no failing
+      // test, just the latency the prefetch exists to remove, on a path that
+      // only a build can show you.
+      //
+      // Read from source rather than from the imports: a dynamic import inside
+      // an effect is a string in a file until something runs it, and running it
+      // here would resolve BOTH through the same test-time module graph and
+      // prove nothing about the two chunks Rollup emits.
+      const specifiers = (file: string) => {
+        const source = readFileSync(resolve(process.cwd(), file), 'utf-8');
+        return [...source.matchAll(/import\(\s*'([^']+)'\s*\)/g)].map(match => match[1]);
+      };
+
+      const home = specifiers('src/pages/HomePage.tsx');
+      const upload = specifiers('src/pages/UploadPage.tsx');
+
+      // Exactly one each, so "equal" cannot be satisfied by two lists that
+      // happen to share a member. A second dynamic import in either file is a
+      // legitimate change that this test then needs to be taught about.
+      expect(home, 'src/pages/HomePage.tsx should hold exactly one dynamic import').toHaveLength(1);
+      expect(
+        upload,
+        'src/pages/UploadPage.tsx should hold exactly one dynamic import'
+      ).toHaveLength(1);
+
+      expect(
+        home[0],
+        `src/pages/HomePage.tsx prefetches '${home[0]}' while src/pages/UploadPage.tsx ` +
+          `lazy-loads '${upload[0]}'. Both files must name the same module or the ` +
+          'prefetch warms a chunk the upload page never asks for.'
+      ).toBe(upload[0]);
+    });
+
+    // This prefetched WizardPage until GH#102 removed that page. The scheduling
+    // is unchanged; only the module moved, to the one chunk on the CTA's path
+    // that is still lazy (GuideDialog, inside UploadPage).
+    it('schedules a guide prefetch via requestIdleCallback when available', () => {
       const requestIdleCallbackSpy = vi.fn(() => 1);
       const cancelIdleCallbackSpy = vi.fn();
       vi.stubGlobal('requestIdleCallback', requestIdleCallbackSpy);

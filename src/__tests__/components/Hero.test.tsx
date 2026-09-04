@@ -137,11 +137,11 @@ describe('Hero Component', () => {
   describe('CTA hrefs', () => {
     // A <button> calling useNavigate() is dead until React hydrates — 3.7s on a cold
     // mobile load. An anchor navigates natively that whole time.
-    it('renders the primary CTA as a real anchor to the wizard', () => {
+    it('renders the primary CTA as a real anchor that opens the guide', () => {
       render(<Hero hasData={false} />);
       expect(
         screen.getByRole('link', { name: new RegExp(heroEN.buttons.getGuide, 'i') })
-      ).toHaveAttribute('href', '/wizard/step/1');
+      ).toHaveAttribute('href', '/upload?guide=1');
     });
 
     it('renders the sample CTA as a real anchor', () => {
@@ -169,7 +169,7 @@ describe('Hero Component', () => {
       render(<Hero hasData={false} />, { initialEntries: ['/ru/'] });
       expect(
         screen.getByRole('link', { name: new RegExp(heroEN.buttons.getGuide, 'i') })
-      ).toHaveAttribute('href', '/ru/wizard/step/1');
+      ).toHaveAttribute('href', '/ru/upload?guide=1');
       expect(
         screen.getByRole('link', { name: new RegExp(heroEN.buttons.trySample, 'i') })
       ).toHaveAttribute('href', '/ru/sample');

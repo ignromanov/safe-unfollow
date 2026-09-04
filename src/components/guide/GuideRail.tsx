@@ -9,7 +9,7 @@ interface GuideRailProps {
 }
 
 /**
- * Seven segments, and every one of them is a button.
+ * One segment per step, and every one of them is a button.
  *
  * The rail is the only thing in the dialog that looks like navigation once
  * Back/Next are gone, and a segmented bar at the top of a mobile modal is one

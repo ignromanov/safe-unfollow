@@ -48,7 +48,8 @@ export function ResponsiveGif({
   //
   // ⚠️ The poster is 600w on both breakpoints (below, and in the video's own
   // `poster`), so a 390px phone downloads a 600-wide still for a 400-wide
-  // clip. Pre-existing; seven sections in one scroll multiply it by seven.
+  // clip. Pre-existing; the guide stacks one per step in a single scroll,
+  // which multiplies it by the step count.
   if (prefersReducedMotion || !isActive) {
     return (
       <img

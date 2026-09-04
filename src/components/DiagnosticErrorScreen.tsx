@@ -4,6 +4,7 @@ import { AlertTriangle, Check, Copy, ExternalLink, RefreshCw } from 'lucide-reac
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PrefixedLink } from '@/components/PrefixedLink';
+import { SAME_PATH_PUSH } from '@/hooks/useGuideDialog';
 import { analytics } from '@/lib/analytics';
 import {
   shouldShowReportIssue,
@@ -78,6 +79,8 @@ export function DiagnosticErrorScreen({
     () => shouldShowReportIssue(diagnosticError.code),
     [diagnosticError.code]
   );
+
+  const guideHref = guideHrefForError('', diagnosticError.code);
 
   // Track error view on mount
   useEffect(() => {
@@ -165,9 +168,18 @@ export function DiagnosticErrorScreen({
           role="group"
           aria-label={t('diagnostic.actionsLabel')}
         >
+          {/* The mark applies only where following the link stays on this page.
+              On /upload it does, and the push is invisible: two entries, same
+              path, the second differing only by a query, so nothing downstream
+              can see it happened and useGuideDialog needs telling before it pops
+              on close. ResultsPage renders this same screen, where the link
+              leaves /results and a pop would undo the navigation the reader
+              asked for — PrefixedLink decides which of the two this is, because
+              it is the half that builds the href. */}
           {onOpenWizard && (
             <PrefixedLink
-              to={guideHrefForError('', diagnosticError.code)}
+              to={guideHref}
+              samePathState={SAME_PATH_PUSH}
               onClick={handleOpenWizard}
               className={recoverable ? PRIMARY_ACTION_CLASS : SECONDARY_ACTION_CLASS(colors)}
             >

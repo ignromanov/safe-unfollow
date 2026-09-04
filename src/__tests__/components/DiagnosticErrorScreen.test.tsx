@@ -5,9 +5,20 @@ import { createI18nMock } from '@/__tests__/utils/mockI18n';
 
 vi.mock('react-i18next', () => createI18nMock(uploadEN));
 
+import { useLocation } from 'react-router-dom';
+
 import { DiagnosticErrorScreen } from '@/components/DiagnosticErrorScreen';
+import { NON_ENGLISH_LANGUAGES } from '@/config/languages';
 import type { DiagnosticErrorCode, ParseWarning } from '@/core/types';
+import { SAME_PATH_PUSH } from '@/hooks/useGuideDialog';
 import { analytics } from '@/lib/analytics';
+import { guideHrefForError } from '@/lib/errors/wizard-routing';
+
+/** Reports the state of the entry the router is standing on. */
+function EntryStateProbe() {
+  const { state } = useLocation();
+  return <span data-testid="entry-state">{JSON.stringify(state) ?? ''}</span>;
+}
 
 // Mock analytics
 vi.mock('@/lib/analytics', () => ({
@@ -162,7 +173,7 @@ describe('DiagnosticErrorScreen', () => {
 
       // diagnostic.showMistakes translation
       const showMistakesLink = screen.getByRole('link', { name: uploadEN.diagnostic.showMistakes });
-      expect(showMistakesLink).toHaveAttribute('href', expect.stringContaining('/upload?step=3'));
+      expect(showMistakesLink).toHaveAttribute('href', expect.stringContaining('/upload?step=4'));
 
       fireEvent.click(showMistakesLink);
       expect(analytics.diagnosticErrorHelp).toHaveBeenCalledWith('NOT_ZIP');
@@ -189,7 +200,7 @@ describe('DiagnosticErrorScreen', () => {
       const primary = within(actions).getByRole('link');
 
       expect(primary).toHaveAccessibleName(/re-export as json/i);
-      expect(primary).toHaveAttribute('href', expect.stringContaining('/upload?step=5'));
+      expect(primary).toHaveAttribute('href', expect.stringContaining('/upload?step=6'));
     });
 
     it('offers a different file as the secondary, never as a retry', () => {
@@ -221,7 +232,7 @@ describe('DiagnosticErrorScreen', () => {
         name: uploadEN.diagnostic.showMistakes,
       });
 
-      expect(secondary).toHaveAttribute('href', expect.stringContaining('/upload?step=5'));
+      expect(secondary).toHaveAttribute('href', expect.stringContaining('/upload?step=6'));
       expect(within(actions).getByRole('button', { name: /try again/i })).toBeInTheDocument();
     });
   });
@@ -243,7 +254,66 @@ describe('DiagnosticErrorScreen', () => {
       const actions = screen.getByRole('group', { name: /actions/i });
       const primary = within(actions).getByRole('link');
 
-      expect(primary).toHaveAttribute('href', '/ar/upload?step=5');
+      expect(primary).toHaveAttribute('href', '/ar/upload?step=6');
+    });
+  });
+
+  describe('the history entry the guide link pushes', () => {
+    // useGuideDialog pops that entry when the reader closes the guide, and it
+    // can only know to do so if the pusher says the push stayed on this page.
+    // No handler of ours runs on the way — the anchor navigates by itself.
+    const code: DiagnosticErrorCode = 'HTML_FORMAT';
+    const href = guideHrefForError('', code);
+    const entryState = () => screen.getByTestId('entry-state').textContent;
+
+    it('marks it as a same-path push when the guide opens on this very page', () => {
+      renderWithRouter(
+        <>
+          <DiagnosticErrorScreen errorCode={code} onOpenWizard={mockOnOpenWizard} />
+          <EntryStateProbe />
+        </>,
+        { initialEntries: [href.split('?')[0]] }
+      );
+
+      fireEvent.click(screen.getByRole('link', { name: uploadEN.diagnostic.reExportJson }));
+
+      expect(entryState()).toBe(JSON.stringify(SAME_PATH_PUSH));
+    });
+
+    it('leaves it unmarked when the same screen renders on another route', () => {
+      // ResultsPage renders this screen too, and there the link is a real
+      // navigation away. Popping it on close would undo the move the reader
+      // asked for and drop them back on the failed results page.
+      renderWithRouter(
+        <>
+          <DiagnosticErrorScreen errorCode={code} onOpenWizard={mockOnOpenWizard} />
+          <EntryStateProbe />
+        </>,
+        { initialEntries: ['/results'] }
+      );
+
+      fireEvent.click(screen.getByRole('link', { name: uploadEN.diagnostic.reExportJson }));
+
+      expect(entryState()).not.toContain('pushedOntoSamePath');
+    });
+
+    // The two cases above both stand at the English root, where the prefix is
+    // '' — so a same-path comparison that lost the prefix would pass them
+    // anyway, and did, while every prefixed locale silently went unmarked. The
+    // list is derived, not written out: a locale added tomorrow is bound the
+    // day it appears.
+    it.each(NON_ENGLISH_LANGUAGES)('marks it the same under the /%s prefix', lang => {
+      renderWithRouter(
+        <>
+          <DiagnosticErrorScreen errorCode={code} onOpenWizard={mockOnOpenWizard} />
+          <EntryStateProbe />
+        </>,
+        { initialEntries: [`/${lang}${href.split('?')[0]}`] }
+      );
+
+      fireEvent.click(screen.getByRole('link', { name: uploadEN.diagnostic.reExportJson }));
+
+      expect(entryState()).toBe(JSON.stringify(SAME_PATH_PUSH));
     });
   });
 

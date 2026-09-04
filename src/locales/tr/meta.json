@@ -6,14 +6,9 @@
   "keywords": "instagram takipten çıkanlar, kim takipten çıktı, takipten çıkanları görme, instagram zip analiz, şifresiz takipçi kontrol, programsız takip analizi",
   "routes": {
     "/upload": {
-      "title": "Instagram ZIP yükle: takipten çıkanları ücretsiz gör",
-      "description": "Instagram veri dışa aktarımını (ZIP) yükle, takipten çıkanları ücretsiz gör. Giriş yok, şifre yok: dosya tarayıcında okunur ve cihazından hiç çıkmaz.",
-      "ogTitle": "Instagram ZIP yükle: takipten çıkanları ücretsiz gör"
-    },
-    "/wizard": {
-      "title": "Instagram verilerini JSON olarak indirme rehberi",
-      "description": "Instagram verilerini JSON formatında indirmek için adım adım rehber. Meta Hesaplar Merkezi'nden veri dışa aktarımını talep et, e-postana gelsin, buraya yükle.",
-      "ogTitle": "Instagram verilerini JSON olarak indirme rehberi"
+      "title": "Instagram ZIP yükle: takipten çıkanları gör, ücretsiz",
+      "description": "Instagram veri dışa aktarımını (ZIP) yükle, takipten çıkanları ücretsiz gör. JSON veya HTML, ikisi de çalışır. Giriş yok, şifre yok: dosya cihazından çıkmaz.",
+      "ogTitle": "Instagram ZIP yükle: takipten çıkanları gör, ücretsiz"
     },
     "/sample": {
       "title": "Instagram Unfollow Tracker'ı dene: ücretsiz demo",

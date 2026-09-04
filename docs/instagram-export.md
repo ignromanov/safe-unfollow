@@ -3,43 +3,40 @@ layout: default
 title: "Instagram Data Export: ZIP/JSON Guide (No Login Needed)"
 description: "Free step-by-step guide to export your Instagram ZIP/JSON file safely — no login or password shared. Avoid the #1 upload mistake."
 permalink: /instagram-export/
-last_updated: 2026-07-24
+last_updated: 2026-08-31
 ---
 
 # How to Download Your Instagram Data as a ZIP (JSON Format)
 
-This complete guide shows you how to get your Instagram data in the correct format for [Instagram Unfollow Tracker](https://safeunfollow.app). The most important step: **choose JSON format, not HTML**.
+This complete guide shows you how to get your Instagram data in the correct format for [Instagram Unfollow Tracker](https://safeunfollow.app). The most important step: **select only "Followers and following"** — an export without it has nothing to analyze. For the format, **choose JSON**: HTML exports also work, but JSON is the format the tracker reads most reliably.
 
 ## Quick Steps
 
-1. **Go to Meta Accounts Center**: Visit [https://accountscenter.instagram.com/](https://accountscenter.instagram.com/)
-2. **Log in** with your Instagram credentials
-3. **Navigate to "Your information and permissions"** in the left sidebar
-4. **Click "Download your information"**
-5. **Configure your download**:
-   - Select **"Some of your information"** (not "All of your information")
-   - Choose **"Followers and Following"** section only
-   - Select **"JSON"** format ← **Critical step!**
-   - Set date range to **"All time"**
-6. **Submit the request** and wait for Instagram to prepare your data (usually 5-30 minutes)
-7. **Download the ZIP file** when you receive the email notification
-8. **Upload the ZIP** to [Instagram Unfollow Tracker](https://safeunfollow.app/upload) using the upload button
+1. **Open Meta Accounts Center**: Visit [https://accountscenter.instagram.com/](https://accountscenter.instagram.com/) and click **"Create export"**
+2. **Choose your Instagram profile** from the list of connected accounts
+3. **Select "Export to device"** — this keeps your data private
+4. **Select only "Followers and following"**: Customize › Clear all › check ONLY "Followers and following" ← **Critical step!**
+5. **Set date range to "All time"** for your complete follower history
+6. **Change format to JSON** (HTML also works; JSON is read most reliably)
+7. **Review and click "Start export"** — verify: Followers and following, All time, JSON
+8. **Wait for the email** (usually 5-30 minutes) and **download the ZIP file**
+9. **Upload the ZIP** to [Instagram Unfollow Tracker](https://safeunfollow.app/upload) using the upload button
 
 ---
 
 ## JSON vs HTML: Why Format Matters
 
-This is the **#1 cause of upload errors** — 74% of failed uploads are caused by choosing the wrong format.
+Choosing HTML instead of JSON has historically been the **#1 cause of upload errors**. The tracker now reads HTML exports through a built-in converter, but JSON remains the format it reads most reliably.
 
 ### Comparison Table
 
-| Feature | JSON Format ✅ | HTML Format ❌ |
+| Feature | JSON Format ✅ | HTML Format ⚠️ |
 |---------|---------------|----------------|
-| **Works with tracker** | Yes | No |
+| **Works with tracker** | Yes — read directly | Usually — read via a built-in converter |
 | **File contents** | `.json` files with structured data | `.html` files for browser viewing |
 | **Data structure** | Machine-readable arrays and objects | Human-readable web pages |
 | **File size** | Smaller (1-5 MB typical) | Larger (includes styling/markup) |
-| **Processing** | Instant parsing | Cannot be parsed by the tracker |
+| **Processing** | Instant parsing | Converted first; may fail on unusual exports |
 
 ### How to Tell Which Format You Have
 
@@ -55,52 +52,51 @@ connections/followers_and_following/following.html
 connections/followers_and_following/followers_1.html
 ```
 
-> **Already downloaded HTML?** You need to re-request your data. Go back to Meta Accounts Center, select JSON format, and submit a new request. The old HTML export won't work.
+> **Already downloaded HTML?** Try uploading it — the tracker reads HTML exports too. If it cannot find your follower lists inside, re-request the export in JSON: Meta Accounts Center › Create export › Select your profile › Export to device › Only "Followers and following" › All time › Format: JSON.
 
 ---
 
 ## Detailed Instructions
 
-### Step 1: Access Meta Accounts Center
+### Step 1: Open the Instagram Export Page
 - Go directly to [https://accountscenter.instagram.com/](https://accountscenter.instagram.com/)
 - This is the unified center for all Meta accounts (Instagram, Facebook, etc.)
-- Log in with your Instagram credentials
+- Log in with your Instagram credentials if asked, then click **"Create export"**
 
-### Step 2: Navigate to Data Download
-- Look for **"Your information and permissions"** in the left sidebar
-- Click on **"Download your information"**
-- This will take you to the data request configuration page
+### Step 2: Choose Your Instagram Profile
+- Select your Instagram account from the list of connected profiles in the Accounts Center
 
-### Step 3: Select Information Type
-- Choose **"Some of your information"** to customize your download
-- This option allows you to select only the specific data you need instead of downloading everything
+### Step 3: Select "Export to device"
+- Choose to export directly to your device
+- This keeps your data private and secure
 
-### Step 4: Choose Data Section
-- Select **ONLY "Followers and Following"** from the available sections
-- **Important**: Do not select other sections like posts, messages, or profile information
+### Step 4: Select Only "Followers and following"
+
+> **This is the most critical step.** An export without it has no follower data to analyze.
+
+- Click **"Customize"** › Clear all › check **ONLY "Followers and following"**
+- Do not select other sections like posts, messages, or profile information
 - These are not needed for unfollow tracking and will make your download larger and slower
 
-### Step 5: Select File Format — JSON
+### Step 5: Set Date Range to "All time"
+- Click **"Date range"** › Select **"All time"** › Save
+- This ensures you have your complete follower history for accurate tracking
 
-> **This is the most critical step.** Select **JSON** format.
-
-- Look for the format dropdown or toggle on the download configuration page
-- Select **"JSON"** — not "HTML"
+### Step 6: Change Format to JSON
+- Click **"Format"** › Select **"JSON"**
+- HTML exports also work, but JSON is the format the tracker reads most reliably
 - JSON and HTML ZIP files look identical from the outside (both are `.zip` files)
 - The only way to tell them apart is by opening them and checking the file extensions inside
 
-### Step 6: Set Date Range
-- Select **"All time"** to get your complete follower history
-- This ensures you have all your followers and following data for accurate tracking
+### Step 7: Review & Start Export
+- Verify your settings show: **Followers and following, All time, JSON**
+- Click **"Start export"**
 
-### Step 7: Submit Request
-- Review your selections and click **"Submit request"**
-- Instagram will process your request — usually takes 5-30 minutes
-- You'll receive an email notification when the data is ready
-
-### Step 8: Download and Upload
-- Check your email for the download notification (check Spam folder too!)
+### Step 8: Wait for Email & Download
+- Instagram emails you when ready (usually 5-30 minutes; check Spam folder too!)
 - Download the ZIP file from the provided link (link expires in 4 days)
+
+### Step 9: Upload Your File
 - Go to [safeunfollow.app/upload](https://safeunfollow.app/upload) and upload the ZIP file
 - Analysis happens instantly, 100% in your browser
 
@@ -160,16 +156,15 @@ If your archive has a different folder structure, the tracker will try to locate
 
 ## Common Errors and Solutions
 
-### "Wrong Format: HTML" Error
-**Problem**: You downloaded your data in HTML format instead of JSON.
-**Solution**: Go back to Meta Accounts Center → Download your information → Select **JSON** format → Submit a new request. You cannot convert HTML exports to JSON.
+### "We couldn't read this export" (HTML) Error
+**Problem**: This is an HTML export, and the tracker could not find your follower lists inside it.
+**Solution**: Ask Instagram for the same export in JSON: Meta Accounts Center › Create export › Select your profile › Export to device › Only **"Followers and following"** › All time › Format: **JSON**. That version is the one the tracker reads most reliably.
 
 ### "No Data Found" Error
 **Problem**: The ZIP doesn't contain follower/following data files.
 **Solutions**:
-1. Make sure you selected **"Followers and Following"** when configuring the export
-2. Check that you selected **"Some of your information"** (not "All") and picked the right section
-3. Verify the ZIP contains `connections/followers_and_following/` folder
+1. Make sure you selected **"Followers and following"** when configuring the export (Customize › Clear all › check only it)
+2. Verify the ZIP contains `connections/followers_and_following/` folder
 
 ### "Not an Instagram Export" Error
 **Problem**: The uploaded file isn't from Instagram's official data export.
@@ -200,7 +195,7 @@ Your Instagram data export contains personal information. Here's how we handle i
 - **100% local processing** — Your ZIP file is analyzed entirely in your browser
 - **No server uploads** — your export never leaves your device
 - **No login required** — We never ask for your Instagram password
-- **No tracking** — We don't track individual users or store any data
+- **No tracking of your data** — Only anonymous page analytics, which you can switch off in the footer
 - **Open source** — [View the code on GitHub](https://github.com/ignromanov/safe-unfollow)
 
 > Keep your ZIP file secure and don't share it with others. Delete it after analysis if you prefer.
@@ -210,5 +205,5 @@ Your Instagram data export contains personal information. Here's how we handle i
 ## Ready to Analyze?
 
 1. **Already have your JSON ZIP?** → [Upload it now](https://safeunfollow.app/upload)
-2. **Need help downloading?** → [Follow our step-by-step wizard](https://safeunfollow.app/upload?guide=1)
+2. **Need help downloading?** → [Follow our step-by-step guide](https://safeunfollow.app/upload?guide=1)
 3. **Want to try first?** → [Load sample data](https://safeunfollow.app/sample)
