@@ -19,7 +19,9 @@ import { ACCOUNTS_CENTER_URL } from '@/config/wizard-steps';
  * No view event of its own. guide_entry_view measured a screen being reached;
  * this block renders whether or not anybody scrolls to it, and on a 390px
  * viewport it starts below the fold. "It rendered" would be the wrong fact.
- * What replaces it is guide_open with a `source`, in PR 4.
+ * What replaces it is guide_open, carrying the `source` of whichever control
+ * inside this block (or elsewhere on the page) actually opened the dialog —
+ * see `GuideDialog`.
  *
  * Ordering on the page is deliberate and was ruled on: the affiliate block
  * stays above this one (operator, 2026-08-25).

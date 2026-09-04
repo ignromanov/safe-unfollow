@@ -11,8 +11,6 @@ vi.mock('react-i18next', () => createI18nMock(wizardEN));
 
 vi.mock('@/lib/analytics', () => ({
   analytics: {
-    guideEntryView: vi.fn(),
-    wizardStepView: vi.fn(),
     linkClick: vi.fn(),
   },
 }));
@@ -43,18 +41,6 @@ describe('UploadGuideBlock', () => {
     await user.click(screen.getByRole('link', { name: /accounts center/i }));
 
     expect(analytics.linkClick).toHaveBeenCalledExactlyOnceWith('meta_accounts');
-  });
-
-  it('emits no view event of its own', () => {
-    // guide_entry_view belonged to a screen: reaching the screen and seeing it
-    // were the same event. This is a block in a document that starts below the
-    // fold on a 390px viewport, so "it rendered" and "someone saw it" are
-    // different facts and the old event would assert the wrong one. What
-    // replaces it is guide_open with a `source`, in PR 4.
-    render(<UploadGuideBlock />);
-
-    expect(analytics.guideEntryView).not.toHaveBeenCalled();
-    expect(analytics.wizardStepView).not.toHaveBeenCalled();
   });
 
   it('carries no "I already have my ZIP file" escape hatch', () => {
