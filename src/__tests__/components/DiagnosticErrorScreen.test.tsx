@@ -277,7 +277,7 @@ describe('DiagnosticErrorScreen', () => {
 
       fireEvent.click(screen.getByRole('link', { name: uploadEN.diagnostic.reExportJson }));
 
-      expect(entryState()).toBe(JSON.stringify(SAME_PATH_PUSH));
+      expect(entryState()).toBe(JSON.stringify({ ...SAME_PATH_PUSH, source: 'error' }));
     });
 
     it('leaves it unmarked when the same screen renders on another route', () => {
@@ -313,7 +313,7 @@ describe('DiagnosticErrorScreen', () => {
 
       fireEvent.click(screen.getByRole('link', { name: uploadEN.diagnostic.reExportJson }));
 
-      expect(entryState()).toBe(JSON.stringify(SAME_PATH_PUSH));
+      expect(entryState()).toBe(JSON.stringify({ ...SAME_PATH_PUSH, source: 'error' }));
     });
   });
 

@@ -179,7 +179,7 @@ export function DiagnosticErrorScreen({
           {onOpenWizard && (
             <PrefixedLink
               to={guideHref}
-              samePathState={SAME_PATH_PUSH}
+              samePathState={{ ...SAME_PATH_PUSH, source: 'error' }}
               onClick={handleOpenWizard}
               className={recoverable ? PRIMARY_ACTION_CLASS : SECONDARY_ACTION_CLASS(colors)}
             >

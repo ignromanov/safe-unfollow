@@ -231,4 +231,23 @@ describe('useGuideDialog', () => {
 
     expect(page.url()).toBe('/id/upload?utm_source=x&step=3');
   });
+
+  it('reads a same-path push naming the error source, though open() never ran', () => {
+    // DiagnosticErrorScreen's CTA is an anchor to /upload?step=N, so no
+    // handler of ours runs and `source` state is never set by open(). Only
+    // the entry's own state can say this arrival was the error screen's link
+    // rather than a plain URL visit.
+    at([
+      '/upload?utm_source=x',
+      { pathname: '/upload', search: '?step=6', state: { ...SAME_PATH_PUSH, source: 'error' } },
+    ]);
+
+    expect(guide).toMatchObject({ isOpen: true, step: 6, source: 'error' });
+  });
+
+  it('falls back to url when a same-path push names no source', () => {
+    at(PUSHED_BY_ERROR_SCREEN);
+
+    expect(guide.source).toBe('url');
+  });
 });

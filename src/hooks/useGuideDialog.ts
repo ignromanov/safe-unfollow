@@ -17,6 +17,13 @@ export type GuideSource = 'accordion' | 'error' | 'zone' | 'url';
  */
 export interface SamePathPushState {
   pushedOntoSamePath: true;
+  /**
+   * Names the gesture that pushed this entry, for a pusher that is an anchor —
+   * `open()` never runs for those, so nothing else can tell the arrival apart
+   * from a plain URL visit. Optional: not every same-path push opens the
+   * guide for a reason worth naming.
+   */
+  source?: GuideSource;
 }
 
 /** What a same-path pusher hands to `<Link state>`. */
@@ -28,6 +35,11 @@ function wasPushedOntoSamePath(state: unknown): boolean {
     state !== null &&
     (state as Partial<SamePathPushState>).pushedOntoSamePath === true
   );
+}
+
+/** The gesture a same-path pusher named, if any. */
+function sourceFromPushState(state: unknown): GuideSource | undefined {
+  return wasPushedOntoSamePath(state) ? (state as SamePathPushState).source : undefined;
 }
 
 export interface GuideDialogState {
@@ -188,10 +200,19 @@ export function useGuideDialog(): GuideDialogState {
     }, true);
   }, [location, navigate, navigateWith]);
 
+  // An anchor push (DiagnosticErrorScreen's CTA) never runs open(), so
+  // pushedRef stays false and `source` state is stale — the arrival's own
+  // location.state is what names the gesture, when it names one at all.
+  // pushedRef.current true means open() itself set `source`, which takes
+  // precedence over whatever the entry happens to carry.
+  const effectiveSource = pushedRef.current
+    ? source
+    : (sourceFromPushState(location.state) ?? 'url');
+
   return {
     isOpen,
     step,
-    source: isOpen ? source : 'url',
+    source: isOpen ? effectiveSource : 'url',
     open,
     goToStep,
     close,
