@@ -5,9 +5,19 @@ import { createI18nMock } from '@/__tests__/utils/mockI18n';
 
 vi.mock('react-i18next', () => createI18nMock(uploadEN));
 
+import { useLocation } from 'react-router-dom';
+
 import { DiagnosticErrorScreen } from '@/components/DiagnosticErrorScreen';
 import type { DiagnosticErrorCode, ParseWarning } from '@/core/types';
+import { SAME_PATH_PUSH } from '@/hooks/useGuideDialog';
 import { analytics } from '@/lib/analytics';
+import { guideHrefForError } from '@/lib/errors/wizard-routing';
+
+/** Reports the state of the entry the router is standing on. */
+function EntryStateProbe() {
+  const { state } = useLocation();
+  return <span data-testid="entry-state">{JSON.stringify(state) ?? ''}</span>;
+}
 
 // Mock analytics
 vi.mock('@/lib/analytics', () => ({
@@ -244,6 +254,46 @@ describe('DiagnosticErrorScreen', () => {
       const primary = within(actions).getByRole('link');
 
       expect(primary).toHaveAttribute('href', '/ar/upload?step=6');
+    });
+  });
+
+  describe('the history entry the guide link pushes', () => {
+    // useGuideDialog pops that entry when the reader closes the guide, and it
+    // can only know to do so if the pusher says the push stayed on this page.
+    // No handler of ours runs on the way — the anchor navigates by itself.
+    const code: DiagnosticErrorCode = 'HTML_FORMAT';
+    const href = guideHrefForError('', code);
+    const entryState = () => screen.getByTestId('entry-state').textContent;
+
+    it('marks it as a same-path push when the guide opens on this very page', () => {
+      renderWithRouter(
+        <>
+          <DiagnosticErrorScreen errorCode={code} onOpenWizard={mockOnOpenWizard} />
+          <EntryStateProbe />
+        </>,
+        { initialEntries: [href.split('?')[0]] }
+      );
+
+      fireEvent.click(screen.getByRole('link', { name: uploadEN.diagnostic.reExportJson }));
+
+      expect(entryState()).toBe(JSON.stringify(SAME_PATH_PUSH));
+    });
+
+    it('leaves it unmarked when the same screen renders on another route', () => {
+      // ResultsPage renders this screen too, and there the link is a real
+      // navigation away. Popping it on close would undo the move the reader
+      // asked for and drop them back on the failed results page.
+      renderWithRouter(
+        <>
+          <DiagnosticErrorScreen errorCode={code} onOpenWizard={mockOnOpenWizard} />
+          <EntryStateProbe />
+        </>,
+        { initialEntries: ['/results'] }
+      );
+
+      fireEvent.click(screen.getByRole('link', { name: uploadEN.diagnostic.reExportJson }));
+
+      expect(entryState()).not.toContain('pushedOntoSamePath');
     });
   });
 

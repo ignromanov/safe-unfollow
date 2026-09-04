@@ -258,7 +258,12 @@ describe('UploadPage', () => {
       await user.click(screen.getByText('Open Wizard'));
 
       // A push, and onto the same path: the guide is a query on /upload now.
-      expect(mockNavigate).toHaveBeenCalledWith('/upload?guide=1', { replace: false });
+      // `state` is the entry's own, carried across unchanged — a replace that
+      // dropped it would erase the mark a same-path pusher leaves for close().
+      expect(mockNavigate).toHaveBeenCalledWith('/upload?guide=1', {
+        replace: false,
+        state: mockLocation.state,
+      });
     });
   });
 
@@ -307,7 +312,10 @@ describe('UploadPage', () => {
 
       // The prefix comes from the location the dialog writes back onto, not
       // from useLanguagePrefix — the guide never leaves the page it is on.
-      expect(mockNavigate).toHaveBeenCalledWith('/upload?guide=1', { replace: false });
+      expect(mockNavigate).toHaveBeenCalledWith('/upload?guide=1', {
+        replace: false,
+        state: mockLocation.state,
+      });
     });
 
     it('should use language prefix in auto-navigation to results', async () => {

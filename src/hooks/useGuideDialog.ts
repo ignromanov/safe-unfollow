@@ -6,6 +6,30 @@ import { GUIDE_STEPS } from '@/config/wizard-steps';
 /** Where the reader came from. Not in the URL — it describes the gesture, not the state. */
 export type GuideSource = 'accordion' | 'error' | 'zone' | 'url';
 
+/**
+ * Router state on a history entry that a link pushed onto the path the reader
+ * was already standing on, so closing the dialog has an entry of its own to pop.
+ *
+ * The pusher has to declare it, because nothing downstream can work it out.
+ * `useNavigationType()` reports PUSH both for `/upload` -> `/upload?step=N` and
+ * for `/` -> `/upload?guide=1`, and the History API does not expose the previous
+ * entry's path; popping the second would take the reader off the site.
+ */
+export interface SamePathPushState {
+  pushedOntoSamePath: true;
+}
+
+/** What a same-path pusher hands to `<Link state>`. */
+export const SAME_PATH_PUSH: SamePathPushState = { pushedOntoSamePath: true };
+
+function wasPushedOntoSamePath(state: unknown): boolean {
+  return (
+    typeof state === 'object' &&
+    state !== null &&
+    (state as Partial<SamePathPushState>).pushedOntoSamePath === true
+  );
+}
+
 export interface GuideDialogState {
   isOpen: boolean;
   /** The section the URL claims, or null for "open, with no claim to a section". */
@@ -72,9 +96,15 @@ export function useGuideDialog(): GuideDialogState {
       const next = new URLSearchParams(location.search);
       mutate(next);
       const search = next.toString();
-      navigate(`${location.pathname}${search ? `?${search}` : ''}`, { replace });
+      // Carry the entry's state across. goToStep replaces, and a replace that
+      // dropped it would erase a SAME_PATH_PUSH mark: the reader picks a
+      // section in the rail, and close() quietly reverts to replacing.
+      navigate(`${location.pathname}${search ? `?${search}` : ''}`, {
+        replace,
+        state: location.state,
+      });
     },
-    [location.pathname, location.search, navigate]
+    [location.pathname, location.search, location.state, navigate]
   );
 
   const open = useCallback(
@@ -113,25 +143,31 @@ export function useGuideDialog(): GuideDialogState {
 
   const close = useCallback(() => {
     setSource('url');
-    // Pop what open() pushed, rather than replacing it. A replace would leave
-    // two adjacent entries for the same page — the one below, without the
-    // dialog, and the one on top with the query stripped — so the reader's
-    // next Back would land on a visually identical page and appear to do
-    // nothing. Dismissing with the hardware Back never reaches here: that
+    // Pop the entry the dialog stands on, rather than replacing it. A replace
+    // would leave two adjacent entries for the same page — the one below,
+    // without the dialog, and the one on top with the query stripped — so the
+    // reader's next Back would land on a visually identical page and appear to
+    // do nothing. Dismissing with the hardware Back never reaches here: that
     // pops the entry itself and the URL closes the dialog.
-    if (pushedRef.current) {
+    //
+    // Two things can have pushed that entry and only one of them is ours:
+    // open(), which sets pushedRef, and a link on this same path carrying
+    // SAME_PATH_PUSH. The second is not reachable through the ref — an anchor
+    // navigates without running any handler of ours (PrefixedLink), which is
+    // why DiagnosticErrorScreen's CTA declares the push instead.
+    if (pushedRef.current || wasPushedOntoSamePath(location.state)) {
       pushedRef.current = false;
       navigate(-1);
       return;
     }
-    // Nothing of ours pushed: the reader arrived on ?guide=1 or ?step=N from
-    // the landing page, the docs or an error screen, so the dialog is on the
-    // entry they came in on and popping it would leave the site.
+    // Nothing pushed this entry: the reader arrived on ?guide=1 or ?step=N
+    // from another page — the landing page or the docs — so the dialog is on
+    // the entry they came in on and popping it would leave the site.
     navigateWith(next => {
       next.delete('step');
       next.delete('guide');
     }, true);
-  }, [navigate, navigateWith]);
+  }, [location.state, navigate, navigateWith]);
 
   return {
     isOpen,
