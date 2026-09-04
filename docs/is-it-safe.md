@@ -1,7 +1,7 @@
 ---
 layout: default
-title: Is an Unfollowers Tracker Safe? What to Check First
-description: No login, no password. Your export stays in the browser, and the code that reads it is open source on GitHub.
+title: 'Is an Unfollowers Tracker Safe? What to Check First'
+description: 'No login, no password. Your export stays in the browser, and the code that reads it is open source on GitHub.'
 permalink: /is-it-safe/
 last_updated: 2026-09-03
 ---
@@ -23,7 +23,7 @@ A tracker you log into has to keep a password that works on your account, then u
 
 ## The safe route already exists
 
-Meta built it on purpose. You ask for your data, Meta sends you a ZIP, and a tool that reads that file needs no access to your account at all — no password to store, nothing to revoke, nothing to leak. [How to request the export](/docs/instagram-export/) takes about four taps.
+Meta built it on purpose. You ask for your data, Meta sends you a ZIP, and a tool that reads that file needs no access to your account at all — no password to store, nothing to revoke, nothing to leak. [How to request the export](/docs/instagram-export) takes about four taps.
 
 So a tracker is safe when three things are true at once: it never asks for your password, it reads only that export, and the file stays on your device.
 
@@ -32,7 +32,7 @@ So a tracker is safe when three things are true at once: it never asks for your 
 Five claims. Each one links to the thing that proves it.
 
 1. **There is no password field.** Not on the upload page, not anywhere else — the product has no login at all. [Open the upload page](/upload?guide=1) and look.
-2. **Your export never leaves your browser.** The ZIP is opened and searched on your device, and the results are stored there too. What the rest of the site loads is a separate question, answered on [the privacy page](/docs/privacy/).
+2. **Your export never leaves your browser.** The ZIP is opened and searched on your device, and the results are stored there too. What the rest of the site loads is a separate question, answered on [the privacy page](/docs/privacy).
 3. **You can read the code.** All of it, MIT licensed, [on GitHub](https://github.com/ignromanov/safe-unfollow) — including the part that opens your archive.
 4. **These claims are checked automatically.** A test in that repository reads this very page and refuses to release a version where we have promised something sweeping about ads, servers or tracking.
 5. **It keeps working if we don't.** Install it once and it runs with no internet, so an analysis you have already done outlives the website.
@@ -63,7 +63,7 @@ This is the list we would want you to run on us.
 
 Point five needs no trust in anybody, which is why it is the one worth doing.
 
-Running it on a specific tool? [We compare SafeUnfollow with four trackers you are likely to meet in the same search results](/docs/compare/) — prices and limits taken from their own pages, each with the date it was checked.
+Running it on a specific tool? [We compare SafeUnfollow with four trackers you are likely to meet in the same search results](/docs/compare) — prices and limits taken from their own pages, each with the date it was checked.
 
 **[Run the check on us — open your export](/upload?guide=1)**
 

@@ -1,0 +1,70 @@
+{%- comment -%}
+  FAQPage for /docs/faq, whose thirty-two visible questions carried no structured
+  data at all while the two-question `faq-schema.html` sat on /docs/is-it-safe.
+
+  Every `name` here is a verbatim `### ` heading in faq.md and every `text` is
+  that heading's own body, flattened. Google requires schema/page parity, and
+  `responsive-layout.test.ts` re-derives both from faq.md rather than trusting
+  this file — edit the page and the gate tells you this went stale.
+
+  "Is it safe? Where do my data go?" is deliberately absent: /docs/is-it-safe is
+  a whole page on that query with its own FAQPage, and two of our URLs competing
+  for it is the cannibalisation this omission avoids.
+{%- endcomment -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "inLanguage": "en",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Do I need my Instagram login/password?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No, absolutely not. You only need the ZIP file from Instagram's official Data Download feature (JSON format). No login credentials required."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What data does the app access?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The app only processes the \"Followers and Following\" section from your Instagram data export. It doesn't access posts, messages, photos, or any other personal content."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What do \"Not following back\" and \"Not followed back\" mean?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Not following back — accounts you follow who do not follow you back (pending/permanent requests are excluded from this check) Not followed back — accounts that follow you, but you do not follow them Mutuals — accounts that follow each other Close friends — accounts marked as close friends in Instagram"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why are some accounts missing?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Instagram may split followers into multiple files (followers_1.json, followers_2.json, etc.). The app automatically merges these files when found. If your archive structure is unusual, ensure you: Selected JSON format when downloading Chose only the \"Followers and Following\" section Downloaded \"All time\" data range"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I use it offline?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes! After the page loads, the app works completely without internet. All computation is client-side using your browser's processing power."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does it work on mobile?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, the UI is fully responsive. However, for large archives (10k+ accounts), desktop is more convenient due to better performance and screen space."
+      }
+    }
+  ]
+}
+</script>

@@ -3,9 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% if page.title %}{{ page.title }} - {% endif %}Instagram Unfollow Tracker</title>
-    <meta name="description" content="{% if page.description %}{{ page.description }}{% else %}Free Instagram unfollow tracker - analyze your followers and following{% endif %}">
-    
+    {%- comment -%}
+      The page owns its whole title. This used to append " - Instagram Unfollow Tracker"
+      unconditionally, which put every one of the fourteen pages here between 79 and 101
+      characters — Google shows about 60 — and made six of them say the brand twice.
+      `title_suffix` restores the old behaviour for a page that must keep its current SERP
+      presentation; see _config.yml defaults for the only page that sets it, and why.
+    {%- endcomment -%}
+    {%- capture head_title -%}
+      {%- if page.title -%}{{ page.title }}{%- if page.title_suffix -%}{{ " - Instagram Unfollow Tracker" }}{%- endif -%}
+      {%- else -%}Instagram Unfollow Tracker{%- endif -%}
+    {%- endcapture -%}
+    <title>{{ head_title | escape }}</title>
+    {%- comment -%}
+      Same reasoning as head_title: this used to be four copies of one if/else,
+      pasted into the description meta, og:description and twitter:description.
+      A change to the fallback text or the escaping could land on one tag and
+      miss the other three. One capture, three readers.
+    {%- endcomment -%}
+    {%- capture head_description -%}
+      {%- if page.description -%}{{ page.description }}{%- else -%}Free Instagram unfollow tracker - analyze your followers and following{%- endif -%}
+    {%- endcapture -%}
+    <meta name="description" content="{{ head_description | escape }}">
+
     {%- comment -%}
       Vercel serves this site with trailingSlash: false, so /docs/faq/ 308-redirects
       to /docs/faq. Jekyll's pretty permalinks end in a slash, so page.url alone would
@@ -19,14 +39,25 @@
     {%- endif -%}
 
     <!-- SEO and social meta tags -->
-    <meta property="og:title" content="{% if page.title %}{{ page.title }} - {% endif %}Instagram Unfollow Tracker">
-    <meta property="og:description" content="{% if page.description %}{{ page.description }}{% else %}Free Instagram unfollow tracker - analyze your followers and following{% endif %}">
+    <meta property="og:title" content="{{ head_title | escape }}">
+    <meta property="og:description" content="{{ head_description | escape }}">
     <meta property="og:url" content="{{ site.url }}{{ canonical_path }}">
     <meta property="og:type" content="website">
-    
-    <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="{% if page.title %}{{ page.title }} - {% endif %}Instagram Unfollow Tracker">
-    <meta name="twitter:description" content="{% if page.description %}{{ page.description }}{% else %}Free Instagram unfollow tracker - analyze your followers and following{% endif %}">
+    {%- comment -%}
+      The card image is the app's, named once in index.html and repeated here because
+      Jekyll cannot read it. Without these four tags a scraper falls back to the first
+      image in the body, so /docs/user-guide represented itself with a screenshot of the
+      upload step; every other page here had no image to fall back to at all. Pinned by
+      src/__tests__/docs/serp-presentation.test.ts, which reads index.html for the path.
+    {%- endcomment -%}
+    <meta property="og:image" content="{{ site.url }}/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="{{ site.url }}/og-image.png">
+    <meta name="twitter:title" content="{{ head_title | escape }}">
+    <meta name="twitter:description" content="{{ head_description | escape }}">
 
     <link rel="canonical" href="{{ site.url }}{{ canonical_path }}"/>
 
@@ -44,6 +75,14 @@
             margin: 0 auto;
             padding: 20px;
             background-color: #f8f9fa;
+            /*
+              Eighteen tokens in this corpus exceed 28 characters and the longest
+              is 54; `pre` scrolls but inline `code` does not. Measured at 375px:
+              `connections/followers_and_following/followers_1.html` rendered
+              511px inside a 315px column and pushed the document 166px sideways.
+              With this, 313px and 0.
+            */
+            overflow-wrap: break-word;
         }
         
         .container {
@@ -60,12 +99,12 @@
         }
         
         h1 {
-            border-bottom: 3px solid #3498db;
+            border-bottom: 3px solid #2176ad;
             padding-bottom: 10px;
         }
         
         a {
-            color: #3498db;
+            color: #2176ad;
             text-decoration: none;
         }
         
@@ -77,14 +116,14 @@
             display: inline-block;
             margin-bottom: 20px;
             padding: 8px 16px;
-            background: #3498db;
+            background: #2176ad;
             color: white;
             border-radius: 4px;
             text-decoration: none;
         }
         
         .back-link:hover {
-            background: #2980b9;
+            background: #17629b;
             text-decoration: none;
         }
         
@@ -102,13 +141,77 @@
             overflow-x: auto;
         }
         
+        /*
+          `body { max-width: 800px }` bounds the container, not the replaced
+          element inside it, so the two 2950px screenshots on /user-guide laid
+          out at 2950px and took the document with them. Measured on the served
+          page before this rule: documentElement.scrollWidth 3295px against a
+          1411px viewport — 1884px of horizontal overflow on a desktop window,
+          not only on a phone. After: 0px at 375, 768 and 1411.
+
+          ⛔ The site-wide "85% mobile" figure does not apply here and must not
+          be cited for it. Umami sees no /docs page at all — the layout loads no
+          tracker — so this property has no device split, no bounce rate and no
+          before/after (.conclave analytics/measurement-boundaries.md). The
+          overflow above is unconditional, which is why it needed no such claim.
+        */
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /*
+          Eight of these pages carry tables of up to five columns whose cells
+          hold prose. A table cannot be told to respect a width, so the choice is
+          between the table scrolling and the document scrolling.
+        */
+        table {
+            display: block;
+            overflow-x: auto;
+            max-width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 6px 10px;
+            border: 1px solid #e1e4e8;
+            text-align: left;
+        }
+
         blockquote {
-            border-left: 4px solid #3498db;
+            border-left: 4px solid #2176ad;
             margin: 0;
             padding-left: 20px;
             color: #666;
         }
         
+        .last-updated {
+            margin-top: 3em;
+            font-size: 0.85em;
+            color: #6c757d;
+        }
+
+
+        /*
+          20px of body padding and 40px of container padding, on both sides, is
+          120px of chrome. On a 375px viewport that left a 255px text column;
+          halving both leaves 315px. Measured, not estimated — a 24% wider line
+          for the same page.
+        */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            h1, h2, h3, h4, h5, h6 {
+                margin-top: 1.5em;
+            }
+        }
+
         .footer {
             margin-top: 40px;
             padding-top: 20px;
@@ -122,20 +225,30 @@
 <body>
     <div class="container">
         <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-            <a href="{{ site.baseurl }}/" class="back-link">← Documentation Home</a>
+            <a href="{{ site.baseurl }}" class="back-link">← Documentation Home</a>
             <a href="/" class="back-link">🚀 Try the App</a>
         </div>
         
         <main>
             {{ content }}
+
+            {%- comment -%}
+              Seven of the fourteen pages here set `last_updated` in front matter and no
+              template read it, so the freshness signal reached neither a reader nor a
+              crawler. Rendered once, here, rather than written into each page's body,
+              where it would drift from the front matter that sets it.
+            {%- endcomment -%}
+            {%- if page.last_updated %}
+            <p class="last-updated">Last updated: <time datetime="{{ page.last_updated | escape }}">{{ page.last_updated | escape }}</time></p>
+            {%- endif %}
         </main>
         
         <div class="footer">
             <p>
-                <a href="{{ site.baseurl }}/">Documentation Home</a> |
+                <a href="{{ site.baseurl }}">Documentation Home</a> |
                 <a href="/">Instagram Unfollow Tracker</a> |
                 <a href="https://github.com/ignromanov/safe-unfollow">GitHub</a> |
-                <a href="{{ site.baseurl }}/privacy/">Privacy</a>
+                <a href="{{ site.baseurl }}/privacy">Privacy</a>
             </p>
         </div>
     </div>

@@ -1,8 +1,9 @@
 ---
 layout: default
-title: SafeUnfollow vs Unfollowgram — Instagram Unfollow Tracker Comparison
-description: Unfollowgram's site is serving a maintenance page as of 2026-09-03. Here is an unfollower tracker that needs no Instagram login and reads the official export instead.
+title: 'SafeUnfollow vs Unfollowgram: Unfollow Tracker Compared'
+description: 'Unfollowgram''s site was serving a maintenance page on 2026-09-03. Here is a tracker that needs no Instagram login and reads the official export instead.'
 permalink: /compare/vs-unfollowgram/
+last_updated: 2026-09-03
 ---
 
 # SafeUnfollow vs Unfollowgram
@@ -30,7 +31,7 @@ There is no login step, so there is nothing to give away and nothing to revoke a
 
 Any claim we made about a competitor's price, limits or data handling would be a claim made by the company competing with them, and it would go stale the day they change a page. So instead of asking you to trust our summary of somebody else, here is the check to run on them — and on us.
 
-[How to check any unfollowers tracker in two minutes](/docs/is-it-safe/) — five questions, the last of which needs no trust in anybody: open your browser's network panel, load your file, and watch whether your archive appears in any request.
+[How to check any unfollowers tracker in two minutes](/docs/is-it-safe) — five questions, the last of which needs no trust in anybody: open your browser's network panel, load your file, and watch whether your archive appears in any request.
 
 ## Common Questions
 

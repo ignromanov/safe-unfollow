@@ -1,8 +1,9 @@
 ---
 layout: default
-title: SafeUnfollow vs Followers App — Login-Based Apps vs the Instagram Export
-description: "Followers App" names several products, so this page states no prices for it. What it does compare is the structural difference: an app that watches your account needs access to it; SafeUnfollow reads a file you download yourself.
+title: 'SafeUnfollow vs Followers App: Login vs the Export File'
+description: '"Followers App" names several products, so this page states no prices. It compares the data paths: an app that watches your account, or a file you download.'
 permalink: /compare/vs-followers-app/
+last_updated: 2026-09-03
 ---
 
 # SafeUnfollow vs Followers App
@@ -33,7 +34,7 @@ SafeUnfollow is the second kind. If real-time alerts are what you actually want,
 | **Platform** | Any browser, desktop or mobile; installable as a PWA |
 | **Source code** | Published under the MIT license |
 
-The site itself is not silent on the network — it loads anonymous page analytics, and the results page carries ads. [What the rest of the site loads is set out on the privacy page](/docs/privacy/). The export is the part that stays on your device.
+The site itself is not silent on the network — it loads anonymous page analytics, and the results page carries ads. [What the rest of the site loads is set out on the privacy page](/docs/privacy). The export is the part that stays on your device.
 
 ## Choosing Between Them
 
@@ -47,7 +48,7 @@ The site itself is not silent on the network — it loads anonymous page analyti
 
 ## Check Any Of Them Yourself
 
-Rather than take our word about any app, including ours: [how to check any unfollowers tracker in two minutes](/docs/is-it-safe/). The last of the five questions needs no trust in anybody — open your browser's network panel, load your file, and watch whether your archive appears in any request.
+Rather than take our word about any app, including ours: [how to check any unfollowers tracker in two minutes](/docs/is-it-safe). The last of the five questions needs no trust in anybody — open your browser's network panel, load your file, and watch whether your archive appears in any request.
 
 ## Common Questions
 

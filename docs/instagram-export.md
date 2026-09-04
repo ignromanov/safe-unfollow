@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "Instagram Data Export: ZIP/JSON Guide (No Login Needed)"
-description: Free step-by-step guide to export your Instagram ZIP/JSON file safely — no login or password shared. Avoid the #1 upload mistake.
+description: "Free step-by-step guide to export your Instagram ZIP/JSON file safely — no login or password shared. Avoid the #1 upload mistake."
 permalink: /instagram-export/
 last_updated: 2026-07-24
 ---
@@ -210,5 +210,5 @@ Your Instagram data export contains personal information. Here's how we handle i
 ## Ready to Analyze?
 
 1. **Already have your JSON ZIP?** → [Upload it now](https://safeunfollow.app/upload)
-2. **Need help downloading?** → [Follow our step-by-step wizard](https://safeunfollow.app/wizard)
+2. **Need help downloading?** → [Follow our step-by-step wizard](https://safeunfollow.app/upload?guide=1)
 3. **Want to try first?** → [Load sample data](https://safeunfollow.app/sample)

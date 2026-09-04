@@ -1,8 +1,9 @@
 ---
 layout: default
-title: How to Find Instagram Unfollowers - Complete Guide
-description: Step-by-step guide to find who unfollowed you on Instagram using free data export. No login required, works offline. Privacy-first tutorial.
+title: 'How to Find Instagram Unfollowers - Complete Guide'
+description: 'Step-by-step guide to find who unfollowed you on Instagram using free data export. No login required, works offline. Privacy-first tutorial.'
 permalink: /
+last_updated: 2026-09-03
 ---
 
 # Documentation - Instagram Unfollow Tracker
@@ -13,22 +14,22 @@ Welcome to the complete documentation for Instagram Unfollow Tracker, a privacy-
 
 ## Quick Start
 
-- **[User Guide](/docs/user-guide/)** - Complete step-by-step tutorial
-- **[FAQ](/docs/faq/)** - Frequently asked questions and answers
-- **[Data Download Guide](/docs/instagram-export/)** - How to get your Instagram data
+- **[User Guide](/docs/user-guide)** - Complete step-by-step tutorial
+- **[FAQ](/docs/faq)** - Frequently asked questions and answers
+- **[Data Download Guide](/docs/instagram-export)** - How to get your Instagram data
 
 ## Detailed Guides
 
-- **[Troubleshooting](/docs/troubleshooting/)** - Problem-solving guide for common issues
-- **[Privacy Policy](/docs/privacy/)** - Data handling principles and privacy commitment
-- **[Accessibility](/docs/accessibility/)** - Accessibility features and support
-- **[Is It Safe?](/docs/is-it-safe/)** - Five checkable facts, and a two-minute test for any tracker
-- **[Alternatives Compared](/docs/compare/)** - How SafeUnfollow differs from the trackers you meet in the same search results
+- **[Troubleshooting](/docs/troubleshooting)** - Problem-solving guide for common issues
+- **[Privacy Policy](/docs/privacy)** - Data handling principles and privacy commitment
+- **[Accessibility](/docs/accessibility)** - Accessibility features and support
+- **[Is It Safe?](/docs/is-it-safe)** - Five checkable facts, and a two-minute test for any tracker
+- **[Alternatives Compared](/docs/compare)** - How SafeUnfollow differs from the trackers you meet in the same search results
 
 ## Technical Information
 
-- **[Technical Specification](/docs/tech-spec/)** - Technical details and architecture
-- **[Roadmap](/docs/roadmap/)** - Future features and development plans
+- **[Technical Specification](/docs/tech-spec)** - Technical details and architecture
+- **[Roadmap](/docs/roadmap)** - Future features and development plans
 
 ## Getting Help
 
@@ -44,7 +45,7 @@ Instagram Unfollow Tracker is a **100% private** tool that analyzes your Instagr
 
 - **Privacy First**: Your Instagram export is read in the browser and never uploaded
 - **No Login Required**: Uses official Instagram data export
-- **Completely Free**: No subscriptions or hidden costs
+- **Free to analyze**: Every badge, filter and account, at any export size — the one paid item is a $7 one-time export unlock
 - **Open Source**: Transparent and auditable code
 - **Offline Capable**: Works without internet after initial load
 

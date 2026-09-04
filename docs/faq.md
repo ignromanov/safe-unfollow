@@ -1,17 +1,19 @@
 ---
 layout: default
-title: Instagram Unfollow Tracker FAQ — No Login, Free, 100% Private
-description: Answers to common questions about Instagram Unfollow Tracker. Learn how it works without login, why it's free, and how your data stays private.
+title: "Instagram Unfollow Tracker FAQ: No Login, Free, Private"
+description: 'Answers to common questions about Instagram Unfollow Tracker. Learn how it works without login, why it''s free, and how your data stays private.'
 permalink: /faq/
-last_updated: 2026-01-16
+last_updated: 2026-09-03
 ---
+
+{% include faq-page-schema.html %}
 
 # FAQ - Instagram Unfollow Tracker
 
 ## Privacy & Security
 
 ### Is it safe? Where do my data go?
-**Your Instagram export never leaves your browser.** The ZIP is opened, parsed and stored on your own device, and no server receives your export. What the rest of the site loads is answered on [the privacy page](/docs/privacy/).
+**Your Instagram export never leaves your browser.** The ZIP is opened, parsed and stored on your own device, and no server receives your export. What the rest of the site loads is answered on [the privacy page](/docs/privacy).
 
 ### Do I need my Instagram login/password?
 **No, absolutely not.** You only need the ZIP file from Instagram's official Data Download feature (JSON format). No login credentials required.
@@ -57,8 +59,8 @@ The app is optimized for massive scale:
 - **1,000,000+ accounts** — built and unit-tested for exports of 1,000,000+ accounts
 - **Filter speed**: stays interactive for any badge combination, even at 1M accounts
 - **Search speed**: near-instant with trigram/prefix indexes
-- **Storage**: ~5 MB for 1M accounts (40x compression)
-- **Memory**: ~5 MB runtime usage
+- **Storage**: ~5 MB for 1M accounts (design target, ~40x compression)
+- **Memory**: ~5 MB runtime usage (design target)
 
 ## Comparison
 
@@ -66,7 +68,7 @@ The app is optimized for massive scale:
 - **Privacy**: 100% local processing, no data collection
 - **Transparency**: Open source, you can see exactly what it does
 - **No login required**: Uses official Instagram data export
-- **Free**: No subscriptions or hidden costs
+- **Free to analyze**: Every badge, filter and account — the one paid item is a $7 one-time export unlock
 - **Customizable**: Modify the code for your needs
 - **Offline**: Works without internet connection
 
@@ -76,9 +78,9 @@ Instagram doesn't provide unfollow tracking features. This tool fills that gap u
 ## Troubleshooting
 
 ### The app shows "No data found" - what should I do?
-1. Ensure you downloaded JSON format (not HTML)
-2. Check that you selected "Followers and Following" section
-3. Verify the ZIP contains files like `connections/followers_and_following/following.json`
+1. **The format is not the cause.** Both JSON and HTML exports have been read since August 2026 — upload the file you already have rather than requesting a new one.
+2. Check that you selected the "Followers and following" section
+3. Verify the ZIP contains a `connections/followers_and_following/` folder, holding either `following.json` or `following.html`
 4. Try the "Load sample" button to test the app functionality
 
 ### My download is taking too long to process
@@ -108,7 +110,7 @@ This is normal and expected:
 - Contribute improvements back
 
 ### Is there a roadmap for new features?
-Yes! See [Project Roadmap](/docs/roadmap/) for upcoming features. Already live:
+Yes! See [Project Roadmap](/docs/roadmap) for upcoming features. Already live:
 - ✅ **PWA support** — install as app, works offline
 - ✅ **10 languages** — including Arabic with RTL support
 - ✅ **3-way theme** — light/dark/system
@@ -163,7 +165,7 @@ Yes! Join our [GitHub Discussions](https://github.com/ignromanov/safe-unfollow/d
 - Development updates
 
 ### How often is the app updated?
-Updates are released regularly based on community feedback and development progress. Check the [roadmap](/docs/roadmap/) for upcoming features.
+Updates are released regularly based on community feedback and development progress. Check the [roadmap](/docs/roadmap) for upcoming features.
 
 ### Can I suggest new features?
 Absolutely! We welcome feature suggestions. Please use [GitHub Discussions](https://github.com/ignromanov/safe-unfollow/discussions) to share your ideas.
