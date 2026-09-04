@@ -7,6 +7,23 @@ import { GUIDE_STEPS } from '@/config/wizard-steps';
 export type GuideSource = 'accordion' | 'error' | 'zone' | 'url';
 
 /**
+ * Router state naming the gesture that pushed this entry, for a pusher that is
+ * an anchor — `open()` never runs for those, so nothing else can tell the
+ * arrival apart from a plain URL visit.
+ *
+ * Deliberately its own shape rather than a field only `SamePathPushState` may
+ * carry. "This entry names a gesture" and "this entry was pushed onto the path
+ * the reader already stood on" are two different facts, and the diagnostic
+ * error screen produces both combinations: on `/upload` its CTA stays on the
+ * path, on `/results` the same component's same button leaves it. Welding the
+ * two together is what made the second report `'url'` — half of one surface
+ * landing in the bucket the other three arms are measured against.
+ */
+export interface GuideSourceState {
+  source: GuideSource;
+}
+
+/**
  * Router state on a history entry that a link pushed onto the path the reader
  * was already standing on, so closing the dialog has an entry of its own to pop.
  *
@@ -14,16 +31,14 @@ export type GuideSource = 'accordion' | 'error' | 'zone' | 'url';
  * `useNavigationType()` reports PUSH both for `/upload` -> `/upload?step=N` and
  * for `/` -> `/upload?guide=1`, and the History API does not expose the previous
  * entry's path; popping the second would take the reader off the site.
+ *
+ * A same-path pusher may also name its gesture, so the two shapes compose —
+ * but neither implies the other, and a cross-path pusher must send
+ * `GuideSourceState` alone: claiming a same-path push it did not make would
+ * pop the reader off the page they navigated from.
  */
-export interface SamePathPushState {
+export interface SamePathPushState extends Partial<GuideSourceState> {
   pushedOntoSamePath: true;
-  /**
-   * Names the gesture that pushed this entry, for a pusher that is an anchor —
-   * `open()` never runs for those, so nothing else can tell the arrival apart
-   * from a plain URL visit. Optional: not every same-path push opens the
-   * guide for a reason worth naming.
-   */
-  source?: GuideSource;
 }
 
 /** What a same-path pusher hands to `<Link state>`. */
@@ -37,9 +52,23 @@ function wasPushedOntoSamePath(state: unknown): boolean {
   );
 }
 
-/** The gesture a same-path pusher named, if any. */
-function sourceFromPushState(state: unknown): GuideSource | undefined {
-  return wasPushedOntoSamePath(state) ? (state as SamePathPushState).source : undefined;
+/** The gesture the entry names, if it names one — whatever else it carries. */
+function namedSource(state: unknown): GuideSource | undefined {
+  if (typeof state !== 'object' || state === null) return undefined;
+  return (state as Partial<GuideSourceState>).source;
+}
+
+/**
+ * The same entry state with its gesture name taken out, for the replace that
+ * consumes it. Everything else is copied across untouched — `pushedOntoSamePath`
+ * above all, which `close()` reads to decide pop-vs-replace. `null` rather than
+ * an empty object when nothing else was there, so a consumed entry is
+ * indistinguishable from one that never carried state.
+ */
+function stateWithoutSource(state: unknown): unknown {
+  if (typeof state !== 'object' || state === null) return state;
+  const { source: _source, ...rest } = state as Record<string, unknown>;
+  return Object.keys(rest).length > 0 ? rest : null;
 }
 
 export interface GuideDialogState {
@@ -72,7 +101,7 @@ function parseStep(raw: string | null): number | null {
  * `'url'` whenever the URL alone opened the dialog.
  *
  * `source`'s two channels (the `source` state below, and `location.state` for
- * a pusher that is an anchor — see `SamePathPushState`) are a deliberate
+ * a pusher that is an anchor — see `GuideSourceState`) are a deliberate
  * split, not an accident to collapse into one. The alternative considered was
  * folding both into `location.state`, so `open()` writes there too instead of
  * keeping its own `useState`. That fails the paragraph above: browser session
@@ -85,6 +114,17 @@ function parseStep(raw: string | null): number | null {
  * ephemeral component state, read only where `location.state` names nothing
  * itself, is what keeps that guarantee true for the `open()` path while still
  * letting an anchor push (which cannot call `open()`) name its own gesture.
+ *
+ * The anchor channel is restorable by construction, for exactly the reason
+ * that paragraph rejects it for `open()` — so it is CONSUMED on arrival
+ * rather than merely read: the gesture is copied into ephemeral memory and
+ * the entry is rewritten, once, without it (`consume the anchor's mark`
+ * below). A reload of that same entry then finds nothing to restore and
+ * reports `'url'`, which is the honest answer — the gesture happened in a
+ * previous page life. Without it the four `source` values are not counted
+ * under one rule: `'error'` would count arrivals on an entry while
+ * `'accordion'`, `'zone'` and `'url'` count gestures, and no column in the
+ * data would show the difference.
  *
  * Query, not path: `vite-react-ssg` prerenders paths. `?step=N` creates no
  * page, needs no canonical tag and adds nothing to the prerendered files —
@@ -120,6 +160,21 @@ export function useGuideDialog(): GuideDialogState {
   // though the render never became visible — the same class of window
   // close()'s own comment below names for the double-pop it used to allow.
   const pushedRef = useRef(false);
+
+  // The gesture the arrival's own entry named, once taken from it. Ephemeral,
+  // like `source` above and for the same reason — but a channel of its own,
+  // because `source` is only trusted where pushedRef says open() wrote it, and
+  // an anchor push never runs open().
+  //
+  // It exists because the entry stops naming the gesture the moment the effect
+  // below consumes it, while the reader of `source` can arrive later than that:
+  // GuideDialog is lazy and mounts only once the chunk has downloaded (see
+  // UploadPage's `everOpened` latch), so on the first opening of a session the
+  // consume lands first. Reading location.state alone would then report 'url'
+  // for the very click this channel exists to name. Written only from effects,
+  // read during render — the same discipline pushedRef's comment above states,
+  // and for the same v7_startTransition reason.
+  const anchorSourceRef = useRef<GuideSource | null>(null);
 
   // The entry a pop has already been issued from. The entry itself, not a
   // boolean: it has to survive the navigation, and it has to stop being true
@@ -258,19 +313,56 @@ export function useGuideDialog(): GuideDialogState {
   useEffect(() => {
     if (wasOpenRef.current && !isOpen) {
       pushedRef.current = false;
+      // Same reason, one channel over: nothing else clears the anchor's mark
+      // once the opening it named is over, and a hardware Back never reaches
+      // close(). Left behind, it would name the gesture of a previous opening
+      // for a later arrival that named none.
+      anchorSourceRef.current = null;
     }
     wasOpenRef.current = isOpen;
   }, [isOpen]);
 
+  // Consume the anchor's mark: take the gesture off the entry and keep it in
+  // memory instead, so it cannot be restored into a later page life. See the
+  // docstring above for why that matters — `history.state` survives a reload,
+  // and a restored mark would make one arm of a four-arm breakdown count
+  // arrivals while the other three count gestures.
+  //
+  // One replace per opening, not one per render: the replace removes the very
+  // thing this effect tests for, so the next run finds nothing and returns.
+  // It cannot re-fire guide_open either — GuideDialog gates that on its own
+  // closed -> open edge and the URL does not change here, so `open` stays true
+  // across the replace.
+  //
+  // Replace, not push, and the rest of the state copied across: `close()`
+  // reads `pushedOntoSamePath` off this entry to decide pop-vs-replace, and a
+  // push would insert an entry between the reader and the page they came from.
+  // Gated on `isOpen` because the mark names the gesture that opened THIS
+  // dialog; an entry carrying one with the dialog shut names nothing anyone
+  // reports.
+  useEffect(() => {
+    if (!isOpen) return;
+    const named = namedSource(location.state);
+    if (named === undefined) return;
+    anchorSourceRef.current = named;
+    navigate(`${location.pathname}${location.search}`, {
+      replace: true,
+      state: stateWithoutSource(location.state),
+    });
+  }, [isOpen, location, navigate]);
+
   // An anchor push (DiagnosticErrorScreen's CTA) never runs open(), so
   // pushedRef stays false and `source` state is stale — the arrival's own
-  // location.state is what names the gesture, when it names one at all.
+  // location.state is what names the gesture, when it names one at all, until
+  // the effect above takes it off the entry and into anchorSourceRef.
+  // Both are read, in that order, because the render that first sees the
+  // arrival runs before that effect commits.
   // pushedRef.current true means open() itself set `source`, and that this
   // opening has not since been closed — see the reset above — which takes
   // precedence over whatever the entry happens to carry.
   const effectiveSource = pushedRef.current
     ? source
-    : (sourceFromPushState(location.state) ?? 'url');
+    : (namedSource(location.state) ?? anchorSourceRef.current ?? 'url');
 
   return {
     isOpen,

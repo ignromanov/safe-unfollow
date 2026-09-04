@@ -4,7 +4,7 @@ import { AlertTriangle, Check, Copy, ExternalLink, RefreshCw } from 'lucide-reac
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PrefixedLink } from '@/components/PrefixedLink';
-import { SAME_PATH_PUSH } from '@/hooks/useGuideDialog';
+import { SAME_PATH_PUSH, type GuideSourceState } from '@/hooks/useGuideDialog';
 import { analytics } from '@/lib/analytics';
 import {
   shouldShowReportIssue,
@@ -15,6 +15,14 @@ import {
   isRecoverable,
 } from '@/lib/errors/diagnostic-utils';
 import { guideHrefForError } from '@/lib/errors/wizard-routing';
+
+/**
+ * What the recovery CTA names when it leaves the page it is rendered on. No
+ * `pushedOntoSamePath`: that navigation genuinely did not push onto the same
+ * path, and claiming it did would have `close()` pop the reader back to the
+ * page they came from instead of shutting the dialog.
+ */
+const ERROR_SOURCE_STATE: GuideSourceState = { source: 'error' };
 
 export interface DiagnosticErrorScreenProps {
   /** Error code for direct error display */
@@ -168,18 +176,24 @@ export function DiagnosticErrorScreen({
           role="group"
           aria-label={t('diagnostic.actionsLabel')}
         >
-          {/* The mark applies only where following the link stays on this page.
-              On /upload it does, and the push is invisible: two entries, same
-              path, the second differing only by a query, so nothing downstream
-              can see it happened and useGuideDialog needs telling before it pops
-              on close. ResultsPage renders this same screen, where the link
-              leaves /results and a pop would undo the navigation the reader
-              asked for — PrefixedLink decides which of the two this is, because
-              it is the half that builds the href. */}
+          {/* Two states, because two facts. The gesture is the same from both
+              render sites and is named on both props; the same-path MARK is
+              not, and applies only where following the link stays on this
+              page. On /upload it does, and the push is invisible: two entries,
+              same path, the second differing only by a query, so nothing
+              downstream can see it happened and useGuideDialog needs telling
+              before it pops on close. ResultsPage renders this same screen,
+              where the link leaves /results and a pop would undo the
+              navigation the reader asked for — so the cross-path state
+              deliberately carries no mark, only the name. PrefixedLink decides
+              which of the two this is, because it is the half that builds the
+              href; before it was given both, the /results half of this one
+              button was counted as a plain URL visit. */}
           {onOpenWizard && (
             <PrefixedLink
               to={guideHref}
               samePathState={{ ...SAME_PATH_PUSH, source: 'error' }}
+              state={ERROR_SOURCE_STATE}
               onClick={handleOpenWizard}
               className={recoverable ? PRIMARY_ACTION_CLASS : SECONDARY_ACTION_CLASS(colors)}
             >

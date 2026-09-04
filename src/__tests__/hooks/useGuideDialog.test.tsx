@@ -1,6 +1,6 @@
 import type { ComponentProps } from 'react';
 import { describe, expect, it } from 'vitest';
-import { act, render, screen } from '@testing-library/react';
+import { act, cleanup, render, screen } from '@testing-library/react';
 import { MemoryRouter, useLocation, useNavigate, useNavigationType } from 'react-router-dom';
 
 import { SAME_PATH_PUSH, useGuideDialog } from '@/hooks/useGuideDialog';
@@ -12,6 +12,8 @@ let guide: Guide;
 let goBack: () => void;
 /** What an anchor does — a push carrying arbitrary router state, no handler of ours involved. */
 let pushLikeAnchor: (search: string, state: unknown) => void;
+/** The same, for an anchor whose href leaves the path it is rendered on. */
+let pushLikeAnchorTo: (to: string, state: unknown) => void;
 
 function Probe() {
   guide = useGuideDialog();
@@ -20,11 +22,16 @@ function Probe() {
   const navigate = useNavigate();
   goBack = () => navigate(-1);
   pushLikeAnchor = (search, state) => navigate(`${location.pathname}${search}`, { state });
+  pushLikeAnchorTo = (to, state) => navigate(to, { state });
 
   return (
     <div>
       <span data-testid="url">{`${location.pathname}${location.search}`}</span>
       <span data-testid="nav">{navigationType}</span>
+      {/* What the entry the reader is standing on carries. `history.state`
+          survives a full reload, so this is also what the NEXT page life on
+          this entry would read back. */}
+      <span data-testid="state">{JSON.stringify(location.state ?? null)}</span>
     </div>
   );
 }
@@ -49,6 +56,8 @@ function at(entries: InitialEntries[number] | InitialEntries) {
   return {
     url: () => screen.getByTestId('url').textContent,
     nav: () => screen.getByTestId('nav').textContent,
+    /** The entry's own state, as the next page life on it would read it back. */
+    entryState: () => JSON.parse(screen.getByTestId('state').textContent ?? 'null') as unknown,
   };
 }
 
@@ -317,6 +326,103 @@ describe('useGuideDialog', () => {
       act(() => guide.open('accordion'));
 
       expect(guide.source).toBe('accordion');
+    });
+  });
+
+  describe('the gesture an entry names is consumed, not left on it', () => {
+    // `history.state` survives a full reload — this hook's own docstring says
+    // so, as its reason for keeping open()'s source out of router state. The
+    // anchor channel has no such option: an anchor runs no handler of ours, so
+    // the entry is the only place its gesture can be written. Left there, an
+    // F5 (or a session restore, or a back/forward across a document load)
+    // would report the gesture again with nobody having clicked anything —
+    // making 'error' count arrivals on an entry while 'accordion', 'zone' and
+    // 'url' count gestures. A systematic bias in one arm of a four-arm
+    // breakdown is worse than a missing arm, because no column shows it.
+
+    it('takes the gesture off the entry and still reports it', () => {
+      // Both halves matter and they pull against each other: GuideDialog is
+      // lazy, so on the first opening of a session it mounts AFTER this
+      // consume lands. Reading the entry alone would leave it reading 'url'
+      // for the very click the channel exists to name.
+      const page = at('/upload?utm_source=x');
+
+      act(() => pushLikeAnchor('?step=6', { ...SAME_PATH_PUSH, source: 'error' }));
+
+      expect(guide.source).toBe('error');
+      expect(page.entryState()).toEqual({ pushedOntoSamePath: true });
+    });
+
+    it('reports url on the next page life, from the entry the last one left behind', () => {
+      // The reload, in the only form a router with its own in-memory history
+      // can state it: run one page life, take the entry exactly as it was
+      // left, and start a second life standing on it. That IS the reload —
+      // `createBrowserHistory` reads `window.history.state` back on load, so
+      // the second life sees precisely this.
+      const first = at('/upload?utm_source=x');
+      act(() => pushLikeAnchor('?step=6', { ...SAME_PATH_PUSH, source: 'error' }));
+      const survives = first.entryState();
+
+      cleanup();
+      at({ pathname: '/upload', search: '?step=6', state: survives });
+
+      expect(guide).toMatchObject({ isOpen: true, step: 6, source: 'url' });
+    });
+
+    it('leaves the same-path mark on the entry, so close() still pops', () => {
+      // The consume rewrites the entry, and `close()` reads that same entry to
+      // decide pop-vs-replace. Dropping the mark along with the gesture would
+      // trade a double-counted event for a dialog that closes by leaving two
+      // identical-looking /upload entries behind.
+      const page = at('/upload?utm_source=x');
+      act(() => pushLikeAnchor('?step=6', { ...SAME_PATH_PUSH, source: 'error' }));
+
+      act(() => guide.close());
+
+      expect(page.url()).toBe('/upload?utm_source=x');
+      expect(page.nav()).toBe('POP');
+    });
+
+    it('replaces the entry rather than adding one, so one Back still reaches the page below', () => {
+      // One replace per opening, not one per render: the consume removes the
+      // very thing it tests for, so the next run finds nothing. If it pushed,
+      // or ran twice, the reader's Back would land on an entry they never
+      // asked for — and a re-run that pushed would not terminate at all.
+      const page = at('/upload?utm_source=x');
+      act(() => pushLikeAnchor('?step=6', { ...SAME_PATH_PUSH, source: 'error' }));
+
+      act(() => goBack());
+
+      expect(page.url()).toBe('/upload?utm_source=x');
+      expect(guide.isOpen).toBe(false);
+    });
+
+    it('names the gesture of a cross-path arrival, which carries no same-path mark', () => {
+      // The /results half of DiagnosticErrorScreen: the same component, the
+      // same button, but the link leaves the page it is rendered on, so it
+      // sends the gesture WITHOUT the mark. Reading the gesture used to be
+      // gated on the mark, which put this arrival in the 'url' bucket
+      // alongside the docs and FAQ links 'error' exists to be told apart from.
+      const page = at('/results');
+
+      act(() => pushLikeAnchorTo('/upload?step=6', { source: 'error' }));
+
+      expect(guide).toMatchObject({ isOpen: true, step: 6, source: 'error' });
+      expect(page.entryState()).toBeNull();
+    });
+
+    it('still refuses to pop a cross-path arrival, gesture or no gesture', () => {
+      // The other half of the decoupling, and the reason the two facts may not
+      // be welded back together: nothing pushed this entry onto /upload, so
+      // popping would undo the navigation the reader asked for and drop them
+      // back on the failed results page.
+      const page = at('/results');
+      act(() => pushLikeAnchorTo('/upload?step=6', { source: 'error' }));
+
+      act(() => guide.close());
+
+      expect(page.url()).toBe('/upload');
+      expect(page.nav()).toBe('REPLACE');
     });
   });
 });

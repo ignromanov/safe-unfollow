@@ -384,6 +384,20 @@ describe('GuideDialog', () => {
 
       expect(analytics.guideOpen).toHaveBeenCalledTimes(1);
     });
+
+    it('does not re-emit when the source changes within the same opening', () => {
+      // `source` is in the same dependency array, and useGuideDialog rewrites
+      // the history entry mid-opening to consume the gesture an anchor named —
+      // one navigation, `open` unchanged. Whatever that does to `source`, the
+      // edge gate has to ignore it: an event that fired twice for one opening
+      // would over-count the exact arm the consume exists to keep honest.
+      const { rerender } = open({ source: 'error', step: 6 });
+      expect(analytics.guideOpen).toHaveBeenCalledExactlyOnceWith('error', 6);
+
+      rerender(<GuideDialog open step={6} source="url" onGoToStep={vi.fn()} onClose={vi.fn()} />);
+
+      expect(analytics.guideOpen).toHaveBeenCalledExactlyOnceWith('error', 6);
+    });
   });
 
   describe('guide_section_view', () => {
