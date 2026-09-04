@@ -305,7 +305,7 @@ describe('Analytics', () => {
         expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.CLEAR_DATA, undefined);
       });
 
-      // wizard_step_view is batched — see stats/impression-batching.test.ts.
+      // guide_section_view is batched — see stats/impression-batching.test.ts.
 
       // The switcher reloads the page to fetch the new locale's SSG HTML, and
       // window.umami.track() sends without keepalive — so this event used to
@@ -639,6 +639,13 @@ describe('Analytics', () => {
       expect(events['RESULTS_SCROLL_DEPTH']).toBeUndefined();
       expect(events['WIZARD_BACK_CLICK']).toBeUndefined();
       expect(events['WIZARD_CANCEL']).toBeUndefined();
+      // Removed by this series' PR-4: renamed, not just retired. Reintroducing
+      // either name is exactly the silent discontinuity the rename exists to
+      // prevent — GUIDE_ENTRY_VIEW had no replacement key at all (its screen
+      // dissolved), and WIZARD_STEP_VIEW's population moved to
+      // GUIDE_SECTION_VIEW under a new name for the same reason.
+      expect(events['GUIDE_ENTRY_VIEW']).toBeUndefined();
+      expect(events['WIZARD_STEP_VIEW']).toBeUndefined();
     });
   });
 

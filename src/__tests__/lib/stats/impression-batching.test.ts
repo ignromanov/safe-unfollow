@@ -204,10 +204,13 @@ describe('promo impression batching', () => {
       expect(trackNavigating).not.toHaveBeenCalled();
     });
 
-    // GH#123 removed the 3%/5% gates from these four. A batched flush is one
-    // request whatever it carries, so the volume argument that justified the
-    // gates does not apply on this transport — and all four are read as counts,
-    // which sampling harms rather than helps. The worst roll must still report.
+    // Three of these (filterToggle, searchPerform, guideSectionView's
+    // wizard_step_view lineage) had a GH#123 gate removed; guideOpen is new
+    // to this series and was unsampled from birth (R8) rather than having one
+    // removed. A batched flush is one request whatever it carries, so the
+    // volume argument that justified a gate does not apply on this transport
+    // for any of the four — and all four are read as counts, which sampling
+    // harms rather than helps. The worst roll must still report.
     it('reports the four batched events on any roll — nothing samples them', () => {
       const random = vi.spyOn(Math, 'random').mockReturnValue(0.99);
 

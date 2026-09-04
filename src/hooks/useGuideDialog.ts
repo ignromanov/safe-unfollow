@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, type Location } from 'react-router-dom';
 
 import { GUIDE_STEPS } from '@/config/wizard-steps';
@@ -94,8 +94,16 @@ export function useGuideDialog(): GuideDialogState {
   const [source, setSource] = useState<GuideSource>('url');
 
   // Whether our own open() pushed the entry the dialog is standing on. A ref,
-  // not state: nothing renders from it, and it must survive the navigation
-  // that follows the write.
+  // not state: writing it must never itself trigger a re-render, and it has
+  // to survive the navigation that follows the write. Read during render
+  // (below, for `effectiveSource`) — but only ever WRITTEN from event
+  // handlers (open(), close()) and the effect further down, never from render
+  // itself. That split matters under `v7_startTransition` (main.tsx runs
+  // every navigation inside one): a render can be computed and then
+  // discarded without committing, and a plain read discarded along with it
+  // costs nothing, but a WRITE made during such a render would persist even
+  // though the render never became visible — the same class of window
+  // close()'s own comment below names for the double-pop it used to allow.
   const pushedRef = useRef(false);
 
   // The entry a pop has already been issued from. The entry itself, not a
@@ -214,20 +222,30 @@ export function useGuideDialog(): GuideDialogState {
   // (reproduced and fixed in this branch), not a hypothetical one, because it
   // fails to a plausible value rather than a broken one.
   //
-  // Reset on the wasOpenRef.current -> !isOpen TRANSITION, not on plain
-  // `!isOpen` — open()'s own push does not land in the same render as its
-  // `setSource`/`pushedRef.current = true`: `setSource` can commit one render
-  // ahead of the router's own location update, and that intermediate render
-  // still has the OLD (closed) `isOpen`. A bare `if (!isOpen)` fired on that
-  // intermediate render too, undoing the flag `open()` had just set moments
-  // earlier — for `source` and, worse, for close()'s pop-vs-replace decision,
-  // which reads the same ref. Gating on "was open, and now is not" ignores
-  // that render, because it was never open to begin with: `wasOpenRef` is
-  // still `false` there, so `false && true` does not fire.
-  if (wasOpenRef.current && !isOpen) {
-    pushedRef.current = false;
-  }
-  wasOpenRef.current = isOpen;
+  // An effect, not a plain `if` in the render body: an effect only runs for a
+  // render that actually committed, so a render React computes and then
+  // discards without committing (reachable under `v7_startTransition`, which
+  // main.tsx wraps every navigation in — see close()'s own comment above for
+  // the double-pop this same window used to allow) can never leave this
+  // reset behind for a commit that never happened. A render-time write would
+  // not have that guarantee.
+  //
+  // Gated on the wasOpenRef.current -> !isOpen TRANSITION, not on plain
+  // `!isOpen`: open()'s own `setSource`/`pushedRef.current = true` can commit
+  // one render ahead of the router's own location update, and that
+  // intermediate commit still has the OLD (closed) `isOpen`. Because the
+  // effect's dependency (`isOpen`) has not changed on that commit, React
+  // skips re-running it — the flag `open()` had just set survives. A plain
+  // `if (!isOpen)` (with no transition-gating) does not get this for free:
+  // it would fire on that same intermediate commit and undo the flag moments
+  // after `open()` set it, for `source` and, worse, for close()'s
+  // pop-vs-replace decision, which reads the same ref.
+  useEffect(() => {
+    if (wasOpenRef.current && !isOpen) {
+      pushedRef.current = false;
+    }
+    wasOpenRef.current = isOpen;
+  }, [isOpen]);
 
   // An anchor push (DiagnosticErrorScreen's CTA) never runs open(), so
   // pushedRef stays false and `source` state is stale — the arrival's own

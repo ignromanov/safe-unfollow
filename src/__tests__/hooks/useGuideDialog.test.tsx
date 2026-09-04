@@ -52,8 +52,24 @@ function at(entries: InitialEntries[number] | InitialEntries) {
   };
 }
 
-/** The history the diagnostic error screen's CTA leaves behind on /upload. */
+/**
+ * The history the diagnostic error screen's CTA actually leaves behind on
+ * /upload — `{ ...SAME_PATH_PUSH, source: 'error' }`, since `05cf29c`. Used
+ * for the pop-mechanics tests below, which do not care about `source` but
+ * should still exercise a shape production actually creates.
+ */
 const PUSHED_BY_ERROR_SCREEN: InitialEntries = [
+  '/upload?utm_source=x',
+  { pathname: '/upload', search: '?step=6', state: { ...SAME_PATH_PUSH, source: 'error' } },
+];
+
+/**
+ * A same-path push naming no gesture — hypothetical rather than something
+ * today's one `SAME_PATH_PUSH` caller (DiagnosticErrorScreen) produces, since
+ * it always names `'error'`. Exercises the fallback-to-`'url'` path for
+ * whichever future pusher adds `SAME_PATH_PUSH` without a `source` of its own.
+ */
+const PUSHED_ON_SAME_PATH_NO_SOURCE: InitialEntries = [
   '/upload?utm_source=x',
   { pathname: '/upload', search: '?step=6', state: SAME_PATH_PUSH },
 ];
@@ -171,7 +187,7 @@ describe('useGuideDialog', () => {
     const page = at([
       '/results',
       '/upload?utm_source=x',
-      { pathname: '/upload', search: '?step=6', state: SAME_PATH_PUSH },
+      { pathname: '/upload', search: '?step=6', state: { ...SAME_PATH_PUSH, source: 'error' } },
     ]);
 
     act(() => {
@@ -244,16 +260,13 @@ describe('useGuideDialog', () => {
     // handler of ours runs and `source` state is never set by open(). Only
     // the entry's own state can say this arrival was the error screen's link
     // rather than a plain URL visit.
-    at([
-      '/upload?utm_source=x',
-      { pathname: '/upload', search: '?step=6', state: { ...SAME_PATH_PUSH, source: 'error' } },
-    ]);
+    at(PUSHED_BY_ERROR_SCREEN);
 
     expect(guide).toMatchObject({ isOpen: true, step: 6, source: 'error' });
   });
 
   it('falls back to url when a same-path push names no source', () => {
-    at(PUSHED_BY_ERROR_SCREEN);
+    at(PUSHED_ON_SAME_PATH_NO_SOURCE);
 
     expect(guide.source).toBe('url');
   });

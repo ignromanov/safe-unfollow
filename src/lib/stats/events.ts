@@ -39,10 +39,11 @@ function firstViewInTab(key: string): boolean {
   if (typeof window === 'undefined') return false;
   const storageKey = `analytics_first_in_tab_${key}`;
   // The getter itself throws SecurityError under Safari's "Block all cookies"
-  // and Firefox's "Block cookies and site data", and both callers run inside a
-  // mount effect — an unguarded throw takes the screen down to report a view.
-  // Degrading to "not first view" under-reports instead, which is the same
-  // trade `getStoredUTM` makes for the identical call (utm.ts).
+  // and Firefox's "Block cookies and site data", and the one caller
+  // (guideSectionView) runs inside GuideDialog's `[open, activeStep]` effect
+  // — an unguarded throw takes the screen down to report a view. Degrading to
+  // "not first view" under-reports instead, which is the same trade
+  // `getStoredUTM` makes for the identical call (utm.ts).
   try {
     if (sessionStorage.getItem(storageKey)) return false;
     sessionStorage.setItem(storageKey, '1');
