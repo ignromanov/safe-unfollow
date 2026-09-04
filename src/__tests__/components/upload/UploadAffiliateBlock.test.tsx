@@ -48,6 +48,28 @@ describe('UploadAffiliateBlock', () => {
     expect(screen.getByRole('link')).toHaveAttribute('href', 'https://get.affiliatescn.net/SHBvA');
   });
 
+  /**
+   * Google reads `data-nosnippet` on `span`, `div` and `section` only — verified
+   * against its robots-meta documentation, not assumed. The block is an `<aside>`,
+   * which is the right semantics for it and is not on that list, so the attribute
+   * goes on a wrapper inside and the assertion is that the link and its creative are
+   * *within* the marked element rather than merely near it.
+   *
+   * What this buys: the Ad chip, the pitch line and the disclosure stop being
+   * candidates for the `/upload` snippet, so the page cannot be summarised in search
+   * by the advertisement sitting in it. The image itself is refused separately, by
+   * `X-Robots-Tag` in `vercel.json` — see `affiliate-creative.test.ts`.
+   */
+  it('marks the whole placement as advertising a snippet must not quote', () => {
+    const { container } = render(<UploadAffiliateBlock />);
+
+    const marked = container.querySelector('div[data-nosnippet]');
+    expect(marked, 'no data-nosnippet wrapper').not.toBeNull();
+    expect(marked?.contains(screen.getByRole('link'))).toBe(true);
+    expect(marked?.contains(screen.getByText('affiliate.adLabel'))).toBe(true);
+    expect(marked?.contains(container.querySelector('img'))).toBe(true);
+  });
+
   it('shows the affiliate disclosure next to the link, not buried', () => {
     render(<UploadAffiliateBlock />);
 

@@ -43,8 +43,19 @@
     <meta property="og:description" content="{{ head_description | escape }}">
     <meta property="og:url" content="{{ site.url }}{{ canonical_path }}">
     <meta property="og:type" content="website">
-    
-    <meta name="twitter:card" content="summary">
+    {%- comment -%}
+      The card image is the app's, named once in index.html and repeated here because
+      Jekyll cannot read it. Without these four tags a scraper falls back to the first
+      image in the body, so /docs/user-guide represented itself with a screenshot of the
+      upload step; every other page here had no image to fall back to at all. Pinned by
+      src/__tests__/docs/serp-presentation.test.ts, which reads index.html for the path.
+    {%- endcomment -%}
+    <meta property="og:image" content="{{ site.url }}/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="{{ site.url }}/og-image.png">
     <meta name="twitter:title" content="{{ head_title | escape }}">
     <meta name="twitter:description" content="{{ head_description | escape }}">
 

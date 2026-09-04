@@ -61,6 +61,36 @@ const variants: ReadonlyArray<readonly [string, AffiliateCreativeVariant]> = [
   ...(creative ? ([['base', creative.base]] as const) : []),
 ];
 
+/**
+ * The creative is an advertisement we host, not a picture of our product, and it is
+ * cut to 1200x628 — the OG card size. On `/upload` it is the only `<img>` in the
+ * prerendered body, so anything that ranks images by size, or falls back to the body
+ * when it ignores `og:image`, picks a VPN advert as the face of the page where a
+ * reader is about to hand over an Instagram export.
+ *
+ * `robots.txt` says `Allow: /`, which is what makes the header the right instrument:
+ * a `Disallow` would stop the crawl and therefore stop Google ever reading a
+ * `noindex`. Crawl it, and refuse the index.
+ */
+describe('the affiliate creative is hosted, not published', () => {
+  it('serves /affiliate/* with X-Robots-Tag: noindex', () => {
+    const config = JSON.parse(readFileSync(resolve(process.cwd(), 'vercel.json'), 'utf-8')) as {
+      headers: { source: string; headers: { key: string; value: string }[] }[];
+    };
+
+    const rule = config.headers.find(entry => entry.source === '/affiliate/(.*)');
+    expect(rule, 'vercel.json declares no header rule for /affiliate/(.*)').toBeDefined();
+
+    const tag = rule?.headers.find(header => header.key === 'X-Robots-Tag');
+    expect(tag?.value, 'the creative is indexable').toContain('noindex');
+  });
+
+  it('leaves robots.txt crawling it, so the header can be read at all', () => {
+    const robots = readFileSync(resolve(process.cwd(), 'public', 'robots.txt'), 'utf-8');
+    expect(robots).not.toMatch(/^Disallow:\s*\/affiliate/m);
+  });
+});
+
 describe('affiliate creative', () => {
   it('is declared for the main offer', () => {
     expect(creative).toBeDefined();

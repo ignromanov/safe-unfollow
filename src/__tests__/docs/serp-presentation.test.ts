@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
@@ -20,6 +20,18 @@ const DOCS = markdownFiles(DOCS_ROOT).map(path => ({
 
 const CONFIG = readFileSync(join(DOCS_ROOT, '_config.yml'), 'utf-8');
 const LAYOUT = readFileSync(join(DOCS_ROOT, '_layouts', 'default.html'), 'utf-8');
+
+/**
+ * The app half of the site, read only for the one fact this file must not copy:
+ * which image the property uses as its social card. `index.html` decides it for
+ * every prerendered route; the docs layout has to agree rather than restate.
+ */
+const APP_HTML = readFileSync(join(process.cwd(), 'index.html'), 'utf-8');
+
+/** The card path `index.html` declares, e.g. `/og-image.png`. */
+const APP_CARD = /<meta property="og:image" content="https:\/\/safeunfollow\.app(\/[^"]+)"/.exec(
+  APP_HTML,
+)?.[1];
 
 /**
  * What Google renders of a title. The pixel budget is about 580px, which is
@@ -190,6 +202,39 @@ describe('every published page fits the search result it appears in', () => {
     for (const doc of DOCS) {
       expect(rawField(doc.text, 'title_suffix'), `${doc.name} sets its own title_suffix`).toBe('');
     }
+  });
+
+  /**
+   * Measured on production 2026-09-03: all thirteen published pages served **no**
+   * `og:image`, so `twitter:card` had to stay at the small `summary` square. It had
+   * never been otherwise — this layout has hand-written og:title/description/url/type
+   * since `4ad0229b` created it, and `jekyll-seo-tag` emits an image only from
+   * `page.image` or `site.image`/`site.logo`, neither of which `_config.yml` sets.
+   *
+   * The failure is not the missing tag, it is what a scraper does instead: with no
+   * `og:image` it falls back to the first image in the body, and `/docs/user-guide`
+   * therefore represented itself with `assets/upload-zip.png`. A page cannot choose
+   * that fallback and cannot see it.
+   *
+   * `APP_CARD` is read from `index.html` rather than written here, so the two halves
+   * of the property cannot drift apart the way this file's own `FROZEN` list was
+   * designed not to — `CLAUDE.md` -> "No copied facts".
+   */
+  it('gives every published page the same social card the app uses', () => {
+    expect(APP_CARD, 'index.html declares no absolute og:image').toBeTruthy();
+    expect(existsSync(join(process.cwd(), 'public', APP_CARD as string))).toBe(true);
+    expect(LAYOUT).toContain(`<meta property="og:image" content="{{ site.url }}${APP_CARD}">`);
+    expect(LAYOUT).toContain(`<meta name="twitter:image" content="{{ site.url }}${APP_CARD}">`);
+  });
+
+  /**
+   * `summary` renders a small square thumbnail and `summary_large_image` the 1200x630
+   * card the image is actually cut for. The layout hardcoded the former while declaring
+   * no image at all, which was at least consistent; declaring a 1200x630 card and
+   * leaving the small type is the one combination that is worse than either.
+   */
+  it('asks for the card size the image is cut for', () => {
+    expect(LAYOUT).toContain('<meta name="twitter:card" content="summary_large_image">');
   });
 
   for (const doc of DOCS) {
