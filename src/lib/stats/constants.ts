@@ -53,12 +53,15 @@ export const AnalyticsEvents = {
   SAMPLE_DATA_LOAD: 'sample_data_load',
   LANGUAGE_CHANGE: 'language_change',
 
-  // Guide entry screen (replaces wizard step 1) — see analytics.guideEntryView
-  // for why this is a separate event name rather than a `variant` field.
-  GUIDE_ENTRY_VIEW: 'guide_entry_view',
+  // The gesture that opened the guide dialog. See analytics.guideOpen for the
+  // payload contract and why it is not a success metric.
+  GUIDE_OPEN: 'guide_open',
 
-  // Wizard (V10: 5% sampling, removed back_click and cancel)
-  WIZARD_STEP_VIEW: 'wizard_step_view',
+  // A section of the guide entering the viewport inside one scroll. Renamed
+  // from WIZARD_STEP_VIEW (GH#102 PR-3 collapsed the eight wizard routes into
+  // one dialog) — see analytics.guideSectionView for why a new name rather
+  // than a `variant` field.
+  GUIDE_SECTION_VIEW: 'guide_section_view',
 
   // Funnel / Page Views (V10: first-in-session UTM attribution only)
   PAGE_VIEW: 'page_view',

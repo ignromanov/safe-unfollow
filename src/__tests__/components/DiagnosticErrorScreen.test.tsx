@@ -277,13 +277,20 @@ describe('DiagnosticErrorScreen', () => {
 
       fireEvent.click(screen.getByRole('link', { name: uploadEN.diagnostic.reExportJson }));
 
-      expect(entryState()).toBe(JSON.stringify(SAME_PATH_PUSH));
+      expect(entryState()).toBe(JSON.stringify({ ...SAME_PATH_PUSH, source: 'error' }));
     });
 
-    it('leaves it unmarked when the same screen renders on another route', () => {
+    it('leaves it unmarked when the same screen renders on another route, but still names the gesture', () => {
       // ResultsPage renders this screen too, and there the link is a real
       // navigation away. Popping it on close would undo the move the reader
       // asked for and drop them back on the failed results page.
+      //
+      // The gesture is named all the same, and that is the whole distinction:
+      // the mark is about Back behaviour, the name is about which of the four
+      // buckets the opening lands in. Sending only the mark left this half of
+      // the surface — the same component, the same button, the same recovery
+      // intent — counted as a plain URL visit, mixed in with the docs and FAQ
+      // arrivals that `'error'` exists to be told apart from.
       renderWithRouter(
         <>
           <DiagnosticErrorScreen errorCode={code} onOpenWizard={mockOnOpenWizard} />
@@ -294,6 +301,7 @@ describe('DiagnosticErrorScreen', () => {
 
       fireEvent.click(screen.getByRole('link', { name: uploadEN.diagnostic.reExportJson }));
 
+      expect(entryState()).toBe(JSON.stringify({ source: 'error' }));
       expect(entryState()).not.toContain('pushedOntoSamePath');
     });
 
@@ -313,7 +321,7 @@ describe('DiagnosticErrorScreen', () => {
 
       fireEvent.click(screen.getByRole('link', { name: uploadEN.diagnostic.reExportJson }));
 
-      expect(entryState()).toBe(JSON.stringify(SAME_PATH_PUSH));
+      expect(entryState()).toBe(JSON.stringify({ ...SAME_PATH_PUSH, source: 'error' }));
     });
   });
 

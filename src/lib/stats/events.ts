@@ -5,9 +5,9 @@
 import { AnalyticsEvents, parseDurationBucket } from './constants';
 import type { FilterAction, LinkType, ParseOutcome } from './constants';
 import { trackEvent } from './core';
-import { recordCTA } from './cta-capture';
 import { enqueueEvent, flushEvents, trackNavigating } from './queue';
 import { getStoredUTM, getEntryCTA } from './utm';
+import type { GuideSource } from '@/hooks/useGuideDialog';
 import type { LabelResolutionMode, RelationshipFormat, RelationshipSkew } from '@/core/types';
 import type { LicenseFailureReason } from '@/lib/export/license';
 
@@ -21,28 +21,29 @@ import type { LicenseFailureReason } from '@/lib/export/license';
  * property called `first_view` would read as "first view this session" —
  * false against the only notion of session the dashboard has.
  *
- * Both ends of the entry→instruction pair carry it. Without it the pair
- * inherits wizard_step_view's back-navigation non-monotonicity — 1→2→1→2 counts
- * twice on both ends and the ratio stops being a funnel. Mechanism follows the
+ * `guideSectionView` is the caller, keyed per section per tab. The guide is
+ * now one scroll rather than eight routes, so this is what tells "scrolled
+ * past" from "read": scrolling up and back down re-enters a section and would
+ * otherwise count it as read a second time. Mechanism follows the
  * `analytics_first_pv` precedent below (`pageView`).
  *
- * Both callers are unsampled since GH#123, so nothing currently stands between
- * this call and the enqueue. If a gate is ever reintroduced it goes *after*
- * this call, never before: the flag describes the reader's history ("has this
- * screen been seen before"), not whether the view got reported. Writing the
- * marker behind a gate would make `first_view_in_tab: true` mean "the first
- * view that happened to be sampled" — expected true-count per session becomes
- * `1 - (1-rate)^n`, which is n-dependent, and the entry→step-2 ratio this flag
- * exists to unbias stays skewed by back-navigation.
+ * Unsampled since GH#123, so nothing currently stands between this call and
+ * the enqueue. If a gate is ever reintroduced it goes *after* this call, never
+ * before: the flag describes the reader's history ("has this section been
+ * seen before"), not whether the view got reported. Writing the marker behind
+ * a gate would make `first_view_in_tab: true` mean "the first view that
+ * happened to be sampled" — expected true-count per session becomes
+ * `1 - (1-rate)^n`, which is n-dependent.
  */
 function firstViewInTab(key: string): boolean {
   if (typeof window === 'undefined') return false;
   const storageKey = `analytics_first_in_tab_${key}`;
   // The getter itself throws SecurityError under Safari's "Block all cookies"
-  // and Firefox's "Block cookies and site data", and both callers run inside a
-  // mount effect — an unguarded throw takes the screen down to report a view.
-  // Degrading to "not first view" under-reports instead, which is the same
-  // trade `getStoredUTM` makes for the identical call (utm.ts).
+  // and Firefox's "Block cookies and site data", and the one caller
+  // (guideSectionView) runs inside GuideDialog's `[open, activeStep]` effect
+  // — an unguarded throw takes the screen down to report a view. Degrading to
+  // "not first view" under-reports instead, which is the same trade
+  // `getStoredUTM` makes for the identical call (utm.ts).
   try {
     if (sessionStorage.getItem(storageKey)) return false;
     sessionStorage.setItem(storageKey, '1');
@@ -233,26 +234,6 @@ export const analytics = {
     });
   },
 
-  // Hero CTAs (sets entry CTA for conversion attribution)
-  //
-  // Batched, unlike the new-tab clicks above: once hydrated these are PrefixedLink,
-  // so the click is preventDefault + pushState and the document never unloads. The
-  // route change that follows drains the queue on the next tick, so the event
-  // leaves as promptly as it did on the immediate path — it just shares a
-  // request with the rest of the landing page's set.
-  //
-  // Before hydration none of that holds — the click is a real navigation and no
-  // handler runs at all, which is why the recorder is a capture-phase listener in
-  // index.html rather than an onClick. These four delegate to the same `recordCTA`
-  // that listener reaches, so the slug→event mapping has one definition (GH#99).
-  heroCTAGuide: () => recordCTA('guide'),
-
-  heroCTASample: () => recordCTA('sample'),
-
-  heroCTAUploadDirect: () => recordCTA('upload_direct'),
-
-  heroCTAContinue: () => recordCTA('continue'),
-
   // Navigation
   themeToggle: (mode: 'dark' | 'light' | 'system') => {
     enqueueEvent(AnalyticsEvents.THEME_TOGGLE, { mode });
@@ -269,29 +250,60 @@ export const analytics = {
   },
 
   /**
-   * The single-action entry screen that replaced wizard step 1.
+   * The gesture that opened the guide dialog, plus the section it landed on
+   * (`step_id`, omitted when none was named). Fires exactly once per opening —
+   * from `GuideDialog`, on the transition from closed to open — never from
+   * repeated section changes within one opening.
    *
-   * A NEW NAME rather than a `variant` on wizard_step_view: a variant field
-   * would leave step_id:1 meaning two different screens depending on the date,
-   * and every historical query silently wrong.
+   * `source` has to be a payload key rather than something derived after the
+   * fact: locale is recoverable from `website_event.url_path` today
+   * (`/id/wizard/step/6`), but every guide view now sits on `url_path =
+   * '/upload'`, and nothing in that path says which of the four gestures
+   * opened it. `url_query` still carries `?step=N` as a cross-check, but not
+   * the gesture itself.
    *
-   * Unsampled since GH#123, as is wizardStepView. At 49 observed rows in 30
-   * days under a 5% gate this event carried ~14% relative noise before any
-   * other error, and it is read as a count rather than as a ratio.
+   * Unsampled, like its neighbour below, since GH#123.
    *
-   * NOT comparable across its own release: the old pair measured
-   * "slide 1 → slide 2", this one measures "entry → first instruction".
-   * Different denominators by construction.
+   * ⛔ NOT a success metric. The guide used to be a full screen between the
+   * reader and the drop zone; it is now one click away from a block that
+   * already renders on `/upload`. This count will be a fraction of the old
+   * `guide_entry_view`, and substituting one for the other is a LARGER
+   * discontinuity than the wizard_step_view → guide_section_view rename
+   * below — never report it as "guide opens grew".
    */
-  guideEntryView: () => {
-    const isFirstView = firstViewInTab('guide_entry');
-    enqueueEvent(AnalyticsEvents.GUIDE_ENTRY_VIEW, { first_view_in_tab: isFirstView });
+  guideOpen: (source: GuideSource, step?: number) => {
+    enqueueEvent(AnalyticsEvents.GUIDE_OPEN, {
+      source,
+      ...(step === undefined ? {} : { step_id: step }),
+    });
   },
 
-  // Wizard events — unsampled since GH#123.
-  wizardStepView: (stepId: number) => {
-    const isFirstView = firstViewInTab(`wizard_step_${stepId}`);
-    enqueueEvent(AnalyticsEvents.WIZARD_STEP_VIEW, {
+  /**
+   * A section of the guide entering the viewport, inside the one scroll the
+   * dialog now is.
+   *
+   * A NEW NAME rather than a `variant` on the old wizard_step_view: a variant
+   * field would leave step_id:1 meaning two different screens depending on
+   * the date, and every historical query silently wrong. Same precedent
+   * guide_entry_view was chosen under, when GuideEntry replaced wizard step 1
+   * — that event is deleted (GuideEntry dissolved when the wizard became a
+   * dialog) and nothing replaces it; guide_open above stands where it stood,
+   * counting a different population.
+   *
+   * `firstViewInTab`'s key changed with the rename, from `wizard_step_` to
+   * `guide_section_`: the old key is already written into a returning
+   * reader's `sessionStorage`, and reusing it would make their first section
+   * view in a fresh tab report `false`.
+   *
+   * NOT comparable across the rename: the old event measured navigation
+   * between eight routes, where 1→2→1→2 was a real detour that back
+   * navigation could reintroduce. Under one scroll there is no back
+   * navigation — scrolling up and back down simply re-enters a section, which
+   * `first_view_in_tab` still tells from "read for the first time".
+   */
+  guideSectionView: (stepId: number) => {
+    const isFirstView = firstViewInTab(`guide_section_${stepId}`);
+    enqueueEvent(AnalyticsEvents.GUIDE_SECTION_VIEW, {
       step_id: stepId,
       first_view_in_tab: isFirstView,
     });

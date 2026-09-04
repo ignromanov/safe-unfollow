@@ -17,6 +17,7 @@ import {
   setEntryCTA,
 } from '@/lib/analytics';
 import { flushEvents } from '@/lib/stats/queue';
+import { recordCTA } from '@/lib/stats/cta-capture';
 
 describe('Analytics', () => {
   let localStorageMock: Record<string, string> = {};
@@ -289,10 +290,10 @@ describe('Analytics', () => {
       // stats/impression-batching.test.ts. What belongs here is the attribution
       // side effect, which is independent of how the event travels.
       it('sets the entry CTA on the first hero click and never overwrites it', () => {
-        analytics.heroCTAGuide();
+        recordCTA('guide');
         expect(sessionStorageMock['analytics_entry_cta']).toBe('guide');
 
-        analytics.heroCTASample();
+        recordCTA('sample');
         expect(sessionStorageMock['analytics_entry_cta']).toBe('guide');
       });
 
@@ -304,7 +305,7 @@ describe('Analytics', () => {
         expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.CLEAR_DATA, undefined);
       });
 
-      // wizard_step_view is batched — see stats/impression-batching.test.ts.
+      // guide_section_view is batched — see stats/impression-batching.test.ts.
 
       // The switcher reloads the page to fetch the new locale's SSG HTML, and
       // window.umami.track() sends without keepalive — so this event used to
@@ -613,7 +614,8 @@ describe('Analytics', () => {
       expect(AnalyticsEvents.HERO_CTA_CONTINUE).toBe('hero_cta_continue');
       expect(AnalyticsEvents.THEME_TOGGLE).toBe('theme_toggle');
       expect(AnalyticsEvents.CLEAR_DATA).toBe('clear_data');
-      expect(AnalyticsEvents.WIZARD_STEP_VIEW).toBe('wizard_step_view');
+      expect(AnalyticsEvents.GUIDE_SECTION_VIEW).toBe('guide_section_view');
+      expect(AnalyticsEvents.GUIDE_OPEN).toBe('guide_open');
       expect(AnalyticsEvents.ERROR_BOUNDARY).toBe('error_boundary');
       expect(AnalyticsEvents.ROUTE_ERROR).toBe('route_error');
       expect(AnalyticsEvents.WEB_VITAL).toBe('web_vital');
@@ -637,6 +639,13 @@ describe('Analytics', () => {
       expect(events['RESULTS_SCROLL_DEPTH']).toBeUndefined();
       expect(events['WIZARD_BACK_CLICK']).toBeUndefined();
       expect(events['WIZARD_CANCEL']).toBeUndefined();
+      // Removed by this series' PR-4: renamed, not just retired. Reintroducing
+      // either name is exactly the silent discontinuity the rename exists to
+      // prevent — GUIDE_ENTRY_VIEW had no replacement key at all (its screen
+      // dissolved), and WIZARD_STEP_VIEW's population moved to
+      // GUIDE_SECTION_VIEW under a new name for the same reason.
+      expect(events['GUIDE_ENTRY_VIEW']).toBeUndefined();
+      expect(events['WIZARD_STEP_VIEW']).toBeUndefined();
     });
   });
 

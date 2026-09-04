@@ -9,7 +9,12 @@ import { renderWithRouter as render } from '@/__tests__/test-utils';
 vi.mock('react-i18next', () => createI18nMock(wizardEN));
 
 vi.mock('@/lib/analytics', () => ({
-  analytics: { linkClick: vi.fn(), calendarReminderClick: vi.fn() },
+  analytics: {
+    linkClick: vi.fn(),
+    calendarReminderClick: vi.fn(),
+    guideOpen: vi.fn(),
+    guideSectionView: vi.fn(),
+  },
 }));
 
 import { GuideDialog } from '@/components/guide/GuideDialog';
@@ -333,5 +338,137 @@ describe('GuideDialog', () => {
       screen.getByRole('button', { name: `Step ${id}` }).querySelector('[data-slot="rail-fill"]');
     expect(fillOf(5)).toHaveClass('bg-primary');
     expect(fillOf(6)).toHaveClass('bg-muted-foreground');
+  });
+
+  describe('guide_open', () => {
+    it('emits on the very first opening, from a lazy mount', () => {
+      // Regression: this component is lazy and mounted only after the first
+      // open (UploadPage's `everOpened` latch), so its very first render
+      // already has `open === true`. A naive `useEffect(fn, [open])` with no
+      // ref would never see a false -> true edge here and would drop it.
+      open({ source: 'zone', step: null });
+
+      expect(analytics.guideOpen).toHaveBeenCalledExactlyOnceWith('zone', undefined);
+    });
+
+    it('carries step_id only when a section was named', () => {
+      open({ source: 'url', step: 3 });
+
+      expect(analytics.guideOpen).toHaveBeenCalledExactlyOnceWith('url', 3);
+    });
+
+    it('emits again when the dialog is reopened in the same tab', () => {
+      const { rerender } = open({ source: 'accordion', step: null });
+      expect(analytics.guideOpen).toHaveBeenCalledTimes(1);
+
+      rerender(
+        <GuideDialog open={false} step={null} source="url" onGoToStep={vi.fn()} onClose={vi.fn()} />
+      );
+      rerender(
+        <GuideDialog open step={null} source="accordion" onGoToStep={vi.fn()} onClose={vi.fn()} />
+      );
+
+      expect(analytics.guideOpen).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not re-emit when the claimed step changes within the same opening', () => {
+      // A rail tap changes `step` without closing the dialog, and `step` sits
+      // in this effect's dependency array alongside `open` — a regression
+      // that dropped the `!wasOpenRef.current` guard would still pass every
+      // other test here (they all use one step per opening) and would only
+      // show up as a silently doubled count in the dashboard.
+      const { rerender } = open({ source: 'url', step: 3 });
+      expect(analytics.guideOpen).toHaveBeenCalledTimes(1);
+
+      rerender(<GuideDialog open step={5} source="url" onGoToStep={vi.fn()} onClose={vi.fn()} />);
+
+      expect(analytics.guideOpen).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not re-emit when the source changes within the same opening', () => {
+      // `source` is in the same dependency array, and useGuideDialog rewrites
+      // the history entry mid-opening to consume the gesture an anchor named —
+      // one navigation, `open` unchanged. Whatever that does to `source`, the
+      // edge gate has to ignore it: an event that fired twice for one opening
+      // would over-count the exact arm the consume exists to keep honest.
+      const { rerender } = open({ source: 'error', step: 6 });
+      expect(analytics.guideOpen).toHaveBeenCalledExactlyOnceWith('error', 6);
+
+      rerender(<GuideDialog open step={6} source="url" onGoToStep={vi.fn()} onClose={vi.fn()} />);
+
+      expect(analytics.guideOpen).toHaveBeenCalledExactlyOnceWith('error', 6);
+    });
+  });
+
+  describe('guide_section_view', () => {
+    it('emits once when the observer first names a section', () => {
+      open();
+
+      reportActiveSection(3);
+
+      expect(analytics.guideSectionView).toHaveBeenCalledExactlyOnceWith(3);
+    });
+
+    it('does not re-emit while the observer keeps reporting the same section', () => {
+      open();
+
+      reportActiveSection(3);
+      reportActiveSection(3);
+
+      expect(analytics.guideSectionView).toHaveBeenCalledExactlyOnceWith(3);
+    });
+
+    it('emits again when the reported section changes', () => {
+      open();
+
+      reportActiveSection(3);
+      reportActiveSection(5);
+
+      expect(analytics.guideSectionView).toHaveBeenNthCalledWith(1, 3);
+      expect(analytics.guideSectionView).toHaveBeenNthCalledWith(2, 5);
+    });
+
+    it('emits again for a section already reported before the dialog closed', () => {
+      // Guards the user-visible behaviour the `if (!open)` reset produces:
+      // reopening and landing back on the same section the reader left
+      // re-emits, rather than staying silent because the ref never forgot it.
+      //
+      // Does NOT isolate that one branch, and that limitation is worth being
+      // explicit about rather than silent: under separate act() calls per
+      // rerender (the shape below, matching two distinct user interactions —
+      // a close click and a later reopen click are two separate commits, not
+      // one), useActiveStep's own close -> null reset already lands as its
+      // own intermediate commit, so `lastReportedStepRef` reaches null via
+      // the unconditional assignment at the bottom of this effect even with
+      // the `if (!open)` branch removed — this test alone would not catch
+      // that removal. A single `act()` batching both rerenders (simulating a
+      // close and reopen with no commit in between) does distinguish them,
+      // but it FAILS even with the branch restored: React's batching means
+      // the intermediate `open: false` commit is never produced at all in
+      // that shape, so no effect — this one or useActiveStep's — ever runs
+      // against it. That sequence is not reachable through real, separate
+      // browser interactions either, so it is not asserted here. What this
+      // test does check is real: the reopened-same-section case must not go
+      // quiet, however many mechanisms currently cooperate to prevent it.
+      const { rerender } = open();
+      reportActiveSection(3);
+      expect(analytics.guideSectionView).toHaveBeenCalledExactlyOnceWith(3);
+
+      rerender(
+        <GuideDialog
+          open={false}
+          step={null}
+          source="accordion"
+          onGoToStep={vi.fn()}
+          onClose={vi.fn()}
+        />
+      );
+      rerender(
+        <GuideDialog open step={null} source="accordion" onGoToStep={vi.fn()} onClose={vi.fn()} />
+      );
+      reportActiveSection(3);
+
+      expect(analytics.guideSectionView).toHaveBeenCalledTimes(2);
+    });
   });
 });
