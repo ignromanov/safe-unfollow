@@ -222,8 +222,8 @@ true: the engine is built and unit-tested against a 1M-account bitset.
 - **Pre-rendered pages**: derived, never written down on this page. `src/routes.tsx` states the
   shape — the static routes, once per supported language — and
   `src/__tests__/docs/architecture-facts.test.ts` computes the number from it. The last audit found
-  this count copied into six documents with four different values, and it halved when the wizard
-  step routes stopped being pages (GH#102)
+  this count copied into six documents with four different values, and it dropped by more than
+  half when the wizard step routes stopped being pages (GH#102)
 - **Path-based routing**: `/es/upload`, `/ar/results`, etc.
 - **Localized meta tags**: Dynamic title/description per language
 - **hreflang tags**: SEO optimization for language variants

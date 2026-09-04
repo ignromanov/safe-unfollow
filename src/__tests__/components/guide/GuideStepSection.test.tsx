@@ -19,9 +19,9 @@ const PLAIN = GUIDE_STEPS.find(step => !step.isWarning)!;
 describe('GuideStepSection', () => {
   it('renders a lazy image, not a video, while off-screen', () => {
     // The poster attribute on a <video> downloads as soon as the element
-    // enters the DOM, regardless of preload="none" — so seven off-screen
-    // <video poster> cost exactly what seven on-screen ones do. Measured over
-    // public/wizard/ steps 2-8: 166 KB of posters alone.
+    // enters the DOM, regardless of preload="none" — so an off-screen
+    // <video poster> costs exactly what an on-screen one does. Measured over
+    // public/wizard/: 187 KB of posters for the eight steps.
     const { container } = render(<GuideStepSection step={PLAIN} isInView={false} />);
 
     expect(container.querySelector('video')).toBeNull();

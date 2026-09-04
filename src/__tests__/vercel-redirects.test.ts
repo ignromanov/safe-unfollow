@@ -9,8 +9,14 @@ import { SUPPORTED_LANGUAGES } from '@/config/languages';
  * The whole SEO value of the wizard route removal (GH#102, PR 3) rests on four
  * hand-written rules in `vercel.json`, and until this file nothing in the
  * repository asserted anything about them: `grep -rn "redirects" src/__tests__`
- * returned nothing. Eighty of the removed addresses are indexed in Google, so a
- * rule that silently stops matching is 80 live 404s with every gate green.
+ * returned nothing. How many of the 90 removed addresses Google still holds is
+ * not derivable from this repository, so no number is claimed here — what is
+ * certain is that a rule which silently stops matching turns every address it
+ * covered into a live 404 with every gate green. (An earlier version of this
+ * note said "eighty of them are indexed", which was both uncheckable and a
+ * collision with a DIFFERENT 80 in `sitemap-no-wizard.test.ts:12` — the 80 step
+ * pages canonicalized away to the 10 base pages, i.e. precisely the set that
+ * does not serve as an indexing target.)
  *
  * Same idiom, and the same reason, as `vercel-csp.test.ts` one file over: this
  * config is enforced only by a deploy, so a defect in it is invisible to

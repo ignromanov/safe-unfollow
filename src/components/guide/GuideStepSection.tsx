@@ -29,7 +29,7 @@ export function GuideStepSection({ step, isInView }: GuideStepSectionProps) {
       aria-labelledby={`${anchorId}-heading`}
       // shrink-0: this is a flex item of the column-flex scroll container in
       // GuideDialog, and `overflow-hidden` below makes its automatic minimum
-      // size resolve to 0 per CSS Flexbox §4.5 — without shrink-0 all seven
+      // size resolve to 0 per CSS Flexbox §4.5 — without shrink-0 the
       // sections absorb negative free space by shrinking and clipping instead
       // of the container overflowing.
       className={`shrink-0 overflow-hidden rounded-3xl border ${

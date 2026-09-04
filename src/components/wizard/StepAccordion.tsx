@@ -15,7 +15,7 @@ interface StepAccordionProps {
 }
 
 /**
- * One disclosure, seven rows. Rows are plain images pointing at each step's
+ * One disclosure, one row per step. Rows are plain images pointing at each step's
  * poster (no `<video>` on this screen — the moving image lives in the guide
  * dialog section the row opens) and stay unmounted until the row is opened, so
  * opening never shifts layout and nothing is reachable before the click.

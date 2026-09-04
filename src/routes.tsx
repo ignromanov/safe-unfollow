@@ -44,7 +44,7 @@ function createPageChildren(): RouteRecord[] {
  * The `*` catch-all is stripped by vite-react-ssg (it skips any path containing
  * ':' or '*'), so the real build emits 10 languages x 7 = 70 prerendered routes.
  *
- * Eight of these used to be `/wizard` and `/wizard/step/1..8`, prerendered per
+ * Nine more used to be `/wizard` and `/wizard/step/1..8`, prerendered per
  * language by an `includedRoutes` hook — 90 of the sitemap's 163 entries, 80 of
  * them canonicalized away to a single page. The guide is a dialog on /upload
  * now (GH#102) and those addresses are permanent redirects in vercel.json. The guide's own

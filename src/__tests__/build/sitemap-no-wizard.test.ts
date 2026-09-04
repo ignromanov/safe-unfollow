@@ -8,7 +8,7 @@ import { SUPPORTED_LANGUAGES } from '@/config/languages';
 /**
  * The one SEO invariant of the route removal (GH#102, PR 3) a unit test can prove.
  *
- * The eight `/wizard` addresses were 90 of the sitemap's 163 `<loc>` entries — 55.2% of
+ * The nine `/wizard` addresses were 90 of the sitemap's 163 `<loc>` entries — 55.2% of
  * everything we asked Google to crawl, and 80 of those 90 were already canonicalized
  * away to `/wizard`, so the crawl budget was being spent on pages that pointed at each
  * other. `vercel.json` now permanently redirects every one of them to `/upload`; a sitemap

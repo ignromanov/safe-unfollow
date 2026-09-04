@@ -106,9 +106,10 @@ export function HowToSection() {
                 link into the guide dialog on /upload — nine links to one
                 screen, on the page that already shows the same eight posters
                 and the same eight instructions. This section has to answer the
-                question on its own, so the only two links left in it are the
-                two actions a reader can actually take from here: ask Instagram
-                for the file, and hand the file over. */}
+                question on its own, so the only two links left among the rows
+                are the two actions a reader can actually take from here: ask
+                Instagram for the file, and hand the file over. The section's
+                closing CTA below is a third. */}
             {steps.map((step, idx) => (
               <li key={step.id} className="relative ps-16 md:ps-24">
                 <div className="absolute start-0 top-0 w-12 h-12 md:w-16 md:h-16 rounded-2xl md:rounded-3xl bg-card border-2 border-primary flex items-center justify-center font-black text-lg md:text-2xl text-primary z-10">
@@ -127,9 +128,11 @@ export function HowToSection() {
                     {step.description}
                   </p>
                   {/* Step 1's own control, the same link the guide's section 1
-                      carries. `linkClick` records no surface by design; the two
-                      stay separable because `url_path` does — this one fires
-                      from "/", the guide's from "/upload". */}
+                      carries. `linkClick` records no surface by design, so
+                      `url_path` is the only separator there is: it tells this
+                      one apart, because it is the only one that fires from "/".
+                      It cannot tell apart the three on "/upload" — the dialog's
+                      footer link, its step 1 section, and UploadGuideBlock. */}
                   {step.externalLink && (
                     <a
                       href={step.externalLink}

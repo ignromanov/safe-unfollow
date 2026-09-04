@@ -22,7 +22,8 @@ export function Component() {
   const hasResults = useHasResults();
 
   // Prefetch the guide dialog on idle: it is what this page's primary CTA
-  // costs. Hero, FooterCTA and every HowTo row now point at /upload?guide=1
+  // costs. Hero, FooterCTA and the HowTo section's closing CTA now point at
+  // /upload?guide=1
   // (GH#102), and `useGuideDialog` opens the dialog straight from that query
   // on arrival — but `GuideDialog` is lazy inside UploadPage (it is a modal,
   // so it does not ship in the entry chunk), while UploadPage itself is a

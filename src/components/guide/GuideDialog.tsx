@@ -56,7 +56,7 @@ function useSectionsInView(root: HTMLDivElement | null, enabled: boolean) {
           }
           // Same set when nothing was added: the observer fires on every
           // scroll past a boundary, and a fresh Set each time would re-render
-          // seven sections to say nothing changed.
+          // every section to say nothing changed.
           return next ?? previous;
         });
       },
@@ -71,8 +71,8 @@ function useSectionsInView(root: HTMLDivElement | null, enabled: boolean) {
 }
 
 /**
- * Which section the reader is actually in, for the rail's fill and "Step N
- * of 7" label — a different question from `useSectionsInView` above, which
+ * Which section the reader is actually in, for the rail's fill and its
+ * "Step N of <total>" label — a different question from `useSectionsInView` above, which
  * asks what to preload. That one uses a 200px margin because video wants
  * advance notice; this one shrinks the root to a thin band near its top edge
  * (`-70%` off the bottom) because a section 200px below the fold is not the
@@ -275,10 +275,12 @@ export function GuideDialog({
           ref={setScrollEl}
           data-guide-scroll
           // tabIndex/role/aria-label: Chrome makes an overflow container
-          // focusable by default, Firefox and Safari do not — and the seven
-          // sections inside contain no interactive elements of their own, so
-          // without this a keyboard user tabs straight past all of them to
-          // the footer buttons.
+          // focusable by default, Firefox and Safari do not — and the sections
+          // inside hold exactly one focusable element between them (step 1's
+          // Accounts Center link, GuideStepSection renders it from
+          // `step.externalLink`), so without this a keyboard user reaches that
+          // one link and then the footer buttons, and can never focus the
+          // container to scroll the rest.
           tabIndex={0}
           role="group"
           aria-label={t('entry.accordion.trigger', { count: GUIDE_STEPS.length })}
