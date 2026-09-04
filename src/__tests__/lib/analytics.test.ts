@@ -17,6 +17,7 @@ import {
   setEntryCTA,
 } from '@/lib/analytics';
 import { flushEvents } from '@/lib/stats/queue';
+import { recordCTA } from '@/lib/stats/cta-capture';
 
 describe('Analytics', () => {
   let localStorageMock: Record<string, string> = {};
@@ -289,10 +290,10 @@ describe('Analytics', () => {
       // stats/impression-batching.test.ts. What belongs here is the attribution
       // side effect, which is independent of how the event travels.
       it('sets the entry CTA on the first hero click and never overwrites it', () => {
-        analytics.heroCTAGuide();
+        recordCTA('guide');
         expect(sessionStorageMock['analytics_entry_cta']).toBe('guide');
 
-        analytics.heroCTASample();
+        recordCTA('sample');
         expect(sessionStorageMock['analytics_entry_cta']).toBe('guide');
       });
 
@@ -613,7 +614,8 @@ describe('Analytics', () => {
       expect(AnalyticsEvents.HERO_CTA_CONTINUE).toBe('hero_cta_continue');
       expect(AnalyticsEvents.THEME_TOGGLE).toBe('theme_toggle');
       expect(AnalyticsEvents.CLEAR_DATA).toBe('clear_data');
-      expect(AnalyticsEvents.WIZARD_STEP_VIEW).toBe('wizard_step_view');
+      expect(AnalyticsEvents.GUIDE_SECTION_VIEW).toBe('guide_section_view');
+      expect(AnalyticsEvents.GUIDE_OPEN).toBe('guide_open');
       expect(AnalyticsEvents.ERROR_BOUNDARY).toBe('error_boundary');
       expect(AnalyticsEvents.ROUTE_ERROR).toBe('route_error');
       expect(AnalyticsEvents.WEB_VITAL).toBe('web_vital');

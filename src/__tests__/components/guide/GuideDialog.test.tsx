@@ -9,7 +9,12 @@ import { renderWithRouter as render } from '@/__tests__/test-utils';
 vi.mock('react-i18next', () => createI18nMock(wizardEN));
 
 vi.mock('@/lib/analytics', () => ({
-  analytics: { linkClick: vi.fn(), calendarReminderClick: vi.fn() },
+  analytics: {
+    linkClick: vi.fn(),
+    calendarReminderClick: vi.fn(),
+    guideOpen: vi.fn(),
+    guideSectionView: vi.fn(),
+  },
 }));
 
 import { GuideDialog } from '@/components/guide/GuideDialog';
@@ -333,5 +338,66 @@ describe('GuideDialog', () => {
       screen.getByRole('button', { name: `Step ${id}` }).querySelector('[data-slot="rail-fill"]');
     expect(fillOf(5)).toHaveClass('bg-primary');
     expect(fillOf(6)).toHaveClass('bg-muted-foreground');
+  });
+
+  describe('guide_open', () => {
+    it('emits on the very first opening, from a lazy mount', () => {
+      // Regression: this component is lazy and mounted only after the first
+      // open (UploadPage's `everOpened` latch), so its very first render
+      // already has `open === true`. A naive `useEffect(fn, [open])` with no
+      // ref would never see a false -> true edge here and would drop it.
+      open({ source: 'zone', step: null });
+
+      expect(analytics.guideOpen).toHaveBeenCalledExactlyOnceWith('zone', undefined);
+    });
+
+    it('carries step_id only when a section was named', () => {
+      open({ source: 'url', step: 3 });
+
+      expect(analytics.guideOpen).toHaveBeenCalledExactlyOnceWith('url', 3);
+    });
+
+    it('emits again when the dialog is reopened in the same tab', () => {
+      const { rerender } = open({ source: 'accordion', step: null });
+      expect(analytics.guideOpen).toHaveBeenCalledTimes(1);
+
+      rerender(
+        <GuideDialog open={false} step={null} source="url" onGoToStep={vi.fn()} onClose={vi.fn()} />
+      );
+      rerender(
+        <GuideDialog open step={null} source="accordion" onGoToStep={vi.fn()} onClose={vi.fn()} />
+      );
+
+      expect(analytics.guideOpen).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('guide_section_view', () => {
+    it('emits once when the observer first names a section', () => {
+      open();
+
+      reportActiveSection(3);
+
+      expect(analytics.guideSectionView).toHaveBeenCalledExactlyOnceWith(3);
+    });
+
+    it('does not re-emit while the observer keeps reporting the same section', () => {
+      open();
+
+      reportActiveSection(3);
+      reportActiveSection(3);
+
+      expect(analytics.guideSectionView).toHaveBeenCalledExactlyOnceWith(3);
+    });
+
+    it('emits again when the reported section changes', () => {
+      open();
+
+      reportActiveSection(3);
+      reportActiveSection(5);
+
+      expect(analytics.guideSectionView).toHaveBeenNthCalledWith(1, 3);
+      expect(analytics.guideSectionView).toHaveBeenNthCalledWith(2, 5);
+    });
   });
 });

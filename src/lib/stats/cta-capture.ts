@@ -14,6 +14,13 @@
  *
  * There is exactly one recorder either way. Wiring `onClick` as well would double-count
  * every hydrated click.
+ *
+ * `recordCTA` is also the whole slug→event mapping (GH#99): every hero CTA, hydrated or
+ * not, is batched through it rather than through four separate wrapper functions. Batched
+ * because a hydrated click is a PrefixedLink, i.e. react-router Link — preventDefault +
+ * pushState, so the document never unloads. The route change that follows drains the queue
+ * on the next tick, so the event leaves as promptly as it did on the immediate path; it just
+ * shares a request with the rest of the landing page's set.
  */
 
 import { AnalyticsEvents } from './constants';

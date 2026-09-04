@@ -14,6 +14,7 @@ vi.mock('@/lib/stats/core', () => ({
 }));
 
 import { analytics } from '@/lib/stats/events';
+import { recordCTA } from '@/lib/stats/cta-capture';
 
 describe('promo impression batching', () => {
   beforeEach(() => {
@@ -136,12 +137,24 @@ describe('promo impression batching', () => {
       expect(trackEvent).not.toHaveBeenCalled();
     });
 
-    it('queues the wizard step view — it is an impression, and the step change unloads nothing', () => {
-      analytics.wizardStepView(3);
+    it('queues the guide section view — it is an impression, and a scroll unloads nothing', () => {
+      analytics.guideSectionView(3);
 
-      expect(enqueueEvent).toHaveBeenCalledWith('wizard_step_view', {
+      expect(enqueueEvent).toHaveBeenCalledWith('guide_section_view', {
         step_id: 3,
         first_view_in_tab: true,
+      });
+      expect(trackEvent).not.toHaveBeenCalled();
+    });
+
+    it('queues guide_open, carrying the gesture and the named section', () => {
+      analytics.guideOpen('accordion');
+      analytics.guideOpen('url', 3);
+
+      expect(enqueueEvent).toHaveBeenNthCalledWith(1, 'guide_open', { source: 'accordion' });
+      expect(enqueueEvent).toHaveBeenNthCalledWith(2, 'guide_open', {
+        source: 'url',
+        step_id: 3,
       });
       expect(trackEvent).not.toHaveBeenCalled();
     });
@@ -178,10 +191,10 @@ describe('promo impression batching', () => {
     // queue on the next tick (useEventQueueFlush), so nothing waits either.
     // Contrast with checkout_start, which precedes a real `location.href`.
     it('queues the hero CTAs — an SPA link unloads nothing, and the route change drains the queue', () => {
-      analytics.heroCTAGuide();
-      analytics.heroCTASample();
-      analytics.heroCTAUploadDirect();
-      analytics.heroCTAContinue();
+      recordCTA('guide');
+      recordCTA('sample');
+      recordCTA('upload_direct');
+      recordCTA('continue');
 
       expect(enqueueEvent).toHaveBeenNthCalledWith(1, 'hero_cta_guide', undefined);
       expect(enqueueEvent).toHaveBeenNthCalledWith(2, 'hero_cta_sample', undefined);
@@ -200,47 +213,33 @@ describe('promo impression batching', () => {
 
       analytics.filterToggle('mutuals', 'enable', 1);
       analytics.searchPerform(4, 10, 100, false);
-      analytics.wizardStepView(3);
-      analytics.guideEntryView();
+      analytics.guideSectionView(3);
+      analytics.guideOpen('accordion');
 
       expect(enqueueEvent).toHaveBeenCalledTimes(4);
       random.mockRestore();
     });
   });
 
-  // guide_entry_view and wizard_step_view's first_view_in_tab — a ratio between two
-  // events needs a matching definition of "first" on both ends, or 1→2→1→2
-  // stops being a funnel. See analytics.guideEntryView for the full rationale.
-  describe('guide entry / first instruction pair', () => {
-    it('marks the first view of the entry screen and only the first', () => {
-      analytics.guideEntryView();
-      analytics.guideEntryView();
+  // guide_section_view's first_view_in_tab, unsampled since GH#123 (R8).
+  describe('guide section view', () => {
+    it('marks first views per section, so scrolling up and back down is not two funnels', () => {
+      analytics.guideSectionView(2);
+      analytics.guideSectionView(3);
+      analytics.guideSectionView(2);
 
-      expect(enqueueEvent).toHaveBeenNthCalledWith(1, 'guide_entry_view', {
-        first_view_in_tab: true,
-      });
-      expect(enqueueEvent).toHaveBeenNthCalledWith(2, 'guide_entry_view', {
-        first_view_in_tab: false,
-      });
-    });
-
-    it('marks first views per step, so 1→2→1→2 is not two funnels', () => {
-      analytics.wizardStepView(2);
-      analytics.wizardStepView(3);
-      analytics.wizardStepView(2);
-
-      expect(enqueueEvent).toHaveBeenNthCalledWith(1, 'wizard_step_view', {
+      expect(enqueueEvent).toHaveBeenNthCalledWith(1, 'guide_section_view', {
         step_id: 2,
         first_view_in_tab: true,
       });
-      expect(enqueueEvent).toHaveBeenNthCalledWith(3, 'wizard_step_view', {
+      expect(enqueueEvent).toHaveBeenNthCalledWith(3, 'guide_section_view', {
         step_id: 2,
         first_view_in_tab: false,
       });
     });
 
     // Safari's "Block all cookies" and Firefox's "Block cookies and site
-    // data" make the getter itself throw, and both callers run inside a mount
+    // data" make the getter itself throw, and the caller runs inside a mount
     // effect — an unguarded throw would take the screen down to report a view.
     it('reports a view rather than throwing when sessionStorage is blocked', () => {
       vi.stubGlobal('sessionStorage', {
@@ -251,26 +250,9 @@ describe('promo impression batching', () => {
         clear: () => {},
       });
 
-      expect(() => analytics.guideEntryView()).not.toThrow();
+      expect(() => analytics.guideSectionView(4)).not.toThrow();
 
-      expect(enqueueEvent).toHaveBeenCalledExactlyOnceWith('guide_entry_view', {
-        first_view_in_tab: false,
-      });
-      vi.unstubAllGlobals();
-    });
-
-    it('does the same for wizardStepView', () => {
-      vi.stubGlobal('sessionStorage', {
-        getItem: () => {
-          throw new DOMException('The operation is insecure.', 'SecurityError');
-        },
-        setItem: () => {},
-        clear: () => {},
-      });
-
-      expect(() => analytics.wizardStepView(4)).not.toThrow();
-
-      expect(enqueueEvent).toHaveBeenCalledExactlyOnceWith('wizard_step_view', {
+      expect(enqueueEvent).toHaveBeenCalledExactlyOnceWith('guide_section_view', {
         step_id: 4,
         first_view_in_tab: false,
       });

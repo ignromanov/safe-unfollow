@@ -146,19 +146,7 @@ function useActiveStep(root: HTMLDivElement | null, enabled: boolean) {
  * Exactly one DialogTitle (GH#140). No second close button: the primitive
  * renders its own, labelled from `common:buttons.close`.
  */
-// `source` is still part of the props contract but no longer read here: it
-// was only ever consumed by the entry-CTA gate this component used to have,
-// removed because it hid the guide's one link to Meta's profile picker
-// behind four of the six ways into this dialog. Kept on the interface (not
-// renamed away, not deleted) for PR 4 of this series, which is scheduled to
-// emit a `guide_open` event carrying it — see progress.md.
-export function GuideDialog({
-  open,
-  step,
-  source: _source,
-  onGoToStep,
-  onClose,
-}: GuideDialogProps) {
+export function GuideDialog({ open, step, source, onGoToStep, onClose }: GuideDialogProps) {
   const { t } = useTranslation('wizard');
   // A callback ref, not `useRef` + `.current`: Radix's Portal (the thing that
   // actually mounts this div) gates on its own `useState(false)`, flipped by
@@ -176,6 +164,40 @@ export function GuideDialog({
   // next opening arrives with the same 'auto' jump rather than inheriting
   // the 'smooth' behaviour a rail tap earns later in the same session.
   const hasArrivedRef = useRef(false);
+
+  // Fires guide_open exactly once per opening, on the closed -> open edge —
+  // never from useGuideDialog.open() itself, because a URL arrival calls
+  // nothing there and firing from both places would need two call sites that
+  // must agree. Initialized false rather than to `open`: this component is
+  // lazy and mounted only after the first opening (UploadPage's `everOpened`
+  // latch), so its very first render already has `open === true` — a ref that
+  // starts false still reads that first render as the edge it is.
+  const wasOpenRef = useRef(false);
+  useEffect(() => {
+    if (open && !wasOpenRef.current) {
+      analytics.guideOpen(source, step ?? undefined);
+    }
+    wasOpenRef.current = open;
+  }, [open, source, step]);
+
+  // Fires guide_section_view whenever the observer names a section the reader
+  // has not just left — i.e. it becomes non-null, or changes to a different
+  // one. Not on every render: the observer can report the same section
+  // repeatedly while the reader sits still inside its band. Reset on close,
+  // like useActiveStep's own `active` state above it — otherwise reopening
+  // and landing back on the same section the reader left would silently emit
+  // nothing, because the ref never forgot it.
+  const lastReportedStepRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (!open) {
+      lastReportedStepRef.current = null;
+      return;
+    }
+    if (activeStep !== null && activeStep !== lastReportedStepRef.current) {
+      analytics.guideSectionView(activeStep);
+    }
+    lastReportedStepRef.current = activeStep;
+  }, [open, activeStep]);
   // Forces the arrival effect below to re-run even when `step` is unchanged —
   // needed because a rail tap on the section the reader is already at (by
   // the URL's account) would otherwise be a no-op scroll.
