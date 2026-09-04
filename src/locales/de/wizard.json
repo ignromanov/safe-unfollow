@@ -33,7 +33,7 @@
       "rows": {
         "destination": "Zu Gerät exportieren",
         "range": "Gesamter Zeitraum",
-        "format": "JSON — nicht HTML",
+        "format": "JSON oder HTML",
         "quality": "Beliebige Medienqualität",
         "content": "Follower und Gefolgte"
       }

@@ -33,7 +33,7 @@
       "rows": {
         "destination": "Exporter sur mon appareil",
         "range": "Tout",
-        "format": "JSON — pas HTML",
+        "format": "JSON ou HTML",
         "quality": "Toute qualité de média",
         "content": "Abonnés et abonnements"
       }

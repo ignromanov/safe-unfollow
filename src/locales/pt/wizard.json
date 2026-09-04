@@ -33,7 +33,7 @@
       "rows": {
         "destination": "Exportar para o dispositivo",
         "range": "Todo o período",
-        "format": "JSON — não HTML",
+        "format": "JSON ou HTML",
         "quality": "Qualquer qualidade de mídia",
         "content": "Seguidores e seguindo"
       }
