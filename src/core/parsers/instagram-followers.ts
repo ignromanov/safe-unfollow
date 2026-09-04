@@ -64,8 +64,7 @@ export interface FollowersParsed {
 /** Parse a single followers JSON text */
 export async function parseFollowersJson(jsonText: string): Promise<string[]> {
   const data = JSON.parse(jsonText) as
-    | InstagramExportEntry[]
-    | { relationships_followers?: InstagramExportEntry[] };
+    InstagramExportEntry[] | { relationships_followers?: InstagramExportEntry[] };
   if (Array.isArray(data)) return extractUsernames(data);
   if (
     Array.isArray(

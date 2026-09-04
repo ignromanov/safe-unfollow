@@ -71,15 +71,13 @@ export const routes: RouteRecord[] = [
     children: createPageChildren(),
   },
   // Language-prefixed routes (es, ru, de, etc.)
-  ...SUPPORTED_LANGUAGES.filter(lang => lang !== 'en').map(
-    (lang): RouteRecord => ({
-      path: `/${lang}`,
-      element: <Layout lang={lang} />,
-      errorElement: <RouteErrorPage />,
-      entry: 'src/components/Layout.tsx',
-      children: createPageChildren(),
-    })
-  ),
+  ...SUPPORTED_LANGUAGES.filter(lang => lang !== 'en').map((lang): RouteRecord => ({
+    path: `/${lang}`,
+    element: <Layout lang={lang} />,
+    errorElement: <RouteErrorPage />,
+    entry: 'src/components/Layout.tsx',
+    children: createPageChildren(),
+  })),
 ];
 
 export type { SupportedLanguage };
