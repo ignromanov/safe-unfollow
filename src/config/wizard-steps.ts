@@ -1,10 +1,34 @@
+/**
+ * A stable name for the instruction a step carries, independent of where it
+ * sits in the list.
+ *
+ * The numbering has moved three times in this stream (eight routes, then
+ * seven sections, then eight again). Anything that has to point at a
+ * particular instruction — `guideStepForError` is the only such consumer
+ * today — names it instead of copying its current position, so a renumbering
+ * carries the reference with it rather than leaving it behind pointing at
+ * whatever moved into that slot.
+ */
+export type GuideStepKey =
+  | 'accountsCenter'
+  | 'chooseProfile'
+  | 'exportToDevice'
+  | 'selectFollowers'
+  | 'dateRange'
+  | 'formatJson'
+  | 'reviewAndStart'
+  | 'waitForEmail';
+
 export interface GuideStep {
   id: number;
+  key: GuideStepKey;
   isWarning?: boolean;
   /**
    * Base path of this step's assets in public/wizard/ — a hyphen, not a slash.
    * The hyphen is what keeps these assets out of the four "/wizard" redirect
-   * rules, which all match a slash. guide-steps.test.ts pins the mapping.
+   * rules: two match "/wizard" exactly and two require a slash after it, so a
+   * path beginning "/wizard/step-" matches none of them. guide-steps.test.ts
+   * pins the mapping.
    */
   visual: string;
   /**
@@ -56,15 +80,29 @@ export const ACCOUNTS_CENTER_URL =
  * than a hierarchy, so the count stays at one.
  */
 export const GUIDE_STEPS: GuideStep[] = [
-  { id: 1, visual: '/wizard/step-1', externalLink: ACCOUNTS_CENTER_URL },
-  { id: 2, visual: '/wizard/step-2' },
-  { id: 3, visual: '/wizard/step-3' },
-  { id: 4, isWarning: true, visual: '/wizard/step-4' },
-  { id: 5, visual: '/wizard/step-5' },
-  { id: 6, visual: '/wizard/step-6' },
-  { id: 7, visual: '/wizard/step-7' },
-  { id: 8, visual: '/wizard/step-8' },
+  { id: 1, key: 'accountsCenter', visual: '/wizard/step-1', externalLink: ACCOUNTS_CENTER_URL },
+  { id: 2, key: 'chooseProfile', visual: '/wizard/step-2' },
+  { id: 3, key: 'exportToDevice', visual: '/wizard/step-3' },
+  { id: 4, key: 'selectFollowers', isWarning: true, visual: '/wizard/step-4' },
+  { id: 5, key: 'dateRange', visual: '/wizard/step-5' },
+  { id: 6, key: 'formatJson', visual: '/wizard/step-6' },
+  { id: 7, key: 'reviewAndStart', visual: '/wizard/step-7' },
+  { id: 8, key: 'waitForEmail', visual: '/wizard/step-8' },
 ];
+
+/**
+ * The section number carrying a named instruction.
+ *
+ * Throws rather than falling back, and that is the point: a fallback would
+ * send a reader whose upload failed to an instruction that does not answer
+ * them, silently. A key that stops existing is a build-time type error at
+ * every call site and a loud failure at the one place a key could be computed.
+ */
+export function guideStepId(key: GuideStepKey): number {
+  const step = GUIDE_STEPS.find(s => s.key === key);
+  if (!step) throw new Error(`No guide step is keyed "${key}"`);
+  return step.id;
+}
 
 /**
  * The DOM anchor a section carries, and the one `?step=N` scrolls to.

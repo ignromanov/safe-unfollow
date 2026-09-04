@@ -1,3 +1,4 @@
+import { guideStepId } from '@/config/wizard-steps';
 import type { DiagnosticErrorCode } from '@/core/types';
 
 /**
@@ -6,10 +7,12 @@ import type { DiagnosticErrorCode } from '@/core/types';
  * Was one hardcoded 6 for every code, threaded to five call sites: a reader
  * whose ZIP was not an Instagram export landed on the page about choosing JSON.
  *
- * The two numbers below moved by one when "Open Accounts Center" became step 1
- * of the guide instead of a button standing outside its numbering. They are
- * section ids, so they follow `GUIDE_STEPS`, and `wizard-routing.test.ts`
- * bounds them against its length rather than trusting these literals.
+ * The two sections below are named, not numbered. They used to be the literals
+ * 4 and 6, which followed `GUIDE_STEPS` only by whoever edited the list
+ * remembering to edit this file too — and the numbering has moved three times.
+ * A bare ordinal cannot go wrong loudly: insert one instruction anywhere above
+ * and `return 4` still passes every gate, including the length bound in
+ * `wizard-routing.test.ts`, while pointing at whatever slid into slot 4.
  *
  * `undefined` and `'UNKNOWN'` are not the same input. `undefined` means no code
  * was ever produced (a caller that never diagnosed the failure) and keeps the
@@ -34,11 +37,11 @@ export function guideStepForError(code?: DiagnosticErrorCode): number | null {
     case 'NO_DATA_FILES':
     case 'MISSING_FOLLOWING':
     case 'MISSING_FOLLOWERS':
-      return 4;
+      return guideStepId('selectFollowers');
     case 'UNKNOWN':
       return null;
     default:
-      return 6;
+      return guideStepId('formatJson');
   }
 }
 
@@ -49,8 +52,8 @@ export function guideStepForError(code?: DiagnosticErrorCode): number | null {
  * rather than read via a hook so this stays a pure function callable from
  * non-component code.
  *
- * ⚠️ `default: return 6` lives on borrowed time. `HTML_FORMAT` has no case of
- * its own — it rides the default, and when the parser accepts HTML it is not
+ * ⚠️ The `formatJson` default lives on borrowed time. `HTML_FORMAT` has no case
+ * of its own — it rides the default, and when the parser accepts HTML it is not
  * one case that goes but the justification for the default arm itself.
  */
 export function guideHrefForError(prefix: string, code?: DiagnosticErrorCode): string {
