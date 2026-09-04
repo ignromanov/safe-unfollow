@@ -106,13 +106,19 @@ describe('UploadPage hands the guide dialog the source the hook derived', () => 
     expect(await dialogSource()).toBe('url');
   });
 
-  it('reports the error screen through a dialog that mounts after the entry is consumed', async () => {
-    // The one sequence the hook's own tests cannot state: the dialog is
-    // `lazy()`, so on the first opening of a session it mounts strictly after
-    // the hook's effects have run — including the one that takes the gesture
-    // off the history entry so a reload cannot restore it. Reading the entry
-    // alone, the dialog would arrive to find nothing there and report 'url'
-    // for the very click the channel exists to name.
+  it('reports the error screen whichever lands first, the dialog or the consume', async () => {
+    // The one sequence the hook's own tests cannot state. The dialog is
+    // `lazy()`, so its mount and the effect that takes the gesture off the
+    // history entry are two independently scheduled pieces of work — under
+    // `v7_startTransition` React guarantees no order between them, and on a
+    // cold chunk fetch the consume lands first by a wide margin.
+    //
+    // The assertion holds under either ordering, and that is the point: the
+    // gesture is kept in ephemeral memory rather than read back off the entry,
+    // so the dialog does not depend on arriving before the consume. Reading
+    // the entry alone, a dialog that mounted second would find nothing there
+    // and report 'url' for the very click the channel exists to name — which
+    // is what the second red-first perturbation in the report demonstrates.
     at({ pathname: '/upload', search: '?step=6', state: { ...SAME_PATH_PUSH, source: 'error' } });
 
     expect(await dialogSource()).toBe('error');

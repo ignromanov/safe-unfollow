@@ -437,6 +437,32 @@ describe('useGuideDialog', () => {
       expect(page.entryState()).toEqual({ source: 'wizard' });
     });
 
+    it('forgets the gesture once a Back has ended the opening it named', () => {
+      // This is Gap 1 again, one ref over. `pushedRef` survived a hardware
+      // Back — which never runs close() — and shadowed the next opening's
+      // source, so an error-CTA click reported 'accordion'. It failed to a
+      // plausible value, which is why nothing in the data would ever have
+      // shown it, and it is the first defect this task shipped.
+      //
+      // anchorSourceRef has the same lifecycle and the same failure mode in
+      // the other direction: left set across a Back, a later plain-URL arrival
+      // would report 'error' for a visit nobody clicked. Both are cleared in
+      // the one `wasOpenRef.current && !isOpen` block, so this test is what
+      // keeps the second clause there.
+      at('/upload?utm_source=x');
+
+      act(() => pushLikeAnchor('?step=6', { ...SAME_PATH_PUSH, source: 'error' }));
+      expect(guide.source).toBe('error');
+
+      act(() => goBack());
+      expect(guide.isOpen).toBe(false);
+
+      // A plain URL arrival: no gesture of ours, no state on the entry.
+      act(() => pushLikeAnchor('?step=3', undefined));
+
+      expect(guide).toMatchObject({ isOpen: true, step: 3, source: 'url' });
+    });
+
     it('still refuses to pop a cross-path arrival, gesture or no gesture', () => {
       // The other half of the decoupling, and the reason the two facts may not
       // be welded back together: nothing pushed this entry onto /upload, so
