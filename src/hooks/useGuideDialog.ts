@@ -3,8 +3,19 @@ import { useLocation, useNavigate, type Location } from 'react-router-dom';
 
 import { GUIDE_STEPS } from '@/config/wizard-steps';
 
-/** Where the reader came from. Not in the URL — it describes the gesture, not the state. */
-export type GuideSource = 'accordion' | 'error' | 'zone' | 'url';
+/**
+ * Where the reader came from. Not in the URL — it describes the gesture, not
+ * the state.
+ *
+ * A runtime list with the type derived from it, rather than a union with a
+ * second copy of its members written out for the guard below. `source` is a
+ * categorical column in the analytics database, so a member set that can drift
+ * from its own guard does not fail — it silently grows a fifth arm on a
+ * four-arm breakdown. Adding a source here binds the guard the same day.
+ */
+export const GUIDE_SOURCES = ['accordion', 'error', 'zone', 'url'] as const;
+
+export type GuideSource = (typeof GUIDE_SOURCES)[number];
 
 /**
  * Router state naming the gesture that pushed this entry, for a pusher that is
@@ -52,10 +63,32 @@ function wasPushedOntoSamePath(state: unknown): boolean {
   );
 }
 
-/** The gesture the entry names, if it names one — whatever else it carries. */
+function isGuideSource(value: unknown): value is GuideSource {
+  return typeof value === 'string' && (GUIDE_SOURCES as readonly string[]).includes(value);
+}
+
+/**
+ * The gesture the entry names, if it names one this hook declares — whatever
+ * else the entry carries.
+ *
+ * Validated rather than cast, on the precedent `cta-capture.ts` sets for its
+ * own slugs: an unrecognised one is discarded rather than passed on to become
+ * an unlisted value. Two things make it worth the three lines here. `source`
+ * is a categorical column, so an unlisted string does not fail — it reaches
+ * the database as a fifth arm of a four-arm breakdown, which is this event's
+ * whole subject one layer down. And `location.state` is `history.state`, which
+ * outlives the page life that wrote it, so this is a boundary whose data is
+ * older than the code reading it.
+ *
+ * The gate widened when naming was decoupled from `pushedOntoSamePath`: any
+ * entry carrying a `source` is now read, not only one that also declared a
+ * same-path push. There is one producer today and it is typed — this is for
+ * the second one.
+ */
 function namedSource(state: unknown): GuideSource | undefined {
   if (typeof state !== 'object' || state === null) return undefined;
-  return (state as Partial<GuideSourceState>).source;
+  const named = (state as { source?: unknown }).source;
+  return isGuideSource(named) ? named : undefined;
 }
 
 /**
@@ -339,7 +372,9 @@ export function useGuideDialog(): GuideDialogState {
   // push would insert an entry between the reader and the page they came from.
   // Gated on `isOpen` because the mark names the gesture that opened THIS
   // dialog; an entry carrying one with the dialog shut names nothing anyone
-  // reports.
+  // reports. An entry naming something `namedSource` does not recognise is
+  // left exactly as it is — it is not ours to rewrite, and it reports 'url'
+  // either way.
   useEffect(() => {
     if (!isOpen) return;
     const named = namedSource(location.state);

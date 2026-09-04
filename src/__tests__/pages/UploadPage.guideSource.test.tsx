@@ -119,4 +119,21 @@ describe('UploadPage hands the guide dialog the source the hook derived', () => 
     await waitFor(() => expect(rendered.props.length).toBeGreaterThan(0));
     expect(rendered.props.at(-1)).toMatchObject({ source: 'error', open: true, step: 6 });
   });
+
+  it('never hands the dialog a source the hook does not declare', async () => {
+    // `location.state` is same-origin writable and outlives the page life that
+    // wrote it, and `source` is a categorical column — an unlisted string
+    // would not fail, it would reach the database as a fifth arm of a four-arm
+    // breakdown.
+    //
+    // Stated at the prop boundary, which is the last place before the emitter:
+    // `analytics.guideOpen(source, …)` is the only thing GuideDialog does with
+    // this prop, so a value that cannot arrive here cannot reach the event.
+    // What this does NOT isolate is the emitter itself — that is
+    // GuideDialog.test.tsx's, and asserting `guideOpen` not-called in this
+    // file would pass vacuously, since the dialog is mocked out of it.
+    at({ pathname: '/upload', search: '?step=6', state: { source: 'wizard' } });
+
+    expect(await dialogSource()).toBe('url');
+  });
 });

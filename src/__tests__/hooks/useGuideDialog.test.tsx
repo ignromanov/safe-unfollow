@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { act, cleanup, render, screen } from '@testing-library/react';
 import { MemoryRouter, useLocation, useNavigate, useNavigationType } from 'react-router-dom';
 
-import { SAME_PATH_PUSH, useGuideDialog } from '@/hooks/useGuideDialog';
+import { GUIDE_SOURCES, SAME_PATH_PUSH, useGuideDialog } from '@/hooks/useGuideDialog';
 
 type Guide = ReturnType<typeof useGuideDialog>;
 
@@ -409,6 +409,32 @@ describe('useGuideDialog', () => {
 
       expect(guide).toMatchObject({ isOpen: true, step: 6, source: 'error' });
       expect(page.entryState()).toBeNull();
+    });
+
+    // The member list is derived, not written out again: the guard reads
+    // GUIDE_SOURCES and so does this, so a fifth source added tomorrow is
+    // covered the day it appears rather than the day someone remembers this
+    // file. A hand-written copy is what `testing.md` bans, and what let nine
+    // locales pass while the tenth shipped a raw key.
+    it.each(GUIDE_SOURCES)('reads %s off the entry, because the hook declares it', named => {
+      at({ pathname: '/upload', search: '?step=6', state: { source: named } });
+
+      expect(guide.source).toBe(named);
+    });
+
+    it('discards a source the hook does not declare, rather than reporting it', () => {
+      // `location.state` is `history.state`: same-origin writable, and it
+      // outlives the page life that wrote it, so this is a boundary whose data
+      // can be older than the code reading it. `source` is a categorical
+      // column, so an unlisted string here does not fail — it reaches the
+      // database as a fifth arm of a four-arm breakdown, which is this event's
+      // own subject one layer down. Same precedent cta-capture.ts sets for an
+      // unrecognised slug.
+      const page = at({ pathname: '/upload', search: '?step=6', state: { source: 'wizard' } });
+
+      expect(guide.source).toBe('url');
+      // And it is left alone rather than rewritten: not ours to consume.
+      expect(page.entryState()).toEqual({ source: 'wizard' });
     });
 
     it('still refuses to pop a cross-path arrival, gesture or no gesture', () => {
