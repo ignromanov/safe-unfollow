@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, type Location } from 'react-router-dom';
 
 import { GUIDE_STEPS } from '@/config/wizard-steps';
 
@@ -86,6 +86,12 @@ export function useGuideDialog(): GuideDialogState {
   // that follows the write.
   const pushedRef = useRef(false);
 
+  // The entry a pop has already been issued from. The entry itself, not a
+  // boolean: it has to survive the navigation, and it has to stop being true
+  // once the reader is somewhere else — a later arrival on the same URL is a
+  // different location object and pops normally.
+  const poppedFromRef = useRef<Location | null>(null);
+
   const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const hasStepParam = params.has('step');
   const isOpen = hasStepParam || params.get('guide') === '1';
@@ -155,7 +161,20 @@ export function useGuideDialog(): GuideDialogState {
     // SAME_PATH_PUSH. The second is not reachable through the ref — an anchor
     // navigates without running any handler of ours (PrefixedLink), which is
     // why DiagnosticErrorScreen's CTA declares the push instead.
+    //
+    // One pop per entry, latched on the entry rather than on a flag that the
+    // next line clears. `pushedRef.current = false` used to be the whole
+    // guard, and it worked only while the ref was the only arm: a second
+    // close() arriving before the router commits the pop reads a
+    // location.state that still carries the mark, so both calls would pop and
+    // the reader would land two entries back, off /upload. main.tsx runs the
+    // pop inside a React transition (v7_startTransition), which is what makes
+    // that window wide enough to hit.
+    if (poppedFromRef.current === location) {
+      return;
+    }
     if (pushedRef.current || wasPushedOntoSamePath(location.state)) {
+      poppedFromRef.current = location;
       pushedRef.current = false;
       navigate(-1);
       return;
@@ -167,7 +186,7 @@ export function useGuideDialog(): GuideDialogState {
       next.delete('step');
       next.delete('guide');
     }, true);
-  }, [location.state, navigate, navigateWith]);
+  }, [location, navigate, navigateWith]);
 
   return {
     isOpen,

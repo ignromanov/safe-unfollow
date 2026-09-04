@@ -154,6 +154,46 @@ describe('useGuideDialog', () => {
     expect(guide.isOpen).toBe(false);
   });
 
+  it('pops once for two close() calls that land in the same pass', () => {
+    // The mark lives on the entry, and the entry does not change until the
+    // router commits the pop — so the condition that decided the first call is
+    // still true for a second one arriving before the commit. Two pops would
+    // take the reader an entry further back than they asked for, off the page.
+    // Reachable programmatically rather than by gesture: a StrictMode
+    // double-invoke, a test, a future caller wiring close() to two controls.
+    const page = at([
+      '/results',
+      '/upload?utm_source=x',
+      { pathname: '/upload', search: '?step=6', state: SAME_PATH_PUSH },
+    ]);
+
+    act(() => {
+      guide.close();
+      guide.close();
+    });
+
+    expect(page.url()).toBe('/upload?utm_source=x');
+    expect(page.nav()).toBe('POP');
+  });
+
+  it('pops again the next time the dialog is opened and closed', () => {
+    // The latch is scoped to the entry the pop was issued from, not to the
+    // hook's lifetime: closing once must not leave close() inert for the rest
+    // of the session.
+    const page = at(['/results', '/upload']);
+
+    act(() => guide.open('accordion', 5));
+    act(() => guide.close());
+    expect(page.url()).toBe('/upload');
+    expect(page.nav()).toBe('POP');
+
+    act(() => guide.open('accordion', 5));
+    act(() => guide.close());
+
+    expect(page.url()).toBe('/upload');
+    expect(page.nav()).toBe('POP');
+  });
+
   it('replaces an unmarked arrival rather than popping the reader off the page', () => {
     // Same shape, no mark: the docs link to /upload?guide=1 from another path,
     // so the entry below is not this page and popping would undo the
