@@ -28,8 +28,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite-react-ssg build && npm run generate:sitemap",
-    "generate:sitemap": "npx tsx scripts/generate-sitemap.ts",
-    "setup:umami": "npx tsx scripts/setup-umami.ts",
+    "generate:sitemap": "tsx scripts/generate-sitemap.ts",
+    "setup:umami": "tsx scripts/setup-umami.ts",
     "build:spa": "tsc -b && vite build",
     "build:all": "npm run build && cd docs && bundle install && bundle exec jekyll build -d ../dist/docs",
     "test": "vitest run --reporter=verbose",
@@ -139,6 +139,7 @@
     "prettier": "^3.6.2",
     "tailwindcss": "^4.1.14",
     "terser": "^5.44.0",
+    "tsx": "^4.23.13",
     "typescript": "^5.5.4",
     "typescript-eslint": "^8.45.0",
     "vite": "^7.1.8",

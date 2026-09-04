@@ -6,6 +6,12 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  # A superseded run proves nothing. Cancel only PR runs: a cancelled push to
+  # main would leave the default branch with no verdict at all.
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   build-test:
     runs-on: ubuntu-latest
@@ -15,7 +21,7 @@ jobs:
         with:
           node-version: 22
           cache: 'npm'
-      - run: npm ci
+      - run: npm ci --prefer-offline --no-audit
       - run: npm run build --if-present
       # The only job with a dist/ to measure. Unwired, the budget guard cannot fail.
       - run: npm run perf:budget
