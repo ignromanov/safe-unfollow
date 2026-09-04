@@ -1,8 +1,18 @@
-import { screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
+import { useLocation } from 'react-router-dom';
 import { describe, it, expect } from 'vitest';
 
 import { renderWithRouter } from '@/__tests__/test-utils';
 import { PrefixedLink } from '@/components/PrefixedLink';
+import { NON_ENGLISH_LANGUAGES } from '@/config/languages';
+
+/** Reports the state of the entry the router is standing on. */
+function EntryStateProbe() {
+  const { state } = useLocation();
+  return <span data-testid="entry-state">{JSON.stringify(state) ?? ''}</span>;
+}
+
+const MARK = { pushedOntoSamePath: true };
 
 describe('PrefixedLink', () => {
   it('renders a real anchor, not a button', () => {
@@ -85,5 +95,94 @@ describe('PrefixedLink', () => {
     expect(link).toHaveClass('cta');
     link.click();
     expect(clicks).toEqual(['hit']);
+  });
+
+  describe('samePathState', () => {
+    // The decision lives here rather than at the call site because it is a
+    // comparison against the href, and the href is built here. A caller that
+    // rebuilt `${prefix}${to}` to make the same comparison would be a second
+    // derivation of one fact, free to drift from this one in silence.
+    it('attaches the state when the link stays on the path it is rendered on', () => {
+      renderWithRouter(
+        <>
+          <PrefixedLink to="/upload?step=6" samePathState={MARK}>
+            Guide
+          </PrefixedLink>
+          <EntryStateProbe />
+        </>,
+        { initialEntries: ['/upload'] }
+      );
+
+      fireEvent.click(screen.getByRole('link', { name: 'Guide' }));
+
+      expect(screen.getByTestId('entry-state').textContent).toBe(JSON.stringify(MARK));
+    });
+
+    it('withholds it when the link leaves the page', () => {
+      renderWithRouter(
+        <>
+          <PrefixedLink to="/upload?step=6" samePathState={MARK}>
+            Guide
+          </PrefixedLink>
+          <EntryStateProbe />
+        </>,
+        { initialEntries: ['/results'] }
+      );
+
+      fireEvent.click(screen.getByRole('link', { name: 'Guide' }));
+
+      expect(screen.getByTestId('entry-state').textContent).not.toContain('pushedOntoSamePath');
+    });
+
+    it.each(NON_ENGLISH_LANGUAGES)('sees through the /%s prefix it added itself', lang => {
+      // The prefix is derived from the same pathname the comparison reads, so
+      // the two cannot disagree about which locale they are in.
+      renderWithRouter(
+        <>
+          <PrefixedLink to="/upload?step=6" samePathState={MARK}>
+            Guide
+          </PrefixedLink>
+          <EntryStateProbe />
+        </>,
+        { initialEntries: [`/${lang}/upload`] }
+      );
+
+      fireEvent.click(screen.getByRole('link', { name: 'Guide' }));
+
+      expect(screen.getByTestId('entry-state').textContent).toBe(JSON.stringify(MARK));
+    });
+
+    it('prefers samePathState over a plain state on the page, and falls back off it', () => {
+      // Both are legal together. `state` is destructured out of the spread so
+      // that a caller passing both cannot have it silently override the
+      // computed one; the two answers are per-location, not per-precedence.
+      const plain = { from: 'elsewhere' };
+      const { unmount } = renderWithRouter(
+        <>
+          <PrefixedLink to="/upload?step=6" samePathState={MARK} state={plain}>
+            Guide
+          </PrefixedLink>
+          <EntryStateProbe />
+        </>,
+        { initialEntries: ['/upload'] }
+      );
+
+      fireEvent.click(screen.getByRole('link', { name: 'Guide' }));
+      expect(screen.getByTestId('entry-state').textContent).toBe(JSON.stringify(MARK));
+      unmount();
+
+      renderWithRouter(
+        <>
+          <PrefixedLink to="/upload?step=6" samePathState={MARK} state={plain}>
+            Guide
+          </PrefixedLink>
+          <EntryStateProbe />
+        </>,
+        { initialEntries: ['/results'] }
+      );
+
+      fireEvent.click(screen.getByRole('link', { name: 'Guide' }));
+      expect(screen.getByTestId('entry-state').textContent).toBe(JSON.stringify(plain));
+    });
   });
 });

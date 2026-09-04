@@ -8,6 +8,7 @@ vi.mock('react-i18next', () => createI18nMock(uploadEN));
 import { useLocation } from 'react-router-dom';
 
 import { DiagnosticErrorScreen } from '@/components/DiagnosticErrorScreen';
+import { NON_ENGLISH_LANGUAGES } from '@/config/languages';
 import type { DiagnosticErrorCode, ParseWarning } from '@/core/types';
 import { SAME_PATH_PUSH } from '@/hooks/useGuideDialog';
 import { analytics } from '@/lib/analytics';
@@ -294,6 +295,25 @@ describe('DiagnosticErrorScreen', () => {
       fireEvent.click(screen.getByRole('link', { name: uploadEN.diagnostic.reExportJson }));
 
       expect(entryState()).not.toContain('pushedOntoSamePath');
+    });
+
+    // The two cases above both stand at the English root, where the prefix is
+    // '' — so a same-path comparison that lost the prefix would pass them
+    // anyway, and did, while every prefixed locale silently went unmarked. The
+    // list is derived, not written out: a locale added tomorrow is bound the
+    // day it appears.
+    it.each(NON_ENGLISH_LANGUAGES)('marks it the same under the /%s prefix', lang => {
+      renderWithRouter(
+        <>
+          <DiagnosticErrorScreen errorCode={code} onOpenWizard={mockOnOpenWizard} />
+          <EntryStateProbe />
+        </>,
+        { initialEntries: [`/${lang}${href.split('?')[0]}`] }
+      );
+
+      fireEvent.click(screen.getByRole('link', { name: uploadEN.diagnostic.reExportJson }));
+
+      expect(entryState()).toBe(JSON.stringify(SAME_PATH_PUSH));
     });
   });
 

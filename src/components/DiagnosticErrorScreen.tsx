@@ -3,9 +3,7 @@ import { createDiagnosticError, mapWarningToDiagnosticCode } from '@/core/types'
 import { AlertTriangle, Check, Copy, ExternalLink, RefreshCw } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
 import { PrefixedLink } from '@/components/PrefixedLink';
-import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
 import { SAME_PATH_PUSH } from '@/hooks/useGuideDialog';
 import { analytics } from '@/lib/analytics';
 import {
@@ -48,8 +46,6 @@ export function DiagnosticErrorScreen({
   onOpenWizard,
 }: DiagnosticErrorScreenProps) {
   const { t } = useTranslation('upload');
-  const { pathname } = useLocation();
-  const prefix = useLanguagePrefix();
 
   // Derive diagnostic error from props
   const diagnosticError = useMemo((): DiagnosticError => {
@@ -85,16 +81,6 @@ export function DiagnosticErrorScreen({
   );
 
   const guideHref = guideHrefForError('', diagnosticError.code);
-
-  // Whether following that link stays on the page the reader is already on.
-  // On /upload it does, and the push is invisible: two entries, same path, the
-  // second differing only by a query. Nothing downstream can see that it
-  // happened, so the link says so and useGuideDialog pops it on close.
-  // ResultsPage renders this same screen, where the link leaves /results — a
-  // pop there would undo the navigation the reader asked for, so no mark.
-  // Compared against the prefixed pathname because PrefixedLink prepends the
-  // same prefix to `to`.
-  const guideStaysOnThisPage = pathname === `${prefix}${guideHref.split('?')[0]}`;
 
   // Track error view on mount
   useEffect(() => {
@@ -182,10 +168,18 @@ export function DiagnosticErrorScreen({
           role="group"
           aria-label={t('diagnostic.actionsLabel')}
         >
+          {/* The mark applies only where following the link stays on this page.
+              On /upload it does, and the push is invisible: two entries, same
+              path, the second differing only by a query, so nothing downstream
+              can see it happened and useGuideDialog needs telling before it pops
+              on close. ResultsPage renders this same screen, where the link
+              leaves /results and a pop would undo the navigation the reader
+              asked for — PrefixedLink decides which of the two this is, because
+              it is the half that builds the href. */}
           {onOpenWizard && (
             <PrefixedLink
               to={guideHref}
-              state={guideStaysOnThisPage ? SAME_PATH_PUSH : undefined}
+              samePathState={SAME_PATH_PUSH}
               onClick={handleOpenWizard}
               className={recoverable ? PRIMARY_ACTION_CLASS : SECONDARY_ACTION_CLASS(colors)}
             >
