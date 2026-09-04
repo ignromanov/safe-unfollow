@@ -94,24 +94,41 @@ describe('IndexedDBCache', () => {
     });
 
     it('should handle cache exactly at 7 day boundary', async () => {
-      const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+      // Frozen, because "exactly" is the whole case. The test builds
+      // `lastAccessed` from one Date.now() and `dbCache.get` measures it with
+      // another; the code's comparison is `cacheAge > maxAge`, so exactly
+      // seven days IS valid and the assertion holds only while both reads
+      // land on the same millisecond. Against the real clock that is true
+      // when this file runs alone and ordinary to miss inside the full
+      // parallel suite, which is why it failed at random and passed 19/19 in
+      // isolation. The code is correct; only the test's construction of
+      // "exactly" was wrong. Latent since #161 (64c8a1d), found 2026-09-04.
+      vi.useFakeTimers();
+      // finally, not a trailing call: a failing assertion would otherwise
+      // leave the clock frozen for the eighteen tests after this one, and
+      // a cascade of unrelated failures is how a real cause gets lost.
+      try {
+        const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
 
-      const mockMetadata = {
-        fileHash: 'test-hash',
-        fileName: 'test.zip',
-        fileSize: 1024,
-        uploadDate: new Date('2024-01-01'),
-        accountCount: 100,
-        lastAccessed: sevenDaysAgo,
-        version: 2,
-      };
+        const mockMetadata = {
+          fileHash: 'test-hash',
+          fileName: 'test.zip',
+          fileSize: 1024,
+          uploadDate: new Date('2024-01-01'),
+          accountCount: 100,
+          lastAccessed: sevenDaysAgo,
+          version: 2,
+        };
 
-      mockIndexedDBService.getFileMetadata.mockResolvedValue(mockMetadata);
+        mockIndexedDBService.getFileMetadata.mockResolvedValue(mockMetadata);
 
-      const result = await dbCache.get('test-hash');
+        const result = await dbCache.get('test-hash');
 
-      // At exactly 7 days, should still be valid
-      expect(result).not.toBeNull();
+        // At exactly 7 days, should still be valid
+        expect(result).not.toBeNull();
+      } finally {
+        vi.useRealTimers();
+      }
     });
 
     it('should handle metadata with different date formats', async () => {
