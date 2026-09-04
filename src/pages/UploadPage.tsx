@@ -18,20 +18,28 @@ const importGuideDialog = () =>
   import('@/components/guide/GuideDialog').then(m => ({ default: m.GuideDialog }));
 
 /**
- * One retry, because React never calls the factory a second time on its own:
- * `lazyInitializer` runs it only while the payload is Uninitialized, and a
- * payload that rejected re-throws its stored error for the life of the module
- * (react 18.3.1). Without this, one flaky fetch leaves every entrance to the
- * guide — the accordion rows, the drop zone's button, the diagnostic error
- * screen's primary CTA — pushing `?step=N` into the URL and rendering nothing
- * until the reader reloads by hand, and `?guide=1` sticks because the only
- * control that clears it lives inside the dialog that did not mount.
+ * No retry here, and the absence is deliberate: `.catch(importGuideDialog)`
+ * stood in this line and could not recover the transient fetch it named.
  *
- * It buys back the transient case and only that one. A stale HTML document
- * naming a chunk the deploy removed (`pages-cache` is NetworkFirst) fails both
- * attempts; that case needs a reload, not a retry.
+ * A second `import()` of the same specifier does not re-fetch. The browser's
+ * module map records a failed fetch against the (url, type) pair, and later
+ * imports of that specifier settle from the map without a request going out —
+ * so the retry re-delivered the stored rejection. Nor could it have reached a
+ * second fetch by another route: Vite's preload helper makes only CSS deps
+ * rejectable (a `modulepreload` link for a JS chunk resolves to `undefined`),
+ * this chunk's deps are all JS because the single stylesheet is imported from
+ * `main.tsx` and lands in the entry, and the helper's `seen` map means a repeat
+ * call creates no link either. React asks once regardless: `lazyInitializer`
+ * runs the factory only while the payload is Uninitialized, and a rejected
+ * payload re-throws its stored error for the life of the module (react 18.3.1).
+ *
+ * What does work on a chunk that will not load is a reload — Vite dispatches
+ * `vite:preloadError` for exactly that. It is not wired up, because nothing
+ * here has measured how often the case arises, and the failure is already
+ * handled rather than merely dropped: see the ErrorBoundary below, which keeps
+ * the uploader working while the guide stays shut.
  */
-const GuideDialog = lazy(() => importGuideDialog().catch(importGuideDialog));
+const GuideDialog = lazy(importGuideDialog);
 
 /**
  * Upload page
