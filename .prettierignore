@@ -29,9 +29,20 @@ scripts/**/*.js
 #   .worktrees/  — other branches, checked out via `git worktree`
 #   .conclave/   — a separate git repository (agent memory + Conclave DATA)
 #   .superpowers/ — git-ignored agent run artifacts
+#   worktrees/   — the same, under the undotted name the global convention
+#                  creates. Added 2026-09-04: the block above was written for
+#                  `.worktrees` and never covered this path, which is the one
+#                  `git worktree add worktrees/<name>` actually produces.
+#   .design/     — DesignSync output. Sixteen files under .design/tally-prompt/
+#                  made `prettier --check .` exit 1 from a clean main checkout,
+#                  for a reason unrelated to any change under test.
+#   .cmux/       — terminal-multiplexer session state.
 .worktrees
+worktrees
 .conclave
 .superpowers
+.design
+.cmux
 
 # Third-party domain-ownership verification, served verbatim. Nothing in the
 # repo explains its format and no reader here can, so it is left byte-for-byte

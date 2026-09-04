@@ -166,3 +166,20 @@ ds-bundle
 .design-sync/learnings
 # Symlink to ../.ds-sync/node_modules, needed by .design-sync/overrides/dts.mjs.
 .design-sync/node_modules
+
+# Agent scratch directories at the repo root. None of these was ignored before
+# 2026-09-04, so all three sat in `git status` as untracked — which is precisely
+# the configuration the "name the files, never `git add -A`" rule exists to
+# survive, loaded three times over. No trailing slashes, for the reason stated
+# in the design-sync block above: git classifies a symlink as a blob, so a
+# directory-only pattern never matches one.
+#   worktrees/ — `git worktree` checkouts, per the global convention. Note the
+#                sibling `.worktrees` in .prettierignore: the measured 2026-08-19
+#                defence covers the dotted name and not the one the convention
+#                actually creates.
+#   .design/   — DesignSync output (16 files under .design/tally-prompt/ made
+#                `prettier --check .` exit 1 from a clean checkout).
+#   .cmux/     — terminal-multiplexer session state.
+worktrees
+.design
+.cmux
