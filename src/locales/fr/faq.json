@@ -3,10 +3,10 @@
   "items": {
     "howToFind": {
       "question": "Comment voir qui s'est désabonné de vous sur Instagram sans application ?",
-      "answer": "Ouvrez l'Espace Comptes Meta › Créer une exportation › Sélectionnez votre profil › « Exporter vers l'appareil » › Uniquement « Abonnés et abonnements » › Format JSON. Téléchargez le ZIP quand il est prêt (généralement 5-30 minutes), puis téléversez-le ici. L'outil compare vos listes dans le navigateur : l'export n'est envoyé nulle part. Sans identifiants.",
+      "answer": "Ouvrez l'Espace Comptes Meta › Créer une exportation › Sélectionnez votre profil › « Exporter vers l'appareil » › Uniquement « Abonnés et abonnements » › « Tout » › Format JSON. Téléchargez le ZIP quand il est prêt (généralement 5-30 minutes), puis téléversez-le ici. L'outil compare vos listes dans le navigateur : l'export n'est envoyé nulle part. Sans identifiants.",
       "relatedLink": {
         "text": "Démarrer le guide d'exportation",
-        "href": "/wizard"
+        "href": "/upload?guide=1"
       }
     },
     "withoutDownload": {
@@ -14,7 +14,7 @@
       "answer": "Non. Instagram ne fournit pas de liste native des désabonnements. Les seules méthodes sûres sont : (1) Vérifier manuellement les comptes suivis vs abonnés, ou (2) Utiliser votre téléchargement officiel de données avec cet outil. Cet outil fait la méthode 2 pour vous, gratuitement : sans mot de passe, sans connexion, sans risque pour votre compte.",
       "relatedLink": {
         "text": "Apprenez comment obtenir vos données",
-        "href": "/wizard"
+        "href": "/upload?guide=1"
       }
     },
     "privacy": {
@@ -42,7 +42,7 @@
       "answer": "Le téléchargement de données Instagram (via l'Espace Comptes Meta) est l'outil officiel pour exporter les informations de votre compte, y compris les listes d'abonnés et d'abonnements. C'est la seule façon sûre et autorisée d'accéder à ces données sans risquer votre compte. Les applications qui demandent votre mot de passe violent les Conditions d'utilisation d'Instagram.",
       "relatedLink": {
         "text": "Suivez notre guide étape par étape",
-        "href": "/wizard"
+        "href": "/upload?guide=1"
       }
     },
     "htmlExport": {
@@ -66,7 +66,7 @@
       "answer": "Meta envoie généralement vos données en 5-30 minutes par e-mail. Les grands comptes ou une charge serveur élevée peuvent prendre jusqu'à quelques heures. Une fois le ZIP en main, l'analyse tourne dans votre propre navigateur plutôt que sur un serveur : ni file d'attente, ni attente de téléversement. Un export volumineux met naturellement plus de temps à être lu qu'un petit.",
       "relatedLink": {
         "text": "Ajouter un rappel au calendrier",
-        "href": "/wizard/step/8"
+        "href": "/upload?step=8"
       }
     },
     "scale": {
@@ -102,7 +102,7 @@
       "answer": "SafeUnfollow utilise la fonction officielle d'export de données Instagram (dans l'Espace Comptes Meta) au lieu de votre mot de passe. Vous téléchargez vos données sous forme de fichier ZIP directement depuis Instagram et les téléversez ici. L'app lit les fichiers JSON du ZIP pour comparer les abonnés. Tout est traité dans votre navigateur.",
       "relatedLink": {
         "text": "Voir le guide d'export",
-        "href": "/wizard"
+        "href": "/upload?guide=1"
       }
     },
     "betterThanPaid": {

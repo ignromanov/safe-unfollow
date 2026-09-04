@@ -10,7 +10,6 @@ import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
 function getActiveScreen(pathname: string): AppState {
   if (pathname.endsWith('/results')) return AppState.RESULTS;
   if (pathname.endsWith('/upload')) return AppState.UPLOAD;
-  if (pathname.endsWith('/wizard')) return AppState.WIZARD;
   if (pathname.endsWith('/sample')) return AppState.SAMPLE;
   if (pathname.endsWith('/privacy')) return AppState.PRIVACY;
   if (pathname.endsWith('/terms')) return AppState.TERMS;

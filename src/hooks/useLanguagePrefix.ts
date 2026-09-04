@@ -13,7 +13,7 @@ import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '@/locales';
 export function useLanguagePrefix(): string {
   const location = useLocation();
 
-  // Extract language from path: /es/wizard -> 'es'
+  // Extract language from path: /es/upload -> 'es'
   const pathSegments = location.pathname.split('/').filter(Boolean);
   const firstSegment = pathSegments[0];
 

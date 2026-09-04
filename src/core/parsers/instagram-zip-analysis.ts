@@ -164,7 +164,7 @@ export function createCriticalError(analysis: ZipAnalysis): ParseWarning {
       code: 'NOT_INSTAGRAM_EXPORT',
       message: "This doesn't appear to be an Instagram data export.",
       severity: 'error',
-      fix: `Found folders: ${analysis.topLevelFolders.join(', ') || 'none'}. Please download your data from Instagram Settings › Download Your Data › Select JSON format › Include "Followers and following".`,
+      fix: `Found folders: ${analysis.topLevelFolders.join(', ') || 'none'}. Make sure you're uploading the ZIP file from "Create export" in Meta Accounts Center, not a random ZIP file.`,
     };
   }
 
@@ -174,9 +174,9 @@ export function createCriticalError(analysis: ZipAnalysis): ParseWarning {
   if (analysis.format === 'html') {
     return {
       code: 'HTML_FORMAT',
-      message: 'Wrong format: You uploaded HTML format, but JSON is required.',
+      message: "This is an HTML export, and we couldn't find your follower lists inside it.",
       severity: 'error',
-      fix: 'Re-request your data from Instagram and select JSON format instead of HTML. Go to Settings › Meta Accounts Center › Your information and permissions › Download your information › Select JSON format.',
+      fix: 'Ask Instagram for the same export in JSON: Meta Accounts Center › Create export › Select your profile › Export to device › Only "Followers and following" › All time › Format: JSON. That version is the one we read most reliably.',
     };
   }
 

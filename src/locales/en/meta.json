@@ -6,14 +6,9 @@
   "keywords": "instagram unfollowers, who unfollowed me instagram, instagram unfollow tracker, check unfollowers without login, instagram zip file analyzer",
   "routes": {
     "/upload": {
-      "title": "Upload Instagram ZIP: Free Unfollower Analysis",
-      "description": "Upload your Instagram data export (ZIP) for a free unfollower analysis. No login and no password: the file is parsed in your browser and stays on your device.",
-      "ogTitle": "Upload Instagram ZIP: Free Unfollower Analysis"
-    },
-    "/wizard": {
-      "title": "How to Download Your Instagram Data as JSON",
-      "description": "Step-by-step guide to download your Instagram data as JSON. Learn how to request your data export from Meta for free unfollow analysis.",
-      "ogTitle": "How to Download Your Instagram Data as JSON"
+      "title": "Already Have Your Instagram ZIP? Check Unfollowers Free",
+      "description": "Already exported your Instagram data? Upload the ZIP and see who unfollowed you, free. JSON or HTML both work, and the file never leaves your browser.",
+      "ogTitle": "Already Have Your Instagram ZIP? Check Unfollowers Free"
     },
     "/sample": {
       "title": "Try the Instagram Unfollow Tracker: Free Demo",

@@ -48,7 +48,7 @@
       "HTML_FORMAT": {
         "title": "Kami Tidak Dapat Membaca Ekspor Ini",
         "message": "Ini adalah ekspor HTML, dan kami tidak dapat menemukan daftar pengikut Anda di dalamnya.",
-        "fix": "Minta ekspor yang sama dalam format JSON ke Instagram: Pusat Akun Meta › Buat ekspor › Ekspor ke perangkat › Format: JSON. Versi itu yang paling andal kami baca."
+        "fix": "Minta ekspor yang sama dalam format JSON ke Instagram: Pusat Akun Meta › Buat ekspor › Pilih profil Anda › Ekspor ke perangkat › Hanya \"Pengikut dan mengikuti\" › Sepanjang waktu › Format: JSON. Versi itu yang paling andal kami baca."
       },
       "NOT_INSTAGRAM_EXPORT": {
         "title": "Bukan Ekspor Instagram",
@@ -93,12 +93,12 @@
       "TOO_MANY_ENTRIES": {
         "title": "Terlalu Banyak File",
         "message": "ZIP ini berisi lebih banyak file daripada yang dapat diindeks alat ini.",
-        "fix": "Minta ekspor yang lebih kecil: Meta Accounts Center › Buat ekspor › pilih hanya \"Pengikut dan mengikuti\" › format JSON."
+        "fix": "Minta ekspor yang lebih kecil: Pusat Akun Meta › Buat ekspor › Pilih profil Anda › Ekspor ke perangkat › Hanya \"Pengikut dan mengikuti\" › Sepanjang waktu › Format: JSON."
       },
       "FILE_TOO_LARGE": {
         "title": "File Terlalu Besar",
         "message": "Browser Anda tidak dapat membuka ekspor ini — terlalu besar untuk perangkat ini.",
-        "fix": "Minta ekspor yang lebih kecil: Meta Accounts Center › Buat ekspor › pilih hanya \"Pengikut dan mengikuti\" › format JSON. Ekspor itu berukuran beberapa MB, bukan ratusan."
+        "fix": "Minta ekspor yang lebih kecil: Pusat Akun Meta › Buat ekspor › Pilih profil Anda › Ekspor ke perangkat › Hanya \"Pengikut dan mengikuti\" › Sepanjang waktu › Format: JSON. Ekspor itu berukuran beberapa MB, bukan ratusan."
       },
       "JSON_PARSE_ERROR": {
         "title": "Format Data Tidak Valid",

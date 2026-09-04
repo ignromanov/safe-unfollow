@@ -56,17 +56,10 @@ const ACTIVATE_TIMEOUT_MS = 15000;
 const KEY_PATTERN = /^[A-Za-z0-9._-]{6,64}$/;
 
 export type LicenseFailureReason =
-  | 'not_found'
-  | 'limit_reached'
-  | 'disabled'
-  | 'invalid'
-  | 'invalid_input'
-  | 'network'
-  | 'unknown';
+  'not_found' | 'limit_reached' | 'disabled' | 'invalid' | 'invalid_input' | 'network' | 'unknown';
 
 export type ActivateResult =
-  | { ok: true; instanceId: string }
-  | { ok: false; reason: LicenseFailureReason };
+  { ok: true; instanceId: string } | { ok: false; reason: LicenseFailureReason };
 
 export type ValidateResult = { ok: true } | { ok: false; reason: LicenseFailureReason };
 

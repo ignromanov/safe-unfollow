@@ -16,7 +16,7 @@ describe('BreadcrumbSchema', () => {
 
     it('should render script tag with JSON-LD on non-home pages', () => {
       const { container } = renderWithRouter(<BreadcrumbSchema />, {
-        initialEntries: ['/wizard'],
+        initialEntries: ['/sample'],
       });
 
       const script = container.querySelector('script[type="application/ld+json"]');
@@ -34,9 +34,9 @@ describe('BreadcrumbSchema', () => {
   });
 
   describe('breadcrumb structure', () => {
-    it('should generate valid BreadcrumbList schema for /wizard', () => {
+    it('should generate valid BreadcrumbList schema for /sample', () => {
       const { container } = renderWithRouter(<BreadcrumbSchema />, {
-        initialEntries: ['/wizard'],
+        initialEntries: ['/sample'],
       });
 
       const script = container.querySelector('script[type="application/ld+json"]');
@@ -65,9 +65,9 @@ describe('BreadcrumbSchema', () => {
       });
     });
 
-    it('should include correct page name for /wizard', () => {
+    it('should include correct page name for /sample', () => {
       const { container } = renderWithRouter(<BreadcrumbSchema />, {
-        initialEntries: ['/wizard'],
+        initialEntries: ['/sample'],
       });
 
       const script = container.querySelector('script[type="application/ld+json"]');
@@ -76,8 +76,8 @@ describe('BreadcrumbSchema', () => {
       expect(schema.itemListElement[1]).toEqual({
         '@type': 'ListItem',
         position: 2,
-        name: 'Export Guide',
-        item: 'https://safeunfollow.app/wizard',
+        name: 'Sample',
+        item: 'https://safeunfollow.app/sample',
       });
     });
 
@@ -139,17 +139,17 @@ describe('BreadcrumbSchema', () => {
   });
 
   describe('language prefix handling', () => {
-    it('should strip language prefix from Spanish route /es/wizard', () => {
+    it('should strip language prefix from Spanish route /es/sample', () => {
       const { container } = renderWithRouter(<BreadcrumbSchema />, {
-        initialEntries: ['/es/wizard'],
+        initialEntries: ['/es/sample'],
       });
 
       const script = container.querySelector('script[type="application/ld+json"]');
       const schema = JSON.parse(script!.textContent!);
 
-      // Should map to English base path /wizard
-      expect(schema.itemListElement[1].name).toBe('Export Guide');
-      expect(schema.itemListElement[1].item).toBe('https://safeunfollow.app/wizard');
+      // Should map to English base path /sample
+      expect(schema.itemListElement[1].name).toBe('Sample');
+      expect(schema.itemListElement[1].item).toBe('https://safeunfollow.app/sample');
     });
 
     it('should strip language prefix from Russian route /ru/upload', () => {
@@ -231,7 +231,7 @@ describe('BreadcrumbSchema', () => {
 
     it('should have correct position values for breadcrumb items', () => {
       const { container } = renderWithRouter(<BreadcrumbSchema />, {
-        initialEntries: ['/wizard'],
+        initialEntries: ['/sample'],
       });
 
       const script = container.querySelector('script[type="application/ld+json"]');
@@ -272,7 +272,7 @@ describe('BreadcrumbSchema', () => {
   describe('schema validation', () => {
     it('should have all required BreadcrumbList properties', () => {
       const { container } = renderWithRouter(<BreadcrumbSchema />, {
-        initialEntries: ['/wizard'],
+        initialEntries: ['/sample'],
       });
 
       const script = container.querySelector('script[type="application/ld+json"]');

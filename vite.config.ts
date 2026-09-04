@@ -6,7 +6,6 @@ import { defineConfig } from "vite";
 import { buildConfig } from "./vite/build-config";
 import { pwaConfig } from "./vite/pwa-config";
 import { injectLocalizedMeta } from "./vite/ssg-meta-injector";
-import { SUPPORTED_LANGUAGES } from "./src/config/languages";
 import pkg from "./package.json";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -53,28 +52,14 @@ export default defineConfig({
       preload: "body",       // Move full CSS to end of <body> (CSP-safe, no inline onload handler)
     },
 
-    // Include dynamic routes (wizard steps 1-8, 404) for all languages
+    // Add the 404 page for Vercel's static fallback. Nothing else is added
+    // back here any more: this hook used to append eight `/wizard/step/N`
+    // pages per language — 80 of the 90 `/wizard` URLs, every one of them
+    // canonicalized to a single page — and the guide is a dialog on /upload
+    // now (GH#102). Its deep links are `?guide=1` and `?step=N`; vite-react-ssg
+    // prerenders paths, not query strings, so there is nothing to add.
     includedRoutes(paths) {
-      const wizardSteps = Array.from({ length: 8 }, (_, i) => i + 1);
-      const dynamicRoutes: string[] = [];
-
-      // Add wizard steps for English
-      wizardSteps.forEach(step => {
-        dynamicRoutes.push(`/wizard/step/${step}`);
-      });
-
-      // Add 404 page for Vercel static fallback
-      dynamicRoutes.push('/404');
-
-      // Add wizard steps and 404 for other languages (from shared config)
-      SUPPORTED_LANGUAGES.filter(lang => lang !== 'en').forEach(lang => {
-        wizardSteps.forEach(step => {
-          dynamicRoutes.push(`/${lang}/wizard/step/${step}`);
-        });
-        // Note: 404 only needs English version - Vercel uses single 404.html
-      });
-
-      return [...paths, ...dynamicRoutes];
+      return [...paths, '/404'];
     },
 
     // Hook to inject localized meta tags, canonical, hreflang for each page

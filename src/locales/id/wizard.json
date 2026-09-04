@@ -1,12 +1,8 @@
 {
   "header": {
-    "ariaLabel": "Wizard ekspor data Instagram",
     "stepOf": "Langkah {{current}} dari {{total}}",
     "stepNavigation": "Navigasi langkah",
     "stepLabel": "Langkah {{step}}"
-  },
-  "footer": {
-    "navigation": "Aksi wizard"
   },
   "calendar": {
     "addReminder": "Tambah pengingat ke kalender",
@@ -14,11 +10,7 @@
     "details": "Cek email untuk ekspor data Instagram dan upload ke Unfollow Tracker di safeunfollow.app"
   },
   "buttons": {
-    "back": "Kembali",
-    "next": "Langkah Berikutnya",
-    "done": "Selesai, ayo mulai!",
     "close": "Tutup panduan",
-    "cancel": "Batal",
     "trySample": "Coba dengan data sampel",
     "uploadFile": "Unggah File Saya"
   },
@@ -52,36 +44,41 @@
   },
   "steps": {
     "1": {
+      "title": "Buka Halaman Ekspor Instagram",
+      "description": "Klik tombol untuk membuka Pusat Akun Meta. Lalu klik \"Buat ekspor\".",
+      "alt": "Jendela \"Ekspor informasi Anda\" di Pusat Akun dengan tombol biru \"Buat ekspor\"."
+    },
+    "2": {
       "title": "Pilih Profil Instagram Anda",
       "description": "Pilih akun Instagram Anda dari daftar profil yang terhubung.",
       "alt": "Layar ekspor Instagram dengan daftar profil yang terhubung."
     },
-    "2": {
+    "3": {
       "title": "Pilih \"Ekspor ke perangkat\"",
       "description": "Pilih ekspor langsung ke perangkat untuk privasi maksimal. Data Anda tetap bersama Anda.",
       "alt": "Layar tujuan dengan \"Ekspor ke perangkat\" terpilih."
     },
-    "3": {
+    "4": {
       "title": "Pilih Hanya \"Pengikut dan mengikuti\"",
       "description": "Klik \"Sesuaikan\" › Hapus semua › Centang HANYA \"Pengikut dan mengikuti\". Ini menjaga file tetap kecil dan cepat.",
       "alt": "Panel \"Sesuaikan\" dengan hanya \"Pengikut dan mengikuti\" yang dicentang."
     },
-    "4": {
+    "5": {
       "title": "Atur Rentang Tanggal ke \"Sepanjang waktu\"",
       "description": "Klik \"Rentang tanggal\" › Pilih \"Sepanjang waktu\" › Simpan. Ini memastikan riwayat pengikut lengkap.",
       "alt": "Panel \"Rentang tanggal\" dengan \"Sepanjang waktu\" terpilih."
     },
-    "5": {
+    "6": {
       "title": "Ubah Format ke JSON",
       "description": "Klik \"Format\" › Pilih \"JSON\". Ekspor HTML juga berfungsi, tetapi JSON adalah format yang paling andal untuk kami baca.",
       "alt": "Panel \"Format\" dengan \"JSON\" terpilih, bukan HTML."
     },
-    "6": {
+    "7": {
       "title": "Tinjau & Mulai Ekspor",
       "description": "Verifikasi pengaturan: Pengikut dan mengikuti, Sepanjang waktu, format JSON. Lalu klik \"Mulai ekspor\".",
       "alt": "Ringkasan ekspor dengan Pengikut dan mengikuti, Sepanjang waktu, dan JSON, di atas tombol \"Mulai ekspor\"."
     },
-    "7": {
+    "8": {
       "title": "Tunggu Email & Unduh",
       "description": "Instagram akan mengirim email saat siap (biasanya 5-30 menit). Klik tautan unduhan di email untuk mendapatkan file ZIP.",
       "alt": "Email dari Instagram dengan tautan unduhan file ZIP."

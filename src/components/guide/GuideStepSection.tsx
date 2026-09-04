@@ -1,8 +1,9 @@
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, ExternalLink } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { ResponsiveGif } from '@/components/ResponsiveGif';
 import { guideStepAnchorId, guideStepPosterSize, type GuideStep } from '@/config/wizard-steps';
+import { analytics } from '@/lib/analytics';
 
 interface GuideStepSectionProps {
   step: GuideStep;
@@ -28,7 +29,7 @@ export function GuideStepSection({ step, isInView }: GuideStepSectionProps) {
       aria-labelledby={`${anchorId}-heading`}
       // shrink-0: this is a flex item of the column-flex scroll container in
       // GuideDialog, and `overflow-hidden` below makes its automatic minimum
-      // size resolve to 0 per CSS Flexbox §4.5 — without shrink-0 all seven
+      // size resolve to 0 per CSS Flexbox §4.5 — without shrink-0 the
       // sections absorb negative free space by shrinking and clipping instead
       // of the container overflowing.
       className={`shrink-0 overflow-hidden rounded-3xl border ${
@@ -81,6 +82,23 @@ export function GuideStepSection({ step, isInView }: GuideStepSectionProps) {
           <p className="mt-1.5 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
             {t(`steps.${step.id}.description` as any)}
           </p>
+          {/* Step 1 is the only instruction the reader cannot carry out on a
+              screen they are already looking at, so it is the only one that
+              ships its own control. This link used to stand above section 1
+              as a button belonging to no step — which is exactly why the
+              guide's numbering did not match the landing page's: the first
+              thing the reader has to do was not a step. */}
+          {step.externalLink && (
+            <a
+              href={step.externalLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => analytics.linkClick('meta_accounts')}
+              className="mt-3 inline-flex min-h-[48px] cursor-pointer items-center justify-center gap-2 whitespace-normal rounded-2xl bg-primary px-6 py-3 text-center text-sm font-black text-primary-foreground shadow-lg"
+            >
+              {t('entry.cta')} <ExternalLink size={18} className="shrink-0" aria-hidden="true" />
+            </a>
+          )}
         </div>
       </div>
 

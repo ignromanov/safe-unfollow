@@ -1,3 +1,7 @@
+/* eslint-disable react-refresh/only-export-components -- FAQ_KEYS is imported by
+   tests only (faq-keys-coverage, FAQSection.test); no production module imports it,
+   so splitting the file would buy no fast-refresh benefit. Directive added when
+   eslint-plugin-react-refresh 0.5.5 began flagging this pattern (#193). */
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, ChevronUp } from 'lucide-react';

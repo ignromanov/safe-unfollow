@@ -56,7 +56,7 @@ function useSectionsInView(root: HTMLDivElement | null, enabled: boolean) {
           }
           // Same set when nothing was added: the observer fires on every
           // scroll past a boundary, and a fresh Set each time would re-render
-          // seven sections to say nothing changed.
+          // every section to say nothing changed.
           return next ?? previous;
         });
       },
@@ -71,8 +71,8 @@ function useSectionsInView(root: HTMLDivElement | null, enabled: boolean) {
 }
 
 /**
- * Which section the reader is actually in, for the rail's fill and "Step N
- * of 7" label — a different question from `useSectionsInView` above, which
+ * Which section the reader is actually in, for the rail's fill and its
+ * "Step N of <total>" label — a different question from `useSectionsInView` above, which
  * asks what to preload. That one uses a 200px margin because video wants
  * advance notice; this one shrinks the root to a thin band near its top edge
  * (`-70%` off the bottom) because a section 200px below the fold is not the
@@ -243,8 +243,8 @@ export function GuideDialog({
         // (tailwind-merge) lets this later class win. The scroll container
         // below then sizes itself off the header's *real* height via flex-1,
         // instead of a hand-maintained `calc(90vh - Nrem)` that drifts every
-        // time the header's content changes (a wrapped title, the "Step N of
-        // 7" label appearing). rounded-3xl/shadow-2xl match the house style
+        // time the header's content changes (a wrapped title, the rail's
+        // step-of label appearing). rounded-3xl/shadow-2xl match the house style
         // for modals (AlertDialogContent) — every card inside this one is
         // already rounded-3xl, and the shell was the one holdout at rounded-lg.
         // 90svh, not 90vh: iOS resolves a bare vh to the LARGE viewport (URL
@@ -275,31 +275,23 @@ export function GuideDialog({
           ref={setScrollEl}
           data-guide-scroll
           // tabIndex/role/aria-label: Chrome makes an overflow container
-          // focusable by default, Firefox and Safari do not — and the seven
-          // sections inside contain no interactive elements of their own, so
-          // without this a keyboard user tabs straight past all of them to
-          // the footer buttons.
+          // focusable by default, Firefox and Safari do not — and the sections
+          // inside hold exactly one focusable element between them (step 1's
+          // Accounts Center link, GuideStepSection renders it from
+          // `step.externalLink`), so without this a keyboard user reaches that
+          // one link and then the footer buttons, and can never focus the
+          // container to scroll the rest.
           tabIndex={0}
           role="group"
           aria-label={t('entry.accordion.trigger', { count: GUIDE_STEPS.length })}
           className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4"
         >
-          {/* Unconditional: this is the step before step 1, and nothing else
-              in the guide says where Meta's profile picker lives — sections
-              1..7 walk the export flow once the reader is already inside it.
-              Four of the six ways into this dialog (the StepAccordion row,
-              and all three UploadZone triggers) used to open here with no
-              way to reach Accounts Center at all. */}
-          <a
-            href={ACCOUNTS_CENTER_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => analytics.linkClick('meta_accounts')}
-            className="inline-flex min-h-[48px] w-full shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-normal rounded-2xl bg-primary px-6 py-3 text-center text-sm font-black text-primary-foreground shadow-lg"
-          >
-            {t('entry.cta')} <ExternalLink size={18} className="shrink-0" aria-hidden="true" />
-          </a>
-
+          {/* No standalone Accounts Center button above the sections any more:
+              it was here because "go to Accounts Center" was not a step, and
+              four of the six ways into this dialog opened with no way to reach
+              it. It is section 1 now, first in this scroll and numbered, so a
+              button repeating it here would be the third copy of one link in
+              one dialog. */}
           {GUIDE_STEPS.map(guideStep => (
             <GuideStepSection
               key={guideStep.id}
@@ -340,10 +332,18 @@ export function GuideDialog({
               <Calendar size={18} aria-hidden="true" />
               {t('calendar.addReminder')}
             </button>
+            {/* Ghost, but the same 48px box as the two above it. It used to
+                be a bare line of text: the only one of the three controls
+                without a min-height, so a reader at the bottom of the scroll
+                saw two buttons and a grey caption. Same size, less ink, is
+                what keeps it readable as a control without making it compete
+                with the CTA — and the hover is neutral (`bg-muted`) rather
+                than brand-tinted, because leaving is not one of the two
+                things this card is asking for. */}
             <button
               type="button"
               onClick={onClose}
-              className="cursor-pointer text-sm font-bold text-muted-foreground hover:text-foreground"
+              className="inline-flex min-h-[48px] cursor-pointer items-center justify-center rounded-2xl px-6 py-3 text-sm font-bold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
               {t('buttons.close')}
             </button>

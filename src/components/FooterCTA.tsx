@@ -23,7 +23,7 @@ export function FooterCTA() {
 
       <div className="flex flex-col sm:flex-row items-center justify-center gap-5 w-full max-w-lg px-6">
         <PrefixedLink
-          to="/wizard/step/1"
+          to="/upload?guide=1"
           className="w-full sm:w-auto px-12 py-5 rounded-2xl bg-primary text-primary-foreground font-black text-base md:text-xl shadow-2xl shadow-primary/40 hover:scale-[1.05] active:scale-95 transition-all flex items-center justify-center gap-3 cursor-pointer"
         >
           <Play size={22} fill="currentColor" />

@@ -1,12 +1,8 @@
 {
   "header": {
-    "ariaLabel": "Asistente de exportación de datos de Instagram",
     "stepOf": "Paso {{current}} de {{total}}",
     "stepNavigation": "Navegación de pasos",
     "stepLabel": "Paso {{step}}"
-  },
-  "footer": {
-    "navigation": "Acciones del asistente"
   },
   "calendar": {
     "addReminder": "Añadir recordatorio al calendario",
@@ -14,11 +10,7 @@
     "details": "Revisa tu email para la exportación de datos de Instagram y súbelo a Unfollow Tracker en safeunfollow.app"
   },
   "buttons": {
-    "back": "Atrás",
-    "next": "Siguiente paso",
-    "done": "¡Listo, vamos!",
     "close": "Cerrar guía",
-    "cancel": "Cancelar",
     "trySample": "Prueba con datos de ejemplo",
     "uploadFile": "Subir mi archivo"
   },
@@ -52,36 +44,41 @@
   },
   "steps": {
     "1": {
+      "title": "Abre la página de exportación de Instagram",
+      "description": "Haz clic en el botón para abrir el Centro de cuentas de Meta. Luego haz clic en \"Crear exportación\".",
+      "alt": "El cuadro de diálogo \"Exportar tu información\" en el Centro de cuentas, con el botón azul \"Crear exportación\"."
+    },
+    "2": {
       "title": "Elige tu perfil de Instagram",
       "description": "Selecciona tu cuenta de Instagram de la lista de perfiles conectados.",
       "alt": "La pantalla de exportación de Instagram con la lista de perfiles conectados."
     },
-    "2": {
+    "3": {
       "title": "Selecciona \"Exportar al dispositivo\"",
       "description": "Elige exportar directamente a tu dispositivo para máxima privacidad. Tus datos se quedan contigo.",
       "alt": "La pantalla de destino con \"Exportar al dispositivo\" seleccionado."
     },
-    "3": {
+    "4": {
       "title": "Selecciona solo \"Seguidores y seguidos\"",
       "description": "Haz clic en \"Personalizar\" › Desmarca todo › Marca SOLO \"Seguidores y seguidos\". Esto mantiene tu archivo pequeño y rápido.",
       "alt": "El panel \"Personalizar\" con solo \"Seguidores y seguidos\" marcado."
     },
-    "4": {
+    "5": {
       "title": "Configura el rango de fechas a \"Todo el tiempo\"",
       "description": "Haz clic en \"Rango de fechas\" › Selecciona \"Todo el tiempo\" › Guardar. Esto asegura tu historial completo de seguidores.",
       "alt": "El panel \"Rango de fechas\" con \"Todo el tiempo\" seleccionado."
     },
-    "5": {
+    "6": {
       "title": "Cambia el formato a JSON",
       "description": "Haz clic en \"Formato\" › Selecciona \"JSON\". Las exportaciones en HTML también funcionan, pero JSON es el formato que leemos de forma más confiable.",
       "alt": "El panel \"Formato\" con \"JSON\" seleccionado en lugar de HTML."
     },
-    "6": {
+    "7": {
       "title": "Revisa e inicia la exportación",
       "description": "Verifica que tu configuración muestre: Seguidores y seguidos, Todo el tiempo, formato JSON. Luego haz clic en \"Iniciar exportación\".",
       "alt": "El resumen de la exportación con Seguidores y seguidos, Todo el tiempo y JSON, sobre el botón \"Iniciar exportación\"."
     },
-    "7": {
+    "8": {
       "title": "Espera el email y descarga",
       "description": "Instagram te enviará un email cuando esté listo (normalmente 5-30 minutos). Haz clic en el enlace de descarga del email para obtener tu archivo ZIP.",
       "alt": "El email de Instagram con el enlace de descarga del archivo ZIP."

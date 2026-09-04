@@ -3,10 +3,10 @@
   "items": {
     "howToFind": {
       "question": "Bagaimana cara cek siapa yang unfollow di Instagram tanpa aplikasi?",
-      "answer": "Buka Pusat Akun Meta › Buat ekspor › Pilih profil Anda › \"Ekspor ke perangkat\" › Hanya \"Pengikut dan mengikuti\" › Format JSON. Unduh ZIP saat siap (biasanya 5-30 menit), lalu unggah di sini. Alat ini membandingkan daftar Anda di dalam browser, jadi ekspornya tidak pernah diunggah ke mana pun. Tidak perlu login.",
+      "answer": "Buka Pusat Akun Meta › Buat ekspor › Pilih profil Anda › \"Ekspor ke perangkat\" › Hanya \"Pengikut dan mengikuti\" › Atur rentang tanggal ke \"Sepanjang waktu\" › Format JSON. Unduh ZIP saat siap (biasanya 5-30 menit), lalu unggah di sini. Alat ini membandingkan daftar Anda di dalam browser, jadi ekspornya tidak pernah diunggah ke mana pun. Tidak perlu login.",
       "relatedLink": {
         "text": "Mulai panduan ekspor",
-        "href": "/wizard"
+        "href": "/upload?guide=1"
       }
     },
     "withoutDownload": {
@@ -14,7 +14,7 @@
       "answer": "Tidak. Instagram tidak menyediakan daftar unfollower bawaan. Satu-satunya metode aman adalah: (1) Memeriksa secara manual akun yang diikuti vs pengikut, atau (2) Menggunakan unduhan data resmi Anda dengan alat ini. Pelacak ini menjalankan metode 2 secara gratis: tanpa kata sandi, tanpa login, tanpa risiko akun.",
       "relatedLink": {
         "text": "Pelajari cara mendapatkan data Anda",
-        "href": "/wizard"
+        "href": "/upload?guide=1"
       }
     },
     "privacy": {
@@ -42,7 +42,7 @@
       "answer": "Unduhan Data Instagram (melalui Pusat Akun Meta) adalah alat resmi untuk mengekspor informasi akun Anda termasuk daftar pengikut dan mengikuti. Ini satu-satunya cara yang aman dan resmi untuk mengakses data ini tanpa mempertaruhkan akun Anda. Aplikasi yang meminta kata sandi Anda melanggar Ketentuan Layanan Instagram.",
       "relatedLink": {
         "text": "Ikuti panduan langkah demi langkah kami",
-        "href": "/wizard"
+        "href": "/upload?guide=1"
       }
     },
     "htmlExport": {
@@ -66,7 +66,7 @@
       "answer": "Meta biasanya mengirim data Anda dalam 5-30 menit melalui email. Akun besar atau beban server tinggi bisa memakan waktu beberapa jam. Setelah ZIP ada di tangan Anda, analisisnya berjalan di browser Anda sendiri, bukan di server, jadi tidak ada antrean dan tidak ada waktu tunggu unggahan. Ekspor yang besar memang butuh waktu lebih lama untuk dibaca daripada yang kecil.",
       "relatedLink": {
         "text": "Tambah pengingat kalender",
-        "href": "/wizard/step/8"
+        "href": "/upload?step=8"
       }
     },
     "scale": {
@@ -102,7 +102,7 @@
       "answer": "SafeUnfollow menggunakan fitur ekspor data resmi Instagram (di Pusat Akun Meta) alih-alih password Anda. Anda mengunduh data sebagai file ZIP langsung dari Instagram dan mengunggahnya di sini. Aplikasi membaca file JSON di dalam ZIP untuk membandingkan daftar pengikut dan yang diikuti, dan semua pemrosesan terjadi di browser Anda. Tanpa akses API, tanpa scraping, tanpa kredensial login.",
       "relatedLink": {
         "text": "Lihat panduan ekspor",
-        "href": "/wizard"
+        "href": "/upload?guide=1"
       }
     },
     "betterThanPaid": {

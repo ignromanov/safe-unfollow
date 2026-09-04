@@ -2,9 +2,7 @@
   "title": "Cómo ver quién <gradient>dejó de seguirte en Instagram</gradient>",
   "subtitle": "Sigue estos 9 simples pasos para analizar tu cuenta de forma segura sin compartir tu contraseña.",
   "important": "Crítico",
-  "openStep": "Abrir paso en la guía",
   "uploadButton": "Subir mi archivo",
-  "openStepAria": "Paso {{step}}: {{title}}. Clic para abrir en la guía",
   "steps": {
     "1": {
       "title": "Abre la página de exportación de Instagram",

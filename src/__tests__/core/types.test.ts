@@ -131,9 +131,9 @@ describe('Diagnostic Error Mapping', () => {
       const error = createDiagnosticError('HTML_FORMAT');
 
       expect(error.code).toBe('HTML_FORMAT');
-      expect(error.title).toBe('Wrong Format: HTML');
+      expect(error.title).toBe("We couldn't read this export");
       expect(error.icon).toBe('html');
-      expect(error.message).toContain('HTML format');
+      expect(error.message).toContain('HTML export');
       expect(error.fix).toContain('JSON');
     });
 

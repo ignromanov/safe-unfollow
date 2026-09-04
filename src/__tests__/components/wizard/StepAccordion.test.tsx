@@ -30,13 +30,13 @@ describe('StepAccordion', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('opens to seven rows, one per section', async () => {
+  it('opens to one row per section', async () => {
     const user = userEvent.setup();
     render(<StepAccordion />);
 
     await user.click(screen.getByRole('button', { name: /step-by-step/i }));
 
-    expect(rows()).toHaveLength(7);
+    expect(rows()).toHaveLength(GUIDE_STEPS.length);
   });
 
   it('asks its caller for a section rather than navigating', async () => {
@@ -68,17 +68,22 @@ describe('StepAccordion', () => {
     expect(poster).toHaveAttribute('height');
   });
 
-  it("reserves step 2's poster box from its own 5:3 intrinsic size, not the 4:3 default", async () => {
+  it("reserves the 5:3 posters' boxes from their own intrinsic size, not the 4:3 default", async () => {
     const user = userEvent.setup();
     const { container } = render(<StepAccordion />);
 
     await user.click(screen.getByRole('button', { name: /step-by-step/i }));
 
-    const [step2Poster, step3Poster] = container.querySelectorAll('img');
-    expect(step2Poster).toHaveAttribute('width', '600');
-    expect(step2Poster).toHaveAttribute('height', '360');
-    expect(step3Poster).toHaveAttribute('width', '600');
-    expect(step3Poster).toHaveAttribute('height', '450');
+    // Steps 1 and 2 are both 600x360; every step after them is 600x450.
+    // Two 5:3 rows, not one — `step-1` came back into the list when "Open
+    // Accounts Center" became a numbered step, and it shares step 2's shape.
+    const posters = container.querySelectorAll('img');
+    for (const poster of [posters[0], posters[1]]) {
+      expect(poster).toHaveAttribute('width', '600');
+      expect(poster).toHaveAttribute('height', '360');
+    }
+    expect(posters[2]).toHaveAttribute('width', '600');
+    expect(posters[2]).toHaveAttribute('height', '450');
   });
 
   it('toggles closed again on a second click', async () => {
@@ -87,7 +92,7 @@ describe('StepAccordion', () => {
     const trigger = screen.getByRole('button', { name: /step-by-step/i });
 
     await user.click(trigger);
-    expect(rows()).toHaveLength(7);
+    expect(rows()).toHaveLength(GUIDE_STEPS.length);
 
     await user.click(trigger);
     expect(rows()).toHaveLength(0);

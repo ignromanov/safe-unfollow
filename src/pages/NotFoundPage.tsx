@@ -59,7 +59,7 @@ export function Component() {
           </h4>
           <ul className="space-y-2 text-sm font-medium text-zinc-600 dark:text-zinc-400">
             <li>
-              <a href={`${prefix}/wizard`} className="hover:text-primary transition-colors">
+              <a href={`${prefix}/upload?guide=1`} className="hover:text-primary transition-colors">
                 › How to get Instagram data
               </a>
             </li>

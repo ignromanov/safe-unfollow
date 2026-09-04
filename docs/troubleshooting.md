@@ -17,7 +17,7 @@ last_updated: 2026-09-03
 
 **Solutions**:
 1. **The format is not the cause**: both JSON and HTML exports have been read since August 2026. If you already have an export, upload it — do not request a new one to change its format.
-2. **Verify data selection**: Confirm you selected "Followers and Following" section
+2. **Verify data selection**: Confirm you selected "Followers and following" when creating the export
 3. **Check file structure**: Your ZIP should contain files like:
    ```
    connections/followers_and_following/

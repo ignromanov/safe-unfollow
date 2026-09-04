@@ -121,17 +121,16 @@ export function createDiagnosticError(
       severity: 'error',
     },
     HTML_FORMAT: {
-      title: 'Wrong Format: HTML',
-      message:
-        'You downloaded your data in HTML format, but this tool requires JSON format to work.',
-      fix: 'Go back to Instagram Settings › Download Your Data › Select "JSON" format (not HTML) › Request download again.',
+      title: "We couldn't read this export",
+      message: "This is an HTML export, and we couldn't find your follower lists inside it.",
+      fix: 'Ask Instagram for the same export in JSON: Meta Accounts Center › Create export › Select your profile › Export to device › Only "Followers and following" › All time › Format: JSON. That version is the one we read most reliably.',
       icon: 'html',
       severity: 'error',
     },
     NOT_INSTAGRAM_EXPORT: {
       title: 'Not an Instagram Export',
       message: "This ZIP file doesn't appear to be an Instagram data export.",
-      fix: 'Make sure you\'re uploading the ZIP file from Instagram\'s "Download Your Data" feature, not a random ZIP file.',
+      fix: 'Make sure you\'re uploading the ZIP file from "Create export" in Meta Accounts Center, not a random ZIP file.',
       icon: 'folder',
       severity: 'error',
     },
@@ -204,14 +203,14 @@ export function createDiagnosticError(
     TOO_MANY_ENTRIES: {
       title: 'Too Many Files',
       message: 'This ZIP contains more files than this tool can index.',
-      fix: 'Ask Instagram for a smaller export: Meta Accounts Center › Create export › select only "Followers and following" › format JSON.',
+      fix: 'Ask Instagram for a smaller export: Meta Accounts Center › Create export › Select your profile › Export to device › Only "Followers and following" › All time › Format: JSON.',
       icon: 'file',
       severity: 'error',
     },
     FILE_TOO_LARGE: {
       title: 'File Too Large',
       message: 'Your browser could not open this export — it is too large for this device.',
-      fix: 'Ask Instagram for just the part this tool needs: Download your information › Some of your information › Followers and Following › JSON.',
+      fix: 'Ask Instagram for a smaller export: Meta Accounts Center › Create export › Select your profile › Export to device › Only "Followers and following" › All time › Format: JSON. That export is a few MB instead of hundreds.',
       icon: 'file',
       severity: 'error',
     },

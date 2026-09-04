@@ -1,8 +1,9 @@
 import { useTranslation, Trans } from 'react-i18next';
-import { ChevronRight, Play, Upload } from 'lucide-react';
+import { ExternalLink, Play, Upload } from 'lucide-react';
 import { PrefixedLink } from '@/components/PrefixedLink';
 import { ResponsiveGif } from '@/components/ResponsiveGif';
 import { GUIDE_STEPS } from '@/config/wizard-steps';
+import { analytics } from '@/lib/analytics';
 
 interface HowToStep {
   id: number;
@@ -10,34 +11,40 @@ interface HowToStep {
   description: string;
   isWarning?: boolean;
   visual?: string;
+  externalLink?: string;
 }
 
-// Step metadata (visuals and warnings are not translated).
+// Step metadata (visuals, warnings and off-site destinations are not translated).
 //
-// The seven middle steps ARE the guide's seven sections - same assets, same
-// warning flag - so they are derived from GUIDE_STEPS rather than restated.
-// Restating them is how this file came to mark two steps critical while
-// wizard-steps.ts marked one: both name the same /wizard/step-N assets and
-// neither imported the other, so the two could not disagree out loud.
+// The first eight steps ARE the guide's eight sections - same assets, same
+// warning flag, same Accounts Center link on step 1 - so they are derived from
+// GUIDE_STEPS rather than restated. Restating them is how this file came to
+// mark two steps critical while wizard-steps.ts marked one: both name the same
+// /wizard/step-N assets and neither imported the other, so the two could not
+// disagree out loud.
 //
-// Only the ends are local: step 1 is the entry screen the guide stopped
-// carrying (GH#102), and step 9 is the hand-off to /upload with no visual.
-const STEP_META: Array<{ isWarning?: boolean; visual?: string }> = [
-  { visual: '/wizard/step-1' },
-  ...GUIDE_STEPS.map(({ isWarning, visual }) => ({ isWarning, visual })),
-  {}, // Step 9: no visual, navigates to upload page
+// Only the tail is local: the last step is the hand-off to /upload, which is
+// ours rather than Meta's and has no visual.
+const STEP_META: Array<{ isWarning?: boolean; visual?: string; externalLink?: string }> = [
+  ...GUIDE_STEPS.map(({ isWarning, visual, externalLink }) => ({
+    isWarning,
+    visual,
+    externalLink,
+  })),
+  {}, // The hand-off: no visual, its own link to the upload page
 ];
 
-/** Step 9 is the hand-off to upload; the rest open their wizard step. */
-function stepHref(stepIndex: number): string {
-  return stepIndex === 8 ? '/upload' : `/wizard/step/${stepIndex + 1}`;
-}
+const STEP_COUNT = STEP_META.length;
 
 export function HowToSection() {
-  const { t } = useTranslation('howto');
+  // Two namespaces: the steps are `howto`'s, and step 1's button label is
+  // `wizard.entry.cta` — the same string the guide dialog puts on the same
+  // link, already native in ten locales. Re-translating "Open Accounts Center"
+  // into a second key would be two canons for one button.
+  const { t } = useTranslation(['howto', 'wizard']);
 
   // Build steps from translations (using 'as any' for dynamic keys)
-  const steps: HowToStep[] = Array.from({ length: 9 }, (_, i) => ({
+  const steps: HowToStep[] = Array.from({ length: STEP_COUNT }, (_, i) => ({
     id: i + 1,
     title: t(`steps.${i + 1}.title` as any),
     description: t(`steps.${i + 1}.description` as any),
@@ -95,53 +102,72 @@ export function HowToSection() {
           </p>
 
           <ol className="space-y-16 md:space-y-24 relative before:absolute before:start-6 md:before:start-8 before:top-4 before:bottom-4 before:w-0.5 before:bg-border">
+            {/* The rows are content, not navigation. Every card used to be a
+                link into the guide dialog on /upload — nine links to one
+                screen, on the page that already shows the same eight posters
+                and the same eight instructions. This section has to answer the
+                question on its own, so the only two links left among the rows
+                are the two actions a reader can actually take from here: ask
+                Instagram for the file, and hand the file over. The section's
+                closing CTA below is a third. */}
             {steps.map((step, idx) => (
-              <li key={step.id} className="relative group">
-                <PrefixedLink
-                  to={stepHref(idx)}
-                  aria-label={t('openStepAria', { step: step.id, title: step.title })}
-                  className="block ps-16 md:ps-24 cursor-pointer"
-                >
-                  <div className="absolute start-0 top-0 w-12 h-12 md:w-16 md:h-16 rounded-2xl md:rounded-3xl bg-card border-2 border-primary flex items-center justify-center font-black text-lg md:text-2xl text-primary z-10 group-hover:scale-110 group-hover:shadow-2xl transition-all duration-300">
-                    {step.id}
-                  </div>
-                  <div className="space-y-4">
-                    <h3 className="text-2xl md:text-3xl font-display font-bold flex items-center flex-wrap gap-3 text-zinc-900 dark:text-white group-hover:text-primary transition-colors">
-                      {step.title}
-                      {step.isWarning && (
-                        <span className="text-xs bg-amber-400 text-black px-3 py-1 rounded-full font-black uppercase tracking-widest shadow-sm">
-                          {t('important')}
-                        </span>
-                      )}
-                    </h3>
-                    <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed font-medium text-base md:text-lg">
-                      {step.description}
-                    </p>
-                    {step.visual && (
-                      <div className="rounded-3xl md:rounded-4xl overflow-hidden border border-border shadow-md max-w-xl mt-6 group-hover:border-primary/30 transition-all flex items-end">
-                        <ResponsiveGif
-                          basePath={step.visual}
-                          alt={step.title}
-                          className="w-full h-auto grayscale-[0.2] group-hover:grayscale-0 transition-all duration-700"
-                        />
-                      </div>
-                    )}
-                    {/* Step 9: upload call-to-action instead of a visual. Presentational
-                        only — the whole card is already the link to the same place, and a
-                        nested anchor would be invalid HTML. */}
-                    {idx === 8 && (
-                      <span className="mt-6 inline-flex items-center justify-center gap-3 px-8 py-4 bg-primary text-primary-foreground rounded-2xl font-black shadow-xl group-hover:scale-105 transition-all text-sm md:text-base">
-                        <Upload size={20} />
-                        {t('uploadButton')}
+              <li key={step.id} className="relative ps-16 md:ps-24">
+                <div className="absolute start-0 top-0 w-12 h-12 md:w-16 md:h-16 rounded-2xl md:rounded-3xl bg-card border-2 border-primary flex items-center justify-center font-black text-lg md:text-2xl text-primary z-10">
+                  {step.id}
+                </div>
+                <div className="space-y-4">
+                  <h3 className="text-2xl md:text-3xl font-display font-bold flex items-center flex-wrap gap-3 text-zinc-900 dark:text-white">
+                    {step.title}
+                    {step.isWarning && (
+                      <span className="text-xs bg-amber-400 text-black px-3 py-1 rounded-full font-black uppercase tracking-widest shadow-sm">
+                        {t('important')}
                       </span>
                     )}
-                    {idx !== 8 && (
-                      <div className="flex items-center gap-2 text-primary font-black text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
-                        {t('openStep')} <ChevronRight size={14} />
-                      </div>
-                    )}
-                  </div>
-                </PrefixedLink>
+                  </h3>
+                  <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed font-medium text-base md:text-lg">
+                    {step.description}
+                  </p>
+                  {/* Step 1's own control, the same link the guide's section 1
+                      carries. `linkClick` records no surface by design, so
+                      `url_path` is the only separator there is: it tells this
+                      one apart, because it is the only one that fires from "/".
+                      It cannot tell apart the three on "/upload" — the dialog's
+                      footer link, its step 1 section, and UploadGuideBlock. */}
+                  {step.externalLink && (
+                    <a
+                      href={step.externalLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => analytics.linkClick('meta_accounts')}
+                      className="mt-6 inline-flex items-center justify-center gap-3 px-8 py-4 bg-primary text-primary-foreground rounded-2xl font-black shadow-xl hover:scale-105 active:scale-95 transition-all text-sm md:text-base cursor-pointer"
+                    >
+                      {t('wizard:entry.cta')}
+                      <ExternalLink size={20} aria-hidden="true" className="shrink-0" />
+                    </a>
+                  )}
+                  {step.visual && (
+                    <div className="rounded-3xl md:rounded-4xl overflow-hidden border border-border shadow-md max-w-xl mt-6 flex items-end">
+                      <ResponsiveGif
+                        basePath={step.visual}
+                        alt={step.title}
+                        className="w-full h-auto"
+                      />
+                    </div>
+                  )}
+                  {/* The last step has no visual, because it does not happen
+                      inside Instagram. It is a real link now rather than a
+                      styled span: the card around it used to be the anchor, so
+                      a nested one would have been invalid HTML. */}
+                  {idx === STEP_COUNT - 1 && (
+                    <PrefixedLink
+                      to="/upload"
+                      className="mt-6 inline-flex items-center justify-center gap-3 px-8 py-4 bg-primary text-primary-foreground rounded-2xl font-black shadow-xl hover:scale-105 active:scale-95 transition-all text-sm md:text-base cursor-pointer"
+                    >
+                      <Upload size={20} aria-hidden="true" />
+                      {t('uploadButton')}
+                    </PrefixedLink>
+                  )}
+                </div>
               </li>
             ))}
           </ol>
@@ -156,7 +182,7 @@ export function HowToSection() {
               </p>
             </div>
             <PrefixedLink
-              to="/wizard/step/1"
+              to="/upload?guide=1"
               className="cursor-pointer w-full md:w-auto px-10 py-5 bg-white text-primary font-black rounded-3xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3 text-lg shadow-xl"
             >
               {t('cta.button')} <Play size={22} fill="currentColor" />

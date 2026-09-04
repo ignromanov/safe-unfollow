@@ -6,14 +6,9 @@
   "keywords": "quem deixou de te seguir instagram, rastreador de unfollowers, quem parou de me seguir, verificar unfollowers sem login, arquivo zip do instagram",
   "routes": {
     "/upload": {
-      "title": "Envie seu ZIP do Instagram: quem deixou de te seguir",
-      "description": "Envie sua exportação de dados do Instagram (ZIP) e veja de graça quem deixou de te seguir. Sem login e sem senha: o arquivo é lido dentro do seu navegador.",
-      "ogTitle": "Envie seu ZIP do Instagram: quem deixou de te seguir"
-    },
-    "/wizard": {
-      "title": "Como baixar seus dados do Instagram em formato JSON",
-      "description": "Guia passo a passo para pedir à Meta a exportação dos seus dados do Instagram em formato JSON, baixar o arquivo ZIP e deixá-lo pronto para a análise. Sem senha.",
-      "ogTitle": "Como baixar seus dados do Instagram em formato JSON"
+      "title": "Já tem o ZIP do Instagram? Veja quem deixou de te seguir",
+      "description": "Envie sua exportação do Instagram e veja grátis quem deixou de te seguir. Serve JSON ou HTML. Sem login e sem senha: o arquivo é lido dentro do seu navegador.",
+      "ogTitle": "Já tem o ZIP do Instagram? Veja quem deixou de te seguir"
     },
     "/sample": {
       "title": "Teste a demo gratuita do rastreador de unfollowers",

@@ -84,7 +84,7 @@ describe('LanguageSwitcher', () => {
 
   it('should show different language when URL path changes', () => {
     // Mock Spanish URL path - language comes from URL, not store
-    mockUseLocation.mockReturnValue({ pathname: '/es/wizard' });
+    mockUseLocation.mockReturnValue({ pathname: '/es/sample' });
 
     render(<LanguageSwitcher />);
 
@@ -137,12 +137,12 @@ describe('LanguageSwitcher', () => {
   it('should trigger full page reload to new language URL when language is selected', async () => {
     const user = userEvent.setup();
 
-    // Mock location for /wizard path
-    mockUseLocation.mockReturnValue({ pathname: '/wizard' });
+    // Mock location for /sample path
+    mockUseLocation.mockReturnValue({ pathname: '/sample' });
 
     // Mock window.location.href
     delete (window as any).location;
-    (window as any).location = { href: '', pathname: '/wizard' };
+    (window as any).location = { href: '', pathname: '/sample' };
 
     render(<LanguageSwitcher />);
 
@@ -154,7 +154,7 @@ describe('LanguageSwitcher', () => {
     // Should persist language synchronously BEFORE redirect
     expect(store.persistLanguageSync).toHaveBeenCalledWith('es');
     // Should reload to Spanish URL
-    expect(window.location.href).toBe('/es/wizard');
+    expect(window.location.href).toBe('/es/sample');
   });
 
   it('should call analytics.languageChange when language is selected', async () => {

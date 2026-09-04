@@ -222,10 +222,10 @@ true: the engine is built and unit-tested against a 1M-account bitset.
 
 ### SSG Architecture
 - **Pre-rendered pages**: derived, never written down on this page. `src/routes.tsx` states the
-  shape — the static routes plus the wizard steps, once per supported language — and
+  shape — the static routes, once per supported language — and
   `src/__tests__/docs/architecture-facts.test.ts` computes the number from it. The last audit found
-  this count copied into six documents with four different values, and it halves again when the
-  wizard step routes are removed
+  this count copied into six documents with four different values, and it dropped by more than
+  half when the wizard step routes stopped being pages (GH#102)
 - **Path-based routing**: `/es/upload`, `/ar/results`, etc.
 - **Localized meta tags**: Dynamic title/description per language
 - **hreflang tags**: SEO optimization for language variants
@@ -260,9 +260,8 @@ src/
 ├── pages/                # SSG page components
 │   ├── HomePage.tsx      # / route
 │   ├── UploadPage.tsx    # /upload route (the guide opens here)
-│   ├── UploadPage.tsx    # /upload route
 │   ├── ResultsPage.tsx   # /results route
-│   └── ...               # 8 pages total
+│   └── ...               # 7 pages total
 ├── components/           # UI components
 │   ├── ui/               # shadcn/ui primitives
 │   ├── Layout.tsx        # Root layout (ThemeProvider, Header, Footer)

@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 import { Component, type ReactNode, type ErrorInfo } from 'react';
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
 

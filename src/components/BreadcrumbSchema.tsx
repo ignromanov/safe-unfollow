@@ -2,7 +2,6 @@ import { useLocation } from 'react-router-dom';
 
 const BREADCRUMB_NAMES: Record<string, string> = {
   '/': 'Home',
-  '/wizard': 'Export Guide',
   '/upload': 'Upload',
   '/results': 'Results',
   '/sample': 'Sample',
@@ -22,7 +21,7 @@ const BASE_URL = 'https://safeunfollow.app';
 export function BreadcrumbSchema() {
   const location = useLocation();
 
-  // Remove language prefix to get base path (e.g., /es/wizard -> /wizard)
+  // Remove language prefix to get base path (e.g., /es/upload -> /upload)
   const path = location.pathname.replace(/^\/[a-z]{2}(?=\/|$)/, '') || '/';
 
   const items = [{ name: 'Home', url: `${BASE_URL}/` }];
