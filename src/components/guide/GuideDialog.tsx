@@ -243,8 +243,8 @@ export function GuideDialog({
         // (tailwind-merge) lets this later class win. The scroll container
         // below then sizes itself off the header's *real* height via flex-1,
         // instead of a hand-maintained `calc(90vh - Nrem)` that drifts every
-        // time the header's content changes (a wrapped title, the "Step N of
-        // 7" label appearing). rounded-3xl/shadow-2xl match the house style
+        // time the header's content changes (a wrapped title, the rail's
+        // step-of label appearing). rounded-3xl/shadow-2xl match the house style
         // for modals (AlertDialogContent) — every card inside this one is
         // already rounded-3xl, and the shell was the one holdout at rounded-lg.
         // 90svh, not 90vh: iOS resolves a bare vh to the LARGE viewport (URL

@@ -100,8 +100,8 @@ describe('GuideDialog', () => {
 
   it('declares its own scroll container', () => {
     // DialogContent is a centred `fixed` with no max-height and no overflow.
-    // Seven sections in one scroll need a container, and it is this container
-    // that scrolls to a section anchor.
+    // Every section shares one scroll. That needs a container, and it is this
+    // container that scrolls to a section anchor.
     open();
 
     expect(document.querySelector('[data-guide-scroll]')).not.toBeNull();
@@ -212,7 +212,8 @@ describe('GuideDialog', () => {
 
   it('makes the scroll container reachable by keyboard in browsers that do not do this natively', () => {
     // Chrome focuses an overflow container by default; Firefox and Safari do
-    // not, and the seven sections carry no interactive element of their own.
+    // not, and only step 1 carries an interactive element of its own (its
+    // externalLink anchor), so every other section is unreachable without this.
     open();
 
     const scroll = document.querySelector('[data-guide-scroll]') as HTMLElement;
