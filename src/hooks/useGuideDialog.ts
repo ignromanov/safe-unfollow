@@ -71,6 +71,21 @@ function parseStep(raw: string | null): number | null {
  * shared or restored. It is component-instance memory, and it is reported as
  * `'url'` whenever the URL alone opened the dialog.
  *
+ * `source`'s two channels (the `source` state below, and `location.state` for
+ * a pusher that is an anchor — see `SamePathPushState`) are a deliberate
+ * split, not an accident to collapse into one. The alternative considered was
+ * folding both into `location.state`, so `open()` writes there too instead of
+ * keeping its own `useState`. That fails the paragraph above: browser session
+ * history keeps `history.state` across a full reload (confirmed against
+ * `createBrowserHistory`'s own init path, which reads `window.history.state`
+ * back on load), so a `source` written into router state would survive an F5
+ * the same way `isOpen`/`step` do — making an accordion-opened dialog report
+ * `'accordion'` again after a reload where nothing was clicked, breaking the
+ * "not restorable" guarantee this paragraph states. Keeping `source` as
+ * ephemeral component state, read only where `location.state` names nothing
+ * itself, is what keeps that guarantee true for the `open()` path while still
+ * letting an anchor push (which cannot call `open()`) name its own gesture.
+ *
  * Query, not path: `vite-react-ssg` prerenders paths. `?step=N` creates no
  * page, needs no canonical tag and adds nothing to the prerendered files —
  * 70 of them, a count `architecture-facts.test.ts` derives and asserts rather
