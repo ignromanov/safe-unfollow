@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
-import { ACCOUNTS_CENTER_URL, GUIDE_STEPS, guideStepPosterSize } from '@/config/wizard-steps';
+import type { GuideStepKey } from '@/config/wizard-steps';
+import {
+  ACCOUNTS_CENTER_URL,
+  GUIDE_STEPS,
+  guideStepId,
+  guideStepPosterSize,
+} from '@/config/wizard-steps';
+import faqEN from '@/locales/en/faq.json';
+import wizardEN from '@/locales/en/wizard.json';
 
 describe('GUIDE_STEPS', () => {
   it('numbers eight sections from one', () => {
@@ -96,5 +104,98 @@ describe('GUIDE_STEPS', () => {
         }
       }
     }
+  });
+
+  it('deep-links from the FAQ only into sections that exist, and identically in every locale', () => {
+    // `items.downloadTime.relatedLink.href` is `/upload?step=8`, hand-written in
+    // all ten bundles, and FAQSection renders the href straight out of the
+    // bundle. The other `?step=N` producer — `guideHrefForError` — is bound by
+    // `wizard-routing.test.ts`; this one was created without a gate.
+    //
+    // The failure it catches is silent by design: `useGuideDialog`'s `parseStep`
+    // resolves an out-of-range step to `null`, so on the next renumbering a
+    // reader following "How long does the download take?" opens the guide at
+    // section 1, and nothing anywhere reports it.
+    //
+    // The regex runs over the serialized bundle rather than over one known key,
+    // so a second such link added under any other key is bound the day it
+    // appears rather than the day someone remembers this test exists.
+    const bundles = import.meta.glob<Record<string, unknown>>('../../locales/*/faq.json', {
+      eager: true,
+      import: 'default',
+    });
+
+    const stepsIn = (bundle: unknown) =>
+      [...JSON.stringify(bundle).matchAll(/\/upload\?step=(\d+)/g)]
+        .map(m => Number(m[1]))
+        .sort((a, b) => a - b);
+
+    const ids = new Set(GUIDE_STEPS.map(s => s.id));
+    const expected = stepsIn(faqEN);
+
+    // English is the reference for the ten-way agreement, so it is anchored
+    // first: without a link of its own the two assertions below hold vacuously,
+    // and a sweep that deleted the link from all ten bundles would read green.
+    expect(expected.length, 'the FAQ carries at least one guide deep link').toBeGreaterThan(0);
+
+    expect(Object.keys(bundles)).toHaveLength(10);
+    for (const [path, bundle] of Object.entries(bundles)) {
+      const steps = stepsIn(bundle);
+      // Membership, not a range: an id no step carries is the defect, and a
+      // range check would pass a gap. Asserted per bundle rather than on the
+      // reference alone — the agreement check below cannot see a step that ten
+      // bundles are wrong about together, which is what a global find-replace
+      // across the locales produces.
+      for (const step of steps) expect(ids, `${path} /upload?step=${step}`).toContain(step);
+      // A translator copying an older bundle can land on a step that exists but
+      // is not the one the sentence promises — in range, so only the ten-way
+      // comparison sees it.
+      expect(steps, path).toEqual(expected);
+    }
+  });
+
+  it('names every section with a key of its own', () => {
+    // The keys are the identity `guideStepForError` points at instead of the
+    // ordinals it used to hardcode. Two steps sharing one key would make
+    // `guideStepId` answer with whichever sits earlier in the array — a wrong
+    // section, resolved silently, which is the exact failure the keys exist to
+    // remove.
+    const keys = GUIDE_STEPS.map(s => s.key);
+    for (const [index, key] of keys.entries()) {
+      expect(typeof key, `GUIDE_STEPS[${index}]`).toBe('string');
+      expect(key.length, `GUIDE_STEPS[${index}]`).toBeGreaterThan(0);
+    }
+    expect(new Set(keys).size).toBe(GUIDE_STEPS.length);
+  });
+
+  it('resolves every key to its own section, and refuses one no section carries', () => {
+    // The list is derived from GUIDE_STEPS rather than typed out: a ninth step
+    // is covered the moment it is added, which a hand-written list of eight
+    // names would not be.
+    for (const step of GUIDE_STEPS) {
+      expect(guideStepId(step.key), step.key).toBe(step.id);
+    }
+
+    // Throwing is the contract, not an implementation detail: a fallback would
+    // send a reader whose upload failed to an instruction that does not answer
+    // them, and say nothing.
+    expect(() => guideStepId('noSuchStep' as GuideStepKey)).toThrow(/noSuchStep/);
+  });
+
+  it('keeps the two keys the error routing depends on pointing at their own instructions', () => {
+    // `guideStepForError` names these two and nothing else. Titles rather than
+    // ids, because an id is what the keys were introduced to stop trusting: a
+    // renumbering that moves "Change Format to JSON" out from under
+    // `formatJson` — by renaming the key, or by attaching it to another step —
+    // is exactly the mistake a number cannot see, and it ends with a reader
+    // whose ZIP was not an export being told to check their file format.
+    // Indexed through a widened alias: the literal keys of the imported JSON
+    // would need the very number under test written into the cast.
+    const steps = wizardEN.steps as Record<string, { title: string }>;
+
+    expect(steps[String(guideStepId('selectFollowers'))].title).toBe(
+      'Select Only "Followers and following"'
+    );
+    expect(steps[String(guideStepId('formatJson'))].title).toBe('Change Format to JSON');
   });
 });
