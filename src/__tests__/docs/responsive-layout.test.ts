@@ -103,6 +103,15 @@ describe('docs layout — the page fits the viewport it is read on', () => {
     expect(Math.max(...breakpoints)).toBeGreaterThanOrEqual(NARROW_VIEWPORT);
   });
 
+  it('breaks a token too long for the column instead of widening the page', () => {
+    // `pre` has scrolled since before this file existed; inline `code` never
+    // has, and the longest path in this corpus is 54 characters. Measured at
+    // 375px: 511px of `code` in a 315px column, 166px of document overflow.
+    const rule = /(^|[\s,{}])body\s*\{([^}]*)\}/m.exec(CSS);
+    expect(rule, 'the stylesheet declares no body rule').not.toBeNull();
+    expect(rule![2]).toMatch(/overflow-wrap:\s*(break-word|anywhere)/);
+  });
+
   it('lets a wide table scroll inside itself rather than widening the page', () => {
     // Eight of these pages carry tables of up to five columns with prose cells.
     // A table has no width it can be told to respect, so the choice is between
