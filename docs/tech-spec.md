@@ -65,10 +65,10 @@ A privacy-focused, local web application that analyzes Instagram Data Download (
 ### Testing & Quality
 | Technology | Purpose |
 |------------|---------|
-| **Vitest** | Fast unit testing (1,601 tests) |
+| **Vitest** | Fast unit testing — `npm run test` reports the current count |
 | **React Testing Library** | Component testing |
 | **@vitest/web-worker** | Web Worker testing |
-| **98% coverage** | Comprehensive test suite |
+| **Coverage gates** | 85% statements/lines, 80% branches/functions (`vitest.config.ts`) |
 | **ESLint** | Code quality (zero warnings) |
 | **Husky** | Git hooks for quality gates |
 

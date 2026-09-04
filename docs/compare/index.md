@@ -27,7 +27,7 @@ Every figure in the rival columns is taken from that product's own homepage or p
 | **How it gets your data** | You upload Instagram's official export | You upload the official export | Connect your Instagram account | You upload the official export (JSON or HTML) | You upload the official export |
 | **Source code published** | Yes (MIT) | No | No | No | No |
 
-The row that matters most is the third one. Three of the four price by account size, by time, or by both; SafeUnfollow prices by neither, and the analysis itself is free at any size — every badge, every filter, the complete list. The one paid extra is a one-time unlock for downloading that list as a file, and the download hands you a free sample first.
+The row that matters most is **Priced by**. Three of the four price by account size, by time, or by both; SafeUnfollow prices by neither, and the analysis itself is free at any size — every badge, every filter, the complete list. The one paid extra is a one-time unlock for downloading that list as a file, and the download hands you a free sample first.
 
 ## Why SafeUnfollow Is Different
 

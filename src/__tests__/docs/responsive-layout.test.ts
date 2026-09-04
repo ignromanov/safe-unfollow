@@ -248,3 +248,42 @@ describe('docs FAQ — the structured data says what the page says', () => {
     );
   });
 });
+
+describe('docs — a number a reader can check, or no number', () => {
+  /**
+   * The published spec said "1,601 tests" and "98% coverage" in four places. The
+   * suite passed 3 442 the day this was written and the configured gates are 85
+   * and 80 — so the count was 1 841 low and the coverage 13 points high, on the
+   * page most likely to be quoted back at us.
+   *
+   * A test count cannot be stated durably: it changes on the commit that adds a
+   * test and nothing recomputes prose. A threshold can, because one file decides
+   * it — so that is the only shape allowed here, and this reads the decider.
+   */
+  const VITEST_CONFIG = readFileSync(join(process.cwd(), 'vitest.config.ts'), 'utf-8');
+
+  const THRESHOLDS = new Set(
+    [...VITEST_CONFIG.matchAll(/^\s*(?:statements|branches|functions|lines):\s*(\d+),/gm)].map(
+      m => m[1],
+    ),
+  );
+
+  it('reads the thresholds it is going to enforce', () => {
+    // Without this the two assertions below pass against an empty set, which is
+    // the failure mode that put a hand-typed 98% in front of readers to begin with.
+    expect(THRESHOLDS.size).toBeGreaterThan(0);
+  });
+
+  it.each(DOCS)('$name states no test count', doc => {
+    const counts = [...doc.text.matchAll(/\b[\d,]{3,}\s+tests\b/gi)].map(m => m[0]);
+    expect(counts).toEqual([]);
+  });
+
+  it.each(DOCS)('$name quotes no coverage figure the config does not set', doc => {
+    const claimed = [...doc.text.matchAll(/(\d{1,3})%\s*(?=coverage)|coverage[^.\n]{0,20}?(\d{1,3})%/gi)]
+      .map(m => m[1] ?? m[2])
+      .filter((v): v is string => Boolean(v));
+    const unbacked = claimed.filter(v => !THRESHOLDS.has(v));
+    expect(unbacked, `not set in vitest.config.ts: ${unbacked.join(', ')}`).toEqual([]);
+  });
+});

@@ -45,7 +45,7 @@ last_updated: 2026-09-03
 - ✅ **Web Workers** — Filter operations off the main thread via Comlink
 - ✅ **TanStack Virtual** — Lazy loading, designed for 60 FPS scrolling at 1M+ items
 - ✅ **Search indexes** — Trigram/prefix for O(1) lookups
-- ✅ **1,601 tests** — 98% coverage with comprehensive test suite
+- ✅ **Coverage gates** — 85% statements and lines, 80% branches and functions, enforced on every run (`vitest.config.ts`)
 - ✅ **TypeScript strict mode** — Full type safety with zero `any` types
 
 ### Privacy & Security
@@ -175,7 +175,6 @@ each third party does and does not receive.
 | Storage (1M) | 200 MB | 5 MB | 40x |
 | Memory (1M) | 100 MB | 5 MB | 20x |
 | Languages | 1 | 10 | 10x |
-| Tests | 175 | 1,601 | 9x |
 
 ⚠️ Filter speed and search speed are design targets, not measurements — no benchmark harness
 exists in this repo, and the only 1M-scale test mocks IndexedDB entirely and asserts a 500ms
