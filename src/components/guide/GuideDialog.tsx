@@ -187,6 +187,13 @@ export function GuideDialog({ open, step, source, onGoToStep, onClose }: GuideDi
   // like useActiveStep's own `active` state above it — otherwise reopening
   // and landing back on the same section the reader left would silently emit
   // nothing, because the ref never forgot it.
+  //
+  // Today that reset makes this clause redundant — `active` is already null by
+  // the time a reopening reports, so no test can isolate the branch and none
+  // tries. It is kept as the mirror AND as the fallback: delete useActiveStep's
+  // reset and this becomes the only thing still forgetting, silently, with a
+  // green suite. Said here because a guard its sibling already covers reads
+  // like dead code to whoever finds it next.
   const lastReportedStepRef = useRef<number | null>(null);
   useEffect(() => {
     if (!open) {
