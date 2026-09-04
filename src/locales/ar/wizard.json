@@ -33,7 +33,7 @@
       "rows": {
         "destination": "التصدير إلى الجهاز",
         "range": "كل الوقت",
-        "format": "JSON — وليس HTML",
+        "format": "JSON أو HTML",
         "quality": "أي جودة للوسائط",
         "content": "المتابعون والمتابَعون"
       }

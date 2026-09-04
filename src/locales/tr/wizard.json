@@ -33,7 +33,7 @@
       "rows": {
         "destination": "Cihaza aktar",
         "range": "Tüm zamanlar",
-        "format": "JSON — HTML değil",
+        "format": "JSON veya HTML",
         "quality": "Herhangi bir medya kalitesi",
         "content": "Takipçiler ve takip edilenler"
       }

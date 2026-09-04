@@ -33,7 +33,7 @@
       "rows": {
         "destination": "Export to device",
         "range": "All time",
-        "format": "JSON — not HTML",
+        "format": "JSON or HTML",
         "quality": "Any media quality",
         "content": "Followers and following"
       }

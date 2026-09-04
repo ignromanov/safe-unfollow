@@ -33,7 +33,7 @@
       "rows": {
         "destination": "デバイスにエクスポート",
         "range": "全期間",
-        "format": "JSON — HTMLではない",
+        "format": "JSON または HTML",
         "quality": "メディア品質は任意",
         "content": "フォロワーとフォロー中"
       }

@@ -33,7 +33,7 @@
       "rows": {
         "destination": "Ekspor ke perangkat",
         "range": "Sepanjang waktu",
-        "format": "JSON — bukan HTML",
+        "format": "JSON atau HTML",
         "quality": "Kualitas media apa pun",
         "content": "Pengikut dan mengikuti"
       }

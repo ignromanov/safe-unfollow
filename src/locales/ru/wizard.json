@@ -33,7 +33,7 @@
       "rows": {
         "destination": "Экспорт на устройство",
         "range": "За всё время",
-        "format": "JSON — не HTML",
+        "format": "JSON или HTML",
         "quality": "Любое качество медиа",
         "content": "Подписчики и подписки"
       }
