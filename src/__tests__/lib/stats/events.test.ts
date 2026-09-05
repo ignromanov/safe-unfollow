@@ -224,3 +224,35 @@ describe('relationshipSkewVerdict dates_fitted field (GH#156)', () => {
     expect(payload).not.toHaveProperty('dates_fitted');
   });
 });
+
+/**
+ * `filter_toggle` had no test of its own, and the field being added here is the
+ * one that makes the stat cards visible at all: 2 377 mutations across 990
+ * sessions came from a surface that emitted nothing. A payload assertion is what
+ * stops the source silently going missing again.
+ */
+describe('filterToggle source field', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should carry the source of the toggle', () => {
+    analytics.filterToggle('unfollowed', 'enable', 2, 'stat_card');
+
+    expect(enqueueEvent).toHaveBeenCalledWith('filter_toggle', {
+      filter_name: 'unfollowed',
+      filter_action: 'enable',
+      active_filter_count: 2,
+      filter_source: 'stat_card',
+    });
+  });
+
+  it('distinguishes the chip from the card, so source_mix has two values', () => {
+    analytics.filterToggle('mutuals', 'disable', 0, 'chip');
+
+    expect(enqueueEvent).toHaveBeenCalledWith(
+      'filter_toggle',
+      expect.objectContaining({ filter_source: 'chip' })
+    );
+  });
+});

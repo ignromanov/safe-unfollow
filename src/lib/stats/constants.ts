@@ -244,6 +244,13 @@ export type LinkType =
 
 export type FilterAction = 'enable' | 'disable';
 
+/**
+ * Which surface performed the toggle. Required at every call site: the stat
+ * cards mutated the same filter set as the chips and emitted nothing, so a
+ * default value here is how that blind spot returns.
+ */
+export type FilterSource = 'chip' | 'stat_card';
+
 /** How the processing state ended. Fast errors must not look like fast parses. */
 export type ParseOutcome = 'success' | 'cached' | 'error' | 'cancelled';
 

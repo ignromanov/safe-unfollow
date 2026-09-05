@@ -1,5 +1,5 @@
 import { vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@tests/utils/testUtils';
+import { render, screen, fireEvent, within } from '@tests/utils/testUtils';
 import { renderWithRouter } from '@/__tests__/test-utils';
 import resultsEN from '@/locales/en/results.json';
 import { createI18nMock } from '@/__tests__/utils/mockI18n';
@@ -10,6 +10,7 @@ import { AccountListSection } from '@/components/AccountListSection';
 import type { BadgeKey } from '@/core/types';
 import { useAccountFiltering } from '@/hooks/useAccountFiltering';
 import { useUploadCaveats } from '@/hooks/useUploadCaveats';
+import { analytics } from '@/lib/analytics';
 
 // Mock the useAccountFiltering hook
 vi.mock('@/hooks/useAccountFiltering');
@@ -59,10 +60,26 @@ vi.mock('@/components/AccountList', () => ({
   },
 }));
 
+// The real StatCard is a <button> whose click is the only path into
+// handleStatCardClick. A mock that renders a bare <div> makes that path
+// unreachable, so the mock keeps its testid and gains the button — enough to
+// exercise the wiring, not enough to restate StatCard's own markup.
 vi.mock('@/components/StatCard', () => ({
-  StatCard: ({ label, value }: { label: string; value: number }) => (
+  StatCard: ({
+    label,
+    value,
+    badgeType,
+    onClick,
+  }: {
+    label: string;
+    value: number;
+    badgeType?: BadgeKey;
+    onClick: (type: BadgeKey) => void;
+  }) => (
     <div data-testid={`stat-card-${label.toLowerCase()}`}>
-      {label}: {value}
+      <button onClick={() => badgeType && onClick(badgeType)} disabled={!badgeType}>
+        {label}: {value}
+      </button>
     </div>
   ),
 }));
@@ -307,6 +324,33 @@ describe('AccountListSection', () => {
     expect(screen.getByPlaceholderText(resultsEN.search.placeholder)).toBeInTheDocument();
     expect(screen.getByTestId('filter-chips')).toBeInTheDocument();
     expect(screen.getByTestId('account-list')).toBeInTheDocument();
+  });
+
+  /**
+   * The stat cards mutate the same filter Set as the chips and, until this test,
+   * emitted nothing: 2 377 mutations across 990 sessions were invisible. The
+   * assertion is on the fourth argument — a toggle without a source is the blind
+   * spot returning.
+   */
+  it('should emit a filter toggle when a stat card is clicked', () => {
+    const filterToggle = vi.spyOn(analytics, 'filterToggle');
+    renderWithRouter(<AccountListSection {...defaultProps} />);
+
+    fireEvent.click(within(screen.getByTestId('stat-card-unfollowed')).getByRole('button'));
+
+    expect(filterToggle).toHaveBeenCalledWith('unfollowed', 'enable', 1, 'stat_card');
+  });
+
+  it('reports the toggle as a disable when the card is already active', () => {
+    mockUseAccountFiltering.mockReturnValue(
+      createMockReturnValue({ filters: new Set<BadgeKey>(['unfollowed']) })
+    );
+    const filterToggle = vi.spyOn(analytics, 'filterToggle');
+    renderWithRouter(<AccountListSection {...defaultProps} />);
+
+    fireEvent.click(within(screen.getByTestId('stat-card-unfollowed')).getByRole('button'));
+
+    expect(filterToggle).toHaveBeenCalledWith('unfollowed', 'disable', 0, 'stat_card');
   });
 
   it('should render stat cards with correct values', () => {

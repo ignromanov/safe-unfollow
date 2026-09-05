@@ -3,7 +3,7 @@
  */
 
 import { AnalyticsEvents, parseDurationBucket } from './constants';
-import type { FilterAction, LinkType, ParseOutcome } from './constants';
+import type { FilterAction, FilterSource, LinkType, ParseOutcome } from './constants';
 import { trackEvent } from './core';
 import { enqueueEvent, flushEvents, trackNavigating } from './queue';
 import { getStoredUTM, getEntryCTA } from './utm';
@@ -143,11 +143,17 @@ export const analytics = {
 
   // Filter events — unsampled since GH#123; read as an absolute count, and
   // sampling serves ratios over large N rather than counts.
-  filterToggle: (filterName: string, action: FilterAction, activeCount: number) => {
+  filterToggle: (
+    filterName: string,
+    action: FilterAction,
+    activeCount: number,
+    source: FilterSource
+  ) => {
     enqueueEvent(AnalyticsEvents.FILTER_TOGGLE, {
       filter_name: filterName,
       filter_action: action,
       active_filter_count: activeCount,
+      filter_source: source,
     });
   },
 
