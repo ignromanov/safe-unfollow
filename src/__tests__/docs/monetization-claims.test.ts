@@ -22,6 +22,15 @@ const DOCS = markdownFiles(DOCS_ROOT).map(path => ({
 }));
 
 /**
+ * `public/llms.txt` lives outside `docs/`, so it is invisible to every `DOCS`-scoped check
+ * below unless explicitly added. Read once, here, so both the pre-existing language-count
+ * gate and the llms.txt-specific describe block near the end of this file see the same text.
+ */
+const LLMS_TXT_PATH = join(process.cwd(), 'public', 'llms.txt');
+const LLMS_TXT_EXISTS = existsSync(LLMS_TXT_PATH);
+const LLMS_TXT_TEXT = LLMS_TXT_EXISTS ? readFileSync(LLMS_TXT_PATH, 'utf-8') : '';
+
+/**
  * Claims that were true when written and stopped being true without anyone
  * editing the sentence.
  *
@@ -597,8 +606,12 @@ describe('docs monetization claims', () => {
   });
 
   it('never states a language count other than SUPPORTED_LANGUAGES.length', () => {
+    // public/llms.txt lives outside docs/ but makes the same claim ("Available in 10
+    // languages") and is at least as likely to go stale silently — included as a subject
+    // here rather than duplicating this check for one more file.
+    const subjects = [...DOCS, { name: 'public/llms.txt', text: LLMS_TXT_TEXT }];
     const pattern = /\b(\d+)\s+languages?\b/gi;
-    const offenders = DOCS.flatMap(doc => {
+    const offenders = subjects.flatMap(doc => {
       const badCounts = [...doc.text.matchAll(pattern)]
         .map(match => Number(match[1]))
         .filter(count => count !== SUPPORTED_LANGUAGES.length);
@@ -721,25 +734,130 @@ describe('comparison pages state facts about others with an expiry', () => {
  * docs page say "free" next to its qualifier are not honoured here. A bullet list has no room
  * for a qualifier, so the unqualified claim simply may not appear.
  */
-const LLMS_TXT_PATH = join(process.cwd(), 'public', 'llms.txt');
+
+/**
+ * Extracted predicates, not inlined into the `it`s below, for one reason: a control test
+ * that duplicates an assertion's logic instead of calling it proves nothing about the
+ * assertion — it proves the copy works. Both the real checks and their controls below call
+ * these same functions, so a control failing means the real check would have failed too.
+ */
+const LLMS_TXT_MIN_BYTES = 200;
+const LLMS_TXT_MAX_BYTES = 4096;
+
+function withinSizeBudget(byteLength: number): boolean {
+  return byteLength > LLMS_TXT_MIN_BYTES && byteLength < LLMS_TXT_MAX_BYTES;
+}
+
+function extractDocsLinks(text: string): string[] {
+  return [...text.matchAll(/https:\/\/safeunfollow\.app(\/docs\/[A-Za-z0-9/_-]*)/g)].map(
+    m => m[1],
+  );
+}
+
+function docsPermalinks(): Set<string> {
+  return new Set(
+    DOCS.map(doc => {
+      const raw = /^permalink:\s*(.*)$/m.exec(doc.text)?.[1]?.trim() ?? '';
+      const clean = raw.replace(/^['"]|['"]$/g, '');
+      return `/docs${clean}`.replace(/\/$/, '') || '/docs';
+    }),
+  );
+}
+
+function missingLinks(links: string[]): string[] {
+  const permalinks = docsPermalinks();
+  return links.filter(link => !permalinks.has(link.replace(/\/$/, '')));
+}
+
+function trailingSlashLinks(text: string): string[] {
+  return [...text.matchAll(/https:\/\/safeunfollow\.app\/docs\/[A-Za-z0-9/_-]*\//g)].map(
+    m => m[0],
+  );
+}
+
+const BANNED_ENTRIES = [...BANNED_PRIVACY, ...PERFORMANCE_BANNED];
+
+/**
+ * One synthetic sentence per `BANNED_ENTRIES` pattern, paired by position, that pattern
+ * MUST match — proof the detector can go red before it is trusted to report green on the
+ * real, shipped text. Paired with `BANNED_KNOWN_INNOCENTS` below, which none of the
+ * patterns may match, so a widened-to-match-everything regex would also be caught.
+ */
+const BANNED_KNOWN_VIOLATIONS = [
+  'This page carries no advertising of any kind.',
+  'We set no tracking cookies, ever.',
+  'There is no data sharing with anyone, full stop.',
+  'No network requests after the page has finished loading.',
+  'This was tested and verified against a real 1,000,000-account export.',
+  'Filtering completes in <5ms even at full scale.',
+  'Search runs at sub-5ms latency.',
+];
+
+const BANNED_KNOWN_INNOCENTS = [
+  'The site carries advertising and uses privacy-focused analytics for page-level metrics.',
+  'Filter speed and search speed are design targets, not measurements.',
+  'Designed for exports up to 1,000,000+ accounts.',
+  'Open source under the MIT licence.',
+];
 
 describe('llms.txt states nothing the docs corpus may not state', () => {
-  const exists = existsSync(LLMS_TXT_PATH);
-  const text = exists ? readFileSync(LLMS_TXT_PATH, 'utf-8') : '';
+  it('the size budget can reject an oversized file', () => {
+    expect(withinSizeBudget(Buffer.byteLength('x'.repeat(LLMS_TXT_MAX_BYTES), 'utf-8'))).toBe(
+      false,
+    );
+  });
+
+  it('the size budget can reject a near-empty file', () => {
+    expect(withinSizeBudget(Buffer.byteLength('too short', 'utf-8'))).toBe(false);
+  });
+
+  it('the banned-claim detector can go red on the claims it exists to catch', () => {
+    const cannotFire = BANNED_ENTRIES.filter(
+      (entry, i) => !entry.pattern.test(BANNED_KNOWN_VIOLATIONS[i]),
+    ).map(entry => String(entry.pattern));
+    expect(cannotFire, `these patterns did not match their own known violation`).toEqual([]);
+  });
+
+  it('the banned-claim detector does not fire on true, hedged copy', () => {
+    const falsePositives = BANNED_ENTRIES.filter(entry =>
+      BANNED_KNOWN_INNOCENTS.some(innocent => entry.pattern.test(innocent)),
+    ).map(entry => String(entry.pattern));
+    expect(falsePositives, `these patterns fired on innocent copy`).toEqual([]);
+  });
+
+  it('the link-permalink check can reject a link to a page nothing builds', () => {
+    expect(missingLinks(['/docs/this-page-does-not-exist'])).toEqual([
+      '/docs/this-page-does-not-exist',
+    ]);
+  });
+
+  it('the link-permalink check accepts a link this repository does build', () => {
+    expect(missingLinks(['/docs/faq'])).toEqual([]);
+  });
+
+  it('the trailing-slash check can reject a slashed link', () => {
+    expect(trailingSlashLinks('See https://safeunfollow.app/docs/faq/ for more.')).toEqual([
+      'https://safeunfollow.app/docs/faq/',
+    ]);
+  });
+
+  it('the trailing-slash check accepts an unslashed link', () => {
+    expect(trailingSlashLinks('See https://safeunfollow.app/docs/faq for more.')).toEqual([]);
+  });
 
   it('is published', () => {
-    expect(exists, 'public/llms.txt does not exist').toBe(true);
+    expect(LLMS_TXT_EXISTS, 'public/llms.txt does not exist').toBe(true);
   });
 
   it('fits the budget a summary file has', () => {
     // 4 KB. Not a standard - a ceiling, so this cannot grow into a second copy of the docs.
-    expect(Buffer.byteLength(text, 'utf-8')).toBeLessThan(4096);
-    expect(Buffer.byteLength(text, 'utf-8')).toBeGreaterThan(200);
+    const bytes = Buffer.byteLength(LLMS_TXT_TEXT, 'utf-8');
+    expect(withinSizeBudget(bytes), `llms.txt is ${bytes} bytes`).toBe(true);
   });
 
-  for (const banned of [...BANNED_PRIVACY, ...PERFORMANCE_BANNED]) {
+  for (const banned of BANNED_ENTRIES) {
     it(`makes no claim matching ${banned.pattern}`, () => {
-      expect(banned.pattern.test(text), `llms.txt: ${banned.why}`).toBe(false);
+      expect(banned.pattern.test(LLMS_TXT_TEXT), `llms.txt: ${banned.why}`).toBe(false);
     });
   }
 
@@ -749,24 +867,15 @@ describe('llms.txt states nothing the docs corpus may not state', () => {
    * the wrong way round for a gate.
    */
   it('links only to docs pages this repository actually builds', () => {
-    const links = [...text.matchAll(/https:\/\/safeunfollow\.app(\/docs\/[A-Za-z0-9/_-]*)/g)].map(
-      m => m[1],
-    );
+    const links = extractDocsLinks(LLMS_TXT_TEXT);
     expect(links.length, 'llms.txt links to no docs page').toBeGreaterThan(3);
-    const permalinks = new Set(
-      DOCS.map(doc => {
-        const raw = /^permalink:\s*(.*)$/m.exec(doc.text)?.[1]?.trim() ?? '';
-        const clean = raw.replace(/^['"]|['"]$/g, '');
-        return `/docs${clean}`.replace(/\/$/, '') || '/docs';
-      }),
-    );
-    const missing = links.filter(link => !permalinks.has(link.replace(/\/$/, '')));
+    const missing = missingLinks(links);
     expect(missing, `llms.txt links to pages nothing builds: ${missing.join(', ')}`).toEqual([]);
   });
 
   it('links to no page through a trailing slash', () => {
     // Same 308 the docs corpus was cleaned of in #184: /docs/faq returns 200, /docs/faq/ redirects.
-    const slashed = [...text.matchAll(/https:\/\/safeunfollow\.app\/docs\/[A-Za-z0-9/_-]*\//g)];
-    expect(slashed.map(m => m[0]), 'llms.txt links through a redirect').toEqual([]);
+    const slashed = trailingSlashLinks(LLMS_TXT_TEXT);
+    expect(slashed, 'llms.txt links through a redirect').toEqual([]);
   });
 });
