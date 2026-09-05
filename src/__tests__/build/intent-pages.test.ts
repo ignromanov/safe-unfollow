@@ -119,6 +119,9 @@ describe.runIf(built)('intent landing pages (prerendered)', () => {
       });
 
       it('should carry its own body text in the prerendered HTML', () => {
+        // Asserted before indexing: a missing entry (task 4 has not run yet) must fail this
+        // assertion, not throw a TypeError that reports as a crash rather than a red test.
+        expect(INTENT_CONTENT[page.slug]).toBeDefined();
         const body = html();
         for (const section of INTENT_CONTENT[page.slug].sections) {
           expect(body).toContain(section.heading);

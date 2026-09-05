@@ -38,9 +38,11 @@ export function Component({ page }: IntentPageProps) {
         {page.h1}
       </h1>
 
-      <p className="text-lg leading-relaxed text-zinc-600 dark:text-zinc-300 mb-10">
+      {/* A div, not a <p>: `intro` is ReactNode like a section body, and a block element inside
+          a <p> is invalid markup that ships straight into the prerendered HTML a crawler reads. */}
+      <div className="text-lg leading-relaxed text-zinc-600 dark:text-zinc-300 mb-10">
         {content.intro}
-      </p>
+      </div>
 
       <PrefixedLink
         to={ctaHref(page)}

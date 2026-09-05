@@ -59,6 +59,11 @@ export const INTENT_CONTENT: Record<string, IntentContent> = {
             <p>
               Private accounts you requested and were rejected by are excluded for the same reason.
             </p>
+            <p>
+              Both exclusions depend on those lists being present and readable in your archive.
+              Instagram does not always include them, and when one is missing nothing is subtracted
+              — the count is then a little high rather than wrong in kind.
+            </p>
           </>
         ),
       },
@@ -68,14 +73,14 @@ export const INTENT_CONTENT: Record<string, IntentContent> = {
           <>
             <p>
               When you request your data from Instagram, the archive contains a{' '}
-              <code>followers_and_following</code> folder. Two files in it carry the whole answer:
-              the list of accounts you follow, and the list of accounts following you. Everything on
-              this page is one comparison between those two lists.
+              <code>connections/followers_and_following</code> folder. Two files in it carry the
+              whole answer: the list of accounts you follow, and the list of accounts following you.
+              Everything on this page is one comparison between those two lists.
             </p>
             <p>
-              Choose <strong>JSON</strong> rather than HTML when Instagram asks for a format, and{' '}
-              <strong>All time</strong> rather than a date range — a date-limited export silently
-              truncates both lists, and the missing accounts look exactly like people who left.
+              Choose <strong>All time</strong> rather than a date range when Instagram offers you
+              the choice — a date-limited export silently truncates both lists, and the missing
+              accounts look exactly like people who left.
             </p>
           </>
         ),
@@ -91,8 +96,10 @@ export const INTENT_CONTENT: Record<string, IntentContent> = {
             </p>
             <p>
               It also does not mean these accounts unfollowed you. Most of them never followed you
-              in the first place. If the question you actually have is who followed you before and
-              does not now, that is a different list and it is the one the home page answers.
+              in the first place. And whether someone followed you before and does not now is not a
+              question one archive can answer: an archive is a single snapshot, and a snapshot has
+              no memory of an earlier one. Telling those apart would take two archives, requested at
+              different times and compared against each other, which this tool does not do.
             </p>
           </>
         ),
