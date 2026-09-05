@@ -63,7 +63,7 @@ The previous implementation had significant limitations:
 │   ↓                                                          │
 │ IndexedDBFilterEngine                                        │
 │   ├─→ Load badge bitsets                                    │
-│   ├─→ Intersect (AND operation, O(n/32))                    │
+│   ├─→ Union in-group, intersect across (O(n/32))            │
 │   ├─→ Apply search index (O(1) lookup)                      │
 │   └─→ Return: number[] (indices only)                       │
 │       ↓                                                      │

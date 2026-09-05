@@ -116,24 +116,35 @@ describe('IndexedDBFilterEngine', () => {
       expect(indices).toEqual([0, 5, 10]);
     });
 
-    it('should filter by multiple badges with AND logic', async () => {
+    // Was `['following', 'followers']` until the facet groups landed. Those two
+    // are one axis and now union; AND is what happens ACROSS axes, so the badges
+    // changed and the contract did not. `unfollowed` is a flag, not a relationship.
+    it('should filter by multiple badges with AND logic across groups', async () => {
+      // A fresh engine with the mock set before init: the shared `engine` is
+      // preloaded by the outer beforeEach under whatever implementation the
+      // previous test left behind, and `following` would be served from that
+      // cache rather than from this test's data.
+      const testEngine = new IndexedDBFilterEngine();
+
       const followingBitset = new BitSet(totalAccounts);
       followingBitset.set(0);
       followingBitset.set(5);
       followingBitset.set(10);
 
-      const followersBitset = new BitSet(totalAccounts);
-      followersBitset.set(5);
-      followersBitset.set(10);
-      followersBitset.set(15);
+      const unfollowedBitset = new BitSet(totalAccounts);
+      unfollowedBitset.set(5);
+      unfollowedBitset.set(10);
+      unfollowedBitset.set(15);
 
+      mockIndexedDBService.getBadgeBitset.mockReset();
       mockIndexedDBService.getBadgeBitset.mockImplementation(async (hash, badge) => {
         if (badge === 'following') return followingBitset;
-        if (badge === 'followers') return followersBitset;
+        if (badge === 'unfollowed') return unfollowedBitset;
         return null;
       });
 
-      const indices = await engine.filterToIndices('', ['following', 'followers']);
+      await testEngine.init(mockFileHash, totalAccounts);
+      const indices = await testEngine.filterToIndices('', ['following', 'unfollowed']);
 
       // Should only include indices present in both bitsets (5, 10)
       expect(indices).toEqual([5, 10]);
@@ -505,6 +516,68 @@ describe('IndexedDBFilterEngine', () => {
 
       // Should batch queries for all accounts (totalAccounts / 1000 batches)
       expect(mockIndexedDBService.getAccountsByRange).toHaveBeenCalled();
+    });
+  });
+
+  describe('grouped filter semantics', () => {
+    const bitsetOf = (indices: number[]) => {
+      const bits = new BitSet(totalAccounts);
+      for (const i of indices) bits.set(i);
+      return bits;
+    };
+
+    it('should union two badges from the same group', async () => {
+      mockIndexedDBService.getBadgeBitset.mockImplementation(async (_hash, badge) => {
+        if (badge === 'notFollowingBack') return bitsetOf([1, 2]);
+        if (badge === 'notFollowedBack') return bitsetOf([3, 4]);
+        return bitsetOf([]);
+      });
+      await engine.init(mockFileHash, totalAccounts);
+
+      const indices = await engine.filterToIndices('', ['notFollowingBack', 'notFollowedBack']);
+
+      expect(indices).toEqual([1, 2, 3, 4]);
+    });
+
+    it('should intersect across groups', async () => {
+      mockIndexedDBService.getBadgeBitset.mockImplementation(async (_hash, badge) => {
+        if (badge === 'notFollowingBack') return bitsetOf([1, 2, 3]);
+        if (badge === 'unfollowed') return bitsetOf([3, 4]);
+        return bitsetOf([]);
+      });
+      await engine.init(mockFileHash, totalAccounts);
+
+      const indices = await engine.filterToIndices('', ['notFollowingBack', 'unfollowed']);
+
+      expect(indices).toEqual([3]);
+    });
+
+    it('should return nothing when one group contributes no members', async () => {
+      mockIndexedDBService.getBadgeBitset.mockImplementation(async (_hash, badge) => {
+        if (badge === 'notFollowingBack') return bitsetOf([1, 2]);
+        return bitsetOf([]);
+      });
+      await engine.init(mockFileHash, totalAccounts);
+
+      const indices = await engine.filterToIndices('', ['notFollowingBack', 'pending']);
+
+      expect(indices).toEqual([]);
+    });
+
+    it('should return nothing when a whole group has no stored bitset', async () => {
+      // The second behaviour change on this deploy, and the one no existing
+      // test covers: a badge from an absent optional file used to be dropped
+      // from the AND, so the result silently widened to the other badge's set.
+      // A group with no readable member now contributes the empty set.
+      mockIndexedDBService.getBadgeBitset.mockImplementation(async (_hash, badge) => {
+        if (badge === 'notFollowingBack') return bitsetOf([1, 2]);
+        return null;
+      });
+      await engine.init(mockFileHash, totalAccounts);
+
+      const indices = await engine.filterToIndices('', ['notFollowingBack', 'restricted']);
+
+      expect(indices).toEqual([]);
     });
   });
 });

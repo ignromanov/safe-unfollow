@@ -6,6 +6,7 @@
  */
 
 import type { AccountBadges, BadgeKey } from '@/core/types';
+import { groupOf, type BadgeGroupId } from '@/core/badges/groups';
 import { BitSet } from '../indexeddb/bitset';
 import { indexedDBService } from '../indexeddb/indexeddb-service';
 import { hasSearchIndexes, smartSearch } from '../search-index';
@@ -89,28 +90,41 @@ export class IndexedDBFilterEngine {
     // Start with all accounts if no filters
     let resultBitset: BitSet | null = null;
 
-    // Apply badge filters (AND logic)
     if (activeFilters.length > 0) {
-      const bitsets = await Promise.all(activeFilters.map(badge => this.loadBitset(badge)));
-
-      // Filter out null bitsets
-      const validBitsets = bitsets.filter((b): b is BitSet => b !== null);
-
-      if (validBitsets.length === 0) {
-        return []; // No matches if any badge has no data
+      // OR within a facet group, AND across groups. The eleven badges are not
+      // eleven independent facets: five of them are mutually-exclusive states
+      // computed from the same two lists, so intersecting them asked for
+      // accounts that cannot exist. Membership lives in `core/badges/groups.ts`
+      // and is stated nowhere else.
+      const byGroup = new Map<BadgeGroupId, BadgeKey[]>();
+      for (const badge of activeFilters) {
+        const id = groupOf(badge);
+        const members = byGroup.get(id);
+        if (members) members.push(badge);
+        else byGroup.set(id, [badge]);
       }
 
-      // Intersect all bitsets
-      const firstBitset = validBitsets[0];
-      if (!firstBitset) return [];
+      for (const members of byGroup.values()) {
+        const bitsets = (await Promise.all(members.map(badge => this.loadBitset(badge)))).filter(
+          (b): b is BitSet => b !== null
+        );
 
-      resultBitset = firstBitset;
+        // A group whose every badge is missing from storage contributes an
+        // empty set to the AND, which is what an absent optional file means.
+        //
+        // This is a BEHAVIOUR CHANGE, not a refactor: the old code filtered
+        // nulls out of the list and intersected what remained, so an absent
+        // badge silently widened the result instead of emptying it. Both the
+        // boundary row and Task 5's `empty.absentTitle` exist because of this
+        // line.
+        if (bitsets.length === 0) return [];
 
-      for (let i = 1; i < validBitsets.length; i++) {
-        const bitset = validBitsets[i];
-        if (bitset) {
-          resultBitset = resultBitset.intersect(bitset);
+        let groupBitset = bitsets[0] as BitSet;
+        for (let i = 1; i < bitsets.length; i++) {
+          groupBitset = groupBitset.union(bitsets[i] as BitSet);
         }
+
+        resultBitset = resultBitset === null ? groupBitset : resultBitset.intersect(groupBitset);
       }
     }
 
