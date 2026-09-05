@@ -20,6 +20,7 @@ import {
   SUPPORTED_LANGUAGES,
   type SupportedLanguage,
 } from "../src/config/languages";
+import { INTENT_PATHS } from "../src/config/intent-pages";
 import { noindexRoutes } from "./noindex-routes";
 
 // Configuration
@@ -80,8 +81,10 @@ const ROUTE_CONFIG: Record<string, { priority: number; changefreq: string }> = {
   "/docs/compare/vs-followers-app": { priority: 0.6, changefreq: "monthly" },
 };
 
-// Paths that are English-only (no i18n versions)
-const ENGLISH_ONLY_PATHS = [
+// The Jekyll docs pages. Built separately, served at /docs/*, and never scanned out of dist/ —
+// so this list is both "suppress hreflang" and "add to the sitemap", and the loop below is the
+// second job.
+const DOCS_PATHS = [
   "/docs",
   "/docs/user-guide",
   "/docs/instagram-export",
@@ -97,6 +100,11 @@ const ENGLISH_ONLY_PATHS = [
   "/docs/compare/vs-unfollowgram",
   "/docs/compare/vs-followers-app",
 ];
+
+// Every path served in English only. The intent pages ARE scanned out of dist/ — they are
+// prerendered app routes — so they need the hreflang half and must not join the loop below,
+// which would be a second reason for them to be in the sitemap.
+const ENGLISH_ONLY_PATHS = [...DOCS_PATHS, ...INTENT_PATHS];
 
 const DEFAULT_CONFIG = { priority: 0.7, changefreq: "monthly" };
 
@@ -325,7 +333,7 @@ function main(): void {
 
   // Add docs pages (English only, hosted via GitHub Pages/Jekyll)
   // These are built separately and served at /docs/*
-  for (const docsPath of ENGLISH_ONLY_PATHS) {
+  for (const docsPath of DOCS_PATHS) {
     const url = buildUrl(docsPath, "en");
     const key = `en:${docsPath}`;
     if (!basePathsSet.has(key)) {

@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '@/config/languages';
+import { INTENT_PATHS } from '@/config/intent-pages';
 
 const LOCALES_DIR = path.resolve(__dirname, '../../locales');
 
@@ -120,7 +121,15 @@ describe('i18n Localization System', () => {
           return;
         }
 
-        const referenceKeys = extractKeys(referenceData).sort();
+        // The three intent-page route entries under `meta.routes` are English-only by design
+        // (src/config/intent-pages.ts) — the pages they describe are registered on the root
+        // route object alone and never render in any other locale. Derived from INTENT_PATHS
+        // rather than named here by hand, so a fourth intent page does not reopen this hole.
+        const referenceKeys = extractKeys(referenceData)
+          .filter(
+            key => namespace !== 'meta' || !INTENT_PATHS.some(p => key.startsWith(`routes.${p}.`))
+          )
+          .sort();
 
         for (const lang of SUPPORTED_LANGUAGES) {
           if (lang === referenceLanguage) continue;
