@@ -24,6 +24,7 @@ describe('filter-worker', () => {
     init: ReturnType<typeof vi.fn>;
     filterToIndices: ReturnType<typeof vi.fn>;
     getStats: ReturnType<typeof vi.fn>;
+    candidateCounts: ReturnType<typeof vi.fn>;
     reset: ReturnType<typeof vi.fn>;
     clear: ReturnType<typeof vi.fn>;
   };
@@ -51,6 +52,7 @@ describe('filter-worker', () => {
         unfollowed: 0,
         dismissed: 0,
       }),
+      candidateCounts: vi.fn().mockResolvedValue({ following: 1 }),
       reset: vi.fn(),
       clear: vi.fn(),
     };
@@ -170,6 +172,23 @@ describe('filter-worker', () => {
       mockEngine.filterToIndices.mockRejectedValue(new Error('Filter error'));
 
       await expect(filterWorkerApi.filterToIndices('test', [])).rejects.toThrow('Filter error');
+    });
+  });
+
+  describe('candidateCounts', () => {
+    it('should throw error if not initialized', async () => {
+      await expect(filterWorkerApi.candidateCounts([])).rejects.toThrow(
+        '[FilterWorker] Engine not initialized'
+      );
+    });
+
+    it('should delegate to the engine with the selection', async () => {
+      await filterWorkerApi.initialize(mockFileHash, totalAccounts);
+
+      const counts = await filterWorkerApi.candidateCounts(['following']);
+
+      expect(mockEngine.candidateCounts).toHaveBeenCalledWith(['following']);
+      expect(counts).toEqual({ following: 1 });
     });
   });
 

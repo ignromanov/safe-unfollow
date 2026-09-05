@@ -52,6 +52,7 @@ vi.mock('comlink', () => ({
 
 // Import after mocks
 import * as Comlink from 'comlink';
+import { filterWorkerApi } from '@/workers/filter-worker';
 import { FILTER_WORKER_INIT_TIMEOUT_MS, useFilterWorker } from '@/hooks/useFilterWorker';
 import { logger } from '@/lib/logger';
 
@@ -559,6 +560,24 @@ describe('useFilterWorker', () => {
         expect(result.current.isReady).toBe(false);
       } finally {
         vi.useRealTimers();
+      }
+    });
+  });
+
+  describe('the boundary itself', () => {
+    it('should expose nothing the worker cannot answer', () => {
+      const { result } = renderHook(() => useFilterWorker({ fileHash: 'h', totalAccounts: 10 }));
+
+      const exposed = Object.entries(result.current)
+        .filter(([, value]) => typeof value === 'function')
+        .map(([name]) => name);
+
+      // The instrument fired. A zero-length list would make the loop below
+      // vacuously true, which is how this class of gate goes green on nothing.
+      expect(exposed.length).toBeGreaterThan(0);
+
+      for (const method of exposed) {
+        expect(Object.keys(filterWorkerApi)).toContain(method);
       }
     });
   });

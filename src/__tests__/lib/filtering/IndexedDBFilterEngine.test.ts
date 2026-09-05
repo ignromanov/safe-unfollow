@@ -498,6 +498,36 @@ describe('IndexedDBFilterEngine', () => {
       expect(duration).toBeLessThan(500); // Should be reasonably fast with bitsets
     });
 
+    it('should compute candidate counts for 11 badges over 1M accounts', async () => {
+      // Mocks IndexedDB, so this measures in-memory bitset iteration, not
+      // storage — the same thing the test above measures. Do not report it as
+      // an end-to-end figure.
+      //
+      // What is being measured is allocation, not arithmetic: BitSet.union and
+      // .intersect call FastBitSet's new_union / new_intersection
+      // (lib/indexeddb/bitset.ts), and each allocates a fresh ~125 KB set at
+      // this size. Eleven candidates against two selected groups is ~30 of them.
+      //
+      // 200ms is a tripwire, not a derived budget. The measured figure belongs
+      // in the commit message; this assertion only says it has not collapsed.
+      const largeBitset = new BitSet(1000000);
+      for (let i = 0; i < 100000; i++) {
+        largeBitset.set(i * 10);
+      }
+
+      mockIndexedDBService.getBadgeBitset.mockResolvedValue(largeBitset);
+
+      const largeEngine = new IndexedDBFilterEngine();
+      await largeEngine.init(mockFileHash, 1000000);
+
+      const start = performance.now();
+      const counts = await largeEngine.candidateCounts(['notFollowingBack', 'unfollowed']);
+      const duration = performance.now() - start;
+
+      expect(Object.keys(counts)).toHaveLength(11);
+      expect(duration).toBeLessThan(200);
+    });
+
     it('should minimize IndexedDB queries with batching', async () => {
       const batchEngine = new IndexedDBFilterEngine();
       await batchEngine.init(mockFileHash, totalAccounts);
@@ -578,6 +608,66 @@ describe('IndexedDBFilterEngine', () => {
       const indices = await engine.filterToIndices('', ['notFollowingBack', 'restricted']);
 
       expect(indices).toEqual([]);
+    });
+  });
+
+  describe('candidateCounts', () => {
+    const bitsetOf = (indices: number[]) => {
+      const bits = new BitSet(totalAccounts);
+      for (const i of indices) bits.set(i);
+      return bits;
+    };
+
+    beforeEach(() => {
+      // Set before any init in this block: the engine caches whatever `init`
+      // preloads, so an implementation installed afterwards is read from cache
+      // and never consulted. That ordering is what made the AND-logic test
+      // non-deterministic on the previous task.
+      mockIndexedDBService.getBadgeBitset.mockImplementation(async (_hash, badge) => {
+        if (badge === 'notFollowingBack') return bitsetOf([1, 2, 3]);
+        if (badge === 'notFollowedBack') return bitsetOf([4]);
+        if (badge === 'unfollowed') return bitsetOf([3, 9]);
+        if (badge === 'pending') return bitsetOf([7]);
+        return bitsetOf([]);
+      });
+    });
+
+    it('should widen a candidate in the same group', async () => {
+      await engine.init(mockFileHash, totalAccounts);
+
+      const counts = await engine.candidateCounts(['notFollowingBack']);
+
+      expect(counts.notFollowedBack).toBe(4); // union {1,2,3} u {4}
+    });
+
+    it('should narrow a candidate in another group', async () => {
+      await engine.init(mockFileHash, totalAccounts);
+
+      const counts = await engine.candidateCounts(['notFollowingBack']);
+
+      expect(counts.unfollowed).toBe(1); // {1,2,3} n {3,9}
+    });
+
+    it('should report zero for a candidate that ends the road', async () => {
+      await engine.init(mockFileHash, totalAccounts);
+
+      const counts = await engine.candidateCounts(['notFollowingBack']);
+
+      expect(counts.pending).toBe(0); // {1,2,3} n {7}
+    });
+
+    it('should differ from the global counts for at least one badge', async () => {
+      await engine.init(mockFileHash, totalAccounts);
+
+      const global = await mockIndexedDBService.getBadgeStats(mockFileHash);
+      const counts = await engine.candidateCounts(['notFollowingBack']);
+
+      // The control. Without it, a candidateCounts that simply returned
+      // getBadgeStats would satisfy the three cases above whenever the fixtures
+      // happened to line up, and the surface would show global counts under a
+      // contextual name.
+      expect(Object.keys(counts)).toHaveLength(Object.keys(global).length);
+      expect(counts).not.toEqual(global);
     });
   });
 });
