@@ -53,7 +53,9 @@ export function noindexRoutes(rules: VercelHeaderRule[]): NoindexRoutes {
 
     const wildcard = PREFIX_WILDCARD.exec(source);
     if (wildcard) {
-      prefixes.push(wildcard[1]);
+      // PREFIX_WILDCARD has exactly one capture group and it is not optional in the
+      // pattern, so a match guarantees it captured.
+      prefixes.push(wildcard[1]!);
       continue;
     }
 
@@ -64,7 +66,7 @@ export function noindexRoutes(rules: VercelHeaderRule[]): NoindexRoutes {
     }
 
     const group = GROUP.exec(bare);
-    if (group) {
+    if (group?.[1] !== undefined) {
       for (const name of group[1].split("|")) exact.add(`/${name}`);
       continue;
     }

@@ -6,6 +6,8 @@ import { describe, expect, it } from 'vitest';
 
 import { SUPPORTED_LANGUAGES } from '@/config/languages';
 
+import { noindexRoutes, type VercelHeaderRule } from '../../../scripts/noindex-routes';
+
 const DOCS_ROOT = join(process.cwd(), 'docs');
 
 function markdownFiles(dir: string): string[] {
@@ -775,6 +777,28 @@ function trailingSlashLinks(text: string): string[] {
   );
 }
 
+/**
+ * Every `safeunfollow.app` URL named in the text, `/docs/...` or not — unlike
+ * `extractDocsLinks`, which is scoped to `/docs/` on purpose (its job is checking those links
+ * resolve to a page this repo builds, and `/` and `/upload` are not docs pages). This one exists
+ * to catch a different failure: `llms.txt`'s "Start here" block links to `/` and `/upload`
+ * today, and nothing stops a future edit from adding `/results` there too — a URL this same
+ * branch tells crawlers to discard (`noindex-routes.ts` / `vercel.json`). A machine reader has
+ * no way to know that; it would just start pointing at a page we asked it not to index.
+ */
+function allSafeunfollowLinks(text: string): string[] {
+  return [...text.matchAll(/https:\/\/safeunfollow\.app(\/[A-Za-z0-9/_-]*)/g)].map(m => m[1]);
+}
+
+/**
+ * Read the same way `noindex-routes.test.ts` and the sitemap artefact gate do, rather than
+ * listing `/results` and `/sample` a third time.
+ */
+const VERCEL = JSON.parse(
+  readFileSync(join(process.cwd(), 'vercel.json'), 'utf-8'),
+) as { headers: VercelHeaderRule[] };
+const NOINDEXED = noindexRoutes(VERCEL.headers);
+
 const BANNED_ENTRIES = [...BANNED_PRIVACY, ...PERFORMANCE_BANNED];
 
 /**
@@ -877,5 +901,18 @@ describe('llms.txt states nothing the docs corpus may not state', () => {
     // Same 308 the docs corpus was cleaned of in #184: /docs/faq returns 200, /docs/faq/ redirects.
     const slashed = trailingSlashLinks(LLMS_TXT_TEXT);
     expect(slashed, 'llms.txt links through a redirect').toEqual([]);
+  });
+
+  it('the noindex check can reject a link to a page we tell crawlers to discard', () => {
+    expect(
+      allSafeunfollowLinks('See https://safeunfollow.app/results for the account list.').filter(
+        path => NOINDEXED.matches(path),
+      ),
+    ).toEqual(['/results']);
+  });
+
+  it('links to no page this site tells crawlers not to index', () => {
+    const offenders = allSafeunfollowLinks(LLMS_TXT_TEXT).filter(path => NOINDEXED.matches(path));
+    expect(offenders, `llms.txt links to noindexed page(s): ${offenders.join(', ')}`).toEqual([]);
   });
 });

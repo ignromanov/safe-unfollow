@@ -3,6 +3,8 @@ import { join, resolve } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { noindexRoutes, type VercelHeaderRule } from '../../../scripts/noindex-routes';
+
 /**
  * The unit gate proves the derivation; this proves the artefact, which is the only thing Google
  * reads. Both are needed for the reason sitemap-no-wizard.test.ts already records: a route can
@@ -16,6 +18,18 @@ const dist = resolve(__dirname, '../../../dist');
 const sitemapPath = join(dist, 'sitemap.xml');
 const built = existsSync(dist) && existsSync(sitemapPath);
 
+/**
+ * Read from `vercel.json` the same way `noindex-routes.test.ts` and `generate-sitemap.ts` do,
+ * rather than hand-listing `['results', 'sample']` a third time — that shape is exactly what
+ * `noindex-routes.ts`'s own docstring calls "one stub behind reality". `exact` holds base paths
+ * with their leading slash already on (e.g. `/results`); strip it to match this file's `/${route}$`
+ * pattern.
+ */
+const VERCEL = JSON.parse(readFileSync(join(process.cwd(), 'vercel.json'), 'utf-8')) as {
+  headers: VercelHeaderRule[];
+};
+const NOINDEXED_ROUTES = [...noindexRoutes(VERCEL.headers).exact].map(path => path.slice(1));
+
 describe.runIf(built)('the sitemap does not advertise a noindexed route', () => {
   const xml = built ? readFileSync(sitemapPath, 'utf-8') : '';
   const locations = [...xml.matchAll(/<loc>([^<]*)<\/loc>/g)].map(match => match[1]);
@@ -24,7 +38,12 @@ describe.runIf(built)('the sitemap does not advertise a noindexed route', () => 
     expect(locations.length).toBeGreaterThan(50);
   });
 
-  for (const route of ['results', 'sample']) {
+  it('derived at least the two routes this gate was written for', () => {
+    // Guards the guard: an empty derivation would satisfy every negative assertion below.
+    expect(NOINDEXED_ROUTES).toEqual(expect.arrayContaining(['results', 'sample']));
+  });
+
+  for (const route of NOINDEXED_ROUTES) {
     it(`lists no /${route}, in any locale`, () => {
       const offenders = locations.filter(loc => new RegExp(`/${route}$`).test(loc));
       expect(offenders, `sitemap advertises ${offenders.join(', ')}`).toEqual([]);

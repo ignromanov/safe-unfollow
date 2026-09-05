@@ -260,11 +260,22 @@ describe('every published page fits the search result it appears in', () => {
       // "Instagram Unfollow Tracker — Alternatives Compared", where the brand is the subject
       // of the sentence. `SUFFIX` is the same constant the layout's title rule uses, so the
       // two rules cannot drift apart on what the string is.
+      //
+      // The separator before the brand isn't fixed to SUFFIX's own ASCII hyphen: an em dash or
+      // en dash reads as the identical "brand tacked on the end" drift to a reader, and this
+      // corpus already uses one (docs/compare/index.md's H1 opens with it, at the front, which
+      // is the case this rule must still let through). So the brand name — SUFFIX minus its
+      // leading " - " — is checked on its own, and only a dash-like separator right before it
+      // counts as the drift; the same brand text appearing as the sentence's subject does not.
       const h1 = /^#\s+(.*)$/m.exec(doc.text)?.[1]?.trim() ?? '';
       expect(h1, `${doc.name} has no H1`).not.toBe('');
-      expect(h1.endsWith(SUFFIX.trim()), `${doc.name}'s H1 ends with the brand: "${h1}"`).toBe(
-        false,
-      );
+      const brand = SUFFIX.trim().replace(/^-\s*/, '');
+      const endsWithBrandAfterDash =
+        h1.endsWith(brand) && /[-–—]\s*$/.test(h1.slice(0, h1.length - brand.length));
+      expect(
+        endsWithBrandAfterDash,
+        `${doc.name}'s H1 ends with the brand: "${h1}"`,
+      ).toBe(false);
     });
 
     it(`${doc.name} writes a description the snippet can show whole`, () => {

@@ -190,8 +190,22 @@ describe('the docs layout emits structured data', () => {
     // M1: SCRIPT can be '' if </script> ever preceded <script> inside BLOCK (a reordering that
     // would otherwise pass this test vacuously, the same trap the earlier `<script>`-in-prose
     // bug took the shape of). Assert it is non-empty before trusting `.not.toContain` on it.
+    //
+    // Hand-listed rather than parsed out of the comment: the comment is prose, not data — one
+    // entry ("FAQPage beyond the one page that already has it") doesn't even put its name right
+    // before the parenthetical, and another ("Article/TechArticle") names two types where the
+    // code only ever emits "TechArticle", so a parser would need the same judgment calls a
+    // reader makes and would be no more trustworthy than this list. Six entries, matching the
+    // six the comment in `default.html` names.
     expect(SCRIPT, 'no script payload extracted').not.toBe('');
-    for (const type of ['speakable', 'HowTo', 'FAQPage', 'TechArticle', 'datePublished']) {
+    for (const type of [
+      'speakable',
+      'HowTo',
+      'FAQPage',
+      'TechArticle',
+      'Organization',
+      'datePublished',
+    ]) {
       expect(
         SCRIPT,
         `${type} is excluded by 00-design.md §4 A1 for a researched reason`
