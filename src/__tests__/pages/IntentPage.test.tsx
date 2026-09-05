@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { INTENT_PAGES } from '@/config/intent-pages';
 import { INTENT_CONTENT, ctaHref } from '@/pages/intent-content';
+import { INTENT_DEMO } from '@/config/intent-demo-rows';
 import IntentPage from '@/pages/IntentPage';
 
 const firstPage = INTENT_PAGES[0];
@@ -55,5 +56,25 @@ describe('IntentPage', () => {
     for (const page of INTENT_PAGES) {
       expect(INTENT_CONTENT[page.slug]).toBeDefined();
     }
+  });
+
+  it('should label the demo as sample data', () => {
+    renderPage();
+    expect(screen.getByText(/sample data/i)).toBeInTheDocument();
+  });
+
+  it('should show the sample rows', () => {
+    renderPage();
+    for (const username of INTENT_DEMO[firstPage.slug].usernames) {
+      expect(screen.getByText(username)).toBeInTheDocument();
+    }
+  });
+
+  it('should say how many of the sample match, and out of how many', () => {
+    renderPage();
+    const slice = INTENT_DEMO[firstPage.slug];
+    expect(
+      screen.getByText(new RegExp(`${slice.matching}\\D+${slice.total.toLocaleString('en-US')}`))
+    ).toBeInTheDocument();
   });
 });

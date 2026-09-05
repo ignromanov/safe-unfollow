@@ -7,6 +7,7 @@ import { I18N_NAMESPACES } from '@/config/languages';
 import { injectLocalizedMeta } from '../../../vite/ssg-meta-injector';
 import meta from '@/locales/en/meta.json';
 import { INTENT_CONTENT } from '@/pages/intent-content';
+import { INTENT_DEMO } from '@/config/intent-demo-rows';
 
 const distDir = resolve(process.cwd(), 'dist');
 const built = existsSync(resolve(distDir, 'index.html'));
@@ -131,6 +132,16 @@ describe.runIf(built)('intent landing pages (prerendered)', () => {
 
       it('should carry the CTA href before hydration', () => {
         expect(html()).toContain(`href="/upload?filter=${page.badge}&amp;from=${page.slug}"`);
+      });
+
+      it('should label the demo before hydration', () => {
+        expect(html()).toContain('Sample data');
+      });
+
+      it('should prerender the demo rows', () => {
+        for (const username of INTENT_DEMO[page.slug].usernames) {
+          expect(html()).toContain(username);
+        }
       });
     });
   }
