@@ -128,7 +128,7 @@ export const FilterChips = memo(function FilterChips({
       newFilters.add(filter);
     }
 
-    analytics.filterToggle(filter, action, newFilters.size);
+    analytics.filterToggle(filter, action, newFilters.size, 'chip');
     onFiltersChange(newFilters);
   };
 

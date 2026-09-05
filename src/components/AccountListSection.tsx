@@ -25,6 +25,7 @@ import { RESCUE_PLAN_BANNER_ENABLED } from '@/config/feature-flags';
 import { useAccountFiltering } from '@/hooks/useAccountFiltering';
 import { useUploadCaveats } from '@/hooks/useUploadCaveats';
 import { useTimeOnResults } from '@/hooks/useTimeOnResults';
+import { analytics } from '@/lib/analytics';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -93,11 +94,15 @@ export function AccountListSection({
 
   const handleStatCardClick = (badgeType: BadgeKey) => {
     const newFilters = new Set(filters);
+    const action = newFilters.has(badgeType) ? 'disable' : 'enable';
+
     if (newFilters.has(badgeType)) {
       newFilters.delete(badgeType);
     } else {
       newFilters.add(badgeType);
     }
+
+    analytics.filterToggle(badgeType, action, newFilters.size, 'stat_card');
     setFilters(newFilters);
     trackAction();
   };

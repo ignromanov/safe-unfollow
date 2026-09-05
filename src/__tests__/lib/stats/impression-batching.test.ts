@@ -160,7 +160,7 @@ describe('promo impression batching', () => {
     });
 
     it('queues in-page interactions, which fire repeatedly inside one page life', () => {
-      analytics.filterToggle('mutuals', 'enable', 1);
+      analytics.filterToggle('mutuals', 'enable', 1, 'chip');
       analytics.filterClearAll(3);
       analytics.searchPerform(4, 10, 100, false);
       analytics.faqExpand(2);
@@ -170,6 +170,7 @@ describe('promo impression batching', () => {
         filter_name: 'mutuals',
         filter_action: 'enable',
         active_filter_count: 1,
+        filter_source: 'chip',
       });
       expect(enqueueEvent).toHaveBeenNthCalledWith(2, 'filter_clear_all', {
         previous_count: 3,
@@ -214,7 +215,7 @@ describe('promo impression batching', () => {
     it('reports the four batched events on any roll — nothing samples them', () => {
       const random = vi.spyOn(Math, 'random').mockReturnValue(0.99);
 
-      analytics.filterToggle('mutuals', 'enable', 1);
+      analytics.filterToggle('mutuals', 'enable', 1, 'chip');
       analytics.searchPerform(4, 10, 100, false);
       analytics.guideSectionView(3);
       analytics.guideOpen('accordion');

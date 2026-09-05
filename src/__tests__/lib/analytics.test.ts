@@ -514,7 +514,7 @@ describe('Analytics', () => {
 
       it('should not track events', () => {
         analytics.fileUploadStart(5.5);
-        analytics.filterToggle('mutuals', 'enable', 1);
+        analytics.filterToggle('mutuals', 'enable', 1, 'chip');
         analytics.searchPerform(5, 10, 100, false);
 
         expect(windowSpy.umami.track).not.toHaveBeenCalled();
@@ -529,7 +529,7 @@ describe('Analytics', () => {
 
       it('should not track events', () => {
         analytics.fileUploadStart(5.5);
-        analytics.filterToggle('mutuals', 'enable', 1);
+        analytics.filterToggle('mutuals', 'enable', 1, 'chip');
         analytics.searchPerform(5, 10, 100, false);
 
         // umami was deleted during opt-out, so no calls
@@ -546,7 +546,7 @@ describe('Analytics', () => {
       it('should not throw error', () => {
         expect(() => {
           analytics.fileUploadStart(5.5);
-          analytics.filterToggle('mutuals', 'enable', 1);
+          analytics.filterToggle('mutuals', 'enable', 1, 'chip');
         }).not.toThrow();
       });
     });
