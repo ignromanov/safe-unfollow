@@ -6,7 +6,7 @@ permalink: /
 last_updated: 2026-09-03
 ---
 
-# Documentation - Instagram Unfollow Tracker
+# Documentation
 
 Welcome to the complete documentation for Instagram Unfollow Tracker, a privacy-focused tool for analyzing your Instagram follower relationships.
 

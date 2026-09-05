@@ -186,6 +186,10 @@ If your archive has a different folder structure, the tracker will try to locate
 | 10,000-100,000 followers | ~3ms | ~1ms |
 | 100,000-1,000,000+ followers | ~5ms | ~2ms |
 
+⚠️ Filter speed and search speed are design targets, not measurements — no benchmark harness
+exists in this repo, and the only 1M-scale test mocks IndexedDB entirely and asserts a 500ms
+ceiling.
+
 ---
 
 ## Privacy and Security

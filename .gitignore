@@ -145,6 +145,10 @@ umami-backup-*.sql.gz
 # Large-archive fixture generator must ship despite the scripts/ ignore above (PR #80)
 !scripts/generate-large-archive.ts
 
+# noindex-routes derivation must ship despite the scripts/ ignore above — generate-sitemap.ts
+# imports it, and src/__tests__/scripts/noindex-routes.test.ts imports it directly
+!scripts/noindex-routes.ts
+
 # design-sync working state — the converter, the generated bundle and the machine
 # caches a resync leaves behind, ~60 MB at repo root. All of it is DERIVED:
 # `.design-sync/tools/preflight.sh` rebuilds every path below from scratch.

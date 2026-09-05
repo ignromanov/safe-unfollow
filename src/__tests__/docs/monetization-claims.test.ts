@@ -1,10 +1,12 @@
 import { execSync } from 'node:child_process';
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { basename, join, relative } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
 import { SUPPORTED_LANGUAGES } from '@/config/languages';
+
+import { noindexRoutes, type VercelHeaderRule } from '../../../scripts/noindex-routes';
 
 const DOCS_ROOT = join(process.cwd(), 'docs');
 
@@ -20,6 +22,15 @@ const DOCS = markdownFiles(DOCS_ROOT).map(path => ({
   name: relative(DOCS_ROOT, path),
   text: readFileSync(path, 'utf-8'),
 }));
+
+/**
+ * `public/llms.txt` lives outside `docs/`, so it is invisible to every `DOCS`-scoped check
+ * below unless explicitly added. Read once, here, so both the pre-existing language-count
+ * gate and the llms.txt-specific describe block near the end of this file see the same text.
+ */
+const LLMS_TXT_PATH = join(process.cwd(), 'public', 'llms.txt');
+const LLMS_TXT_EXISTS = existsSync(LLMS_TXT_PATH);
+const LLMS_TXT_TEXT = LLMS_TXT_EXISTS ? readFileSync(LLMS_TXT_PATH, 'utf-8') : '';
 
 /**
  * Claims that were true when written and stopped being true without anyone
@@ -351,6 +362,71 @@ const PERFORMANCE_BANNED: BannedEntry[] = [
 ];
 
 /**
+ * A published figure and the caveat that makes it honest belong in one gate.
+ *
+ * `/docs/roadmap` and `/docs/instagram-export` print the same two metrics — filter speed and
+ * search speed at 1M accounts — and until this gate only one of them said they are design
+ * targets. `.claude/CLAUDE.md` -> "Performance Targets" forbids restating one as achieved, and
+ * a table with a millisecond column and no caveat is exactly that restatement, in the form a
+ * reader is most likely to quote back.
+ *
+ * The clause is READ from roadmap.md rather than written here, so the two pages cannot drift
+ * apart the way the tech-spec's own wording already has. Only the sentence both pages can
+ * truthfully make is compared: roadmap's paragraph ends with a sentence about its Languages and
+ * Tests rows, which instagram-export does not have.
+ *
+ * Subjects are derived from two conditions, not listed: a page must name the metrics AND print
+ * a millisecond figure. `faq.md` names them without a number ("stays interactive") and is
+ * correctly out. `tech-spec.md` prints `sub-2ms` without naming them and carries its own,
+ * differently-worded disclaimer at its section 5 — recorded, not unified here.
+ *
+ * ⛔ `PERFORMANCE_BANNED_DOCS_EXEMPT` does not apply. That exemption covers the literal phrases
+ * `<5ms` / `sub-5ms`; this page is this rule's subject.
+ */
+const PERFORMANCE_CLAUSE_END = 'ceiling.';
+
+function collapse(text: string): string {
+  return text.replace(/\s+/g, ' ').trim();
+}
+
+/** The clause both pages must carry, derived from the page that already has it. */
+function performanceClause(): string {
+  const roadmap = DOCS.find(doc => doc.name === 'roadmap.md');
+  expect(roadmap, 'roadmap.md is the source of this clause and was not found').toBeTruthy();
+  const collapsed = collapse((roadmap as { text: string }).text);
+  const start = collapsed.indexOf('Filter speed and search speed are design targets');
+  expect(start, 'roadmap.md no longer carries the clause this rule is derived from').toBeGreaterThan(-1);
+  const end = collapsed.indexOf(PERFORMANCE_CLAUSE_END, start);
+  expect(end, 'the clause in roadmap.md no longer ends where this rule expects').toBeGreaterThan(-1);
+  return collapsed.slice(start, end + PERFORMANCE_CLAUSE_END.length);
+}
+
+const NAMES_THE_METRICS = /filter speed|search speed/i;
+const PRINTS_MILLISECONDS = /[<~]\s*\d+(\.\d+)?\s*ms\b|\b\d+(\.\d+)?\s*ms\b/i;
+
+describe('a page that prints these two metrics says they are targets', () => {
+  const subjects = DOCS.filter(
+    doc => NAMES_THE_METRICS.test(doc.text) && PRINTS_MILLISECONDS.test(doc.text),
+  );
+
+  it('finds the pages the rule is about', () => {
+    // Guards the guard: an empty subject set would pass the loop below silently, which is how
+    // a rule that no longer matches anything keeps reporting green.
+    expect(subjects.map(doc => doc.name).sort()).toEqual(['instagram-export.md', 'roadmap.md']);
+  });
+
+  for (const doc of subjects) {
+    it(`${doc.name} carries the design-target clause`, () => {
+      expect(
+        collapse(doc.text),
+        `${doc.name} prints a millisecond figure for filter or search speed with no caveat. ` +
+          'Copy the clause from docs/roadmap.md; do not write a new one.',
+      ).toContain(performanceClause());
+    });
+  }
+});
+
+/**
  * The same regexes, aimed at shipped product UI instead of docs.
  *
  * `docs/*.md` is the page a sceptical reader checks; `src/locales/en/*.json` is what
@@ -532,8 +608,12 @@ describe('docs monetization claims', () => {
   });
 
   it('never states a language count other than SUPPORTED_LANGUAGES.length', () => {
+    // public/llms.txt lives outside docs/ but makes the same claim ("Available in 10
+    // languages") and is at least as likely to go stale silently — included as a subject
+    // here rather than duplicating this check for one more file.
+    const subjects = [...DOCS, { name: 'public/llms.txt', text: LLMS_TXT_TEXT }];
     const pattern = /\b(\d+)\s+languages?\b/gi;
-    const offenders = DOCS.flatMap(doc => {
+    const offenders = subjects.flatMap(doc => {
       const badCounts = [...doc.text.matchAll(pattern)]
         .map(match => Number(match[1]))
         .filter(count => count !== SUPPORTED_LANGUAGES.length);
@@ -644,4 +724,222 @@ describe('comparison pages state facts about others with an expiry', () => {
       expect(doc.text, `${doc.name} carries an HTML comment, which is served to the client`).not.toMatch(/<!--/);
     });
   }
+});
+
+/**
+ * `/llms.txt` is a summary of the product written for a machine, which makes it the one
+ * published surface most likely to be quoted whole and least likely to be re-read by a human.
+ * It gets the same claim discipline as the docs corpus, from the same lists — not a copy of
+ * them, the lists themselves.
+ *
+ * Stricter than the docs rule in one way, deliberately: the `qualifiedBy` exemptions that let a
+ * docs page say "free" next to its qualifier are not honoured here. A bullet list has no room
+ * for a qualifier, so the unqualified claim simply may not appear.
+ */
+
+/**
+ * Extracted predicates, not inlined into the `it`s below, for one reason: a control test
+ * that duplicates an assertion's logic instead of calling it proves nothing about the
+ * assertion — it proves the copy works. Both the real checks and their controls below call
+ * these same functions, so a control failing means the real check would have failed too.
+ */
+const LLMS_TXT_MIN_BYTES = 200;
+const LLMS_TXT_MAX_BYTES = 4096;
+
+function withinSizeBudget(byteLength: number): boolean {
+  return byteLength > LLMS_TXT_MIN_BYTES && byteLength < LLMS_TXT_MAX_BYTES;
+}
+
+function extractDocsLinks(text: string): string[] {
+  return [...text.matchAll(/https:\/\/safeunfollow\.app(\/docs\/[A-Za-z0-9/_-]*)/g)].map(
+    m => m[1],
+  );
+}
+
+function docsPermalinks(): Set<string> {
+  return new Set(
+    DOCS.map(doc => {
+      const raw = /^permalink:\s*(.*)$/m.exec(doc.text)?.[1]?.trim() ?? '';
+      const clean = raw.replace(/^['"]|['"]$/g, '');
+      return `/docs${clean}`.replace(/\/$/, '') || '/docs';
+    }),
+  );
+}
+
+function missingLinks(links: string[]): string[] {
+  const permalinks = docsPermalinks();
+  return links.filter(link => !permalinks.has(link.replace(/\/$/, '')));
+}
+
+function trailingSlashLinks(text: string): string[] {
+  return [...text.matchAll(/https:\/\/safeunfollow\.app\/docs\/[A-Za-z0-9/_-]*\//g)].map(
+    m => m[0],
+  );
+}
+
+/**
+ * Every `safeunfollow.app` URL named in the text, `/docs/...` or not — unlike
+ * `extractDocsLinks`, which is scoped to `/docs/` on purpose (its job is checking those links
+ * resolve to a page this repo builds, and `/` and `/upload` are not docs pages). This one exists
+ * to catch a different failure: `llms.txt`'s "Start here" block links to `/` and `/upload`
+ * today, and nothing stops a future edit from adding `/results` there too — a URL this same
+ * branch tells crawlers to discard (`noindex-routes.ts` / `vercel.json`). A machine reader has
+ * no way to know that; it would just start pointing at a page we asked it not to index.
+ */
+function allSafeunfollowLinks(text: string): string[] {
+  return [...text.matchAll(/https:\/\/safeunfollow\.app(\/[A-Za-z0-9/_-]*)/g)].map(m => m[1]);
+}
+
+/**
+ * Read the same way `noindex-routes.test.ts` and the sitemap artefact gate do, rather than
+ * listing `/results` and `/sample` a third time.
+ */
+const VERCEL = JSON.parse(
+  readFileSync(join(process.cwd(), 'vercel.json'), 'utf-8'),
+) as { headers: VercelHeaderRule[] };
+const NOINDEXED = noindexRoutes(VERCEL.headers);
+
+/**
+ * `NOINDEXED.matches()` takes a base path with any locale prefix already stripped — that is the
+ * contract `scripts/generate-sitemap.ts`'s own `parseUrlPath()` satisfies before calling it. A
+ * URL pulled out of prose has not had that done to it, so `/id/results` would sail past a check
+ * that only ever asks about `/results`. Derived from `SUPPORTED_LANGUAGES`, the same source
+ * `parseUrlPath` reads, rather than a hand-typed locale list — hardcoding one here would recreate
+ * the exact drift `2e85694` closed one file over. `en` needs no case: it is never prefixed.
+ */
+function stripLocalePrefix(path: string): string {
+  const match = /^\/([a-z]{2})(\/.*)?$/.exec(path);
+  const lang = match?.[1];
+  if (lang && lang !== 'en' && (SUPPORTED_LANGUAGES as readonly string[]).includes(lang)) {
+    return match?.[2] || '/';
+  }
+  return path;
+}
+
+const BANNED_ENTRIES = [...BANNED_PRIVACY, ...PERFORMANCE_BANNED];
+
+/**
+ * One synthetic sentence per `BANNED_ENTRIES` pattern, paired by position, that pattern
+ * MUST match — proof the detector can go red before it is trusted to report green on the
+ * real, shipped text. Paired with `BANNED_KNOWN_INNOCENTS` below, which none of the
+ * patterns may match, so a widened-to-match-everything regex would also be caught.
+ */
+const BANNED_KNOWN_VIOLATIONS = [
+  'This page carries no advertising of any kind.',
+  'We set no tracking cookies, ever.',
+  'There is no data sharing with anyone, full stop.',
+  'No network requests after the page has finished loading.',
+  'This was tested and verified against a real 1,000,000-account export.',
+  'Filtering completes in <5ms even at full scale.',
+  'Search runs at sub-5ms latency.',
+];
+
+const BANNED_KNOWN_INNOCENTS = [
+  'The site carries advertising and uses privacy-focused analytics for page-level metrics.',
+  'Filter speed and search speed are design targets, not measurements.',
+  'Designed for exports up to 1,000,000+ accounts.',
+  'Open source under the MIT licence.',
+];
+
+describe('llms.txt states nothing the docs corpus may not state', () => {
+  it('the size budget can reject an oversized file', () => {
+    expect(withinSizeBudget(Buffer.byteLength('x'.repeat(LLMS_TXT_MAX_BYTES), 'utf-8'))).toBe(
+      false,
+    );
+  });
+
+  it('the size budget can reject a near-empty file', () => {
+    expect(withinSizeBudget(Buffer.byteLength('too short', 'utf-8'))).toBe(false);
+  });
+
+  it('the banned-claim detector can go red on the claims it exists to catch', () => {
+    const cannotFire = BANNED_ENTRIES.filter(
+      (entry, i) => !entry.pattern.test(BANNED_KNOWN_VIOLATIONS[i]),
+    ).map(entry => String(entry.pattern));
+    expect(cannotFire, `these patterns did not match their own known violation`).toEqual([]);
+  });
+
+  it('the banned-claim detector does not fire on true, hedged copy', () => {
+    const falsePositives = BANNED_ENTRIES.filter(entry =>
+      BANNED_KNOWN_INNOCENTS.some(innocent => entry.pattern.test(innocent)),
+    ).map(entry => String(entry.pattern));
+    expect(falsePositives, `these patterns fired on innocent copy`).toEqual([]);
+  });
+
+  it('the link-permalink check can reject a link to a page nothing builds', () => {
+    expect(missingLinks(['/docs/this-page-does-not-exist'])).toEqual([
+      '/docs/this-page-does-not-exist',
+    ]);
+  });
+
+  it('the link-permalink check accepts a link this repository does build', () => {
+    expect(missingLinks(['/docs/faq'])).toEqual([]);
+  });
+
+  it('the trailing-slash check can reject a slashed link', () => {
+    expect(trailingSlashLinks('See https://safeunfollow.app/docs/faq/ for more.')).toEqual([
+      'https://safeunfollow.app/docs/faq/',
+    ]);
+  });
+
+  it('the trailing-slash check accepts an unslashed link', () => {
+    expect(trailingSlashLinks('See https://safeunfollow.app/docs/faq for more.')).toEqual([]);
+  });
+
+  it('is published', () => {
+    expect(LLMS_TXT_EXISTS, 'public/llms.txt does not exist').toBe(true);
+  });
+
+  it('fits the budget a summary file has', () => {
+    // 4 KB. Not a standard - a ceiling, so this cannot grow into a second copy of the docs.
+    const bytes = Buffer.byteLength(LLMS_TXT_TEXT, 'utf-8');
+    expect(withinSizeBudget(bytes), `llms.txt is ${bytes} bytes`).toBe(true);
+  });
+
+  for (const banned of BANNED_ENTRIES) {
+    it(`makes no claim matching ${banned.pattern}`, () => {
+      expect(banned.pattern.test(LLMS_TXT_TEXT), `llms.txt: ${banned.why}`).toBe(false);
+    });
+  }
+
+  /**
+   * Every link is checked against the file that produces the page, not fetched. A fetch would
+   * pass against production while this branch links somewhere that does not exist yet, which is
+   * the wrong way round for a gate.
+   */
+  it('links only to docs pages this repository actually builds', () => {
+    const links = extractDocsLinks(LLMS_TXT_TEXT);
+    expect(links.length, 'llms.txt links to no docs page').toBeGreaterThan(3);
+    const missing = missingLinks(links);
+    expect(missing, `llms.txt links to pages nothing builds: ${missing.join(', ')}`).toEqual([]);
+  });
+
+  it('links to no page through a trailing slash', () => {
+    // Same 308 the docs corpus was cleaned of in #184: /docs/faq returns 200, /docs/faq/ redirects.
+    const slashed = trailingSlashLinks(LLMS_TXT_TEXT);
+    expect(slashed, 'llms.txt links through a redirect').toEqual([]);
+  });
+
+  it('the noindex check can reject a link to a page we tell crawlers to discard', () => {
+    expect(
+      allSafeunfollowLinks('See https://safeunfollow.app/results for the account list.').filter(
+        path => NOINDEXED.matches(stripLocalePrefix(path)),
+      ),
+    ).toEqual(['/results']);
+  });
+
+  it('the noindex check catches the same page behind a locale prefix', () => {
+    expect(
+      allSafeunfollowLinks('See https://safeunfollow.app/id/results for the account list.').filter(
+        path => NOINDEXED.matches(stripLocalePrefix(path)),
+      ),
+    ).toEqual(['/id/results']);
+  });
+
+  it('links to no page this site tells crawlers not to index, in any locale', () => {
+    const offenders = allSafeunfollowLinks(LLMS_TXT_TEXT).filter(path =>
+      NOINDEXED.matches(stripLocalePrefix(path)),
+    );
+    expect(offenders, `llms.txt links to noindexed page(s): ${offenders.join(', ')}`).toEqual([]);
+  });
 });

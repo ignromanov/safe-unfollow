@@ -6,7 +6,7 @@ permalink: /roadmap/
 last_updated: 2026-09-03
 ---
 
-# Roadmap - Instagram Unfollow Tracker
+# Roadmap
 
 ## Current Status (v1.5.0) ✅
 

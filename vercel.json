@@ -122,6 +122,24 @@
       ]
     },
     {
+      "source": "/:path(results|sample)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
+    },
+    {
+      "source": "/:lang(ar|de|es|fr|id|ja|pt|ru|tr)/:path(results|sample)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
+    },
+    {
       "source": "/favicon.ico",
       "headers": [
         {
