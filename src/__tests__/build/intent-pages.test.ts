@@ -1,11 +1,86 @@
-import { describe, it, expect } from 'vitest';
-import { readFileSync, existsSync } from 'fs';
-import { resolve } from 'path';
-import { INTENT_PAGES } from '@/config/intent-pages';
+import { describe, it, expect, afterAll } from 'vitest';
+import { readFileSync, existsSync, mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'fs';
+import { resolve, join } from 'path';
+import { tmpdir } from 'os';
+import { INTENT_PAGES, INTENT_PATHS } from '@/config/intent-pages';
+import { I18N_NAMESPACES } from '@/config/languages';
+import { injectLocalizedMeta } from '../../../vite/ssg-meta-injector';
 import meta from '@/locales/en/meta.json';
 
 const distDir = resolve(process.cwd(), 'dist');
 const built = existsSync(resolve(distDir, 'index.html'));
+
+/**
+ * The logic half: does `injectLocalizedMeta` itself suppress hreflang for an intent path, and
+ * does a normal page still get the full set? Fixture-driven — no `dist/` needed — because the
+ * regression this task guards against (someone editing the `englishOnly` guard) lives in
+ * build-time code that `describe.runIf(built)` below cannot see when CI skips the build
+ * (code-quality.yml runs test:coverage with no build — GH#159).
+ *
+ * A throwaway rootDir stands in for the repo: `injectLocalizedMeta` reads
+ * `<rootDir>/src/locales/<lang>/meta.json` and `<rootDir>/dist/.vite/manifest.json` (via
+ * localeChunkHrefs), so both are written here rather than pointed at the real ones — the real
+ * vite manifest only exists after a build, which is exactly the dependency this half must not
+ * have.
+ */
+const fixtureRoot = mkdtempSync(join(tmpdir(), 'intent-meta-injector-'));
+
+function writeFixture(): void {
+  const localesDir = join(fixtureRoot, 'src', 'locales', 'en');
+  mkdirSync(localesDir, { recursive: true });
+  writeFileSync(
+    join(localesDir, 'meta.json'),
+    JSON.stringify({
+      title: 'Site Title',
+      description: 'Site description',
+      ogTitle: 'Site Title',
+      keywords: 'kw',
+      routes: {
+        '/upload': { title: 'Upload Title', description: 'Upload description' },
+        [INTENT_PATHS[0]]: { title: 'Intent Title', description: 'Intent description' },
+      },
+    })
+  );
+
+  const manifestDir = join(fixtureRoot, 'dist', '.vite');
+  mkdirSync(manifestDir, { recursive: true });
+  const manifest: Record<string, { file: string }> = {};
+  for (const ns of I18N_NAMESPACES) {
+    manifest[`src/locales/en/${ns}.json`] = { file: `assets/${ns}-fake.js` };
+  }
+  writeFileSync(join(manifestDir, 'manifest.json'), JSON.stringify(manifest));
+}
+
+writeFixture();
+afterAll(() => rmSync(fixtureRoot, { recursive: true, force: true }));
+
+const BASE_HTML =
+  '<!doctype html><html lang="en"><head><title>x</title></head><body></body></html>';
+
+describe('injectLocalizedMeta (fixture, always runs)', () => {
+  it('suppresses hreflang and og:locale:alternate for an intent path', async () => {
+    const html = await injectLocalizedMeta(INTENT_PATHS[0], BASE_HTML, fixtureRoot);
+
+    expect(html).not.toContain('hreflang=');
+    expect(html).not.toContain('og:locale:alternate');
+  });
+
+  it('still emits the full set on a normal route — the control', async () => {
+    const html = await injectLocalizedMeta('/upload', BASE_HTML, fixtureRoot);
+
+    expect(html).toContain('hreflang="de"');
+    expect(html).toContain('hreflang="x-default"');
+    expect(html).toContain('og:locale:alternate');
+  });
+
+  it('canonicalises an intent path to itself, without a query string', async () => {
+    const html = await injectLocalizedMeta(INTENT_PATHS[0], BASE_HTML, fixtureRoot);
+
+    expect(html).toContain(
+      `<link rel="canonical" href="https://safeunfollow.app${INTENT_PATHS[0]}"/>`
+    );
+  });
+});
 
 describe.runIf(built)('intent landing pages (prerendered)', () => {
   // The control. /upload IS a ten-locale page, so it MUST carry hreflang — if this fails,

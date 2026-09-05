@@ -370,7 +370,7 @@ ${entries.join("\n\n")}
 
   // Summary
   const basePaths = new Set(urlEntries.map((e) => e.basePath));
-  const docsCount = ENGLISH_ONLY_PATHS.length;
+  const docsCount = DOCS_PATHS.length;
   console.log(`✅ Sitemap generated: dist/sitemap.xml`);
   console.log(`   Total URLs: ${urlEntries.length}`);
   console.log(`   - Static pages: ${urlEntries.length - docsCount}`);
