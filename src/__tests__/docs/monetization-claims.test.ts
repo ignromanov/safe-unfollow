@@ -1,5 +1,5 @@
 import { execSync } from 'node:child_process';
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { basename, join, relative } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
@@ -709,4 +709,64 @@ describe('comparison pages state facts about others with an expiry', () => {
       expect(doc.text, `${doc.name} carries an HTML comment, which is served to the client`).not.toMatch(/<!--/);
     });
   }
+});
+
+/**
+ * `/llms.txt` is a summary of the product written for a machine, which makes it the one
+ * published surface most likely to be quoted whole and least likely to be re-read by a human.
+ * It gets the same claim discipline as the docs corpus, from the same lists — not a copy of
+ * them, the lists themselves.
+ *
+ * Stricter than the docs rule in one way, deliberately: the `qualifiedBy` exemptions that let a
+ * docs page say "free" next to its qualifier are not honoured here. A bullet list has no room
+ * for a qualifier, so the unqualified claim simply may not appear.
+ */
+const LLMS_TXT_PATH = join(process.cwd(), 'public', 'llms.txt');
+
+describe('llms.txt states nothing the docs corpus may not state', () => {
+  const exists = existsSync(LLMS_TXT_PATH);
+  const text = exists ? readFileSync(LLMS_TXT_PATH, 'utf-8') : '';
+
+  it('is published', () => {
+    expect(exists, 'public/llms.txt does not exist').toBe(true);
+  });
+
+  it('fits the budget a summary file has', () => {
+    // 4 KB. Not a standard - a ceiling, so this cannot grow into a second copy of the docs.
+    expect(Buffer.byteLength(text, 'utf-8')).toBeLessThan(4096);
+    expect(Buffer.byteLength(text, 'utf-8')).toBeGreaterThan(200);
+  });
+
+  for (const banned of [...BANNED_PRIVACY, ...PERFORMANCE_BANNED]) {
+    it(`makes no claim matching ${banned.pattern}`, () => {
+      expect(banned.pattern.test(text), `llms.txt: ${banned.why}`).toBe(false);
+    });
+  }
+
+  /**
+   * Every link is checked against the file that produces the page, not fetched. A fetch would
+   * pass against production while this branch links somewhere that does not exist yet, which is
+   * the wrong way round for a gate.
+   */
+  it('links only to docs pages this repository actually builds', () => {
+    const links = [...text.matchAll(/https:\/\/safeunfollow\.app(\/docs\/[A-Za-z0-9/_-]*)/g)].map(
+      m => m[1],
+    );
+    expect(links.length, 'llms.txt links to no docs page').toBeGreaterThan(3);
+    const permalinks = new Set(
+      DOCS.map(doc => {
+        const raw = /^permalink:\s*(.*)$/m.exec(doc.text)?.[1]?.trim() ?? '';
+        const clean = raw.replace(/^['"]|['"]$/g, '');
+        return `/docs${clean}`.replace(/\/$/, '') || '/docs';
+      }),
+    );
+    const missing = links.filter(link => !permalinks.has(link.replace(/\/$/, '')));
+    expect(missing, `llms.txt links to pages nothing builds: ${missing.join(', ')}`).toEqual([]);
+  });
+
+  it('links to no page through a trailing slash', () => {
+    // Same 308 the docs corpus was cleaned of in #184: /docs/faq returns 200, /docs/faq/ redirects.
+    const slashed = [...text.matchAll(/https:\/\/safeunfollow\.app\/docs\/[A-Za-z0-9/_-]*\//g)];
+    expect(slashed.map(m => m[0]), 'llms.txt links through a redirect').toEqual([]);
+  });
 });

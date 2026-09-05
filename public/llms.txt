@@ -1,0 +1,43 @@
+# Instagram Unfollow Tracker
+
+> A browser-based analyzer for the official Instagram data export. Upload the ZIP Meta gives
+> you and see who unfollowed you, who does not follow back, and who is mutual. The parsing and
+> the filtering run in your own browser, so the export never leaves your device. No Instagram
+> login and no account of any kind is required.
+
+## What it does
+
+- Reads the official Instagram data export (request it from the Meta Accounts Center; JSON is
+  the format the parser reads best, and HTML exports are read too).
+- Shows unfollowers, non-mutuals, mutuals, pending requests, restricted and close-friends
+  accounts as filterable badges.
+- Designed for exports up to 1,000,000+ accounts, using columnar storage in IndexedDB and
+  bitset filtering. Stored in the browser, never uploaded.
+- Available in 10 languages.
+- Open source under the MIT licence.
+
+## What it costs
+
+- The analysis is free in full: every badge, every filter, every account, at any export size.
+- Exporting the result to CSV or JSON is a one-time $7 licence key. A free 10-row sample is
+  shown before anything is asked for.
+- The site carries advertising and uses privacy-focused analytics for page-level metrics. The
+  Instagram export itself is never sent anywhere, so nothing on the page can read it.
+
+## Documentation
+
+- [How to download your Instagram data as a ZIP](https://safeunfollow.app/docs/instagram-export): the export request, the settings that matter, and how long Meta takes.
+- [User guide](https://safeunfollow.app/docs/user-guide): uploading, badges, filtering, search.
+- [FAQ](https://safeunfollow.app/docs/faq): what it does and does not do.
+- [Is the unfollowers tracker legit?](https://safeunfollow.app/docs/is-it-safe): why no login is asked for and what that rules out.
+- [Troubleshooting](https://safeunfollow.app/docs/troubleshooting): upload failures and what causes them.
+- [Technical specification](https://safeunfollow.app/docs/tech-spec): storage, parsing and the client-side architecture.
+- [Privacy](https://safeunfollow.app/docs/privacy): what is processed where.
+- [Accessibility](https://safeunfollow.app/docs/accessibility): keyboard, screen reader and RTL support.
+- [Alternatives compared](https://safeunfollow.app/docs/compare): how it differs from trackers that ask for a login.
+- [Roadmap](https://safeunfollow.app/docs/roadmap): what is built and what is planned.
+
+## Start here
+
+- [Open the app](https://safeunfollow.app/)
+- [Upload an export](https://safeunfollow.app/upload)
