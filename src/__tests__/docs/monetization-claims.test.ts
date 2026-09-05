@@ -351,6 +351,71 @@ const PERFORMANCE_BANNED: BannedEntry[] = [
 ];
 
 /**
+ * A published figure and the caveat that makes it honest belong in one gate.
+ *
+ * `/docs/roadmap` and `/docs/instagram-export` print the same two metrics — filter speed and
+ * search speed at 1M accounts — and until this gate only one of them said they are design
+ * targets. `.claude/CLAUDE.md` -> "Performance Targets" forbids restating one as achieved, and
+ * a table with a millisecond column and no caveat is exactly that restatement, in the form a
+ * reader is most likely to quote back.
+ *
+ * The clause is READ from roadmap.md rather than written here, so the two pages cannot drift
+ * apart the way the tech-spec's own wording already has. Only the sentence both pages can
+ * truthfully make is compared: roadmap's paragraph ends with a sentence about its Languages and
+ * Tests rows, which instagram-export does not have.
+ *
+ * Subjects are derived from two conditions, not listed: a page must name the metrics AND print
+ * a millisecond figure. `faq.md` names them without a number ("stays interactive") and is
+ * correctly out. `tech-spec.md` prints `sub-2ms` without naming them and carries its own,
+ * differently-worded disclaimer at its section 5 — recorded, not unified here.
+ *
+ * ⛔ `PERFORMANCE_BANNED_DOCS_EXEMPT` does not apply. That exemption covers the literal phrases
+ * `<5ms` / `sub-5ms`; this page is this rule's subject.
+ */
+const PERFORMANCE_CLAUSE_END = 'ceiling.';
+
+function collapse(text: string): string {
+  return text.replace(/\s+/g, ' ').trim();
+}
+
+/** The clause both pages must carry, derived from the page that already has it. */
+function performanceClause(): string {
+  const roadmap = DOCS.find(doc => doc.name === 'roadmap.md');
+  expect(roadmap, 'roadmap.md is the source of this clause and was not found').toBeTruthy();
+  const collapsed = collapse((roadmap as { text: string }).text);
+  const start = collapsed.indexOf('Filter speed and search speed are design targets');
+  expect(start, 'roadmap.md no longer carries the clause this rule is derived from').toBeGreaterThan(-1);
+  const end = collapsed.indexOf(PERFORMANCE_CLAUSE_END, start);
+  expect(end, 'the clause in roadmap.md no longer ends where this rule expects').toBeGreaterThan(-1);
+  return collapsed.slice(start, end + PERFORMANCE_CLAUSE_END.length);
+}
+
+const NAMES_THE_METRICS = /filter speed|search speed/i;
+const PRINTS_MILLISECONDS = /[<~]\s*\d+(\.\d+)?\s*ms\b|\b\d+(\.\d+)?\s*ms\b/i;
+
+describe('a page that prints these two metrics says they are targets', () => {
+  const subjects = DOCS.filter(
+    doc => NAMES_THE_METRICS.test(doc.text) && PRINTS_MILLISECONDS.test(doc.text),
+  );
+
+  it('finds the pages the rule is about', () => {
+    // Guards the guard: an empty subject set would pass the loop below silently, which is how
+    // a rule that no longer matches anything keeps reporting green.
+    expect(subjects.map(doc => doc.name).sort()).toEqual(['instagram-export.md', 'roadmap.md']);
+  });
+
+  for (const doc of subjects) {
+    it(`${doc.name} carries the design-target clause`, () => {
+      expect(
+        collapse(doc.text),
+        `${doc.name} prints a millisecond figure for filter or search speed with no caveat. ` +
+          'Copy the clause from docs/roadmap.md; do not write a new one.',
+      ).toContain(performanceClause());
+    });
+  }
+});
+
+/**
  * The same regexes, aimed at shipped product UI instead of docs.
  *
  * `docs/*.md` is the page a sceptical reader checks; `src/locales/en/*.json` is what
