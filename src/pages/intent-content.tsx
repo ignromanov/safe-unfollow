@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import type { IntentPageConfig } from '@/config/intent-pages';
+import type { IntentPageConfig, IntentSlug } from '@/config/intent-pages';
 
 /**
  * The four things every intent page answers, from the spec at
@@ -33,7 +33,7 @@ export function ctaHref(page: IntentPageConfig): string {
   return `/upload?filter=${page.badge}&from=${page.slug}`;
 }
 
-export const INTENT_CONTENT: Record<string, IntentContent> = {
+export const INTENT_CONTENT: Record<IntentSlug, IntentContent> = {
   'who-doesnt-follow-me-back': {
     intro: (
       <>
@@ -122,5 +122,149 @@ export const INTENT_CONTENT: Record<string, IntentContent> = {
       },
     ],
     ctaLabel: 'See who does not follow you back',
+  },
+  'instagram-pending-follow-requests': {
+    intro: (
+      <>
+        Instagram does not show you the follow requests you have sent and that were never accepted —
+        but your data export lists every one of them. Many people find they have none, and that is a
+        real answer too. This page shows you how to read the list out of your own export, without
+        logging in to anything.
+      </>
+    ),
+    sections: [
+      {
+        heading: 'What counts as pending',
+        body: (
+          <>
+            <p>
+              A request you sent to a private account that has neither accepted nor declined it. It
+              sits in that state indefinitely — Instagram does not expire these, and it does not
+              notify you about them.
+            </p>
+            <p>
+              A request that was <em>declined</em> is not pending. It is a separate list in the
+              export, and this page does not count it: the two mean opposite things about the other
+              account.
+            </p>
+          </>
+        ),
+      },
+      {
+        heading: 'Why this list is invisible in the app',
+        body: (
+          <>
+            <p>
+              The Instagram app shows requests coming <em>to</em> you. There is no screen listing
+              the ones going <em>out</em> from you. The only place that list exists in full is
+              inside the archive Meta builds when you request your data — which is why a page like
+              this one has to start with an export rather than a login.
+            </p>
+          </>
+        ),
+      },
+      {
+        heading: 'Finding it in your archive',
+        body: (
+          <>
+            <p>
+              The pending requests live under <code>connections/followers_and_following</code>, in
+              their own file, separate from the accounts you actually follow.
+            </p>
+            <p>
+              Choose <strong>All time</strong> rather than a date range when Instagram offers you
+              the choice — a date-limited archive drops older requests, which are exactly the ones
+              you have forgotten about.
+            </p>
+          </>
+        ),
+      },
+      {
+        heading: 'An empty list is a normal result',
+        body: (
+          <>
+            <p>
+              If you rarely request private accounts, you will have none, and nothing has gone
+              wrong. The number is small for most people.
+            </p>
+            <p>
+              If you do have them and want them gone, cancelling is done in the Instagram app — this
+              tool never connects to Instagram, so it can show you the list and nothing more.
+            </p>
+          </>
+        ),
+      },
+    ],
+    ctaLabel: 'See your pending requests',
+  },
+  'instagram-mutual-followers': {
+    intro: (
+      <>
+        Your export holds both lists — who you follow and who follows you — so the accounts in both
+        are your mutuals, exactly, with no estimating. This works on <em>your</em> account, from{' '}
+        <em>your</em> archive. It cannot tell you the mutuals between two other people.
+      </>
+    ),
+    sections: [
+      {
+        heading: 'Exact, because it is set arithmetic',
+        body: (
+          <>
+            <p>
+              There is no sampling and no API limit here. Both lists are complete in the archive, so
+              the overlap between them is complete too — whether you follow two hundred accounts or
+              two hundred thousand.
+            </p>
+          </>
+        ),
+      },
+      {
+        heading: 'What this page cannot do, and why',
+        body: (
+          <>
+            <p>
+              If you are trying to find the mutual followers between two <em>other</em> accounts —
+              yours and a friend's, or two public profiles — this is the wrong tool, and honestly
+              so. That needs read access to accounts that are not yours, which means either scraping
+              Instagram or holding your login. This tool does neither, ever.
+            </p>
+            <p>
+              What it does instead is answer the version of the question you have the data for: your
+              own, exactly, offline.
+            </p>
+          </>
+        ),
+      },
+      {
+        heading: 'Where the two lists live',
+        body: (
+          <>
+            <p>
+              Both are in the <code>connections/followers_and_following</code> folder of the archive
+              Meta builds for you. Choose <strong>All time</strong> rather than a date range when it
+              offers you the choice — a truncated list on either side removes mutuals that are
+              really there.
+            </p>
+          </>
+        ),
+      },
+      {
+        heading: 'Reading the ratio',
+        body: (
+          <>
+            <p>
+              Mutuals as a share of the people you follow is the number most people are actually
+              after. A low share is not a verdict on anything: following many accounts you do not
+              know — brands, artists, news — drives it down by design.
+            </p>
+            <p>
+              The comparison is only meaningful against your own earlier archive, and only if both
+              were exported the same way.
+            </p>
+          </>
+        ),
+      },
+    ],
+    ctaLabel: 'See your mutual followers',
   },
 };

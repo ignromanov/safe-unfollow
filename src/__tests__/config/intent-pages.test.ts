@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { INTENT_PAGES } from '@/config/intent-pages';
 import { BADGE_ORDER } from '@/core/badges';
+import meta from '@/locales/en/meta.json';
+import { INTENT_CONTENT } from '@/pages/intent-content';
 
 /**
  * The slug travels twice: as the URL, and as the `?from=` value the results page reads back
@@ -54,5 +56,33 @@ describe('INTENT_PAGES', () => {
     for (const page of INTENT_PAGES) {
       expect(heroKeys).not.toContain(page.slug);
     }
+  });
+});
+
+describe('intent pages do not cannibalise each other or the property', () => {
+  const routes = meta.routes as Record<string, { title: string }>;
+
+  it('should give every intent page a routes entry', () => {
+    for (const page of INTENT_PAGES) {
+      expect(routes[`/${page.slug}`]?.title).toBeTruthy();
+    }
+  });
+
+  it('should not repeat a title anywhere in the bundle', () => {
+    // Every title the property serves from this file — the intent pages' and everyone else's.
+    const titles = [meta.title, ...Object.values(routes).map(r => r.title)];
+    expect(new Set(titles).size).toBe(titles.length);
+  });
+
+  it('should not share a section heading between two pages', () => {
+    const headings = INTENT_PAGES.flatMap(p =>
+      INTENT_CONTENT[p.slug].sections.map(s => `${s.heading}`)
+    );
+    expect(new Set(headings).size).toBe(headings.length);
+  });
+
+  it('should not share a call to action between two pages', () => {
+    const labels = INTENT_PAGES.map(p => INTENT_CONTENT[p.slug].ctaLabel);
+    expect(new Set(labels).size).toBe(labels.length);
   });
 });

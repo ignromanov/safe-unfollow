@@ -20,20 +20,6 @@ export function Component({ page }: IntentPageProps) {
   const content = INTENT_CONTENT[page.slug];
   const demo = INTENT_DEMO[page.slug];
 
-  // Every manifest entry gets a route (src/routes.tsx), which the SSG build renders eagerly
-  // for all three — including a page task 4 has not written content for yet. Falling back to
-  // the bare h1 keeps the build green in that transitional state; IntentPage.test.tsx's "should
-  // have content for every page in the manifest" is the gate that turns this a permanent no-op.
-  if (!content) {
-    return (
-      <main className="flex-1 mx-auto w-full max-w-3xl px-4 py-12">
-        <h1 className="text-3xl lg:text-4xl font-display font-extrabold tracking-tight mb-6">
-          {page.h1}
-        </h1>
-      </main>
-    );
-  }
-
   return (
     <main className="flex-1 mx-auto w-full max-w-3xl px-4 py-12">
       <h1 className="text-3xl lg:text-4xl font-display font-extrabold tracking-tight mb-6">

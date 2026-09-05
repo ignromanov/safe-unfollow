@@ -51,8 +51,7 @@ describe('IntentPage', () => {
     expect(ctaLinks).toHaveLength(1);
   });
 
-  // task 4 flips this back to it(...) when it adds the two remaining content entries
-  it.fails('should have content for every page in the manifest', () => {
+  it('should have content for every page in the manifest', () => {
     for (const page of INTENT_PAGES) {
       expect(INTENT_CONTENT[page.slug]).toBeDefined();
     }
