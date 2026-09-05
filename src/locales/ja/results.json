@@ -2,7 +2,10 @@
   "header": {
     "title": "分析結果",
     "fileInfo": "{{filename}} • {{count, number}}件",
-    "showing": "{{total}}件中{{filtered}}件を表示"
+    "showing": "{{total}}件中{{filtered}}件を表示",
+    "showingOne": "{{total}}件中{{filtered}}件を表示：{{filterName}}",
+    "showingMany": "{{total}}件中{{filtered}}件を表示：フィルタ{{count}}件",
+    "showingAll": "{{total}}件を表示"
   },
   "sample": {
     "banner": "サンプルデータを表示中",
@@ -83,7 +86,11 @@
   },
   "empty": {
     "noUsers": "ユーザーが見つかりません",
-    "resetFilters": "フィルタをリセット"
+    "resetFilters": "フィルタをリセット",
+    "filteredTitle": "「{{filterName}}」に該当するアカウントはありません",
+    "filteredBody": "データどおりの結果です。不具合ではありません。",
+    "absentTitle": "このエクスポートには「{{filterName}}」のデータが含まれていません",
+    "absentBody": "このデータは、Instagram がダウンロードに含めなかったファイルから読み込まれます。"
   },
   "list": {
     "header": "アカウント ({{count, number}})",

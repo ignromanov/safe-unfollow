@@ -2,7 +2,10 @@
   "header": {
     "title": "Analysis Results",
     "fileInfo": "{{filename}} • {{count, number}} Total",
-    "showing": "Showing {{filtered}} of {{total}} accounts"
+    "showing": "Showing {{filtered}} of {{total}} accounts",
+    "showingOne": "Showing {{filtered}} of {{total}} — {{filterName}}",
+    "showingMany": "Showing {{filtered}} of {{total}} — {{count}} filters",
+    "showingAll": "Showing {{total}} accounts"
   },
   "sample": {
     "banner": "Viewing Sample Data",
@@ -83,7 +86,11 @@
   },
   "empty": {
     "noUsers": "No users found",
-    "resetFilters": "Reset Filters"
+    "resetFilters": "Reset Filters",
+    "filteredTitle": "No accounts are {{filterName}}",
+    "filteredBody": "That is what this export says — nothing is broken.",
+    "absentTitle": "This export does not include {{filterName}}",
+    "absentBody": "That data comes from a file Instagram did not put in your download."
   },
   "list": {
     "header": "Accounts ({{count, number}})",

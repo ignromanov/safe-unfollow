@@ -24,6 +24,7 @@ import { RescuePlanBanner } from './RescuePlanBanner';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { ResultsExportControls } from './export/ResultsExportControls';
 import type { BadgeKey } from '@/core/types';
+import { BADGE_ORDER } from '@/core/badges';
 import { RESCUE_PLAN_BANNER_ENABLED } from '@/config/feature-flags';
 import { useAccountFiltering } from '@/hooks/useAccountFiltering';
 import { useUploadCaveats } from '@/hooks/useUploadCaveats';
@@ -31,6 +32,88 @@ import { useTimeOnResults } from '@/hooks/useTimeOnResults';
 import { analytics } from '@/lib/analytics';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
+
+/** What the applied selection means to a reader, as text and as an empty-state fact. */
+interface SelectionSummary {
+  /** The rendered state line: one of three, never a dangling separator. */
+  stateLine: string;
+  /** The single applied filter, or undefined when zero or several are applied. */
+  activeFilter?: { label: string; presentInExport: boolean | null };
+}
+
+/**
+ * Extracted rather than inlined, and the reason is a budget rather than taste:
+ * `AccountListSection` sat at exactly ESLint's `complexity` ceiling of 20 before
+ * this, and `lint:strict` runs `--max-warnings 0`, so one more branch in the
+ * component body fails CI. Complexity is counted per function, so moving the
+ * branches out is what buys room — condensing them would not.
+ *
+ * The name is not decoration either: a control already lit on arrival gives
+ * perception no transient to attach to, and `aria-live` does not announce
+ * initial content, so the filter's name has to be in the rendered text or it is
+ * nowhere.
+ */
+function describeSelection({
+  filters,
+  filterCounts,
+  displayCount,
+  totalCount,
+  language,
+  t,
+}: {
+  filters: Set<BadgeKey>;
+  filterCounts: Record<BadgeKey, number>;
+  displayCount: number;
+  totalCount: number;
+  language: string;
+  t: TFunction<'results'>;
+}): SelectionSummary {
+  const appliedBadges = BADGE_ORDER.filter(badge => filters.has(badge));
+  const appliedLabels = appliedBadges.map(badge => t(`badges.${badge}`));
+
+  const onlyBadge = appliedBadges.length === 1 ? appliedBadges[0] : undefined;
+  const onlyCount = onlyBadge ? filterCounts[onlyBadge] : undefined;
+
+  // Present in this export, absent from it, or NOT YET MEASURED. `filterCounts`
+  // is the global per-badge count from `getBadgeStats`, and it is `{}` until
+  // that promise resolves (`useAccountFiltering.ts:248-256`) — so a missing key
+  // means "no answer yet", not "zero". Only a real zero may tell a reader the
+  // file that badge is read from was not in their download, which is a
+  // different sentence from "you have none of these" and a third one from
+  // "we do not know yet".
+  //
+  // The absence check is per key, not on the map: `noUncheckedIndexedAccess`
+  // already types this `number | undefined`, and it stays right if
+  // `getBadgeStats` ever returns a partial map, where a check on the map's size
+  // would not.
+  const activeFilter =
+    onlyBadge && appliedLabels[0]
+      ? {
+          label: appliedLabels[0],
+          presentInExport: onlyCount === undefined ? null : onlyCount > 0,
+        }
+      : undefined;
+
+  const filtered = displayCount.toLocaleString(language);
+  const total = totalCount.toLocaleString(language);
+
+  if (appliedLabels.length === 0) {
+    return { stateLine: t('header.showingAll', { total }), activeFilter };
+  }
+
+  if (appliedLabels.length === 1) {
+    return {
+      stateLine: t('header.showingOne', { filtered, total, filterName: appliedLabels[0] }),
+      activeFilter,
+    };
+  }
+
+  return {
+    stateLine: t('header.showingMany', { filtered, total, count: appliedLabels.length }),
+    activeFilter,
+  };
+}
 
 /**
  * Props for AccountListSection
@@ -128,6 +211,15 @@ export function AccountListSection({
     setFilters(newFilters);
     trackAction();
   };
+
+  const { stateLine, activeFilter } = describeSelection({
+    filters,
+    filterCounts,
+    displayCount,
+    totalCount,
+    language: i18n.language,
+    t,
+  });
 
   // Calculate stat card values
   const followersCount = filterCounts.followers || 0;
@@ -341,10 +433,7 @@ export function AccountListSection({
               // reading from different grey systems.
               className="text-sm font-semibold text-muted-foreground min-w-0"
             >
-              {t('header.showing', {
-                filtered: displayCount.toLocaleString(i18n.language),
-                total: totalCount.toLocaleString(i18n.language),
-              })}
+              {stateLine}
             </p>
             {/* Sample data is demo content — never worth paying to export */}
             {!isSample && (
@@ -363,6 +452,8 @@ export function AccountListSection({
             accountIndices={sortedIndices}
             hasLoadedData={hasLoadedData}
             isLoading={isFiltering}
+            activeFilter={activeFilter}
+            searchActive={query.length > 0}
             onClearFilters={handleClearFilters}
             onAccountClick={trackClick}
           />

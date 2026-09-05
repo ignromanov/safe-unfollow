@@ -56,17 +56,36 @@ vi.mock('@/components/FilterChips', () => ({
 }));
 
 vi.mock('@/components/AccountList', () => ({
+  // Like the FilterChips stub above, and for the same reason: `activeFilter`
+  // carries a three-valued `presentInExport` and nothing else can see it cross
+  // this boundary. `{ label, presentInExport: false }` type-checks exactly as
+  // cleanly as `null` does, so `tsc` cannot tell a wired contract from a
+  // collapsed one — `(filterCounts[badge] ?? 0) > 0` would ship "this export
+  // does not include Pending request" about a badge the export contains, with
+  // the suite green.
+  //
+  // Reported via String() so null, false, true and undefined are four distinct
+  // renderings rather than three empty ones.
   AccountList: ({
     accountIndices,
     accountCount,
+    activeFilter,
+    searchActive,
   }: {
     accountIndices: number[] | null;
     accountCount: number;
+    activeFilter?: { label: string; presentInExport: boolean | null };
+    searchActive?: boolean;
   }) => {
     const count = accountIndices === null ? accountCount : accountIndices.length;
     return (
       <div data-testid="account-list">
         <p>Accounts ({count})</p>
+        <p data-testid="active-filter-label">{activeFilter ? activeFilter.label : 'undefined'}</p>
+        <p data-testid="active-filter-presence">
+          {activeFilter ? String(activeFilter.presentInExport) : 'undefined'}
+        </p>
+        <p data-testid="search-active">{String(searchActive)}</p>
         {accountIndices !== null && accountIndices.length === 0 && (
           <p>No accounts match your filters</p>
         )}
@@ -172,6 +191,12 @@ describe('AccountListSection', () => {
     mockUseAccountFiltering.mockReturnValue(createMockReturnValue());
     mockUseUploadCaveats.mockReturnValue(caveats());
   });
+
+  /** Drives the file's existing mock; does not replace it. */
+  const renderWithFilters = (filters: Set<BadgeKey>, overrides: object = {}) => {
+    mockUseAccountFiltering.mockReturnValue(createMockReturnValue({ filters, ...overrides }));
+    return render(<AccountListSection {...defaultProps} />);
+  };
 
   /**
    * GH#41. When a follow-requests file is present and unreadable, both request
@@ -826,6 +851,117 @@ describe('AccountListSection', () => {
       expect(toggle).toHaveAttribute('aria-pressed', 'true');
       expect(toggle).toHaveClass('bg-primary', 'text-primary-foreground');
       expect(toggle.className).not.toMatch(/\btext-white\b/);
+    });
+  });
+  /**
+   * Task 5. `header.showing` reports a subset without saying which filter
+   * produced it. The name has to be in the rendered text rather than in an
+   * announcement: the line is wrapped in `aria-live`, live regions announce
+   * changes, and initial content is not a change — so a reader arriving with a
+   * filter already on from localStorage is told nothing by the live region.
+   */
+  describe('state line', () => {
+    /**
+     * Expectations are built from the bundle and matched whole.
+     *
+     * A bare /Recently unfollowed/ would also match the applied-filters chip
+     * Task 4 renders from the same label, so it would pass with no state line
+     * at all — the one thing this task adds. It would also throw on multiple
+     * matches rather than assert anything.
+     */
+    const filled = (template: string, vars: Record<string, string>) =>
+      Object.entries(vars).reduce((acc, [k, v]) => acc.replace(`{{${k}}}`, v), template);
+
+    it('should name the filter when exactly one is applied', async () => {
+      renderWithFilters(new Set<BadgeKey>(['unfollowed']));
+
+      expect(
+        await screen.findByText(
+          filled(resultsEN.header.showingOne, {
+            filtered: '21',
+            total: '21',
+            filterName: resultsEN.badges.unfollowed,
+          })
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('should count the filters when several are applied', async () => {
+      renderWithFilters(new Set<BadgeKey>(['unfollowed', 'pending']));
+
+      // Naming one of several would point the reader at a filter that is not
+      // necessarily the one that emptied the list — under Task 2's semantics
+      // the narrowing constraint is a group, not a badge.
+      expect(
+        await screen.findByText(
+          filled(resultsEN.header.showingMany, { filtered: '21', total: '21', count: '2' })
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('should not render a dangling separator when nothing is applied', async () => {
+      renderWithFilters(new Set<BadgeKey>());
+
+      expect(
+        await screen.findByText(filled(resultsEN.header.showingAll, { total: '21' }))
+      ).toBeInTheDocument();
+      expect(screen.queryByText(/—\s*$/)).not.toBeInTheDocument();
+    });
+  });
+  /**
+   * What crosses into AccountList, which decides which of the three empty-state
+   * sentences a reader gets. `presentInExport` is three-valued and its absence
+   * state is the one the type system cannot defend: `false` is assignable
+   * everywhere `null` is, so only these assertions separate "we measured zero"
+   * from "we have not measured yet".
+   */
+  describe('empty-state contract across the AccountList boundary', () => {
+    it('should send null, not false, while the per-badge counts are unmeasured', () => {
+      // `filterCounts` is `{}` from mount until `getBadgeStats` resolves. Under
+      // `(filterCounts[badge] ?? 0) > 0` this renders 'false', and the reader is
+      // told their export does not include a badge it does contain.
+      renderWithFilters(new Set<BadgeKey>(['pending']), {
+        filterCounts: {} as Record<BadgeKey, number>,
+      });
+
+      expect(screen.getByTestId('active-filter-presence')).toHaveTextContent('null');
+      expect(screen.getByTestId('active-filter-label')).toHaveTextContent(resultsEN.badges.pending);
+    });
+
+    it('should send false only for a count that was actually measured as zero', () => {
+      // `permanent` is 0 in defaultFilterCounts — a real zero, read from a file
+      // that was present. This is the one case allowed to speak for the export.
+      renderWithFilters(new Set<BadgeKey>(['permanent']));
+
+      expect(screen.getByTestId('active-filter-presence')).toHaveTextContent('false');
+    });
+
+    it('should send true for a badge the export carries', () => {
+      renderWithFilters(new Set<BadgeKey>(['pending']));
+
+      expect(screen.getByTestId('active-filter-presence')).toHaveTextContent('true');
+    });
+
+    it('should name no filter when several are applied', () => {
+      // Naming one of several would tell the reader to remove a filter that is
+      // not necessarily the one that emptied the list.
+      renderWithFilters(new Set<BadgeKey>(['pending', 'unfollowed']));
+
+      expect(screen.getByTestId('active-filter-presence')).toHaveTextContent('undefined');
+    });
+
+    it('should report the search box as narrowing the list when it has a query', () => {
+      // The remove-this-filter label is false whenever this is true, because
+      // handleClearFilters empties the search box as well as the filters.
+      renderWithFilters(new Set<BadgeKey>(['pending']), { query: 'ab' });
+
+      expect(screen.getByTestId('search-active')).toHaveTextContent('true');
+    });
+
+    it('should report the search box as idle when it is empty', () => {
+      renderWithFilters(new Set<BadgeKey>(['pending']));
+
+      expect(screen.getByTestId('search-active')).toHaveTextContent('false');
     });
   });
 });

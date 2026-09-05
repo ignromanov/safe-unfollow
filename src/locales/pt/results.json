@@ -2,7 +2,10 @@
   "header": {
     "title": "Resultados da Análise",
     "fileInfo": "{{filename}} • {{count, number}} Total",
-    "showing": "Mostrando {{filtered}} de {{total}} contas"
+    "showing": "Mostrando {{filtered}} de {{total}} contas",
+    "showingOne": "Mostrando {{filtered}} de {{total}} — {{filterName}}",
+    "showingMany": "Mostrando {{filtered}} de {{total}} — {{count}} filtros",
+    "showingAll": "Mostrando {{total}} contas"
   },
   "sample": {
     "banner": "Visualizando Dados de Exemplo",
@@ -83,7 +86,11 @@
   },
   "empty": {
     "noUsers": "Nenhum usuário encontrado",
-    "resetFilters": "Limpar Filtros"
+    "resetFilters": "Limpar Filtros",
+    "filteredTitle": "Nenhuma conta com o filtro \"{{filterName}}\"",
+    "filteredBody": "É isso que os seus dados dizem — não há nada quebrado.",
+    "absentTitle": "Esta exportação não inclui dados de \"{{filterName}}\"",
+    "absentBody": "Esses dados vêm de um arquivo que o Instagram não incluiu no seu download."
   },
   "list": {
     "header": "Contas ({{count, number}})",

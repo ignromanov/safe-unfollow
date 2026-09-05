@@ -2,7 +2,10 @@
   "header": {
     "title": "Результаты анализа",
     "fileInfo": "{{filename}} • {{count, number}} всего",
-    "showing": "Показано {{filtered}} из {{total}} аккаунтов"
+    "showing": "Показано {{filtered}} из {{total}} аккаунтов",
+    "showingOne": "Показано {{filtered}} из {{total}} — {{filterName}}",
+    "showingMany": "Показано {{filtered}} из {{total}} — фильтров: {{count}}",
+    "showingAll": "Показано {{total}} аккаунтов"
   },
   "sample": {
     "banner": "Просмотр демо-данных",
@@ -83,7 +86,11 @@
   },
   "empty": {
     "noUsers": "Пользователи не найдены",
-    "resetFilters": "Сбросить фильтры"
+    "resetFilters": "Сбросить фильтры",
+    "filteredTitle": "Нет аккаунтов с фильтром «{{filterName}}»",
+    "filteredBody": "Так говорят твои данные — ничего не сломалось.",
+    "absentTitle": "В этом экспорте нет данных для фильтра «{{filterName}}»",
+    "absentBody": "Эти данные берутся из файла, который Instagram не включил в твой архив."
   },
   "list": {
     "header": "Аккаунты ({{count, number}})",

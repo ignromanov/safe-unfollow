@@ -21,6 +21,10 @@ export interface AccountListProps {
   hasLoadedData: boolean;
   /** Whether filtering is in progress */
   isLoading?: boolean;
+  /** The single applied filter, or undefined when zero or several are applied. */
+  activeFilter?: { label: string; presentInExport: boolean | null };
+  /** Whether a search query is also narrowing the list. */
+  searchActive?: boolean;
   /** Callback to clear all filters */
   onClearFilters?: () => void;
   /** V7: Callback to track account click with badges for aggregation */
@@ -32,6 +36,8 @@ export const AccountList = memo(function AccountList({
   accountCount,
   accountIndices,
   hasLoadedData,
+  activeFilter,
+  searchActive,
   onClearFilters,
   onAccountClick,
 }: AccountListProps) {
@@ -82,14 +88,37 @@ export const AccountList = memo(function AccountList({
         <div className="flex flex-col items-center justify-center py-24 text-center px-12">
           <Ghost size={64} className="mb-8 opacity-10" />
           <p className="text-xl md:text-2xl font-display font-bold text-zinc-300">
-            {t('empty.noUsers')}
+            {!activeFilter
+              ? t('empty.noUsers')
+              : activeFilter.presentInExport === false
+                ? t('empty.absentTitle', { filterName: activeFilter.label })
+                : t('empty.filteredTitle', { filterName: activeFilter.label })}
           </p>
+          {/*
+            Three states, not two. `presentInExport === null` means the per-badge
+            counts have not resolved yet, and neither explanation has been
+            measured: the title above names the filter, which is true either
+            way, and no body claims anything about the export.
+          */}
+          {activeFilter && activeFilter.presentInExport !== null && (
+            <p className="mt-3 text-sm text-muted-foreground">
+              {activeFilter.presentInExport ? t('empty.filteredBody') : t('empty.absentBody')}
+            </p>
+          )}
           {onClearFilters && (
             <button
               onClick={onClearFilters}
               className="mt-4 text-primary font-black uppercase text-xs tracking-widest hover:underline"
             >
-              {t('empty.resetFilters')}
+              {/*
+                The specific label only when it is a true description of the tap.
+                This button clears the search box as well as the filters, so
+                "Remove <filter> filter" is a promise it does not keep whenever a
+                query is active.
+              */}
+              {activeFilter && !searchActive
+                ? t('filters.removeOne', { label: activeFilter.label })
+                : t('empty.resetFilters')}
             </button>
           )}
         </div>

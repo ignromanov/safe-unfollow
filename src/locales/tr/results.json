@@ -2,7 +2,10 @@
   "header": {
     "title": "Analiz Sonuçları",
     "fileInfo": "{{filename}} • {{count, number}} Toplam",
-    "showing": "{{filtered}} / {{total}} hesap gösteriliyor"
+    "showing": "{{filtered}} / {{total}} hesap gösteriliyor",
+    "showingOne": "{{filtered}} / {{total}} hesap gösteriliyor — {{filterName}}",
+    "showingMany": "{{filtered}} / {{total}} hesap gösteriliyor — {{count}} filtre",
+    "showingAll": "{{total}} hesap gösteriliyor"
   },
   "sample": {
     "banner": "Örnek Veri Görüntüleniyor",
@@ -83,7 +86,11 @@
   },
   "empty": {
     "noUsers": "Kullanıcı bulunamadı",
-    "resetFilters": "Filtreleri Sıfırla"
+    "resetFilters": "Filtreleri Sıfırla",
+    "filteredTitle": "\"{{filterName}}\" filtresine uyan hesap yok",
+    "filteredBody": "Verileriniz böyle diyor — bozulan bir şey yok.",
+    "absentTitle": "Bu dışa aktarma \"{{filterName}}\" verisini içermiyor",
+    "absentBody": "Bu veri, Instagram'ın indirmenize eklemediği bir dosyadan gelir."
   },
   "list": {
     "header": "Hesaplar ({{count, number}})",

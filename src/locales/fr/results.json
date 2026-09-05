@@ -2,7 +2,10 @@
   "header": {
     "title": "Résultats de l'analyse",
     "fileInfo": "{{filename}} • {{count, number}} au total",
-    "showing": "Affichage de {{filtered}} sur {{total}} comptes"
+    "showing": "Affichage de {{filtered}} sur {{total}} comptes",
+    "showingOne": "Affichage de {{filtered}} sur {{total}} — {{filterName}}",
+    "showingMany": "Affichage de {{filtered}} sur {{total}} — {{count}} filtres",
+    "showingAll": "Affichage de {{total}} comptes"
   },
   "sample": {
     "banner": "Affichage des données exemple",
@@ -83,7 +86,11 @@
   },
   "empty": {
     "noUsers": "Aucun utilisateur trouvé",
-    "resetFilters": "Réinitialiser les filtres"
+    "resetFilters": "Réinitialiser les filtres",
+    "filteredTitle": "Aucun compte avec le filtre « {{filterName}} »",
+    "filteredBody": "C'est ce que disent vos données — rien n'est cassé.",
+    "absentTitle": "Cet export ne contient pas de données pour « {{filterName}} »",
+    "absentBody": "Ces données proviennent d'un fichier qu'Instagram n'a pas inclus dans votre téléchargement."
   },
   "list": {
     "header": "Comptes ({{count, number}})",
