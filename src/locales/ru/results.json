@@ -34,7 +34,20 @@
     "emptyCategories": "Пустые категории ({{count, number}})",
     "addFilter": "Добавить фильтр «{{label}}» ({{count, number}} аккаунтов)",
     "removeFilter": "Убрать фильтр «{{label}}» ({{count, number}} аккаунтов)",
-    "chipWithHint": "{{label}} — {{hint}}"
+    "chipWithHint": "{{label}} — {{hint}}",
+    "groups": {
+      "relationship": "Подписки и подписчики",
+      "requests": "Заявки на подписку",
+      "flags": "Метки и история"
+    },
+    "groupHint": "В разделе можно выбрать несколько",
+    "openSheet": "Фильтр аккаунтов",
+    "openSheetWithCount": "Фильтр аккаунтов (включено: {{count}})",
+    "applied": "Применённые фильтры",
+    "removeOne": "Убрать фильтр «{{label}}»",
+    "unavailable": "«{{label}}» — нет аккаунтов при текущем выборе",
+    "addFilterPlain": "Добавить фильтр «{{label}}»",
+    "removeFilterPlain": "Убрать фильтр «{{label}}»"
   },
   "badges": {
     "followers": "Подписчики",

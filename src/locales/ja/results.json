@@ -34,7 +34,20 @@
     "emptyCategories": "空のカテゴリ（{{count, number}}件）",
     "addFilter": "{{label}}フィルタを追加（{{count, number}}件）",
     "removeFilter": "{{label}}フィルタを削除（{{count, number}}件）",
-    "chipWithHint": "{{label}}。{{hint}}"
+    "chipWithHint": "{{label}}。{{hint}}",
+    "groups": {
+      "relationship": "フォロー関係",
+      "requests": "フォローリクエスト",
+      "flags": "フラグと履歴"
+    },
+    "groupHint": "各セクション内で自由に選択できます",
+    "openSheet": "アカウントを絞り込む",
+    "openSheetWithCount": "アカウントを絞り込む（{{count}}件適用中）",
+    "applied": "適用中のフィルタ",
+    "removeOne": "{{label}}フィルタを削除",
+    "unavailable": "{{label}}。現在の選択では該当するアカウントがありません",
+    "addFilterPlain": "{{label}}フィルタを追加",
+    "removeFilterPlain": "{{label}}フィルタを削除"
   },
   "badges": {
     "followers": "フォロワー",

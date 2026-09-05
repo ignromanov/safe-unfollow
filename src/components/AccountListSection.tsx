@@ -7,8 +7,11 @@ import {
   ArrowUpDown,
   Database,
   Upload,
+  Filter,
 } from 'lucide-react';
 import { FilterChips } from './FilterChips';
+import { AppliedFilters } from './AppliedFilters';
+import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import { FollowRequestsCaveat } from './FollowRequestsCaveat';
 import { TruncatedFileCaveat } from './TruncatedFileCaveat';
 import { AccountList } from './AccountList';
@@ -58,6 +61,7 @@ export function AccountListSection({
     filters,
     setFilters,
     filterCounts,
+    candidateCounts,
     isFiltering,
     totalCount,
     hasLoadedData,
@@ -70,6 +74,7 @@ export function AccountListSection({
   const { followRequestsUnreadable, truncatedRelationshipFile } = useUploadCaveats(fileHash);
 
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [isFilterSheetOpen, setFilterSheetOpen] = useState(false);
 
   // Track time on results for engagement analytics
   // V7: trackClick collects badge click data for aggregated summary event
@@ -86,9 +91,26 @@ export function AccountListSection({
   // Display count: null means "show all" so use totalCount
   const displayCount = sortedIndices === null ? totalCount : sortedIndices.length;
 
+  // The only clear-all in the shipped surface after the filter card lost its
+  // Reset button, so it is the only `filter_clear_all` call site in `src/`.
+  // This emit is written fresh rather than moved: FilterChips' `handleClearAll`
+  // called `onFiltersChange` and never reached this function, so there was
+  // nothing to reroute.
+  //
+  // Note what this control actually does — it empties the search box too, not
+  // only the filters.
   const handleClearFilters = () => {
+    analytics.filterClearAll(filters.size);
     setFilters(new Set());
     setQuery('');
+    trackAction();
+  };
+
+  const handleRemoveFilter = (badgeType: BadgeKey) => {
+    const newFilters = new Set(filters);
+    newFilters.delete(badgeType);
+    analytics.filterToggle(badgeType, 'disable', newFilters.size, 'chip');
+    setFilters(newFilters);
     trackAction();
   };
 
@@ -237,16 +259,43 @@ export function AccountListSection({
           />
         )}
 
-        {/* Filters Sidebar */}
+        {/* Filters Sidebar: what is applied stays on the page; choosing is a
+            sheet on every viewport. A lit control in the option space cannot
+            carry applied state — it lights identically whether the reader
+            tapped it or arrived with it already on from localStorage.
+
+            `lg:sticky lg:top-24` belongs on this card and only this card: the
+            declaration it replaces sat inside what is now a `fixed` sheet,
+            where it did nothing. */}
         <div className="space-y-6">
-          <FilterChips
-            selectedFilters={filters}
-            onFiltersChange={setFilters}
-            filterCounts={filterCounts}
-            isFiltering={isFiltering}
-            followRequestsUnreadable={followRequestsUnreadable}
-            truncatedRelationshipFile={truncatedRelationshipFile}
-          />
+          <div className="bg-card p-5 md:p-6 rounded-4xl border border-border shadow-sm space-y-5 lg:sticky lg:top-24">
+            <AppliedFilters
+              selectedFilters={filters}
+              onRemove={handleRemoveFilter}
+              onClearAll={handleClearFilters}
+            />
+            <Sheet open={isFilterSheetOpen} onOpenChange={setFilterSheetOpen}>
+              <SheetTrigger asChild>
+                <button className="cursor-pointer w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl border border-border bg-zinc-50/50 dark:bg-zinc-900/20 text-xs font-black uppercase tracking-widest hover:border-primary/40">
+                  <Filter size={14} className="text-primary" />
+                  {filters.size > 0
+                    ? t('filters.openSheetWithCount', { count: filters.size })
+                    : t('filters.openSheet')}
+                </button>
+              </SheetTrigger>
+              <SheetContent aria-label={t('filters.title')}>
+                <FilterChips
+                  selectedFilters={filters}
+                  onFiltersChange={setFilters}
+                  filterCounts={filterCounts}
+                  candidateCounts={candidateCounts}
+                  isFiltering={isFiltering}
+                  followRequestsUnreadable={followRequestsUnreadable}
+                  truncatedRelationshipFile={truncatedRelationshipFile}
+                />
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
 
         {/* The only promo above the list. On desktop it takes the full-width

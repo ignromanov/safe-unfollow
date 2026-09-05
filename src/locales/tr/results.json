@@ -34,7 +34,20 @@
     "emptyCategories": "Boş Kategoriler ({{count, number}})",
     "addFilter": "{{label}} filtresi ekle ({{count, number}} hesap)",
     "removeFilter": "{{label}} filtresini kaldır ({{count, number}} hesap)",
-    "chipWithHint": "{{label}} — {{hint}}"
+    "chipWithHint": "{{label}} — {{hint}}",
+    "groups": {
+      "relationship": "Takip ilişkisi",
+      "requests": "Takip istekleri",
+      "flags": "İşaretler ve geçmiş"
+    },
+    "groupHint": "Her bölümde istediğinizi seçin",
+    "openSheet": "Hesapları filtrele",
+    "openSheetWithCount": "Hesapları filtrele ({{count}} açık)",
+    "applied": "Uygulanan filtreler",
+    "removeOne": "{{label}} filtresini kaldır",
+    "unavailable": "{{label}} — mevcut seçimle eşleşen hesap yok",
+    "addFilterPlain": "{{label}} filtresi ekle",
+    "removeFilterPlain": "{{label}} filtresini kaldır"
   },
   "badges": {
     "followers": "Takipçiler",

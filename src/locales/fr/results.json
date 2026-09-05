@@ -34,7 +34,20 @@
     "emptyCategories": "Catégories vides ({{count, number}})",
     "addFilter": "Ajouter le filtre {{label}} ({{count, number}} comptes)",
     "removeFilter": "Retirer le filtre {{label}} ({{count, number}} comptes)",
-    "chipWithHint": "{{label}} — {{hint}}"
+    "chipWithHint": "{{label}} — {{hint}}",
+    "groups": {
+      "relationship": "Relation d'abonnement",
+      "requests": "Demandes d'abonnement",
+      "flags": "Marqueurs et historique"
+    },
+    "groupHint": "Choisissez ce que vous voulez dans chaque section",
+    "openSheet": "Filtrer les comptes",
+    "openSheetWithCount": "Filtrer les comptes ({{count}} actifs)",
+    "applied": "Filtres appliqués",
+    "removeOne": "Retirer le filtre {{label}}",
+    "unavailable": "{{label}} — aucun compte avec la sélection actuelle",
+    "addFilterPlain": "Ajouter le filtre {{label}}",
+    "removeFilterPlain": "Retirer le filtre {{label}}"
   },
   "badges": {
     "followers": "Abonnés",

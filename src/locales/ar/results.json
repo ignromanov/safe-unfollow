@@ -34,7 +34,20 @@
     "emptyCategories": "فئات فارغة ({{count, number}})",
     "addFilter": "إضافة فلتر {{label}} ({{count, number}} حسابات)",
     "removeFilter": "إزالة فلتر {{label}} ({{count, number}} حسابات)",
-    "chipWithHint": "{{label}}. {{hint}}"
+    "chipWithHint": "{{label}}. {{hint}}",
+    "groups": {
+      "relationship": "علاقة المتابعة",
+      "requests": "طلبات المتابعة",
+      "flags": "علامات وسجل"
+    },
+    "groupHint": "اختر ما تشاء داخل كل قسم",
+    "openSheet": "تصفية الحسابات",
+    "openSheetWithCount": "تصفية الحسابات (مُفعّل: {{count}})",
+    "applied": "الفلاتر المطبقة",
+    "removeOne": "إزالة فلتر {{label}}",
+    "unavailable": "{{label}}. لا توجد حسابات ضمن التحديد الحالي",
+    "addFilterPlain": "إضافة فلتر {{label}}",
+    "removeFilterPlain": "إزالة فلتر {{label}}"
   },
   "badges": {
     "followers": "المتابعون",

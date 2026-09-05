@@ -34,7 +34,20 @@
     "emptyCategories": "Categorías vacías ({{count, number}})",
     "addFilter": "Agregar filtro {{label}} ({{count, number}} cuentas)",
     "removeFilter": "Quitar filtro {{label}} ({{count, number}} cuentas)",
-    "chipWithHint": "{{label}} — {{hint}}"
+    "chipWithHint": "{{label}} — {{hint}}",
+    "groups": {
+      "relationship": "Relación de seguimiento",
+      "requests": "Solicitudes de seguimiento",
+      "flags": "Marcas e historial"
+    },
+    "groupHint": "Elige las que quieras en cada sección",
+    "openSheet": "Filtrar cuentas",
+    "openSheetWithCount": "Filtrar cuentas ({{count}} activos)",
+    "applied": "Filtros aplicados",
+    "removeOne": "Quitar filtro {{label}}",
+    "unavailable": "{{label}} — sin cuentas con la selección actual",
+    "addFilterPlain": "Agregar filtro {{label}}",
+    "removeFilterPlain": "Quitar filtro {{label}}"
   },
   "badges": {
     "followers": "Seguidores",

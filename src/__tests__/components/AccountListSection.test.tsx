@@ -317,12 +317,15 @@ describe('AccountListSection', () => {
     });
   });
 
+  // The options moved into a sheet, so what this page renders is the trigger,
+  // not the chips. Asserting the stub here would only prove a closed dialog
+  // still mounts its children, which it does not.
   it('should render all main components', () => {
     renderWithRouter(<AccountListSection {...defaultProps} />);
 
     expect(screen.getByText(resultsEN.header.title)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(resultsEN.search.placeholder)).toBeInTheDocument();
-    expect(screen.getByTestId('filter-chips')).toBeInTheDocument();
+    expect(screen.getByText(resultsEN.filters.openSheet)).toBeInTheDocument();
     expect(screen.getByTestId('account-list')).toBeInTheDocument();
   });
 
@@ -351,6 +354,60 @@ describe('AccountListSection', () => {
     fireEvent.click(within(screen.getByTestId('stat-card-unfollowed')).getByRole('button'));
 
     expect(filterToggle).toHaveBeenCalledWith('unfollowed', 'disable', 0, 'stat_card');
+  });
+
+  /**
+   * `filter_clear_all` has exactly one call site in the shipped surface, and it
+   * is this one. Before this task the only emitter lived on FilterChips' Reset
+   * button, which called `onFiltersChange` and never reached this function —
+   * so the button and the emitter were deleted together and the emit rewritten
+   * here. Half of that change in either direction silently doubles the series
+   * or silences it, and no gate outside this test would see it.
+   */
+  it('should emit exactly one filter_clear_all when the applied row is reset', () => {
+    mockUseAccountFiltering.mockReturnValue(
+      createMockReturnValue({ filters: new Set<BadgeKey>(['unfollowed', 'pending']) })
+    );
+    const filterClearAll = vi.spyOn(analytics, 'filterClearAll');
+    renderWithRouter(<AccountListSection {...defaultProps} />);
+
+    fireEvent.click(screen.getByText(resultsEN.filters.reset));
+
+    expect(filterClearAll).toHaveBeenCalledTimes(1);
+    expect(filterClearAll).toHaveBeenCalledWith(2);
+  });
+
+  it('should report a removal from the applied row as a chip disable', () => {
+    mockUseAccountFiltering.mockReturnValue(
+      createMockReturnValue({ filters: new Set<BadgeKey>(['unfollowed', 'pending']) })
+    );
+    const filterToggle = vi.spyOn(analytics, 'filterToggle');
+    renderWithRouter(<AccountListSection {...defaultProps} />);
+
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: resultsEN.filters.removeOne.replace('{{label}}', resultsEN.badges.pending),
+      })
+    );
+
+    expect(filterToggle).toHaveBeenCalledWith('pending', 'disable', 1, 'chip');
+  });
+
+  it('should count the applied filters on the sheet trigger', () => {
+    mockUseAccountFiltering.mockReturnValue(
+      createMockReturnValue({ filters: new Set<BadgeKey>(['unfollowed', 'pending']) })
+    );
+    renderWithRouter(<AccountListSection {...defaultProps} />);
+
+    expect(
+      screen.getByText(resultsEN.filters.openSheetWithCount.replace('{{count}}', '2'))
+    ).toBeInTheDocument();
+  });
+
+  it('should name the trigger without a count when nothing is applied', () => {
+    renderWithRouter(<AccountListSection {...defaultProps} />);
+
+    expect(screen.getByText(resultsEN.filters.openSheet)).toBeInTheDocument();
   });
 
   it('should render stat cards with correct values', () => {
@@ -427,11 +484,23 @@ describe('AccountListSection', () => {
 
     renderWithRouter(<AccountListSection {...defaultProps} />);
 
-    expect(screen.getByText('Active filters: 2')).toBeInTheDocument();
+    // Applied state is on the page now, named, rather than a count inside the
+    // option space — which is the whole point of splitting the surface.
+    expect(screen.getByText(resultsEN.badges.following)).toBeInTheDocument();
+    expect(screen.getByText(resultsEN.badges.followers)).toBeInTheDocument();
   });
 
+  // The sheet is opened here deliberately, and only for the wiring: this is the
+  // one assertion that the trigger actually mounts FilterChips and that its
+  // `onFiltersChange` reaches `setFilters`. Without it a broken `asChild`
+  // trigger ships green. Everything ABOUT the option space — group headings,
+  // disabled options, contextual counts, the null branch — is asserted in
+  // FilterChips.test.tsx against the real component, because the stub this file
+  // installs cannot answer any of it.
   it('should handle filter changes from FilterChips', () => {
     renderWithRouter(<AccountListSection {...defaultProps} />);
+
+    fireEvent.click(screen.getByText(resultsEN.filters.openSheet));
 
     const toggleButton = screen.getByText('Toggle Following');
     fireEvent.click(toggleButton);
@@ -580,7 +649,9 @@ describe('AccountListSection', () => {
           <AccountListSection fileHash="abc" accountCount={100} filename="d.zip" />
         );
 
-        const filters = container.querySelector('[data-testid="filter-chips"]') as HTMLElement;
+        // The option space is portalled into a sheet, so it is no longer a node
+        // in this column. The trigger is, and it is what the reader sees here.
+        const filters = screen.getByText(resultsEN.filters.openSheet);
         const ad = container.querySelector('[data-ad-name="results"]') as HTMLElement;
         const list = container.querySelector('[data-testid="account-list"]') as HTMLElement;
 

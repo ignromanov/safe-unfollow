@@ -34,7 +34,20 @@
     "emptyCategories": "Empty Categories ({{count, number}})",
     "addFilter": "Add {{label}} filter ({{count, number}} accounts)",
     "removeFilter": "Remove {{label}} filter ({{count, number}} accounts)",
-    "chipWithHint": "{{label}} — {{hint}}"
+    "chipWithHint": "{{label}} — {{hint}}",
+    "groups": {
+      "relationship": "Follow relationship",
+      "requests": "Follow requests",
+      "flags": "Flags and history"
+    },
+    "groupHint": "Pick any within a section",
+    "openSheet": "Filter accounts",
+    "openSheetWithCount": "Filter accounts ({{count}} on)",
+    "applied": "Applied filters",
+    "removeOne": "Remove {{label}} filter",
+    "unavailable": "{{label}} — no accounts with your current selection",
+    "addFilterPlain": "Add {{label}} filter",
+    "removeFilterPlain": "Remove {{label}} filter"
   },
   "badges": {
     "followers": "Followers",
