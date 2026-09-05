@@ -380,7 +380,7 @@ describe('OrganizationSchema', () => {
       const scripts = container.querySelectorAll('script[type="application/ld+json"]');
       const softwareSchema = JSON.parse(scripts[1].textContent!);
 
-      expect(softwareSchema.featureList).toHaveLength(8);
+      expect(softwareSchema.featureList).toHaveLength(7);
     });
 
     it('should include key privacy feature', () => {
@@ -416,17 +416,6 @@ describe('OrganizationSchema', () => {
       const softwareSchema = JSON.parse(scripts[1].textContent!);
 
       expect(softwareSchema.featureList).toContain('Analyze up to 1,000,000+ accounts');
-    });
-
-    it('should include performance feature', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      const softwareSchema = JSON.parse(scripts[1].textContent!);
-
-      expect(softwareSchema.featureList).toContain('Sub-5ms filtering performance');
     });
 
     it('should include open source feature', () => {

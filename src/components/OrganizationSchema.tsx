@@ -70,7 +70,6 @@ export function OrganizationSchema() {
       'Uses official Instagram data export (ZIP file)',
       'Free and open-source (MIT license)',
       'Works offline after loading',
-      'Sub-5ms filtering performance',
     ],
     keywords:
       'instagram unfollow tracker, who unfollowed me on instagram, instagram unfollowers, instagram data export analyzer',
