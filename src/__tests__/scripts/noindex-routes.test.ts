@@ -3,6 +3,8 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { SUPPORTED_LANGUAGES } from '@/config/languages';
+
 import { noindexRoutes, type VercelHeaderRule } from '../../../scripts/noindex-routes';
 
 /**
@@ -17,6 +19,18 @@ import { noindexRoutes, type VercelHeaderRule } from '../../../scripts/noindex-r
  * falling through, because falling through means the route quietly stays in the sitemap - green,
  * and wrong. A site-wide noindex throws too: expanding it would empty the sitemap, which is a
  * catastrophic action to take on a config typo.
+ *
+ * ⛔ What "matches vercel.json as it actually stands" does NOT cover, and why the next test
+ * exists: `noindexRoutes().matches()` is called on the base path, after `parseUrlPath()` has
+ * already stripped any locale prefix by membership in `SUPPORTED_LANGUAGES`. That derivation
+ * is correct by construction on the sitemap side. But the header side —
+ * `/:lang(ar|de|es|fr|id|ja|pt|ru|tr)/:path(results|sample)` in vercel.json — is a HAND COPY
+ * of that same locale list, exactly the shape `vercel-redirects.test.ts` already gates for the
+ * `/wizard` redirects (same file, two rules up). Add an eleventh locale and nothing here would
+ * fail: the sitemap excludes `/xx/results` for free (base-path derivation), while the header
+ * rule silently fails to cover it — the page becomes indexable and unlisted at once, which is
+ * invisible because nothing points a crawler back at it. A stale locale left behind after a
+ * retirement (the `hi` shape of GH#87) fails the same way in reverse.
  */
 const VERCEL = JSON.parse(
   readFileSync(join(process.cwd(), 'vercel.json'), 'utf-8'),
@@ -27,16 +41,46 @@ const noindex = (source: string): VercelHeaderRule => ({
   headers: [{ key: 'X-Robots-Tag', value: 'noindex' }],
 });
 
+/** The `(ar|de|…)` group out of a `:lang` capture, or null when the source has none. */
+function langAlternationOf(source: string): string[] | null {
+  const match = /:lang\(([^)]+)\)/.exec(source);
+  return match ? match[1]!.split('|') : null;
+}
+
+/** Every noindex header rule (X-Robots-Tag containing "noindex") in the shipped config. */
+const noindexHeaderRules = VERCEL.headers.filter(rule =>
+  rule.headers.some(
+    header => header.key.toLowerCase() === 'x-robots-tag' && /\bnoindex\b/i.test(header.value),
+  ),
+);
+
 describe('routes the site serves as noindex', () => {
   it('reads the shipped config, not a fixture', () => {
     // Guards the guard: an empty rule list would satisfy every negative assertion below.
     expect(VERCEL.headers.length).toBeGreaterThan(5);
   });
 
-  it('matches /results and /sample from vercel.json as it actually stands', () => {
+  it('matches /results and /sample from vercel.json as it actually stands, on the base path', () => {
     const routes = noindexRoutes(VERCEL.headers);
     expect(routes.matches('/results')).toBe(true);
     expect(routes.matches('/sample')).toBe(true);
+  });
+
+  it('names every non-default locale in the noindex :lang alternation, and nothing else', () => {
+    // Found structurally — filtered by carrying X-Robots-Tag: noindex, then by source shape —
+    // never by index or by a literal copy of the locale list, which would just re-create the
+    // defect this test exists to catch.
+    const localized = SUPPORTED_LANGUAGES.filter(lang => lang !== 'en');
+    const alternations = noindexHeaderRules
+      .map(rule => langAlternationOf(rule.source))
+      .filter((alternation): alternation is string[] => alternation !== null);
+
+    // Guards the guard: zero rules found would make the set-equality assertion below vacuous.
+    expect(alternations.length).toBeGreaterThan(0);
+
+    for (const alternation of alternations) {
+      expect([...alternation].sort()).toEqual([...localized].sort());
+    }
   });
 
   it('leaves every other published route alone', () => {
