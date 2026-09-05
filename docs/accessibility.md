@@ -6,7 +6,7 @@ permalink: /accessibility/
 last_updated: 2026-03-05
 ---
 
-# Accessibility Guide - Instagram Unfollow Tracker
+# Accessibility Guide
 
 ## Our Accessibility Commitment
 

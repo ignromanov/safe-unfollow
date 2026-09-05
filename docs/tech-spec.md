@@ -6,7 +6,7 @@ permalink: /tech-spec/
 last_updated: 2026-09-03
 ---
 
-# Technical Specification - Instagram Unfollow Tracker
+# Technical Specification
 
 **Version:** 1.5.0
 

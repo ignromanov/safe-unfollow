@@ -8,7 +8,7 @@ last_updated: 2026-09-03
 
 {% include faq-page-schema.html %}
 
-# FAQ - Instagram Unfollow Tracker
+# FAQ
 
 ## Privacy & Security
 

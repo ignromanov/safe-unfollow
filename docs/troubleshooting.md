@@ -6,7 +6,7 @@ permalink: /troubleshooting/
 last_updated: 2026-09-03
 ---
 
-# Troubleshooting Guide - Instagram Unfollow Tracker
+# Troubleshooting Guide
 
 ## Common Issues & Solutions
 

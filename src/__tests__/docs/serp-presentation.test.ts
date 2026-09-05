@@ -250,6 +250,23 @@ describe('every published page fits the search result it appears in', () => {
       ).toBeLessThanOrEqual(frozen ? 90 : TITLE_BUDGET);
     });
 
+    it(`${doc.name} spends its H1 on the topic, not on the brand`, () => {
+      // The <h1> is the strongest topical signal a page has. The brand is already in the
+      // <title>, the og:title, the canonical host and the nav; repeating it in the heading
+      // buys nothing and costs the tail of the one element Google weighs most heavily on
+      // topic. Seven of fourteen pages carried it and six did not, so this was drift.
+      //
+      // Asserted as a trailing suffix, not as containment: `compare/index.md` opens
+      // "Instagram Unfollow Tracker — Alternatives Compared", where the brand is the subject
+      // of the sentence. `SUFFIX` is the same constant the layout's title rule uses, so the
+      // two rules cannot drift apart on what the string is.
+      const h1 = /^#\s+(.*)$/m.exec(doc.text)?.[1]?.trim() ?? '';
+      expect(h1, `${doc.name} has no H1`).not.toBe('');
+      expect(h1.endsWith(SUFFIX.trim()), `${doc.name}'s H1 ends with the brand: "${h1}"`).toBe(
+        false,
+      );
+    });
+
     it(`${doc.name} writes a description the snippet can show whole`, () => {
       // Same defect one field over, and it was on five pages when this was added —
       // one at 240 characters. Measured on the source string, not the rendered

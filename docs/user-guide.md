@@ -6,7 +6,7 @@ permalink: /user-guide/
 last_updated: 2026-09-03
 ---
 
-# User Guide - Instagram Unfollow Tracker
+# User Guide
 
 ## Getting Started
 
