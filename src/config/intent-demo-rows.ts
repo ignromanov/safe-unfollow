@@ -5,7 +5,7 @@ import type { IntentSlug } from './intent-pages';
  *
  * A slice rather than the file: the file is 148 KB and Vite would inline all of it to render
  * eight rows. A test asserts this slice still matches the file, so regenerating the sample fails
- * the build rather than silently putting a wrong count on a public page.
+ * the test suite rather than silently putting a wrong count on a public page.
  */
 export interface DemoSlice {
   /** Eight real usernames from the sample that carry this page's badge. */

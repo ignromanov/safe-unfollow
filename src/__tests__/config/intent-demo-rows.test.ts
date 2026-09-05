@@ -21,6 +21,9 @@ const sample = JSON.parse(
 };
 
 describe('INTENT_DEMO', () => {
+  // tsc owns this now: INTENT_DEMO is typed Record<IntentSlug, DemoSlice>, so a missing entry
+  // is a compile error before any test runs. This case is a backstop for if that type ever
+  // widens back to Record<string, DemoSlice> — it is not the live guard.
   it('should cover every page in the manifest', () => {
     for (const page of INTENT_PAGES) {
       expect(INTENT_DEMO[page.slug]).toBeDefined();
@@ -49,6 +52,10 @@ describe('INTENT_DEMO', () => {
 
       it('should show eight rows', () => {
         expect(slice().usernames).toHaveLength(8);
+      });
+
+      it('should show eight distinct usernames', () => {
+        expect(new Set(slice().usernames).size).toBe(8);
       });
     });
   }

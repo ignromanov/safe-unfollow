@@ -58,9 +58,11 @@ describe('IntentPage', () => {
     }
   });
 
-  it('should label the demo as sample data', () => {
+  it("should label the demo as sample data, not the reader's own account", () => {
     renderPage();
-    expect(screen.getByText(/sample data/i)).toBeInTheDocument();
+    // The compliance weight is in "not your account", not "sample data" — a page that kept the
+    // first half and dropped the disavowal must fail this test.
+    expect(screen.getByText(/sample data.*not your account/i)).toBeInTheDocument();
   });
 
   it('should show the sample rows', () => {

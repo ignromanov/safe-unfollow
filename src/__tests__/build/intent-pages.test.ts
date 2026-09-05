@@ -135,13 +135,24 @@ describe.runIf(built)('intent landing pages (prerendered)', () => {
       });
 
       it('should label the demo before hydration', () => {
-        expect(html()).toContain('Sample data');
+        // ASCII only, and the disavowal half — "Sample data" alone stays true even if "not your
+        // account" is deleted, and that half carries the compliance weight.
+        expect(html()).toContain('not your account');
       });
 
       it('should prerender the demo rows', () => {
         for (const username of INTENT_DEMO[page.slug].usernames) {
           expect(html()).toContain(username);
         }
+      });
+
+      it('should prerender the counts it claims about the sample', () => {
+        const slice = INTENT_DEMO[page.slug];
+        // React SSR splits interpolations with comment markers — the rendered HTML is
+        // "150<!-- --> of <!-- -->1,180", not the plain joined string. Strip them before
+        // asserting, or this always fails regardless of what the page actually renders.
+        const text = html().replace(/<!--.*?-->/g, '');
+        expect(text).toContain(`${slice.matching} of ${slice.total.toLocaleString('en-US')}`);
       });
     });
   }

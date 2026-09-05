@@ -4,7 +4,7 @@ import { INTENT_CONTENT, ctaHref } from './intent-content';
 import { INTENT_DEMO } from '@/config/intent-demo-rows';
 
 interface IntentPageProps {
-  page: IntentPageConfig;
+  page: IntentPageConfig & { slug: IntentSlug };
 }
 
 /**
@@ -18,9 +18,7 @@ interface IntentPageProps {
  */
 export function Component({ page }: IntentPageProps) {
   const content = INTENT_CONTENT[page.slug];
-  // page.slug is `string` on IntentPageConfig (task 1 widens it deliberately so the interface
-  // stays generic); every real value is a manifest entry's slug, so it is a real IntentSlug.
-  const demo = INTENT_DEMO[page.slug as IntentSlug];
+  const demo = INTENT_DEMO[page.slug];
 
   // Every manifest entry gets a route (src/routes.tsx), which the SSG build renders eagerly
   // for all three — including a page task 4 has not written content for yet. Falling back to
@@ -72,8 +70,8 @@ export function Component({ page }: IntentPageProps) {
           ))}
         </ul>
         <p className="px-4 py-3 text-xs text-zinc-500 border-t border-zinc-200 dark:border-zinc-800">
-          Eight of {demo.matching} rows from a demo archive. Your own export produces your own list,
-          in this browser, and nothing is uploaded anywhere.
+          Eight of {demo.matching} rows from a demo archive. Your own archive produces your own
+          list, in this browser — and your archive never leaves your device.
         </p>
       </figure>
 
