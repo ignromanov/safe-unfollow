@@ -6,6 +6,7 @@ import { INTENT_PAGES, INTENT_PATHS } from '@/config/intent-pages';
 import { I18N_NAMESPACES } from '@/config/languages';
 import { injectLocalizedMeta } from '../../../vite/ssg-meta-injector';
 import meta from '@/locales/en/meta.json';
+import { INTENT_CONTENT } from '@/pages/intent-content';
 
 const distDir = resolve(process.cwd(), 'dist');
 const built = existsSync(resolve(distDir, 'index.html'));
@@ -115,6 +116,18 @@ describe.runIf(built)('intent landing pages (prerendered)', () => {
         const expected = (meta.routes as Record<string, { title: string }>)[`/${page.slug}`]?.title;
         expect(expected).toBeTruthy();
         expect(html().match(/<title>([^<]*)<\/title>/)?.[1]).toBe(expected);
+      });
+
+      it('should carry its own body text in the prerendered HTML', () => {
+        const body = html();
+        for (const section of INTENT_CONTENT[page.slug].sections) {
+          expect(body).toContain(section.heading);
+        }
+        expect(body).toContain(INTENT_CONTENT[page.slug].ctaLabel);
+      });
+
+      it('should carry the CTA href before hydration', () => {
+        expect(html()).toContain(`href="/upload?filter=${page.badge}&amp;from=${page.slug}"`);
       });
     });
   }
