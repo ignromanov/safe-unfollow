@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { renderWithRouter } from '../test-utils';
 import { BreadcrumbSchema } from '@/components/BreadcrumbSchema';
+import { NON_ENGLISH_LANGUAGES } from '@/config/languages';
 
 describe('BreadcrumbSchema', () => {
   describe('rendering', () => {
@@ -138,8 +139,55 @@ describe('BreadcrumbSchema', () => {
     });
   });
 
-  describe('language prefix handling', () => {
-    it('should strip language prefix from Spanish route /es/sample', () => {
+  /**
+   * The locale belongs in the emitted URL, not only in the lookup.
+   *
+   * Stripping the locale prefix so `BREADCRUMB_NAMES` can be keyed by bare paths
+   * is correct. The defect was that the same stripped path then built the URL,
+   * and `Home` was hardcoded to the English root — so every non-English page told
+   * a crawler its breadcrumb pointed at the English one. There was no locale
+   * branch anywhere in the component, so it was universal across all nine
+   * non-English locales.
+   *
+   * These cases are generated from `NON_ENGLISH_LANGUAGES` rather than listed by
+   * hand for that reason: the defect was universal, so the test must be, and the
+   * next locale added is covered without anyone remembering to add a case. The
+   * three tests that stood here before were titled "should strip language prefix
+   * from <language> route" and asserted the English URL — they described the
+   * defect as the requirement.
+   *
+   * The invariant is agreement with the page's own canonical. For a locale route
+   * `vite/ssg-meta-injector.ts` builds `https://safeunfollow.app/<lang><path>`,
+   * and `useLanguageFromPath.ts` writes the same value into the live canonical
+   * tag. A breadcrumb that disagreed made one rendered document assert two
+   * different addresses for itself.
+   */
+  describe('locale prefixes survive into the emitted URLs', () => {
+    it.each(NON_ENGLISH_LANGUAGES)('%s: the page item keeps its locale', lang => {
+      const { container } = renderWithRouter(<BreadcrumbSchema />, {
+        initialEntries: [`/${lang}/upload`],
+      });
+
+      const script = container.querySelector('script[type="application/ld+json"]');
+      const schema = JSON.parse(script!.textContent!);
+
+      expect(schema.itemListElement[1].item).toBe(`https://safeunfollow.app/${lang}/upload`);
+    });
+
+    it.each(NON_ENGLISH_LANGUAGES)('%s: Home points at that locale, not English', lang => {
+      const { container } = renderWithRouter(<BreadcrumbSchema />, {
+        initialEntries: [`/${lang}/sample`],
+      });
+
+      const script = container.querySelector('script[type="application/ld+json"]');
+      const schema = JSON.parse(script!.textContent!);
+
+      // No trailing slash, because that is what the injector makes canonical for
+      // a locale home: `${BASE_URL}/${lang}` with an empty base path.
+      expect(schema.itemListElement[0].item).toBe(`https://safeunfollow.app/${lang}`);
+    });
+
+    it('still looks the page name up by the bare path', () => {
       const { container } = renderWithRouter(<BreadcrumbSchema />, {
         initialEntries: ['/es/sample'],
       });
@@ -147,32 +195,23 @@ describe('BreadcrumbSchema', () => {
       const script = container.querySelector('script[type="application/ld+json"]');
       const schema = JSON.parse(script!.textContent!);
 
-      // Should map to English base path /sample
+      // Names stay English deliberately — localizing BREADCRUMB_NAMES is a
+      // separate decision with no evidence behind it yet, and this fix does not
+      // pre-empt it.
       expect(schema.itemListElement[1].name).toBe('Sample');
-      expect(schema.itemListElement[1].item).toBe('https://safeunfollow.app/sample');
+      expect(schema.itemListElement[0].name).toBe('Home');
     });
 
-    it('should strip language prefix from Russian route /ru/upload', () => {
+    it('leaves the English pages exactly as they were', () => {
       const { container } = renderWithRouter(<BreadcrumbSchema />, {
-        initialEntries: ['/ru/upload'],
+        initialEntries: ['/upload'],
       });
 
       const script = container.querySelector('script[type="application/ld+json"]');
       const schema = JSON.parse(script!.textContent!);
 
-      expect(schema.itemListElement[1].name).toBe('Upload');
+      expect(schema.itemListElement[0].item).toBe('https://safeunfollow.app/');
       expect(schema.itemListElement[1].item).toBe('https://safeunfollow.app/upload');
-    });
-
-    it('should strip language prefix from Portuguese route /pt/results', () => {
-      const { container } = renderWithRouter(<BreadcrumbSchema />, {
-        initialEntries: ['/pt/results'],
-      });
-
-      const script = container.querySelector('script[type="application/ld+json"]');
-      const schema = JSON.parse(script!.textContent!);
-
-      expect(schema.itemListElement[1].name).toBe('Results');
     });
 
     it('should handle language-prefixed home page /es/', () => {
@@ -193,6 +232,17 @@ describe('BreadcrumbSchema', () => {
       // Should not render (home page)
       const script = container.querySelector('script[type="application/ld+json"]');
       expect(script).not.toBeInTheDocument();
+    });
+
+    it('should strip language prefix from Portuguese route /pt/results', () => {
+      const { container } = renderWithRouter(<BreadcrumbSchema />, {
+        initialEntries: ['/pt/results'],
+      });
+
+      const script = container.querySelector('script[type="application/ld+json"]');
+      const schema = JSON.parse(script!.textContent!);
+
+      expect(schema.itemListElement[1].name).toBe('Results');
     });
 
     it('should strip language prefix from German route /de/privacy', () => {
