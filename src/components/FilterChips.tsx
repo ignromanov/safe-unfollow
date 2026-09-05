@@ -160,12 +160,23 @@ export const FilterChips = memo(function FilterChips({
     truncationAffectsChip: boolean;
   }) => {
     // A disabled option says what the selection yields, not that anything is
-    // broken — and it says it instead of the add/remove affordance, which it no
+    // broken — and it says it INSTEAD of the add/remove affordance, which it no
     // longer offers. `filters.unavailable` carries `{{label}}` for exactly this
     // reason, where every hint appended via `chipWithHint` deliberately does
     // not.
-    if (option.isUnavailable) return t('filters.unavailable', { label: option.label });
-    if (!option.isUnreliable) return option.chipLabel;
+    //
+    // It replaces the affordance and nothing else. Unavailability and an
+    // untrustworthy count are independent facts and they COMPOSE: a truncated
+    // file drives `mutuals` and one of the two not-following counts DOWN, so
+    // the count that disabled this option may itself be the false one. Returning
+    // early on `isUnavailable` dropped the caveat exactly where it matters most
+    // — and dropped it only for screen-reader users, who are the ones who cannot
+    // see the AlertTriangle rendered beside the label.
+    const base = option.isUnavailable
+      ? t('filters.unavailable', { label: option.label })
+      : option.chipLabel;
+
+    if (!option.isUnreliable) return base;
 
     // Appended, not a separate element: an aria-label overrides the button's
     // content, so a visually-hidden span inside would never be announced. The
@@ -173,7 +184,7 @@ export const FilterChips = memo(function FilterChips({
     // that character in their own copy and would otherwise get one injected
     // between two non-Latin runs.
     return t('filters.chipWithHint', {
-      label: option.chipLabel,
+      label: base,
       // One hint, not both, when both causes apply to the same chip. The mark's
       // job is "this number cannot be trusted, read the notice above", and both
       // notices are on the page; reciting two causes inside an aria-label the

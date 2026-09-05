@@ -469,6 +469,60 @@ describe('FilterChips Component', () => {
       expect(screen.queryByText('999')).not.toBeInTheDocument();
     });
 
+    /**
+     * The intersection nothing covered: a chip that is BOTH disabled and
+     * carrying an untrustworthy count.
+     *
+     * It is not a corner case. A truncated followers file drives `mutuals`
+     * DOWN, so the zero that disables this option may itself be the false
+     * number — which is exactly when a reader needs to be told the count is
+     * suspect. The sighted reader still gets the AlertTriangle; before this,
+     * the screen-reader reader got a flat "no accounts with your current
+     * selection" with the caveat stripped.
+     */
+    it('should keep the untrustworthy-count caveat on an option that is also disabled', () => {
+      render(
+        <FilterChips
+          {...defaultProps}
+          truncatedRelationshipFile="followers"
+          selectedFilters={new Set<BadgeKey>(['notFollowingBack'])}
+          candidateCounts={{ ...allAvailable, mutuals: 0 }}
+        />
+      );
+
+      const unavailable = resultsEN.filters.unavailable.replace(
+        '{{label}}',
+        resultsEN.badges.mutuals
+      );
+
+      expect(
+        screen.getByRole('button', { name: new RegExp(resultsEN.badges.mutuals) })
+      ).toHaveAccessibleName(
+        resultsEN.filters.chipWithHint
+          .replace('{{label}}', unavailable)
+          .replace('{{hint}}', resultsEN.caveat.truncated.followers.chipHint)
+      );
+    });
+
+    // Control on the composition: without it, a component that appended the
+    // caveat to EVERY disabled option — trustworthy or not — would pass the
+    // test above.
+    it('should not invent a caveat for a disabled option whose count is sound', () => {
+      render(
+        <FilterChips
+          {...defaultProps}
+          selectedFilters={new Set<BadgeKey>(['notFollowingBack'])}
+          candidateCounts={{ ...allAvailable, mutuals: 0 }}
+        />
+      );
+
+      expect(
+        screen.getByRole('button', { name: new RegExp(resultsEN.badges.mutuals) })
+      ).toHaveAccessibleName(
+        resultsEN.filters.unavailable.replace('{{label}}', resultsEN.badges.mutuals)
+      );
+    });
+
     // The gate on the null contract, and the one that goes red under `?? 0`.
     // `null` is not a rare error path: it is the state of every first paint,
     // before the first count resolves.

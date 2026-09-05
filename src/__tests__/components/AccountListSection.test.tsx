@@ -26,15 +26,30 @@ vi.mock('@/hooks/useLanguagePrefix', () => ({
 
 // Mock child components
 vi.mock('@/components/FilterChips', () => ({
+  // The stub reports the `candidateCounts` it was handed, because that prop is
+  // the whole point of this feature and nothing else can see it cross this
+  // boundary: this file mocks FilterChips wholesale, and FilterChips.test.tsx
+  // supplies the prop directly rather than receiving it from the hook.
+  // `candidateCounts={filterCounts}` type-checks cleanly — Record is assignable
+  // to Record | null — so without this the whole feature could silently revert
+  // to all-time counts with `tsc` quiet and the suite green.
+  //
+  // Rendered as the literal 'null' rather than an empty string so that null (the
+  // contract's absence state) and undefined (a drifted mock) are distinguishable.
   FilterChips: ({
     selectedFilters,
     onFiltersChange,
+    candidateCounts,
   }: {
     selectedFilters: Set<BadgeKey>;
     onFiltersChange: (filters: Set<BadgeKey>) => void;
+    candidateCounts: Record<BadgeKey, number> | null;
   }) => (
     <div data-testid="filter-chips">
       <p>Active filters: {selectedFilters.size}</p>
+      <p data-testid="candidate-followers">
+        {candidateCounts === null ? 'null' : String(candidateCounts?.followers)}
+      </p>
       <button onClick={() => onFiltersChange(new Set(['following']))}>Toggle Following</button>
     </div>
   ),
@@ -127,6 +142,11 @@ describe('AccountListSection', () => {
     dismissed: 1,
   };
 
+  // Deliberately NOT equal to defaultFilterCounts on `followers`: if the two
+  // maps agreed, a component handing FilterChips the wrong one would be
+  // indistinguishable from one handing it the right one.
+  const defaultCandidateCounts = { ...defaultFilterCounts, followers: 42 };
+
   // Helper function to create mock return value
   const createMockReturnValue = (overrides = {}) => ({
     query: '',
@@ -135,6 +155,11 @@ describe('AccountListSection', () => {
     filters: new Set<BadgeKey>(),
     setFilters: mockSetFilters,
     filterCounts: defaultFilterCounts,
+    // Task 3 added this to the hook's return and this task consumes it. A mock
+    // missing it renders `undefined`, which the contract says cannot occur —
+    // `null` is the absence state — and nothing would catch it, because
+    // `tsconfig.json:23-32` excludes the tests (GH#70).
+    candidateCounts: defaultCandidateCounts,
     isFiltering: false,
     totalCount: 21,
     hasLoadedData: true,
@@ -408,6 +433,37 @@ describe('AccountListSection', () => {
     renderWithRouter(<AccountListSection {...defaultProps} />);
 
     expect(screen.getByText(resultsEN.filters.openSheet)).toBeInTheDocument();
+  });
+
+  /**
+   * The one line that makes this whole task real: the contextual map the hook
+   * computes must be the map FilterChips receives.
+   *
+   * `candidateCounts={filterCounts}` type-checks cleanly, so neither `tsc` nor
+   * any other test in the suite would notice the substitution — it would simply
+   * revert the feature to the all-time counts Task 3 exists to replace.
+   */
+  it('should hand FilterChips the contextual counts, not the all-time ones', () => {
+    renderWithRouter(<AccountListSection {...defaultProps} />);
+    fireEvent.click(screen.getByText(resultsEN.filters.openSheet));
+
+    // 42 is candidateCounts.followers; 15 is filterCounts.followers.
+    expect(screen.getByTestId('candidate-followers')).toHaveTextContent('42');
+    expect(screen.getByTestId('candidate-followers')).not.toHaveTextContent('15');
+  });
+
+  /**
+   * And it must pass `null` through unchanged. `null` is every first paint,
+   * and any fallback applied on the way — `?? {}`, `?? filterCounts` — turns
+   * "not measured yet" into "every badge yields zero", which disables the whole
+   * option space on arrival.
+   */
+  it('should pass a null candidateCounts through without a fallback', () => {
+    mockUseAccountFiltering.mockReturnValue(createMockReturnValue({ candidateCounts: null }));
+    renderWithRouter(<AccountListSection {...defaultProps} />);
+    fireEvent.click(screen.getByText(resultsEN.filters.openSheet));
+
+    expect(screen.getByTestId('candidate-followers')).toHaveTextContent('null');
   });
 
   it('should render stat cards with correct values', () => {
