@@ -61,6 +61,55 @@
 
     <link rel="canonical" href="{{ site.url }}{{ canonical_path }}"/>
 
+    {%- comment -%} structured-data:start
+      Two nodes and no more, each for a reason recorded in
+      .claude/plans/2026-09-04-geo-quick-wins/00-design.md §4 A1:
+
+      WebPage        — keyed on the same `canonical_path` the <link rel="canonical"> above is
+                       built from, so the @id and the canonical cannot disagree.
+      BreadcrumbList — the trail, derived from that same path. Google's documented shape: every
+                       ListItem carries position and name; the final one omits `item`, because it
+                       is the page the reader is already on. Two items minimum, so /docs itself
+                       emits none.
+
+      Not here, each checked against Google's documentation rather than assumed: speakable (beta
+      since 2018, US-English news only), HowTo (rich result removed Sep 2023), FAQPage beyond the
+      one page that already has it (restricted to gov/health Aug 2023, deprecation notice May
+      2026), Article/TechArticle (all three recognised types expect an author these pages do not
+      have), Organization (cross-document @id resolution could not be confirmed from a primary
+      source), and datePublished (no publish date exists in front matter, and inventing one puts
+      a lie in a machine-readable field).
+
+      Every author-written value goes through `jsonify`. Inside this script element an unescaped
+      quote does not break one attribute, it invalidates the whole block and the page silently
+      loses all of its markup.
+    {%- endcomment -%}
+    {%- capture page_canonical_url -%}{{ site.url }}{{ canonical_path }}{%- endcapture -%}
+    {%- assign crumb_segments = canonical_path | split: '/' -%}
+    {%- assign crumb_count = crumb_segments | size | minus: 1 -%}
+    {%- assign crumb_walk = '' -%}
+    {%- assign crumb_items = '' -%}
+    {%- assign crumb_position = 0 -%}
+    {%- for crumb_segment in crumb_segments -%}
+      {%- if crumb_segment == '' -%}{%- continue -%}{%- endif -%}
+      {%- assign crumb_walk = crumb_walk | append: '/' | append: crumb_segment -%}
+      {%- assign crumb_position = crumb_position | plus: 1 -%}
+      {%- if crumb_items != '' -%}{%- assign crumb_items = crumb_items | append: ',' -%}{%- endif -%}
+      {%- if crumb_position == crumb_count -%}
+        {%- capture crumb_entry -%}{"@type":"ListItem","position":{{ crumb_position }},"name":{{ head_title | jsonify }}}{%- endcapture -%}
+      {%- else -%}
+        {%- capture crumb_item_url -%}{{ site.url }}{{ crumb_walk }}{%- endcapture -%}
+        {%- capture crumb_entry -%}{"@type":"ListItem","position":{{ crumb_position }},"name":{{ crumb_segment | capitalize | jsonify }},"item":{{ crumb_item_url | jsonify }}}{%- endcapture -%}
+      {%- endif -%}
+      {%- assign crumb_items = crumb_items | append: crumb_entry -%}
+    {%- endfor -%}
+    {%- unless page.no_structured_data -%}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":{{ page_canonical_url | jsonify }},"url":{{ page_canonical_url | jsonify }},"name":{{ head_title | jsonify }},"description":{{ head_description | jsonify }},"dateModified":{{ page.last_updated | date: '%Y-%m-%d' | jsonify }}}{%- if crumb_count >= 2 -%},{"@type":"BreadcrumbList","itemListElement":[{{ crumb_items }}]}{%- endif -%}]}
+</script>
+    {%- endunless -%}
+    {%- comment -%} structured-data:end {%- endcomment -%}
+
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">

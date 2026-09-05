@@ -63,6 +63,10 @@ defaults:
       type: "pages"
     values:
       title_suffix: true
+      # Same freeze, second consequence: a BreadcrumbList can change the URL line Google shows
+      # under the title, and this page's snippet is the object being measured. GH#189 rules the
+      # same way. ⛔ Delete this with the line above it — one exemption, both halves.
+      no_structured_data: true
 
 # Kramdown settings
 kramdown:
