@@ -799,6 +799,23 @@ const VERCEL = JSON.parse(
 ) as { headers: VercelHeaderRule[] };
 const NOINDEXED = noindexRoutes(VERCEL.headers);
 
+/**
+ * `NOINDEXED.matches()` takes a base path with any locale prefix already stripped — that is the
+ * contract `scripts/generate-sitemap.ts`'s own `parseUrlPath()` satisfies before calling it. A
+ * URL pulled out of prose has not had that done to it, so `/id/results` would sail past a check
+ * that only ever asks about `/results`. Derived from `SUPPORTED_LANGUAGES`, the same source
+ * `parseUrlPath` reads, rather than a hand-typed locale list — hardcoding one here would recreate
+ * the exact drift `2e85694` closed one file over. `en` needs no case: it is never prefixed.
+ */
+function stripLocalePrefix(path: string): string {
+  const match = /^\/([a-z]{2})(\/.*)?$/.exec(path);
+  const lang = match?.[1];
+  if (lang && lang !== 'en' && (SUPPORTED_LANGUAGES as readonly string[]).includes(lang)) {
+    return match?.[2] || '/';
+  }
+  return path;
+}
+
 const BANNED_ENTRIES = [...BANNED_PRIVACY, ...PERFORMANCE_BANNED];
 
 /**
@@ -906,13 +923,23 @@ describe('llms.txt states nothing the docs corpus may not state', () => {
   it('the noindex check can reject a link to a page we tell crawlers to discard', () => {
     expect(
       allSafeunfollowLinks('See https://safeunfollow.app/results for the account list.').filter(
-        path => NOINDEXED.matches(path),
+        path => NOINDEXED.matches(stripLocalePrefix(path)),
       ),
     ).toEqual(['/results']);
   });
 
-  it('links to no page this site tells crawlers not to index', () => {
-    const offenders = allSafeunfollowLinks(LLMS_TXT_TEXT).filter(path => NOINDEXED.matches(path));
+  it('the noindex check catches the same page behind a locale prefix', () => {
+    expect(
+      allSafeunfollowLinks('See https://safeunfollow.app/id/results for the account list.').filter(
+        path => NOINDEXED.matches(stripLocalePrefix(path)),
+      ),
+    ).toEqual(['/id/results']);
+  });
+
+  it('links to no page this site tells crawlers not to index, in any locale', () => {
+    const offenders = allSafeunfollowLinks(LLMS_TXT_TEXT).filter(path =>
+      NOINDEXED.matches(stripLocalePrefix(path)),
+    );
     expect(offenders, `llms.txt links to noindexed page(s): ${offenders.join(', ')}`).toEqual([]);
   });
 });
