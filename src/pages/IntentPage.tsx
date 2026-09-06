@@ -35,6 +35,7 @@ export function Component({ page }: IntentPageProps) {
 
       <PrefixedLink
         to={ctaHref(page)}
+        cta={page.slug}
         className="inline-flex items-center justify-center rounded-xl bg-primary px-6 py-3 text-base font-bold text-primary-foreground hover:opacity-90 transition-opacity"
       >
         {content.ctaLabel}

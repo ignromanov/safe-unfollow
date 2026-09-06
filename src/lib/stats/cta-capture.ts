@@ -23,6 +23,7 @@
  * shares a request with the rest of the landing page's set.
  */
 
+import { INTENT_PAGES, type IntentSlug } from '../../config/intent-pages';
 import { AnalyticsEvents } from './constants';
 import { enqueueEvent, type EventData } from './queue';
 import { setEntryCTA } from './utm';
@@ -54,9 +55,38 @@ function isHeroCta(value: string): value is HeroCta {
   return Object.prototype.hasOwnProperty.call(HERO_CTAS, value);
 }
 
+/**
+ * Intent-page slugs, which share the `data-cta` namespace with the hero keys but not their
+ * semantics. Derived from the manifest so the set cannot drift from the routes; a slug that
+ * collides with a hero key is refused by the manifest's own gate (task 1).
+ */
+const INTENT_SLUGS: ReadonlySet<string> = new Set(INTENT_PAGES.map(page => page.slug));
+
+function isIntentCta(value: string): value is IntentSlug {
+  return INTENT_SLUGS.has(value);
+}
+
 function record(cta: HeroCta, data?: EventData): void {
   setEntryCTA(cta);
   enqueueEvent(HERO_CTAS[cta], data);
+}
+
+/**
+ * An intent-page CTA records the click and nothing else.
+ *
+ * Deliberately no setEntryCTA: `entry_cta` is a closed four-value dimension whose keys ARE
+ * the HERO_CTAS keys, and it has a live series behind it. Writing a slug into it would break
+ * that series to carry a fact `arrived_from` (impl-A task 7) already carries from the `?from=`
+ * parameter this same CTA sets.
+ */
+function recordIntent(slug: IntentSlug, data?: EventData): void {
+  enqueueEvent(AnalyticsEvents.INTENT_CTA_CLICK, { intent_slug: slug, ...data });
+}
+
+/** The one place a `data-cta` value becomes an event, whichever path delivered it. */
+function dispatch(cta: string, data?: EventData): void {
+  if (isHeroCta(cta)) record(cta, data);
+  else if (isIntentCta(cta)) recordIntent(cta, data);
 }
 
 /** Record a CTA click that reached the app directly. */
@@ -94,9 +124,9 @@ export function drainPendingCTA(): void {
   // sessionStorage is writable by anything on the origin and outlives a rename, so an
   // unrecognised slug is discarded rather than passed on to become an unlisted event name.
   const { c, p } = parsed;
-  if (typeof c !== 'string' || !isHeroCta(c)) return;
+  if (typeof c !== 'string') return;
 
-  record(c, { deferred: true, ...(typeof p === 'string' && p ? { from_path: p } : {}) });
+  dispatch(c, { deferred: true, ...(typeof p === 'string' && p ? { from_path: p } : {}) });
 }
 
 /**
@@ -109,6 +139,6 @@ export function installCTACapture(): void {
   if (typeof window === 'undefined') return;
   drainPendingCTA();
   window.__ctaSink = (cta: string) => {
-    if (isHeroCta(cta)) recordCTA(cta);
+    dispatch(cta);
   };
 }

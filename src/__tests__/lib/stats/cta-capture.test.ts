@@ -86,4 +86,49 @@ describe('CTA capture', () => {
       from_path: '/',
     });
   });
+
+  it('records an intent CTA without touching entry_cta', () => {
+    installCTACapture();
+
+    window.__ctaSink!('who-doesnt-follow-me-back');
+
+    expect(enqueueEvent).toHaveBeenCalledWith('intent_cta_click', {
+      intent_slug: 'who-doesnt-follow-me-back',
+    });
+    // The whole point: an intent slug must never win the session's entry CTA — see
+    // cta-capture.ts's recordIntent docstring.
+    expect(getEntryCTA()).toBeNull();
+  });
+
+  it('still writes entry_cta for a hero CTA — the control', () => {
+    installCTACapture();
+
+    window.__ctaSink!('sample');
+
+    expect(getEntryCTA()).toBe('sample');
+  });
+
+  it('replays an intent CTA parked before hydration', () => {
+    sessionStorage.setItem(
+      PENDING_CTA_KEY,
+      JSON.stringify({ c: 'who-doesnt-follow-me-back', p: '/who-doesnt-follow-me-back' })
+    );
+
+    drainPendingCTA();
+
+    expect(enqueueEvent).toHaveBeenCalledWith('intent_cta_click', {
+      intent_slug: 'who-doesnt-follow-me-back',
+      deferred: true,
+      from_path: '/who-doesnt-follow-me-back',
+    });
+    expect(getEntryCTA()).toBeNull();
+  });
+
+  it('discards a slug it does not know', () => {
+    sessionStorage.setItem(PENDING_CTA_KEY, JSON.stringify({ c: 'who-doesnt-follow-me-back-v2' }));
+
+    drainPendingCTA();
+
+    expect(enqueueEvent).not.toHaveBeenCalled();
+  });
 });

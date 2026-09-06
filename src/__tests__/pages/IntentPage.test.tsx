@@ -96,4 +96,18 @@ describe('IntentPage', () => {
       expect(screen.queryByRole('link', { name: page.h1 })).not.toBeInTheDocument();
     });
   }
+
+  it('should mark the CTA as a tracked CTA carrying this page slug', () => {
+    renderPage();
+    const cta = screen.getByRole('link', { name: INTENT_CONTENT[firstPage.slug].ctaLabel });
+
+    expect(cta).toHaveAttribute('data-cta', firstPage.slug);
+  });
+
+  it('should not mark the sibling links', () => {
+    renderPage();
+    const sibling = INTENT_PAGES.find(p => p.slug !== firstPage.slug)!;
+
+    expect(screen.getByRole('link', { name: sibling.h1 })).not.toHaveAttribute('data-cta');
+  });
 });
