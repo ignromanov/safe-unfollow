@@ -228,7 +228,7 @@ describe.runIf(built)('prerendered meta', () => {
   // string. What this adds is the *name*: `dist/results.html`, flat, asserted to exist. Drop
   // /results from the prerender list and the walk above stays green — it asserts a floor of 50
   // pages and full locale coverage, both of which survive — while this goes red on readPage.
-  it('should canonicalise /results without a query string', () => {
+  it('still prerenders results.html, canonical and parameter-free', () => {
     const html = readPage('results.html');
     const canonical = html.match(/<link rel="canonical" href="([^"]+)"/)?.[1];
 

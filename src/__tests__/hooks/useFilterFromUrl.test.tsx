@@ -59,7 +59,8 @@ describe('useFilterFromUrl', () => {
   // re-apply path at all. `useSearchParams` memoises on `location.search`
   // (react-router-dom/dist/index.js:1027-1038) and `setFilters` is a stable zustand action, so
   // the effect's deps never change and it never runs a second time — this test stays green with
-  // the once-per-mount guard deleted, verified by mutation. The next test is the real one.
+  // the once-per-mount guard deleted, verified by mutation. The next test is the one that pins
+  // the guard.
   it('should not re-apply on a plain re-render after the reader clears the filter', () => {
     const { rerender } = renderHook(() => useFilterFromUrl(), {
       wrapper: wrapperFor('/results?filter=pending'),
@@ -73,11 +74,15 @@ describe('useFilterFromUrl', () => {
     expect([...useAppStore.getState().filters]).toEqual([]);
   });
 
-  // The production path the guard exists for. `?filter=` stays in the URL so the view is
-  // reloadable and shareable, and anything else that writes the query — the guide's
-  // `?guide=1`, a language switch — changes `location.search` and hands the effect a fresh
-  // `searchParams`. Without the guard the reader's cleared filter snaps back the next time
-  // any unrelated parameter moves, and the filter becomes impossible to remove.
+  // Pins the contract — "applies once per mount" — rather than defending an observed hazard.
+  // ⚠️ No current path in this app rewrites the router's `location.search` while /results is
+  // mounted, so nothing today can make this fire: `useSearchParams` has one production caller
+  // (the hook itself), `useGuideDialog` mounts only on /upload, the guide link from /results
+  // leaves the route, and a language switch is a full document load that drops the query.
+  // `unlock.ts:250` does call `history.replaceState` on this page, but React Router subscribes
+  // to `popstate` alone and never learns of it. The contract is still worth a gate: honouring
+  // it costs one ref, and without the guard a re-render driven by a changed search would make
+  // the reader's cleared filter snap back and the filter impossible to remove.
   it('should not re-apply when an unrelated parameter rewrites the search', () => {
     const { result } = renderHook(
       () => {

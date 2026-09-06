@@ -59,8 +59,12 @@ vi.mock('@/components/DiagnosticErrorScreen', () => ({
 // Mock react-router-dom
 const mockNavigate = vi.fn();
 // Mutable, and the only location this page sees: `useFilterFromUrl` reads `?filter=` off it
-// at hydration. A fresh URLSearchParams per call is deliberate — it makes the effect's deps
-// change on every render, which is the shape the once-per-mount guard has to survive.
+// at hydration.
+// ⚠️ This suite gates the WIRING — that the page calls the hook at all — and nothing else.
+// It does not exercise the once-per-mount guard: every test here renders once and never
+// triggers a second render, so the effect runs once whether or not a guard exists. Removing
+// the guard leaves this file 18/18 green, verified by mutation. The guard is gated by
+// `src/__tests__/hooks/useFilterFromUrl.test.tsx`.
 const mockSearch = { value: '' };
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
