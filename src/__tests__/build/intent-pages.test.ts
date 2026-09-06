@@ -159,6 +159,49 @@ describe.runIf(built)('intent landing pages (prerendered)', () => {
     });
   }
 
+  describe('home page and locale pages', () => {
+    // The artefact task 5 exists to produce: links a crawler sees. Everything else in this
+    // file reads source, jsdom renders, or docs/index.md — none of that would go red if SSG
+    // stopped emitting the Hero's conditional block.
+    it('should carry all three intent hrefs on the English home page', () => {
+      const html = readFileSync(resolve(distDir, 'index.html'), 'utf-8');
+      for (const page of INTENT_PAGES) {
+        expect(html).toContain(`href="/${page.slug}"`);
+      }
+    });
+
+    // Two locales, not one — a single-file accident (the wrong dist file, a stale build)
+    // would still pass if only one negative case were checked. Matched by suffix, not by
+    // exact href: a locale-prefixed link (`/ru/who-doesnt-follow-me-back`) still links the
+    // page, and an exact `href="/${slug}"` match would miss it.
+    for (const locale of ['ru', 'id']) {
+      it(`should carry none of the intent hrefs on the ${locale} home page`, () => {
+        const html = readFileSync(resolve(distDir, `${locale}.html`), 'utf-8');
+        for (const page of INTENT_PAGES) {
+          expect(html).not.toMatch(new RegExp(`href="[^"]*/${page.slug}"`));
+        }
+      });
+    }
+  });
+
+  describe('sibling links (prerendered)', () => {
+    for (const page of INTENT_PAGES) {
+      it(`/${page.slug} should link its two siblings and not itself, before hydration`, () => {
+        const html = readFileSync(resolve(distDir, `${page.slug}.html`), 'utf-8');
+        const siblings = INTENT_PAGES.filter(other => other.slug !== page.slug);
+        for (const sibling of siblings) {
+          expect(html).toContain(`href="/${sibling.slug}"`);
+        }
+        // href="/<own-slug>" only ever appears as this page's own canonical/hreflang-free
+        // self-reference, never as a sibling-nav link — so a self-link here is undetectable
+        // by count alone. Assert on the count of matches instead, which is 0 without a
+        // self-referencing bug in the sibling filter.
+        const selfLinks = html.match(new RegExp(`href="/${page.slug}"`, 'g')) ?? [];
+        expect(selfLinks).toHaveLength(0);
+      });
+    }
+  });
+
   describe('sitemap', () => {
     const sitemap = () => readFileSync(resolve(distDir, 'sitemap.xml'), 'utf-8');
 

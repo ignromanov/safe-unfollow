@@ -105,7 +105,11 @@ export function Hero({ hasData }: HeroProps) {
                 when there is no language prefix, so nine of the ten locales would carry a
                 hero.json entry nothing can ever render — and adding a key to en/hero.json
                 alone risks whichever parity gate PR #96 left behind. The intent pages this
-                points at are English-only for the same reason. */}
+                points at are English-only for the same reason. This follows the Hero
+                wherever the Hero renders, including ResultsPage's no-data fallback
+                (`<Hero hasData={false} />`) — harmless, since /results is noindex and the
+                block is absent from dist/results.html, but worth naming so the next reader
+                does not have to rediscover it. */}
             Also answers:{' '}
             {INTENT_PAGES.map((page, i) => (
               <span key={page.slug}>

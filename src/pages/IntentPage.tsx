@@ -74,10 +74,10 @@ export function Component({ page }: IntentPageProps) {
       </div>
 
       <nav
-        aria-label="Other questions your export answers"
+        aria-labelledby="other-questions-heading"
         className="mt-16 border-t border-zinc-200 dark:border-zinc-800 pt-8"
       >
-        <h2 className="text-xl font-bold tracking-tight mb-4">
+        <h2 id="other-questions-heading" className="text-xl font-bold tracking-tight mb-4">
           Other questions your export answers
         </h2>
         <ul className="space-y-2">

@@ -82,16 +82,18 @@ describe('IntentPage', () => {
     ).toBeInTheDocument();
   });
 
-  it('should link to its two siblings and not to itself', () => {
-    renderPage();
-    const siblings = INTENT_PAGES.filter(p => p.slug !== firstPage.slug);
+  for (const page of INTENT_PAGES) {
+    it(`/${page.slug} should link to its two siblings and not to itself`, () => {
+      renderPage(page);
+      const siblings = INTENT_PAGES.filter(p => p.slug !== page.slug);
 
-    for (const sibling of siblings) {
-      expect(screen.getByRole('link', { name: sibling.h1 })).toHaveAttribute(
-        'href',
-        `/${sibling.slug}`
-      );
-    }
-    expect(screen.queryByRole('link', { name: firstPage.h1 })).not.toBeInTheDocument();
-  });
+      for (const sibling of siblings) {
+        expect(screen.getByRole('link', { name: sibling.h1 })).toHaveAttribute(
+          'href',
+          `/${sibling.slug}`
+        );
+      }
+      expect(screen.queryByRole('link', { name: page.h1 })).not.toBeInTheDocument();
+    });
+  }
 });

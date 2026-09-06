@@ -3,7 +3,7 @@ layout: default
 title: 'How to Find Instagram Unfollowers - Complete Guide'
 description: 'Step-by-step guide to find who unfollowed you on Instagram using free data export. No login required, works offline. Privacy-first tutorial.'
 permalink: /
-last_updated: 2026-09-03
+last_updated: 2026-09-06
 ---
 
 # Documentation
@@ -21,8 +21,8 @@ Welcome to the complete documentation for Instagram Unfollow Tracker, a privacy-
 ## Answer One Question
 
 - **[Who Doesn't Follow You Back on Instagram](/who-doesnt-follow-me-back)** - The accounts you follow that don't follow you, read straight from your export
-- **[Your Pending Instagram Follow Requests](/instagram-pending-follow-requests)** - Requests you sent that were never accepted, a list the app never shows you
-- **[Your Mutual Followers, From Your Own Export](/instagram-mutual-followers)** - Exactly who follows you back, with no sampling and no API limit
+- **[Your Pending Instagram Follow Requests](/instagram-pending-follow-requests)** - Requests you sent that were never accepted: the outgoing side, not the ones waiting for you
+- **[Your Mutual Followers, From Your Own Export](/instagram-mutual-followers)** - Who follows you back, computed over every row of your export rather than a sample
 
 ## Detailed Guides
 
