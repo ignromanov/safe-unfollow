@@ -3,13 +3,14 @@
  */
 
 import { AnalyticsEvents, parseDurationBucket } from './constants';
-import type { FilterAction, FilterSource, LinkType, ParseOutcome } from './constants';
-import { trackEvent } from './core';
+import type { LinkType, ParseOutcome } from './constants';
+import { trackBeacon, trackEvent } from './core';
 import { enqueueEvent, flushEvents, trackNavigating } from './queue';
 import { getStoredUTM, getEntryCTA } from './utm';
 import type { GuideSource } from '@/hooks/useGuideDialog';
 import type { LabelResolutionMode, RelationshipFormat, RelationshipSkew } from '@/core/types';
 import type { LicenseFailureReason } from '@/lib/export/license';
+import type { FilterSessionSummary } from './filter-session';
 
 /**
  * True the first time this key is seen in this browser tab, false afterwards.
@@ -141,19 +142,33 @@ export const analytics = {
     });
   },
 
-  // Filter events — unsampled since GH#123; read as an absolute count, and
-  // sampling serves ratios over large N rather than counts.
-  filterToggle: (
-    filterName: string,
-    action: FilterAction,
-    activeCount: number,
-    source: FilterSource
-  ) => {
-    enqueueEvent(AnalyticsEvents.FILTER_TOGGLE, {
-      filter_name: filterName,
-      filter_action: action,
-      active_filter_count: activeCount,
-      filter_source: source,
+  // Filter events — unsampled; read as absolute counts.
+  /**
+   * One event per filtering session, replacing 9.48 per-toggle rows.
+   *
+   * Unsampled, and deliberately not on `useTimeOnResults`'s `fireEvent` path:
+   * that handler is a 25% sample of visits over five seconds, and this replaces
+   * a series GH#123 made unsampled on purpose so it reads as a count.
+   *
+   * `trackBeacon` rather than `trackEvent`: this is all-or-nothing per session
+   * and mostly fires on the way out, where an ordinary request is freely
+   * cancelled. (`resultsClicksSummary` below is on `trackEvent` and has the same
+   * exposure — a pre-existing inconsistency, not this event's to fix.)
+   *
+   * `seq` supersedes: the accumulator is cumulative, so a row with a higher seq
+   * contains everything the lower ones did. Analysis reads the highest seq per
+   * session and ignores the rest.
+   */
+  filterSessionSummary: (summary: FilterSessionSummary, seq: number) => {
+    trackBeacon(AnalyticsEvents.FILTER_SESSION_SUMMARY, {
+      seq,
+      filters_used: JSON.stringify(summary.filtersUsed),
+      max_active: summary.maxActive,
+      arrived_with: summary.arrivedWith,
+      arrived_from: summary.arrivedFrom ?? '',
+      reached_empty: summary.reachedEmpty,
+      toggle_count: summary.toggleCount,
+      source_mix: JSON.stringify(summary.sourceMix),
     });
   },
 
@@ -163,7 +178,8 @@ export const analytics = {
     });
   },
 
-  // Search events — unsampled since GH#123, see filterToggle.
+  // Search events — unsampled since GH#123: read as an absolute count, and
+  // sampling serves ratios over large N rather than counts.
   searchPerform: (
     queryLength: number,
     resultCount: number,

@@ -1,4 +1,6 @@
 import { vi, beforeEach } from 'vitest';
+import type { ReactElement } from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { render, screen, fireEvent, within } from '@tests/utils/testUtils';
 import { renderWithRouter } from '@/__tests__/test-utils';
 import resultsEN from '@/locales/en/results.json';
@@ -11,6 +13,7 @@ import type { BadgeKey } from '@/core/types';
 import { useAccountFiltering } from '@/hooks/useAccountFiltering';
 import { useUploadCaveats } from '@/hooks/useUploadCaveats';
 import { analytics } from '@/lib/analytics';
+import { buildFilterSummary, resetFilterSession } from '@/lib/stats/filter-session';
 
 // Mock the useAccountFiltering hook
 vi.mock('@/hooks/useAccountFiltering');
@@ -185,14 +188,31 @@ describe('AccountListSection', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    // Module state shared by every test in this file, and by every other file
+    // in the run that touches it.
+    resetFilterSession();
     mockUseAccountFiltering.mockReturnValue(createMockReturnValue());
     mockUseUploadCaveats.mockReturnValue(caveats());
   });
 
-  /** Drives the file's existing mock; does not replace it. */
+  /**
+   * Themed and routed. The file's `render` (from testUtils) supplies the theme
+   * provider but no router, and `renderWithRouter` the reverse; the component
+   * now needs both, because it reads the arrival URL from the router rather than
+   * from `window.location`.
+   */
+  const renderThemedRouted = (ui: ReactElement) => render(<MemoryRouter>{ui}</MemoryRouter>);
+
+  /**
+   * Drives the file's existing mock; does not replace it.
+   *
+   * Routed rather than bare: the component reads the arrival URL from the router
+   * (`useLocation`) and not from `window.location`, so it now requires a router
+   * context exactly as it has one in `routes.tsx`.
+   */
   const renderWithFilters = (filters: Set<BadgeKey>, overrides: object = {}) => {
     mockUseAccountFiltering.mockReturnValue(createMockReturnValue({ filters, ...overrides }));
-    return render(<AccountListSection {...defaultProps} />);
+    return renderWithRouter(<AccountListSection {...defaultProps} />);
   };
 
   /**
@@ -378,29 +398,33 @@ describe('AccountListSection', () => {
 
   /**
    * The stat cards mutate the same filter Set as the chips and, until this test,
-   * emitted nothing: 2 377 mutations across 990 sessions were invisible. The
-   * assertion is on the fourth argument — a toggle without a source is the blind
-   * spot returning.
+   * recorded nothing: 2 377 mutations across 990 sessions were invisible. The
+   * assertion is on the source — a toggle without one is the blind spot
+   * returning. It moved from the per-toggle event's fourth argument to
+   * `source_mix` on the session summary when that event's series ended.
    */
-  it('should emit a filter toggle when a stat card is clicked', () => {
-    const filterToggle = vi.spyOn(analytics, 'filterToggle');
+  it('should record a stat card click against the stat_card source', () => {
     renderWithRouter(<AccountListSection {...defaultProps} />);
 
     fireEvent.click(within(screen.getByTestId('stat-card-unfollowed')).getByRole('button'));
 
-    expect(filterToggle).toHaveBeenCalledWith('unfollowed', 'enable', 1, 'stat_card');
+    expect(buildFilterSummary()?.sourceMix).toEqual({ stat_card: 1 });
+    expect(buildFilterSummary()?.filtersUsed).toEqual({ unfollowed: 1 });
   });
 
-  it('reports the toggle as a disable when the card is already active', () => {
+  it('records the toggle as a disable when the card is already active', () => {
     mockUseAccountFiltering.mockReturnValue(
       createMockReturnValue({ filters: new Set<BadgeKey>(['unfollowed']) })
     );
-    const filterToggle = vi.spyOn(analytics, 'filterToggle');
     renderWithRouter(<AccountListSection {...defaultProps} />);
 
     fireEvent.click(within(screen.getByTestId('stat-card-unfollowed')).getByRole('button'));
 
-    expect(filterToggle).toHaveBeenCalledWith('unfollowed', 'disable', 0, 'stat_card');
+    const summary = buildFilterSummary();
+    expect(summary?.sourceMix).toEqual({ stat_card: 1 });
+    expect(summary?.toggleCount).toBe(1);
+    // A disable never enters the ranking, whatever surface produced it.
+    expect(summary?.filtersUsed).toEqual({});
   });
 
   /**
@@ -428,7 +452,6 @@ describe('AccountListSection', () => {
     mockUseAccountFiltering.mockReturnValue(
       createMockReturnValue({ filters: new Set<BadgeKey>(['unfollowed', 'pending']) })
     );
-    const filterToggle = vi.spyOn(analytics, 'filterToggle');
     renderWithRouter(<AccountListSection {...defaultProps} />);
 
     fireEvent.click(
@@ -437,7 +460,11 @@ describe('AccountListSection', () => {
       })
     );
 
-    expect(filterToggle).toHaveBeenCalledWith('pending', 'disable', 1, 'chip');
+    const summary = buildFilterSummary();
+    expect(summary?.sourceMix).toEqual({ chip: 1 });
+    // The applied row is a chip surface, not a card one: the removal must not
+    // land in the stat_card bucket.
+    expect(summary?.sourceMix).not.toHaveProperty('stat_card');
   });
 
   it('should count the applied filters on the sheet trigger', () => {
@@ -696,7 +723,7 @@ describe('AccountListSection', () => {
 
     it('puts the ad above the list and the donation ask below it', () => {
       withAdEnv(() => {
-        const { container } = render(
+        const { container } = renderThemedRouted(
           <AccountListSection fileHash="abc" accountCount={100} filename="d.zip" />
         );
 
@@ -723,7 +750,7 @@ describe('AccountListSection', () => {
     // out as such — one `lg:` class rather than a mobile/desktop pair.
     it('sits between the filters and the list on mobile, hoisted above both only on desktop', () => {
       withAdEnv(() => {
-        const { container } = render(
+        const { container } = renderThemedRouted(
           <AccountListSection fileHash="abc" accountCount={100} filename="d.zip" />
         );
 
@@ -751,7 +778,7 @@ describe('AccountListSection', () => {
       vi.stubEnv('VITE_ADSENSE_CLIENT', 'ca-pub-test');
       vi.stubEnv('VITE_ADSENSE_SLOT_RESULTS_END', '333');
       try {
-        const { container } = render(
+        const { container } = renderThemedRouted(
           <AccountListSection fileHash="abc" accountCount={100} filename="d.zip" />
         );
 
@@ -773,7 +800,7 @@ describe('AccountListSection', () => {
     it('renders nothing for the tail unit without its env var', () => {
       vi.stubEnv('VITE_ADSENSE_CLIENT', 'ca-pub-test');
       try {
-        const { container } = render(
+        const { container } = renderThemedRouted(
           <AccountListSection fileHash="abc" accountCount={100} filename="d.zip" />
         );
 
@@ -787,7 +814,7 @@ describe('AccountListSection', () => {
       vi.stubEnv('VITE_ADSENSE_CLIENT', 'ca-pub-test');
       vi.stubEnv('VITE_ADSENSE_SLOT_RESULTS_END', '333');
       try {
-        const { container } = render(
+        const { container } = renderThemedRouted(
           <AccountListSection fileHash="abc" accountCount={100} filename="d.zip" />
         );
 
@@ -803,7 +830,7 @@ describe('AccountListSection', () => {
 
   describe('sticky header', () => {
     it('keeps the heading out of the sticky container, and keeps exactly one h1', () => {
-      const { container } = render(
+      const { container } = renderThemedRouted(
         <AccountListSection fileHash="abc" accountCount={100} filename="d.zip" />
       );
 
@@ -818,7 +845,7 @@ describe('AccountListSection', () => {
     });
 
     it('keeps search and sort inside the sticky container', () => {
-      const { container } = render(
+      const { container } = renderThemedRouted(
         <AccountListSection fileHash="abc" accountCount={100} filename="d.zip" />
       );
 
@@ -836,7 +863,7 @@ describe('AccountListSection', () => {
       container.querySelector('button[aria-pressed]') as HTMLElement;
 
     it('drives the descending state from the token, not a literal colour', () => {
-      const { container } = render(
+      const { container } = renderThemedRouted(
         <AccountListSection fileHash="abc" accountCount={100} filename="d.zip" />
       );
 
@@ -942,6 +969,128 @@ describe('AccountListSection', () => {
       renderWithFilters(new Set<BadgeKey>(['pending']));
 
       expect(screen.getByTestId('search-active')).toHaveTextContent('false');
+    });
+  });
+
+  /**
+   * The filtering session, accumulated in `@/lib/stats/filter-session` and sent
+   * as one row instead of 9.48. These assert the real accumulator rather than a
+   * spy on it: there is no instrument to prove fired, because there is no
+   * instrument.
+   */
+  describe('filter session accumulation', () => {
+    it('takes the arrival from the ROUTER url, not from window.location', () => {
+      // The whole point of this assertion. `unlock.ts` calls
+      // `window.history.replaceState` on every /results view to strip licence
+      // params, and @remix-run/router resyncs only on popstate — so from that
+      // call onward the two disagree permanently, and `arrived_from` would be
+      // lost on exactly the sessions that bought an export. Under MemoryRouter
+      // window.location.search is empty, so this passes only if the router is
+      // the source.
+      expect(window.location.search).toBe('');
+
+      renderWithRouter(<AccountListSection {...defaultProps} />, {
+        initialEntries: ['/results?filter=pending&from=landing-unfollowers'],
+      });
+
+      const summary = buildFilterSummary();
+      expect(summary?.arrivedFrom).toBe('landing-unfollowers');
+      // A valid `?filter=` REPLACES the persisted set, so it is exactly one.
+      expect(summary?.arrivedWith).toBe(1);
+      expect(summary?.toggleCount).toBe(0);
+    });
+
+    it('falls back to the persisted selection when the url carries no filter', () => {
+      mockUseAccountFiltering.mockReturnValue(
+        createMockReturnValue({ filters: new Set<BadgeKey>(['unfollowed', 'pending']) })
+      );
+
+      renderWithRouter(<AccountListSection {...defaultProps} />, {
+        initialEntries: ['/results'],
+      });
+
+      const summary = buildFilterSummary();
+      expect(summary?.arrivedWith).toBe(2);
+      expect(summary?.arrivedFrom).toBeNull();
+    });
+
+    it('records nothing for an arrival with no filter and no source', () => {
+      renderWithRouter(<AccountListSection {...defaultProps} />, {
+        initialEntries: ['/results'],
+      });
+
+      // Otherwise this event costs one row per visit to /results — more than the
+      // per-toggle stream it replaces.
+      expect(buildFilterSummary()).toBeNull();
+    });
+
+    it('records a stat card toggle against the stat_card source', () => {
+      renderWithRouter(<AccountListSection {...defaultProps} />);
+
+      fireEvent.click(within(screen.getByTestId('stat-card-unfollowed')).getByRole('button'));
+
+      const summary = buildFilterSummary();
+      expect(summary?.toggleCount).toBe(1);
+      expect(summary?.sourceMix).toEqual({ stat_card: 1 });
+      expect(summary?.filtersUsed).toEqual({ unfollowed: 1 });
+      expect(summary?.maxActive).toBe(1);
+    });
+
+    it('records an applied-row removal as a chip disable and does not rank it', () => {
+      mockUseAccountFiltering.mockReturnValue(
+        createMockReturnValue({ filters: new Set<BadgeKey>(['unfollowed', 'pending']) })
+      );
+      renderWithRouter(<AccountListSection {...defaultProps} />);
+
+      fireEvent.click(
+        screen.getByRole('button', {
+          name: resultsEN.filters.removeOne.replace('{{label}}', resultsEN.badges.pending),
+        })
+      );
+
+      const summary = buildFilterSummary();
+      expect(summary?.sourceMix).toEqual({ chip: 1 });
+      // A disable is counted as a toggle and never as a use: `unfollowed` looked
+      // like the most popular filter for months because disables were counted.
+      expect(summary?.filtersUsed).toEqual({});
+    });
+
+    it('records and emits the moment a filtered list comes back empty', () => {
+      const summarySpy = vi.spyOn(analytics, 'filterSessionSummary');
+      mockUseAccountFiltering.mockReturnValue(
+        createMockReturnValue({
+          filters: new Set<BadgeKey>(['pending']),
+          filteredIndices: [],
+          isFiltering: false,
+        })
+      );
+
+      renderWithRouter(<AccountListSection {...defaultProps} />);
+
+      expect(buildFilterSummary()?.reachedEmpty).toBe(true);
+      // Emitted here rather than only on the way out: the exit that follows a
+      // dead end is the one most likely to lose its keepalive request, and it is
+      // the 50.1% this plan exists for.
+      expect(summarySpy).toHaveBeenCalledWith(
+        expect.objectContaining({ reachedEmpty: true }),
+        expect.any(Number)
+      );
+    });
+
+    it('does not claim an empty result while the filter is still resolving', () => {
+      mockUseAccountFiltering.mockReturnValue(
+        createMockReturnValue({
+          filters: new Set<BadgeKey>(['pending']),
+          filteredIndices: [],
+          isFiltering: true,
+        })
+      );
+
+      renderWithRouter(<AccountListSection {...defaultProps} />);
+
+      // A list that has not finished filtering is not a dead end. Absence is not
+      // zero.
+      expect(buildFilterSummary()?.reachedEmpty).toBe(false);
     });
   });
 });

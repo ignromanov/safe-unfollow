@@ -29,8 +29,11 @@ import { RESCUE_PLAN_BANNER_ENABLED } from '@/config/feature-flags';
 import { useAccountFiltering } from '@/hooks/useAccountFiltering';
 import { useUploadCaveats } from '@/hooks/useUploadCaveats';
 import { useTimeOnResults } from '@/hooks/useTimeOnResults';
+import { readArrivalFilter, readArrivalSource } from '@/hooks/useFilterFromUrl';
 import { analytics } from '@/lib/analytics';
-import { useState } from 'react';
+import { recordArrival, recordEmptyResult, recordToggle } from '@/lib/stats/filter-session';
+import { useEffect, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 
@@ -143,7 +146,18 @@ export function AccountListSection({
 
   // Track time on results for engagement analytics
   // V7: trackClick collects badge click data for aggregated summary event
-  const { trackAction, trackClick } = useTimeOnResults(accountCount, hasLoadedData);
+  const { trackAction, trackClick, fireFilterSummary } = useTimeOnResults(
+    accountCount,
+    hasLoadedData
+  );
+
+  // The ROUTER's search string, never `window.location.search`. `unlock.ts`
+  // calls `window.history.replaceState` on every /results view to strip the
+  // licence and checkout params, and @remix-run/router resyncs only on
+  // `popstate` — which `replaceState` does not fire. From that call onward the
+  // two disagree permanently, and the sessions where they disagree are the ones
+  // that bought an export.
+  const { search } = useLocation();
 
   // Apply sort order to filtered indices (null = show all)
   const sortedIndices =
@@ -174,7 +188,7 @@ export function AccountListSection({
   const handleRemoveFilter = (badgeType: BadgeKey) => {
     const newFilters = new Set(filters);
     newFilters.delete(badgeType);
-    analytics.filterToggle(badgeType, 'disable', newFilters.size, 'chip');
+    recordToggle(badgeType, 'disable', newFilters.size, 'chip');
     setFilters(newFilters);
     trackAction();
   };
@@ -189,10 +203,45 @@ export function AccountListSection({
       newFilters.add(badgeType);
     }
 
-    analytics.filterToggle(badgeType, action, newFilters.size, 'stat_card');
+    recordToggle(badgeType, action, newFilters.size, 'stat_card');
     setFilters(newFilters);
     trackAction();
   };
+
+  // What the reader arrived with, before they did anything. Recorded once:
+  // 52.3% of sessions arrive with a filter already on, and from Task 6 some of
+  // them arrive with one we chose for them.
+  //
+  // The count comes from the URL when the URL carries one, NOT from the store.
+  // `useFilterFromUrl` runs in ResultsPage, this effect runs in a child, and
+  // React flushes child effects before parent effects in the same commit — so
+  // reading `filters.size` here would see yesterday's persisted selection on
+  // exactly the arrivals this measurement exists for. Deriving from the URL
+  // removes the ordering dependency rather than depending on it holding.
+  //
+  // `fromUrl ? 1 : filters.size` is not an approximation: a valid `?filter=`
+  // REPLACES the persisted set, so it means exactly one filter is applied.
+  const arrivalRecorded = useRef(false);
+  useEffect(() => {
+    if (arrivalRecorded.current || !hasLoadedData) return;
+    arrivalRecorded.current = true;
+
+    recordArrival(readArrivalFilter(search) ? 1 : filters.size, readArrivalSource(search));
+  }, [hasLoadedData, filters.size, search]);
+
+  // The empty result is the finding, and the exit that follows it is the one
+  // most likely to lose its beacon. Emit at the moment it happens, not only on
+  // the way out — seq supersedes, so this costs one extra row in exactly the
+  // sessions worth a row and changes nothing about how the series is read.
+  //
+  // `!isFiltering` is load-bearing: a list still resolving is not a dead end,
+  // and reporting one would be reporting a measurement not taken as a zero.
+  useEffect(() => {
+    if (filters.size > 0 && hasLoadedData && !isFiltering && displayCount === 0) {
+      recordEmptyResult();
+      fireFilterSummary();
+    }
+  }, [filters.size, hasLoadedData, isFiltering, displayCount, fireFilterSummary]);
 
   const { stateLine, activeFilter } = describeSelection({
     filters,

@@ -25,8 +25,8 @@ export const AnalyticsEvents = {
   UPLOAD_PARSE_DURATION: 'upload_parse_duration',
 
   // Filters
-  FILTER_TOGGLE: 'filter_toggle',
   FILTER_CLEAR_ALL: 'filter_clear_all',
+  FILTER_SESSION_SUMMARY: 'filter_session_summary',
 
   // Search
   SEARCH_PERFORM: 'search_perform',

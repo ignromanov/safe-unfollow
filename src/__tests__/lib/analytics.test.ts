@@ -514,7 +514,7 @@ describe('Analytics', () => {
 
       it('should not track events', () => {
         analytics.fileUploadStart(5.5);
-        analytics.filterToggle('mutuals', 'enable', 1, 'chip');
+        analytics.filterClearAll(1);
         analytics.searchPerform(5, 10, 100, false);
 
         expect(windowSpy.umami.track).not.toHaveBeenCalled();
@@ -529,7 +529,7 @@ describe('Analytics', () => {
 
       it('should not track events', () => {
         analytics.fileUploadStart(5.5);
-        analytics.filterToggle('mutuals', 'enable', 1, 'chip');
+        analytics.filterClearAll(1);
         analytics.searchPerform(5, 10, 100, false);
 
         // umami was deleted during opt-out, so no calls
@@ -546,7 +546,7 @@ describe('Analytics', () => {
       it('should not throw error', () => {
         expect(() => {
           analytics.fileUploadStart(5.5);
-          analytics.filterToggle('mutuals', 'enable', 1, 'chip');
+          analytics.filterClearAll(1);
         }).not.toThrow();
       });
     });
@@ -603,7 +603,6 @@ describe('Analytics', () => {
     it('should have all expected event names', () => {
       expect(AnalyticsEvents.FILE_UPLOAD_START).toBe('file_upload_start');
       expect(AnalyticsEvents.FILE_UPLOAD_SUCCESS).toBe('file_upload_success');
-      expect(AnalyticsEvents.FILTER_TOGGLE).toBe('filter_toggle');
       expect(AnalyticsEvents.FILTER_CLEAR_ALL).toBe('filter_clear_all');
       expect(AnalyticsEvents.SEARCH_PERFORM).toBe('search_perform');
       expect(AnalyticsEvents.RESULTS_CLICKS_SUMMARY).toBe('results_clicks_summary');

@@ -226,33 +226,11 @@ describe('relationshipSkewVerdict dates_fitted field (GH#156)', () => {
 });
 
 /**
- * `filter_toggle` had no test of its own, and the field being added here is the
- * one that makes the stat cards visible at all: 2 377 mutations across 990
- * sessions came from a surface that emitted nothing. A payload assertion is what
- * stops the source silently going missing again.
+ * The per-toggle event is gone: `filter_toggle` was 31 520 event rows and
+ * 94 560 payload rows, and one `filter_session_summary` per session carries the
+ * same four findings. What this block used to guard — that a toggle records
+ * WHICH surface produced it, the blind spot that hid 2 377 stat-card mutations
+ * across 990 sessions — now lives as `source_mix` on the summary, gated in
+ * `src/__tests__/components/FilterChips.test.tsx` and
+ * `src/__tests__/components/AccountListSection.test.tsx`.
  */
-describe('filterToggle source field', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it('should carry the source of the toggle', () => {
-    analytics.filterToggle('unfollowed', 'enable', 2, 'stat_card');
-
-    expect(enqueueEvent).toHaveBeenCalledWith('filter_toggle', {
-      filter_name: 'unfollowed',
-      filter_action: 'enable',
-      active_filter_count: 2,
-      filter_source: 'stat_card',
-    });
-  });
-
-  it('distinguishes the chip from the card, so source_mix has two values', () => {
-    analytics.filterToggle('mutuals', 'disable', 0, 'chip');
-
-    expect(enqueueEvent).toHaveBeenCalledWith(
-      'filter_toggle',
-      expect.objectContaining({ filter_source: 'chip' })
-    );
-  });
-});

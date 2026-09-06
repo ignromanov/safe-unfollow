@@ -5,6 +5,7 @@ import { BADGE_ORDER } from '@/core/badges';
 import { BADGE_GROUPS } from '@/core/badges/groups';
 import type { BadgeKey } from '@/core/types';
 import resultsEN from '@/locales/en/results.json';
+import { buildFilterSummary, resetFilterSession } from '@/lib/stats/filter-session';
 
 // react-i18next is already mocked globally in vitest.setup.ts
 
@@ -37,6 +38,8 @@ describe('FilterChips Component', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    // Module state, shared with every other suite in the run.
+    resetFilterSession();
   });
 
   describe('rendering', () => {
@@ -547,6 +550,44 @@ describe('FilterChips Component', () => {
       for (const button of options) {
         expect(button).toBeEnabled();
       }
+    });
+  });
+
+  /**
+   * The chips are one of the two surfaces that mutate the filter set, and the
+   * only one that records `'chip'` from inside a sheet. They emit nothing of
+   * their own any more: the per-toggle event is gone and what they do instead is
+   * accumulate into the session summary.
+   */
+  describe('filter session accumulation', () => {
+    /** Derived from the rendered surface, never from a hand-written badge name. */
+    const firstOptionFor = (badge: BadgeKey) =>
+      screen.getByRole('button', {
+        name: new RegExp(resultsEN.badges[badge], 'i'),
+      });
+
+    it('records an enable against the chip source', () => {
+      render(<FilterChips {...defaultProps} />);
+
+      fireEvent.click(firstOptionFor('unfollowed'));
+
+      const summary = buildFilterSummary();
+      expect(summary?.sourceMix).toEqual({ chip: 1 });
+      expect(summary?.filtersUsed).toEqual({ unfollowed: 1 });
+      expect(summary?.maxActive).toBe(1);
+    });
+
+    it('records a disable as a toggle without ranking the badge', () => {
+      render(<FilterChips {...defaultProps} selectedFilters={new Set<BadgeKey>(['unfollowed'])} />);
+
+      fireEvent.click(firstOptionFor('unfollowed'));
+
+      const summary = buildFilterSummary();
+      expect(summary?.toggleCount).toBe(1);
+      expect(summary?.sourceMix).toEqual({ chip: 1 });
+      // Disables are what made `unfollowed` look like the most-used filter for
+      // months. They count as activity and never as a use.
+      expect(summary?.filtersUsed).toEqual({});
     });
   });
 });

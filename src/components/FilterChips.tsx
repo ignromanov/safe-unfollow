@@ -49,7 +49,7 @@ interface FilterChipsProps {
    */
   truncatedRelationshipFile?: RelationshipSkew;
 }
-import { analytics } from '@/lib/analytics';
+import { recordToggle } from '@/lib/stats/filter-session';
 import type { ReactNode } from 'react';
 import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -142,7 +142,7 @@ export const FilterChips = memo(function FilterChips({
       newFilters.add(filter);
     }
 
-    analytics.filterToggle(filter, action, newFilters.size, 'chip');
+    recordToggle(filter, action, newFilters.size, 'chip');
     onFiltersChange(newFilters);
   };
 

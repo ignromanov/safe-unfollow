@@ -160,29 +160,22 @@ describe('promo impression batching', () => {
     });
 
     it('queues in-page interactions, which fire repeatedly inside one page life', () => {
-      analytics.filterToggle('mutuals', 'enable', 1, 'chip');
       analytics.filterClearAll(3);
       analytics.searchPerform(4, 10, 100, false);
       analytics.faqExpand(2);
       analytics.themeToggle('dark');
 
-      expect(enqueueEvent).toHaveBeenNthCalledWith(1, 'filter_toggle', {
-        filter_name: 'mutuals',
-        filter_action: 'enable',
-        active_filter_count: 1,
-        filter_source: 'chip',
-      });
-      expect(enqueueEvent).toHaveBeenNthCalledWith(2, 'filter_clear_all', {
+      expect(enqueueEvent).toHaveBeenNthCalledWith(1, 'filter_clear_all', {
         previous_count: 3,
       });
-      expect(enqueueEvent).toHaveBeenNthCalledWith(3, 'search_perform', {
+      expect(enqueueEvent).toHaveBeenNthCalledWith(2, 'search_perform', {
         query_length: 4,
         result_count: 10,
         total_count: 100,
         has_filters_active: false,
       });
-      expect(enqueueEvent).toHaveBeenNthCalledWith(4, 'faq_expand', { question_id: 2 });
-      expect(enqueueEvent).toHaveBeenNthCalledWith(5, 'theme_toggle', { mode: 'dark' });
+      expect(enqueueEvent).toHaveBeenNthCalledWith(3, 'faq_expand', { question_id: 2 });
+      expect(enqueueEvent).toHaveBeenNthCalledWith(4, 'theme_toggle', { mode: 'dark' });
       expect(trackEvent).not.toHaveBeenCalled();
     });
 
@@ -205,22 +198,26 @@ describe('promo impression batching', () => {
       expect(trackNavigating).not.toHaveBeenCalled();
     });
 
-    // Three of these (filterToggle, searchPerform, guideSectionView's
-    // wizard_step_view lineage) had a GH#123 gate removed; guideOpen is new
-    // to this series and was unsampled from birth (R8) rather than having one
-    // removed. A batched flush is one request whatever it carries, so the
-    // volume argument that justified a gate does not apply on this transport
-    // for any of the four — and all four are read as counts, which sampling
-    // harms rather than helps. The worst roll must still report.
-    it('reports the four batched events on any roll — nothing samples them', () => {
+    // Two of these (searchPerform, guideSectionView's wizard_step_view lineage)
+    // had a GH#123 gate removed; guideOpen is new to this series and was
+    // unsampled from birth (R8) rather than having one removed. A batched flush
+    // is one request whatever it carries, so the volume argument that justified
+    // a gate does not apply on this transport for any of the three — and all
+    // three are read as counts, which sampling harms rather than helps. The
+    // worst roll must still report.
+    //
+    // `filterToggle` was the fourth until its series ended; its replacement,
+    // `filter_session_summary`, is unsampled for the same reason but rides
+    // `trackBeacon` rather than the queue, so it is gated where it lives —
+    // `src/__tests__/hooks/useTimeOnResults.test.tsx`.
+    it('reports the three batched events on any roll — nothing samples them', () => {
       const random = vi.spyOn(Math, 'random').mockReturnValue(0.99);
 
-      analytics.filterToggle('mutuals', 'enable', 1, 'chip');
       analytics.searchPerform(4, 10, 100, false);
       analytics.guideSectionView(3);
       analytics.guideOpen('accordion');
 
-      expect(enqueueEvent).toHaveBeenCalledTimes(4);
+      expect(enqueueEvent).toHaveBeenCalledTimes(3);
       random.mockRestore();
     });
   });
