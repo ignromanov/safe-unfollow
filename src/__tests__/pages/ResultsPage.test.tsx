@@ -6,7 +6,7 @@ import { Component as ResultsPage } from '@/pages/ResultsPage';
 import { useAppStore } from '@/lib/store';
 import heroEN from '@/locales/en/hero.json';
 
-import type { FileMetadata } from '@/core/types';
+import type { BadgeKey, FileMetadata } from '@/core/types';
 
 // Mock child components
 vi.mock('@/components/AccountListSection', () => ({
@@ -58,8 +58,13 @@ vi.mock('@/components/DiagnosticErrorScreen', () => ({
 
 // Mock react-router-dom
 const mockNavigate = vi.fn();
+// Mutable, and the only location this page sees: `useFilterFromUrl` reads `?filter=` off it
+// at hydration. A fresh URLSearchParams per call is deliberate — it makes the effect's deps
+// change on every render, which is the shape the once-per-mount guard has to survive.
+const mockSearch = { value: '' };
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
+  useSearchParams: () => [new URLSearchParams(mockSearch.value), vi.fn()],
 }));
 
 // Mock hooks with vi.fn() for dynamic returns
@@ -80,7 +85,51 @@ describe('ResultsPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseLanguagePrefix.mockReturnValue('');
-    useAppStore.setState({ uploadStatus: 'idle', uploadError: null, fileMetadata: null });
+    mockSearch.value = '';
+    useAppStore.setState({
+      uploadStatus: 'idle',
+      uploadError: null,
+      fileMetadata: null,
+      filters: new Set<BadgeKey>(),
+    });
+  });
+
+  // Gates the wiring, not the hook — useFilterFromUrl has its own suite. Without these the
+  // call could be deleted from the page and every other test here would stay green.
+  describe('?filter= on arrival', () => {
+    it('should apply the badge named in the URL', () => {
+      mockSearch.value = '?filter=pending';
+      useAppStore.setState({ uploadStatus: 'success', fileMetadata: FILE });
+
+      render(<ResultsPage />);
+
+      expect([...useAppStore.getState().filters]).toEqual(['pending']);
+    });
+
+    it('should replace a persisted selection rather than intersecting it', () => {
+      mockSearch.value = '?filter=pending';
+      useAppStore.setState({
+        uploadStatus: 'success',
+        fileMetadata: FILE,
+        filters: new Set<BadgeKey>(['unfollowed']),
+      });
+
+      render(<ResultsPage />);
+
+      expect([...useAppStore.getState().filters]).toEqual(['pending']);
+    });
+
+    it('should leave the selection alone when no parameter is present', () => {
+      useAppStore.setState({
+        uploadStatus: 'success',
+        fileMetadata: FILE,
+        filters: new Set<BadgeKey>(['unfollowed']),
+      });
+
+      render(<ResultsPage />);
+
+      expect([...useAppStore.getState().filters]).toEqual(['unfollowed']);
+    });
   });
 
   describe('rendering with data', () => {

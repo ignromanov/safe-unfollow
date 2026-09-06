@@ -5,7 +5,7 @@ import { useInstagramData } from '@/hooks/useInstagramData';
 import { useGuideDialog } from '@/hooks/useGuideDialog';
 import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
 import { lazy, Suspense, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 /**
  * The guide is a modal, and it was in the entry chunk for every visitor of
@@ -52,6 +52,7 @@ const GuideDialog = lazy(importGuideDialog);
  */
 export function Component() {
   const navigate = useNavigate();
+  const location = useLocation();
   const prefix = useLanguagePrefix();
   const { uploadState, handleZipUpload, handleClearData, parseWarnings } = useInstagramData();
   const guide = useGuideDialog();
@@ -65,9 +66,26 @@ export function Component() {
   // Auto-navigate to results after successful upload
   useEffect(() => {
     if (uploadState.status === 'success') {
-      navigate(`${prefix}/results`, { replace: true });
+      // The reader chose this filter by clicking a page about it. A multi-second
+      // parse and a route change sit between that click and the view, and
+      // re-applying it by hand at the other end is the whole point of the
+      // landing page not landing.
+      // Both parameters survive, and only they: the filter is what the reader
+      // asked to see, and the source is the only thing that will ever say which
+      // page asked. Forwarding the whole query instead would ship this page's own
+      // `?guide=1` / `?step=N` to a page that has no guide on it.
+      // No validation here — the hook at the other end owns the badge list, and
+      // two copies of it is the defect CLAUDE.md bans.
+      const incoming = new URLSearchParams(location.search);
+      const carried = new URLSearchParams();
+      const filter = incoming.get('filter');
+      const from = incoming.get('from');
+      if (filter) carried.set('filter', filter);
+      if (from) carried.set('from', from);
+      const suffix = carried.toString();
+      navigate(`${prefix}/results${suffix ? `?${suffix}` : ''}`, { replace: true });
     }
-  }, [uploadState.status, navigate, prefix]);
+  }, [uploadState.status, navigate, prefix, location.search]);
 
   // Show loader during redirect to prevent flash of upload page
   if (uploadState.status === 'success') {

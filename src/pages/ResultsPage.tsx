@@ -2,6 +2,7 @@ import { AccountListSection } from '@/components/AccountListSection';
 import { DiagnosticErrorScreen } from '@/components/DiagnosticErrorScreen';
 import { Hero } from '@/components/Hero';
 import { ResultsSkeleton } from '@/components/ResultsSkeleton';
+import { useFilterFromUrl } from '@/hooks/useFilterFromUrl';
 import { useIsClient } from '@/hooks/useIsClient';
 import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
 import { useResultsFile } from '@/hooks/useResultsFile';
@@ -32,6 +33,12 @@ export function Component() {
   const resultsFile = useResultsFile();
   const uploadStatus = useStoreSSR(s => s.uploadStatus, 'idle');
   const uploadError = useStoreSSR(s => s.uploadError, null);
+
+  // Above every early return below, because a hook cannot live behind one and this page
+  // has three. Harmless during the prerender: effects do not run under SSG, so the
+  // parameter is read on the client at hydration — the first frame that could show a
+  // list — and there is no unfiltered flash to design around.
+  useFilterFromUrl();
 
   const handleTryAgain = () => {
     navigate(`${prefix}/upload`);

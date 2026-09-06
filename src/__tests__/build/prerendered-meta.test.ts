@@ -219,6 +219,23 @@ describe.runIf(built)('prerendered meta', () => {
     expect(wrong).toEqual([]);
   });
 
+  // `?filter=` is application state that happens to travel in the URL; the landing pages are
+  // the indexable surface. The canonical is injected per route by `injectLocalizedMeta`, so it
+  // is parameter-free by construction — and "by construction" is the claim worth a gate.
+  //
+  // ⚠️ Narrower than it looks next to `every page is self-canonical` above, which compares the
+  // href to `${origin}${urlPathOf(rel)}` for the whole tree and so already forbids a query
+  // string. What this adds is the *name*: `dist/results.html`, flat, asserted to exist. Drop
+  // /results from the prerender list and the walk above stays green — it asserts a floor of 50
+  // pages and full locale coverage, both of which survive — while this goes red on readPage.
+  it('should canonicalise /results without a query string', () => {
+    const html = readPage('results.html');
+    const canonical = html.match(/<link rel="canonical" href="([^"]+)"/)?.[1];
+
+    expect(canonical).toBeTruthy(); // the instrument fired
+    expect(canonical).not.toContain('?');
+  });
+
   it('every page carries a non-empty title and description', () => {
     const empty: string[] = [];
     for (const rel of prerenderedPages()) {
