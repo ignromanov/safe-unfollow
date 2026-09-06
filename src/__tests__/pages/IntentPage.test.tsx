@@ -52,6 +52,9 @@ describe('IntentPage', () => {
   });
 
   it('should have content for every page in the manifest', () => {
+    // Under Record<IntentSlug, IntentContent> this cannot go red at runtime — a fourth manifest
+    // page with no content fails npm run type-check, not this assertion. Kept as a runtime
+    // statement of the invariant, not as the gate that enforces it.
     for (const page of INTENT_PAGES) {
       expect(INTENT_CONTENT[page.slug]).toBeDefined();
     }

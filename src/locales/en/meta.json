@@ -42,7 +42,7 @@
     },
     "/instagram-mutual-followers": {
       "title": "Your Mutual Followers on Instagram, From Your Own Export",
-      "description": "Which accounts follow you back? Your own Instagram data export answers it exactly. No login, no username lookups, nothing leaves your browser.",
+      "description": "Which accounts follow you back? Your own Instagram data export answers it exactly. No login, no username lookups, and the file never leaves your browser.",
       "ogTitle": "Your Mutual Followers on Instagram"
     }
   }

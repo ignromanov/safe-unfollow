@@ -75,7 +75,8 @@ export const INTENT_CONTENT: Record<IntentSlug, IntentContent> = {
               When you request your data from Instagram, the archive contains a{' '}
               <code>connections/followers_and_following</code> folder. Two files in it carry the
               whole answer: the list of accounts you follow, and the list of accounts following you.
-              Everything on this page is one comparison between those two lists.
+              Everything on this page is one comparison between those two lists. Older archives put
+              that folder at the top level, without the <code>connections/</code> prefix.
             </p>
             <p>
               Choose <strong>All time</strong> rather than a date range when Instagram offers you
@@ -127,9 +128,8 @@ export const INTENT_CONTENT: Record<IntentSlug, IntentContent> = {
     intro: (
       <>
         Instagram does not show you the follow requests you have sent and that were never accepted —
-        but your data export lists every one of them. Many people find they have none, and that is a
-        real answer too. This page shows you how to read the list out of your own export, without
-        logging in to anything.
+        but your data export lists every one of them. This page shows you how to read the list out
+        of your own export, without logging in to anything.
       </>
     ),
     sections: [
@@ -169,7 +169,8 @@ export const INTENT_CONTENT: Record<IntentSlug, IntentContent> = {
           <>
             <p>
               The pending requests live under <code>connections/followers_and_following</code>, in
-              their own file, separate from the accounts you actually follow.
+              their own file, separate from the accounts you actually follow. Older archives put
+              that folder at the top level, without the <code>connections/</code> prefix.
             </p>
             <p>
               Choose <strong>All time</strong> rather than a date range when Instagram offers you
@@ -185,7 +186,7 @@ export const INTENT_CONTENT: Record<IntentSlug, IntentContent> = {
           <>
             <p>
               If you rarely request private accounts, you will have none, and nothing has gone
-              wrong. The number is small for most people.
+              wrong.
             </p>
             <p>
               If you do have them and want them gone, cancelling is done in the Instagram app — this
@@ -211,9 +212,11 @@ export const INTENT_CONTENT: Record<IntentSlug, IntentContent> = {
         body: (
           <>
             <p>
-              There is no sampling and no API limit here. Both lists are complete in the archive, so
-              the overlap between them is complete too — whether you follow two hundred accounts or
-              two hundred thousand.
+              There is no sampling and no API limit here: whether you follow two hundred accounts or
+              two hundred thousand, the overlap is computed over every row rather than over a page
+              of results. What it cannot outrun is a truncated archive — an export limited to a date
+              range arrives with its followers list already filtered, and the mutuals missing from
+              it look exactly like people who never followed you back.
             </p>
           </>
         ),
@@ -241,9 +244,10 @@ export const INTENT_CONTENT: Record<IntentSlug, IntentContent> = {
           <>
             <p>
               Both are in the <code>connections/followers_and_following</code> folder of the archive
-              Meta builds for you. Choose <strong>All time</strong> rather than a date range when it
-              offers you the choice — a truncated list on either side removes mutuals that are
-              really there.
+              Meta builds for you. Older archives put that folder at the top level, without the{' '}
+              <code>connections/</code> prefix. Choose <strong>All time</strong> rather than a date
+              range when it offers you the choice — a truncated list on either side removes mutuals
+              that are really there.
             </p>
           </>
         ),

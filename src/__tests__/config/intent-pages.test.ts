@@ -68,21 +68,28 @@ describe('intent pages do not cannibalise each other or the property', () => {
     }
   });
 
-  it('should not repeat a title anywhere in the bundle', () => {
+  it('should not repeat a title inside meta.json', () => {
     // Every title the property serves from this file — the intent pages' and everyone else's.
     const titles = [meta.title, ...Object.values(routes).map(r => r.title)];
     expect(new Set(titles).size).toBe(titles.length);
   });
 
   it('should not share a section heading between two pages', () => {
-    const headings = INTENT_PAGES.flatMap(p =>
-      INTENT_CONTENT[p.slug].sections.map(s => `${s.heading}`)
-    );
+    const headings = INTENT_PAGES.flatMap(p => INTENT_CONTENT[p.slug].sections.map(s => s.heading));
     expect(new Set(headings).size).toBe(headings.length);
   });
 
   it('should not share a call to action between two pages', () => {
     const labels = INTENT_PAGES.map(p => INTENT_CONTENT[p.slug].ctaLabel);
     expect(new Set(labels).size).toBe(labels.length);
+  });
+
+  it('should answer all four questions on every page', () => {
+    // The four sections are the page's contract with the reader — see IntentContent's doc
+    // comment. A page that ships with three is the thin-content shape this page class is
+    // judged on, and until now only the comment said so.
+    for (const page of INTENT_PAGES) {
+      expect(INTENT_CONTENT[page.slug].sections.length).toBeGreaterThanOrEqual(4);
+    }
   });
 });
