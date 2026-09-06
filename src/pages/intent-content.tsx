@@ -13,7 +13,17 @@ import type { IntentPageConfig, IntentSlug } from '@/config/intent-pages';
  * makes it obvious when one is missing.
  */
 export interface IntentContent {
-  /** One paragraph under the h1. The answer, before any explanation of it. */
+  /**
+   * The answer itself, in one or two sentences, and nothing else.
+   *
+   * Split out of `intro` so that "the reader has the answer before the fold" is a property of
+   * the type rather than of whoever last edited a paragraph. It sits above the sample card and
+   * is the only prose between the h1 and the proof; everything that explains, qualifies or
+   * introduces belongs in `intro` below the card. Nothing was reworded when the two were
+   * separated — the sentences are the ones this file already shipped.
+   */
+  answer: ReactNode;
+  /** One paragraph. What the page then does for the reader, below the sample. */
   intro: ReactNode;
   /** Ordered h2 sections. Four or more — see the type doc above. */
   sections: ReadonlyArray<{ heading: string; body: ReactNode }>;
@@ -35,12 +45,17 @@ export function ctaHref(page: IntentPageConfig): string {
 
 export const INTENT_CONTENT: Record<IntentSlug, IntentContent> = {
   'who-doesnt-follow-me-back': {
-    intro: (
+    answer: (
       <>
         Your Instagram data export contains both lists: everyone you follow, and everyone who
         follows you. The accounts in the first list and not the second are the ones that do not
-        follow you back. This page shows you how to read that answer out of your own export, without
-        logging in to anything.
+        follow you back.
+      </>
+    ),
+    intro: (
+      <>
+        This page shows you how to read that answer out of your own export, without logging in to
+        anything.
       </>
     ),
     sections: [
@@ -125,11 +140,16 @@ export const INTENT_CONTENT: Record<IntentSlug, IntentContent> = {
     ctaLabel: 'See who does not follow you back',
   },
   'instagram-pending-follow-requests': {
-    intro: (
+    answer: (
       <>
         Instagram does not show you the follow requests you have sent and that were never accepted —
-        but your data export lists every one of them. This page shows you how to read the list out
-        of your own export, without logging in to anything.
+        but your data export lists every one of them.
+      </>
+    ),
+    intro: (
+      <>
+        This page shows you how to read the list out of your own export, without logging in to
+        anything.
       </>
     ),
     sections: [
@@ -199,11 +219,16 @@ export const INTENT_CONTENT: Record<IntentSlug, IntentContent> = {
     ctaLabel: 'See your pending requests',
   },
   'instagram-mutual-followers': {
-    intro: (
+    answer: (
       <>
         Your export holds both lists — who you follow and who follows you — so the accounts in both
-        are your mutuals, exactly, with no estimating. This works on <em>your</em> account, from{' '}
-        <em>your</em> archive. It cannot tell you the mutuals between two other people.
+        are your mutuals, exactly, with no estimating.
+      </>
+    ),
+    intro: (
+      <>
+        This works on <em>your</em> account, from <em>your</em> archive. It cannot tell you the
+        mutuals between two other people.
       </>
     ),
     sections: [

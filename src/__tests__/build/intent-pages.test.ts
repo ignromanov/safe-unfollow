@@ -156,9 +156,21 @@ describe.runIf(built)('intent landing pages (prerendered)', () => {
         // SSR splits the literal from the interpolation with a comment marker, so strip those
         // first — asserting on the raw HTML would fail on the separator, not on the content.
         const text = html().replace(/<!--.*?-->/g, '');
-        for (const username of INTENT_DEMO[page.slug].usernames) {
-          expect(text).toContain(`@${username}`);
-        }
+        const slice = INTENT_DEMO[page.slug];
+
+        // Not every username in the slice: the card renders a prefix of it, because it now sits
+        // above the call to action and each row it draws pushes the button down (PREVIEW_ROWS).
+        // This iterated the whole slice until 2026-09-06 and would have gone red in CI while
+        // passing here — these suites are describe.runIf(built) and skip in silence without a
+        // dist/, so a local green says nothing about them.
+        const rendered = slice.usernames.filter(u => text.includes(`@${u}`));
+        expect(rendered.length).toBeGreaterThan(0);
+        // A prefix, in order — the rows a crawler sees are the slice's own first N, so a card
+        // wired to some other list of handles still fails here.
+        expect(rendered).toEqual(slice.usernames.slice(0, rendered.length));
+        // And the caption states the number that actually reached the HTML.
+        const flat = text.replace(/<[^>]+>/g, '');
+        expect(flat).toContain(`${rendered.length} of ${slice.matching} rows`);
       });
 
       it('should prerender the counts it claims about the sample', () => {
