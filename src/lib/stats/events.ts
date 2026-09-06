@@ -156,11 +156,14 @@ export const analytics = {
    * exposure — a pre-existing inconsistency, not this event's to fix.)
    *
    * `seq` supersedes: the accumulator is cumulative, so a row with a higher seq
-   * contains everything the lower ones did. Analysis reads the highest seq per
-   * session and ignores the rest.
+   * contains everything the lower ones did. Analysis reads the highest seq
+   * **per `filter_session_id`**, never per Umami session — one Umami session can
+   * hold several complete filtering sessions, each with its own `seq: 0`, and
+   * grouping on the Umami session alone discards all but one of them.
    */
   filterSessionSummary: (summary: FilterSessionSummary, seq: number) => {
     trackBeacon(AnalyticsEvents.FILTER_SESSION_SUMMARY, {
+      filter_session_id: summary.id,
       seq,
       filters_used: JSON.stringify(summary.filtersUsed),
       max_active: summary.maxActive,

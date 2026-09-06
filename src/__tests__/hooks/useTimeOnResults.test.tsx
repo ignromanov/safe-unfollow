@@ -224,5 +224,49 @@ describe('useTimeOnResults', () => {
         0
       );
     });
+
+    it('keeps two filtering sessions in one page life distinguishable', () => {
+      // /results -> elsewhere -> /results, inside one Umami session. Each cycle
+      // is a complete, independent filtering session: the reset effect's cleanup
+      // ends the accumulator and the seq sequence together, so both emit seq 0.
+      recordToggle('unfollowed', 'enable', 1, 'chip');
+      render(<Harness accountCount={100} isActive />).unmount();
+
+      recordToggle('pending', 'enable', 1, 'chip');
+      render(<Harness accountCount={100} isActive />).unmount();
+
+      const calls = vi.mocked(analytics.filterSessionSummary).mock.calls;
+      expect(calls).toHaveLength(2);
+      expect(calls[0]?.[0].toggleCount).toBe(1);
+      expect(calls[1]?.[0].toggleCount).toBe(1);
+
+      // Both really do carry seq 0 — that is not the bug, it is the input to it.
+      expect(calls[0]?.[1]).toBe(0);
+      expect(calls[1]?.[1]).toBe(0);
+
+      // The bug is that the dedup rule this task ships would then keep one row
+      // and silently discard the other, undercounting filtering sessions and
+      // reached_empty in the flattering direction. The id is what makes the two
+      // groupable separately, so nothing has to be discarded.
+      expect(calls[0]?.[0].id).not.toBe(calls[1]?.[0].id);
+      expect(calls[0]?.[0].id).toBeTruthy();
+    });
+
+    it('keeps one session under one id across its own repeated emits', () => {
+      // The other half, and the trap in the obvious fix: a per-emit counter
+      // would make these two rows look like two sessions, and the supersede rule
+      // exists precisely to collapse them.
+      recordToggle('unfollowed', 'enable', 1, 'chip');
+
+      render(<Harness accountCount={100} isActive />);
+      leave();
+      recordToggle('pending', 'enable', 2, 'chip');
+      leave();
+
+      const calls = vi.mocked(analytics.filterSessionSummary).mock.calls;
+      expect(calls).toHaveLength(2);
+      expect(calls[0]?.[0].id).toBe(calls[1]?.[0].id);
+      expect(calls[1]?.[1]).toBeGreaterThan(Number(calls[0]?.[1]));
+    });
   });
 });

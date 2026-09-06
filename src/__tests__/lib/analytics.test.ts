@@ -604,6 +604,9 @@ describe('Analytics', () => {
       expect(AnalyticsEvents.FILE_UPLOAD_START).toBe('file_upload_start');
       expect(AnalyticsEvents.FILE_UPLOAD_SUCCESS).toBe('file_upload_success');
       expect(AnalyticsEvents.FILTER_CLEAR_ALL).toBe('filter_clear_all');
+      // `FILTER_TOGGLE` was here until its series ended; this is what replaced
+      // it. A list that loses a line and gains none is not a list.
+      expect(AnalyticsEvents.FILTER_SESSION_SUMMARY).toBe('filter_session_summary');
       expect(AnalyticsEvents.SEARCH_PERFORM).toBe('search_perform');
       expect(AnalyticsEvents.RESULTS_CLICKS_SUMMARY).toBe('results_clicks_summary');
       expect(AnalyticsEvents.LINK_CLICK).toBe('link_click');
@@ -620,6 +623,22 @@ describe('Analytics', () => {
       expect(AnalyticsEvents.WEB_VITAL).toBe('web_vital');
       expect(AnalyticsEvents.PWA_INSTALL_PROMPT).toBe('pwa_install_prompt');
       expect(AnalyticsEvents.PWA_INSTALLED).toBe('pwa_installed');
+    });
+
+    /**
+     * The list above names 18 of them by hand, which is the enumerated-gate
+     * hazard: it stays green for every constant it forgot, and it shrank by one
+     * on this branch without anyone noticing. This one is derived, so it covers
+     * all of them and cannot be outgrown — a constant whose value drifts from
+     * its key fails here whether or not anybody remembered to list it.
+     */
+    it('should name every event after its own constant, all of them', () => {
+      const entries = Object.entries(AnalyticsEvents as Record<string, string>);
+
+      expect(entries.length).toBeGreaterThan(18); // the instrument fired
+      for (const [key, value] of entries) {
+        expect(value).toBe(key.toLowerCase());
+      }
     });
 
     it('should NOT have removed V9/V10 events', () => {
