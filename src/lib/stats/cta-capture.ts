@@ -1,5 +1,5 @@
 /**
- * Hero CTA clicks that happen before React exists.
+ * CTA clicks that happen before React exists — hero and intent-page alike.
  *
  * Every prerendered page ships an inert `<a href>` so the browser can navigate during the
  * hydration window (see `PrefixedLink`). React's `onClick` does not exist in that window, so
@@ -15,15 +15,22 @@
  * There is exactly one recorder either way. Wiring `onClick` as well would double-count
  * every hydrated click.
  *
- * `recordCTA` is also the whole slug→event mapping (GH#99): every hero CTA, hydrated or
- * not, is batched through it rather than through four separate wrapper functions. Batched
- * because a hydrated click is a PrefixedLink, i.e. react-router Link — preventDefault +
- * pushState, so the document never unloads. The route change that follows drains the queue
- * on the next tick, so the event leaves as promptly as it did on the immediate path; it just
- * shares a request with the rest of the landing page's set.
+ * `dispatch` is the whole slug→event mapping (GH#99): one function turns a `data-cta` value into
+ * an event, whichever path delivered it and whichever of the two namespaces it belongs to. Hero
+ * keys additionally set `entry_cta`; intent-page slugs deliberately do not — see `recordIntent`.
+ *
+ * Everything is batched rather than sent immediately, because a hydrated click is a PrefixedLink,
+ * i.e. react-router Link — preventDefault + pushState, so the document never unloads. The route
+ * change that follows drains the queue on the next tick, so the event leaves as promptly as it did
+ * on the immediate path; it just shares a request with the rest of the landing page's set.
+ *
+ * `recordCTA` is exported with no production caller, and that is deliberate: it is the direct seam
+ * onto `record()`, whose behaviour is live on every hero CTA click through `dispatch`. Three test
+ * files address it as a unit; routing them through `window.__ctaSink` instead would make them
+ * integration tests of a path they are not about.
  */
 
-import { INTENT_PAGES, type IntentSlug } from '../../config/intent-pages';
+import { INTENT_PAGES, type IntentSlug } from '@/config/intent-pages';
 import { AnalyticsEvents } from './constants';
 import { enqueueEvent, type EventData } from './queue';
 import { setEntryCTA } from './utm';
@@ -50,6 +57,9 @@ const HERO_CTAS = {
 } as const;
 
 export type HeroCta = keyof typeof HERO_CTAS;
+
+/** The hero namespace, exported so a gate can check a slug against it without re-listing it. */
+export const HERO_CTA_KEYS = Object.keys(HERO_CTAS) as readonly HeroCta[];
 
 function isHeroCta(value: string): value is HeroCta {
   return Object.prototype.hasOwnProperty.call(HERO_CTAS, value);
@@ -121,8 +131,9 @@ export function drainPendingCTA(): void {
     return;
   }
 
-  // sessionStorage is writable by anything on the origin and outlives a rename, so an
-  // unrecognised slug is discarded rather than passed on to become an unlisted event name.
+  // sessionStorage is writable by anything on the origin and outlives a rename, so this only
+  // checks the value is a string; `dispatch` is what discards an unrecognised slug, by matching
+  // neither namespace and doing nothing.
   const { c, p } = parsed;
   if (typeof c !== 'string') return;
 

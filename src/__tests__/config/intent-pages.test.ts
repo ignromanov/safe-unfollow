@@ -4,6 +4,7 @@ import { BADGE_ORDER } from '@/core/badges';
 import meta from '@/locales/en/meta.json';
 import { INTENT_CONTENT } from '@/pages/intent-content';
 import { SUPPORTED_LANGUAGES } from '@/config/languages';
+import { HERO_CTA_KEYS } from '@/lib/stats/cta-capture';
 
 /**
  * The slug travels twice: as the URL, and as the `?from=` value the results page reads back
@@ -61,11 +62,11 @@ describe('INTENT_PAGES', () => {
 
   it('should not collide with a hero CTA slug', () => {
     // Task 6 puts the slug in `data-cta`, where the pre-hydration listener reads one flat
-    // namespace shared with the four hero keys. A page slugged `sample` would be recorded as a
-    // hero CTA and would write `entry_cta`, silently, on a live series.
-    const heroKeys = ['guide', 'sample', 'upload_direct', 'continue'];
+    // namespace shared with the hero keys. A page slugged `sample` would be recorded as a
+    // hero CTA and would write `entry_cta`, silently, on a live series. Derived from
+    // HERO_CTA_KEYS rather than hand-listed, so a fifth hero CTA cannot slip past this gate.
     for (const page of INTENT_PAGES) {
-      expect(heroKeys).not.toContain(page.slug);
+      expect(HERO_CTA_KEYS).not.toContain(page.slug);
     }
   });
 });

@@ -136,6 +136,15 @@ describe.runIf(built)('intent landing pages (prerendered)', () => {
         expect(html()).toContain(`href="/upload?filter=${page.badge}&amp;from=${page.slug}"`);
       });
 
+      it('should mark the CTA for the pre-hydration recorder, and ship the recorder itself', () => {
+        // The inline listener in index.html is the only thing that can see data-cta before
+        // React exists (GH#99) — cta-capture-shipped.test.ts asserts this pair for the hero
+        // CTAs but scopes its corpus to locale home pages, so nothing checked it reaches these
+        // three pages, which have no other recorder either.
+        expect(html()).toContain(`data-cta="${page.slug}"`);
+        expect(html()).toContain('__ctaSink');
+      });
+
       it('should label the demo before hydration', () => {
         // ASCII only, and the disavowal half — "Sample data" alone stays true even if "not your
         // account" is deleted, and that half carries the compliance weight.
