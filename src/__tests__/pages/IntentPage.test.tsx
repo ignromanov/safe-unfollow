@@ -81,4 +81,17 @@ describe('IntentPage', () => {
       screen.getByText(new RegExp(`${slice.matching}\\D+${slice.total.toLocaleString('en-US')}`))
     ).toBeInTheDocument();
   });
+
+  it('should link to its two siblings and not to itself', () => {
+    renderPage();
+    const siblings = INTENT_PAGES.filter(p => p.slug !== firstPage.slug);
+
+    for (const sibling of siblings) {
+      expect(screen.getByRole('link', { name: sibling.h1 })).toHaveAttribute(
+        'href',
+        `/${sibling.slug}`
+      );
+    }
+    expect(screen.queryByRole('link', { name: firstPage.h1 })).not.toBeInTheDocument();
+  });
 });

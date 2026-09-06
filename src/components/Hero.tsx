@@ -9,6 +9,8 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { PrefixedLink } from '@/components/PrefixedLink';
+import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
+import { INTENT_PAGES } from '@/config/intent-pages';
 
 interface HeroProps {
   hasData?: boolean;
@@ -16,6 +18,7 @@ interface HeroProps {
 
 export function Hero({ hasData }: HeroProps) {
   const { t } = useTranslation('hero');
+  const prefix = useLanguagePrefix();
 
   return (
     <section className="py-12 md:py-32 text-center max-w-5xl mx-auto flex flex-col items-center animate-in fade-in duration-700">
@@ -95,6 +98,25 @@ export function Hero({ hasData }: HeroProps) {
         >
           {t('buttons.trySample')}
         </PrefixedLink>
+
+        {prefix === '' && (
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+            {/* Literal English, deliberately not a translation key. This block renders only
+                when there is no language prefix, so nine of the ten locales would carry a
+                hero.json entry nothing can ever render — and adding a key to en/hero.json
+                alone risks whichever parity gate PR #96 left behind. The intent pages this
+                points at are English-only for the same reason. */}
+            Also answers:{' '}
+            {INTENT_PAGES.map((page, i) => (
+              <span key={page.slug}>
+                {i > 0 && ' · '}
+                <PrefixedLink to={`/${page.slug}`} className="text-primary hover:underline">
+                  {page.shortLabel}
+                </PrefixedLink>
+              </span>
+            ))}
+          </p>
+        )}
 
         {/* Trust Badges */}
         <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs md:text-sm text-zinc-500 font-semibold">

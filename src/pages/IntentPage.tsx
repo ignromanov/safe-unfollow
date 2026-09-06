@@ -1,4 +1,5 @@
 import { PrefixedLink } from '@/components/PrefixedLink';
+import { INTENT_PAGES } from '@/config/intent-pages';
 import type { IntentPageConfig, IntentSlug } from '@/config/intent-pages';
 import { INTENT_CONTENT, ctaHref } from './intent-content';
 import { INTENT_DEMO } from '@/config/intent-demo-rows';
@@ -71,6 +72,24 @@ export function Component({ page }: IntentPageProps) {
           </section>
         ))}
       </div>
+
+      <nav
+        aria-label="Other questions your export answers"
+        className="mt-16 border-t border-zinc-200 dark:border-zinc-800 pt-8"
+      >
+        <h2 className="text-xl font-bold tracking-tight mb-4">
+          Other questions your export answers
+        </h2>
+        <ul className="space-y-2">
+          {INTENT_PAGES.filter(other => other.slug !== page.slug).map(other => (
+            <li key={other.slug}>
+              <PrefixedLink to={`/${other.slug}`} className="text-primary hover:underline">
+                {other.h1}
+              </PrefixedLink>
+            </li>
+          ))}
+        </ul>
+      </nav>
     </main>
   );
 }

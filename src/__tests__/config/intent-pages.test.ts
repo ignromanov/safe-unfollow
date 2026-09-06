@@ -3,6 +3,7 @@ import { INTENT_PAGES } from '@/config/intent-pages';
 import { BADGE_ORDER } from '@/core/badges';
 import meta from '@/locales/en/meta.json';
 import { INTENT_CONTENT } from '@/pages/intent-content';
+import { SUPPORTED_LANGUAGES } from '@/config/languages';
 
 /**
  * The slug travels twice: as the URL, and as the `?from=` value the results page reads back
@@ -45,6 +46,16 @@ describe('INTENT_PAGES', () => {
     for (const label of labels) {
       expect(label).toBe(label.toLowerCase());
       expect(label).not.toMatch(/[.!?]$/);
+    }
+  });
+
+  it('should not use a slug that reads as a language prefix', () => {
+    // useLanguagePrefix() reads the first path segment; for these single-segment routes that
+    // is the slug itself. A slug equal to a language code would make every link on the page
+    // resolve into that locale.
+    for (const page of INTENT_PAGES) {
+      expect(SUPPORTED_LANGUAGES).not.toContain(page.slug);
+      expect(page.slug).not.toContain('/');
     }
   });
 

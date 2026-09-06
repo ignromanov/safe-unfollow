@@ -18,6 +18,12 @@ Welcome to the complete documentation for Instagram Unfollow Tracker, a privacy-
 - **[FAQ](/docs/faq)** - Frequently asked questions and answers
 - **[Data Download Guide](/docs/instagram-export)** - How to get your Instagram data
 
+## Answer One Question
+
+- **[Who Doesn't Follow You Back on Instagram](/who-doesnt-follow-me-back)** - The accounts you follow that don't follow you, read straight from your export
+- **[Your Pending Instagram Follow Requests](/instagram-pending-follow-requests)** - Requests you sent that were never accepted, a list the app never shows you
+- **[Your Mutual Followers, From Your Own Export](/instagram-mutual-followers)** - Exactly who follows you back, with no sampling and no API limit
+
 ## Detailed Guides
 
 - **[Troubleshooting](/docs/troubleshooting)** - Problem-solving guide for common issues

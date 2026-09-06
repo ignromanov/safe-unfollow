@@ -5,6 +5,7 @@ import { screen } from '@testing-library/react';
 import heroEN from '@/locales/en/hero.json';
 import { createI18nMock } from '@/__tests__/utils/mockI18n';
 import { renderWithRouter as render } from '@/__tests__/test-utils';
+import { INTENT_PAGES } from '@/config/intent-pages';
 
 vi.mock('react-i18next', () => createI18nMock(heroEN));
 
@@ -176,6 +177,25 @@ describe('Hero Component', () => {
       expect(
         screen.getByRole('link', { name: new RegExp(heroEN.buttons.haveFile, 'i') })
       ).toHaveAttribute('href', '/ru/upload');
+    });
+  });
+
+  describe('intent page links', () => {
+    it('should point English visitors at the other questions', () => {
+      render(<Hero />, { initialEntries: ['/'] });
+      for (const page of INTENT_PAGES) {
+        expect(screen.getByRole('link', { name: page.shortLabel })).toHaveAttribute(
+          'href',
+          `/${page.slug}`
+        );
+      }
+    });
+
+    it('should show none of them on a language-prefixed page', () => {
+      render(<Hero />, { initialEntries: ['/ru'] });
+      for (const page of INTENT_PAGES) {
+        expect(screen.queryByRole('link', { name: page.shortLabel })).not.toBeInTheDocument();
+      }
     });
   });
 

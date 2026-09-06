@@ -13,7 +13,16 @@
 import type { BadgeKey } from '../core/types/badges';
 
 export interface IntentPageConfig {
-  /** URL path without a leading slash, and the `?from=` value. One string, both jobs. */
+  /**
+   * URL path without a leading slash, and the `?from=` value. One string, both jobs.
+   *
+   * Two of the three slugs below carry an `instagram-` prefix and one does not, and that is
+   * deliberate rather than inconsistent: each slug mirrors its own query rather than a house
+   * naming convention. "pending follow requests" and "mutual followers" are both ambiguous
+   * across platforms, so the prefix disambiguates them; "who doesn't follow me back" is
+   * already a self-identifying question, and the prefix would only lengthen the URL for no
+   * gain in clarity. The page's `h1` and title carry "on Instagram" regardless of the slug.
+   */
   slug: string;
   /** The filter the CTA pre-applies. */
   badge: BadgeKey;
