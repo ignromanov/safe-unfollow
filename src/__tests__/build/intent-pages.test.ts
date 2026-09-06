@@ -192,10 +192,10 @@ describe.runIf(built)('intent landing pages (prerendered)', () => {
         for (const sibling of siblings) {
           expect(html).toContain(`href="/${sibling.slug}"`);
         }
-        // href="/<own-slug>" only ever appears as this page's own canonical/hreflang-free
-        // self-reference, never as a sibling-nav link — so a self-link here is undetectable
-        // by count alone. Assert on the count of matches instead, which is 0 without a
-        // self-referencing bug in the sibling filter.
+        // The canonical tag emits an absolute URL (https://safeunfollow.app/...), so the
+        // relative form href="/<own-slug>" can appear on this page for exactly one reason:
+        // the sibling nav linked the page to itself. Zero is therefore the whole assertion,
+        // and it is a count rather than a boolean so the failure names how many there are.
         const selfLinks = html.match(new RegExp(`href="/${page.slug}"`, 'g')) ?? [];
         expect(selfLinks).toHaveLength(0);
       });
