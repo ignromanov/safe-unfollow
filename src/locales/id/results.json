@@ -87,10 +87,7 @@
   "empty": {
     "noUsers": "Tidak ada pengguna ditemukan",
     "resetFilters": "Reset Filter",
-    "filteredTitle": "Tidak ada akun dengan filter \"{{filterName}}\"",
-    "filteredBody": "Memang begitu isi data Anda — tidak ada yang rusak.",
-    "absentTitle": "Ekspor ini tidak memuat data \"{{filterName}}\"",
-    "absentBody": "Data itu berasal dari file yang tidak disertakan Instagram dalam unduhan Anda."
+    "filteredTitle": "Tidak ada akun dengan filter \"{{filterName}}\""
   },
   "list": {
     "header": "Akun ({{count, number}})",

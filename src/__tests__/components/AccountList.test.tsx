@@ -24,7 +24,7 @@ vi.mock('@/hooks/useAccountDataSource', () => ({
  * order — and it must not speak for an export it has not read.
  */
 describe('empty state', () => {
-  type ActiveFilter = { label: string; presentInExport: boolean | null };
+  type ActiveFilter = { label: string };
 
   const emptyList = (activeFilter?: ActiveFilter, searchActive = false) => (
     <AccountList
@@ -39,12 +39,10 @@ describe('empty state', () => {
     />
   );
 
-  const present: ActiveFilter = { label: resultsEN.badges.pending, presentInExport: true };
-  const absent: ActiveFilter = { label: resultsEN.badges.pending, presentInExport: false };
-  const unmeasured: ActiveFilter = { label: resultsEN.badges.pending, presentInExport: null };
+  const applied: ActiveFilter = { label: resultsEN.badges.pending };
 
   it('should name the filter that emptied the list', () => {
-    render(emptyList(present));
+    render(emptyList(applied));
 
     expect(
       screen.getByText(
@@ -62,7 +60,7 @@ describe('empty state', () => {
         accountIndices={[]}
         hasLoadedData
         isLoading={false}
-        activeFilter={present}
+        activeFilter={applied}
         searchActive={false}
         onClearFilters={onClearFilters}
       />
@@ -87,7 +85,7 @@ describe('empty state', () => {
    * assertion cannot see that difference; the label is the only thing that can.
    */
   it('should not promise to remove only the filter when a search is also active', () => {
-    render(emptyList(present, true));
+    render(emptyList(applied, true));
 
     expect(screen.getByRole('button', { name: resultsEN.empty.resetFilters })).toBeInTheDocument();
     expect(
@@ -97,45 +95,38 @@ describe('empty state', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('should not claim the export says something it does not carry', () => {
-    render(emptyList(absent));
-
-    expect(
-      screen.getByText(
-        resultsEN.empty.absentTitle.replace('{{filterName}}', resultsEN.badges.pending)
-      )
-    ).toBeInTheDocument();
-    // What stops an implementation that renders both explanations at once.
-    expect(screen.queryByText(resultsEN.empty.filteredBody)).not.toBeInTheDocument();
-  });
-
   /**
-   * The third state, and the one that goes red if `presentInExport` is typed
-   * `boolean`. `filterCounts` is `{}` until `getBadgeStats` resolves
-   * (`useAccountFiltering.ts:248-256`), so a missing key means "no answer yet",
-   * not "zero". Collapse null into false and this renders `absentTitle` about a
-   * badge the export contains; collapse it into true and it renders "that is
-   * what this export says". Both are claims about the reader's own data that
-   * nothing has measured.
+   * The empty state may name the filter and nothing else.
+   *
+   * A count of 0 cannot say whether the badge's file was in the download:
+   * `storeAllAccounts` seeds an entry for every badge in `ALL_BADGES` with
+   * `count: 0` and writes them unconditionally (`indexeddb-service.ts:194-254`),
+   * so `getBadgeStats` returns 0 both for "the file was absent" and for "the
+   * file was there and you have none". Measured, not inferred: it returns all
+   * 11 keys. Any sentence about the export is therefore unmeasured, whichever
+   * way it leans.
+   *
+   * Derived from the bundle rather than typed out: this iterates every
+   * `empty.*` string, so a re-added `absentTitle` or `absentBody` is caught
+   * without anyone remembering to add it here.
    */
-  it('should say nothing about the export before the counts have arrived', () => {
-    render(emptyList(unmeasured));
+  it('should claim nothing about the export beyond naming the filter', () => {
+    render(emptyList({ label: resultsEN.badges.pending }));
 
-    // The filter is named — that much is true of an empty list either way.
-    expect(
-      screen.getByText(
-        resultsEN.empty.filteredTitle.replace('{{filterName}}', resultsEN.badges.pending)
-      )
-    ).toBeInTheDocument();
+    const interpolate = (s: string) =>
+      s
+        .replace('{{filterName}}', resultsEN.badges.pending)
+        .replace('{{label}}', resultsEN.badges.pending);
 
-    // But neither explanation is offered, because neither has been measured.
-    expect(
-      screen.queryByText(
-        resultsEN.empty.absentTitle.replace('{{filterName}}', resultsEN.badges.pending)
-      )
-    ).not.toBeInTheDocument();
-    expect(screen.queryByText(resultsEN.empty.filteredBody)).not.toBeInTheDocument();
-    expect(screen.queryByText(resultsEN.empty.absentBody)).not.toBeInTheDocument();
+    const title = interpolate(resultsEN.empty.filteredTitle);
+    expect(screen.getByText(title)).toBeInTheDocument();
+
+    const allowed = new Set([title, resultsEN.empty.resetFilters]);
+    for (const value of Object.values(resultsEN.empty)) {
+      const rendered = interpolate(value);
+      if (allowed.has(rendered)) continue;
+      expect(screen.queryByText(rendered)).not.toBeInTheDocument();
+    }
   });
 
   /** Control: an empty export with no filter applied must not be told a filter emptied it. */

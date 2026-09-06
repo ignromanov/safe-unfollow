@@ -87,10 +87,7 @@
   "empty": {
     "noUsers": "Пользователи не найдены",
     "resetFilters": "Сбросить фильтры",
-    "filteredTitle": "Нет аккаунтов с фильтром «{{filterName}}»",
-    "filteredBody": "Так говорят твои данные — ничего не сломалось.",
-    "absentTitle": "В этом экспорте нет данных для фильтра «{{filterName}}»",
-    "absentBody": "Эти данные берутся из файла, который Instagram не включил в твой архив."
+    "filteredTitle": "Нет аккаунтов с фильтром «{{filterName}}»"
   },
   "list": {
     "header": "Аккаунты ({{count, number}})",

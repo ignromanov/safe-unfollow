@@ -87,10 +87,7 @@
   "empty": {
     "noUsers": "ユーザーが見つかりません",
     "resetFilters": "フィルタをリセット",
-    "filteredTitle": "「{{filterName}}」に該当するアカウントはありません",
-    "filteredBody": "データどおりの結果です。不具合ではありません。",
-    "absentTitle": "このエクスポートには「{{filterName}}」のデータが含まれていません",
-    "absentBody": "このデータは、Instagram がダウンロードに含めなかったファイルから読み込まれます。"
+    "filteredTitle": "「{{filterName}}」に該当するアカウントはありません"
   },
   "list": {
     "header": "アカウント ({{count, number}})",

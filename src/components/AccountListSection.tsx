@@ -39,7 +39,7 @@ interface SelectionSummary {
   /** The rendered state line: one of three, never a dangling separator. */
   stateLine: string;
   /** The single applied filter, or undefined when zero or several are applied. */
-  activeFilter?: { label: string; presentInExport: boolean | null };
+  activeFilter?: { label: string };
 }
 
 /**
@@ -56,14 +56,12 @@ interface SelectionSummary {
  */
 function describeSelection({
   filters,
-  filterCounts,
   displayCount,
   totalCount,
   language,
   t,
 }: {
   filters: Set<BadgeKey>;
-  filterCounts: Record<BadgeKey, number>;
   displayCount: number;
   totalCount: number;
   language: string;
@@ -72,28 +70,12 @@ function describeSelection({
   const appliedBadges = BADGE_ORDER.filter(badge => filters.has(badge));
   const appliedLabels = appliedBadges.map(badge => t(`badges.${badge}`));
 
+  // The label is all that crosses: the empty state may name the filter and say
+  // nothing about the export. A per-badge count cannot support more than that —
+  // `getBadgeStats` returns 0 both for a badge whose file was missing from the
+  // download and for one whose file was present and empty.
   const onlyBadge = appliedBadges.length === 1 ? appliedBadges[0] : undefined;
-  const onlyCount = onlyBadge ? filterCounts[onlyBadge] : undefined;
-
-  // Present in this export, absent from it, or NOT YET MEASURED. `filterCounts`
-  // is the global per-badge count from `getBadgeStats`, and it is `{}` until
-  // that promise resolves (`useAccountFiltering.ts:248-256`) — so a missing key
-  // means "no answer yet", not "zero". Only a real zero may tell a reader the
-  // file that badge is read from was not in their download, which is a
-  // different sentence from "you have none of these" and a third one from
-  // "we do not know yet".
-  //
-  // The absence check is per key, not on the map: `noUncheckedIndexedAccess`
-  // already types this `number | undefined`, and it stays right if
-  // `getBadgeStats` ever returns a partial map, where a check on the map's size
-  // would not.
-  const activeFilter =
-    onlyBadge && appliedLabels[0]
-      ? {
-          label: appliedLabels[0],
-          presentInExport: onlyCount === undefined ? null : onlyCount > 0,
-        }
-      : undefined;
+  const activeFilter = onlyBadge && appliedLabels[0] ? { label: appliedLabels[0] } : undefined;
 
   const filtered = displayCount.toLocaleString(language);
   const total = totalCount.toLocaleString(language);
@@ -214,7 +196,6 @@ export function AccountListSection({
 
   const { stateLine, activeFilter } = describeSelection({
     filters,
-    filterCounts,
     displayCount,
     totalCount,
     language: i18n.language,

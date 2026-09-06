@@ -56,16 +56,16 @@ vi.mock('@/components/FilterChips', () => ({
 }));
 
 vi.mock('@/components/AccountList', () => ({
-  // Like the FilterChips stub above, and for the same reason: `activeFilter`
-  // carries a three-valued `presentInExport` and nothing else can see it cross
-  // this boundary. `{ label, presentInExport: false }` type-checks exactly as
-  // cleanly as `null` does, so `tsc` cannot tell a wired contract from a
-  // collapsed one — `(filterCounts[badge] ?? 0) > 0` would ship "this export
-  // does not include Pending request" about a badge the export contains, with
-  // the suite green.
+  // Like the FilterChips stub above, and for the same reason: nothing else can
+  // see what crosses this boundary, and the empty state a reader gets is
+  // decided entirely by it.
   //
-  // Reported via String() so null, false, true and undefined are four distinct
-  // renderings rather than three empty ones.
+  // `activeFilter` carried a `presentInExport` flag until fix round 1. It was
+  // derived from `filterCounts[badge] > 0`, and a zero cannot mean what that
+  // flag claimed: `storeAllAccounts` seeds every badge in `ALL_BADGES` with
+  // `count: 0` and writes them unconditionally, so `getBadgeStats` returns 0
+  // both for a badge whose file was absent from the download and for one whose
+  // file was present and empty. The label is all that survives.
   AccountList: ({
     accountIndices,
     accountCount,
@@ -74,7 +74,7 @@ vi.mock('@/components/AccountList', () => ({
   }: {
     accountIndices: number[] | null;
     accountCount: number;
-    activeFilter?: { label: string; presentInExport: boolean | null };
+    activeFilter?: { label: string };
     searchActive?: boolean;
   }) => {
     const count = accountIndices === null ? accountCount : accountIndices.length;
@@ -82,9 +82,6 @@ vi.mock('@/components/AccountList', () => ({
       <div data-testid="account-list">
         <p>Accounts ({count})</p>
         <p data-testid="active-filter-label">{activeFilter ? activeFilter.label : 'undefined'}</p>
-        <p data-testid="active-filter-presence">
-          {activeFilter ? String(activeFilter.presentInExport) : 'undefined'}
-        </p>
         <p data-testid="search-active">{String(searchActive)}</p>
         {accountIndices !== null && accountIndices.length === 0 && (
           <p>No accounts match your filters</p>
@@ -909,37 +906,20 @@ describe('AccountListSection', () => {
     });
   });
   /**
-   * What crosses into AccountList, which decides which of the three empty-state
-   * sentences a reader gets. `presentInExport` is three-valued and its absence
-   * state is the one the type system cannot defend: `false` is assignable
-   * everywhere `null` is, so only these assertions separate "we measured zero"
-   * from "we have not measured yet".
+   * What crosses into AccountList, which decides what the empty state says.
+   *
+   * This block gated a three-valued `presentInExport` until fix round 1. That
+   * flag is gone, and its tests went with it: a suite asserting the behaviour
+   * of a deleted feature reads as coverage while gating nothing. What is left
+   * is the contract that survives — the label crosses when exactly one filter
+   * is applied, and the search box's state crosses because the remove-label
+   * depends on it.
    */
   describe('empty-state contract across the AccountList boundary', () => {
-    it('should send null, not false, while the per-badge counts are unmeasured', () => {
-      // `filterCounts` is `{}` from mount until `getBadgeStats` resolves. Under
-      // `(filterCounts[badge] ?? 0) > 0` this renders 'false', and the reader is
-      // told their export does not include a badge it does contain.
-      renderWithFilters(new Set<BadgeKey>(['pending']), {
-        filterCounts: {} as Record<BadgeKey, number>,
-      });
-
-      expect(screen.getByTestId('active-filter-presence')).toHaveTextContent('null');
-      expect(screen.getByTestId('active-filter-label')).toHaveTextContent(resultsEN.badges.pending);
-    });
-
-    it('should send false only for a count that was actually measured as zero', () => {
-      // `permanent` is 0 in defaultFilterCounts — a real zero, read from a file
-      // that was present. This is the one case allowed to speak for the export.
-      renderWithFilters(new Set<BadgeKey>(['permanent']));
-
-      expect(screen.getByTestId('active-filter-presence')).toHaveTextContent('false');
-    });
-
-    it('should send true for a badge the export carries', () => {
+    it('should send the label of the single applied filter', () => {
       renderWithFilters(new Set<BadgeKey>(['pending']));
 
-      expect(screen.getByTestId('active-filter-presence')).toHaveTextContent('true');
+      expect(screen.getByTestId('active-filter-label')).toHaveTextContent(resultsEN.badges.pending);
     });
 
     it('should name no filter when several are applied', () => {
@@ -947,7 +927,7 @@ describe('AccountListSection', () => {
       // not necessarily the one that emptied the list.
       renderWithFilters(new Set<BadgeKey>(['pending', 'unfollowed']));
 
-      expect(screen.getByTestId('active-filter-presence')).toHaveTextContent('undefined');
+      expect(screen.getByTestId('active-filter-label')).toHaveTextContent('undefined');
     });
 
     it('should report the search box as narrowing the list when it has a query', () => {

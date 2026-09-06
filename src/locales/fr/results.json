@@ -87,10 +87,7 @@
   "empty": {
     "noUsers": "Aucun utilisateur trouvé",
     "resetFilters": "Réinitialiser les filtres",
-    "filteredTitle": "Aucun compte avec le filtre « {{filterName}} »",
-    "filteredBody": "C'est ce que disent vos données — rien n'est cassé.",
-    "absentTitle": "Cet export ne contient pas de données pour « {{filterName}} »",
-    "absentBody": "Ces données proviennent d'un fichier qu'Instagram n'a pas inclus dans votre téléchargement."
+    "filteredTitle": "Aucun compte avec le filtre « {{filterName}} »"
   },
   "list": {
     "header": "Comptes ({{count, number}})",

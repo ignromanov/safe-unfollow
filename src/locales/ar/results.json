@@ -87,10 +87,7 @@
   "empty": {
     "noUsers": "لم يتم العثور على مستخدمين",
     "resetFilters": "إعادة تعيين الفلاتر",
-    "filteredTitle": "لا توجد حسابات ضمن فلتر «{{filterName}}»",
-    "filteredBody": "هذا ما تقوله بياناتك، ولا يوجد أي خلل.",
-    "absentTitle": "لا يحتوي هذا التصدير على بيانات «{{filterName}}»",
-    "absentBody": "تأتي هذه البيانات من ملف لم يضعه Instagram في ملف التنزيل الخاص بك."
+    "filteredTitle": "لا توجد حسابات ضمن فلتر «{{filterName}}»"
   },
   "list": {
     "header": "الحسابات ({{count, number}})",

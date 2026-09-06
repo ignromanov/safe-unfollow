@@ -22,7 +22,7 @@ export interface AccountListProps {
   /** Whether filtering is in progress */
   isLoading?: boolean;
   /** The single applied filter, or undefined when zero or several are applied. */
-  activeFilter?: { label: string; presentInExport: boolean | null };
+  activeFilter?: { label: string };
   /** Whether a search query is also narrowing the list. */
   searchActive?: boolean;
   /** Callback to clear all filters */
@@ -87,24 +87,20 @@ export const AccountList = memo(function AccountList({
             message in a tall panel; the cap left the class inert. */}
         <div className="flex flex-col items-center justify-center py-24 text-center px-12">
           <Ghost size={64} className="mb-8 opacity-10" />
-          <p className="text-xl md:text-2xl font-display font-bold text-zinc-300">
-            {!activeFilter
-              ? t('empty.noUsers')
-              : activeFilter.presentInExport === false
-                ? t('empty.absentTitle', { filterName: activeFilter.label })
-                : t('empty.filteredTitle', { filterName: activeFilter.label })}
-          </p>
           {/*
-            Three states, not two. `presentInExport === null` means the per-badge
-            counts have not resolved yet, and neither explanation has been
-            measured: the title above names the filter, which is true either
-            way, and no body claims anything about the export.
+            Names the filter and claims nothing else. There is no sentence here
+            about what the export contains, because no value in scope can carry
+            one: `getBadgeStats` seeds every badge with `count: 0` and writes
+            them unconditionally (`indexeddb-service.ts:194-254`), so 0 means
+            "the file was absent" and "the file was there and you have none"
+            indistinguishably. Same shape as GH#21 one level down, where
+            `itemCount: 0` cannot separate "empty" from "unreadable".
           */}
-          {activeFilter && activeFilter.presentInExport !== null && (
-            <p className="mt-3 text-sm text-muted-foreground">
-              {activeFilter.presentInExport ? t('empty.filteredBody') : t('empty.absentBody')}
-            </p>
-          )}
+          <p className="text-xl md:text-2xl font-display font-bold text-zinc-300">
+            {activeFilter
+              ? t('empty.filteredTitle', { filterName: activeFilter.label })
+              : t('empty.noUsers')}
+          </p>
           {onClearFilters && (
             <button
               onClick={onClearFilters}

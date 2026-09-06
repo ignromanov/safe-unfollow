@@ -87,10 +87,7 @@
   "empty": {
     "noUsers": "Kullanıcı bulunamadı",
     "resetFilters": "Filtreleri Sıfırla",
-    "filteredTitle": "\"{{filterName}}\" filtresine uyan hesap yok",
-    "filteredBody": "Verileriniz böyle diyor — bozulan bir şey yok.",
-    "absentTitle": "Bu dışa aktarma \"{{filterName}}\" verisini içermiyor",
-    "absentBody": "Bu veri, Instagram'ın indirmenize eklemediği bir dosyadan gelir."
+    "filteredTitle": "\"{{filterName}}\" filtresine uyan hesap yok"
   },
   "list": {
     "header": "Hesaplar ({{count, number}})",
