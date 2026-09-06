@@ -252,6 +252,59 @@ describe('useTimeOnResults', () => {
       expect(calls[0]?.[0].id).toBeTruthy();
     });
 
+    it('does not carry an inactive visit into the next mount', () => {
+      // Finding 6. Both emitting effects return early on `!isActive`, so a mount
+      // that never became active used to register no cleanup at all — and
+      // `isActive` is `hasLoadedData`, which gates only the list body: the stat
+      // cards and the options are clickable while it is false.
+      //
+      // Visit 1: the reader taps a stat card during the IndexedDB load and
+      // leaves before it finishes. Nothing may be emitted for it — there is no
+      // active visit — but it must not be inherited either.
+      recordToggle('unfollowed', 'enable', 1, 'chip');
+      const first = render(<Harness accountCount={100} isActive={false} />);
+      first.unmount();
+
+      expect(analytics.filterSessionSummary).not.toHaveBeenCalled();
+
+      // Visit 2, same page life, this time with data.
+      recordToggle('pending', 'enable', 1, 'chip');
+      render(<Harness accountCount={100} isActive />);
+      leave();
+
+      const calls = vi.mocked(analytics.filterSessionSummary).mock.calls;
+      // The instrument: without this, the two assertions below are also
+      // satisfied by an emit that never happened.
+      expect(calls).toHaveLength(1);
+      // Visit 1's toggle is absent. Under the defect this row reported
+      // toggleCount 2 and both badges — one row describing two visits, under
+      // visit 1's id, with visit 2's arrival written over visit 1's.
+      expect(calls[0]?.[0].toggleCount).toBe(1);
+      expect(calls[0]?.[0].filtersUsed).toEqual({ pending: 1 });
+    });
+
+    it('keeps a toggle made before the data arrived', () => {
+      // The other side of the same guard clause, and the reason the unmount
+      // reset above is its own `[]`-keyed effect rather than a reset folded into
+      // the `isActive`-keyed one. Folding it there looks equivalent and passes
+      // the test above — but its cleanup also runs on the false -> true
+      // TRANSITION, wiping exactly the toggles that test exists to save.
+      //
+      // One mount, one visit: the reader taps a stat card while the list is
+      // still loading, the data lands, and they leave. The row must carry the
+      // tap.
+      const { rerender } = render(<Harness accountCount={100} isActive={false} />);
+      recordToggle('unfollowed', 'enable', 1, 'chip');
+
+      rerender(<Harness accountCount={100} isActive />);
+      leave();
+
+      const calls = vi.mocked(analytics.filterSessionSummary).mock.calls;
+      expect(calls).toHaveLength(1);
+      expect(calls[0]?.[0].filtersUsed).toEqual({ unfollowed: 1 });
+      expect(calls[0]?.[0].toggleCount).toBe(1);
+    });
+
     it('keeps one session under one id across its own repeated emits', () => {
       // The other half, and the trap in the obvious fix: a per-emit counter
       // would make these two rows look like two sessions, and the supersede rule

@@ -29,7 +29,7 @@ import { RESCUE_PLAN_BANNER_ENABLED } from '@/config/feature-flags';
 import { useAccountFiltering } from '@/hooks/useAccountFiltering';
 import { useUploadCaveats } from '@/hooks/useUploadCaveats';
 import { useTimeOnResults } from '@/hooks/useTimeOnResults';
-import { readArrivalFilter, readArrivalSource } from '@/hooks/useFilterFromUrl';
+import { readArrivalSource } from '@/hooks/useFilterFromUrl';
 import { analytics } from '@/lib/analytics';
 import { recordArrival, recordEmptyResult, recordToggle } from '@/lib/stats/filter-session';
 import { useEffect, useRef, useState } from 'react';
@@ -113,6 +113,20 @@ export interface AccountListSectionProps {
   filename: string;
   /** Whether this is sample/demo data (shows indicator banner) */
   isSample?: boolean;
+  /**
+   * The badge this page's `useFilterFromUrl` APPLIED from `?filter=`, when the
+   * page applies it at all. Absent means nobody applied one here, and that is
+   * the honest default: `/sample` renders this component and does not call the
+   * hook, so a page that does not apply the parameter has nothing to pass and
+   * the arrival is counted from the store instead.
+   *
+   * Passed rather than read from the URL because a URL states an intent and not
+   * an outcome. Reading `?filter=` here reported `arrived_with: 1` on `/sample`
+   * with nothing applied, and emitted a summary row for a visit in which the
+   * reader did nothing — inflating both the arrival count and the denominator
+   * every rate on this event is read against.
+   */
+  appliedUrlFilter?: BadgeKey | null;
 }
 
 export function AccountListSection({
@@ -120,6 +134,12 @@ export function AccountListSection({
   accountCount,
   filename,
   isSample = false,
+  // No default value, deliberately: a default in this destructuring is a BRANCH
+  // against ESLint's per-function `complexity` budget, and this component sits
+  // at exactly its ceiling of 20 (`lint:strict` runs `--max-warnings 0`, so a
+  // warning fails CI). `undefined` and `null` are both falsy and both mean "no
+  // page applied one", which is the only distinction the arrival reads.
+  appliedUrlFilter,
 }: AccountListSectionProps) {
   const { t, i18n } = useTranslation('results');
   const {
@@ -212,22 +232,30 @@ export function AccountListSection({
   // 52.3% of sessions arrive with a filter already on, and from Task 6 some of
   // them arrive with one we chose for them.
   //
-  // The count comes from the URL when the URL carries one, NOT from the store.
-  // `useFilterFromUrl` runs in ResultsPage, this effect runs in a child, and
-  // React flushes child effects before parent effects in the same commit — so
-  // reading `filters.size` here would see yesterday's persisted selection on
-  // exactly the arrivals this measurement exists for. Deriving from the URL
-  // removes the ordering dependency rather than depending on it holding.
+  // The count comes from the APPLIER, not from the store and not from the URL.
   //
-  // `fromUrl ? 1 : filters.size` is not an approximation: a valid `?filter=`
+  // Not the store, because `useFilterFromUrl` runs in the page and this effect
+  // runs in a child: React flushes child effects before parent effects in the
+  // same commit, so `filters.size` here would see yesterday's persisted
+  // selection on exactly the arrivals this measurement exists for.
+  //
+  // Not the URL either, though it was until this fix. A URL states what was
+  // ASKED FOR; only the code that applies it knows whether anyone acted. This
+  // component is rendered by `/results` AND `/sample`, and `/sample` calls no
+  // applier — so `/sample?filter=pending` reported one applied filter and, worse,
+  // marked the session `touched`, buying a summary row for a visit in which
+  // nothing happened. `appliedUrlFilter` is computed during the page's render,
+  // so it is here before this effect runs: the ordering dependency stays removed.
+  //
+  // `applied ? 1 : filters.size` is not an approximation: a valid `?filter=`
   // REPLACES the persisted set, so it means exactly one filter is applied.
   const arrivalRecorded = useRef(false);
   useEffect(() => {
     if (arrivalRecorded.current || !hasLoadedData) return;
     arrivalRecorded.current = true;
 
-    recordArrival(readArrivalFilter(search) ? 1 : filters.size, readArrivalSource(search));
-  }, [hasLoadedData, filters.size, search]);
+    recordArrival(appliedUrlFilter ? 1 : filters.size, readArrivalSource(search));
+  }, [hasLoadedData, filters.size, search, appliedUrlFilter]);
 
   // The empty result is the finding, and the exit that follows it is the one
   // most likely to lose its beacon. Emit at the moment it happens, not only on

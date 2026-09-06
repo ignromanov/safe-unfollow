@@ -1,4 +1,5 @@
 import type { AccountBadges } from '@/core/types';
+import { BADGE_ORDER } from '@/core/badges';
 import { BitSet } from '@/lib/indexeddb/bitset';
 import { IndexedDBFilterEngine } from '@/lib/filtering/IndexedDBFilterEngine';
 import { indexedDBService } from '@/lib/indexeddb/indexeddb-service';
@@ -524,7 +525,7 @@ describe('IndexedDBFilterEngine', () => {
       const counts = await largeEngine.candidateCounts(['notFollowingBack', 'unfollowed']);
       const duration = performance.now() - start;
 
-      expect(Object.keys(counts)).toHaveLength(11);
+      expect(Object.keys(counts)).toHaveLength(BADGE_ORDER.length);
       expect(duration).toBeLessThan(200);
     });
 
@@ -668,6 +669,74 @@ describe('IndexedDBFilterEngine', () => {
       // contextual name.
       expect(Object.keys(counts)).toHaveLength(Object.keys(global).length);
       expect(counts).not.toEqual(global);
+    });
+
+    it('should agree with filterToIndices when a candidate has no stored bitset', async () => {
+      // The absent-bitset branch of `candidateCounts`, which nothing else on
+      // this surface reaches: every other test in this block resolves
+      // `getBadgeBitset` to a real (sometimes empty) BitSet, so the falsy-bits
+      // arm is never entered and its removal is invisible.
+      //
+      // The expectation is DERIVED from `filterToIndices`, never written as a
+      // literal. A hardcoded `0` passes for the wrong reason the moment the
+      // impossible-detection is what broke: with it removed the absent group is
+      // dropped from the AND, the option renders enabled showing the other
+      // group's count, and the list the reader then gets is empty. Comparing
+      // the two functions gates the agreement rather than the number.
+      mockIndexedDBService.getBadgeBitset.mockImplementation(async (_hash, badge) => {
+        if (badge === 'pending') return null;
+        if (badge === 'notFollowingBack') return bitsetOf([1, 2, 3]);
+        if (badge === 'unfollowed') return bitsetOf([3, 9]);
+        return bitsetOf([]);
+      });
+      await engine.init(mockFileHash, totalAccounts);
+
+      const counts = await engine.candidateCounts(['notFollowingBack']);
+
+      // The instrument. A candidate whose bitset IS stored must agree too, and
+      // must agree on a non-zero — otherwise the null case's zero would also be
+      // satisfied by an engine that had returned zero for everything.
+      const reachable = await engine.filterToIndices('', ['notFollowingBack', 'unfollowed']);
+      expect(reachable.length).toBeGreaterThan(0);
+      expect(counts.unfollowed).toBe(reachable.length);
+
+      const absent = await engine.filterToIndices('', ['notFollowingBack', 'pending']);
+      expect(counts.pending).toBe(absent.length);
+    });
+
+    it('counts the badge selection only, never the search box — so it is an upper bound', async () => {
+      // The boundary this surface makes no statement about anywhere else, and
+      // the one a reader can see: the chip's number and the list it delivers can
+      // disagree while a query is active.
+      //
+      // Pinned as INTENDED. `candidateCounts` answers "what would this SELECTION
+      // hold", which is what its name and its doc comment say, and the counts
+      // effect in `useAccountFiltering` deliberately omits `debouncedQuery` from
+      // its deps while the filtering effect includes it. Recomputing eleven
+      // candidate intersections per debounced keystroke is the cost of the other
+      // reading, and the numbers would churn under the reader's fingers.
+      //
+      // What must never invert is the DIRECTION. Search can only narrow, so the
+      // count is an upper bound on what tapping delivers: an option is therefore
+      // never wrongly DISABLED, which is the only failure that would remove a
+      // reader's option. It can only over-promise, and the empty state Task 5
+      // built names the filter that emptied it.
+      mockHasSearchIndexes.mockResolvedValue(true);
+      const searchBitset = new BitSet(totalAccounts);
+      searchBitset.set(9);
+      mockSmartSearch.mockResolvedValue(searchBitset);
+      await engine.init(mockFileHash, totalAccounts);
+
+      const counts = await engine.candidateCounts(['notFollowingBack']);
+      const withoutSearch = await engine.filterToIndices('', ['notFollowingBack', 'unfollowed']);
+      const withSearch = await engine.filterToIndices('bob', ['notFollowingBack', 'unfollowed']);
+
+      // The instrument: the query has to actually narrow something, or the two
+      // assertions below are the same assertion.
+      expect(withSearch.length).toBeLessThan(withoutSearch.length);
+
+      expect(counts.unfollowed).toBe(withoutSearch.length);
+      expect(counts.unfollowed).toBeGreaterThanOrEqual(withSearch.length);
     });
   });
 });

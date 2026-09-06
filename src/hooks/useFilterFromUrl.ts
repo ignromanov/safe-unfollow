@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { BADGE_ORDER } from '@/core/badges';
 import { useAppStore } from '@/lib/store';
@@ -35,11 +35,10 @@ export function readArrivalSource(search: string): string | null {
  * page they clicked did nothing. Applied, the empty state at least names the
  * filter that emptied it.
  *
- * Exported because Task 7 needs the same answer without reading the store: the
- * arrival snapshot lives in a child component, React runs child effects before
- * parent effects, and the store does not hold the URL's selection yet at that
- * moment. Both callers go through this function, so `BADGES` stays the only
- * copy of the badge list.
+ * Exported for its own suite. It is deliberately NOT the thing a consumer reads
+ * to learn whether a filter was applied — a URL says what was asked for, and
+ * only `useFilterFromUrl` knows whether anybody acted on it. That distinction is
+ * the whole of the note on the hook below.
  */
 export function readArrivalFilter(search: string): BadgeKey | null {
   const requested = new URLSearchParams(search).get('filter');
@@ -47,7 +46,7 @@ export function readArrivalFilter(search: string): BadgeKey | null {
 }
 
 /**
- * Applies `?filter=<badge>` on arrival, once.
+ * Applies `?filter=<badge>` on arrival, once — and RETURNS what it applied.
  *
  * The parameter REPLACES the persisted selection. `filters` survives in
  * localStorage, so 52.3% of sessions arrive with something already on; keeping
@@ -58,19 +57,45 @@ export function readArrivalFilter(search: string): BadgeKey | null {
  * Applied once per mount and never again: the parameter stays in the URL so the
  * view is reloadable and shareable, which means a hook that re-read it on every
  * render would make the filter impossible to remove.
+ *
+ * ## Why it returns a value, and why the value is frozen
+ *
+ * The arrival snapshot (`arrived_with`) is taken in `AccountListSection`, which
+ * `/results` and `/sample` BOTH render — and only `/results` calls this hook.
+ * Reading `?filter=` there and calling it applied was true on one page and false
+ * on the other: `/sample?filter=pending` would have reported `arrived_with: 1`
+ * with nothing applied, and would have emitted a whole summary row for a visit
+ * in which the reader did nothing. Only the code that applies a filter can
+ * honestly report that it was applied, so the applier hands its answer down and
+ * a page that does not apply the parameter has nothing to hand.
+ *
+ * The answer is computed in a lazy `useState` initialiser rather than in the
+ * effect, and that is what keeps the property the snapshot was moved to the URL
+ * for in the first place: it is available DURING THE FIRST RENDER, before any
+ * effect anywhere has run. A value produced by this hook's effect would be null
+ * when the child's effect reads it, because React flushes child effects before
+ * parent effects — the exact ordering dependency this avoids. Freezing it also
+ * matches what the hook does: it applies the first render's parameter and never
+ * re-applies, so reporting any later value would be reporting something that was
+ * never applied.
  */
-export function useFilterFromUrl(): void {
+export function useFilterFromUrl(): BadgeKey | null {
   const [searchParams] = useSearchParams();
   const setFilters = useAppStore(s => s.setFilters);
   const applied = useRef(false);
+
+  // The initialiser is pure and runs once per mount; StrictMode's double
+  // invocation is therefore free.
+  const [arrival] = useState<BadgeKey | null>(() => readArrivalFilter(searchParams.toString()));
 
   useEffect(() => {
     if (applied.current) return;
     applied.current = true;
 
-    const requested = readArrivalFilter(searchParams.toString());
-    if (!requested) return;
+    if (!arrival) return;
 
-    setFilters(new Set<BadgeKey>([requested]));
-  }, [searchParams, setFilters]);
+    setFilters(new Set<BadgeKey>([arrival]));
+  }, [arrival, setFilters]);
+
+  return arrival;
 }

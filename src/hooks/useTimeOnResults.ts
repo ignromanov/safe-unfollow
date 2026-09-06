@@ -176,5 +176,30 @@ export function useTimeOnResults(accountCount: number, isActive: boolean): UseTi
     };
   }, [isActive, fireEvent, fireFilterSummary]);
 
+  // The accumulator's last owner, and the only cleanup here registered whether
+  // or not the visit ever became active.
+  //
+  // Both effects above return early on `!isActive`, so a mount that never became
+  // active registers NO cleanup at all — and `isActive` is `hasLoadedData`,
+  // which gates only the list body. The stat cards, the sheet trigger and the
+  // options are rendered and clickable while it is false. Tap one during the
+  // IndexedDB load, leave /results before it finishes, come back in the same
+  // page life: without this, visit 2 inherits visit 1's toggles under visit 1's
+  // `filter_session_id`, with `arrived_with`/`arrived_from` overwritten by visit
+  // 2 — one row describing two visits — and if the reader never returns, those
+  // toggles are never emitted at all.
+  //
+  // Deps are `[]` so this fires on unmount ONLY. It must not be folded into the
+  // effect above, whose deps carry `isActive`: a reset there would run on the
+  // false→true transition and wipe exactly the toggles this exists to save.
+  // Registered last so it runs last, leaving the emit path above untouched — the
+  // second reset on an active unmount replaces an already-empty accumulator, and
+  // its only trace is one unused session id.
+  useEffect(() => {
+    return () => {
+      resetFilterSession();
+    };
+  }, []);
+
   return { trackAction, trackClick, fireFilterSummary };
 }

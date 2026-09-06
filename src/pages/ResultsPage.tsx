@@ -38,7 +38,10 @@ export function Component() {
   // has three. Harmless during the prerender: effects do not run under SSG, so the
   // parameter is read on the client at hydration — the first frame that could show a
   // list — and there is no unfiltered flash to design around.
-  useFilterFromUrl();
+  // The return value, not just the call: this page is the only one that APPLIES
+  // `?filter=`, so it is the only one that may report an arrival as filtered.
+  // `AccountListSection` is shared with `/sample`, which passes nothing.
+  const appliedUrlFilter = useFilterFromUrl();
 
   const handleTryAgain = () => {
     navigate(`${prefix}/upload`);
@@ -72,6 +75,7 @@ export function Component() {
         accountCount={resultsFile.accountCount!}
         filename={resultsFile.name}
         isSample={false}
+        appliedUrlFilter={appliedUrlFilter}
       />
     );
   }

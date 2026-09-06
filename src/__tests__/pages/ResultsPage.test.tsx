@@ -15,17 +15,22 @@ vi.mock('@/components/AccountListSection', () => ({
     accountCount,
     filename,
     isSample,
+    appliedUrlFilter,
   }: {
     fileHash: string;
     accountCount: number;
     filename: string;
     isSample: boolean;
+    appliedUrlFilter?: BadgeKey | null;
   }) => (
     <div data-testid="account-list-section">
       <div data-testid="file-hash">{fileHash}</div>
       <div data-testid="account-count">{accountCount}</div>
       <div data-testid="filename">{filename}</div>
       <div data-testid="is-sample">{String(isSample)}</div>
+      {/* Rendered as the literal 'null' so the contract's absence state and a
+          drifted mock's `undefined` stay distinguishable. */}
+      <div data-testid="applied-url-filter">{String(appliedUrlFilter)}</div>
     </div>
   ),
 }));
@@ -108,6 +113,29 @@ describe('ResultsPage', () => {
       render(<ResultsPage />);
 
       expect([...useAppStore.getState().filters]).toEqual(['pending']);
+    });
+
+    it('should hand the applied badge to the list section, not just the store', () => {
+      // The store is not enough. `AccountListSection` takes the arrival snapshot
+      // in a CHILD effect, which React flushes before this page's effects — so
+      // it cannot learn from the store what this page is about to apply. It is
+      // told, during render. `/sample` renders the same component and applies
+      // nothing, which is why the section may not read `?filter=` for itself.
+      mockSearch.value = '?filter=pending';
+      useAppStore.setState({ uploadStatus: 'success', fileMetadata: FILE });
+
+      render(<ResultsPage />);
+
+      expect(screen.getByTestId('applied-url-filter')).toHaveTextContent('pending');
+    });
+
+    it('should hand down nothing when the url names no valid badge', () => {
+      mockSearch.value = '?filter=nonsense';
+      useAppStore.setState({ uploadStatus: 'success', fileMetadata: FILE });
+
+      render(<ResultsPage />);
+
+      expect(screen.getByTestId('applied-url-filter')).toHaveTextContent('null');
     });
 
     it('should replace a persisted selection rather than intersecting it', () => {

@@ -979,7 +979,7 @@ describe('AccountListSection', () => {
    * instrument.
    */
   describe('filter session accumulation', () => {
-    it('takes the arrival from the ROUTER url, not from window.location', () => {
+    it('takes the arrival source from the ROUTER url, not from window.location', () => {
       // The whole point of this assertion. `unlock.ts` calls
       // `window.history.replaceState` on every /results view to strip licence
       // params, and @remix-run/router resyncs only on popstate — so from that
@@ -989,7 +989,7 @@ describe('AccountListSection', () => {
       // the source.
       expect(window.location.search).toBe('');
 
-      renderWithRouter(<AccountListSection {...defaultProps} />, {
+      renderWithRouter(<AccountListSection {...defaultProps} appliedUrlFilter="pending" />, {
         initialEntries: ['/results?filter=pending&from=landing-unfollowers'],
       });
 
@@ -998,6 +998,39 @@ describe('AccountListSection', () => {
       // A valid `?filter=` REPLACES the persisted set, so it is exactly one.
       expect(summary?.arrivedWith).toBe(1);
       expect(summary?.toggleCount).toBe(0);
+    });
+
+    /**
+     * The two halves of one gate, and they only mean anything together. The URL
+     * is IDENTICAL in both; the only difference is whether a page above actually
+     * applied the parameter.
+     *
+     * `/results` and `/sample` both render this component and only `/results`
+     * calls `useFilterFromUrl`, so reading `?filter=` here reported an applied
+     * filter on a page that applies none — and, because a non-zero arrival marks
+     * the session `touched`, bought a whole summary row for a visit in which the
+     * reader did nothing. That inflates the arrival count and the denominator of
+     * every rate read against this event.
+     *
+     * Neither half is a gate alone: without the control, the null below is
+     * equally consistent with the arrival effect having never run at all.
+     */
+    it('reports no applied filter when the page did not apply one', () => {
+      renderWithRouter(<AccountListSection {...defaultProps} />, {
+        initialEntries: ['/sample?filter=pending'],
+      });
+
+      expect(buildFilterSummary()).toBeNull();
+    });
+
+    it('reports the applied filter when the page did apply one — same url', () => {
+      renderWithRouter(<AccountListSection {...defaultProps} appliedUrlFilter="pending" />, {
+        initialEntries: ['/sample?filter=pending'],
+      });
+
+      const summary = buildFilterSummary();
+      expect(summary).not.toBeNull();
+      expect(summary?.arrivedWith).toBe(1);
     });
 
     it('falls back to the persisted selection when the url carries no filter', () => {

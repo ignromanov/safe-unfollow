@@ -626,16 +626,28 @@ describe('Analytics', () => {
     });
 
     /**
-     * The list above names 18 of them by hand, which is the enumerated-gate
-     * hazard: it stays green for every constant it forgot, and it shrank by one
-     * on this branch without anyone noticing. This one is derived, so it covers
-     * all of them and cannot be outgrown — a constant whose value drifts from
-     * its key fails here whether or not anybody remembered to list it.
+     * The list above is hand-maintained, which is the enumerated-gate hazard: it
+     * stays green for every constant it forgot, and it shrank by one on this
+     * branch without anyone noticing. This one is derived and covers the whole
+     * collection — but only for the NAMING invariant. It does not close the
+     * enumeration hole: it cannot notice a constant that should exist and does
+     * not, and a constant that no emitter uses could be deleted under it in
+     * silence. What actually holds presence is `tsc`, because
+     * `AnalyticsEventName` is `(typeof AnalyticsEvents)[keyof typeof
+     * AnalyticsEvents]` (`constants.ts`), so removing a constant an emitter
+     * still uses is a type error rather than a quiet pass.
+     *
+     * No count is written here in either the prose or the floor. The three
+     * quantities in play — how many the list above names, how many the
+     * collection holds, and how many a floor would admit — are all copied facts
+     * the moment they are typed, and the previous version of this comment had
+     * the first of them wrong. The floor below is an instrument, not a
+     * measurement: it says the loop had a subject, nothing more.
      */
     it('should name every event after its own constant, all of them', () => {
       const entries = Object.entries(AnalyticsEvents as Record<string, string>);
 
-      expect(entries.length).toBeGreaterThan(18); // the instrument fired
+      expect(entries.length).toBeGreaterThan(0); // the instrument fired
       for (const [key, value] of entries) {
         expect(value).toBe(key.toLowerCase());
       }
