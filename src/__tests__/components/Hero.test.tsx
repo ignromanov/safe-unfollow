@@ -197,6 +197,23 @@ describe('Hero Component', () => {
         expect(screen.queryByRole('link', { name: page.shortLabel })).not.toBeInTheDocument();
       }
     });
+
+    it('should distinguish them from the sentence without relying on colour', () => {
+      // These are links inside a run of text, which is the one place WCAG 1.4.1 applies to a
+      // link at all. They shipped as `text-primary hover:underline`: primary against the
+      // surrounding zinc-500 measures 1.19:1 where the criterion wants 3:1, and a hover cue is
+      // absent on load and unreachable on touch — 85% of this traffic.
+      //
+      // A class assertion because jsdom computes no colour and no pseudo-state; what it can
+      // state is that the underline is unconditional. `hover:underline` alone fails here, which
+      // is the shape that shipped.
+      render(<Hero />, { initialEntries: ['/'] });
+      for (const page of INTENT_PAGES) {
+        const link = screen.getByRole('link', { name: page.shortLabel });
+        const classes = (link.getAttribute('class') ?? '').split(/\s+/);
+        expect(classes).toContain('underline');
+      }
+    });
   });
 
   describe('CTA analytics', () => {

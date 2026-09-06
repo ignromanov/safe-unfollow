@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { INTENT_PAGES } from '@/config/intent-pages';
 import { BADGE_ORDER } from '@/core/badges';
 import meta from '@/locales/en/meta.json';
+import resultsEN from '@/locales/en/results.json';
 import { INTENT_CONTENT } from '@/pages/intent-content';
 import { SUPPORTED_LANGUAGES } from '@/config/languages';
 import { HERO_CTA_KEYS } from '@/lib/stats/cta-capture';
@@ -94,6 +95,16 @@ describe('intent pages do not cannibalise each other or the property', () => {
   it('should not share a call to action between two pages', () => {
     const labels = INTENT_PAGES.map(p => INTENT_CONTENT[p.slug].ctaLabel);
     expect(new Set(labels).size).toBe(labels.length);
+  });
+
+  it('should name each badge exactly as the English locale spells it', () => {
+    // badgeLabel is a literal because intent-pages.ts may hold no runtime import and these
+    // pages are English-only — and because an unresolved i18n key renders as the key itself on
+    // a prerendered public page with nothing to flag it (GH#78). Two copies of one fact are
+    // acceptable only while something binds them; this is that something.
+    for (const page of INTENT_PAGES) {
+      expect(resultsEN.badges[page.badge]).toBe(page.badgeLabel);
+    }
   });
 
   it('should answer all four questions on every page', () => {

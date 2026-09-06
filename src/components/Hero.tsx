@@ -114,7 +114,18 @@ export function Hero({ hasData }: HeroProps) {
             {INTENT_PAGES.map((page, i) => (
               <span key={page.slug}>
                 {i > 0 && ' · '}
-                <PrefixedLink to={`/${page.slug}`} className="text-primary hover:underline">
+                {/* Underlined foreground weight, not a coloured word. These are links inside a
+                    run of text, and `text-primary hover:underline` distinguished them by colour
+                    alone: primary against the surrounding zinc-500 measures 1.19:1 where WCAG
+                    1.4.1 wants 3:1 or a non-colour cue, and a hover cue is absent on load and
+                    unavailable on touch — which is 85% of this traffic. The same colour also
+                    measures 4.05:1 on white as text, below AA; that is a property-wide token
+                    question and is tracked separately, but these three need not be new
+                    instances of it. */}
+                <PrefixedLink
+                  to={`/${page.slug}`}
+                  className="text-foreground font-semibold underline decoration-primary/60 underline-offset-2 hover:decoration-primary"
+                >
                   {page.shortLabel}
                 </PrefixedLink>
               </span>

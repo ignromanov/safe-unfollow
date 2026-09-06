@@ -151,9 +151,13 @@ describe.runIf(built)('intent landing pages (prerendered)', () => {
         expect(html()).toContain('not your account');
       });
 
-      it('should prerender the demo rows', () => {
+      it('should prerender the demo rows the way the results screen shows them', () => {
+        // With the @, which is what AccountItem.tsx renders and what the preview promises. React
+        // SSR splits the literal from the interpolation with a comment marker, so strip those
+        // first — asserting on the raw HTML would fail on the separator, not on the content.
+        const text = html().replace(/<!--.*?-->/g, '');
         for (const username of INTENT_DEMO[page.slug].usernames) {
-          expect(html()).toContain(username);
+          expect(text).toContain(`@${username}`);
         }
       });
 
@@ -162,7 +166,13 @@ describe.runIf(built)('intent landing pages (prerendered)', () => {
         // React SSR splits interpolations with comment markers — the rendered HTML is
         // "150<!-- --> of <!-- -->1,180", not the plain joined string. Strip them before
         // asserting, or this always fails regardless of what the page actually renders.
-        const text = html().replace(/<!--.*?-->/g, '');
+        //
+        // Tags go too, because the count and its unit are styled differently and therefore sit
+        // in sibling elements. What must reach a crawler is the two of them together as text;
+        // where the element boundary falls is a visual decision this gate should not pin.
+        const text = html()
+          .replace(/<!--.*?-->/g, '')
+          .replace(/<[^>]+>/g, '');
         expect(text).toContain(`${slice.matching} of ${slice.total.toLocaleString('en-US')}`);
       });
     });
