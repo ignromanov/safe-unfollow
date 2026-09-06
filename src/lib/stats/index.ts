@@ -12,6 +12,9 @@
  *   see events.ts for its current delivery path
  * - Removed results_scroll_depth (engagement inferred from time_on_results)
  * - Removed wizard_back_click, wizard_cancel (low actionability)
+ * - `filterToggle` ended entirely: `filter_session_summary` replaces 9.48 rows
+ *   per session with one. The two entries below name it as history, not as a
+ *   live emitter.
  * - Tightened sampling: wizardStepView 5%, filterToggle 3%, searchPerform 5%, webVital 3%
  *   (wizardStepView — now guideSectionView — filterToggle, searchPerform and
  *   guideEntryView (deleted; GuideEntry dissolved in PR-1 of the wizard-popup

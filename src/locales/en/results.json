@@ -2,7 +2,10 @@
   "header": {
     "title": "Analysis Results",
     "fileInfo": "{{filename}} • {{count, number}} Total",
-    "showing": "Showing {{filtered}} of {{total}} accounts"
+    "showing": "Showing {{filtered}} of {{total}} accounts",
+    "showingOne": "Showing {{filtered}} of {{total}} — {{filterName}}",
+    "showingMany": "Showing {{filtered}} of {{total}} — {{count}} filters",
+    "showingAll": "Showing {{total}} accounts"
   },
   "sample": {
     "banner": "Viewing Sample Data",
@@ -34,7 +37,20 @@
     "emptyCategories": "Empty Categories ({{count, number}})",
     "addFilter": "Add {{label}} filter ({{count, number}} accounts)",
     "removeFilter": "Remove {{label}} filter ({{count, number}} accounts)",
-    "chipWithHint": "{{label}} — {{hint}}"
+    "chipWithHint": "{{label}} — {{hint}}",
+    "groups": {
+      "relationship": "Follow relationship",
+      "requests": "Follow requests",
+      "flags": "Flags and history"
+    },
+    "groupHint": "Pick any within a section",
+    "openSheet": "Filter accounts",
+    "openSheetWithCount": "Filter accounts ({{count}} on)",
+    "applied": "Applied filters",
+    "removeOne": "Remove {{label}} filter",
+    "unavailable": "{{label}} — no accounts with your current selection",
+    "addFilterPlain": "Add {{label}} filter",
+    "removeFilterPlain": "Remove {{label}} filter"
   },
   "badges": {
     "followers": "Followers",
@@ -70,7 +86,8 @@
   },
   "empty": {
     "noUsers": "No users found",
-    "resetFilters": "Reset Filters"
+    "resetFilters": "Reset Filters",
+    "filteredTitle": "No accounts are {{filterName}}"
   },
   "list": {
     "header": "Accounts ({{count, number}})",

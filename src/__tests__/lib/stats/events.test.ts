@@ -9,8 +9,10 @@ vi.mock('@/lib/stats/queue', () => ({
   trackNavigating: (name: string, data?: unknown) => trackNavigating(name, data),
   flushEvents: () => flushEvents(),
 }));
+const trackBeacon = vi.fn();
 vi.mock('@/lib/stats/core', () => ({
   trackEvent: (name: string, data?: unknown) => trackEvent(name, data),
+  trackBeacon: (name: string, data?: unknown) => trackBeacon(name, data),
 }));
 
 import { analytics } from '@/lib/stats/events';
@@ -226,33 +228,75 @@ describe('relationshipSkewVerdict dates_fitted field (GH#156)', () => {
 });
 
 /**
- * `filter_toggle` had no test of its own, and the field being added here is the
- * one that makes the stat cards visible at all: 2 377 mutations across 990
- * sessions came from a surface that emitted nothing. A payload assertion is what
- * stops the source silently going missing again.
+ * The per-toggle event is gone: `filter_toggle` was 31 520 event rows and
+ * 94 560 payload rows, and one `filter_session_summary` per session carries the
+ * same four findings.
+ *
+ * This block is what the deleted `filterToggle source field` describe was: the
+ * gate on the accumulator-to-PAYLOAD mapping. The suites for FilterChips and
+ * AccountListSection assert what the accumulator holds; nothing there can see
+ * the event name, the JSON serialisation, the null flattening, or the transport.
+ * A comment claiming they covered it was a restatement, not a gate — rename any
+ * key here, or regress the transport to `trackEvent`, and both of those suites
+ * stay green.
  */
-describe('filterToggle source field', () => {
+describe('filterSessionSummary payload and transport', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('should carry the source of the toggle', () => {
-    analytics.filterToggle('unfollowed', 'enable', 2, 'stat_card');
+  const summary = {
+    id: 'abc123',
+    filtersUsed: { unfollowed: 2, pending: 1 },
+    maxActive: 3,
+    arrivedWith: 1,
+    arrivedFrom: 'landing-unfollowers',
+    reachedEmpty: true,
+    toggleCount: 4,
+    sourceMix: { chip: 3, stat_card: 1 },
+  } as const;
 
-    expect(enqueueEvent).toHaveBeenCalledWith('filter_toggle', {
-      filter_name: 'unfollowed',
-      filter_action: 'enable',
-      active_filter_count: 2,
-      filter_source: 'stat_card',
+  it('sends every field under the name the dashboard reads', () => {
+    analytics.filterSessionSummary({ ...summary }, 2);
+
+    expect(trackBeacon).toHaveBeenCalledWith('filter_session_summary', {
+      filter_session_id: 'abc123',
+      seq: 2,
+      // Maps go over as JSON strings: Umami stores one row per payload key, and
+      // a key per badge would put the row count back where this task found it.
+      filters_used: '{"unfollowed":2,"pending":1}',
+      max_active: 3,
+      arrived_with: 1,
+      arrived_from: 'landing-unfollowers',
+      reached_empty: true,
+      toggle_count: 4,
+      source_mix: '{"chip":3,"stat_card":1}',
     });
   });
 
-  it('distinguishes the chip from the card, so source_mix has two values', () => {
-    analytics.filterToggle('mutuals', 'disable', 0, 'chip');
+  it('flattens an absent arrival source to an empty string, not to null', () => {
+    // `trackBeacon`'s payload type admits string | number | boolean and nothing
+    // else, so a null would be a type error at the call site and a silently
+    // dropped column if it ever reached the wire.
+    analytics.filterSessionSummary({ ...summary, arrivedFrom: null }, 0);
 
-    expect(enqueueEvent).toHaveBeenCalledWith(
-      'filter_toggle',
-      expect.objectContaining({ filter_source: 'chip' })
+    expect(trackBeacon).toHaveBeenCalledWith(
+      'filter_session_summary',
+      expect.objectContaining({ arrived_from: '' })
     );
+  });
+
+  /**
+   * The transport is the whole reason this event is not on `trackEvent` like its
+   * neighbour `resultsClicksSummary`. `trackEvent` calls `window.umami.track()`:
+   * an ordinary request with no `keepalive`, freely cancelled when the page goes
+   * away — and this event fires on the way out, all-or-nothing, once per session.
+   */
+  it('rides the request that survives page unload, and neither of the other two', () => {
+    analytics.filterSessionSummary({ ...summary }, 0);
+
+    expect(trackBeacon).toHaveBeenCalledTimes(1);
+    expect(trackEvent).not.toHaveBeenCalled();
+    expect(enqueueEvent).not.toHaveBeenCalled();
   });
 });

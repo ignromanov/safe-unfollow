@@ -21,6 +21,10 @@ export interface AccountListProps {
   hasLoadedData: boolean;
   /** Whether filtering is in progress */
   isLoading?: boolean;
+  /** The single applied filter, or undefined when zero or several are applied. */
+  activeFilter?: { label: string };
+  /** Whether a search query is also narrowing the list. */
+  searchActive?: boolean;
   /** Callback to clear all filters */
   onClearFilters?: () => void;
   /** V7: Callback to track account click with badges for aggregation */
@@ -32,6 +36,8 @@ export const AccountList = memo(function AccountList({
   accountCount,
   accountIndices,
   hasLoadedData,
+  activeFilter,
+  searchActive,
   onClearFilters,
   onAccountClick,
 }: AccountListProps) {
@@ -81,15 +87,34 @@ export const AccountList = memo(function AccountList({
             message in a tall panel; the cap left the class inert. */}
         <div className="flex flex-col items-center justify-center py-24 text-center px-12">
           <Ghost size={64} className="mb-8 opacity-10" />
+          {/*
+            Names the filter and claims nothing else. There is no sentence here
+            about what the export contains, because no value in scope can carry
+            one: `getBadgeStats` seeds every badge with `count: 0` and writes
+            them unconditionally (`indexeddb-service.ts:194-254`), so 0 means
+            "the file was absent" and "the file was there and you have none"
+            indistinguishably. Same shape as GH#21 one level down, where
+            `itemCount: 0` cannot separate "empty" from "unreadable".
+          */}
           <p className="text-xl md:text-2xl font-display font-bold text-zinc-300">
-            {t('empty.noUsers')}
+            {activeFilter
+              ? t('empty.filteredTitle', { filterName: activeFilter.label })
+              : t('empty.noUsers')}
           </p>
           {onClearFilters && (
             <button
               onClick={onClearFilters}
               className="mt-4 text-primary font-black uppercase text-xs tracking-widest hover:underline"
             >
-              {t('empty.resetFilters')}
+              {/*
+                The specific label only when it is a true description of the tap.
+                This button clears the search box as well as the filters, so
+                "Remove <filter> filter" is a promise it does not keep whenever a
+                query is active.
+              */}
+              {activeFilter && !searchActive
+                ? t('filters.removeOne', { label: activeFilter.label })
+                : t('empty.resetFilters')}
             </button>
           )}
         </div>

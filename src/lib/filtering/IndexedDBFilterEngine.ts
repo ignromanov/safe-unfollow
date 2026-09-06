@@ -6,7 +6,8 @@
  */
 
 import type { AccountBadges, BadgeKey } from '@/core/types';
-import { groupOf, type BadgeGroupId } from '@/core/badges/groups';
+import { BADGE_ORDER } from '@/core/badges';
+import { BADGE_GROUPS, groupOf, type BadgeGroupId } from '@/core/badges/groups';
 import { BitSet } from '../indexeddb/bitset';
 import { indexedDBService } from '../indexeddb/indexeddb-service';
 import { hasSearchIndexes, smartSearch } from '../search-index';
@@ -144,6 +145,77 @@ export class IndexedDBFilterEngine {
     }
 
     return indices;
+  }
+
+  /**
+   * For each badge, how many accounts the current selection would hold if that
+   * badge were added to it. A zero means the option ends the road, and the
+   * surface disables it rather than letting the reader walk into an empty list.
+   *
+   * The chip's all-time badge count systematically overstates under grouped
+   * semantics: it promises rows the other groups' AND constraints remove. This
+   * is the number that does not.
+   *
+   * Group unions for the selection are built once; only the candidate's own
+   * group is rebuilt per candidate, and every bitset involved is already
+   * resident in `bitsetCache` after `init`.
+   */
+  async candidateCounts(activeFilters: BadgeKey[]): Promise<Record<BadgeKey, number>> {
+    if (!this.fileHash) {
+      throw new Error('[IndexedDB Filter Engine] Not initialized');
+    }
+
+    const selectedByGroup = new Map<BadgeGroupId, BadgeKey[]>();
+    for (const badge of activeFilters) {
+      const id = groupOf(badge);
+      const members = selectedByGroup.get(id);
+      if (members) members.push(badge);
+      else selectedByGroup.set(id, [badge]);
+    }
+
+    const unionOf = async (badges: readonly BadgeKey[]): Promise<BitSet | null> => {
+      const bitsets = (await Promise.all(badges.map(b => this.loadBitset(b)))).filter(
+        (b): b is BitSet => b !== null
+      );
+      if (bitsets.length === 0) return null;
+      let acc = bitsets[0] as BitSet;
+      for (let i = 1; i < bitsets.length; i++) acc = acc.union(bitsets[i] as BitSet);
+      return acc;
+    };
+
+    const groupUnions = new Map<BadgeGroupId, BitSet | null>();
+    for (const [id, badges] of selectedByGroup) {
+      groupUnions.set(id, await unionOf(badges));
+    }
+
+    const counts = {} as Record<BadgeKey, number>;
+
+    for (const candidate of BADGE_ORDER) {
+      const candidateGroup = groupOf(candidate);
+      const selectedHere = selectedByGroup.get(candidateGroup) ?? [];
+      const merged = selectedHere.includes(candidate) ? selectedHere : [...selectedHere, candidate];
+
+      let result: BitSet | null = null;
+      let impossible = false;
+
+      for (const { id } of BADGE_GROUPS) {
+        if (id !== candidateGroup && !selectedByGroup.has(id)) continue;
+
+        // A group with no readable bitset contributes the empty set, matching
+        // filterToIndices: an absent optional file empties the result rather
+        // than silently widening it.
+        const bits = id === candidateGroup ? await unionOf(merged) : (groupUnions.get(id) ?? null);
+        if (!bits) {
+          impossible = true;
+          break;
+        }
+        result = result === null ? bits : result.intersect(bits);
+      }
+
+      counts[candidate] = impossible || result === null ? 0 : result.count();
+    }
+
+    return counts;
   }
 
   /**

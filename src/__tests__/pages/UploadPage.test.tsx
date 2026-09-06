@@ -205,6 +205,76 @@ describe('UploadPage', () => {
         expect(mockNavigate).toHaveBeenCalledWith('/results', { replace: true });
       });
     });
+
+    // The reader chose a filter by clicking a page about it, then handed over a ZIP. A
+    // multi-second parse and a route change sit between that click and the view, and this
+    // navigate is the only place the intent can survive them. `mockLocation.search` is the
+    // only location the page sees and `beforeEach` already resets it (`:76`), so nothing
+    // leaks into the guide deep-link tests that read the same field.
+    it('should carry the filter parameter through to results', async () => {
+      mockLocation.search = '?filter=pending';
+      mockUseInstagramData.mockReturnValue({
+        uploadState: { status: 'success', error: null, fileName: 'export.zip' },
+        handleZipUpload: mockHandleZipUpload,
+        parseWarnings: [],
+      });
+
+      render(<UploadPage />);
+
+      await waitFor(() => {
+        expect(mockNavigate).toHaveBeenCalledWith('/results?filter=pending', { replace: true });
+      });
+    });
+
+    it('should carry the arrival source alongside the filter', async () => {
+      mockLocation.search = '?filter=pending&from=pending-requests';
+      mockUseInstagramData.mockReturnValue({
+        uploadState: { status: 'success', error: null, fileName: 'export.zip' },
+        handleZipUpload: mockHandleZipUpload,
+        parseWarnings: [],
+      });
+
+      render(<UploadPage />);
+
+      await waitFor(() => {
+        expect(mockNavigate).toHaveBeenCalledWith('/results?filter=pending&from=pending-requests', {
+          replace: true,
+        });
+      });
+    });
+
+    // The control. `${prefix}/results${location.search}` would pass both tests above and
+    // ship `?guide=1` to a page with no guide on it — the query is carried by name, not
+    // wholesale, and this is what says so.
+    it('should carry only the two parameters results can use', async () => {
+      mockLocation.search = '?guide=1&filter=pending&step=3';
+      mockUseInstagramData.mockReturnValue({
+        uploadState: { status: 'success', error: null, fileName: 'export.zip' },
+        handleZipUpload: mockHandleZipUpload,
+        parseWarnings: [],
+      });
+
+      render(<UploadPage />);
+
+      await waitFor(() => {
+        expect(mockNavigate).toHaveBeenCalledWith('/results?filter=pending', { replace: true });
+      });
+    });
+
+    it('should navigate without a query string when nothing was carried', async () => {
+      mockLocation.search = '?guide=1';
+      mockUseInstagramData.mockReturnValue({
+        uploadState: { status: 'success', error: null, fileName: 'export.zip' },
+        handleZipUpload: mockHandleZipUpload,
+        parseWarnings: [],
+      });
+
+      render(<UploadPage />);
+
+      await waitFor(() => {
+        expect(mockNavigate).toHaveBeenCalledWith('/results', { replace: true });
+      });
+    });
   });
 
   describe('upload handling', () => {

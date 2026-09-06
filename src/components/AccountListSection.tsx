@@ -7,8 +7,11 @@ import {
   ArrowUpDown,
   Database,
   Upload,
+  Filter,
 } from 'lucide-react';
 import { FilterChips } from './FilterChips';
+import { AppliedFilters } from './AppliedFilters';
+import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import { FollowRequestsCaveat } from './FollowRequestsCaveat';
 import { TruncatedFileCaveat } from './TruncatedFileCaveat';
 import { AccountList } from './AccountList';
@@ -21,13 +24,81 @@ import { RescuePlanBanner } from './RescuePlanBanner';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { ResultsExportControls } from './export/ResultsExportControls';
 import type { BadgeKey } from '@/core/types';
+import { BADGE_ORDER } from '@/core/badges';
 import { RESCUE_PLAN_BANNER_ENABLED } from '@/config/feature-flags';
 import { useAccountFiltering } from '@/hooks/useAccountFiltering';
 import { useUploadCaveats } from '@/hooks/useUploadCaveats';
 import { useTimeOnResults } from '@/hooks/useTimeOnResults';
+import { readArrivalSource } from '@/hooks/useFilterFromUrl';
 import { analytics } from '@/lib/analytics';
-import { useState } from 'react';
+import { recordArrival, recordEmptyResult, recordToggle } from '@/lib/stats/filter-session';
+import { useEffect, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
+
+/** What the applied selection means to a reader, as text and as an empty-state fact. */
+interface SelectionSummary {
+  /** The rendered state line: one of three, never a dangling separator. */
+  stateLine: string;
+  /** The single applied filter, or undefined when zero or several are applied. */
+  activeFilter?: { label: string };
+}
+
+/**
+ * Extracted rather than inlined, and the reason is a budget rather than taste:
+ * `AccountListSection` sat at exactly ESLint's `complexity` ceiling of 20 before
+ * this, and `lint:strict` runs `--max-warnings 0`, so one more branch in the
+ * component body fails CI. Complexity is counted per function, so moving the
+ * branches out is what buys room — condensing them would not.
+ *
+ * The name is not decoration either: a control already lit on arrival gives
+ * perception no transient to attach to, and `aria-live` does not announce
+ * initial content, so the filter's name has to be in the rendered text or it is
+ * nowhere.
+ */
+function describeSelection({
+  filters,
+  displayCount,
+  totalCount,
+  language,
+  t,
+}: {
+  filters: Set<BadgeKey>;
+  displayCount: number;
+  totalCount: number;
+  language: string;
+  t: TFunction<'results'>;
+}): SelectionSummary {
+  const appliedBadges = BADGE_ORDER.filter(badge => filters.has(badge));
+  const appliedLabels = appliedBadges.map(badge => t(`badges.${badge}`));
+
+  // The label is all that crosses: the empty state may name the filter and say
+  // nothing about the export. A per-badge count cannot support more than that —
+  // `getBadgeStats` returns 0 both for a badge whose file was missing from the
+  // download and for one whose file was present and empty.
+  const onlyBadge = appliedBadges.length === 1 ? appliedBadges[0] : undefined;
+  const activeFilter = onlyBadge && appliedLabels[0] ? { label: appliedLabels[0] } : undefined;
+
+  const filtered = displayCount.toLocaleString(language);
+  const total = totalCount.toLocaleString(language);
+
+  if (appliedLabels.length === 0) {
+    return { stateLine: t('header.showingAll', { total }), activeFilter };
+  }
+
+  if (appliedLabels.length === 1) {
+    return {
+      stateLine: t('header.showingOne', { filtered, total, filterName: appliedLabels[0] }),
+      activeFilter,
+    };
+  }
+
+  return {
+    stateLine: t('header.showingMany', { filtered, total, count: appliedLabels.length }),
+    activeFilter,
+  };
+}
 
 /**
  * Props for AccountListSection
@@ -42,6 +113,20 @@ export interface AccountListSectionProps {
   filename: string;
   /** Whether this is sample/demo data (shows indicator banner) */
   isSample?: boolean;
+  /**
+   * The badge this page's `useFilterFromUrl` APPLIED from `?filter=`, when the
+   * page applies it at all. Absent means nobody applied one here, and that is
+   * the honest default: `/sample` renders this component and does not call the
+   * hook, so a page that does not apply the parameter has nothing to pass and
+   * the arrival is counted from the store instead.
+   *
+   * Passed rather than read from the URL because a URL states an intent and not
+   * an outcome. Reading `?filter=` here reported `arrived_with: 1` on `/sample`
+   * with nothing applied, and emitted a summary row for a visit in which the
+   * reader did nothing — inflating both the arrival count and the denominator
+   * every rate on this event is read against.
+   */
+  appliedUrlFilter?: BadgeKey | null;
 }
 
 export function AccountListSection({
@@ -49,6 +134,12 @@ export function AccountListSection({
   accountCount,
   filename,
   isSample = false,
+  // No default value, deliberately: a default in this destructuring is a BRANCH
+  // against ESLint's per-function `complexity` budget, and this component sits
+  // at exactly its ceiling of 20 (`lint:strict` runs `--max-warnings 0`, so a
+  // warning fails CI). `undefined` and `null` are both falsy and both mean "no
+  // page applied one", which is the only distinction the arrival reads.
+  appliedUrlFilter,
 }: AccountListSectionProps) {
   const { t, i18n } = useTranslation('results');
   const {
@@ -58,6 +149,7 @@ export function AccountListSection({
     filters,
     setFilters,
     filterCounts,
+    candidateCounts,
     isFiltering,
     totalCount,
     hasLoadedData,
@@ -70,10 +162,22 @@ export function AccountListSection({
   const { followRequestsUnreadable, truncatedRelationshipFile } = useUploadCaveats(fileHash);
 
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [isFilterSheetOpen, setFilterSheetOpen] = useState(false);
 
   // Track time on results for engagement analytics
   // V7: trackClick collects badge click data for aggregated summary event
-  const { trackAction, trackClick } = useTimeOnResults(accountCount, hasLoadedData);
+  const { trackAction, trackClick, fireFilterSummary } = useTimeOnResults(
+    accountCount,
+    hasLoadedData
+  );
+
+  // The ROUTER's search string, never `window.location.search`. `unlock.ts`
+  // calls `window.history.replaceState` on every /results view to strip the
+  // licence and checkout params, and @remix-run/router resyncs only on
+  // `popstate` — which `replaceState` does not fire. From that call onward the
+  // two disagree permanently, and the sessions where they disagree are the ones
+  // that bought an export.
+  const { search } = useLocation();
 
   // Apply sort order to filtered indices (null = show all)
   const sortedIndices =
@@ -86,9 +190,26 @@ export function AccountListSection({
   // Display count: null means "show all" so use totalCount
   const displayCount = sortedIndices === null ? totalCount : sortedIndices.length;
 
+  // The only clear-all in the shipped surface after the filter card lost its
+  // Reset button, so it is the only `filter_clear_all` call site in `src/`.
+  // This emit is written fresh rather than moved: FilterChips' `handleClearAll`
+  // called `onFiltersChange` and never reached this function, so there was
+  // nothing to reroute.
+  //
+  // Note what this control actually does — it empties the search box too, not
+  // only the filters.
   const handleClearFilters = () => {
+    analytics.filterClearAll(filters.size);
     setFilters(new Set());
     setQuery('');
+    trackAction();
+  };
+
+  const handleRemoveFilter = (badgeType: BadgeKey) => {
+    const newFilters = new Set(filters);
+    newFilters.delete(badgeType);
+    recordToggle(badgeType, 'disable', newFilters.size, 'chip');
+    setFilters(newFilters);
     trackAction();
   };
 
@@ -102,10 +223,61 @@ export function AccountListSection({
       newFilters.add(badgeType);
     }
 
-    analytics.filterToggle(badgeType, action, newFilters.size, 'stat_card');
+    recordToggle(badgeType, action, newFilters.size, 'stat_card');
     setFilters(newFilters);
     trackAction();
   };
+
+  // What the reader arrived with, before they did anything. Recorded once:
+  // 52.3% of sessions arrive with a filter already on, and from Task 6 some of
+  // them arrive with one we chose for them.
+  //
+  // The count comes from the APPLIER, not from the store and not from the URL.
+  //
+  // Not the store, because `useFilterFromUrl` runs in the page and this effect
+  // runs in a child: React flushes child effects before parent effects in the
+  // same commit, so `filters.size` here would see yesterday's persisted
+  // selection on exactly the arrivals this measurement exists for.
+  //
+  // Not the URL either, though it was until this fix. A URL states what was
+  // ASKED FOR; only the code that applies it knows whether anyone acted. This
+  // component is rendered by `/results` AND `/sample`, and `/sample` calls no
+  // applier — so `/sample?filter=pending` reported one applied filter and, worse,
+  // marked the session `touched`, buying a summary row for a visit in which
+  // nothing happened. `appliedUrlFilter` is computed during the page's render,
+  // so it is here before this effect runs: the ordering dependency stays removed.
+  //
+  // `applied ? 1 : filters.size` is not an approximation: a valid `?filter=`
+  // REPLACES the persisted set, so it means exactly one filter is applied.
+  const arrivalRecorded = useRef(false);
+  useEffect(() => {
+    if (arrivalRecorded.current || !hasLoadedData) return;
+    arrivalRecorded.current = true;
+
+    recordArrival(appliedUrlFilter ? 1 : filters.size, readArrivalSource(search));
+  }, [hasLoadedData, filters.size, search, appliedUrlFilter]);
+
+  // The empty result is the finding, and the exit that follows it is the one
+  // most likely to lose its beacon. Emit at the moment it happens, not only on
+  // the way out — seq supersedes, so this costs one extra row in exactly the
+  // sessions worth a row and changes nothing about how the series is read.
+  //
+  // `!isFiltering` is load-bearing: a list still resolving is not a dead end,
+  // and reporting one would be reporting a measurement not taken as a zero.
+  useEffect(() => {
+    if (filters.size > 0 && hasLoadedData && !isFiltering && displayCount === 0) {
+      recordEmptyResult();
+      fireFilterSummary();
+    }
+  }, [filters.size, hasLoadedData, isFiltering, displayCount, fireFilterSummary]);
+
+  const { stateLine, activeFilter } = describeSelection({
+    filters,
+    displayCount,
+    totalCount,
+    language: i18n.language,
+    t,
+  });
 
   // Calculate stat card values
   const followersCount = filterCounts.followers || 0;
@@ -237,16 +409,43 @@ export function AccountListSection({
           />
         )}
 
-        {/* Filters Sidebar */}
+        {/* Filters Sidebar: what is applied stays on the page; choosing is a
+            sheet on every viewport. A lit control in the option space cannot
+            carry applied state — it lights identically whether the reader
+            tapped it or arrived with it already on from localStorage.
+
+            `lg:sticky lg:top-24` belongs on this card and only this card: the
+            declaration it replaces sat inside what is now a `fixed` sheet,
+            where it did nothing. */}
         <div className="space-y-6">
-          <FilterChips
-            selectedFilters={filters}
-            onFiltersChange={setFilters}
-            filterCounts={filterCounts}
-            isFiltering={isFiltering}
-            followRequestsUnreadable={followRequestsUnreadable}
-            truncatedRelationshipFile={truncatedRelationshipFile}
-          />
+          <div className="bg-card p-5 md:p-6 rounded-4xl border border-border shadow-sm space-y-5 lg:sticky lg:top-24">
+            <AppliedFilters
+              selectedFilters={filters}
+              onRemove={handleRemoveFilter}
+              onClearAll={handleClearFilters}
+            />
+            <Sheet open={isFilterSheetOpen} onOpenChange={setFilterSheetOpen}>
+              <SheetTrigger asChild>
+                <button className="cursor-pointer w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl border border-border bg-zinc-50/50 dark:bg-zinc-900/20 text-xs font-black uppercase tracking-widest hover:border-primary/40">
+                  <Filter size={14} className="text-primary" />
+                  {filters.size > 0
+                    ? t('filters.openSheetWithCount', { count: filters.size })
+                    : t('filters.openSheet')}
+                </button>
+              </SheetTrigger>
+              <SheetContent aria-label={t('filters.title')}>
+                <FilterChips
+                  selectedFilters={filters}
+                  onFiltersChange={setFilters}
+                  filterCounts={filterCounts}
+                  candidateCounts={candidateCounts}
+                  isFiltering={isFiltering}
+                  followRequestsUnreadable={followRequestsUnreadable}
+                  truncatedRelationshipFile={truncatedRelationshipFile}
+                />
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
 
         {/* The only promo above the list. On desktop it takes the full-width
@@ -292,10 +491,7 @@ export function AccountListSection({
               // reading from different grey systems.
               className="text-sm font-semibold text-muted-foreground min-w-0"
             >
-              {t('header.showing', {
-                filtered: displayCount.toLocaleString(i18n.language),
-                total: totalCount.toLocaleString(i18n.language),
-              })}
+              {stateLine}
             </p>
             {/* Sample data is demo content — never worth paying to export */}
             {!isSample && (
@@ -314,6 +510,8 @@ export function AccountListSection({
             accountIndices={sortedIndices}
             hasLoadedData={hasLoadedData}
             isLoading={isFiltering}
+            activeFilter={activeFilter}
+            searchActive={query.length > 0}
             onClearFilters={handleClearFilters}
             onAccountClick={trackClick}
           />

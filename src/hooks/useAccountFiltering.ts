@@ -40,6 +40,7 @@ export function useAccountFiltering(options: UseAccountFilteringOptions) {
   // Use Web Worker for filtering (keeps main thread responsive)
   const {
     filterToIndices: workerFilterToIndices,
+    candidateCounts: workerCandidateCounts,
     isReady: isWorkerReady,
     hasError: workerHasError,
   } = useFilterWorker({ fileHash, totalAccounts: totalCount });
@@ -254,6 +255,50 @@ export function useAccountFiltering(options: UseAccountFilteringOptions) {
     }
   }, [fileHash]);
 
+  // Per-option counts against the live selection, alongside the all-time counts
+  // above. Both are returned: filterCounts still feeds the stat cards, which are
+  // not part of a selection.
+  //
+  // `null` is the "no count" state and is not the same as `{}` — an empty map
+  // reads downstream as "every badge yields zero", which is a legitimate value
+  // and would disable everything.
+  const [candidateCounts, setCandidateCounts] = useState<Record<BadgeKey, number> | null>(null);
+
+  useEffect(() => {
+    if (!fileHash || totalCount === 0) return;
+    // The same path selection performFilter makes. Reading filterEngineRef alone
+    // would never compute for a real reader: the fallback engine is constructed
+    // only when the worker has failed, and production prefers the worker.
+    if (!isWorkerReady && !isFallbackReady) return;
+
+    let cancelled = false;
+
+    const compute = async (): Promise<Record<BadgeKey, number> | null> =>
+      isWorkerReady
+        ? workerCandidateCounts(new Set(filtersArray))
+        : (filterEngineRef.current?.candidateCounts(filtersArray) ?? null);
+
+    compute()
+      .then(counts => {
+        if (!cancelled) setCandidateCounts(counts);
+      })
+      .catch(() => {
+        if (!cancelled) setCandidateCounts(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    fileHash,
+    totalCount,
+    filtersKey,
+    filtersArray,
+    isWorkerReady,
+    isFallbackReady,
+    workerCandidateCounts,
+  ]);
+
   const clearFilters = useCallback(() => {
     // Cancel any pending filter requests
     if (abortControllerRef.current) {
@@ -296,6 +341,7 @@ export function useAccountFiltering(options: UseAccountFilteringOptions) {
     filters,
     setFilters: setStoreFilters,
     filterCounts,
+    candidateCounts,
     isFiltering,
     processingTime,
     clearFilters,
