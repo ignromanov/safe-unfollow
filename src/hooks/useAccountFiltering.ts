@@ -289,15 +289,12 @@ export function useAccountFiltering(options: UseAccountFilteringOptions) {
     return () => {
       cancelled = true;
     };
-  }, [
-    fileHash,
-    totalCount,
-    filtersKey,
-    filtersArray,
-    isWorkerReady,
-    isFallbackReady,
-    workerCandidateCounts,
-  ]);
+    // `filtersArray` and not `filtersKey`: the body reads the array, and the
+    // two change together — it is memoized on the store's `filters` Set, which
+    // Zustand replaces only when the selection actually changes. Listing both
+    // was copied from the effect above, where the same pair is equally
+    // redundant; that one is left alone as pre-existing.
+  }, [fileHash, totalCount, filtersArray, isWorkerReady, isFallbackReady, workerCandidateCounts]);
 
   const clearFilters = useCallback(() => {
     // Cancel any pending filter requests

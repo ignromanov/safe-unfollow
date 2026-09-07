@@ -9,6 +9,17 @@ const BADGES = new Set<string>(BADGE_ORDER);
 const SLUG = /^[a-z0-9-]{1,40}$/;
 
 /**
+ * The two query keys this module owns.
+ *
+ * Exported because `UploadPage` forwards both across its post-upload redirect
+ * and has no business knowing how they are spelled. It already declines to
+ * re-validate them — its own comment says two copies of the badge list is the
+ * defect CLAUDE.md bans — and the key names are the same fact one level up.
+ */
+export const FILTER_PARAM = 'filter';
+export const SOURCE_PARAM = 'from';
+
+/**
  * Which landing page sent this reader, when one did.
  *
  * Attribution is a separate parameter from the filter because a filter can be
@@ -21,7 +32,7 @@ const SLUG = /^[a-z0-9-]{1,40}$/;
  * dimension, and an unvalidated free-text field becomes an unbounded one.
  */
 export function readArrivalSource(search: string): string | null {
-  const value = new URLSearchParams(search).get('from');
+  const value = new URLSearchParams(search).get(SOURCE_PARAM);
   return value && SLUG.test(value) ? value : null;
 }
 
@@ -41,7 +52,7 @@ export function readArrivalSource(search: string): string | null {
  * the whole of the note on the hook below.
  */
 export function readArrivalFilter(search: string): BadgeKey | null {
-  const requested = new URLSearchParams(search).get('filter');
+  const requested = new URLSearchParams(search).get(FILTER_PARAM);
   return requested && BADGES.has(requested) ? (requested as BadgeKey) : null;
 }
 

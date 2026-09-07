@@ -5,6 +5,19 @@ import { useTranslation } from 'react-i18next';
 
 import { cn } from '@/lib/utils';
 
+/**
+ * Everything a dialog's dismiss control looks like, minus where it sits.
+ *
+ * The 44px box is WCAG 2.5.5 and is the reason this is one string rather than
+ * eleven classes at each call site: `sheet.tsx` had retyped all twenty of these
+ * tokens verbatim, under a comment pointing here for the rationale — the
+ * rationale linked, the value copied, which is the shape this project's
+ * "no copied facts" rule exists to stop. Positioning is deliberately absent:
+ * `DialogContent` pins its own to a corner, the sheet's sits in a sticky row.
+ */
+export const DIALOG_CLOSE_CONTROL_CLASS =
+  "ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground flex size-11 cursor-pointer items-center justify-center rounded-full opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4";
+
 function Dialog({ ...props }: React.ComponentProps<typeof DialogPrimitive.Root>) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />;
 }
@@ -92,7 +105,7 @@ const DialogContent = React.forwardRef<
             // 2px of where it was drawn (4 + 22 = 26 from each edge, against 16
             // + 8 = 24) while the 44px box still ends at 48px — exactly the
             // `pe-12` reserve GuideDialog's header leaves for it.
-            className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-1 end-1 flex size-11 cursor-pointer items-center justify-center rounded-full opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+            className={cn(DIALOG_CLOSE_CONTROL_CLASS, 'absolute top-1 end-1')}
           >
             <XIcon />
             <span className="sr-only">{t('buttons.close', { defaultValue: 'Close' })}</span>

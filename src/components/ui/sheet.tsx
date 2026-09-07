@@ -4,6 +4,7 @@ import { XIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { cn } from '@/lib/utils';
+import { DIALOG_CLOSE_CONTROL_CLASS } from './dialog';
 
 /**
  * A bottom-anchored panel over `@radix-ui/react-dialog` — the same primitive
@@ -137,10 +138,11 @@ const SheetContent = React.forwardRef<
           className="sticky top-0 z-10 -mx-5 -mt-5 mb-1 flex items-center justify-between gap-3 bg-card px-5 pt-5 pb-3"
         >
           <SheetTitle className={title ? undefined : 'sr-only'}>{title ?? ariaLabel}</SheetTitle>
-          {/* size-11 (44px) and the WCAG 2.5.5 rationale are `dialog.tsx`'s
-              convention, stated there — every other dialog in this app has
-              this control, and a sheet that quietly differs is the surprise. */}
-          <SheetClose className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">
+          {/* `dialog.tsx`'s own control, imported rather than retyped: every
+              other dialog in this app has this one, and a sheet that quietly
+              differs is the surprise. Only the positioning is ours — that
+              control is pinned to a corner, this one sits in the sticky row. */}
+          <SheetClose className={cn(DIALOG_CLOSE_CONTROL_CLASS, 'shrink-0')}>
             <XIcon />
             <span className="sr-only">{t('buttons.close', { defaultValue: 'Close' })}</span>
           </SheetClose>

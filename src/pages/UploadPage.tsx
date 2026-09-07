@@ -1,6 +1,7 @@
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { PageLoader } from '@/components/PageLoader';
 import { UploadZone } from '@/components/UploadZone';
+import { FILTER_PARAM, SOURCE_PARAM } from '@/hooks/useFilterFromUrl';
 import { useInstagramData } from '@/hooks/useInstagramData';
 import { useGuideDialog } from '@/hooks/useGuideDialog';
 import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
@@ -78,10 +79,10 @@ export function Component() {
       // two copies of it is the defect CLAUDE.md bans.
       const incoming = new URLSearchParams(location.search);
       const carried = new URLSearchParams();
-      const filter = incoming.get('filter');
-      const from = incoming.get('from');
-      if (filter) carried.set('filter', filter);
-      if (from) carried.set('from', from);
+      const filter = incoming.get(FILTER_PARAM);
+      const from = incoming.get(SOURCE_PARAM);
+      if (filter) carried.set(FILTER_PARAM, filter);
+      if (from) carried.set(SOURCE_PARAM, from);
       const suffix = carried.toString();
       navigate(`${prefix}/results${suffix ? `?${suffix}` : ''}`, { replace: true });
     }
