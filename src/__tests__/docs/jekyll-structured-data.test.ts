@@ -174,12 +174,21 @@ describe('the docs layout emits structured data', () => {
 
   it('renders valid JSON with a breadcrumb trail', () => {
     const parsed = JSON.parse(render(true)) as { '@graph': Array<{ '@type': string }> };
-    expect(parsed['@graph'].map(node => node['@type'])).toEqual(['WebPage', 'BreadcrumbList']);
+    expect(parsed['@graph'].map(node => node['@type'])).toEqual([
+      'WebPage',
+      'WebSite',
+      'Organization',
+      'BreadcrumbList',
+    ]);
   });
 
   it('renders valid JSON without one', () => {
     const parsed = JSON.parse(render(false)) as { '@graph': Array<{ '@type': string }> };
-    expect(parsed['@graph'].map(node => node['@type'])).toEqual(['WebPage']);
+    expect(parsed['@graph'].map(node => node['@type'])).toEqual([
+      'WebPage',
+      'WebSite',
+      'Organization',
+    ]);
   });
 
   it('emits no type the design excluded', () => {
@@ -195,17 +204,16 @@ describe('the docs layout emits structured data', () => {
     // entry ("FAQPage beyond the one page that already has it") doesn't even put its name right
     // before the parenthetical, and another ("Article/TechArticle") names two types where the
     // code only ever emits "TechArticle", so a parser would need the same judgment calls a
-    // reader makes and would be no more trustworthy than this list. Six entries, matching the
-    // six the comment in `default.html` names.
+    // reader makes and would be no more trustworthy than this list. Five entries, matching the
+    // five the comment in `default.html` still names.
+    //
+    // ⚠️ `Organization` left this list on 2026-09-07 and the layout now emits it. The exclusion
+    // was not wrong about its own reason — cross-document `@id` resolution is still unconfirmed
+    // — so the node is written out in full on every page and resolves nothing across documents.
+    // The evidence that moved it is in
+    // `.claude/analytics/2026-09-07-entity-resolution/00-the-entity-defects.md` §2.
     expect(SCRIPT, 'no script payload extracted').not.toBe('');
-    for (const type of [
-      'speakable',
-      'HowTo',
-      'FAQPage',
-      'TechArticle',
-      'Organization',
-      'datePublished',
-    ]) {
+    for (const type of ['speakable', 'HowTo', 'FAQPage', 'TechArticle', 'datePublished']) {
       expect(
         SCRIPT,
         `${type} is excluded by 00-design.md §4 A1 for a researched reason`
@@ -300,6 +308,72 @@ describe('the docs layout emits structured data', () => {
         'extra empty segment on every pretty-permalink page'
     ).toMatch(
       /canonical_last == ['"]\/['"][\s\S]{0,200}canonical_path \| slice: 0, canonical_trimmed/
+    );
+  });
+});
+
+/**
+ * One entity, published by two builds that share no source.
+ *
+ * Jekyll renders `/docs/*` and Vite renders everything else, so the Organization node exists
+ * twice — `docs/_config.yml`'s `entity:` block and `src/components/OrganizationSchema.tsx`. Two
+ * copies of a fact disagree within a month; `CLAUDE.md` bans the shape by name and the 2026-08-14
+ * audit found the same number written six times with four values. Here the cost of drift is
+ * specific rather than generic: the two copies carry the same `@id`, so a consumer that merges
+ * them would receive one organisation described two different ways — the exact failure the node
+ * was added to fix.
+ *
+ * This is the only thing keeping them equal. There is no shared module to import.
+ */
+describe('the docs entity and the app entity are the same entity', () => {
+  /** Reads a `const NAME = 'a' + 'b';` chain out of the component's source and joins it. */
+  function componentString(name: string): string {
+    const COMPONENT = readFileSync(
+      join(process.cwd(), 'src', 'components', 'OrganizationSchema.tsx'),
+      'utf-8'
+    );
+    const declaration = new RegExp(`const ${name} =([\\s\\S]*?);\\n`).exec(COMPONENT)?.[1];
+    expect(declaration, `${name} not found in OrganizationSchema.tsx`).toBeTruthy();
+    const parts = [...declaration!.matchAll(/'((?:[^'\\\\]|\\\\.)*)'/g)].map(m => m[1]);
+    expect(parts.length, `${name} yielded no string literals`).toBeGreaterThan(0);
+    return parts.join('');
+  }
+
+  async function entity(): Promise<Record<string, unknown>> {
+    const { parse: parseYAML } = await import('yaml');
+    const parsed = parseYAML(CONFIG) as { entity?: Record<string, unknown> };
+    expect(parsed.entity, 'docs/_config.yml has no entity: block').toBeTruthy();
+    return parsed.entity!;
+  }
+
+  it('describes the organisation identically on both surfaces', async () => {
+    const e = await entity();
+    expect(e.description).toBe(componentString('ORGANIZATION_DESCRIPTION'));
+    expect(e.disambiguating_description).toBe(componentString('DISAMBIGUATING_DESCRIPTION'));
+  });
+
+  it('claims the same profiles on both surfaces', async () => {
+    const e = await entity();
+    // SAME_AS holds identifiers, so the extractor reads the const it is built from.
+    const github = componentString('GITHUB_URL');
+    expect(e.same_as).toEqual([github]);
+  });
+
+  it('builds the shared @id from the site URL rather than typing it twice', async () => {
+    const e = await entity();
+    expect(e.id).toBe(`${e.url as string}/#organization`);
+    expect(e.website_id).toBe(`${e.url as string}/#website`);
+    const COMPONENT = readFileSync(
+      join(process.cwd(), 'src', 'components', 'OrganizationSchema.tsx'),
+      'utf-8'
+    );
+    expect(COMPONENT).toContain('`${BASE_URL}/#organization`');
+  });
+
+  /** The control: the extractor must be able to see a difference, or it proves nothing. */
+  it('the comparison can go red', () => {
+    expect(componentString('ORGANIZATION_DESCRIPTION')).not.toBe(
+      componentString('DISAMBIGUATING_DESCRIPTION')
     );
   });
 });

@@ -7,6 +7,38 @@ description: "Free Instagram unfollow tracker - analyze your followers and follo
 baseurl: "/docs"
 url: "https://safeunfollow.app"
 
+# The publisher, named once so thirteen pages can assert the same entity.
+#
+# Overturns the GEO plan's §4 A1 exclusion of `Organization` from this layout, and states why in
+# the place the next reader will look. That exclusion was reasoned — "cross-document `@id`
+# resolution by Google's Search parser could not be confirmed from a primary source" — and it is
+# still correct about resolution. It is answered by never requiring any: each page carries the
+# **complete** node, not a bare `{"@id": ...}` reference to the home page's copy, so a consumer
+# that resolves nothing still reads a self-describing organisation. The shared `@id` is a bonus
+# for consumers that do merge, never a dependency.
+#
+# What changed to make it worth doing: the five-engine citation baseline of 2026-09-07 measured
+# four of five AI engines resolving the string "SafeUnfollow" to an unrelated Chrome extension
+# that automates unfollowing. These thirteen pages are the ones `llms.txt` routes engines to and
+# the ones that rank — and until now they asserted no entity at all.
+# `.claude/analytics/2026-09-07-entity-resolution/00-the-entity-defects.md` §2 and §3.
+#
+# ⛔ These four strings are duplicated from `src/components/OrganizationSchema.tsx`, because
+# Jekyll and Vite are separate builds with no shared source. `jekyll-structured-data.test.ts`
+# reads both files and fails when they disagree — that gate is the only thing keeping one entity
+# from being published as two.
+entity:
+  id: "https://safeunfollow.app/#organization"
+  website_id: "https://safeunfollow.app/#website"
+  name: "SafeUnfollow"
+  alternate_name: "Instagram Unfollow Tracker"
+  url: "https://safeunfollow.app"
+  logo: "https://safeunfollow.app/logo.svg"
+  same_as:
+    - "https://github.com/ignromanov/safe-unfollow"
+  description: "SafeUnfollow is a free web app that reads the official Instagram data export in your browser and shows who unfollowed you, who does not follow back, and who is mutual. The export is parsed on your own device and never uploaded, and no Instagram login is required."
+  disambiguating_description: "SafeUnfollow is the web app at safeunfollow.app. It is not a browser extension, it does not act inside an Instagram session, and it never follows or unfollows anyone on your behalf."
+
 # Build settings
 markdown: kramdown
 highlighter: rouge

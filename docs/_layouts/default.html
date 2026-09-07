@@ -62,8 +62,8 @@
     <link rel="canonical" href="{{ site.url }}{{ canonical_path }}"/>
 
     {%- comment -%} structured-data:start
-      Two nodes and no more, each for a reason recorded in
-      .claude/plans/2026-09-04-geo-quick-wins/00-design.md §4 A1:
+      Four nodes, three of them from .claude/plans/2026-09-04-geo-quick-wins/00-design.md §4 A1
+      and one that overturns it:
 
       WebPage        — keyed on the same `canonical_path` the <link rel="canonical"> above is
                        built from, so the @id and the canonical cannot disagree.
@@ -71,14 +71,25 @@
                        ListItem carries position and name; the final one omits `item`, because it
                        is the page the reader is already on. Two items minimum, so /docs itself
                        emits none.
+      WebSite        — the site these pages are part of, published by the organisation below.
+      Organization   — ⚠️ A1 excluded this, and the exclusion was reasoned: "cross-document @id
+                       resolution by Google's Search parser could not be confirmed from a primary
+                       source". That is still true, and it is answered rather than ignored — this
+                       node is written out IN FULL on every page, never as a bare {"@id": ...}
+                       pointing at the home page's copy, so nothing has to be resolved across
+                       documents for it to read. What changed is the evidence on the other side:
+                       the citation baseline of 2026-09-07 measured four of five AI engines
+                       resolving "SafeUnfollow" to an unrelated Chrome extension, and these are
+                       the pages llms.txt sends those engines to. Values live in _config.yml's
+                       `entity:` block; a gate compares them against the React component that
+                       publishes the same entity on the home page.
 
-      Not here, each checked against Google's documentation rather than assumed: speakable (beta
-      since 2018, US-English news only), HowTo (rich result removed Sep 2023), FAQPage beyond the
-      one page that already has it (restricted to gov/health Aug 2023, deprecation notice May
-      2026), Article/TechArticle (all three recognised types expect an author these pages do not
-      have), Organization (cross-document @id resolution could not be confirmed from a primary
-      source), and datePublished (no publish date exists in front matter, and inventing one puts
-      a lie in a machine-readable field).
+      Still not here, each checked against Google's documentation rather than assumed: speakable
+      (beta since 2018, US-English news only), HowTo (rich result removed Sep 2023), FAQPage
+      beyond the one page that already has it (restricted to gov/health Aug 2023, deprecation
+      notice May 2026), Article/TechArticle (all three recognised types expect an author these
+      pages do not have), and datePublished (no publish date exists in front matter, and
+      inventing one puts a lie in a machine-readable field).
 
       Every author-written value goes through `jsonify`. Inside this script element an unescaped
       quote does not break one attribute, it invalidates the whole block and the page silently
@@ -105,7 +116,7 @@
     {%- endfor -%}
     {%- unless page.no_structured_data -%}
 <script type="application/ld+json">
-{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":{{ page_canonical_url | jsonify }},"url":{{ page_canonical_url | jsonify }},"name":{{ head_title | jsonify }},"description":{{ head_description | jsonify }},"dateModified":{{ page.last_updated | date: '%Y-%m-%d' | jsonify }}}{%- if crumb_count >= 2 -%},{"@type":"BreadcrumbList","itemListElement":[{{ crumb_items }}]}{%- endif -%}]}
+{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":{{ page_canonical_url | jsonify }},"url":{{ page_canonical_url | jsonify }},"name":{{ head_title | jsonify }},"description":{{ head_description | jsonify }},"dateModified":{{ page.last_updated | date: '%Y-%m-%d' | jsonify }},"isPartOf":{"@id":{{ site.entity.website_id | jsonify }}}},{"@type":"WebSite","@id":{{ site.entity.website_id | jsonify }},"url":{{ site.entity.url | jsonify }},"name":{{ site.entity.alternate_name | jsonify }},"publisher":{"@id":{{ site.entity.id | jsonify }}}},{"@type":"Organization","@id":{{ site.entity.id | jsonify }},"name":{{ site.entity.name | jsonify }},"alternateName":{{ site.entity.alternate_name | jsonify }},"url":{{ site.entity.url | jsonify }},"logo":{{ site.entity.logo | jsonify }},"sameAs":{{ site.entity.same_as | jsonify }},"description":{{ site.entity.description | jsonify }},"disambiguatingDescription":{{ site.entity.disambiguating_description | jsonify }}}{%- if crumb_count >= 2 -%},{"@type":"BreadcrumbList","itemListElement":[{{ crumb_items }}]}{%- endif -%}]}
 </script>
     {%- endunless -%}
     {%- comment -%} structured-data:end {%- endcomment -%}

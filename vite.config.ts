@@ -19,6 +19,11 @@ export default defineConfig({
     __APP_VERSION__: JSON.stringify(
       process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? pkg.version
     ),
+    // The semver, always — `__APP_VERSION__` above resolves to a commit sha in Vercel builds,
+    // which is the wrong shape for `SoftwareApplication.softwareVersion` in the JSON-LD
+    // (src/components/OrganizationSchema.tsx). That field held a hand-typed '1.5.0' against a
+    // package.json reading '1.6.0' until 2026-09-07.
+    __PKG_VERSION__: JSON.stringify(pkg.version),
   },
   plugins: [
     react(),
