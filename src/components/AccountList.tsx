@@ -96,7 +96,7 @@ export const AccountList = memo(function AccountList({
             indistinguishably. Same shape as GH#21 one level down, where
             `itemCount: 0` cannot separate "empty" from "unreadable".
           */}
-          <p className="text-xl md:text-2xl font-display font-bold text-zinc-300">
+          <p className="text-xl md:text-2xl font-display font-bold text-muted-foreground">
             {activeFilter
               ? t('empty.filteredTitle', { filterName: activeFilter.label })
               : t('empty.noUsers')}

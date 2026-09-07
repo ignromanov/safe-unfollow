@@ -87,7 +87,7 @@
   "empty": {
     "noUsers": "No users found",
     "resetFilters": "Reset Filters",
-    "filteredTitle": "No accounts are {{filterName}}"
+    "filteredTitle": "No accounts match the \"{{filterName}}\" filter"
   },
   "list": {
     "header": "Accounts ({{count, number}})",

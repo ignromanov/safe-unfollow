@@ -40,7 +40,7 @@ export const AppliedFilters = memo(function AppliedFilters({
         </h4>
         <button
           onClick={onClearAll}
-          className="cursor-pointer text-xs font-black text-rose-500 uppercase tracking-widest hover:underline"
+          className="cursor-pointer text-xs font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest hover:underline"
         >
           {t('filters.reset')}
         </button>
