@@ -7,6 +7,7 @@ import {
   getLocaleCode,
   detectLanguageFromPathname,
 } from '@/config/languages';
+import { INTENT_PATHS } from '@/config/intent-pages';
 
 const BASE_URL = 'https://safeunfollow.app';
 
@@ -48,6 +49,19 @@ function updateHreflangTags(currentPath: string, cache: Map<string, HTMLLinkElem
   // (e.g., from SSG output or other sources)
   if (cache.size === 0) {
     document.querySelectorAll('link[rel="alternate"][hreflang]').forEach(el => el.remove());
+  }
+
+  // English-only routes advertise no alternates — in the live DOM as well as in dist/ and in
+  // sitemap.xml, because Googlebot reads the rendered DOM. This hook removes as well as adds, so
+  // the behaviour here is "clear and add nothing": a bare early return would leave the SSG tags
+  // standing on first render and the previous route's ten standing after a client-side navigation.
+  //
+  // Matched against the full path rather than the locale-stripped one: /ru/<slug> is not one of
+  // these routes, it is that locale's NotFoundPage, and it keeps the normal alternates.
+  if (INTENT_PATHS.includes(currentPath)) {
+    cache.forEach(link => link.remove());
+    cache.clear();
+    return;
   }
 
   // All hreflang keys: supported languages + x-default

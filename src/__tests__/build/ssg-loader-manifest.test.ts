@@ -2,6 +2,7 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
 import { describe, it, expect } from 'vitest';
+import { describeDist } from '../utils/dist-gate';
 
 /**
  * GH#36 — 263 `route_error` events over 24 Jul – 12 Aug 2026, `status` always -1,
@@ -47,7 +48,7 @@ const dist = join(root, 'dist');
 const built = existsSync(dist) && existsSync(join(dist, 'index.html'));
 
 /**
- * Walked lazily, inside a test. `describe.runIf` marks a suite skipped but still
+ * Walked lazily, inside a test. `describeDist` marks a suite skipped but still
  * runs its callback during collection, so reading `dist` from the suite body —
  * or from an `it.each` argument — throws ENOENT in the CI jobs that do not build.
  */
@@ -99,7 +100,7 @@ function manifestGateVariable(): string | null {
   return null;
 }
 
-describe.runIf(built)('SSG static loader manifest', () => {
+describeDist('SSG static loader manifest', built, () => {
   it('resolves to null for every route, so an empty manifest is an exact substitute', () => {
     // The per-page data live under `static-loader-data/`; the index that points at
     // them is a *sibling file*, `static-loader-data-manifest-<hash>.json`, whose
@@ -176,8 +177,9 @@ describe.runIf(built)('SSG static loader manifest', () => {
  * global while leaving the old name alive elsewhere in the bundle, which is
  * exactly the shape of change a range would have taken silently.
  *
- * Outside `describe.runIf(built)` deliberately — this reads `package.json`, so
- * it runs in the two CI jobs that never build as well as the one that does.
+ * Outside the dist gate deliberately — this reads `package.json`, so it runs in the CI job
+ * that never builds (`code-quality.yml`) as well as the one that does. That used to say "the
+ * two jobs"; `test.yml` was deleted, and GH#159's own table still names it.
  */
 describe('vite-react-ssg version', () => {
   it('is pinned exactly, because this fix depends on internals a minor has already moved', () => {

@@ -1,7 +1,8 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 
-import { describe, it, expect } from 'vitest';
+import { it, expect } from 'vitest';
+import { describeDist } from '../utils/dist-gate';
 
 /**
  * Every page on this site ships as prerendered HTML that is completely inert until React
@@ -113,9 +114,10 @@ function controls(file: string): Control[] {
 const built = existsSync(dist) && existsSync(join(dist, 'index.html'));
 
 /**
- * Walked lazily, inside the tests. `describe.runIf` marks a suite skipped but still RUNS
+ * Walked lazily, inside the tests. `describeDist` marks a suite skipped but still RUNS
  * its callback during collection, so touching the filesystem in the suite body throws
- * ENOENT in every CI job that does not build first — which is two of the three.
+ * ENOENT in any CI job that does not build first — today that is `code-quality.yml` alone,
+ * since `test.yml` was deleted.
  */
 let scanned: { pages: string[]; all: Control[] } | null = null;
 function scan(): { pages: string[]; all: Control[] } {
@@ -126,7 +128,7 @@ function scan(): { pages: string[]; all: Control[] } {
   return scanned;
 }
 
-describe.runIf(built)('prerendered controls', () => {
+describeDist('prerendered controls', built, () => {
   it('scans the English prerendered pages, and there are some to scan', () => {
     // Guards the guard: a glob that silently matched nothing would report success.
     // Floors, not counts: 9 English pages today. This was `> 10` while /wizard and its
@@ -173,7 +175,7 @@ const LANDING_HREFS = ['/upload?guide=1', '/sample', '/upload', '/'];
 
 const hrefBuilt = HREF_CASES.every(c => existsSync(join(dist, c.page)));
 
-describe.runIf(hrefBuilt)('prerendered CTA hrefs', () => {
+describeDist('prerendered CTA hrefs', hrefBuilt, () => {
   it.each(HREF_CASES)(
     '$page carries localized anchors for every landing CTA',
     ({ page, prefix }) => {

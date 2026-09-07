@@ -9,6 +9,30 @@
         "href": "/upload?guide=1"
       }
     },
+    "whoDoesntFollowBack": {
+      "question": "Instagram'da beni geri takip etmeyenler kimler?",
+      "answer": "Instagram veri dışa aktarımın iki listeyi de içerir: takip ettiklerin ve seni takip edenler. İlk listede olup ikincide olmayan hesaplar seni geri takip etmeyenlerdir. Dışa aktarımı buraya yükle, \"Geri takip etmiyor\" filtresi hepsini gösterir: ücretsiz, giriş yapmadan ve dosya tarayıcından dışarı çıkmadan.",
+      "relatedLink": {
+        "text": "Geri takip etmeyenleri gör",
+        "href": "/upload?filter=notFollowingBack"
+      }
+    },
+    "pendingSent": {
+      "question": "Instagram'da gönderdiğim takip isteklerini nasıl görürüm?",
+      "answer": "Uygulamada bunun için bir ekran yok ama veri dışa aktarımında var: pending_follow_requests.json, gönderdiğin ve hiç kabul edilmeyen her isteği listeler. Dışa aktarımı buraya yükle, \"Bekleyen istek\" filtresi tüm listeyi tek seferde gösterir, giriş yapmadan.",
+      "relatedLink": {
+        "text": "Bekleyen isteklerini gör",
+        "href": "/upload?filter=pending"
+      }
+    },
+    "mutuals": {
+      "question": "Instagram'da karşılıklı takipçilerimi nasıl bulurum?",
+      "answer": "Dışa aktarımının iki listesinde de yer alan hesaplar — takip edilenler ve takipçiler — karşılıklı takipçilerindir; örneklem üzerinden değil, dışa aktarımın her satırı üzerinden hesaplanır. Yalnızca kendi hesabın için çalışır; başka iki kişinin profillerini karşılaştıramaz.",
+      "relatedLink": {
+        "text": "Karşılıklı takipçilerini gör",
+        "href": "/upload?filter=mutuals"
+      }
+    },
     "withoutDownload": {
       "question": "Veri indirmeden veya uygulama olmadan Instagram takipten çıkanları kontrol edebilir miyim?",
       "answer": "Hayır. Instagram yerel bir takipten çıkan listesi sağlamaz. Tek güvenli yöntemler: (1) Takip edilen hesapları takipçilerle manuel olarak karşılaştırmak, veya (2) Bu araçla resmi veri indirmenizi kullanmak. Bu izleyici yöntem 2'yi senin için ücretsiz yapar: şifre yok, giriş yok, hesap riski yok.",

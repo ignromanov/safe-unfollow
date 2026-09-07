@@ -2,6 +2,8 @@ import type { RouteRecord } from 'vite-react-ssg';
 import { Layout } from '@/components/Layout';
 import { RouteErrorPage } from '@/components/RouteErrorPage';
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '@/locales';
+import { INTENT_PAGES } from '@/config/intent-pages';
+import IntentPage from './pages/IntentPage';
 
 // Direct imports for parallel loading (no lazy waterfall)
 import HomePage from './pages/HomePage';
@@ -30,6 +32,25 @@ function createPageChildren(): RouteRecord[] {
 }
 
 /**
+ * The intent landing pages, English only.
+ *
+ * Deliberately NOT part of createPageChildren(): that factory is called once for `/` and once
+ * for each of the nine other languages (:74-80), so anything inside it ships in ten locales.
+ * These pages exist in English and nowhere else, which is the operator's scope ruling for the
+ * pSEO stream — see .claude/plans/2026-09-05-filter-and-intent-pages/00-INDEX.md.
+ *
+ * A request for /ru/who-doesnt-follow-me-back therefore falls to that language's `*` route and
+ * renders NotFoundPage. That is intended: nothing links there, and after this task nothing
+ * advertises it either.
+ */
+function createIntentPageChildren(): RouteRecord[] {
+  return INTENT_PAGES.map(page => ({
+    path: page.slug,
+    element: <IntentPage page={page} />,
+  }));
+}
+
+/**
  * Route definitions for SSG prerendering
  *
  * Structure (7 prerendered routes per language):
@@ -42,7 +63,7 @@ function createPageChildren(): RouteRecord[] {
  * - /404
  *
  * The `*` catch-all is stripped by vite-react-ssg (it skips any path containing
- * ':' or '*'), so the real build emits 10 languages x 7 = 70 prerendered routes.
+ * ':' or '*'), so the real build emits 10 languages x 7 + 3 English-only = 73 prerendered routes.
  *
  * Nine more used to be `/wizard` and `/wizard/step/1..8`, prerendered per
  * language by an `includedRoutes` hook — 90 of the sitemap's 163 entries, 80 of
@@ -68,7 +89,7 @@ export const routes: RouteRecord[] = [
     element: <Layout />,
     errorElement: <RouteErrorPage />,
     entry: 'src/components/Layout.tsx',
-    children: createPageChildren(),
+    children: [...createIntentPageChildren(), ...createPageChildren()],
   },
   // Language-prefixed routes (es, ru, de, etc.)
   ...SUPPORTED_LANGUAGES.filter(lang => lang !== 'en').map((lang): RouteRecord => ({

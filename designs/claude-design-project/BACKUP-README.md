@@ -8,10 +8,16 @@ a git worktree was removed.
 
 ## What is here, and what is not
 
-Backed up (43 files): `foundations/` (18 specimen cards) · `catalog/` (5 variant grids) ·
+Backed up: `foundations/` (18 specimen cards) · `catalog/` (5 variant grids) ·
 `ui_kits/app/` (6, the click-through app recreation) · `handoff/` (2 conversion-redesign
 documents) · `templates/conversion-audit/` (4 mockups + their loader and runtime) ·
+`templates/intent-landing/` (4 artboards + a canvas + the same runtime pair, 2026-09-06) ·
 six root text files.
+
+> The file count that used to open this line is gone rather than updated. Nothing recomputed
+> it, so it drifted the moment a directory was added — `git ls-files designs/claude-design-project | wc -l`
+> answers it in one command, and `.claude/CLAUDE.md` → "No copied facts" is why it is a
+> command and not a number.
 
 Not backed up, deliberately:
 

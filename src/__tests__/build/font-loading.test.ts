@@ -2,6 +2,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 
 import { describe, it, expect } from 'vitest';
+import { describeDist } from '../utils/dist-gate';
 
 import { dropOnDemandFontPreloads } from '../../../vite/ssg-meta-injector';
 
@@ -156,7 +157,7 @@ describe('dropOnDemandFontPreloads', () => {
 
 const built = existsSync(dist) && existsSync(join(dist, 'index.html'));
 
-/** Walked lazily: describe.runIf still runs the suite body during collection. */
+/** Walked lazily: describeDist still runs the suite body during collection. */
 function builtCss(): { href: string; text: string }[] {
   const dir = join(dist, 'assets');
   return readdirSync(dir)
@@ -178,7 +179,7 @@ function requestedFontUrls(): string[] {
   return out;
 }
 
-describe.runIf(built)('built font assets resolve', () => {
+describeDist('built font assets resolve', built, () => {
   it('every font the stylesheet requests exists in dist', () => {
     const requested = requestedFontUrls();
     expect(requested.length, 'built CSS requests no fonts at all').toBeGreaterThan(0);

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><style>body{margin:0;background:oklch(0.9 0.008 264)}a{color:var(--foreground)}a:hover{color:var(--primary)}</style></helmet>
+<div class="{{ themeClass }}" style="width:1100px;margin:0 auto;position:relative;font-family:'Inter Variable','Inter',ui-sans-serif,system-ui;background:var(--background);color:var(--foreground);min-height:2000px">
+<div style="position:sticky;top:0;z-index:80;height:80px;display:flex;align-items:center;justify-content:space-between;padding:0 32px;background:var(--card);border-bottom:1px solid var(--border)">
+<div style="display:flex;align-items:center;gap:12px"><div class="bg-gradient-brand" style="width:40px;height:40px;border-radius:12px"></div><span class="font-display" style="font-weight:800;font-size:20px">SafeUnfollow<span style="color:var(--primary)">.app</span></span></div>
+<span style="font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-foreground)">Header · inherited from Layout · h-20</span>
+</div>
+<main style="padding:56px 32px 0">
+<div style="display:grid;grid-template-columns:minmax(0,1fr) 420px;gap:64px;align-items:start;max-width:1040px;margin:0 auto">
+<div>
+<h1 class="font-display" style="font-size:48px;font-weight:800;letter-spacing:-.04em;line-height:1.1;margin:0;text-wrap:pretty">Your Pending Instagram Follow Requests</h1>
+<p style="margin:20px 0 0;font-size:19px;line-height:1.6;font-weight:500;max-width:34em">Instagram keeps a list of every follow request you sent that was never accepted. It sits in your data export, and this reads it and shows you each account — in your browser, from your own file.</p>
+<div style="margin-top:28px;display:flex;align-items:center;gap:20px;flex-wrap:wrap"><x-import component-from-global-scope="SafeUnfollow.Button" size="lg" className="h-12 px-8 rounded-2xl text-base font-bold shadow-2xl shadow-primary/30 hover:scale-[1.02] active:scale-95" hint-size="280px,48px">See your pending requests</x-import>
+<p style="margin:0;font-size:14px;line-height:1.45;color:var(--muted-foreground)">No login. Your archive never leaves your device.</p></div>
+<div style="margin-top:28px;display:flex;gap:12px;align-items:flex-start;border:1px solid var(--border);background:var(--card);border-radius:16px;padding:14px 16px;max-width:520px">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted-foreground);flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+<p style="margin:0;font-size:14px;line-height:1.5;color:var(--muted-foreground)"><b style="color:var(--foreground)">No export yet?</b> Requesting one from Instagram takes about two minutes. Meta emails the file later — often after a day or more. This page will be here when it arrives.</p>
+</div>
+</div>
+<section aria-label="Sample archive" style="border:1px solid var(--border);background:var(--card);border-radius:2rem;box-shadow:0 1px 2px oklch(0 0 0 / .05);overflow:hidden">
+<div style="padding:22px 22px 12px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+<div><p style="margin:0;font-size:11px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-foreground)">Sample archive</p>
+<p class="font-display" style="margin:4px 0 0;font-size:32px;font-weight:900;letter-spacing:-.04em;line-height:1">30 <span style="font-size:14px;font-weight:700;color:var(--muted-foreground);letter-spacing:0">of 1,180 accounts</span></p></div>
+<span style="flex-shrink:0;margin-top:2px;background:oklch(0.7 0.15 50 / 0.12);color:oklch(0.65 0.18 50);border:1px solid oklch(0.7 0.15 50 / 0.2);font-size:11px;text-transform:uppercase;letter-spacing:.05em;font-weight:900;padding:5px 10px;border-radius:8px;line-height:1">Pending request</span>
+</div>
+<p style="margin:0 22px 12px;font-size:13px;font-weight:700">Sample data — not your account.</p>
+<sc-for list="{{ rows }}" as="r" hint-placeholder-count="4">
+<div style="display:flex;align-items:center;gap:14px;padding:12px 22px;border-top:1px solid var(--border);min-height:60px">
+<div style="width:44px;height:44px;border-radius:16px;background:var(--muted);border:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted-foreground)"><circle cx="12" cy="8" r="4"></circle><path d="M20 21a8 8 0 0 0-16 0"></path></svg></div>
+<div style="min-width:0;flex:1;display:flex;align-items:center;justify-content:space-between;gap:12px"><div class="font-display" style="font-weight:700;font-size:16px;line-height:1.2;display:flex;align-items:center;gap:6px"><span>@</span><span style="display:inline-block;height:12px;border-radius:6px;background:repeating-linear-gradient(135deg,var(--muted) 0 6px,var(--border) 6px 8px);width:96px"></span><span style="font-size:10px;font-family:ui-monospace,monospace;font-weight:400;color:var(--muted-foreground);margin-inline-start:6px">handle {{ r.n }}</span></div>
+<span style="background:oklch(0.7 0.15 50 / 0.12);color:oklch(0.65 0.18 50);border:1px solid oklch(0.7 0.15 50 / 0.2);font-size:10px;text-transform:uppercase;letter-spacing:.05em;font-weight:900;padding:4px 8px;border-radius:8px;line-height:1;flex-shrink:0">Pending request</span></div>
+</div>
+</sc-for>
+<div style="padding:14px 22px 16px;border-top:1px solid var(--border);background:var(--muted)">
+<p style="margin:0;font-size:13px;line-height:1.5;color:var(--muted-foreground)"><b style="color:var(--foreground)">{{ remaining }} more</b> in this sample. In your own archive this list may be empty — that is a normal result, not a failure.</p></div>
+</section>
+</div>
+<article style="margin:64px auto 0;max-width:680px;font-size:17px;line-height:1.65;color:var(--foreground)">
+<h2 class="font-display" style="font-size:28px;font-weight:800;letter-spacing:-.04em;line-height:1.2;margin:0 0 10px">What counts as pending</h2>
+<p style="margin:0 0 14px">Pending means you tapped Follow on a private account and the request was neither accepted nor declined. The account is not in your following list, because you are not following it yet, and it is not in your followers list either. Instagram holds the request open indefinitely; some are days old, some are years old.</p>
+<p style="margin:0 0 14px">Requests you cancelled yourself are not pending — cancelling removes them. Declined requests are not pending either: Instagram deletes a declined request without telling you, so a declined and an accepted request both simply disappear from this list. What remains is the set still waiting, and that is the set this page hands you.</p>
+<p style="margin:0">It is also the set that can inflate a "not following back" count. An account you have requested but that has not accepted you is neither a follower nor a follow, and a tool that only compares two lists can misfile it. This one reads the third list.</p>
+<h2 class="font-display" style="font-size:28px;font-weight:800;letter-spacing:-.04em;line-height:1.2;margin:44px 0 12px">Why this list is invisible in the app</h2>
+<p style="margin:0 0 14px">Instagram shows you the requests other people sent to you. It does not show you the requests you sent to others. There is no screen for it, no count on your profile, and no notification when one has been sitting for a year. The only way to see a sent request in the app is to open that account's profile and notice the button says Requested instead of Follow — one profile at a time, if you can remember which ones to check.</p>
+<p style="margin:0">The data export is the exception. When you download your information from Accounts Center, the archive contains a file named <span style="font-family:ui-monospace,monospace;font-size:14px">pending_follow_requests</span>, and it lists every open request with the date you sent it. Meta writes it; nothing here reconstructs or guesses it. That is why this tool needs the export rather than your login: the list exists only in the file.</p>
+<h2 class="font-display" style="font-size:28px;font-weight:800;letter-spacing:-.04em;line-height:1.2;margin:44px 0 12px">Finding it in your archive</h2>
+<p style="margin:0 0 14px">The archive is a ZIP. Inside it, under <span style="font-family:ui-monospace,monospace;font-size:14px">connections/followers_and_following</span>, is <span style="font-family:ui-monospace,monospace;font-size:14px">pending_follow_requests.json</span> — one entry per request, each with a username and a timestamp. You do not need to open it yourself. Drop the whole ZIP on the upload page and the file is read in your browser alongside your followers and following lists, so each pending account is shown with its date and with any other badge it carries.</p>
+<p style="margin:0">One thing decides whether the file is there at all: the export must include <i>Followers and following</i> — one of the categories you tick in Meta's dialog. Either format Meta offers, HTML or JSON, is read here. The request itself takes about two minutes. The wait for Meta's email is the slow part, and it can be a day or more.</p>
+<h2 class="font-display" style="font-size:28px;font-weight:800;letter-spacing:-.04em;line-height:1.2;margin:44px 0 12px">An empty list is a normal result</h2>
+<p style="margin:0 0 14px">Many people have no pending requests at all. If you mostly follow public accounts, or if every private account you requested has answered, the file exists and contains nothing, and the results page says so rather than padding the list. That is the correct answer, not a failure. A short list is also common: the sample archive above holds 30 pending requests out of 1,180 accounts, and 30 is on the high side for an account that size.</p>
+<p style="margin:0">When the list is not empty, what you do with it is up to you — cancel requests that have sat for years, or leave them. Nothing here acts on your account; the tool cannot, because it never logs in. It reads the file, shows you the list, and the list stays on your device.</p>
+</article>
+<div style="margin:56px auto 0;max-width:680px;border:1px solid var(--border);background:var(--card);border-radius:1.5rem;padding:28px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap">
+<div><p class="font-display" style="margin:0;font-size:24px;font-weight:800;letter-spacing:-.04em;line-height:1.2">Ready when your export is.</p>
+<p style="margin:6px 0 0;font-size:15px;line-height:1.5;color:var(--muted-foreground)">Drop the ZIP and the pending list is the first thing you see.<br>No login. Your archive never leaves your device.</p></div>
+<x-import component-from-global-scope="SafeUnfollow.Button" size="lg" className="h-12 px-8 rounded-2xl text-base font-bold active:scale-95" hint-size="260px,48px">See your pending requests</x-import>
+</div>
+<nav aria-label="Related pages" style="margin:40px auto 0;max-width:680px">
+<p style="margin:0 0 8px;font-size:11px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-foreground)">Also answers</p>
+<ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:16px;line-height:1.5">
+<li><a href="#" style="text-decoration:underline;text-decoration-color:oklch(0.6 0.18 264 / .5);text-underline-offset:3px;font-weight:600">Who Doesn't Follow You Back on Instagram</a> <span style="color:var(--muted-foreground)">— the one-way follows</span></li>
+<li><a href="#" style="text-decoration:underline;text-decoration-color:oklch(0.6 0.18 264 / .5);text-underline-offset:3px;font-weight:600">Your Mutual Followers, From Your Own Export</a> <span style="color:var(--muted-foreground)">— accounts on both lists</span></li>
+</ul></nav>
+</main>
+<div style="margin-top:56px;height:140px;background:var(--card);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-foreground)">Footer · inherited from Layout</div>
+<sc-if value="{{ showFold }}" hint-placeholder-val="{{ true }}">
+<div style="position:absolute;left:0;right:0;top:820px;border-top:2px dashed oklch(0.55 0.25 25);pointer-events:none"><span style="position:absolute;right:12px;top:-22px;font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:oklch(0.55 0.25 25);background:var(--background);padding:2px 6px;border-radius:6px">≈820px · 1440×900 after browser chrome</span></div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:390},&quot;proofRows&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:4,&quot;min&quot;:0,&quot;max&quot;:8,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Proof card&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;light&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Theme&quot;},&quot;showFold&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Annotations&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const n = Math.max(0, Math.min(8, this.props.proofRows ?? 4));
+    const widths = ['92px','118px','76px','132px','104px','88px','124px','98px'];
+    return {
+      rows: Array.from({ length: n }, (_, i) => ({ n: i + 1, w: widths[i] })),
+      remaining: 30 - n,
+      showFold: this.props.showFold ?? true,
+      themeClass: (this.props.theme ?? 'light') === 'dark' ? 'dark' : ''
+    };
+  }
+}
+</script>
+</body>
+</html>

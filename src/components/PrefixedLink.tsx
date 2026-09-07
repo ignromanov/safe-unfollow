@@ -1,6 +1,7 @@
 import { Link, useLocation, type LinkProps } from 'react-router-dom';
 
 import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
+import type { IntentSlug } from '@/config/intent-pages';
 import type { HeroCta } from '@/lib/stats/cta-capture';
 
 export interface PrefixedLinkProps extends Omit<LinkProps, 'to'> {
@@ -9,9 +10,10 @@ export interface PrefixedLinkProps extends Omit<LinkProps, 'to'> {
   /**
    * Marks this link as a tracked CTA. Rendered as `data-cta`, which is all the
    * pre-hydration listener in index.html can see. A prop rather than a hand-written
-   * attribute so the slug is checked against the four the drain knows.
+   * attribute so the slug is checked against the values the drain knows — the four hero
+   * keys, and the intent-page slugs.
    */
-  cta?: HeroCta;
+  cta?: HeroCta | IntentSlug;
   /**
    * Router state to attach **only** when the resolved href stays on the path this
    * link is rendered on. What the value means is the caller's business; whether it

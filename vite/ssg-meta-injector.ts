@@ -9,6 +9,7 @@ import {
   createLanguagePrefixRegex,
   type SupportedLanguage,
 } from '../src/config/languages.js';
+import { INTENT_PATHS } from '../src/config/intent-pages.js';
 
 const BASE_URL = 'https://safeunfollow.app';
 
@@ -202,27 +203,40 @@ export async function injectLocalizedMeta(
   const escapedTwitterDesc = escapeHtml(metaTags.twitterDescription || metaTags.description || '');
   const localeCode = getLocaleCode(currentLang);
 
-  // Generate hreflang links
-  const hreflangLinks = SUPPORTED_LANGUAGES.map(lang => {
-    const url =
-      lang === 'en'
-        ? `${BASE_URL}${normalizedBasePath || '/'}`
-        : `${BASE_URL}/${lang}${normalizedBasePath}`;
-    return `<link rel="alternate" hreflang="${lang}" href="${url}"/>`;
-  }).join('\n    ');
+  // Pages that exist in English only advertise no alternates. Emitting the full
+  // SUPPORTED_LANGUAGES list here would name nine URLs no build emits — the same defect
+  // scripts/generate-sitemap.ts records at its EXCLUDE_PATTERNS comment, from the other end.
+  const englishOnly = INTENT_PATHS.includes(basePath);
 
-  // Add x-default (English)
+  // Generate hreflang links
+  const hreflangLinks = englishOnly
+    ? ''
+    : SUPPORTED_LANGUAGES.map(lang => {
+        const url =
+          lang === 'en'
+            ? `${BASE_URL}${normalizedBasePath || '/'}`
+            : `${BASE_URL}/${lang}${normalizedBasePath}`;
+        return `<link rel="alternate" hreflang="${lang}" href="${url}"/>`;
+      }).join('\n    ');
+
+  // x-default names a URL too, so it goes with them.
   const xDefaultUrl = `${BASE_URL}${normalizedBasePath || '/'}`;
-  const xDefaultLink = `<link rel="alternate" hreflang="x-default" href="${xDefaultUrl}"/>`;
+  const xDefaultLink = englishOnly
+    ? ''
+    : `<link rel="alternate" hreflang="x-default" href="${xDefaultUrl}"/>`;
 
   // Canonical link
   const canonicalLink = `<link rel="canonical" href="${canonicalUrl}"/>`;
 
-  // Build og:locale:alternate list (excluding current language)
-  const alternateLocales = Object.values(LOCALE_CODES)
-    .filter(locale => locale !== localeCode)
-    .map(locale => `<meta property="og:locale:alternate" content="${locale}"/>`)
-    .join('\n    ');
+  // Same guard, same reason, weaker medium: these name a locale code rather than a URL, so
+  // nothing here can crawl to a 404 — but an English-only page still claims nine locales it
+  // does not have.
+  const alternateLocales = englishOnly
+    ? ''
+    : Object.values(LOCALE_CODES)
+        .filter(locale => locale !== localeCode)
+        .map(locale => `<meta property="og:locale:alternate" content="${locale}"/>`)
+        .join('\n    ');
 
   // Preload the locale chunks this page will fetch during hydration, so they start
   // downloading with the entry bundle instead of after it parses.

@@ -69,6 +69,12 @@ export const AnalyticsEvents = {
   // Upload Zone
   UPLOAD_CLICK: 'upload_click',
 
+  // An intent-page CTA click (task 6). Its own name rather than a payload on
+  // UPLOAD_CLICK: that event has run unpayloaded since it shipped, and giving it
+  // one now would split its own history into a before and an after for one new
+  // question.
+  INTENT_CTA_CLICK: 'intent_cta_click',
+
   // Loading Tips (shown during ZIP parsing)
   LOADING_TIP_IMPRESSION: 'loading_tip_impression',
 

@@ -4,6 +4,7 @@ import { join, relative } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import { SUPPORTED_LANGUAGES } from '@/config/languages';
+import { INTENT_PAGES } from '@/config/intent-pages';
 
 const ROOT = process.cwd();
 
@@ -113,7 +114,18 @@ function storeStateFields(): string[] {
 
 const LANGUAGES = SUPPORTED_LANGUAGES.length;
 const STATIC_ROUTES = prerenderableRoutesPerLanguage();
-const PRERENDERED_ROUTES = LANGUAGES * STATIC_ROUTES;
+
+/**
+ * Routes registered on the ROOT route object only, outside createPageChildren(). These exist in
+ * English and nowhere else, so they contribute once each rather than once per language.
+ *
+ * Derived from the manifest rather than parsed out of routes.tsx, because createIntentPageChildren()
+ * maps INTENT_PAGES — the count lives in the manifest, and a regex over the factory body would be
+ * a second source for it. That second source is the defect this whole file exists to prevent.
+ */
+const ROOT_ONLY = INTENT_PAGES.length;
+
+const PRERENDERED_ROUTES = LANGUAGES * STATIC_ROUTES + ROOT_ONLY;
 
 describe('architecture facts — derived, not copied', () => {
   it('finds documentation to check', () => {
@@ -137,10 +149,11 @@ describe('architecture facts — derived, not copied', () => {
     // more pages than this number while every document repeating it stayed green.
     // `?guide=1` and `?step=N` are query strings — vite-react-ssg prerenders paths, so
     // they can never contribute a page here.
-    expect({ LANGUAGES, STATIC_ROUTES, PRERENDERED_ROUTES }).toEqual({
+    expect({ LANGUAGES, STATIC_ROUTES, ROOT_ONLY, PRERENDERED_ROUTES }).toEqual({
       LANGUAGES: 10,
       STATIC_ROUTES: 7,
-      PRERENDERED_ROUTES: 70,
+      ROOT_ONLY: 3,
+      PRERENDERED_ROUTES: 73,
     });
   });
 

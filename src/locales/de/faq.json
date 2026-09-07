@@ -9,6 +9,30 @@
         "href": "/upload?guide=1"
       }
     },
+    "whoDoesntFollowBack": {
+      "question": "Wer folgt mir auf Instagram nicht zurück?",
+      "answer": "Dein Instagram-Datenexport enthält beide Listen – wem du folgst und wer dir folgt. Die Accounts aus der ersten Liste, die in der zweiten fehlen, folgen dir nicht zurück. Lade den Export hier hoch, und der Filter „Folgt nicht zurück“ zeigt sie: kostenlos, ohne Login, und die Datei verlässt deinen Browser nicht.",
+      "relatedLink": {
+        "text": "Zeigen, wer nicht zurückfolgt",
+        "href": "/upload?filter=notFollowingBack"
+      }
+    },
+    "pendingSent": {
+      "question": "Wie sehe ich meine gesendeten Follow-Anfragen auf Instagram?",
+      "answer": "Die App hat dafür keinen Bildschirm, dein Datenexport aber schon: pending_follow_requests.json listet jede Anfrage, die du gesendet hast und die nie angenommen wurde. Lade den Export hier hoch, und der Filter „Anfrage ausstehend“ zeigt die ganze Liste auf einmal, ohne Login.",
+      "relatedLink": {
+        "text": "Gesendete Anfragen zeigen",
+        "href": "/upload?filter=pending"
+      }
+    },
+    "mutuals": {
+      "question": "Wie finde ich meine gegenseitigen Follower auf Instagram?",
+      "answer": "Accounts, die in beiden Listen deines Exports stehen – Abonniert und Follower –, sind deine gegenseitigen Follower, berechnet über jede Zeile des Exports statt über eine Stichprobe. Das funktioniert nur für deinen eigenen Account; zwei fremde Profile lassen sich damit nicht vergleichen.",
+      "relatedLink": {
+        "text": "Gegenseitige Follower zeigen",
+        "href": "/upload?filter=mutuals"
+      }
+    },
     "withoutDownload": {
       "question": "Kann ich Instagram-Entfolger ohne Daten-Download oder Apps prüfen?",
       "answer": "Nein. Instagram bietet keine native Entfolger-Liste. Die einzigen sicheren Methoden sind: (1) Manuelles Prüfen von gefolgten Konten vs. Followern, oder (2) Deinen offiziellen Daten-Download mit diesem Tool verwenden. Dieser Tracker erledigt Methode 2 für dich, kostenlos: kein Passwort, keine Anmeldung, kein Kontorisiko.",

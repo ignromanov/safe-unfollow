@@ -1,7 +1,8 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
-import { describe, it, expect } from 'vitest';
+import { it, expect } from 'vitest';
+import { describeDist } from '../utils/dist-gate';
 
 import { SUPPORTED_LANGUAGES } from '@/config/languages';
 
@@ -19,15 +20,15 @@ import { SUPPORTED_LANGUAGES } from '@/config/languages';
  * be emitted if `includedRoutes` still prerenders a page for it. Only the artefact
  * proves both halves are gone.
  *
- * `describe.runIf(built)` like the other prerender suites: this only runs against
- * `dist/`, which only `ci.yml` produces before the tests. A dist-less local run skips it
- * rather than failing, and that skip is not a pass.
+ * `describeDist` like the other prerender suites: this only runs against `dist/`, which
+ * only `ci.yml` produces before the tests. A dist-less local run skips it, and that skip is
+ * not a pass; under `EXPECT_DIST` (set only by `ci.yml`) it fails instead (GH#159).
  */
 const dist = resolve(__dirname, '../../../dist');
 const sitemapPath = join(dist, 'sitemap.xml');
 const built = existsSync(dist) && existsSync(sitemapPath);
 
-describe.runIf(built)('sitemap after the wizard routes were removed', () => {
+describeDist('sitemap after the wizard routes were removed', built, () => {
   const xml = built ? readFileSync(sitemapPath, 'utf-8') : '';
   const locations = [...xml.matchAll(/<loc>([^<]*)<\/loc>/g)].map(match => match[1]);
 

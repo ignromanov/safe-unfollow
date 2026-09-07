@@ -2,6 +2,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, resolve, sep } from 'node:path';
 
 import { describe, it, expect } from 'vitest';
+import { describeDist } from '../utils/dist-gate';
 
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '../../config/languages';
 
@@ -16,9 +17,9 @@ import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '../../config/langua
  * pointing ten /upload pages at the site root is the same bug, passes code:check, passes
  * the full suite, and is invisible in the rendered page.
  *
- * Runs only against a dist/ that exists: describe.runIf(built) means a dist-less run
- * SKIPS this file rather than failing it, so a green run proves nothing unless something
- * built first. dist/ is resolved from this file's own repo root, because each worktree
+ * Runs only against a dist/ that exists: `describeDist` means a dist-less local run SKIPS
+ * this file, so a green run proves nothing unless something built first. Under `EXPECT_DIST`
+ * -- set only by `ci.yml`, the one workflow that builds -- it FAILS instead (GH#159). dist/ is resolved from this file's own repo root, because each worktree
  * has its own and a relative path reads whichever one the process happens to start in.
  */
 
@@ -190,7 +191,7 @@ function readPage(rel: string): string {
   return readFileSync(join(dist, rel), 'utf8');
 }
 
-describe.runIf(built)('prerendered meta', () => {
+describeDist('prerendered meta', built, () => {
   it('walks the whole prerendered tree, every language included', () => {
     const pages = prerenderedPages();
     // A floor, not a count: a non-recursive walk would see only the top level.
