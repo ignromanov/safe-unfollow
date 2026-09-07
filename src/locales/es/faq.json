@@ -9,6 +9,30 @@
         "href": "/upload?guide=1"
       }
     },
+    "whoDoesntFollowBack": {
+      "question": "¿Quién no me sigue de vuelta en Instagram?",
+      "answer": "Tu exportación de datos de Instagram contiene ambas listas: a quién sigues y quién te sigue. Las cuentas de la primera lista que no están en la segunda son las que no te siguen de vuelta. Sube la exportación aquí y el filtro «No te sigue» las muestra: gratis, sin iniciar sesión y sin que el archivo salga de tu navegador.",
+      "relatedLink": {
+        "text": "Ver quién no te sigue de vuelta",
+        "href": "/upload?filter=notFollowingBack"
+      }
+    },
+    "pendingSent": {
+      "question": "¿Cómo veo las solicitudes de seguimiento que envié en Instagram?",
+      "answer": "La app no tiene una pantalla para eso, pero tu exportación de datos sí: pending_follow_requests.json lista cada solicitud que enviaste y que nunca fue aceptada. Sube la exportación aquí y el filtro «Solicitud pendiente» muestra toda la lista de una vez, sin iniciar sesión.",
+      "relatedLink": {
+        "text": "Ver tus solicitudes pendientes",
+        "href": "/upload?filter=pending"
+      }
+    },
+    "mutuals": {
+      "question": "¿Cómo encuentro mis seguidores mutuos en Instagram?",
+      "answer": "Las cuentas que aparecen en ambas listas de tu exportación —seguidos y seguidores— son tus mutuos, calculados sobre cada fila de la exportación y no sobre una muestra. Solo funciona con tu propia cuenta; no puede comparar los perfiles de otras dos personas.",
+      "relatedLink": {
+        "text": "Ver tus seguidores mutuos",
+        "href": "/upload?filter=mutuals"
+      }
+    },
     "withoutDownload": {
       "question": "¿Puedo ver unfollowers de Instagram sin descargar datos o apps?",
       "answer": "No. Instagram no proporciona una lista nativa de unfollowers. Los únicos métodos seguros son: (1) Revisar manualmente cuentas seguidas vs seguidores, o (2) Usar tu descarga oficial de datos con esta herramienta. Este rastreador hace el método 2 rápido y gratis: sin contraseña, sin iniciar sesión, sin riesgo para tu cuenta.",

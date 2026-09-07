@@ -5,6 +5,7 @@ import { screen } from '@testing-library/react';
 import heroEN from '@/locales/en/hero.json';
 import { createI18nMock } from '@/__tests__/utils/mockI18n';
 import { renderWithRouter as render } from '@/__tests__/test-utils';
+import { INTENT_PAGES } from '@/config/intent-pages';
 
 vi.mock('react-i18next', () => createI18nMock(heroEN));
 
@@ -176,6 +177,20 @@ describe('Hero Component', () => {
       expect(
         screen.getByRole('link', { name: new RegExp(heroEN.buttons.haveFile, 'i') })
       ).toHaveAttribute('href', '/ru/upload');
+    });
+  });
+
+  describe('intent page links', () => {
+    // The intent pages moved out of the Hero and into FAQSection on 2026-09-07 (three inline
+    // links beside the primary CTA, measured by nothing). FAQSection.test.tsx owns the positive
+    // assertion now; this one keeps the Hero from quietly growing them back.
+    it('should not link the intent pages from the hero', () => {
+      render(<Hero />, { initialEntries: ['/'] });
+      for (const page of INTENT_PAGES) {
+        expect(
+          screen.queryByRole('link', { name: new RegExp(page.shortLabel, 'i') })
+        ).not.toBeInTheDocument();
+      }
     });
   });
 

@@ -3,7 +3,7 @@ import { useLanguageFromPath } from '@/hooks/useLanguageFromPath';
 import { useAppStore } from '@/lib/store';
 import { useLocation } from 'react-router-dom';
 import i18n, { initI18n, loadLanguage } from '@/locales';
-import type { SupportedLanguage } from '@/config/languages';
+import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '@/config/languages';
 
 // Mock dependencies
 vi.mock('@/lib/store');
@@ -1032,6 +1032,87 @@ describe('useLanguageFromPath', () => {
 
       // HTML lang should update based on URL, not store
       expect(document.documentElement.lang).toBe('ru');
+    });
+  });
+
+  describe('English-only intent routes', () => {
+    // updateHreflangTags CLEARS the head and rebuilds it, so what Googlebot sees post-hydration
+    // can drift from dist/ and sitemap.xml unless this hook is taught the same exclusion.
+    const hreflangs = () =>
+      Array.from(document.querySelectorAll('link[rel="alternate"][hreflang]')).map(el =>
+        el.getAttribute('hreflang')
+      );
+
+    it('advertises no alternates on an English-only intent route', () => {
+      mockUseLocation.mockReturnValue({
+        pathname: '/who-doesnt-follow-me-back',
+        search: '',
+        hash: '',
+        state: null,
+        key: 'default',
+      });
+
+      mockUseAppStore.mockReturnValue({
+        language: 'en' as SupportedLanguage,
+        setLanguage: mockSetLanguage,
+      });
+
+      renderHook(() => useLanguageFromPath());
+      vi.runAllTimers();
+
+      expect(hreflangs()).toEqual([]);
+    });
+
+    it('removes the alternates left by a previous route when navigating into one', () => {
+      mockUseLocation.mockReturnValue({
+        pathname: '/upload',
+        search: '',
+        hash: '',
+        state: null,
+        key: 'default',
+      });
+
+      mockUseAppStore.mockReturnValue({
+        language: 'en' as SupportedLanguage,
+        setLanguage: mockSetLanguage,
+      });
+
+      const { rerender } = renderHook(() => useLanguageFromPath());
+      vi.runAllTimers();
+      expect(hreflangs().length).toBe(SUPPORTED_LANGUAGES.length + 1);
+
+      mockUseLocation.mockReturnValue({
+        pathname: '/who-doesnt-follow-me-back',
+        search: '',
+        hash: '',
+        state: null,
+        key: 'default',
+      });
+
+      rerender();
+      vi.runAllTimers();
+
+      expect(hreflangs()).toEqual([]);
+    });
+
+    it('still emits the full set on a normal route — the control', () => {
+      mockUseLocation.mockReturnValue({
+        pathname: '/upload',
+        search: '',
+        hash: '',
+        state: null,
+        key: 'default',
+      });
+
+      mockUseAppStore.mockReturnValue({
+        language: 'en' as SupportedLanguage,
+        setLanguage: mockSetLanguage,
+      });
+
+      renderHook(() => useLanguageFromPath());
+      vi.runAllTimers();
+
+      expect(hreflangs()).toEqual([...SUPPORTED_LANGUAGES, 'x-default']);
     });
   });
 });

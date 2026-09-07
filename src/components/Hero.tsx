@@ -96,6 +96,12 @@ export function Hero({ hasData }: HeroProps) {
           {t('buttons.trySample')}
         </PrefixedLink>
 
+        {/* The three intent pages are linked from FAQSection, not from here. An "Also answers:"
+            line sat under the sample link until 2026-09-07: three inline links beside the
+            primary CTA on 85%-mobile traffic, measured by nothing. The FAQ items link the same
+            URL from the same page, are measured by analytics.faqExpand, and ride along in the
+            FAQPage JSON-LD FAQSection already emits. */}
+
         {/* Trust Badges */}
         <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs md:text-sm text-zinc-500 font-semibold">
           <div className="flex items-center gap-1.5">

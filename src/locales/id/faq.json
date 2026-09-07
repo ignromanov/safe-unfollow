@@ -9,6 +9,30 @@
         "href": "/upload?guide=1"
       }
     },
+    "whoDoesntFollowBack": {
+      "question": "Siapa yang tidak follow back saya di Instagram?",
+      "answer": "Ekspor data Instagram kamu memuat kedua daftar — siapa yang kamu ikuti dan siapa yang mengikutimu. Akun di daftar pertama yang tidak ada di daftar kedua adalah yang tidak follow back. Unggah ekspornya di sini dan filter \"Tidak follow back\" menampilkannya: gratis, tanpa login, dan filenya tidak pernah keluar dari browser kamu.",
+      "relatedLink": {
+        "text": "Lihat siapa yang tidak follow back",
+        "href": "/upload?filter=notFollowingBack"
+      }
+    },
+    "pendingSent": {
+      "question": "Bagaimana cara melihat permintaan follow yang saya kirim di Instagram?",
+      "answer": "Aplikasinya tidak punya layar untuk itu, tapi ekspor datamu punya: pending_follow_requests.json memuat setiap permintaan yang kamu kirim dan tidak pernah diterima. Unggah ekspornya di sini dan filter \"Permintaan tertunda\" menampilkan seluruh daftarnya sekaligus, tanpa login.",
+      "relatedLink": {
+        "text": "Lihat permintaan yang tertunda",
+        "href": "/upload?filter=pending"
+      }
+    },
+    "mutuals": {
+      "question": "Bagaimana cara menemukan mutual followers saya di Instagram?",
+      "answer": "Akun yang muncul di kedua daftar ekspormu — mengikuti dan pengikut — adalah mutual kamu, dihitung dari setiap baris ekspor, bukan dari sampel. Ini hanya berlaku untuk akunmu sendiri; tidak bisa membandingkan profil dua orang lain.",
+      "relatedLink": {
+        "text": "Lihat mutual followers kamu",
+        "href": "/upload?filter=mutuals"
+      }
+    },
     "withoutDownload": {
       "question": "Bisakah saya memeriksa unfollower Instagram tanpa mengunduh data atau aplikasi?",
       "answer": "Tidak. Instagram tidak menyediakan daftar unfollower bawaan. Satu-satunya metode aman adalah: (1) Memeriksa secara manual akun yang diikuti vs pengikut, atau (2) Menggunakan unduhan data resmi Anda dengan alat ini. Pelacak ini menjalankan metode 2 secara gratis: tanpa kata sandi, tanpa login, tanpa risiko akun.",

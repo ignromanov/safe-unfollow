@@ -8,8 +8,31 @@ vi.mock('react-i18next', () => createI18nMock(faqEN));
 
 import { renderWithRouter } from '../test-utils';
 import { FAQ_KEYS, FAQSection } from '@/components/FAQSection';
+import { INTENT_PAGES } from '@/config/intent-pages';
 
 describe('FAQSection Component', () => {
+  describe('intent page links', () => {
+    // The three intent pages are linked from here since 2026-09-07, not from the Hero. The
+    // anchors sit inside collapsed answers — `hidden`, so outside the accessibility tree,
+    // which is why this queries the DOM rather than getByRole: the prerendered HTML a crawler
+    // reads carries them either way, and src/__tests__/build/intent-pages.test.ts checks that
+    // artefact. Derived from the manifest, so a fourth page fails here until it gets an item.
+    it('should link every intent page from an English answer', () => {
+      const { container } = renderWithRouter(<FAQSection />, { initialEntries: ['/'] });
+      for (const page of INTENT_PAGES) {
+        expect(
+          container.querySelector(`a[href="/${page.slug}"]`),
+          `no FAQ answer links /${page.slug}`
+        ).not.toBeNull();
+      }
+    });
+
+    it('control: a slug nothing links is reported absent', () => {
+      const { container } = renderWithRouter(<FAQSection />, { initialEntries: ['/'] });
+      expect(container.querySelector('a[href="/no-such-intent-page"]')).toBeNull();
+    });
+  });
+
   describe('rendering', () => {
     it('should render without crashing', () => {
       renderWithRouter(<FAQSection />);
