@@ -51,7 +51,7 @@ interface FilterChipsProps {
 }
 import { recordToggle } from '@/lib/stats/filter-session';
 import type { ReactNode } from 'react';
-import { memo, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // Module-level icon map (outside component, never re-created)
@@ -68,9 +68,6 @@ const BADGE_ICON_MAP: Record<BadgeKey, { icon: typeof Users; defaultClass: strin
   close: { icon: Heart, defaultClass: 'text-pink-500 fill-current' },
   dismissed: { icon: XCircle, defaultClass: 'text-zinc-400 opacity-50' },
 };
-
-// Module-level Intl.NumberFormat instance (created once, reused)
-const numberFormatter = new Intl.NumberFormat();
 
 // Get icon with correct color based on active state
 function getBadgeIcon(type: BadgeKey, isActive: boolean): ReactNode {
@@ -109,8 +106,13 @@ export const FilterChips = memo(function FilterChips({
   followRequestsUnreadable = false,
   truncatedRelationshipFile = 'not-applicable',
 }: FilterChipsProps) {
-  const { t } = useTranslation('results');
+  const { t, i18n } = useTranslation('results');
   const [showEmptyFilters, setShowEmptyFilters] = useState(false);
+
+  // Keyed on the page's own locale, never the browser's — `AccountListSection`'s
+  // state line already formats from `i18n.language` via `toLocaleString`, and a
+  // second source here would read differently in ar/ru/de/id.
+  const numberFormatter = useMemo(() => new Intl.NumberFormat(i18n.language), [i18n.language]);
 
   // Derived, never listed here: which counts a short file corrupts is a fact
   // about the badge arithmetic, and a component naming badge keys by hand would
@@ -151,6 +153,15 @@ export const FilterChips = memo(function FilterChips({
   const emptyFilters = GROUP_CONFIGS.flatMap(group => group.configs).filter(
     cfg => getBadgeCount(cfg.type) === 0
   );
+
+  // Filtered once, here, rather than inline in the section loop below — the
+  // group hint needs to know whether ANY section will render before the loop
+  // starts, and the "-> null" gate that used to live inside a .map cannot be
+  // probed in advance.
+  const visibleGroups = GROUP_CONFIGS.map(group => ({
+    id: group.id,
+    configs: group.configs.filter(cfg => getBadgeCount(cfg.type) > 0),
+  })).filter(group => group.configs.length > 0);
 
   const optionAriaLabel = (option: {
     label: string;
@@ -231,8 +242,14 @@ export const FilterChips = memo(function FilterChips({
     return (
       <button
         key={cfg.type}
-        onClick={() => handleFilterToggle(cfg.type)}
-        disabled={isUnavailable}
+        onClick={() => {
+          // Unavailable stays in the tab order (aria-disabled below, not
+          // `disabled`) so `filters.unavailable` reaches a screen-reader user;
+          // the click still has to be a no-op.
+          if (isUnavailable) return;
+          handleFilterToggle(cfg.type);
+        }}
+        aria-disabled={isUnavailable}
         className={`cursor-pointer flex flex-col items-start justify-between p-4 rounded-2xl text-xs font-bold transition-all border min-h-[85px] relative ${
           isActive
             ? 'bg-primary text-primary-foreground border-primary shadow-md'
@@ -280,26 +297,20 @@ export const FilterChips = memo(function FilterChips({
     // The title lives once, on SheetContent's accessible name, and the single
     // Reset control lives once, in AppliedFilters.
     <div className="space-y-6">
-      {GROUP_CONFIGS.map(group => {
-        // Keyed on the all-time count, through the one expression that decides
-        // it: an option for a badge this export does not contain belongs in the
-        // collapsible block below, not in a section.
-        const configs = group.configs.filter(cfg => getBadgeCount(cfg.type) > 0);
-        if (configs.length === 0) return null;
-
-        return (
-          <section key={group.id} className="mt-6 first:mt-0">
-            <h5 className="mb-3 text-xs font-black text-zinc-500 uppercase tracking-widest">
-              {t(`filters.groups.${group.id}`)}
-            </h5>
-            <p className="mb-3 text-xs text-muted-foreground">{t('filters.groupHint')}</p>
-            {/* 2-col grid on mobile, 1-col on desktop sidebar */}
-            <div className="grid grid-cols-2 lg:grid-cols-1 gap-2.5">
-              {configs.map(renderOption)}
-            </div>
-          </section>
-        );
-      })}
+      {/* One hint above the whole group set, not one per section — the panel
+          already scrolls for eleven options, and three identical sentences cost
+          more than they explain. */}
+      {visibleGroups.length > 0 && (
+        <p className="text-xs text-muted-foreground">{t('filters.groupHint')}</p>
+      )}
+      {visibleGroups.map(group => (
+        <section key={group.id} className="mt-6 first:mt-0">
+          <h5 className="mb-3 text-xs font-black text-zinc-500 uppercase tracking-widest">
+            {t(`filters.groups.${group.id}`)}
+          </h5>
+          <div className="grid grid-cols-2 gap-2.5">{group.configs.map(renderOption)}</div>
+        </section>
+      ))}
 
       {/* Empty Categories — one block below the three sections, not split per
           group. It is keyed on the GLOBAL count being zero, which is "this
@@ -310,14 +321,14 @@ export const FilterChips = memo(function FilterChips({
         <div className="mt-6 pt-6 border-t border-border">
           <button
             onClick={() => setShowEmptyFilters(!showEmptyFilters)}
-            className="cursor-pointer flex items-center justify-between w-full text-xs font-black text-zinc-400 uppercase tracking-widest hover:text-primary transition-colors"
+            className="cursor-pointer flex items-center justify-between w-full text-xs font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-widest hover:text-primary transition-colors"
           >
             <span>{t('filters.emptyCategories', { count: emptyFilters.length })}</span>
             {showEmptyFilters ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
           </button>
 
           {showEmptyFilters && (
-            <div className="grid grid-cols-2 lg:grid-cols-1 gap-2.5 mt-4 animate-in slide-in-from-top-2 duration-300">
+            <div className="grid grid-cols-2 gap-2.5 mt-4 animate-in slide-in-from-top-2 duration-300">
               {emptyFilters.map(cfg => (
                 <div
                   key={cfg.type}
@@ -329,7 +340,7 @@ export const FilterChips = memo(function FilterChips({
                       0
                     </span>
                   </div>
-                  <span className="mt-3 block leading-snug text-start text-xs text-zinc-400">
+                  <span className="mt-3 block leading-snug text-start text-xs text-zinc-500 dark:text-zinc-400">
                     {t(`badges.${cfg.type}`)}
                   </span>
                 </div>

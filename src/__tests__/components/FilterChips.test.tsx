@@ -91,6 +91,23 @@ describe('FilterChips Component', () => {
       expect(screen.getByText('1,234,567')).toBeInTheDocument();
     });
 
+    // The formatter must follow the PAGE locale (`i18n.language`), not the
+    // browser's — `AccountListSection`'s own state line already reads
+    // `i18n.language`, and a component-level `new Intl.NumberFormat()` with no
+    // argument follows the host instead, disagreeing with it in ar/ru/de/id.
+    // A call-argument spy is the only way to see this: the mocked `i18n.language`
+    // is 'en', which happens to format identically to the host default here, so
+    // the rendered digits alone would not tell the two sources apart.
+    it('should build the number formatter from i18n.language, not the host locale', () => {
+      const formatSpy = vi.spyOn(Intl, 'NumberFormat');
+
+      render(<FilterChips {...defaultProps} />);
+
+      expect(formatSpy).toHaveBeenCalledWith('en');
+
+      formatSpy.mockRestore();
+    });
+
     // Was 'should show filter icon in header'. The header and its Filter icon
     // moved to the sheet trigger in AccountListSection; what this component
     // still owns is the per-option badge icon, so that is what it now checks.
@@ -99,6 +116,22 @@ describe('FilterChips Component', () => {
 
       const followersOption = screen.getByRole('button', { name: /Add Followers filter/i });
       expect(followersOption.querySelector('svg')).toBeInTheDocument();
+    });
+
+    // The option grid used to carry `lg:grid-cols-1`, correct only while this
+    // component was itself the sidebar card. It now renders exclusively inside
+    // the sheet (`AccountListSection.tsx`), where `lg` stacks eleven options
+    // one per row in a 472px-wide centred dialog — two columns hold at every
+    // width the sheet renders at.
+    it('should keep two columns at every breakpoint', () => {
+      const { container } = render(<FilterChips {...defaultProps} />);
+
+      const grids = container.querySelectorAll('.grid');
+      expect(grids.length).toBeGreaterThan(0); // the instrument fired
+      for (const grid of grids) {
+        expect(grid.className).toContain('grid-cols-2');
+        expect(grid.className).not.toMatch(/lg:grid-cols-1/);
+      }
     });
   });
 
@@ -190,6 +223,24 @@ describe('FilterChips Component', () => {
       fireEvent.click(toggleButton);
 
       expect(screen.getByText(resultsEN.badges.dismissed)).toBeInTheDocument();
+    });
+
+    // text-zinc-400 alone measured 2.63:1 on the card in light mode, below the
+    // 4.5:1 normal-text minimum. text-zinc-500 clears it (4.83:1) while
+    // dark:text-zinc-400 is unchanged (7.15:1 already clears it there).
+    it('should keep the toggle and its labels above the AA contrast minimum', () => {
+      render(<FilterChips {...defaultProps} />);
+
+      const toggleButton = screen.getByText(/Empty Categories/i);
+      // The class lives on the <button>; getByText matches the <span> inside it.
+      expect(toggleButton.closest('button')).toHaveClass('text-zinc-500', 'dark:text-zinc-400');
+
+      fireEvent.click(toggleButton);
+
+      expect(screen.getByText(resultsEN.badges.dismissed)).toHaveClass(
+        'text-zinc-500',
+        'dark:text-zinc-400'
+      );
     });
   });
 
@@ -427,18 +478,47 @@ describe('FilterChips Component', () => {
       }
     });
 
-    it('should disable an option that yields nothing', () => {
+    // `groupHint` used to sit inside the per-group loop and render once per
+    // section — three identical sentences in a panel that already scrolls for
+    // eleven options. It belongs once, above the whole group set.
+    it('should render filters.groupHint once, not once per group', () => {
+      render(<FilterChips {...defaultProps} candidateCounts={allAvailable} />);
+
+      // More than one group renders with allAvailable (verified above), so this
+      // would catch a regression back to the per-group placement.
+      expect(screen.getAllByText(resultsEN.filters.groupHint)).toHaveLength(1);
+    });
+
+    // An option that yields nothing stays reachable: `aria-disabled`, not
+    // `disabled` — the latter removes the button from the tab order, so a
+    // keyboard or screen-reader user could never reach `filters.unavailable`,
+    // the string written specifically to explain why the option is unavailable.
+    it('should mark an option that yields nothing as aria-disabled, and keep it reachable', () => {
+      const mockOnFiltersChange = vi.fn();
       render(
         <FilterChips
           {...defaultProps}
+          onFiltersChange={mockOnFiltersChange}
           selectedFilters={new Set<BadgeKey>(['notFollowingBack'])}
           candidateCounts={{ ...allAvailable, pending: 0 }}
         />
       );
 
-      expect(
-        screen.getByRole('button', { name: new RegExp(resultsEN.badges.pending) })
-      ).toBeDisabled();
+      const pendingOption = screen.getByRole('button', {
+        name: new RegExp(resultsEN.badges.pending),
+      });
+
+      // Still in the tab order, so assistive tech can reach it...
+      expect(pendingOption).not.toBeDisabled();
+      expect(pendingOption).toHaveAttribute('aria-disabled', 'true');
+      expect(pendingOption).toHaveAccessibleName(
+        resultsEN.filters.unavailable.replace('{{label}}', resultsEN.badges.pending)
+      );
+
+      // ...but a click is still a no-op — aria-disabled carries no browser
+      // enforcement of its own.
+      fireEvent.click(pendingOption);
+      expect(mockOnFiltersChange).not.toHaveBeenCalled();
     });
 
     // Control. Without it a component that disabled everything would pass.
