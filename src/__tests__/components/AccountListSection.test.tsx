@@ -397,6 +397,28 @@ describe('AccountListSection', () => {
   });
 
   /**
+   * Task 3: the sheet's accessible name must resolve to a node a sighted user
+   * also sees. Before this task the caller passed `aria-label`, which
+   * `SheetContent` renders as a real `Title` node but with an `sr-only`
+   * class — a passing `aria-labelledby` lookup that proves nothing about what
+   * the panel shows on screen. Asserting only "an accessible name exists"
+   * cannot go red on that regression, since one already existed; asserting the
+   * title node is not `sr-only` can.
+   */
+  it('gives the filter sheet a visible heading, not only an accessible name', () => {
+    renderWithRouter(<AccountListSection {...defaultProps} />);
+    fireEvent.click(screen.getByText(resultsEN.filters.openSheet));
+
+    const dialog = screen.getByRole('dialog');
+    const labelledBy = dialog.getAttribute('aria-labelledby');
+    expect(labelledBy).toBeTruthy();
+
+    const titleNode = document.getElementById(labelledBy as string);
+    expect(titleNode).toHaveTextContent(resultsEN.filters.title);
+    expect(titleNode?.className).not.toContain('sr-only');
+  });
+
+  /**
    * The stat cards mutate the same filter Set as the chips and, until this test,
    * recorded nothing: 2 377 mutations across 990 sessions were invisible. The
    * assertion is on the source — a toggle without one is the blind spot

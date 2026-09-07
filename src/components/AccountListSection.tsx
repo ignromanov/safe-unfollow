@@ -433,7 +433,7 @@ export function AccountListSection({
                     : t('filters.openSheet')}
                 </button>
               </SheetTrigger>
-              <SheetContent aria-label={t('filters.title')}>
+              <SheetContent title={t('filters.title')}>
                 <FilterChips
                   selectedFilters={filters}
                   onFiltersChange={setFilters}

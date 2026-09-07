@@ -294,7 +294,7 @@ export const FilterChips = memo(function FilterChips({
 
   return (
     // No card chrome: this is the sheet's content, and the sheet is the card.
-    // The title lives once, on SheetContent's accessible name, and the single
+    // The title lives once, as SheetContent's visible heading, and the single
     // Reset control lives once, in AppliedFilters.
     <div className="space-y-6">
       {/* One hint above the whole group set, not one per section — the panel
