@@ -29,6 +29,21 @@
       "title": "Terms of Service",
       "description": "SafeUnfollow terms of service. Free, open-source Instagram unfollow tracker with 100% local processing.",
       "ogTitle": "Terms of Service"
+    },
+    "/who-doesnt-follow-me-back": {
+      "title": "Who Doesn't Follow You Back on Instagram — Free, No Login",
+      "description": "See every account you follow that doesn't follow you back, from your own Instagram data export. No login, no password, and the file never leaves your browser.",
+      "ogTitle": "Who Doesn't Follow You Back on Instagram"
+    },
+    "/instagram-pending-follow-requests": {
+      "title": "See Your Pending Instagram Follow Requests — Free, No Login",
+      "description": "Your Instagram export lists the follow requests you sent that were never accepted. See all of them at once, without logging in to anything.",
+      "ogTitle": "Your Pending Instagram Follow Requests"
+    },
+    "/instagram-mutual-followers": {
+      "title": "Your Mutual Followers on Instagram, From Your Own Export",
+      "description": "Which accounts follow you back? Your own Instagram data export answers it exactly. No login, no username lookups, and the file never leaves your browser.",
+      "ogTitle": "Your Mutual Followers on Instagram"
     }
   }
 }

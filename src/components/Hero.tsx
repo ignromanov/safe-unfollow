@@ -9,6 +9,8 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { PrefixedLink } from '@/components/PrefixedLink';
+import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
+import { INTENT_PAGES } from '@/config/intent-pages';
 
 interface HeroProps {
   hasData?: boolean;
@@ -16,6 +18,7 @@ interface HeroProps {
 
 export function Hero({ hasData }: HeroProps) {
   const { t } = useTranslation('hero');
+  const prefix = useLanguagePrefix();
 
   return (
     <section className="py-12 md:py-32 text-center max-w-5xl mx-auto flex flex-col items-center animate-in fade-in duration-700">
@@ -95,6 +98,40 @@ export function Hero({ hasData }: HeroProps) {
         >
           {t('buttons.trySample')}
         </PrefixedLink>
+
+        {prefix === '' && (
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+            {/* Literal English, deliberately not a translation key. This block renders only
+                when there is no language prefix, so nine of the ten locales would carry a
+                hero.json entry nothing can ever render — and adding a key to en/hero.json
+                alone risks whichever parity gate PR #96 left behind. The intent pages this
+                points at are English-only for the same reason. This follows the Hero
+                wherever the Hero renders, including ResultsPage's no-data fallback
+                (`<Hero hasData={false} />`) — harmless, since /results is noindex and the
+                block is absent from dist/results.html, but worth naming so the next reader
+                does not have to rediscover it. */}
+            Also answers:{' '}
+            {INTENT_PAGES.map((page, i) => (
+              <span key={page.slug}>
+                {i > 0 && ' · '}
+                {/* Underlined foreground weight, not a coloured word. These are links inside a
+                    run of text, and `text-primary hover:underline` distinguished them by colour
+                    alone: primary against the surrounding zinc-500 measures 1.19:1 where WCAG
+                    1.4.1 wants 3:1 or a non-colour cue, and a hover cue is absent on load and
+                    unavailable on touch — which is 85% of this traffic. The same colour also
+                    measures 4.05:1 on white as text, below AA; that is a property-wide token
+                    question and is tracked separately, but these three need not be new
+                    instances of it. */}
+                <PrefixedLink
+                  to={`/${page.slug}`}
+                  className="text-foreground font-semibold underline decoration-primary/60 underline-offset-2 hover:decoration-primary"
+                >
+                  {page.shortLabel}
+                </PrefixedLink>
+              </span>
+            ))}
+          </p>
+        )}
 
         {/* Trust Badges */}
         <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs md:text-sm text-zinc-500 font-semibold">

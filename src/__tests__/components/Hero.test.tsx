@@ -5,6 +5,7 @@ import { screen } from '@testing-library/react';
 import heroEN from '@/locales/en/hero.json';
 import { createI18nMock } from '@/__tests__/utils/mockI18n';
 import { renderWithRouter as render } from '@/__tests__/test-utils';
+import { INTENT_PAGES } from '@/config/intent-pages';
 
 vi.mock('react-i18next', () => createI18nMock(heroEN));
 
@@ -176,6 +177,42 @@ describe('Hero Component', () => {
       expect(
         screen.getByRole('link', { name: new RegExp(heroEN.buttons.haveFile, 'i') })
       ).toHaveAttribute('href', '/ru/upload');
+    });
+  });
+
+  describe('intent page links', () => {
+    it('should point English visitors at the other questions', () => {
+      render(<Hero />, { initialEntries: ['/'] });
+      for (const page of INTENT_PAGES) {
+        expect(screen.getByRole('link', { name: page.shortLabel })).toHaveAttribute(
+          'href',
+          `/${page.slug}`
+        );
+      }
+    });
+
+    it('should show none of them on a language-prefixed page', () => {
+      render(<Hero />, { initialEntries: ['/ru'] });
+      for (const page of INTENT_PAGES) {
+        expect(screen.queryByRole('link', { name: page.shortLabel })).not.toBeInTheDocument();
+      }
+    });
+
+    it('should distinguish them from the sentence without relying on colour', () => {
+      // These are links inside a run of text, which is the one place WCAG 1.4.1 applies to a
+      // link at all. They shipped as `text-primary hover:underline`: primary against the
+      // surrounding zinc-500 measures 1.19:1 where the criterion wants 3:1, and a hover cue is
+      // absent on load and unreachable on touch — 85% of this traffic.
+      //
+      // A class assertion because jsdom computes no colour and no pseudo-state; what it can
+      // state is that the underline is unconditional. `hover:underline` alone fails here, which
+      // is the shape that shipped.
+      render(<Hero />, { initialEntries: ['/'] });
+      for (const page of INTENT_PAGES) {
+        const link = screen.getByRole('link', { name: page.shortLabel });
+        const classes = (link.getAttribute('class') ?? '').split(/\s+/);
+        expect(classes).toContain('underline');
+      }
     });
   });
 

@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '@/config/languages';
+import { INTENT_PATHS } from '@/config/intent-pages';
 
 const LOCALES_DIR = path.resolve(__dirname, '../../locales');
 
@@ -71,6 +72,17 @@ function loadJsonFile(filePath: string): Record<string, unknown> | null {
   }
 }
 
+/**
+ * A meta.json key is excluded from the cross-locale parity check only when it is one of the
+ * three intent-page route entries — never by matching on `routes.` generally, which would also
+ * swallow `/upload`, `/results`, `/privacy` and `/terms` and silently disable parity for all
+ * four. Named and exported from the filter site rather than inlined, so the control below tests
+ * the exact predicate the real filter uses, not a restatement of it.
+ */
+function isIntentOnlyMetaKey(key: string): boolean {
+  return INTENT_PATHS.some(p => key.startsWith(`routes.${p}.`));
+}
+
 describe('i18n Localization System', () => {
   describe('namespace file existence', () => {
     for (const lang of SUPPORTED_LANGUAGES) {
@@ -120,7 +132,13 @@ describe('i18n Localization System', () => {
           return;
         }
 
-        const referenceKeys = extractKeys(referenceData).sort();
+        // The three intent-page route entries under `meta.routes` are English-only by design
+        // (src/config/intent-pages.ts) — the pages they describe are registered on the root
+        // route object alone and never render in any other locale. Derived from INTENT_PATHS
+        // rather than named here by hand, so a fourth intent page does not reopen this hole.
+        const referenceKeys = extractKeys(referenceData)
+          .filter(key => namespace !== 'meta' || !isIntentOnlyMetaKey(key))
+          .sort();
 
         for (const lang of SUPPORTED_LANGUAGES) {
           if (lang === referenceLanguage) continue;
@@ -163,6 +181,19 @@ describe('i18n Localization System', () => {
         }
       });
     }
+  });
+
+  describe('the meta English-only carve-out is narrow', () => {
+    // The control the carve-out above needs: proof that widening the predicate to
+    // `key.startsWith('routes.')` — which would silently disable parity for /upload, /results,
+    // /privacy and /terms in every non-English locale — would turn this test red.
+    it('excludes only the three intent-page route keys, not routes.* generally', () => {
+      expect(isIntentOnlyMetaKey('routes./upload.title')).toBe(false);
+      expect(isIntentOnlyMetaKey('routes./results.title')).toBe(false);
+      expect(isIntentOnlyMetaKey('routes./privacy.title')).toBe(false);
+      expect(isIntentOnlyMetaKey('routes./terms.title')).toBe(false);
+      expect(isIntentOnlyMetaKey(`routes.${INTENT_PATHS[0]}.title`)).toBe(true);
+    });
   });
 
   describe('no empty strings', () => {
@@ -209,7 +240,12 @@ describe('i18n Localization System', () => {
           const langData = loadJsonFile(langPath);
 
           if (refData && langData) {
-            const refKeys = extractKeys(refData);
+            // Same carve-out as the parity check above: the three intent-page route keys are
+            // English-only by design, so counting them as untranslated would keep a
+            // fully-translated locale from ever reporting 100%.
+            const refKeys = extractKeys(refData).filter(
+              key => namespace !== 'meta' || !isIntentOnlyMetaKey(key)
+            );
             const langKeys = extractKeys(langData);
 
             totalKeys += refKeys.length;

@@ -257,6 +257,10 @@ const BANNED: BannedEntry[] = [
     pattern: new RegExp(`${NEGATION}${GAP}\\bsponsored\\b${GAP}\\bcontent\\b`, 'i'),
     why: '/upload carries an affiliate placement',
   },
+  {
+    pattern: /\bnothing\b[^.\n]{0,25}\bleaves?\b/i,
+    why: 'the export never leaves the browser, but Umami events and ad requests do — name the subject',
+  },
   { pattern: /remains completely free/i, why: 'the file export is paid' },
   {
     pattern: new RegExp(`\\bfree\\b${PHRASE_GAP}\\bforever\\b`, 'i'),
@@ -521,6 +525,14 @@ describe('docs monetization claims', () => {
       expect(offenders, `${offenders.join(', ')} — ${entry.why}`).toEqual([]);
     });
   }
+
+  it('should not flag a claim that names its subject', () => {
+    // The gate above bans the blanket subject, not the verb. If this control ever goes red the
+    // pattern has widened onto the correct wording, which ships in four places.
+    expect('Your Instagram export never leaves this browser.').not.toMatch(
+      /\bnothing\b[^.\n]{0,25}\bleaves?\b/i
+    );
+  });
 
   for (const { pattern, why } of BANNED_PRIVACY) {
     it(`never claims ${String(pattern)} — ${why}`, () => {
