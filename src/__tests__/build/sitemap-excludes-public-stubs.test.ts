@@ -1,7 +1,8 @@
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, resolve, sep } from 'node:path';
 
-import { describe, it, expect } from 'vitest';
+import { it, expect } from 'vitest';
+import { describeDist } from '../utils/dist-gate';
 
 import { SUPPORTED_LANGUAGES } from '@/config/languages';
 
@@ -18,9 +19,10 @@ import { SUPPORTED_LANGUAGES } from '@/config/languages';
  * names none of them either: both sides are derived — public/ walked, and the sitemap's
  * own URLs parsed — and a stub added tomorrow is bound the day the file appears.
  *
- * `describe.runIf(built)` like the other prerender suites: dist/sitemap.xml is a postbuild
- * artefact, so a dist-less run SKIPS this file rather than failing it, and that skip is not
- * a pass. dist/ and public/ are resolved from this file's own repo root, because each
+ * `describeDist` like the other prerender suites: dist/sitemap.xml is a postbuild artefact,
+ * so a dist-less local run SKIPS this file, and that skip is not a pass. Under `EXPECT_DIST`
+ * -- set only by `ci.yml`, the one workflow that builds -- the same state FAILS instead,
+ * because there a missing artefact means the build step broke (GH#159). dist/ and public/ are resolved from this file's own repo root, because each
  * worktree has its own and a relative path reads whichever one the process started in.
  */
 const root = resolve(__dirname, '../../..');
@@ -65,7 +67,7 @@ function advertisedPaths(xml: string): Array<{ url: string; basePath: string }> 
   return urls.map(url => ({ url, basePath: basePathOf(new URL(url).pathname) }));
 }
 
-describe.runIf(built)('sitemap and the files public/ ships verbatim', () => {
+describeDist('sitemap and the files public/ ships verbatim', built, () => {
   const xml = built ? readFileSync(sitemapPath, 'utf-8') : '';
   const advertised = advertisedPaths(xml);
   const stubPaths = existsSync(publicDir)
