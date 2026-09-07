@@ -44,7 +44,7 @@ describe('FilterChips Component', () => {
 
   describe('rendering', () => {
     // Re-pointed from `filters.title`: this component no longer renders a card
-    // header. The title lives once, on the sheet's accessible name
+    // header. The title lives once, as SheetContent's visible heading
     // (`AccountListSection`), and a group heading is what proves this rendered.
     it('should render without crashing', () => {
       render(<FilterChips {...defaultProps} />);
@@ -125,6 +125,11 @@ describe('FilterChips Component', () => {
     // width the sheet renders at.
     it('should keep two columns at every breakpoint', () => {
       const { container } = render(<FilterChips {...defaultProps} />);
+
+      // Brings the Empty Categories grid into the DOM — under `defaultProps`
+      // it starts collapsed behind this toggle, and the section grid alone
+      // would not catch a regression on the second `lg:grid-cols-1` removal.
+      fireEvent.click(screen.getByText(/Empty Categories/i));
 
       const grids = container.querySelectorAll('.grid');
       expect(grids.length).toBeGreaterThan(0); // the instrument fired
@@ -519,9 +524,21 @@ describe('FilterChips Component', () => {
       // enforcement of its own.
       fireEvent.click(pendingOption);
       expect(mockOnFiltersChange).not.toHaveBeenCalled();
+
+      // Inert for analytics too, not only for state: `recordToggle` sits on the
+      // line right before `onFiltersChange` inside `handleFilterToggle`, so a
+      // guard that only proved the state side inert could still let a click on
+      // an unavailable option leave a row in the session summary. `662bdd7`
+      // exists because that exact coupling came apart once.
+      expect(buildFilterSummary()).toBeNull();
     });
 
-    // Control. Without it a component that disabled everything would pass.
+    // Control. Without it a component that marked everything aria-disabled
+    // would pass. `toBeEnabled()` cannot serve this any more: jest-dom defines
+    // it as the absence of the `disabled` attribute, which the component never
+    // sets — aria-disabled is a separate attribute it does not read — so every
+    // option button passes `toBeEnabled()` regardless of this component's own
+    // behaviour. The mechanism this control actually guards is `aria-disabled`.
     it('should leave an option that yields rows enabled', () => {
       render(
         <FilterChips
@@ -533,7 +550,7 @@ describe('FilterChips Component', () => {
 
       expect(
         screen.getByRole('button', { name: new RegExp(resultsEN.badges.notFollowedBack) })
-      ).toBeEnabled();
+      ).not.toHaveAttribute('aria-disabled', 'true');
     });
 
     // Control. Without it a component still rendering `filterCounts` under the

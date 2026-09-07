@@ -46,31 +46,19 @@ const SheetTitle = React.forwardRef<
 ));
 SheetTitle.displayName = DialogPrimitive.Title.displayName;
 
-const SheetDescription = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Description>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
->(({ className, ...props }, ref) => (
-  <DialogPrimitive.Description
-    ref={ref}
-    data-slot="sheet-description"
-    className={cn('text-muted-foreground text-sm', className)}
-    {...props}
-  />
-));
-SheetDescription.displayName = DialogPrimitive.Description.displayName;
-
 type SheetContentBaseProps = React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>;
 
 /**
  * `title` renders visibly in the sticky header row (finding 5, below). A
- * caller that only has an `aria-label` — the current `/results` caller,
- * `AccountListSection.tsx` — gets a sr-only `SheetTitle` built from that
- * string instead: a real Radix `Title` descendant wires `aria-labelledby`
- * automatically (fixing the "DialogContent requires a DialogTitle" warning
- * and the AT/browser pairs that prefer an element over the attribute), and
- * nothing changes on screen until the caller migrates to `title` — so this
- * does not add the second rendered `filters.title` that would violate "one
- * title, one Reset control on the shipped surface".
+ * caller that only has an `aria-label` gets a sr-only `SheetTitle` built from
+ * that string instead: a real Radix `Title` descendant wires
+ * `aria-labelledby` automatically (fixing the "DialogContent requires a
+ * DialogTitle" warning and the AT/browser pairs that prefer an element over
+ * the attribute). There is currently no `aria-label`-only caller in the
+ * tree — `AccountListSection.tsx` passes `title` — so this fallback branch is
+ * exercised only by `sheet.test.tsx`; it is kept as a real, tested part of
+ * the API rather than dead code, for whichever caller reaches for `aria-label`
+ * next.
  *
  * The union — not a plain optional `title` — is what makes "cannot render a
  * sheet with an empty header band" a compile error rather than a hope: a
@@ -154,4 +142,4 @@ const SheetContent = React.forwardRef<
 });
 SheetContent.displayName = DialogPrimitive.Content.displayName;
 
-export { Sheet, SheetClose, SheetContent, SheetDescription, SheetTitle, SheetTrigger };
+export { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger };

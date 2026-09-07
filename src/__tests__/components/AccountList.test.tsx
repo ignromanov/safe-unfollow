@@ -129,6 +129,19 @@ describe('empty state', () => {
     }
   });
 
+  // Pins WHERE the colour from `results-surface-contrast.test.ts` is applied.
+  // That file only computes the arithmetic on the pinned token; a revert of
+  // this class would leave it green with nothing else to notice the regression.
+  it('keeps the empty-state title on the colour the contrast gate measured', () => {
+    render(emptyList(applied));
+
+    expect(
+      screen.getByText(
+        resultsEN.empty.filteredTitle.replace('{{filterName}}', resultsEN.badges.pending)
+      )
+    ).toHaveClass('text-muted-foreground');
+  });
+
   /** Control: an empty export with no filter applied must not be told a filter emptied it. */
   it('should keep the neutral message when no filter is applied', () => {
     render(emptyList(undefined));
