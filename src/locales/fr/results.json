@@ -2,7 +2,10 @@
   "header": {
     "title": "Résultats de l'analyse",
     "fileInfo": "{{filename}} • {{count, number}} au total",
-    "showing": "Affichage de {{filtered}} sur {{total}} comptes"
+    "showing": "Affichage de {{filtered}} sur {{total}} comptes",
+    "showingOne": "Affichage de {{filtered}} sur {{total}} — {{filterName}}",
+    "showingMany": "Affichage de {{filtered}} sur {{total}} — {{count}} filtres",
+    "showingAll": "Affichage de {{total}} comptes"
   },
   "sample": {
     "banner": "Affichage des données exemple",
@@ -34,7 +37,20 @@
     "emptyCategories": "Catégories vides ({{count, number}})",
     "addFilter": "Ajouter le filtre {{label}} ({{count, number}} comptes)",
     "removeFilter": "Retirer le filtre {{label}} ({{count, number}} comptes)",
-    "chipWithHint": "{{label}} — {{hint}}"
+    "chipWithHint": "{{label}} — {{hint}}",
+    "groups": {
+      "relationship": "Relation d'abonnement",
+      "requests": "Demandes d'abonnement",
+      "flags": "Marqueurs et historique"
+    },
+    "groupHint": "Choisissez ce que vous voulez dans chaque section",
+    "openSheet": "Filtrer les comptes",
+    "openSheetWithCount": "Filtrer les comptes ({{count}} actifs)",
+    "applied": "Filtres appliqués",
+    "removeOne": "Retirer le filtre {{label}}",
+    "unavailable": "{{label}} — aucun compte avec la sélection actuelle",
+    "addFilterPlain": "Ajouter le filtre {{label}}",
+    "removeFilterPlain": "Retirer le filtre {{label}}"
   },
   "badges": {
     "followers": "Abonnés",
@@ -70,7 +86,8 @@
   },
   "empty": {
     "noUsers": "Aucun utilisateur trouvé",
-    "resetFilters": "Réinitialiser les filtres"
+    "resetFilters": "Réinitialiser les filtres",
+    "filteredTitle": "Aucun compte avec le filtre « {{filterName}} »"
   },
   "list": {
     "header": "Comptes ({{count, number}})",

@@ -4,6 +4,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import commonEN from '@/locales/en/common.json';
+import type { BadgeKey } from '@/core/types';
 
 // Mock AccountListSection component
 vi.mock('@/components/AccountListSection', () => ({
@@ -12,13 +13,18 @@ vi.mock('@/components/AccountListSection', () => ({
     accountCount,
     filename,
     isSample,
+    appliedUrlFilter,
   }: {
     fileHash: string;
     accountCount: number;
     filename: string;
     isSample: boolean;
+    appliedUrlFilter?: BadgeKey | null;
   }) => (
     <div data-testid="account-list-section">
+      {/* Rendered as the literal 'undefined' when this page passes nothing, so
+          "not passed" and "passed as null" stay distinguishable. */}
+      <div data-testid="applied-url-filter">{String(appliedUrlFilter)}</div>
       <div data-testid="file-hash">{fileHash}</div>
       <div data-testid="account-count">{accountCount}</div>
       <div data-testid="filename">{filename}</div>
@@ -224,6 +230,28 @@ describe('SamplePage', () => {
       render(<SamplePage />);
 
       expect(screen.getByTestId('filename')).toHaveTextContent('Sample Data');
+    });
+
+    it('should pass no applied url filter, because it applies none', () => {
+      // This page renders the same `AccountListSection` as `/results` and calls
+      // no `useFilterFromUrl`. While the section read `?filter=` for itself,
+      // `/sample?filter=pending` reported an applied filter that was never
+      // applied and bought a summary row for a visit in which nothing happened.
+      // Passing nothing is the honest signal, and it is what makes the absent
+      // prop's default the SAFE default: a future page that renders this
+      // component and forgets the applier under-reports rather than inventing.
+      vi.mocked(useSampleData).mockReturnValue({
+        load: mockLoadSampleData,
+        state: 'success',
+        data: {
+          fileHash: 'sample-hash',
+          accountCount: 1180,
+        },
+      });
+
+      render(<SamplePage />);
+
+      expect(screen.getByTestId('applied-url-filter')).toHaveTextContent('undefined');
     });
 
     it('should pass isSample as true', () => {

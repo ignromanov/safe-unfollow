@@ -38,6 +38,12 @@ const defaultProps = {
   isSample: false,
 };
 
+// Derived from the bundle, not typed out. Task 5 replaced the single
+// `header.showing` with three variants; this pair asserts the announcement
+// mechanics — one live region, visible, surviving the trigger's absence — not
+// the wording, and with no filters applied the line is `showingAll`.
+const stateLineText = resultsEN.header.showingAll.replace('{{total}}', '21');
+
 const filterCounts = {
   following: 10,
   followers: 15,
@@ -147,7 +153,7 @@ describe('AccountListSection — export trigger placement', () => {
   it('should announce the result count exactly once', () => {
     renderWithRouter(<AccountListSection {...defaultProps} />);
 
-    const announcements = screen.getAllByText(/Showing 21 of 21 accounts/);
+    const announcements = screen.getAllByText(stateLineText);
 
     expect(announcements).toHaveLength(1);
     expect(announcements[0]).toHaveAttribute('aria-live', 'polite');
@@ -159,7 +165,7 @@ describe('AccountListSection — export trigger placement', () => {
   it('should keep the count when the trigger is absent', () => {
     renderWithRouter(<AccountListSection {...defaultProps} isSample />);
 
-    expect(screen.getByText(/Showing 21 of 21 accounts/)).toBeInTheDocument();
+    expect(screen.getByText(stateLineText)).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: triggerLabel })).not.toBeInTheDocument();
   });
 });

@@ -33,6 +33,15 @@ interface UseFilterWorkerResult {
   filterToIndices: (query: string, filters: Set<BadgeKey>) => Promise<number[]>;
   /** Get badge statistics */
   getStats: () => Promise<Record<BadgeKey, number>>;
+  /**
+   * Per-option counts against the live selection.
+   *
+   * `null`, not `{}`, when the worker cannot answer: `{}[badge] ?? 0` is `0`,
+   * and `0` is a legitimate value here — it is what the surface reads to
+   * disable an option. An absent measurement and a measured zero must not
+   * render alike, which is why this does not copy `getStats` above.
+   */
+  candidateCounts: (filters: Set<BadgeKey>) => Promise<Record<BadgeKey, number> | null>;
   /** Whether the worker is initialized and ready */
   isReady: boolean;
   /** Whether the worker failed to initialize */
@@ -176,9 +185,28 @@ export function useFilterWorker(options: UseFilterWorkerOptions): UseFilterWorke
     }
   }, []);
 
+  // Contextual counts. Unlike getStats this resolves null rather than {} when
+  // the worker is absent or throws — see the interface note.
+  const candidateCounts = useCallback(
+    async (filters: Set<BadgeKey>): Promise<Record<BadgeKey, number> | null> => {
+      if (!apiRef.current) {
+        return null;
+      }
+
+      try {
+        return await apiRef.current.candidateCounts(Array.from(filters));
+      } catch (err) {
+        logger.error('[useFilterWorker] candidateCounts failed:', err);
+        return null;
+      }
+    },
+    []
+  );
+
   return {
     filterToIndices,
     getStats,
+    candidateCounts,
     isReady,
     hasError: error !== null,
     error,

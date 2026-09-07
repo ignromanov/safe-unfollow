@@ -2,7 +2,10 @@
   "header": {
     "title": "Resultados da Análise",
     "fileInfo": "{{filename}} • {{count, number}} Total",
-    "showing": "Mostrando {{filtered}} de {{total}} contas"
+    "showing": "Mostrando {{filtered}} de {{total}} contas",
+    "showingOne": "Mostrando {{filtered}} de {{total}} — {{filterName}}",
+    "showingMany": "Mostrando {{filtered}} de {{total}} — {{count}} filtros",
+    "showingAll": "Mostrando {{total}} contas"
   },
   "sample": {
     "banner": "Visualizando Dados de Exemplo",
@@ -34,7 +37,20 @@
     "emptyCategories": "Categorias Vazias ({{count, number}})",
     "addFilter": "Adicionar filtro {{label}} ({{count, number}} contas)",
     "removeFilter": "Remover filtro {{label}} ({{count, number}} contas)",
-    "chipWithHint": "{{label}} — {{hint}}"
+    "chipWithHint": "{{label}} — {{hint}}",
+    "groups": {
+      "relationship": "Relação de seguimento",
+      "requests": "Solicitações de seguimento",
+      "flags": "Marcações e histórico"
+    },
+    "groupHint": "Escolha quantas quiser em cada seção",
+    "openSheet": "Filtrar contas",
+    "openSheetWithCount": "Filtrar contas ({{count}} ativos)",
+    "applied": "Filtros aplicados",
+    "removeOne": "Remover filtro {{label}}",
+    "unavailable": "{{label}} — nenhuma conta com a seleção atual",
+    "addFilterPlain": "Adicionar filtro {{label}}",
+    "removeFilterPlain": "Remover filtro {{label}}"
   },
   "badges": {
     "followers": "Seguidores",
@@ -70,7 +86,8 @@
   },
   "empty": {
     "noUsers": "Nenhum usuário encontrado",
-    "resetFilters": "Limpar Filtros"
+    "resetFilters": "Limpar Filtros",
+    "filteredTitle": "Nenhuma conta com o filtro \"{{filterName}}\""
   },
   "list": {
     "header": "Contas ({{count, number}})",

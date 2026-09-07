@@ -53,6 +53,7 @@ describe('useAccountFiltering', () => {
       init: vi.fn().mockResolvedValue(undefined),
       clear: vi.fn(),
       filterToIndices: vi.fn().mockResolvedValue([0, 1, 2]),
+      candidateCounts: vi.fn().mockResolvedValue(mockFilterCounts),
     };
 
     vi.mocked(IndexedDBFilterEngine).mockImplementation(() => mockEngine as any);
@@ -65,8 +66,9 @@ describe('useAccountFiltering', () => {
       filterToIndices: mockWorkerFilterToIndices,
       isReady: false,
       hasError: true, // Default to error so fallback engine is used (preserving existing test behavior)
-      terminate: vi.fn(),
-      recreate: vi.fn(),
+      getStats: vi.fn().mockResolvedValue(mockFilterCounts),
+      candidateCounts: vi.fn().mockResolvedValue(mockFilterCounts),
+      error: null,
     });
 
     // Create stable mock state object to prevent infinite loops
@@ -672,8 +674,9 @@ describe('useAccountFiltering', () => {
         filterToIndices: mockWorkerFilterToIndices,
         isReady: true,
         hasError: false,
-        terminate: vi.fn(),
-        recreate: vi.fn(),
+        getStats: vi.fn().mockResolvedValue(mockFilterCounts),
+        candidateCounts: vi.fn().mockResolvedValue(mockFilterCounts),
+        error: null,
       });
 
       const { result, unmount } = renderHook(() =>
@@ -704,8 +707,9 @@ describe('useAccountFiltering', () => {
         filterToIndices: mockWorkerFilterToIndices,
         isReady: false,
         hasError: true,
-        terminate: vi.fn(),
-        recreate: vi.fn(),
+        getStats: vi.fn().mockResolvedValue(mockFilterCounts),
+        candidateCounts: vi.fn().mockResolvedValue(mockFilterCounts),
+        error: null,
       });
 
       const { result, unmount } = renderHook(() =>
@@ -1332,6 +1336,61 @@ describe('useAccountFiltering', () => {
         expect(result.current.filteredIndices).toEqual([3, 4]);
       });
       expect(result.current.isFiltering).toBe(false);
+
+      unmount();
+    });
+  });
+
+  describe('candidate counts', () => {
+    it('should compute through the worker when the worker is the live path', async () => {
+      const workerCandidateCounts = vi.fn().mockResolvedValue({ ...mockFilterCounts, pending: 0 });
+      vi.mocked(useFilterWorker).mockReturnValue({
+        filterToIndices: mockWorkerFilterToIndices,
+        getStats: vi.fn().mockResolvedValue(mockFilterCounts),
+        candidateCounts: workerCandidateCounts,
+        isReady: true,
+        hasError: false,
+        error: null,
+      });
+
+      const { result, unmount } = renderHook(() =>
+        useAccountFiltering({
+          fileHash: mockFileMetadata.fileHash,
+          accountCount: mockFileMetadata.accountCount,
+        })
+      );
+
+      await waitFor(() => expect(result.current.candidateCounts).not.toBeNull());
+      expect(workerCandidateCounts).toHaveBeenCalled();
+      // The control: on the worker path the fallback engine must not be consulted
+      // at all. Without it this test passes on a hook that reads only the ref —
+      // the path no real reader takes.
+      expect(mockEngine.candidateCounts).not.toHaveBeenCalled();
+
+      unmount();
+    });
+
+    it('should report null rather than an empty map when nothing can answer', async () => {
+      vi.mocked(useFilterWorker).mockReturnValue({
+        filterToIndices: mockWorkerFilterToIndices,
+        getStats: vi.fn().mockResolvedValue(mockFilterCounts),
+        candidateCounts: vi.fn().mockResolvedValue(null),
+        isReady: true,
+        hasError: false,
+        error: null,
+      });
+
+      const { result, unmount } = renderHook(() =>
+        useAccountFiltering({
+          fileHash: mockFileMetadata.fileHash,
+          accountCount: mockFileMetadata.accountCount,
+        })
+      );
+
+      await waitFor(() => expect(result.current.candidateCounts).toBeNull());
+      // Not {}: an empty map reads as "every badge yields zero" downstream, and
+      // zero is the value that disables an option.
+      expect(result.current.candidateCounts).not.toEqual({});
 
       unmount();
     });

@@ -2,7 +2,10 @@
   "header": {
     "title": "نتائج التحليل",
     "fileInfo": "{{filename}} • {{count, number}} إجمالي",
-    "showing": "عرض {{filtered}} من {{total}} حساب"
+    "showing": "عرض {{filtered}} من {{total}} حساب",
+    "showingOne": "عرض {{filtered}} من {{total}}، {{filterName}}",
+    "showingMany": "عرض {{filtered}} من {{total}}، {{count}} فلاتر",
+    "showingAll": "عرض {{total}} حساب"
   },
   "sample": {
     "banner": "عرض بيانات العينة",
@@ -34,7 +37,20 @@
     "emptyCategories": "فئات فارغة ({{count, number}})",
     "addFilter": "إضافة فلتر {{label}} ({{count, number}} حسابات)",
     "removeFilter": "إزالة فلتر {{label}} ({{count, number}} حسابات)",
-    "chipWithHint": "{{label}}. {{hint}}"
+    "chipWithHint": "{{label}}. {{hint}}",
+    "groups": {
+      "relationship": "علاقة المتابعة",
+      "requests": "طلبات المتابعة",
+      "flags": "علامات وسجل"
+    },
+    "groupHint": "اختر ما تشاء داخل كل قسم",
+    "openSheet": "تصفية الحسابات",
+    "openSheetWithCount": "تصفية الحسابات (مُفعّل: {{count}})",
+    "applied": "الفلاتر المطبقة",
+    "removeOne": "إزالة فلتر {{label}}",
+    "unavailable": "{{label}}. لا توجد حسابات ضمن التحديد الحالي",
+    "addFilterPlain": "إضافة فلتر {{label}}",
+    "removeFilterPlain": "إزالة فلتر {{label}}"
   },
   "badges": {
     "followers": "المتابعون",
@@ -70,7 +86,8 @@
   },
   "empty": {
     "noUsers": "لم يتم العثور على مستخدمين",
-    "resetFilters": "إعادة تعيين الفلاتر"
+    "resetFilters": "إعادة تعيين الفلاتر",
+    "filteredTitle": "لا توجد حسابات ضمن فلتر «{{filterName}}»"
   },
   "list": {
     "header": "الحسابات ({{count, number}})",

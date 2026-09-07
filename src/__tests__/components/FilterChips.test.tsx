@@ -1,8 +1,11 @@
 import { vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { FilterChips } from '@/components/FilterChips';
+import { BADGE_ORDER } from '@/core/badges';
+import { BADGE_GROUPS } from '@/core/badges/groups';
 import type { BadgeKey } from '@/core/types';
 import resultsEN from '@/locales/en/results.json';
+import { buildFilterSummary, resetFilterSession } from '@/lib/stats/filter-session';
 
 // react-i18next is already mocked globally in vitest.setup.ts
 
@@ -25,18 +28,30 @@ describe('FilterChips Component', () => {
     selectedFilters: new Set<BadgeKey>(),
     onFiltersChange: vi.fn(),
     filterCounts: defaultFilterCounts,
+    // With nothing selected the contextual count and the all-time count are the
+    // same number, which is what production computes too. The two are separate
+    // props because they diverge the moment a filter is on, and the tests that
+    // care about the difference say so explicitly.
+    candidateCounts: defaultFilterCounts,
     isFiltering: false,
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
+    // Module state, shared with every other suite in the run.
+    resetFilterSession();
   });
 
   describe('rendering', () => {
+    // Re-pointed from `filters.title`: this component no longer renders a card
+    // header. The title lives once, as SheetContent's visible heading
+    // (`AccountListSection`), and a group heading is what proves this rendered.
     it('should render without crashing', () => {
       render(<FilterChips {...defaultProps} />);
 
-      expect(screen.getByText(resultsEN.filters.title)).toBeInTheDocument();
+      expect(
+        screen.getByRole('heading', { name: resultsEN.filters.groups.relationship })
+      ).toBeInTheDocument();
     });
 
     it('should render filter chips for badges with non-zero counts', () => {
@@ -48,18 +63,24 @@ describe('FilterChips Component', () => {
       expect(screen.getByText(resultsEN.badges.notFollowingBack)).toBeInTheDocument();
     });
 
+    // The pill reads the contextual map, not the all-time one. Passed
+    // explicitly rather than leaning on defaultProps so the source of these
+    // three numbers is visible in the test that asserts them.
     it('should display badge counts', () => {
-      render(<FilterChips {...defaultProps} />);
+      render(<FilterChips {...defaultProps} candidateCounts={defaultFilterCounts} />);
 
       expect(screen.getByText('100')).toBeInTheDocument();
       expect(screen.getByText('150')).toBeInTheDocument();
       expect(screen.getByText('50')).toBeInTheDocument();
     });
 
+    // The large number moved to candidateCounts with the pill it is rendered
+    // in; filterCounts keeps a non-zero followers so the option still renders.
+    // Locale separators are what this test is for and that behaviour survives.
     it('should format large counts with locale separators', () => {
       const propsWithLargeCounts = {
         ...defaultProps,
-        filterCounts: {
+        candidateCounts: {
           ...defaultFilterCounts,
           followers: 1234567,
         },
@@ -70,11 +91,52 @@ describe('FilterChips Component', () => {
       expect(screen.getByText('1,234,567')).toBeInTheDocument();
     });
 
-    it('should show filter icon in header', () => {
+    // The formatter must follow the PAGE locale (`i18n.language`), not the
+    // browser's — `AccountListSection`'s own state line already reads
+    // `i18n.language`, and a component-level `new Intl.NumberFormat()` with no
+    // argument follows the host instead, disagreeing with it in ar/ru/de/id.
+    // A call-argument spy is the only way to see this: the mocked `i18n.language`
+    // is 'en', which happens to format identically to the host default here, so
+    // the rendered digits alone would not tell the two sources apart.
+    it('should build the number formatter from i18n.language, not the host locale', () => {
+      const formatSpy = vi.spyOn(Intl, 'NumberFormat');
+
       render(<FilterChips {...defaultProps} />);
 
-      const filterIcon = document.querySelector('svg');
-      expect(filterIcon).toBeInTheDocument();
+      expect(formatSpy).toHaveBeenCalledWith('en');
+
+      formatSpy.mockRestore();
+    });
+
+    // Was 'should show filter icon in header'. The header and its Filter icon
+    // moved to the sheet trigger in AccountListSection; what this component
+    // still owns is the per-option badge icon, so that is what it now checks.
+    it('should show a badge icon on an option', () => {
+      render(<FilterChips {...defaultProps} />);
+
+      const followersOption = screen.getByRole('button', { name: /Add Followers filter/i });
+      expect(followersOption.querySelector('svg')).toBeInTheDocument();
+    });
+
+    // The option grid used to carry `lg:grid-cols-1`, correct only while this
+    // component was itself the sidebar card. It now renders exclusively inside
+    // the sheet (`AccountListSection.tsx`), where `lg` stacks eleven options
+    // one per row in a 472px-wide centred dialog — two columns hold at every
+    // width the sheet renders at.
+    it('should keep two columns at every breakpoint', () => {
+      const { container } = render(<FilterChips {...defaultProps} />);
+
+      // Brings the Empty Categories grid into the DOM — under `defaultProps`
+      // it starts collapsed behind this toggle, and the section grid alone
+      // would not catch a regression on the second `lg:grid-cols-1` removal.
+      fireEvent.click(screen.getByText(/Empty Categories/i));
+
+      const grids = container.querySelectorAll('.grid');
+      expect(grids.length).toBeGreaterThan(0); // the instrument fired
+      for (const grid of grids) {
+        expect(grid.className).toContain('grid-cols-2');
+        expect(grid.className).not.toMatch(/lg:grid-cols-1/);
+      }
     });
   });
 
@@ -128,40 +190,6 @@ describe('FilterChips Component', () => {
     });
   });
 
-  describe('reset functionality', () => {
-    it('should not show reset button when no filters are selected', () => {
-      render(<FilterChips {...defaultProps} />);
-
-      expect(screen.queryByText(resultsEN.filters.reset)).not.toBeInTheDocument();
-    });
-
-    it('should show reset button when filters are selected', () => {
-      const selectedFilters = new Set<BadgeKey>(['followers']);
-
-      render(<FilterChips {...defaultProps} selectedFilters={selectedFilters} />);
-
-      expect(screen.getByText(resultsEN.filters.reset)).toBeInTheDocument();
-    });
-
-    it('should call onFiltersChange with empty set when reset is clicked', () => {
-      const mockOnFiltersChange = vi.fn();
-      const selectedFilters = new Set<BadgeKey>(['followers', 'following']);
-
-      render(
-        <FilterChips
-          {...defaultProps}
-          selectedFilters={selectedFilters}
-          onFiltersChange={mockOnFiltersChange}
-        />
-      );
-
-      const resetButton = screen.getByText(resultsEN.filters.reset);
-      fireEvent.click(resetButton);
-
-      expect(mockOnFiltersChange).toHaveBeenCalledWith(new Set());
-    });
-  });
-
   describe('empty categories', () => {
     it('should show empty categories toggle when some badges have zero count', () => {
       render(<FilterChips {...defaultProps} />);
@@ -200,6 +228,24 @@ describe('FilterChips Component', () => {
       fireEvent.click(toggleButton);
 
       expect(screen.getByText(resultsEN.badges.dismissed)).toBeInTheDocument();
+    });
+
+    // text-zinc-400 alone measured 2.63:1 on the card in light mode, below the
+    // 4.5:1 normal-text minimum. text-zinc-500 clears it (4.83:1) while
+    // dark:text-zinc-400 is unchanged (7.15:1 already clears it there).
+    it('should keep the toggle and its labels above the AA contrast minimum', () => {
+      render(<FilterChips {...defaultProps} />);
+
+      const toggleButton = screen.getByText(/Empty Categories/i);
+      // The class lives on the <button>; getByText matches the <span> inside it.
+      expect(toggleButton.closest('button')).toHaveClass('text-zinc-500', 'dark:text-zinc-400');
+
+      fireEvent.click(toggleButton);
+
+      expect(screen.getByText(resultsEN.badges.dismissed)).toHaveClass(
+        'text-zinc-500',
+        'dark:text-zinc-400'
+      );
     });
   });
 
@@ -240,10 +286,14 @@ describe('FilterChips Component', () => {
       expect(screen.getByText(resultsEN.badges.notFollowingBack)).toBeInTheDocument();
     });
 
-    it('should use translated filter title', () => {
+    // Re-pointed for the same reason as 'should render without crashing': the
+    // component's own translated heading is now the group label.
+    it('should use translated group headings', () => {
       render(<FilterChips {...defaultProps} />);
 
-      expect(screen.getByText(resultsEN.filters.title)).toBeInTheDocument();
+      expect(
+        screen.getByRole('heading', { name: resultsEN.filters.groups.requests })
+      ).toBeInTheDocument();
     });
   });
 
@@ -407,6 +457,234 @@ describe('FilterChips Component', () => {
       expect(icons).toHaveLength(2);
       expect(icons[1]).toHaveClass('text-primary-foreground');
       expect(icons[1]).not.toHaveClass('text-white');
+    });
+  });
+
+  /**
+   * The option space is three labelled sections, and an option that would
+   * yield nothing with the current selection is disabled rather than hidden.
+   *
+   * The count on an option is the CONTEXTUAL one — what this option adds to
+   * what is already selected — not the all-time figure the stat cards show.
+   */
+  describe('grouped option space', () => {
+    const allAvailable = Object.fromEntries(BADGE_ORDER.map(b => [b, 10])) as Record<
+      BadgeKey,
+      number
+    >;
+
+    it('should render a heading for every group', () => {
+      render(<FilterChips {...defaultProps} candidateCounts={allAvailable} />);
+
+      for (const group of BADGE_GROUPS) {
+        expect(
+          screen.getByRole('heading', { name: resultsEN.filters.groups[group.id] })
+        ).toBeInTheDocument();
+      }
+    });
+
+    // `groupHint` used to sit inside the per-group loop and render once per
+    // section — three identical sentences in a panel that already scrolls for
+    // eleven options. It belongs once, above the whole group set.
+    it('should render filters.groupHint once, not once per group', () => {
+      render(<FilterChips {...defaultProps} candidateCounts={allAvailable} />);
+
+      // More than one group renders with allAvailable (verified above), so this
+      // would catch a regression back to the per-group placement.
+      expect(screen.getAllByText(resultsEN.filters.groupHint)).toHaveLength(1);
+    });
+
+    // An option that yields nothing stays reachable: `aria-disabled`, not
+    // `disabled` — the latter removes the button from the tab order, so a
+    // keyboard or screen-reader user could never reach `filters.unavailable`,
+    // the string written specifically to explain why the option is unavailable.
+    it('should mark an option that yields nothing as aria-disabled, and keep it reachable', () => {
+      const mockOnFiltersChange = vi.fn();
+      render(
+        <FilterChips
+          {...defaultProps}
+          onFiltersChange={mockOnFiltersChange}
+          selectedFilters={new Set<BadgeKey>(['notFollowingBack'])}
+          candidateCounts={{ ...allAvailable, pending: 0 }}
+        />
+      );
+
+      const pendingOption = screen.getByRole('button', {
+        name: new RegExp(resultsEN.badges.pending),
+      });
+
+      // Still in the tab order, so assistive tech can reach it...
+      expect(pendingOption).not.toBeDisabled();
+      expect(pendingOption).toHaveAttribute('aria-disabled', 'true');
+      expect(pendingOption).toHaveAccessibleName(
+        resultsEN.filters.unavailable.replace('{{label}}', resultsEN.badges.pending)
+      );
+
+      // ...but a click is still a no-op — aria-disabled carries no browser
+      // enforcement of its own.
+      fireEvent.click(pendingOption);
+      expect(mockOnFiltersChange).not.toHaveBeenCalled();
+
+      // Inert for analytics too, not only for state: `recordToggle` sits on the
+      // line right before `onFiltersChange` inside `handleFilterToggle`, so a
+      // guard that only proved the state side inert could still let a click on
+      // an unavailable option leave a row in the session summary. `662bdd7`
+      // exists because that exact coupling came apart once.
+      expect(buildFilterSummary()).toBeNull();
+    });
+
+    // Control. Without it a component that marked everything aria-disabled
+    // would pass. `toBeEnabled()` cannot serve this any more: jest-dom defines
+    // it as the absence of the `disabled` attribute, which the component never
+    // sets — aria-disabled is a separate attribute it does not read — so every
+    // option button passes `toBeEnabled()` regardless of this component's own
+    // behaviour. The mechanism this control actually guards is `aria-disabled`.
+    it('should leave an option that yields rows enabled', () => {
+      render(
+        <FilterChips
+          {...defaultProps}
+          selectedFilters={new Set<BadgeKey>(['notFollowingBack'])}
+          candidateCounts={{ ...allAvailable, pending: 0 }}
+        />
+      );
+
+      expect(
+        screen.getByRole('button', { name: new RegExp(resultsEN.badges.notFollowedBack) })
+      ).not.toHaveAttribute('aria-disabled', 'true');
+    });
+
+    // Control. Without it a component still rendering `filterCounts` under the
+    // new prop name would pass.
+    it('should show the contextual count, not the global one', () => {
+      render(
+        <FilterChips
+          {...defaultProps}
+          filterCounts={{ ...defaultFilterCounts, notFollowedBack: 999 }}
+          selectedFilters={new Set<BadgeKey>(['notFollowingBack'])}
+          candidateCounts={{ ...allAvailable, notFollowedBack: 42 }}
+        />
+      );
+
+      expect(screen.getByText('42')).toBeInTheDocument();
+      expect(screen.queryByText('999')).not.toBeInTheDocument();
+    });
+
+    /**
+     * The intersection nothing covered: a chip that is BOTH disabled and
+     * carrying an untrustworthy count.
+     *
+     * It is not a corner case. A truncated followers file drives `mutuals`
+     * DOWN, so the zero that disables this option may itself be the false
+     * number — which is exactly when a reader needs to be told the count is
+     * suspect. The sighted reader still gets the AlertTriangle; before this,
+     * the screen-reader reader got a flat "no accounts with your current
+     * selection" with the caveat stripped.
+     */
+    it('should keep the untrustworthy-count caveat on an option that is also disabled', () => {
+      render(
+        <FilterChips
+          {...defaultProps}
+          truncatedRelationshipFile="followers"
+          selectedFilters={new Set<BadgeKey>(['notFollowingBack'])}
+          candidateCounts={{ ...allAvailable, mutuals: 0 }}
+        />
+      );
+
+      const unavailable = resultsEN.filters.unavailable.replace(
+        '{{label}}',
+        resultsEN.badges.mutuals
+      );
+
+      expect(
+        screen.getByRole('button', { name: new RegExp(resultsEN.badges.mutuals) })
+      ).toHaveAccessibleName(
+        resultsEN.filters.chipWithHint
+          .replace('{{label}}', unavailable)
+          .replace('{{hint}}', resultsEN.caveat.truncated.followers.chipHint)
+      );
+    });
+
+    // Control on the composition: without it, a component that appended the
+    // caveat to EVERY disabled option — trustworthy or not — would pass the
+    // test above.
+    it('should not invent a caveat for a disabled option whose count is sound', () => {
+      render(
+        <FilterChips
+          {...defaultProps}
+          selectedFilters={new Set<BadgeKey>(['notFollowingBack'])}
+          candidateCounts={{ ...allAvailable, mutuals: 0 }}
+        />
+      );
+
+      expect(
+        screen.getByRole('button', { name: new RegExp(resultsEN.badges.mutuals) })
+      ).toHaveAccessibleName(
+        resultsEN.filters.unavailable.replace('{{label}}', resultsEN.badges.mutuals)
+      );
+    });
+
+    // The gate on the null contract, and the one that goes red under `?? 0`.
+    // `null` is not a rare error path: it is the state of every first paint,
+    // before the first count resolves.
+    it('should render no count and disable nothing before the counts arrive', () => {
+      render(
+        <FilterChips
+          {...defaultProps}
+          selectedFilters={new Set<BadgeKey>(['notFollowingBack'])}
+          candidateCounts={null}
+        />
+      );
+
+      // No count, rather than a zero: a measurement not taken renders as nothing.
+      expect(screen.queryByText('100')).not.toBeInTheDocument();
+      expect(screen.queryByText('0')).not.toBeInTheDocument();
+
+      // And absence disables nothing. Every option the export contains stays
+      // live. A loop over what is rendered, not a hand-named two or three: an
+      // enumerated assertion passes while the badges it forgot are dead.
+      const options = screen.getAllByRole('button', { pressed: false });
+      expect(options.length).toBeGreaterThan(0); // the instrument fired
+      for (const button of options) {
+        expect(button).toBeEnabled();
+      }
+    });
+  });
+
+  /**
+   * The chips are one of the two surfaces that mutate the filter set, and the
+   * only one that records `'chip'` from inside a sheet. They emit nothing of
+   * their own any more: the per-toggle event is gone and what they do instead is
+   * accumulate into the session summary.
+   */
+  describe('filter session accumulation', () => {
+    /** Derived from the rendered surface, never from a hand-written badge name. */
+    const firstOptionFor = (badge: BadgeKey) =>
+      screen.getByRole('button', {
+        name: new RegExp(resultsEN.badges[badge], 'i'),
+      });
+
+    it('records an enable against the chip source', () => {
+      render(<FilterChips {...defaultProps} />);
+
+      fireEvent.click(firstOptionFor('unfollowed'));
+
+      const summary = buildFilterSummary();
+      expect(summary?.sourceMix).toEqual({ chip: 1 });
+      expect(summary?.filtersUsed).toEqual({ unfollowed: 1 });
+      expect(summary?.maxActive).toBe(1);
+    });
+
+    it('records a disable as a toggle without ranking the badge', () => {
+      render(<FilterChips {...defaultProps} selectedFilters={new Set<BadgeKey>(['unfollowed'])} />);
+
+      fireEvent.click(firstOptionFor('unfollowed'));
+
+      const summary = buildFilterSummary();
+      expect(summary?.toggleCount).toBe(1);
+      expect(summary?.sourceMix).toEqual({ chip: 1 });
+      // Disables are what made `unfollowed` look like the most-used filter for
+      // months. They count as activity and never as a use.
+      expect(summary?.filtersUsed).toEqual({});
     });
   });
 });

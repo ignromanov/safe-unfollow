@@ -2,7 +2,10 @@
   "header": {
     "title": "Результаты анализа",
     "fileInfo": "{{filename}} • {{count, number}} всего",
-    "showing": "Показано {{filtered}} из {{total}} аккаунтов"
+    "showing": "Показано {{filtered}} из {{total}} аккаунтов",
+    "showingOne": "Показано {{filtered}} из {{total}} — {{filterName}}",
+    "showingMany": "Показано {{filtered}} из {{total}} — фильтров: {{count}}",
+    "showingAll": "Показано {{total}} аккаунтов"
   },
   "sample": {
     "banner": "Просмотр демо-данных",
@@ -34,7 +37,20 @@
     "emptyCategories": "Пустые категории ({{count, number}})",
     "addFilter": "Добавить фильтр «{{label}}» ({{count, number}} аккаунтов)",
     "removeFilter": "Убрать фильтр «{{label}}» ({{count, number}} аккаунтов)",
-    "chipWithHint": "{{label}} — {{hint}}"
+    "chipWithHint": "{{label}} — {{hint}}",
+    "groups": {
+      "relationship": "Подписки и подписчики",
+      "requests": "Заявки на подписку",
+      "flags": "Метки и история"
+    },
+    "groupHint": "В разделе можно выбрать несколько",
+    "openSheet": "Фильтр аккаунтов",
+    "openSheetWithCount": "Фильтр аккаунтов (включено: {{count}})",
+    "applied": "Применённые фильтры",
+    "removeOne": "Убрать фильтр «{{label}}»",
+    "unavailable": "«{{label}}» — нет аккаунтов при текущем выборе",
+    "addFilterPlain": "Добавить фильтр «{{label}}»",
+    "removeFilterPlain": "Убрать фильтр «{{label}}»"
   },
   "badges": {
     "followers": "Подписчики",
@@ -70,7 +86,8 @@
   },
   "empty": {
     "noUsers": "Пользователи не найдены",
-    "resetFilters": "Сбросить фильтры"
+    "resetFilters": "Сбросить фильтры",
+    "filteredTitle": "Нет аккаунтов с фильтром «{{filterName}}»"
   },
   "list": {
     "header": "Аккаунты ({{count, number}})",

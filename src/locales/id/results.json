@@ -2,7 +2,10 @@
   "header": {
     "title": "Hasil Analisis",
     "fileInfo": "{{filename}} • {{count, number}} Total",
-    "showing": "Menampilkan {{filtered}} dari {{total}} akun"
+    "showing": "Menampilkan {{filtered}} dari {{total}} akun",
+    "showingOne": "Menampilkan {{filtered}} dari {{total}} — {{filterName}}",
+    "showingMany": "Menampilkan {{filtered}} dari {{total}} — {{count}} filter",
+    "showingAll": "Menampilkan {{total}} akun"
   },
   "sample": {
     "banner": "Melihat Data Sampel",
@@ -34,7 +37,20 @@
     "emptyCategories": "Kategori Kosong ({{count, number}})",
     "addFilter": "Tambah filter {{label}} ({{count, number}} akun)",
     "removeFilter": "Hapus filter {{label}} ({{count, number}} akun)",
-    "chipWithHint": "{{label}} — {{hint}}"
+    "chipWithHint": "{{label}} — {{hint}}",
+    "groups": {
+      "relationship": "Hubungan mengikuti",
+      "requests": "Permintaan mengikuti",
+      "flags": "Tanda dan riwayat"
+    },
+    "groupHint": "Pilih mana saja di setiap bagian",
+    "openSheet": "Filter akun",
+    "openSheetWithCount": "Filter akun ({{count}} aktif)",
+    "applied": "Filter yang diterapkan",
+    "removeOne": "Hapus filter {{label}}",
+    "unavailable": "{{label}} — tidak ada akun dengan pilihan saat ini",
+    "addFilterPlain": "Tambah filter {{label}}",
+    "removeFilterPlain": "Hapus filter {{label}}"
   },
   "badges": {
     "followers": "Pengikut",
@@ -70,7 +86,8 @@
   },
   "empty": {
     "noUsers": "Tidak ada pengguna ditemukan",
-    "resetFilters": "Reset Filter"
+    "resetFilters": "Reset Filter",
+    "filteredTitle": "Tidak ada akun dengan filter \"{{filterName}}\""
   },
   "list": {
     "header": "Akun ({{count, number}})",

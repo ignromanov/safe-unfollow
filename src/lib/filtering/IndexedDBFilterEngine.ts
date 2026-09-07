@@ -6,6 +6,7 @@
  */
 
 import type { AccountBadges, BadgeKey } from '@/core/types';
+import { BADGE_ORDER } from '@/core/badges';
 import { groupOf, type BadgeGroupId } from '@/core/badges/groups';
 import { BitSet } from '../indexeddb/bitset';
 import { indexedDBService } from '../indexeddb/indexeddb-service';
@@ -79,6 +80,70 @@ export class IndexedDBFilterEngine {
   }
 
   /**
+   * Partition badges by facet group.
+   *
+   * OR applies within a group, AND across groups. The eleven badges are not
+   * eleven independent facets: five of them are mutually-exclusive states
+   * computed from the same two lists, so intersecting them asked for accounts
+   * that cannot exist. Membership lives in `core/badges/groups.ts` and is
+   * stated nowhere else.
+   */
+  private groupBadges(badges: readonly BadgeKey[]): Map<BadgeGroupId, BadgeKey[]> {
+    const byGroup = new Map<BadgeGroupId, BadgeKey[]>();
+    for (const badge of badges) {
+      const id = groupOf(badge);
+      const members = byGroup.get(id);
+      if (members) members.push(badge);
+      else byGroup.set(id, [badge]);
+    }
+    return byGroup;
+  }
+
+  /**
+   * The union of a group's bitsets — the OR half of the rule above.
+   *
+   * `null` when not one of them is readable, which is what an absent optional
+   * file means: the group contributes the empty set to the AND rather than
+   * silently widening the result. Both the measurement-boundary row and Task
+   * 5's `empty.absentTitle` exist because of this.
+   */
+  private async unionOf(badges: readonly BadgeKey[]): Promise<BitSet | null> {
+    const bitsets = (await Promise.all(badges.map(b => this.loadBitset(b)))).filter(
+      (b): b is BitSet => b !== null
+    );
+    if (bitsets.length === 0) return null;
+
+    let acc = bitsets[0] as BitSet;
+    for (let i = 1; i < bitsets.length; i++) acc = acc.union(bitsets[i] as BitSet);
+    return acc;
+  }
+
+  /**
+   * The accounts a non-empty selection holds: OR within each facet group, AND
+   * across groups. `null` means the selection is provably empty.
+   *
+   * This is the one statement of that rule. `filterToIndices` and
+   * `candidateCounts` both read it from here rather than each carrying its own
+   * copy — they carried two until 2026-09-07, and the copies had already
+   * drifted in shape (one returned early on the first empty group, the other
+   * raised a flag and kept looping). They agreed on every input anyone tried;
+   * what they could not do is stay agreed through the next edit to the rule,
+   * and a disagreement there is invisible, because the chip counts and the list
+   * would each remain self-consistent.
+   */
+  private async selectionBitset(filters: readonly BadgeKey[]): Promise<BitSet | null> {
+    let result: BitSet | null = null;
+
+    for (const members of this.groupBadges(filters).values()) {
+      const groupBitset = await this.unionOf(members);
+      if (!groupBitset) return null;
+      result = result === null ? groupBitset : result.intersect(groupBitset);
+    }
+
+    return result;
+  }
+
+  /**
    * Filter accounts by badges and search query
    * Returns indices of matching accounts
    */
@@ -91,41 +156,10 @@ export class IndexedDBFilterEngine {
     let resultBitset: BitSet | null = null;
 
     if (activeFilters.length > 0) {
-      // OR within a facet group, AND across groups. The eleven badges are not
-      // eleven independent facets: five of them are mutually-exclusive states
-      // computed from the same two lists, so intersecting them asked for
-      // accounts that cannot exist. Membership lives in `core/badges/groups.ts`
-      // and is stated nowhere else.
-      const byGroup = new Map<BadgeGroupId, BadgeKey[]>();
-      for (const badge of activeFilters) {
-        const id = groupOf(badge);
-        const members = byGroup.get(id);
-        if (members) members.push(badge);
-        else byGroup.set(id, [badge]);
-      }
-
-      for (const members of byGroup.values()) {
-        const bitsets = (await Promise.all(members.map(badge => this.loadBitset(badge)))).filter(
-          (b): b is BitSet => b !== null
-        );
-
-        // A group whose every badge is missing from storage contributes an
-        // empty set to the AND, which is what an absent optional file means.
-        //
-        // This is a BEHAVIOUR CHANGE, not a refactor: the old code filtered
-        // nulls out of the list and intersected what remained, so an absent
-        // badge silently widened the result instead of emptying it. Both the
-        // boundary row and Task 5's `empty.absentTitle` exist because of this
-        // line.
-        if (bitsets.length === 0) return [];
-
-        let groupBitset = bitsets[0] as BitSet;
-        for (let i = 1; i < bitsets.length; i++) {
-          groupBitset = groupBitset.union(bitsets[i] as BitSet);
-        }
-
-        resultBitset = resultBitset === null ? groupBitset : resultBitset.intersect(groupBitset);
-      }
+      resultBitset = await this.selectionBitset(activeFilters);
+      // A group whose every badge is missing from storage empties the result
+      // rather than widening it — the convention is stated on `unionOf`.
+      if (resultBitset === null) return [];
     }
 
     // Convert bitset to indices
@@ -144,6 +178,86 @@ export class IndexedDBFilterEngine {
     }
 
     return indices;
+  }
+
+  /**
+   * For each badge, how many accounts the current selection would hold if that
+   * badge were added to it. A zero means the option ends the road, and the
+   * surface disables it rather than letting the reader walk into an empty list.
+   *
+   * The chip's all-time badge count systematically overstates under grouped
+   * semantics: it promises rows the other groups' AND constraints remove. This
+   * is the number that does not.
+   *
+   * The rule is `selectionBitset`'s; what this adds is the arithmetic that
+   * makes eleven answers cheaper than eleven independent ones. Two things are
+   * constant across every candidate that shares a group and are therefore built
+   * once per group rather than once per candidate: that group's own union, and
+   * the AND of all the *other* selected groups. Every bitset involved is
+   * already resident in `bitsetCache` after `init`.
+   */
+  async candidateCounts(activeFilters: BadgeKey[]): Promise<Record<BadgeKey, number>> {
+    if (!this.fileHash) {
+      throw new Error('[IndexedDB Filter Engine] Not initialized');
+    }
+
+    const selectedByGroup = this.groupBadges(activeFilters);
+
+    const groupUnions = new Map<BadgeGroupId, BitSet | null>();
+    for (const [id, badges] of selectedByGroup) {
+      groupUnions.set(id, await this.unionOf(badges));
+    }
+
+    // `undefined` = no other group constrains this one; `null` = another group
+    // is empty, so nothing in this one can yield a row.
+    const constraintExcluding = (skip: BadgeGroupId): BitSet | null | undefined => {
+      let acc: BitSet | undefined;
+      for (const [id, bits] of groupUnions) {
+        if (id === skip) continue;
+        if (!bits) return null;
+        acc = acc === undefined ? bits : acc.intersect(bits);
+      }
+      return acc;
+    };
+
+    const otherGroups = new Map<BadgeGroupId, BitSet | null | undefined>();
+    const counts = {} as Record<BadgeKey, number>;
+
+    for (const candidate of BADGE_ORDER) {
+      const group = groupOf(candidate);
+
+      if (!otherGroups.has(group)) otherGroups.set(group, constraintExcluding(group));
+      const rest = otherGroups.get(group);
+      if (rest === null) {
+        counts[candidate] = 0;
+        continue;
+      }
+
+      // The candidate's own group with the candidate in it. Already selected
+      // means that union is the one already built; otherwise it is that union
+      // plus one bitset, never the whole chain rebuilt.
+      const selectedHere = selectedByGroup.get(group);
+      let withCandidate: BitSet | null;
+      if (selectedHere?.includes(candidate)) {
+        withCandidate = groupUnions.get(group) ?? null;
+      } else {
+        const candidateBits = await this.loadBitset(candidate);
+        const base = groupUnions.get(group);
+        withCandidate =
+          candidateBits === null ? null : base ? base.union(candidateBits) : candidateBits;
+      }
+
+      if (!withCandidate) {
+        counts[candidate] = 0;
+        continue;
+      }
+
+      counts[candidate] = (
+        rest === undefined ? withCandidate : withCandidate.intersect(rest)
+      ).count();
+    }
+
+    return counts;
   }
 
   /**

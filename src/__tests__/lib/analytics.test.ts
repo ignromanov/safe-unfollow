@@ -514,7 +514,7 @@ describe('Analytics', () => {
 
       it('should not track events', () => {
         analytics.fileUploadStart(5.5);
-        analytics.filterToggle('mutuals', 'enable', 1, 'chip');
+        analytics.filterClearAll(1);
         analytics.searchPerform(5, 10, 100, false);
 
         expect(windowSpy.umami.track).not.toHaveBeenCalled();
@@ -529,7 +529,7 @@ describe('Analytics', () => {
 
       it('should not track events', () => {
         analytics.fileUploadStart(5.5);
-        analytics.filterToggle('mutuals', 'enable', 1, 'chip');
+        analytics.filterClearAll(1);
         analytics.searchPerform(5, 10, 100, false);
 
         // umami was deleted during opt-out, so no calls
@@ -546,7 +546,7 @@ describe('Analytics', () => {
       it('should not throw error', () => {
         expect(() => {
           analytics.fileUploadStart(5.5);
-          analytics.filterToggle('mutuals', 'enable', 1, 'chip');
+          analytics.filterClearAll(1);
         }).not.toThrow();
       });
     });
@@ -603,8 +603,10 @@ describe('Analytics', () => {
     it('should have all expected event names', () => {
       expect(AnalyticsEvents.FILE_UPLOAD_START).toBe('file_upload_start');
       expect(AnalyticsEvents.FILE_UPLOAD_SUCCESS).toBe('file_upload_success');
-      expect(AnalyticsEvents.FILTER_TOGGLE).toBe('filter_toggle');
       expect(AnalyticsEvents.FILTER_CLEAR_ALL).toBe('filter_clear_all');
+      // `FILTER_TOGGLE` was here until its series ended; this is what replaced
+      // it. A list that loses a line and gains none is not a list.
+      expect(AnalyticsEvents.FILTER_SESSION_SUMMARY).toBe('filter_session_summary');
       expect(AnalyticsEvents.SEARCH_PERFORM).toBe('search_perform');
       expect(AnalyticsEvents.RESULTS_CLICKS_SUMMARY).toBe('results_clicks_summary');
       expect(AnalyticsEvents.LINK_CLICK).toBe('link_click');
@@ -621,6 +623,34 @@ describe('Analytics', () => {
       expect(AnalyticsEvents.WEB_VITAL).toBe('web_vital');
       expect(AnalyticsEvents.PWA_INSTALL_PROMPT).toBe('pwa_install_prompt');
       expect(AnalyticsEvents.PWA_INSTALLED).toBe('pwa_installed');
+    });
+
+    /**
+     * The list above is hand-maintained, which is the enumerated-gate hazard: it
+     * stays green for every constant it forgot, and it shrank by one on this
+     * branch without anyone noticing. This one is derived and covers the whole
+     * collection — but only for the NAMING invariant. It does not close the
+     * enumeration hole: it cannot notice a constant that should exist and does
+     * not, and a constant that no emitter uses could be deleted under it in
+     * silence. What actually holds presence is `tsc`, because
+     * `AnalyticsEventName` is `(typeof AnalyticsEvents)[keyof typeof
+     * AnalyticsEvents]` (`constants.ts`), so removing a constant an emitter
+     * still uses is a type error rather than a quiet pass.
+     *
+     * No count is written here in either the prose or the floor. The three
+     * quantities in play — how many the list above names, how many the
+     * collection holds, and how many a floor would admit — are all copied facts
+     * the moment they are typed, and the previous version of this comment had
+     * the first of them wrong. The floor below is an instrument, not a
+     * measurement: it says the loop had a subject, nothing more.
+     */
+    it('should name every event after its own constant, all of them', () => {
+      const entries = Object.entries(AnalyticsEvents as Record<string, string>);
+
+      expect(entries.length).toBeGreaterThan(0); // the instrument fired
+      for (const [key, value] of entries) {
+        expect(value).toBe(key.toLowerCase());
+      }
     });
 
     it('should NOT have removed V9/V10 events', () => {

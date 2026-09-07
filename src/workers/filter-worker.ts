@@ -67,6 +67,18 @@ export const filterWorkerApi = {
   },
 
   /**
+   * Per-option counts against the live selection. Same reason as getStats: the
+   * bitsets are resident here, and shipping them to the main thread to count
+   * them would move ~125 KB per badge per selection change.
+   */
+  async candidateCounts(filters: string[]): Promise<Record<BadgeKey, number>> {
+    if (!engineInstance) {
+      throw new Error('[FilterWorker] Engine not initialized');
+    }
+    return engineInstance.candidateCounts(filters as BadgeKey[]);
+  },
+
+  /**
    * Reset the engine (clear caches and state)
    */
   reset(): void {
