@@ -414,11 +414,23 @@ export function AccountListSection({
             carry applied state — it lights identically whether the reader
             tapped it or arrived with it already on from localStorage.
 
-            `lg:sticky lg:top-24` belongs on this card and only this card: the
-            declaration it replaces sat inside what is now a `fixed` sheet,
-            where it did nothing. */}
+            Deliberately NOT sticky. The `lg:sticky lg:top-24` that stood here
+            was carried over from the option space, where it sat inside what is
+            now a `fixed` sheet and did nothing at all. Made effective on this
+            card, it pinned it at 96px while the search bar's stuck box runs
+            64px to ~142px: ~46px of permanent overlap, and the bar paints over
+            it (the bar carries `z-10`, this card would have `z-index: auto`),
+            so the applied-filters heading disappeared on scroll.
+
+            An offset that cleared it would have to be derived from a sibling's
+            rendered height. Nothing here can verify such a number — jsdom lays
+            nothing out — and it rots on the next padding or font change. It
+            would also inherit an unfixed bug: the bar sticks at `top-16` (64px)
+            under an `md:h-20` (80px) header, so above 768px the bar is already
+            16px too high, and the card's offset would bake that in.
+            Gated by AccountListSection.test.tsx -> "sticky layering". */}
         <div className="space-y-6">
-          <div className="bg-card p-5 md:p-6 rounded-4xl border border-border shadow-sm space-y-5 lg:sticky lg:top-24">
+          <div className="bg-card p-5 md:p-6 rounded-4xl border border-border shadow-sm space-y-5">
             <AppliedFilters
               selectedFilters={filters}
               onRemove={handleRemoveFilter}

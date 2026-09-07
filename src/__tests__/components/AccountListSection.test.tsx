@@ -877,6 +877,94 @@ describe('AccountListSection', () => {
     });
   });
 
+  /**
+   * The rule rather than the current markup: no sticky element in this section
+   * may declare a top offset that pins it inside the stuck box of the
+   * full-width sticky bar above it. Written this way so it can go red from
+   * either side — a card given too small an offset, and a search bar moved or
+   * grown so that an offset which used to clear it no longer does.
+   *
+   * Reported on a real desktop browser: the filter card slid under the search
+   * bar while scrolling and its applied-filters heading vanished. jsdom
+   * performs no layout, so nothing here can observe the overlap — what it can
+   * observe is the pair of declarations that produce it.
+   */
+  describe('sticky layering', () => {
+    /**
+     * The search bar's own stuck height in px, derived from its classes because
+     * jsdom lays nothing out:
+     *
+     *   container py-3       12 + 12                      = 24
+     *   input     py-3.5     14 + 14                      = 28
+     *   input     text-base  line-height 1.5rem           = 24
+     *   input     border     1 + 1                        =  2
+     *                                                      ---
+     *                                                       78
+     *
+     * That this number cannot be verified anywhere in the repository is the
+     * argument against depending on it: it exists to make the rule checkable,
+     * not to be trusted as a measurement of the rendered box.
+     */
+    const SEARCH_BAR_HEIGHT_PX = 78;
+
+    /** Tailwind's spacing scale: `top-16` is 16 x 4px. */
+    const SPACING_PX = 4;
+
+    const tokens = (el: HTMLElement) => el.className.split(/\s+/);
+
+    /** Breakpoint prefixes at which the element is sticky; `''` means always. */
+    const stickyAt = (el: HTMLElement) =>
+      tokens(el)
+        .map(token => /^(?:([a-z]{2}):)?sticky$/.exec(token))
+        .filter((match): match is RegExpExecArray => match !== null)
+        .map(match => match[1] ?? '');
+
+    /** Declared top offset in px at `breakpoint`, or null when none is declared. */
+    const topOffsetPx = (el: HTMLElement, breakpoint: string): number | null => {
+      const offsets = new Map<string, number>();
+      for (const token of tokens(el)) {
+        const match = /^(?:([a-z]{2}):)?top-(\d+)$/.exec(token);
+        if (match) offsets.set(match[1] ?? '', Number(match[2]) * SPACING_PX);
+      }
+      // A breakpoint-specific offset wins there; an unprefixed one still applies.
+      return offsets.get(breakpoint) ?? offsets.get('') ?? null;
+    };
+
+    it('keeps every sticky element clear of the sticky search bar above it', () => {
+      const { container } = renderThemedRouted(
+        <AccountListSection fileHash="abc" accountCount={100} filename="d.zip" />
+      );
+
+      // The instrument is asserted before anything is measured with it: a
+      // selector that matches nothing must say ABSENT rather than satisfy the
+      // rule over an empty set. Both of these elements have moved before.
+      const bar = container.querySelector('.sticky') as HTMLElement | null;
+      expect(bar, 'ABSENT: no unconditionally sticky bar in this section').not.toBeNull();
+      expect(
+        bar!.querySelector('#account-search'),
+        'ABSENT: the sticky element found is not the search bar'
+      ).not.toBeNull();
+
+      const barTop = topOffsetPx(bar!, '');
+      expect(barTop, 'ABSENT: the sticky search bar declares no top offset').not.toBeNull();
+
+      const card = screen
+        .getByText(resultsEN.filters.openSheet)
+        .closest('.bg-card') as HTMLElement | null;
+      expect(card, 'ABSENT: no filter card around the sheet trigger').not.toBeNull();
+
+      const floor = barTop! + SEARCH_BAR_HEIGHT_PX;
+      for (const breakpoint of stickyAt(card!)) {
+        const cardTop = topOffsetPx(card!, breakpoint);
+        expect(cardTop, `sticky at "${breakpoint}" with no top offset to check`).not.toBeNull();
+        // Under this floor the card is pinned inside the bar's stuck box and
+        // paints beneath it whatever the DOM order: the bar carries `z-10`, and
+        // a positioned element with `z-index: auto` paints at an earlier step.
+        expect(cardTop!).toBeGreaterThanOrEqual(floor);
+      }
+    });
+  });
+
   describe('sort toggle contrast', () => {
     // Descending fills the toggle with --primary. A literal white glyph on it
     // measures 3.95:1 in light and 3.30:1 in dark — below AA, and below the 3:1
