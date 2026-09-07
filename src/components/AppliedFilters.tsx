@@ -2,6 +2,7 @@ import { X } from 'lucide-react';
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BADGE_ORDER } from '@/core/badges';
+import { BADGE_CHIP_LABEL_CLASS, BADGE_CHIP_STYLES } from '@/constants/badge-styles';
 import type { BadgeKey } from '@/core/types';
 
 interface AppliedFiltersProps {
@@ -20,6 +21,13 @@ interface AppliedFiltersProps {
  *
  * Ordered by BADGE_ORDER rather than by insertion, so the row does not reshuffle
  * as filters are added and removed.
+ *
+ * Each chip carries its own badge's hue, the same one the account rows use, so
+ * the row that says what is filtering the list speaks the product's colour
+ * language rather than one shared blue. The hue reaches the chip through the
+ * tint and the border only — `BADGE_CHIP_STYLES` deliberately has no text
+ * colour, because the row badges' hued text is what GH#211 measured failing
+ * WCAG AA on `--card`.
  */
 export const AppliedFilters = memo(function AppliedFilters({
   selectedFilters,
@@ -53,7 +61,7 @@ export const AppliedFilters = memo(function AppliedFilters({
               <button
                 onClick={() => onRemove(badge)}
                 aria-label={t('filters.removeOne', { label })}
-                className="cursor-pointer flex items-center gap-1.5 ps-3 pe-2 py-1.5 rounded-full text-xs font-bold bg-primary text-primary-foreground border border-primary"
+                className={`cursor-pointer flex items-center gap-1.5 ps-3 pe-2 py-1.5 rounded-full text-xs font-bold border ${BADGE_CHIP_STYLES[badge]} ${BADGE_CHIP_LABEL_CLASS}`}
               >
                 {label}
                 <X size={13} aria-hidden="true" />
