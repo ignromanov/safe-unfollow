@@ -25,4 +25,11 @@ jobs:
       - run: npm run build --if-present
       # The only job with a dist/ to measure. Unwired, the budget guard cannot fail.
       - run: npm run perf:budget
+      # EXPECT_DIST arms the loud path in src/__tests__/utils/dist-gate.ts: this is the one
+      # job that builds, so a build suite finding no dist/ here means the build step broke,
+      # not that the job never promised one. code-quality.yml deliberately does not set it
+      # (it runs test:coverage with no build), which is why the gate keys on this variable
+      # and not on process.env.CI — CI is true in both. GH#159.
       - run: npm test --ignore-scripts
+        env:
+          EXPECT_DIST: '1'

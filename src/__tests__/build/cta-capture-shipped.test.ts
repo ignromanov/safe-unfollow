@@ -1,7 +1,8 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
-import { describe, it, expect } from 'vitest';
+import { it, expect } from 'vitest';
+import { describeDist } from '../utils/dist-gate';
 
 import { SUPPORTED_LANGUAGES } from '@/config/languages';
 
@@ -21,7 +22,7 @@ const built = existsSync(dist) && existsSync(join(dist, 'index.html'));
 /** Locale home pages — the only prerendered route that renders the hero. */
 const HOME_PAGES = SUPPORTED_LANGUAGES.map(lang => (lang === 'en' ? 'index.html' : `${lang}.html`));
 
-describe.runIf(built)('CTA capture reaches the built pages', () => {
+describeDist('CTA capture reaches the built pages', built, () => {
   it('ships the listener on every locale home page', () => {
     for (const page of HOME_PAGES) {
       const html = readFileSync(join(dist, page), 'utf-8');

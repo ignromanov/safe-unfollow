@@ -1,7 +1,8 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 
-import { describe, it, expect } from 'vitest';
+import { it, expect } from 'vitest';
+import { describeDist } from '../utils/dist-gate';
 
 /**
  * velum-cdpo's condition 2 (`.claude/plans/2026-08-19-feedback-channel/07-trigger.md`):
@@ -13,9 +14,9 @@ import { describe, it, expect } from 'vitest';
  * it exists to catch a future change that adds a `<head>` snippet or an eager import,
  * which would defeat `openFeedbackForm`'s lazy-injection design silently.
  *
- * `describe.runIf(built)` like the other prerender suites: this only runs against
- * `dist/`, which only `ci.yml` produces before the tests. A dist-less local run skips it
- * rather than failing, and that skip is not a pass.
+ * `describeDist` like the other prerender suites: this only runs against `dist/`, which
+ * only `ci.yml` produces before the tests. A dist-less local run skips it, and that skip is
+ * not a pass; under `EXPECT_DIST` (set only by `ci.yml`) it fails instead (GH#159).
  */
 const dist = resolve(__dirname, '../../../dist');
 const built = existsSync(dist) && existsSync(join(dist, 'index.html'));
@@ -28,7 +29,7 @@ function htmlFiles(dir: string): string[] {
   });
 }
 
-describe.runIf(built)('no Tally reference in prerendered HTML', () => {
+describeDist('no Tally reference in prerendered HTML', built, () => {
   it('scans some prerendered pages', () => {
     // Guards the guard: an empty glob would report success for the wrong reason.
     expect(htmlFiles(dist).length).toBeGreaterThan(10);
