@@ -100,5 +100,22 @@ describe('SheetContent', () => {
 
     // A width cap exists at sm and above.
     expect(dialogClassName).toContain('sm:max-w-lg');
+
+    // ...and a width for that cap to cap. This assertion is the point of the
+    // test's title: a `position: fixed` box with `left` set, `right: auto`
+    // and `width: auto` is shrink-to-fit, so a `max-width` alone leaves the
+    // panel's width to its content's max-content size — it would change
+    // between locales, since German and French badge labels are longer than
+    // the English ones. `dialog.tsx`'s `DialogContent` carries `w-full`
+    // beside its own `sm:max-w-lg` for exactly this reason.
+    //
+    // Derived, not a literal: the utility only counts if it applies at `sm`
+    // and up, so a bare `w-*` or an `sm:w-*` passes and a `max-sm:w-*`
+    // (which stops at the breakpoint this test names) does not.
+    const widthAtSmAndUp = dialogClassName.split(/\s+/).filter(c => /^(?:sm:)?w-/.test(c));
+    expect(
+      widthAtSmAndUp,
+      'no width declaration applies at `sm` and up, so `sm:max-w-lg` caps a width the content decides'
+    ).not.toEqual([]);
   });
 });

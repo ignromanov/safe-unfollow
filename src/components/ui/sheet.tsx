@@ -93,8 +93,18 @@ const SheetContent = React.forwardRef<
         // reapplies exactly this padding (`-mx-5 -mt-5 … px-5 pt-5`), and a
         // padding that forked by breakpoint would force that arithmetic to
         // fork with it for no reason this component needs.
+        //
+        // `w-full` is load-bearing, not decoration. This box is `fixed` with
+        // `left` set and `right: auto`, which is shrink-to-fit: without a
+        // width, the `sm:max-w-lg` below caps a width the *content* decides,
+        // so the panel would be a different size in German or French than in
+        // English. `dialog.tsx`'s `DialogContent` carries `w-full` beside its
+        // own cap for exactly this reason. Below `sm` it changes nothing —
+        // `max-sm:inset-x-0` already resolves the box to the viewport width,
+        // and a `width` alongside both insets is over-constrained, so the
+        // used width is the same one either declaration gives.
         className={cn(
-          'fixed z-[90] max-h-[85dvh] overflow-y-auto border-border bg-card p-5 shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+          'fixed z-[90] w-full max-h-[85dvh] overflow-y-auto border-border bg-card p-5 shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
           // Below `sm`: bottom-anchored, full width, one border on top only —
           // the option space is eleven items in three sections and 85% of
           // this page's readers are on a phone. The safe-area padding is
