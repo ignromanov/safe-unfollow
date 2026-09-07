@@ -165,11 +165,13 @@ export function Component({ page }: IntentPageProps) {
           {content.ctaLabel}
           <ArrowRight size={20} aria-hidden="true" />
         </PrefixedLink>
-        {/* Both halves already ship on this page — "without logging in to anything" in the intro,
-            and the archive sentence in the card. Restated at the point of the click because that
-            is where the objection is, not where the paragraph is. */}
+        {/* Restated at the point of the click because that is where the objection is, not where
+            the paragraph is. "Free" and "nothing to install" are here because they are the
+            modifiers the queries carry ("… online free", "… without app" — GSC, 2026-09-07
+            review) and appeared nowhere in the visible copy; "archive" names the subject, which
+            monetization-claims.test.ts requires of any "never leaves" sentence. */}
         <span className="text-sm text-muted-foreground">
-          No login. Your archive never leaves your device.
+          Free · no login · nothing to install. Your archive never leaves your device.
         </span>
       </div>
 
@@ -200,7 +202,7 @@ export function Component({ page }: IntentPageProps) {
             Ready to read your own list?
           </span>
           <span className="text-sm text-muted-foreground">
-            Drop in the ZIP Instagram sent you. Nothing is uploaded.
+            Drop in the ZIP Instagram sent you. Your file never leaves your browser.
           </span>
         </div>
         <PrefixedLink to={ctaHref(page)} className={CTA_CLASS}>

@@ -193,7 +193,8 @@ describe.runIf(built)('intent landing pages (prerendered)', () => {
   describe('home page and locale pages', () => {
     // The artefact task 5 exists to produce: links a crawler sees. Everything else in this
     // file reads source, jsdom renders, or docs/index.md — none of that would go red if SSG
-    // stopped emitting the Hero's conditional block.
+    // stopped emitting FAQSection's relatedLink anchors (the hrefs live inside collapsed
+    // answers, `hidden` but in the DOM, which is exactly why this reads the artefact).
     it('should carry all three intent hrefs on the English home page', () => {
       const html = readFileSync(resolve(distDir, 'index.html'), 'utf-8');
       for (const page of INTENT_PAGES) {

@@ -23,6 +23,13 @@ interface FAQItem {
 // Reordered: high-intent questions first for better SEO
 export const FAQ_KEYS = [
   'howToFind', // "How to check who unfollowed" - highest intent
+  // The three intent pages (src/config/intent-pages.ts) are linked from here rather than from
+  // the Hero (2026-09-07): same URL, so the same link equity; measured by faqExpand; and the
+  // Question rides along in the FAQPage JSON-LD below. `relatedLink` on these three exists in
+  // en/faq.json only — the pages are English-only, and PrefixedLink would send /ru to a 404.
+  'whoDoesntFollowBack', // "Who doesn't follow me back" → /who-doesnt-follow-me-back
+  'pendingSent', // "How do I see the follow requests I sent" → /instagram-pending-follow-requests
+  'mutuals', // "How do I find my mutual followers" → /instagram-mutual-followers
   'withoutDownload', // NEW: "Can I check without download" - captures "no app" searches
   'privacy', // "How does it work without login" - trust + method
   'safety', // "Is it safe to use" - trust signal

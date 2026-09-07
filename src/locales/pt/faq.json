@@ -9,6 +9,30 @@
         "href": "/upload?guide=1"
       }
     },
+    "whoDoesntFollowBack": {
+      "question": "Quem não me segue de volta no Instagram?",
+      "answer": "Sua exportação de dados do Instagram traz as duas listas: quem você segue e quem segue você. As contas da primeira lista que não estão na segunda são as que não seguem de volta. Envie a exportação aqui e o filtro \"Não segue de volta\" mostra todas: grátis, sem login, e o arquivo nunca sai do seu navegador.",
+      "relatedLink": {
+        "text": "Ver quem não segue de volta",
+        "href": "/upload?filter=notFollowingBack"
+      }
+    },
+    "pendingSent": {
+      "question": "Como ver as solicitações de seguir que enviei no Instagram?",
+      "answer": "O app não tem uma tela para isso, mas a sua exportação de dados tem: pending_follow_requests.json lista cada solicitação que você enviou e nunca foi aceita. Envie a exportação aqui e o filtro \"Solicitação pendente\" mostra a lista inteira de uma vez, sem login.",
+      "relatedLink": {
+        "text": "Ver suas solicitações pendentes",
+        "href": "/upload?filter=pending"
+      }
+    },
+    "mutuals": {
+      "question": "Como encontro meus seguidores mútuos no Instagram?",
+      "answer": "As contas que aparecem nas duas listas da sua exportação — seguindo e seguidores — são seus mútuos, calculados sobre cada linha da exportação e não sobre uma amostra. Funciona só para a sua própria conta; não compara os perfis de duas outras pessoas.",
+      "relatedLink": {
+        "text": "Ver seus seguidores mútuos",
+        "href": "/upload?filter=mutuals"
+      }
+    },
     "withoutDownload": {
       "question": "Posso verificar unfollowers do Instagram sem baixar dados ou apps?",
       "answer": "Não. O Instagram não fornece uma lista nativa de unfollowers. Os únicos métodos seguros são: (1) Verificar manualmente contas seguidas vs seguidores, ou (2) Usar seu download oficial de dados com esta ferramenta. Este rastreador torna o método 2 rápido e gratuito: sem senha, sem login, sem risco para a conta.",

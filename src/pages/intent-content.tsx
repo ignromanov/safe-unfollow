@@ -47,9 +47,8 @@ export const INTENT_CONTENT: Record<IntentSlug, IntentContent> = {
   'who-doesnt-follow-me-back': {
     answer: (
       <>
-        Your Instagram data export contains both lists: everyone you follow, and everyone who
-        follows you. The accounts in the first list and not the second are the ones that do not
-        follow you back.
+        Everyone you follow who doesn't follow you — read from the two lists in your own Instagram
+        data export, the people you follow and the people who follow you.
       </>
     ),
     intro: (
@@ -89,9 +88,11 @@ export const INTENT_CONTENT: Record<IntentSlug, IntentContent> = {
             <p>
               When you request your data from Instagram, the archive contains a{' '}
               <code>connections/followers_and_following</code> folder. Two files in it carry the
-              whole answer: the list of accounts you follow, and the list of accounts following you.
-              Everything on this page is one comparison between those two lists. Older archives put
-              that folder at the top level, without the <code>connections/</code> prefix.
+              whole answer: <code>following.json</code>, the accounts you follow, and{' '}
+              <code>followers_1.json</code>, the accounts following you (or their <code>.html</code>{' '}
+              twins, if you chose that format). Everything on this page is one comparison between
+              those two lists. Older archives put that folder at the top level, without the{' '}
+              <code>connections/</code> prefix.
             </p>
             <p>
               Choose <strong>All time</strong> rather than a date range when Instagram offers you
@@ -112,10 +113,10 @@ export const INTENT_CONTENT: Record<IntentSlug, IntentContent> = {
             </p>
             <p>
               It also does not mean these accounts unfollowed you. Most of them never followed you
-              in the first place. And whether someone followed you before and does not now is not a
-              question one archive can answer: an archive is a single snapshot, and a snapshot has
-              no memory of an earlier one. Telling those apart would take two archives, requested at
-              different times and compared against each other, which this tool does not do.
+              in the first place. Whether someone followed you before and does not now is a
+              different question, and one archive cannot answer it: a snapshot has no memory of an
+              earlier one. Telling those apart would take two archives, requested at different times
+              and compared against each other, which this tool does not do.
             </p>
           </>
         ),
@@ -125,19 +126,21 @@ export const INTENT_CONTENT: Record<IntentSlug, IntentContent> = {
         body: (
           <>
             <p>
-              Read it, sort it, and decide. This tool does not follow or unfollow anything on your
-              behalf — it never connects to Instagram, so it cannot. Every action stays yours, in
-              the app, where Instagram expects it.
+              Sort the list, search it, open any profile in a tap, and decide for yourself. The
+              analysis is free at any size, and the list is yours to keep: it runs entirely inside
+              this browser tab, and your archive never leaves your device. The code is open source
+              (MIT), so that is a claim you can check rather than take on trust.
             </p>
             <p>
-              The list is yours to keep too: the analysis runs entirely inside this browser tab and
-              your archive never leaves your device.
+              One boundary: this tool never connects to Instagram, so it does not follow or unfollow
+              anyone on your behalf. Every action stays yours, in the app, where Instagram expects
+              it.
             </p>
           </>
         ),
       },
     ],
-    ctaLabel: 'See who does not follow you back',
+    ctaLabel: "See who doesn't follow you back",
   },
   'instagram-pending-follow-requests': {
     answer: (
@@ -177,7 +180,7 @@ export const INTENT_CONTENT: Record<IntentSlug, IntentContent> = {
             <p>
               The Instagram app shows requests coming <em>to</em> you. There is no screen listing
               the ones going <em>out</em> from you. The only place that list exists in full is
-              inside the archive Meta builds when you request your data — which is why a page like
+              inside the archive Meta builds when you request your data. That is why a page like
               this one has to start with an export rather than a login.
             </p>
           </>
@@ -189,8 +192,10 @@ export const INTENT_CONTENT: Record<IntentSlug, IntentContent> = {
           <>
             <p>
               The pending requests live under <code>connections/followers_and_following</code>, in
-              their own file, separate from the accounts you actually follow. Older archives put
-              that folder at the top level, without the <code>connections/</code> prefix.
+              their own file — <code>pending_follow_requests.json</code>, or{' '}
+              <code>pending_follow_requests.html</code> if you chose that format — separate from the
+              accounts you actually follow. Older archives put that folder at the top level, without
+              the <code>connections/</code> prefix.
             </p>
             <p>
               Choose <strong>All time</strong> rather than a date range when Instagram offers you
@@ -209,8 +214,9 @@ export const INTENT_CONTENT: Record<IntentSlug, IntentContent> = {
               wrong.
             </p>
             <p>
-              If you do have them and want them gone, cancelling is done in the Instagram app — this
-              tool never connects to Instagram, so it can show you the list and nothing more.
+              If you do have them and want them gone, cancelling is done in the Instagram app. This
+              tool never connects to Instagram, so it can show you the list and nothing more — for
+              free, at any size, with the code open source (MIT) so you can read what it does.
             </p>
           </>
         ),
@@ -222,7 +228,7 @@ export const INTENT_CONTENT: Record<IntentSlug, IntentContent> = {
     answer: (
       <>
         Your export holds both lists — who you follow and who follows you — so the accounts in both
-        are your mutuals, exactly, with no estimating.
+        are your mutuals: exact for an "All time" export, with no estimating.
       </>
     ),
     intro: (
@@ -237,11 +243,11 @@ export const INTENT_CONTENT: Record<IntentSlug, IntentContent> = {
         body: (
           <>
             <p>
-              There is no sampling and no API limit here: whether you follow two hundred accounts or
-              two hundred thousand, the overlap is computed over every row rather than over a page
-              of results. What it cannot outrun is a truncated archive — an export limited to a date
-              range arrives with its followers list already filtered, and the mutuals missing from
-              it look exactly like people who never followed you back.
+              There is no sampling and no API limit here. Whether you follow two hundred accounts or
+              two hundred thousand, the overlap is computed over every row, not over a page of
+              results, and it is free at either size. What it cannot outrun is a truncated archive.
+              An export limited to a date range arrives with its followers list already filtered,
+              and the mutuals missing from it look exactly like people who never followed you back.
             </p>
           </>
         ),
@@ -252,9 +258,10 @@ export const INTENT_CONTENT: Record<IntentSlug, IntentContent> = {
           <>
             <p>
               If you are trying to find the mutual followers between two <em>other</em> accounts —
-              yours and a friend's, or two public profiles — this is the wrong tool, and honestly
-              so. That needs read access to accounts that are not yours, which means either scraping
-              Instagram or holding your login. This tool does neither, ever.
+              yours and a friend's, or two public profiles — this is the wrong tool. That needs read
+              access to accounts that are not yours, which means either scraping Instagram or
+              holding your login. This tool does neither, ever; the code is open source (MIT), so
+              you can confirm that rather than take our word for it.
             </p>
             <p>
               What it does instead is answer the version of the question you have the data for: your
@@ -269,10 +276,14 @@ export const INTENT_CONTENT: Record<IntentSlug, IntentContent> = {
           <>
             <p>
               Both are in the <code>connections/followers_and_following</code> folder of the archive
-              Meta builds for you. Older archives put that folder at the top level, without the{' '}
-              <code>connections/</code> prefix. Choose <strong>All time</strong> rather than a date
-              range when it offers you the choice — a truncated list on either side removes mutuals
-              that are really there.
+              Meta builds for you: <code>following.json</code> and <code>followers_1.json</code>, or
+              their <code>.html</code> twins. Where that folder sits in older archives, and every
+              step of requesting one, is on the{' '}
+              <a href="/docs/instagram-export" className="underline underline-offset-2">
+                export guide
+              </a>
+              . Choose <strong>All time</strong> rather than a date range when Instagram offers you
+              the choice — a truncated list on either side removes mutuals that are really there.
             </p>
           </>
         ),

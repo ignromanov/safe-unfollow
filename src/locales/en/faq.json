@@ -9,6 +9,30 @@
         "href": "/upload?guide=1"
       }
     },
+    "whoDoesntFollowBack": {
+      "question": "Who doesn't follow me back on Instagram?",
+      "answer": "Your Instagram data export holds both lists — who you follow and who follows you — and the accounts in the first list but not the second are the ones that don't follow you back. Upload the export here and the \"Not following back\" filter shows them: free, with no login, and the file never leaves your browser.",
+      "relatedLink": {
+        "text": "Who doesn't follow you back, step by step",
+        "href": "/who-doesnt-follow-me-back"
+      }
+    },
+    "pendingSent": {
+      "question": "How do I see the follow requests I sent on Instagram?",
+      "answer": "The app has no screen for them, but your data export does: pending_follow_requests.json lists every request you sent that was never accepted. Upload the export here and the \"Pending request\" filter shows the whole list at once, with no login.",
+      "relatedLink": {
+        "text": "Your pending follow requests, explained",
+        "href": "/instagram-pending-follow-requests"
+      }
+    },
+    "mutuals": {
+      "question": "How do I find my mutual followers on Instagram?",
+      "answer": "The accounts that appear in both lists of your export — following and followers — are your mutuals, computed over every row of the export rather than a sample. This works for your own account only; it cannot compare two other people's profiles.",
+      "relatedLink": {
+        "text": "Your mutual followers, from your own export",
+        "href": "/instagram-mutual-followers"
+      }
+    },
     "withoutDownload": {
       "question": "Can I check Instagram unfollowers without data download or apps?",
       "answer": "No. Instagram doesn't provide a native unfollower list. The only safe methods are: (1) Manually checking followed accounts vs followers, or (2) Using your official data download with this tool. This tracker does method 2 for you, free: no password, no login, no account risk.",

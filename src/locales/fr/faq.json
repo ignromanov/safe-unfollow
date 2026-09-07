@@ -9,6 +9,30 @@
         "href": "/upload?guide=1"
       }
     },
+    "whoDoesntFollowBack": {
+      "question": "Qui ne me suit pas en retour sur Instagram ?",
+      "answer": "Votre export de données Instagram contient les deux listes : qui vous suivez et qui vous suit. Les comptes de la première liste absents de la seconde sont ceux qui ne vous suivent pas en retour. Importez l'export ici et le filtre « Ne vous suit pas » les affiche : gratuit, sans connexion, et le fichier ne quitte pas votre navigateur.",
+      "relatedLink": {
+        "text": "Voir qui ne vous suit pas en retour",
+        "href": "/upload?filter=notFollowingBack"
+      }
+    },
+    "pendingSent": {
+      "question": "Comment voir les demandes d'abonnement que j'ai envoyées sur Instagram ?",
+      "answer": "L'application n'a pas d'écran pour cela, mais votre export de données, si : pending_follow_requests.json liste chaque demande envoyée et jamais acceptée. Importez l'export ici et le filtre « Demande en attente » affiche toute la liste d'un coup, sans connexion.",
+      "relatedLink": {
+        "text": "Voir vos demandes en attente",
+        "href": "/upload?filter=pending"
+      }
+    },
+    "mutuals": {
+      "question": "Comment trouver mes abonnés mutuels sur Instagram ?",
+      "answer": "Les comptes présents dans les deux listes de votre export — abonnements et abonnés — sont vos mutuels, calculés sur chaque ligne de l'export et non sur un échantillon. Cela ne fonctionne que pour votre propre compte ; impossible de comparer les profils de deux autres personnes.",
+      "relatedLink": {
+        "text": "Voir vos abonnés mutuels",
+        "href": "/upload?filter=mutuals"
+      }
+    },
     "withoutDownload": {
       "question": "Puis-je voir les désabonnements Instagram sans télécharger de données ou d'applications ?",
       "answer": "Non. Instagram ne fournit pas de liste native des désabonnements. Les seules méthodes sûres sont : (1) Vérifier manuellement les comptes suivis vs abonnés, ou (2) Utiliser votre téléchargement officiel de données avec cet outil. Cet outil fait la méthode 2 pour vous, gratuitement : sans mot de passe, sans connexion, sans risque pour votre compte.",
