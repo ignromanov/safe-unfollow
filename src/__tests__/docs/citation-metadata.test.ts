@@ -3,6 +3,8 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { SUPPORTED_LANGUAGES } from '@/config/languages';
+
 const ROOT = process.cwd();
 
 const read = (name: string): string => readFileSync(join(ROOT, name), 'utf-8');
@@ -101,6 +103,19 @@ describe('citation metadata', () => {
       `LICENSE does not mention "${title}". It named "Unfollow Radar Contributors" until ` +
         '2026-09-08 — an entity that existed in no other file in the tree.',
     ).toBe(true);
+  });
+
+  it('the README language badge matches SUPPORTED_LANGUAGES', () => {
+    // monetization-claims.test.ts already forbids a wrong language count, but its pattern is
+    // /(\d+)\s+languages?/ — a number *before* the word, as prose writes it ("10 languages").
+    // The badge writes it the other way round ("Languages: 10"), so that gate reads straight
+    // past it. Measured 2026-09-08: the badge is right today and held by nothing.
+    const badge = /!\[Languages:\s*(\d+)\]/.exec(read('README.md'));
+    expect(badge, 'README has no Languages badge to check').not.toBeNull();
+    expect(
+      Number(badge?.[1]),
+      `README says ${String(badge?.[1])} languages, src/config/languages.ts has ${SUPPORTED_LANGUAGES.length}`,
+    ).toBe(SUPPORTED_LANGUAGES.length);
   });
 
   it('the README badge derives the version instead of restating it', () => {
