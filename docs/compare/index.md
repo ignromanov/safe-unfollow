@@ -22,7 +22,7 @@ Every figure in the rival columns is taken from that product's own homepage or p
 |---|---|---|---|---|---|
 | **Price** | Free — optional one-time unlock, price shown on the button in your currency | Free tier; "Essential" $2.29/week | Free tier; PRO $4.99/mo, $17.99/6 mo, $24.99/yr | Free | Free |
 | **Priced by** | Neither size nor time | Time (weekly), and size | Time (monthly) | — | — |
-| **Account limit** | None — built and unit-tested for 1,000,000 accounts | 2,500 followers on Essential | Not stated | Not stated | Not stated |
+| **Account limit** | 1M+ by design — unit-tested at 1,000,000 accounts | 2,500 followers on Essential | Not stated | Not stated | Not stated |
 | **Login required** | No | No | Yes | No | No |
 | **How it gets your data** | You upload Instagram's official export | You upload the official export | Connect your Instagram account | You upload the official export (JSON or HTML) | You upload the official export |
 | **Source code published** | Yes (MIT) | No | No | No | No |
@@ -35,7 +35,7 @@ The row that matters most is **Priced by**. Three of the four price by account s
 Most unfollow trackers need your Instagram password or an account connection. SafeUnfollow uses Instagram's **official data export** (ZIP file) — no credentials, no account link. Two of the four above take the same route; the difference between us and them is further down the page, not here.
 
 ### The Export Stays In Your Browser
-Your Instagram export is parsed, stored and filtered in your own browser, using IndexedDB and Web Workers. It is never uploaded anywhere. The site itself does load anonymous page analytics, and the results page carries ads — [what the rest of the site loads is set out on the privacy page](/docs/privacy).
+Your Instagram export is parsed, stored and filtered in your own browser, using IndexedDB and Web Workers. It never leaves your browser. The site itself does load anonymous page analytics, and the results page carries ads — [what the rest of the site loads is set out on the privacy page](/docs/privacy).
 
 ### Built For Large Accounts
 SafeUnfollow uses columnar storage and bitset filtering, and is built and unit-tested for over 1,000,000 accounts, with no network round-trip — filtering runs locally in your browser.

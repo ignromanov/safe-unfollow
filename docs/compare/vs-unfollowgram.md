@@ -24,7 +24,7 @@ There is no login step, so there is nothing to give away and nothing to revoke a
 | **Instagram login** | Not required |
 | **Free** | The whole analysis — every badge, every filter, the complete list, at any account size |
 | **Paid** | A one-time unlock for downloading your list as a file; price shown on the button in your currency, with a free sample of the first rows before you pay |
-| **Account size limit** | None — built and unit-tested for 1,000,000 accounts |
+| **Account size limit** | 1M+ by design — unit-tested at 1,000,000 accounts |
 | **Source code** | Published under the MIT license |
 
 ## Why We Do Not Rate Other Trackers Here

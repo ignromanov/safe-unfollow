@@ -3,7 +3,7 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { SUPPORTED_LANGUAGES } from '@/config/languages';
+import { RTL_LANGUAGES, SUPPORTED_LANGUAGES } from '@/config/languages';
 
 const ROOT = process.cwd();
 
@@ -116,6 +116,75 @@ describe('citation metadata', () => {
       Number(badge?.[1]),
       `README says ${String(badge?.[1])} languages, src/config/languages.ts has ${SUPPORTED_LANGUAGES.length}`,
     ).toBe(SUPPORTED_LANGUAGES.length);
+  });
+
+  /**
+   * Ten with the wrong ten passes a count.
+   *
+   * The assertion above compares the badge's number to `SUPPORTED_LANGUAGES.length` and
+   * stops there. On the same `main` it was written against, the README named Hindi —
+   * retired 2026-08-08 for zero measured demand — and omitted French, shipped since: ten
+   * names, ten table rows, one correct count, two wrong members. A count cannot see that,
+   * and this repository has now recorded six gates that held a wrong fact in place. This
+   * one was mine.
+   *
+   * So the membership is compared, not the size. English names are derived through
+   * `Intl.DisplayNames` rather than typed into a second table here: `LANGUAGE_NAMES` holds
+   * the *native* names the switcher renders, and a hand-typed English map beside it would
+   * be exactly the copied fact this file exists to remove.
+   */
+  describe('the README names the languages languages.ts supports', () => {
+    const README = read('README.md');
+    const english = new Intl.DisplayNames(['en'], { type: 'language' });
+
+    /** The `## 🌍 Multilingual Support` section, so no other table's cells are read. */
+    const languageSection = (): string => {
+      const start = README.indexOf('## 🌍 Multilingual Support');
+      expect(start, 'README has no Multilingual Support section to read').toBeGreaterThan(-1);
+      const end = README.indexOf('\n## ', start + 1);
+      return README.slice(start, end === -1 ? README.length : end);
+    };
+
+    const tableRows = (): RegExpMatchArray[] => {
+      const rows = [...languageSection().matchAll(/^\|([^|\n]+)\|\s*([a-z]{2})\s*\|([^|\n]*)\|\s*$/gm)];
+      // Guards the guard: a table whose shape changed would yield no rows, and every
+      // set comparison below would then pass against an empty set.
+      expect(rows.length, 'no language rows parsed out of the Multilingual section').toBe(
+        SUPPORTED_LANGUAGES.length,
+      );
+      return rows;
+    };
+
+    it('can name a language in English', () => {
+      // A control with a known answer. A Node built with small-icu returns the code
+      // itself from `of('fr')`, and every comparison below would then fail as though
+      // the README were wrong. If this line is red, the environment is the defect.
+      expect(
+        english.of('fr'),
+        'Intl.DisplayNames cannot name languages in English — this Node has no full ICU',
+      ).toBe('French');
+    });
+
+    it('the language table lists exactly the supported codes', () => {
+      expect([...tableRows().map(row => row[2])].sort()).toEqual([...SUPPORTED_LANGUAGES].sort());
+    });
+
+    it('the language table marks exactly the RTL languages', () => {
+      const rtl = tableRows()
+        .filter(row => row[3].includes('\u2705'))
+        .map(row => row[2]);
+      expect(rtl.sort()).toEqual([...RTL_LANGUAGES].sort());
+    });
+
+    it('the feature bullet names exactly the supported languages', () => {
+      const bullet = /\*\*\d+ languages?\*\*\s*[—-]\s*([^\n]+)/.exec(README);
+      expect(bullet, 'README has no "N languages — ..." bullet to check').not.toBeNull();
+      const named = String(bullet?.[1])
+        .split(',')
+        .map(name => name.replace(/\([^)]*\)/g, '').trim())
+        .filter(Boolean);
+      expect(named.sort()).toEqual(SUPPORTED_LANGUAGES.map(code => english.of(code)).sort());
+    });
   });
 
   it('the README badge derives the version instead of restating it', () => {

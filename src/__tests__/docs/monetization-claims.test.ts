@@ -176,7 +176,12 @@ const README_TEXT = readFileSync(join(process.cwd(), 'README.md'), 'utf-8');
  *   setting it to `always` would rewrap these files and could turn a correctly
  *   bounded sentence red. If that ever happens, the sentence is not the bug.
  */
-const NEGATION = '\\b(?:no|not|without|zero|never)\\b';
+// `none` joined this list 2026-09-08. README's comparison table said
+// `| **Ads/Tracking** | ✅ None |` — false since AdSense shipped and Umami started
+// logging — and every pattern below read straight past it, because a table cell
+// carries no verb and none of the five words above appears in it. The gate was not
+// wrong about the sentence; it never saw a sentence.
+const NEGATION = '\\b(?:no|none|not|without|zero|never)\\b';
 const GAP = '[^.\\n]{0,60}';
 const PHRASE_GAP = '[^.\\n]{0,20}';
 
@@ -305,6 +310,44 @@ const BANNED: BannedEntry[] = [
     why: 'Umami events and AdSense ad requests are data, and they are sent off-device',
     qualifiedBy: QUALIFIER_BOUND,
   },
+  /**
+   * The same denial, read the other way round — because a comparison table does not write
+   * sentences.
+   *
+   * Every entry above reads NEGATION first and the noun second, which is the order prose
+   * uses ("no ads"). A table splits the claim across two cells and reverses it: the subject
+   * is the row label and the denial is the value. README shipped
+   * `| **Ads/Tracking** | ✅ None | ⚠️ Usually present |` — false since AdSense shipped and
+   * Umami started logging — and it survived BOTH the perimeter addition that brought README
+   * into this file on 2026-09-08 AND the `none` widening of NEGATION made the same day.
+   * Adding a word to the vocabulary could not help: the whole table *form* was invisible.
+   *
+   * Measured, not assumed: putting `✅ None` back with `none` already in NEGATION left all
+   * 94 assertions green. That red-proof is why this entry exists.
+   *
+   * `[^\n]{0,60}` rather than `GAP` on purpose — `GAP` also stops at a period, and a table
+   * row has none; one line is exactly the unit a row occupies.
+   *
+   * ⛔ The negation here is `none|nothing`, NOT the shared `NEGATION`, and that is
+   * measured rather than cautious. Reversed with the full vocabulary this pattern flagged
+   * three correct sentences and no false one: `tech-spec.md`’s "**Anonymous analytics**:
+   * Umami (no personal data)", `roadmap.md`’s "**Umami Analytics** — Anonymous usage
+   * statistics (no personal data, GDPR-compliant)" and `vs-followsback.md`’s "you want
+   * tracking, not an answer". The first two are disclosures that name the vendor, which is
+   * the opposite of this defect; the third is contrastive prose with no denial in it.
+   * Rewording any of them would have made the documentation worse to make this file
+   * greener — the move this file’s own comments forbid. A bare `none` or `nothing` has no
+   * such use here: scanned across `docs/`, README and `src/locales/en`, reading every match
+   * rather than the first, it matches nothing once the README cell is corrected.
+   *
+   * `qualifiedBy` for the same reason the four above carry it: `⚠️ Ads + analytics — never
+   * usernames or your export file` names its subject and is a different claim from `✅ None`.
+   */
+  {
+    pattern: /\b(?:ads?|advertising|tracking|analytics)\b[^\n]{0,60}\b(?:none|nothing)\b/i,
+    why: 'AdSense ships two units on /results and Umami logs every page view — a cell denying either is false',
+    qualifiedBy: QUALIFIER_BOUND,
+  },
 ];
 
 /**
@@ -422,14 +465,22 @@ const NAMES_THE_METRICS = /filter speed|search speed/i;
 const PRINTS_MILLISECONDS = /[<~]\s*\d+(\.\d+)?\s*ms\b|\b\d+(\.\d+)?\s*ms\b/i;
 
 describe('a page that prints these two metrics says they are targets', () => {
-  const subjects = DOCS.filter(
+  // README is a subject by the rule's own two conditions and was outside it only because it
+  // was outside the corpus: on 2026-09-08 it printed the whole 10k/100k/1M target table with
+  // no caveat at all, plus `5ms (1M accounts)` as an achieved comparison against paid apps.
+  // It is the page a reader reaches first, and the one a Zenodo archive freezes.
+  const subjects = [...DOCS, { name: 'README.md', text: README_TEXT }].filter(
     doc => NAMES_THE_METRICS.test(doc.text) && PRINTS_MILLISECONDS.test(doc.text),
   );
 
   it('finds the pages the rule is about', () => {
     // Guards the guard: an empty subject set would pass the loop below silently, which is how
     // a rule that no longer matches anything keeps reporting green.
-    expect(subjects.map(doc => doc.name).sort()).toEqual(['instagram-export.md', 'roadmap.md']);
+    expect(subjects.map(doc => doc.name).sort()).toEqual([
+      'README.md',
+      'instagram-export.md',
+      'roadmap.md',
+    ]);
   });
 
   for (const doc of subjects) {
@@ -439,6 +490,71 @@ describe('a page that prints these two metrics says they are targets', () => {
         `${doc.name} prints a millisecond figure for filter or search speed with no caveat. ` +
           'Copy the clause from docs/roadmap.md; do not write a new one.',
       ).toContain(performanceClause());
+    });
+  }
+});
+
+/**
+ * One capability claim, five documents, and the fifth was repaired into disagreeing with
+ * the other four.
+ *
+ * README said `| **Account Limit** | ✅ Unlimited (1M+ tested) |` and the four
+ * `docs/compare/*.md` pages said `| **Account size limit** | None — built and unit-tested
+ * for 1,000,000 accounts |`. Both are false the same way: the limit is bounded by the
+ * device's memory, and "tested" reads as end-to-end when the only 1M-scale test mocks
+ * IndexedDB entirely. `None` is additionally invisible to every pattern in this file —
+ * `account limit` is not one of the nouns the reversed-order entry above watches, so the
+ * table form hid it there too.
+ *
+ * ⛔ The reason this gate exists rather than a fifth careful edit: fixing README alone
+ * *created* the contradiction. One fact, five documents, two answers — arriving through a
+ * repair instead of through drift, which is the direction `.claude/CLAUDE.md` -> "No copied
+ * facts" does not warn about and is exactly as bad.
+ *
+ * So the claim is READ from README and required in every page that makes it, the way
+ * `performanceClause()` reads its clause from `docs/roadmap.md`. Subjects are derived from
+ * the row's presence, not listed, so a new comparison page joins the rule by writing the
+ * row. `toContain` rather than equality because the compare pages carry the longer form
+ * ("— unit-tested at 1,000,000 accounts") that a one-line README cell has no room for.
+ */
+const ACCOUNT_LIMIT_ROW = String.raw`^\|\s*\*\*Account (?:size )?limit\*\*\s*\|([^|]*)\|`;
+
+function accountLimitCell(text: string): string | undefined {
+  return new RegExp(ACCOUNT_LIMIT_ROW, 'im').exec(text)?.[1];
+}
+
+describe('every page that states an account limit states the same one', () => {
+  /** The claim itself, derived from README — never a second copy typed here. */
+  const claim = (): string => {
+    const cell = accountLimitCell(README_TEXT);
+    expect(cell, 'README no longer carries an account-limit row to derive the claim from').toBeTruthy();
+    // Strip the status emoji README uses in that column; keep the words.
+    return String(cell).replace(/[^\u0020-\u007E]/g, '').trim();
+  };
+
+  const subjects = DOCS.filter(doc => accountLimitCell(doc.text) !== undefined);
+
+  it('finds the pages the rule is about', () => {
+    // Guards the guard: an empty subject set would pass the loop below in silence.
+    expect(subjects.map(doc => doc.name).sort()).toEqual([
+      'compare/index.md',
+      'compare/vs-followers-app.md',
+      'compare/vs-followsback.md',
+      'compare/vs-unfollowgram.md',
+    ]);
+  });
+
+  it('derives a claim from README rather than an empty string', () => {
+    expect(claim().length).toBeGreaterThan(5);
+  });
+
+  for (const doc of subjects) {
+    it(`${doc.name} states the account limit the way README states it`, () => {
+      expect(
+        String(accountLimitCell(doc.text)),
+        `${doc.name} disagrees with README about the account limit. Copy README's wording; ` +
+          'do not write a new one. "None" is false — device memory bounds it.',
+      ).toContain(claim());
     });
   }
 });
