@@ -23,14 +23,25 @@ const APPLICATION_ID = `${BASE_URL}/#app`;
  * Profiles that identify *this* entity, not its maintainer.
  *
  * ⛔ Two entries, and the second one is here because it was *observed* rather than submitted.
- * Crunchbase joined 2026-09-07 after the operator opened the profile signed out and got the
- * filled page back. AlternativeTo and SaaSHub were filled the same evening and still read
- * "waiting to be reviewed", so they are deliberately absent: a filled form is not a published
- * assertion about this entity, and `sameAs` may only claim assertions that exist.
+ * Crunchbase joined 2026-09-07 on the strength of the operator opening the profile signed out and
+ * getting the filled page back — evidence that was insufficient, which is the point of this note.
+ * Re-checked 2026-09-08 by fetching the page and reading its head: no robots meta, self-canonical.
+ * It stays, now on a measurement rather than on an inference.
  *
- * ⚠️ An anonymous `curl` is not the instrument for that check. Crunchbase answers it 403 whatever
- * User-Agent it carries — a bot block, not a verdict on visibility — so the admissible reading is
- * a signed-out browser.
+ * ⛔ Filled, reachable and indexable are three separate facts. Measured 2026-09-08:
+ *   SaaSHub        200, names the product 77 times, and carries a `noindex` robots meta while the
+ *                  submission is pending — a complete profile that no index will ever read.
+ *   AlternativeTo  404 to the public. The submission produced no page at all; the browser tab that
+ *                  showed one belonged to the signed-in submitter.
+ * A page a human can read in an incognito window may still be excluded from every index by one tag
+ * that renders nothing, so "the operator can see it" is not the check. The check is a fetch, and
+ * `sameAs` may only claim assertions that exist and can be indexed.
+ *
+ * ⚠️ An anonymous `curl` is not always the instrument either, and its failures imitate findings.
+ * Crunchbase answers it 403 whatever User-Agent it carries; AlternativeTo answers 403 with a
+ * `noindex` meta that belongs to the bot-block page itself — a control fetch of a nonsense slug on
+ * that host returns the identical 403. Any 403 here needs that control before it is read as a
+ * verdict, and a signed-out browser is what settles it.
  *
  * Still queued, each blocked on a profile being created or an editor approving one —
  * AlternativeTo, opensourcealternative.to, SaaSHub — ranked in `00-the-entity-defects.md` §5, and
