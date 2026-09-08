@@ -265,7 +265,7 @@ export const INTENT_CONTENT: Record<IntentSlug, IntentContent> = {
             </p>
             <p>
               What it does instead is answer the version of the question you have the data for: your
-              own, exactly, offline.
+              own, exactly, from the export you already hold.
             </p>
           </>
         ),

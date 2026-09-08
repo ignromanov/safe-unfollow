@@ -1,9 +1,9 @@
 ---
 layout: default
 title: 'How to Find Instagram Unfollowers - Complete Guide'
-description: 'Step-by-step guide to find who unfollowed you on Instagram using free data export. No login required, works offline. Privacy-first tutorial.'
+description: 'Step-by-step guide to find who unfollowed you on Instagram using the free data export. No login, and your export never leaves the browser.'
 permalink: /
-last_updated: 2026-09-06
+last_updated: 2026-09-08
 ---
 
 # Documentation
@@ -53,7 +53,6 @@ Instagram Unfollow Tracker is a **100% private** tool that analyzes your Instagr
 - **No Login Required**: Uses official Instagram data export
 - **Free to analyze**: Every badge, filter and account, at any export size — the one paid item is a $7 one-time export unlock
 - **Open Source**: Transparent and auditable code
-- **Offline Capable**: Works without internet after initial load
 
 ### What It Shows
 

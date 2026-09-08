@@ -3,7 +3,7 @@ layout: default
 title: "How to Use Instagram Unfollow Tracker — Complete Guide"
 description: 'Complete guide to using Instagram Unfollow Tracker. Upload your ZIP file, filter unfollowers, search accounts, and understand badges. Free and private.'
 permalink: /user-guide/
-last_updated: 2026-09-03
+last_updated: 2026-09-08
 ---
 
 # User Guide
@@ -19,7 +19,7 @@ Instagram Unfollow Tracker is a privacy-focused tool that analyzes your Instagra
 - **Free to analyze**: Every badge, filter and account, at any export size — the one paid item is a $7 one-time export unlock
 - **Open Source**: Transparent and auditable code
 - **10 Languages**: Including Arabic with RTL support
-- **PWA Ready**: Install as app, works offline
+- **PWA Ready**: Install as an app from the browser menu
 - **Handles 1M+ accounts**: Built and unit-tested for exports of 1,000,000+ accounts
 
 ## Step-by-Step Tutorial
@@ -135,7 +135,7 @@ Instagram Unfollow Tracker is a privacy-focused tool that analyzes your Instagra
 ## What's Next?
 
 ### Already Live (v1.5.0)
-- ✅ **PWA Support**: Install as app, works fully offline
+- ✅ **PWA Support**: Install as an app from the browser menu
 - ✅ **10 Languages**: EN, ES, RU, DE, PT, TR, ID, JA, AR (RTL), FR
 - ✅ **3-way Theme**: Light / Dark / System
 - ✅ **1M+ Accounts**: Filtering stays interactive as the list grows — built and unit-tested at 1M accounts

@@ -688,6 +688,150 @@ function getPath(value: unknown, path: readonly string[]): unknown {
 }
 
 /**
+ * "Works offline" — a claim nothing in the build ever made true (GH#224).
+ *
+ * `vite/pwa-config.ts` precaches `**\/*.{ico,png,svg}` and nothing else: 15 icons on
+ * production, no HTML, no JS. Navigations are `NetworkFirst` with a 3 s timeout and
+ * chunks are `StaleWhileRevalidate` — cached only after they have been fetched once. So
+ * what actually works with the network off is a page you have already opened, after
+ * an analysis you have already run. `docs/roadmap.md` said "176 precached assets" (the
+ * number was 15, and they were icons), eight hero locales said "Works offline.", the
+ * `SoftwareApplication` `featureList` said it in JSON-LD, and README said the app shell
+ * was "precached at build time". Ruled 2026-09-08 (lumen-cro, operator-approved):
+ * retire the claim from the hero, the schema and the meta descriptions; keep one narrowed
+ * sentence where a reader asks the question.
+ *
+ * The narrowed form is allowed by the same rule as `free forever`: it is qualified. Here
+ * the qualifier is the word that names what has to have happened first — `already`
+ * ("pages you have already opened keep working with the network off"). A sentence that
+ * says "offline" without it is the blanket claim.
+ *
+ * A line ending in `?` is a question, not a claim, and is skipped — the FAQ heading that
+ * introduces the narrowed answer would otherwise fail on its own title.
+ *
+ * `docs/privacy.md` is exempted rather than fixed: its line is inside the claims corpus
+ * velum-cdpo rules on and inside PR #234's file at the time of writing. Remove the
+ * exemption in the same change that narrows the line.
+ *
+ * Non-English locales are not read by this regex, per this file's own rule above; the
+ * eight hero sentences that were deleted are archived below instead, and their return is
+ * caught by bytes.
+ */
+const OFFLINE_CLAIM = /\b(?:offline|without (?:an? )?internet(?: connection)?|network off)\b/i;
+const OFFLINE_QUALIFIER = /\balready\b/i;
+const OFFLINE_EXEMPT_DOCS = new Set(['privacy.md']);
+
+const OFFLINE_KNOWN_VIOLATIONS = [
+  '100% Private. Works offline.',
+  'Install as app, works fully offline',
+  '- **Offline**: Works without internet connection',
+  '| **Offline Mode**    | ✅ Works offline | ❌ Requires internet |',
+  'Full offline functionality after first load',
+  'the app works completely offline. You can even save the page for offline use.',
+];
+
+const OFFLINE_KNOWN_INNOCENTS = [
+  'Pages you have already opened keep working with the network off',
+  'Can I use it offline?',
+  '**Q: Can I use it offline?**  ',
+  'a route keeps working with the network off only after it has already been opened',
+];
+
+/**
+ * The sentence around a match, bounded by `.`, `?`, `!` or a line break on either side.
+ *
+ * Deliberately NOT `qualificationWindow`: that one looks forward only, which is right
+ * for "no servers … store your ZIP" and wrong here, because the qualifier that makes an
+ * offline sentence true names what happened *first* and therefore comes first —
+ * "pages you have **already** opened keep working with the network off". A forward-only
+ * window read that sentence as unqualified on the first run of this gate.
+ */
+function sentenceOf(text: string, index: number): { sentence: string; terminator: string } {
+  const before = text.slice(0, index);
+  const start = Math.max(...['.', '?', '!', '\n'].map(mark => before.lastIndexOf(mark))) + 1;
+  const rest = text.slice(index);
+  const end = rest.search(/[.?!\n]/);
+  const sentence = text.slice(start, end === -1 ? text.length : index + end);
+  const terminator = end === -1 ? '' : rest[end];
+  return { sentence, terminator };
+}
+
+function offlineOffences(text: string): string[] {
+  return [...text.matchAll(new RegExp(OFFLINE_CLAIM.source, 'gi'))]
+    .map(match => sentenceOf(text, match.index ?? 0))
+    .filter(({ sentence, terminator }) => terminator !== '?' && !OFFLINE_QUALIFIER.test(sentence))
+    .map(({ sentence }) => sentence.trim());
+}
+
+/** The literal sentence each hero locale carried until 2026-09-08. `ar` and `id` never did. */
+const ARCHIVED_FALSE_HERO_OFFLINE: Readonly<Record<string, string>> = {
+  de: 'Funktioniert offline.',
+  en: 'Works offline.',
+  es: 'Funciona offline.',
+  fr: 'Fonctionne hors ligne.',
+  ja: 'オフラインでも使えます。',
+  pt: 'Funciona offline.',
+  ru: 'Работает офлайн.',
+  tr: 'Çevrimdışı çalışır.',
+};
+
+describe('no page or bundle says the app works offline without saying what has to have happened first', () => {
+  it('the detector goes red on the sentences that were live', () => {
+    expect(OFFLINE_KNOWN_VIOLATIONS.filter(text => offlineOffences(text).length === 0)).toEqual([]);
+  });
+
+  it('the detector stays quiet on the narrowed form and on a question', () => {
+    expect(OFFLINE_KNOWN_INNOCENTS.filter(text => offlineOffences(text).length > 0)).toEqual([]);
+  });
+
+  const subjects = [
+    ...DOCS.filter(doc => !OFFLINE_EXEMPT_DOCS.has(doc.name)),
+    { name: 'README.md', text: README_TEXT },
+    ...(LLMS_TXT_EXISTS ? [{ name: 'public/llms.txt', text: LLMS_TXT_TEXT }] : []),
+    ...EN_LOCALE_FILES.map(file => ({
+      name: `src/locales/en/${file.name}`,
+      text: file.values.map(value => value.text).join('\n'),
+    })),
+  ];
+
+  for (const doc of subjects) {
+    it(`${doc.name} makes no unqualified offline claim`, () => {
+      expect(
+        offlineOffences(doc.text),
+        `${doc.name}: the precache is icons only (vite/pwa-config.ts); say what has already ` +
+          'happened for it to work — "pages you have already opened" — or drop the claim',
+      ).toEqual([]);
+    });
+  }
+
+  it('the exemption still names a page that exists', () => {
+    // Guards the guard: a renamed page would leave the exemption pointing at nothing while
+    // the new name went unchecked.
+    const names = new Set(DOCS.map(doc => doc.name));
+    expect([...OFFLINE_EXEMPT_DOCS].filter(name => !names.has(name))).toEqual([]);
+  });
+
+  it('the archived hero sentences name only locales that exist', () => {
+    const dirs = new Set(localeDirs());
+    expect(Object.keys(ARCHIVED_FALSE_HERO_OFFLINE).filter(lang => !dirs.has(lang))).toEqual([]);
+  });
+
+  for (const lang of localeDirs()) {
+    it(`${lang}/hero.json does not carry its archived offline sentence back`, () => {
+      const hero: unknown = JSON.parse(readFileSync(join(LOCALES_ROOT, lang, 'hero.json'), 'utf-8'));
+      const strings = jsonStringValues(hero).map(value => value.text);
+      const archived = ARCHIVED_FALSE_HERO_OFFLINE[lang];
+      if (archived) {
+        expect(strings.filter(text => text.includes(archived))).toEqual([]);
+      }
+      // Language-neutral: the loanword is spelled the same in de/es/pt/id, and a new claim in
+      // a locale that never had one is the case the archive cannot see.
+      expect(strings.filter(text => /\boffline\b/i.test(text))).toEqual([]);
+    });
+  }
+});
+
+/**
  * Claim-bearing keys, watched in every locale by a different method than the
  * regexes above: this is an exact-string archive, not a pattern match, because
  * a pattern match is exactly what stops working outside English.

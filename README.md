@@ -85,7 +85,7 @@ All processing happens **100% locally** in your browser: your Instagram export i
 - 💾 **Smart caching** — instant reload with IndexedDB persistence
 - 📊 **Sample data** — try it without uploading your own data
 - 🌍 **10 languages** — English, Spanish, Russian, German, Portuguese, Turkish, French, Indonesian, Japanese, Arabic (RTL)
-- 📲 **PWA support** — install as app, works fully offline
+- 📲 **PWA support** — install as an app from the browser menu
 - 🛡️ **Error recovery** — graceful error handling with recovery options
 
 ## 🌍 Multilingual Support
@@ -118,7 +118,6 @@ Available in **10 languages** with full RTL support:
 | **Instagram Login** | ✅ Not required                                          | ❌ Required (risky!)           |
 | **Account Limit**   | ✅ 1M+ by design                                         | ⚠️ 10k-100k max                |
 | **Data Processing** | ⚡ In your browser, no round-trip                        | 🐌 Cloud round-trip            |
-| **Offline Mode**    | ✅ Works offline                                         | ❌ Requires internet           |
 | **Open Source**     | ✅ MIT license                                           | ❌ Closed source               |
 | **Ads/Tracking**    | ⚠️ Ads + analytics — never usernames or your export file | ⚠️ Usually present             |
 | **Platform**        | 🌐 Web (all devices)                                     | 📱 Mobile apps usually         |
@@ -128,7 +127,7 @@ Available in **10 languages** with full RTL support:
 - **🔒 100% Private** — all processing happens locally in your browser (IndexedDB)
 - **💰 Free analysis** — no subscription, no account; the file export is a one-time purchase
 - **🔓 Open Source** — transparent code you can audit and customize
-- **⚡ Fast & Offline** — works without internet
+- **⚡ Fast** — no network round-trip; filtering is local
 - **🛡️ No Account Risk** — no Instagram login required, respects platform rules
 - **🎯 Accurate Results** — clear mutual/non-mutual detection without gimmicks
 - **📈 Scales to millions** — handles 1M+ accounts with ease (vs 100k limit in paid apps)
@@ -195,7 +194,7 @@ ceiling. The storage and memory columns are targets on the same footing.
 - **Web Workers + Comlink** — type-safe off-thread filtering
 - **Trigram/Prefix Indexes** — O(1) search instead of O(n) linear scan
 - **vite-react-ssg** — 73 pre-rendered pages for SEO and instant loads
-- **PWA (Workbox)** — offline-first, the app shell precached at build time
+- **PWA (Workbox)** — runtime caching; only icons and the manifest are precached (`vite/pwa-config.ts`)
 
 📖 **Deep dive:** [IndexedDB Architecture](INDEXEDDB_ARCHITECTURE.md)
 
@@ -206,7 +205,7 @@ ceiling. The storage and memory columns are targets on the same footing.
 - **Modern Stack** — React 18, Vite, shadcn/ui, Tailwind CSS
 - **Code Quality** — ESLint, Husky git hooks, automated quality checks
 - **Error Boundaries** — graceful error handling with recovery UI
-- **PWA** — installable, works offline once the shell is cached
+- **PWA** — installable; pages you have already opened keep working with the network off
 
 ## ❓ FAQ
 
@@ -220,7 +219,7 @@ A: No. You only need the ZIP file from Instagram Data Download.
 A: Accounts you follow who don't follow you back (excluding pending/restricted accounts).
 
 **Q: Can I use it offline?**  
-A: Yes! After the page loads, the app works completely offline.
+A: Partly. Pages and analyses you have already run keep working with the network off; a first visit and the first upload need a connection.
 
 **Q: Does it work on mobile?**
 A: Yes, the interface is fully responsive and works on all devices.

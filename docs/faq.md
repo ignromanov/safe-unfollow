@@ -3,7 +3,7 @@ layout: default
 title: "Instagram Unfollow Tracker FAQ: No Login, Free, Private"
 description: 'Answers to common questions about Instagram Unfollow Tracker. Learn how it works without login, why it''s free, and how your data stays private.'
 permalink: /faq/
-last_updated: 2026-09-03
+last_updated: 2026-09-08
 ---
 
 {% include faq-page-schema.html %}
@@ -42,7 +42,7 @@ Instagram may split followers into multiple files (`followers_1.json`, `follower
 ## Technical
 
 ### Can I use it offline?
-**Yes!** After the page loads, the app works completely without internet. All computation is client-side using your browser's processing power.
+**Partly.** Pages and analyses you have already run keep working with the network off — the app caches what it has fetched, not the whole site. A first visit, and the first upload, need a connection. All computation is client-side either way.
 
 ### Does it work on mobile?
 **Yes, the UI is fully responsive.** However, for large archives (10k+ accounts), desktop is more convenient due to better performance and screen space.
@@ -70,7 +70,6 @@ The app is optimized for massive scale:
 - **No login required**: Uses official Instagram data export
 - **Free to analyze**: Every badge, filter and account — the one paid item is a $7 one-time export unlock
 - **Customizable**: Modify the code for your needs
-- **Offline**: Works without internet connection
 
 ### How does it compare to Instagram's built-in features?
 Instagram doesn't provide unfollow tracking features. This tool fills that gap using your own exported data, giving you insights Instagram doesn't offer.
@@ -111,7 +110,7 @@ This is normal and expected:
 
 ### Is there a roadmap for new features?
 Yes! See [Project Roadmap](/docs/roadmap) for upcoming features. Already live:
-- ✅ **PWA support** — install as app, works offline
+- ✅ **PWA support** — install as an app from the browser menu
 - ✅ **10 languages** — including Arabic with RTL support
 - ✅ **3-way theme** — light/dark/system
 
@@ -134,9 +133,6 @@ Yes, the app works with any Instagram account type (public, private, business). 
 ### Why does the app need JavaScript?
 The app processes your Instagram data entirely in your browser using JavaScript. This ensures your data never leaves your device and provides the best privacy protection.
 
-### Can I run this offline?
-Yes! After the initial page load, the app works completely offline. You can even save the page for offline use.
-
 ### What if Instagram changes their data format?
 The app is designed to handle various Instagram export formats. If Instagram changes their format, we'll update the app to support the new format.
 
@@ -147,7 +143,7 @@ Your Instagram data is stored locally in your browser's IndexedDB for fast acces
 The app is available in **10 languages**: English, Spanish, Russian, German, Portuguese, Turkish, Indonesian, Japanese, Arabic (with RTL support), and French. The app auto-detects your browser language.
 
 ### Can I install it as an app?
-**Yes!** The app is a PWA (Progressive Web App). Click "Install" in your browser to add it to your home screen. It works fully offline after installation.
+**Yes!** The app is a PWA (Progressive Web App). Click "Install" in your browser to add it to your home screen.
 
 ## Community & Support
 
