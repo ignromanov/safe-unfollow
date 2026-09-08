@@ -6,6 +6,16 @@ type: software
 authors:
   - family-names: Romanov
     given-names: Ignat
+identifiers:
+  # The concept DOI, and deliberately only that one: it resolves to whichever
+  # version is newest, so it cannot go stale. Zenodo also mints a DOI per version
+  # (10.5281/zenodo.22663616 for 1.6.0), and that one would be wrong the moment
+  # 1.7.0 ships while still reading as current — nothing in this repository
+  # updates it, and the release that would falsify it is the release nobody
+  # rechecks this file during.
+  - type: doi
+    value: 10.5281/zenodo.22663615
+    description: 'Concept DOI — always resolves to the latest archived version.'
 repository-code: 'https://github.com/ignromanov/safe-unfollow'
 url: 'https://safeunfollow.app'
 license: MIT
