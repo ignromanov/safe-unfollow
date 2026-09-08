@@ -495,6 +495,71 @@ describe('a page that prints these two metrics says they are targets', () => {
 });
 
 /**
+ * One capability claim, five documents, and the fifth was repaired into disagreeing with
+ * the other four.
+ *
+ * README said `| **Account Limit** | ✅ Unlimited (1M+ tested) |` and the four
+ * `docs/compare/*.md` pages said `| **Account size limit** | None — built and unit-tested
+ * for 1,000,000 accounts |`. Both are false the same way: the limit is bounded by the
+ * device's memory, and "tested" reads as end-to-end when the only 1M-scale test mocks
+ * IndexedDB entirely. `None` is additionally invisible to every pattern in this file —
+ * `account limit` is not one of the nouns the reversed-order entry above watches, so the
+ * table form hid it there too.
+ *
+ * ⛔ The reason this gate exists rather than a fifth careful edit: fixing README alone
+ * *created* the contradiction. One fact, five documents, two answers — arriving through a
+ * repair instead of through drift, which is the direction `.claude/CLAUDE.md` -> "No copied
+ * facts" does not warn about and is exactly as bad.
+ *
+ * So the claim is READ from README and required in every page that makes it, the way
+ * `performanceClause()` reads its clause from `docs/roadmap.md`. Subjects are derived from
+ * the row's presence, not listed, so a new comparison page joins the rule by writing the
+ * row. `toContain` rather than equality because the compare pages carry the longer form
+ * ("— unit-tested at 1,000,000 accounts") that a one-line README cell has no room for.
+ */
+const ACCOUNT_LIMIT_ROW = String.raw`^\|\s*\*\*Account (?:size )?limit\*\*\s*\|([^|]*)\|`;
+
+function accountLimitCell(text: string): string | undefined {
+  return new RegExp(ACCOUNT_LIMIT_ROW, 'im').exec(text)?.[1];
+}
+
+describe('every page that states an account limit states the same one', () => {
+  /** The claim itself, derived from README — never a second copy typed here. */
+  const claim = (): string => {
+    const cell = accountLimitCell(README_TEXT);
+    expect(cell, 'README no longer carries an account-limit row to derive the claim from').toBeTruthy();
+    // Strip the status emoji README uses in that column; keep the words.
+    return String(cell).replace(/[^\u0020-\u007E]/g, '').trim();
+  };
+
+  const subjects = DOCS.filter(doc => accountLimitCell(doc.text) !== undefined);
+
+  it('finds the pages the rule is about', () => {
+    // Guards the guard: an empty subject set would pass the loop below in silence.
+    expect(subjects.map(doc => doc.name).sort()).toEqual([
+      'compare/index.md',
+      'compare/vs-followers-app.md',
+      'compare/vs-followsback.md',
+      'compare/vs-unfollowgram.md',
+    ]);
+  });
+
+  it('derives a claim from README rather than an empty string', () => {
+    expect(claim().length).toBeGreaterThan(5);
+  });
+
+  for (const doc of subjects) {
+    it(`${doc.name} states the account limit the way README states it`, () => {
+      expect(
+        String(accountLimitCell(doc.text)),
+        `${doc.name} disagrees with README about the account limit. Copy README's wording; ` +
+          'do not write a new one. "None" is false — device memory bounds it.',
+      ).toContain(claim());
+    });
+  }
+});
+
+/**
  * The same regexes, aimed at shipped product UI instead of docs.
  *
  * `docs/*.md` is the page a sceptical reader checks; `src/locales/en/*.json` is what

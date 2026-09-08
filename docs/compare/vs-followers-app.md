@@ -29,7 +29,7 @@ SafeUnfollow is the second kind. If real-time alerts are what you actually want,
 | **Where the analysis runs** | In your browser — the export is parsed, stored and filtered on your device |
 | **Free** | The whole analysis — every badge, every filter, the complete list, at any account size |
 | **Paid** | A one-time unlock for downloading your list as a file; price shown on the button in your currency, with a free sample of the first rows before you pay |
-| **Account size limit** | None — built and unit-tested for 1,000,000 accounts |
+| **Account size limit** | 1M+ by design — unit-tested at 1,000,000 accounts |
 | **Real-time alerts** | No |
 | **Platform** | Any browser, desktop or mobile; installable as a PWA |
 | **Source code** | Published under the MIT license |

@@ -21,7 +21,7 @@ last_updated: 2026-09-03
 | **Free tier** | The whole analysis — every badge, every filter, the complete list | The core non-follow-back comparison |
 | **Paid tier** | One-time unlock for downloading your list as a file; price shown on the button in your currency | "Essential" — $2.29/week |
 | **What the paid tier buys** | The file | The ongoing analysis: daily history and email alerts |
-| **Account size limit** | None — built and unit-tested for 1,000,000 accounts | 2,500 followers on Essential |
+| **Account size limit** | 1M+ by design — unit-tested at 1,000,000 accounts | 2,500 followers on Essential |
 | **Networks** | Instagram | Instagram, Threads, TikTok, Twitter/X |
 | **Ongoing monitoring** | No — one export, one snapshot | Yes, on the paid tier |
 | **Source code published** | Yes (MIT) | No |
