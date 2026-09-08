@@ -5,6 +5,7 @@
 
 <br>
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22663615.svg)](https://doi.org/10.5281/zenodo.22663615)
 ![Version](https://img.shields.io/github/package-json/v/ignromanov/safe-unfollow?label=Version&color=blue)
 ![Privacy: 100% local](https://img.shields.io/badge/Privacy-100%25%20local-success)
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue)
@@ -228,6 +229,17 @@ A: Yes, the interface is fully responsive and works on all devices.
 A: 10 languages including Arabic with RTL support. The app auto-detects your browser language.
 
 📖 **More questions?** See [FAQ](docs/faq.md) or [Troubleshooting Guide](docs/troubleshooting.md)
+
+## 📄 Citing SafeUnfollow
+
+Use the **Cite this repository** button above, or [`CITATION.cff`](CITATION.cff) directly.
+The DOI below is the concept DOI and always resolves to the newest archived version:
+
+> Romanov, I. _SafeUnfollow_. https://doi.org/10.5281/zenodo.22663615
+
+The version, repository, site and licence in `CITATION.cff` are checked against
+`package.json` on every CI run, so a citation cannot disagree with the code it points at.
+The source tree is also archived by [Software Heritage](https://archive.softwareheritage.org/browse/origin/directory/?origin_url=https://github.com/ignromanov/safe-unfollow).
 
 ## 🤝 Contributing
 

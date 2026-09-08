@@ -118,6 +118,41 @@ describe('citation metadata', () => {
     ).toBe(true);
   });
 
+  it('the README cites the DOI CITATION.cff declares, and cites it once', async () => {
+    // Minted 2026-09-08 from the v1.6.0 release. The DOI is now the sixth statement of a
+    // fact about this project that lives in more than one file — README badge, README prose
+    // and CITATION.cff — and every previous one on that list disagreed with itself inside a
+    // month. So it is derived here rather than compared to a literal typed into this test.
+    //
+    // ⛔ Only the CONCEPT DOI belongs in the tree. Zenodo mints a second, per-version DOI
+    // from every release; nothing in this repository updates it, and it would be wrong from
+    // the moment the next version ships while still reading as current. This assertion
+    // therefore also fails if a second `type: doi` identifier appears — that is the point,
+    // not a side effect.
+    const cff = await loadCitation();
+    const identifiers = (cff.identifiers ?? []) as Array<{ type?: string; value?: string }>;
+    const dois = identifiers.filter(id => id.type === 'doi').map(id => String(id.value));
+
+    expect(
+      dois,
+      `CITATION.cff declares ${dois.length} DOI identifiers (${dois.join(', ') || 'none'}); ` +
+        'it must declare exactly one, the concept DOI. A per-version DOI goes stale on the ' +
+        'next release while still reading as current.',
+    ).toHaveLength(1);
+    const doi = dois[0];
+    expect(doi, 'the DOI is not a Zenodo-shaped DOI').toMatch(/^10\.\d{4,}\/[-.\w]+$/);
+
+    // Every DOI written anywhere in the README must be that one. A badge and a prose
+    // citation that disagree is the same defect as a badge and a package version that do.
+    const inReadme = [...read('README.md').matchAll(/10\.\d{4,}\/zenodo\.\d+/g)].map(m => m[0]);
+    expect(inReadme.length, 'README states no DOI — the badge and the citation line are gone').toBeGreaterThan(0);
+    expect(
+      [...new Set(inReadme)],
+      `README cites ${[...new Set(inReadme)].join(', ')}; CITATION.cff declares ${doi}. ` +
+        'A citation that disagrees with the record it points at is worse than none.',
+    ).toEqual([doi]);
+  });
+
   it('the LICENSE names the entity CITATION.cff names', async () => {
     const cff = await loadCitation();
     const title = String(cff.title);
