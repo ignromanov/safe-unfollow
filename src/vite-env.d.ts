@@ -44,3 +44,11 @@ interface ImportMeta {
  * form's `version` hidden field (src/lib/feedback/tally.ts) — never per-user.
  */
 declare const __APP_VERSION__: string;
+
+/**
+ * `package.json`'s semver, inlined by `define` in vite.config.ts and vitest.config.ts.
+ * Distinct from `__APP_VERSION__`, which becomes a commit sha in Vercel builds: this one is
+ * published as `SoftwareApplication.softwareVersion` in the home page's JSON-LD, where a sha
+ * would be a malformed version string.
+ */
+declare const __PKG_VERSION__: string;

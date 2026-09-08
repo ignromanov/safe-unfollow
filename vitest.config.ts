@@ -3,6 +3,8 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { defineConfig } from "vitest/config";
 
+import pkg from "./package.json";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -12,6 +14,9 @@ export default defineConfig({
   // a fixed string is enough since no test asserts a particular version value.
   define: {
     __APP_VERSION__: JSON.stringify("test"),
+    // Not a fixed string, unlike the line above: this one is asserted against package.json in
+    // src/__tests__/components/OrganizationSchema.test.tsx, which is the point of deriving it.
+    __PKG_VERSION__: JSON.stringify(pkg.version),
   },
   plugins: [react()],
   resolve: {

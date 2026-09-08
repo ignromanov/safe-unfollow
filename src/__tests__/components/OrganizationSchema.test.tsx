@@ -1,6 +1,35 @@
 import { describe, it, expect } from 'vitest';
 import { renderWithRouter } from '../test-utils';
 import { OrganizationSchema } from '@/components/OrganizationSchema';
+import { SUPPORTED_LANGUAGES } from '@/config/languages';
+
+import pkg from '../../../package.json';
+
+/**
+ * One JSON-LD read, shared by the assertions below.
+ *
+ * `scripts[0]` is the Organization node, `scripts[1]` the SoftwareApplication — the component
+ * emits exactly two, which `rendering` above pins.
+ */
+function readSchemas(): { organization: OrgNode; software: AppNode } {
+  const { container } = renderWithRouter(<OrganizationSchema />, { initialEntries: ['/'] });
+  const scripts = container.querySelectorAll('script[type="application/ld+json"]');
+  return {
+    organization: JSON.parse(scripts[0].textContent!) as OrgNode,
+    software: JSON.parse(scripts[1].textContent!) as AppNode,
+  };
+}
+
+type OrgRef = { '@type': string; '@id': string; name: string; url: string };
+type OrgNode = OrgRef & { description: string; disambiguatingDescription: string };
+type AppNode = {
+  '@id': string;
+  softwareVersion: string;
+  inLanguage: string[];
+  author: OrgRef;
+  provider: OrgRef;
+  publisher: OrgRef;
+};
 
 describe('OrganizationSchema', () => {
   describe('rendering', () => {
@@ -175,7 +204,7 @@ describe('OrganizationSchema', () => {
       expect(organizationSchema.logo).toBe('https://safeunfollow.app/logo.svg');
     });
 
-    it('should include sameAs with GitHub URL', () => {
+    it('should include sameAs with every profile that names this entity', () => {
       const { container } = renderWithRouter(<OrganizationSchema />, {
         initialEntries: ['/'],
       });
@@ -183,7 +212,12 @@ describe('OrganizationSchema', () => {
       const scripts = container.querySelectorAll('script[type="application/ld+json"]');
       const organizationSchema = JSON.parse(scripts[0].textContent!);
 
-      expect(organizationSchema.sameAs).toEqual(['https://github.com/ignromanov/safe-unfollow']);
+      // Written out rather than imported: this pins the claim the page actually publishes. A
+      // profile joins the list only once it has been observed public, never when a form was filled.
+      expect(organizationSchema.sameAs).toEqual([
+        'https://github.com/ignromanov/safe-unfollow',
+        'https://www.crunchbase.com/organization/safeunfollow',
+      ]);
     });
 
     it('should include organization description', () => {
@@ -194,8 +228,68 @@ describe('OrganizationSchema', () => {
       const scripts = container.querySelectorAll('script[type="application/ld+json"]');
       const organizationSchema = JSON.parse(scripts[0].textContent!);
 
-      expect(organizationSchema.description).toBe(
-        'Privacy-first tools for social media data analysis. All processing happens locally in your browser.'
+      // Not pinned to a literal, deliberately. Copy changes; what must not change is that this
+      // field answers "what is SafeUnfollow" with a product rather than a category. It read
+      // "Privacy-first tools for social media data analysis. All processing happens locally in
+      // your browser." until 2026-09-07 — a sentence naming no product, no platform and no
+      // domain, on the field a name match lands on first. Same shape as PR #203/#204: guard the
+      // class, never the wording.
+      const description = organizationSchema.description;
+      expect(description).toMatch(/instagram/i);
+      expect(description).toMatch(/unfollow/i);
+      expect(description).toMatch(/browser/i);
+    });
+
+    /** The control: the sentence this gate exists to reject must actually fail it. */
+    it('the description gate goes red on a category-only sentence', () => {
+      const superseded =
+        'Privacy-first tools for social media data analysis. All processing happens locally in your browser.';
+      expect(
+        [/instagram/i, /unfollow/i].every(pattern => pattern.test(superseded)),
+        'the superseded description would still pass — the gate is not testing its own subject'
+      ).toBe(false);
+    });
+
+    it('names one organization, not three', () => {
+      const { organization, software } = readSchemas();
+
+      // Before 2026-09-07 the file minted three anonymous `Organization` nodes — the standalone
+      // one, `author` and `provider` — none of which a graph consumer could merge. This is the
+      // assertion that keeps them one node; a fourth reference added without the shared `@id`
+      // fails here rather than silently splitting the entity again.
+      const expectedId = 'https://safeunfollow.app/#organization';
+      expect(organization['@id']).toBe(expectedId);
+      for (const [role, ref] of [
+        ['author', software.author],
+        ['provider', software.provider],
+        ['publisher', software.publisher],
+      ] as const) {
+        expect(ref['@id'], `${role} does not carry the shared Organization @id`).toBe(expectedId);
+        // Written out in full as well as identified: a consumer that does not resolve `@id`
+        // must still receive a usable node. See the component's comment on publisherRef.
+        expect(ref['@type'], `${role} is not typed`).toBe('Organization');
+        expect(ref.name, `${role} has no name`).toBe('SafeUnfollow');
+      }
+      expect(software['@id']).toBe('https://safeunfollow.app/#app');
+    });
+
+    it('states what this entity is not', () => {
+      const { organization } = readSchemas();
+
+      // A separately published Chrome extension shares this name and automates unfollowing
+      // inside a live Instagram session; the citation baseline of 2026-09-07 measured three of
+      // five AI engines attributing that behaviour to us. `disambiguatingDescription` is
+      // schema.org's own field for exactly this and was unused.
+      const disambiguation = organization.disambiguatingDescription;
+      expect(disambiguation, 'no disambiguatingDescription is published').toBeTruthy();
+      expect(disambiguation).toMatch(/safeunfollow\.app/);
+      expect(disambiguation).toMatch(/not a browser extension/i);
+    });
+
+    it('carries the product name as an alternate name', () => {
+      const { organization } = readSchemas();
+      expect((organization as unknown as { alternateName: string }).alternateName).toBe(
+        'Instagram Unfollow Tracker'
       );
     });
   });
@@ -266,7 +360,21 @@ describe('OrganizationSchema', () => {
       const scripts = container.querySelectorAll('script[type="application/ld+json"]');
       const softwareSchema = JSON.parse(scripts[1].textContent!);
 
-      expect(softwareSchema.softwareVersion).toBe('1.5.0');
+      // Derived, not typed. This assertion read `'1.5.0'` while package.json said `1.6.0`, so
+      // the gate held the drift in place instead of catching it — the class `progress.md`
+      // records five times over. `__PKG_VERSION__` is defined from package.json in both
+      // vite.config.ts and vitest.config.ts.
+      expect(softwareSchema.softwareVersion).toBe(pkg.version);
+    });
+
+    it('declares every locale the app actually serves', () => {
+      const { software } = readSchemas();
+
+      // Derived from the same constant the router and the locale bundles use, so a language
+      // added or retired cannot leave a stale list in machine-readable form. `hi` was retired
+      // 2026-08-08; a hand-typed array here would still be advertising it.
+      expect(software.inLanguage).toEqual([...SUPPORTED_LANGUAGES]);
+      expect(software.inLanguage).not.toContain('hi');
     });
 
     it('should include date published', () => {
@@ -327,6 +435,7 @@ describe('OrganizationSchema', () => {
 
       expect(softwareSchema.author).toEqual({
         '@type': 'Organization',
+        '@id': 'https://safeunfollow.app/#organization',
         name: 'SafeUnfollow',
         url: 'https://safeunfollow.app',
       });
@@ -342,6 +451,7 @@ describe('OrganizationSchema', () => {
 
       expect(softwareSchema.provider).toEqual({
         '@type': 'Organization',
+        '@id': 'https://safeunfollow.app/#organization',
         name: 'SafeUnfollow',
         url: 'https://safeunfollow.app',
       });
