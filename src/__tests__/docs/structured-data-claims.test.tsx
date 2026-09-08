@@ -43,6 +43,16 @@ import { renderWithRouter } from '../test-utils';
 const LATENCY_CLAIM = /\b(?:sub[-\s]?)?\d+(?:[.,]\d+)?\s*(?:ms|milliseconds?)\b/i;
 
 /**
+ * The second claim JSON-LD carried that nothing measured: `'Works offline after loading'`
+ * in the `SoftwareApplication` `featureList` (GH#224). The precache is icons only
+ * (`vite/pwa-config.ts`), so the true statement needs the qualifier "already opened" —
+ * and a `featureList` entry has no room for one. Same rule as latency: prose may carry
+ * the caveat (`monetization-claims.test.ts` polices that), structured data may not make
+ * the claim at all.
+ */
+const OFFLINE_CLAIM = /\boffline\b|\bwithout (?:an? )?internet\b/i;
+
+/**
  * The control.
  *
  * A gate whose subject has just been deleted passes for two indistinguishable
@@ -58,6 +68,8 @@ const KNOWN_VIOLATIONS = [
   'Filters 1,000,000 accounts in under 5 ms',
   'Search completes in 2 milliseconds',
 ];
+
+const OFFLINE_KNOWN_VIOLATIONS = ['Works offline after loading', 'Works without internet', 'Offline-capable'];
 
 /** Strings that must NOT trip it — a version, a duration, an ISO date, a count. */
 const KNOWN_INNOCENTS = [
@@ -99,6 +111,27 @@ const EMITTERS: Array<[string, () => React.ReactElement, string]> = [
   ['HowToSection', () => <HowToSection />, '/'],
   ['FAQSection', () => <FAQSection />, '/'],
 ];
+
+describe('shipped structured data does not claim the app works offline', () => {
+  it('the detector can go red on the entry that was live', () => {
+    expect(OFFLINE_KNOWN_VIOLATIONS.filter(text => !OFFLINE_CLAIM.test(text))).toEqual([]);
+  });
+
+  it('the detector does not fire on the entries that stay', () => {
+    expect(KNOWN_INNOCENTS.filter(text => OFFLINE_CLAIM.test(text))).toEqual([]);
+  });
+
+  it.each(EMITTERS)('%s asserts nothing about offline', (name, render, route) => {
+    const offenders = jsonLdStrings(render(), route).filter(text => OFFLINE_CLAIM.test(text));
+
+    expect(
+      offenders,
+      `${name} claims offline capability in JSON-LD: ${offenders.join(' | ')} — ` +
+        'the precache is icons only (vite/pwa-config.ts) and a featureList entry cannot ' +
+        'carry the "already opened" qualifier that would make it true (GH#224)'
+    ).toEqual([]);
+  });
+});
 
 describe('shipped structured data states no unmeasured performance figure', () => {
   it('the detector can go red on the claims this gate exists to catch', () => {

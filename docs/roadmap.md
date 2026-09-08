@@ -3,7 +3,7 @@ layout: default
 title: "Instagram Unfollow Tracker Roadmap: Planned Features"
 description: 'See what''s coming next for Instagram Unfollow Tracker. Historical comparison, CSV export, Chrome extension, and more planned features.'
 permalink: /roadmap/
-last_updated: 2026-09-03
+last_updated: 2026-09-08
 ---
 
 # Roadmap
@@ -36,8 +36,7 @@ last_updated: 2026-09-03
 
 ### Progressive Web App (PWA)
 - ✅ **Installable** — Add to home screen on iOS/Android/Desktop
-- ✅ **Offline support** — 176 precached assets via Workbox
-- ✅ **Service worker** — Full offline functionality after first load
+- ✅ **Service worker** — Workbox runtime caching; pages you have already opened keep working with the network off, a first visit does not
 
 ### Performance & Quality
 - ✅ **IndexedDB v2** — Columnar storage, designed for ~40x space reduction (~5 MB at 1M accounts)

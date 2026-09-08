@@ -531,7 +531,7 @@ describe('OrganizationSchema', () => {
       const scripts = container.querySelectorAll('script[type="application/ld+json"]');
       const softwareSchema = JSON.parse(scripts[1].textContent!);
 
-      expect(softwareSchema.featureList).toHaveLength(7);
+      expect(softwareSchema.featureList).toHaveLength(6);
     });
 
     it('should include key privacy feature', () => {

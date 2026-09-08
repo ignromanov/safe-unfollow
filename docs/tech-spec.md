@@ -3,7 +3,7 @@ layout: default
 title: "How the Instagram Unfollow Tracker Works: Architecture"
 description: 'How the tracker works: 100% local processing, IndexedDB columnar storage, BitSet filtering, and how it is built to hold 1M+ accounts.'
 permalink: /tech-spec/
-last_updated: 2026-09-03
+last_updated: 2026-09-08
 ---
 
 # Technical Specification
@@ -336,9 +336,9 @@ connections/followers_and_following/
 ## 11. PWA Configuration
 
 ### Workbox Strategy
-- **Precache**: 176 static assets
-- **Runtime caching**: NetworkFirst for HTML pages
-- **Offline fallback**: Cached app shell
+- **Precache**: icons and the manifest only — `globPatterns` in `vite/pwa-config.ts` decides, and it deliberately excludes `assets/**`
+- **Runtime caching**: NetworkFirst for HTML pages (3 s timeout), StaleWhileRevalidate for JS/CSS/fonts once fetched
+- **Offline fallback**: none — a route keeps working with the network off only after it has already been opened and its chunks fetched; a cold start needs a connection
 
 ### Manifest
 ```json
