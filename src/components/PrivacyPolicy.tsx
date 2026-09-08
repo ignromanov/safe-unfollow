@@ -109,9 +109,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             <li>Geographic region (country-level, not precise location)</li>
             <li>Referral sources</li>
             <li>
-              Measurements of the export you load — how many accounts it holds and how large the
-              file is. Numbers only: never a username, and never anything read from inside the
-              archive
+              Your export's account count and file size — never a username, never its contents
             </li>
           </ul>
           <p className="text-muted-foreground mt-4">
@@ -334,11 +332,9 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             When you do click, you leave for the partner's site, and from that point their privacy
             policy applies: like any site you visit, they can see your IP address, your browser, and
             that you arrived from us, and they may set their own cookies to attribute the referral.
-            On our side we record that a click happened, which offer it was and where it sat in the
-            list, together with the figures that chose the offers: how many accounts your export
-            holds, and a band describing how many of them stopped following you. We record no
-            identifier of you. Nothing read from inside the archive leaves your browser in the first
-            place.
+            We record the click, the offer, its position, and what chose it: your export's account
+            count and how many stopped following you. No identifier of you, and none of its
+            contents, which never leave your browser.
           </p>
           <p className="text-muted-foreground mt-4">
             Which partner offer you see depends on the language you are viewing the site in, because
