@@ -108,6 +108,9 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             <li>Device type and browser (anonymized)</li>
             <li>Geographic region (country-level, not precise location)</li>
             <li>Referral sources</li>
+            <li>
+              Your export's account count and file size — never a username, never its contents
+            </li>
           </ul>
           <p className="text-muted-foreground mt-4">
             <strong className="text-foreground">You can disable all analytics</strong> by clicking
@@ -234,7 +237,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             payment can be matched to the page it started from: whether you are on a phone or a big
             screen, the language you are reading in, and your country. The country is worked out
             from your device's own time zone setting — we never ask anyone else where you are. The
-            number of accounts in your export is not among them and never leaves your browser.
+            number of accounts in your export is not among them.
           </p>
           <p className="text-muted-foreground mt-4">
             After a successful payment, Dodo Payments sends you back to this site with your license
@@ -329,9 +332,9 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             When you do click, you leave for the partner's site, and from that point their privacy
             policy applies: like any site you visit, they can see your IP address, your browser, and
             that you arrived from us, and they may set their own cookies to attribute the referral.
-            On our side we record only that a click happened and which offer it was — no identifier
-            of you, and nothing derived from your Instagram export, which never leaves your browser
-            in the first place.
+            We record the click, the offer, its position, and what chose it: your export's account
+            count and how many stopped following you. No identifier of you, and none of its
+            contents, which never leave your browser.
           </p>
           <p className="text-muted-foreground mt-4">
             Which partner offer you see depends on the language you are viewing the site in, because

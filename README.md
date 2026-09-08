@@ -39,7 +39,7 @@ Upload your Instagram data export and instantly see:
 - **Mutual followers** — accounts you both follow
 - **Connection patterns** — understand your Instagram network
 
-All processing happens **100% locally** in your browser. Your data never leaves your device.
+All processing happens **100% locally** in your browser: your Instagram export is parsed there and never uploaded.
 
 ## 📸 Screenshots
 
@@ -167,7 +167,7 @@ Open the app and click **"Upload ZIP"** to load your Instagram Data Download, or
 
 ## 🔒 Privacy & Security
 
-- **100% Local Processing** — your data never leaves your device
+- **100% Local Processing** — your Instagram export is parsed in your browser and never uploaded
 - **Your export stays put** — the analytics we run never receive usernames or your export file
 - **No Instagram Login** — works with your data export only
 - **Open Source** — you can audit the code yourself
@@ -211,7 +211,7 @@ ceiling. The storage and memory columns are targets on the same footing.
 ## ❓ FAQ
 
 **Q: Is it safe to use?**  
-A: Yes! All processing happens locally in your browser. Nothing is uploaded to any server.
+A: Yes! All processing happens locally in your browser. Your export is never uploaded to any server.
 
 **Q: Do I need my Instagram password?**  
 A: No. You only need the ZIP file from Instagram Data Download.

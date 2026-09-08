@@ -26,7 +26,7 @@ handful of third parties, and the canonical policy names what each one receives:
 | Who | What they get | Where |
 |-----|---------------|-------|
 | Vercel | standard web server logs (IP, timestamp, requested URL) | every page |
-| Umami | anonymous page views and product events, no personal identifiers | every page |
+| Umami | page views, product events, and measurements of the export you load — how many accounts it holds and how large the file is. No personal identifiers, no usernames, nothing read from inside the archive | every page |
 | Google AdSense | ad requests and advertising cookies, subject to your consent choice | the units we place are on `/results`; Google's own automatic placements can appear on any screen once its script has started |
 | Google (Funding Choices) | your consent choice, stored so the banner stops asking | consent regions |
 | Affiliate networks | only what a link click sends, and only if you click | `/upload` |
@@ -34,7 +34,7 @@ handful of third parties, and the canonical policy names what each one receives:
 | Tally | the feedback you type, plus your language, the page you sent it from and the site version — and only if you open the form | `/results`, on click |
 
 Ads run on this site, and `/upload` carries one affiliate link. That is how the free analysis
-is paid for. None of it touches the export, because the export is never uploaded anywhere.
+is paid for. None of them receives the export itself — it is never uploaded anywhere. Our own analytics do record measurements of it, and the canonical policy names them.
 
 ## Verify rather than believe
 
