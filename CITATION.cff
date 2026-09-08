@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: 'If you use SafeUnfollow in your work, please cite it as below.'
+title: SafeUnfollow
+abstract: 'Find out who unfollowed you on Instagram. SafeUnfollow reads the official Instagram data export and computes unfollowers, non-mutuals and mutuals entirely in the browser; the export never leaves the device. No login, no server, no Instagram API.'
+type: software
+authors:
+  - family-names: Romanov
+    given-names: Ignat
+repository-code: 'https://github.com/ignromanov/safe-unfollow'
+url: 'https://safeunfollow.app'
+license: MIT
+version: 1.6.0
+date-released: '2026-09-08'
+keywords:
+  - instagram
+  - unfollow
+  - tracker
+  - privacy
+  - local
+  - react
+  - typescript
+  - open-source
+  - data-analysis
+  - social-media

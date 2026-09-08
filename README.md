@@ -1,17 +1,16 @@
 <div align="center">
   <img src="./public/logo.svg" width="100" height="100" alt="Logo">
-  <h1>Instagram Unfollow Tracker</h1>
+  <h1>SafeUnfollow — Instagram Unfollow Tracker</h1>
 </div>
 
 <br>
 
-![Version: 1.5.0](https://img.shields.io/badge/Version-1.5.0-blue)
+![Version](https://img.shields.io/github/package-json/v/ignromanov/safe-unfollow?label=Version&color=blue)
 ![Privacy: 100% local](https://img.shields.io/badge/Privacy-100%25%20local-success)
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue)
 ![Open Source](https://img.shields.io/badge/Open%20Source-Yes-informational)
-![Free](https://img.shields.io/badge/Free-Forever-green)
-![Coverage: 98%](https://img.shields.io/badge/Coverage-98%25-brightgreen)
-![Tests: 1601 passed](https://img.shields.io/badge/Tests-1601%20passed-success)
+![Analysis: free](https://img.shields.io/badge/Analysis-Free-green)
+![CI](https://github.com/ignromanov/safe-unfollow/actions/workflows/code-quality.yml/badge.svg)
 ![Languages: 10](https://img.shields.io/badge/Languages-10-purple)
 ![PWA Ready](https://img.shields.io/badge/PWA-Ready-orange)
 
@@ -28,7 +27,7 @@
 
 <br>
 
-**Find out who unfollowed you on Instagram** — analyze your Instagram Data Download ZIP locally to discover mutuals, non-mutuals, and connection patterns. No login, no servers, no tracking.
+**Find out who unfollowed you on Instagram** — analyze your Instagram Data Download ZIP locally to discover mutuals, non-mutuals, and connection patterns. No login, and the export never reaches a server: the ZIP is parsed in your browser.
 
 ## 🎯 What it does
 
@@ -111,17 +110,17 @@ Available in **10 languages** with full RTL support:
 
 ## 🚀 Why choose this over paid tools?
 
-| Feature             | Instagram Unfollow Tracker | Paid Apps (Unfollowgram, etc.) |
-| ------------------- | -------------------------- | ------------------------------ |
-| **Price**           | 💰 Free forever            | 💸 $5-10/month                 |
-| **Privacy**         | 🔒 100% local (no upload)  | ⚠️ Upload to cloud servers     |
-| **Instagram Login** | ✅ Not required            | ❌ Required (risky!)           |
-| **Account Limit**   | ✅ Unlimited (1M+ tested)  | ⚠️ 10k-100k max                |
-| **Data Processing** | ⚡ 5ms (1M accounts)       | 🐌 150ms+                      |
-| **Offline Mode**    | ✅ Works offline           | ❌ Requires internet           |
-| **Open Source**     | ✅ MIT license             | ❌ Closed source               |
-| **Ads/Tracking**    | ✅ None                    | ⚠️ Usually present             |
-| **Platform**        | 🌐 Web (all devices)       | 📱 Mobile apps usually         |
+| Feature             | Instagram Unfollow Tracker          | Paid Apps (Unfollowgram, etc.) |
+| ------------------- | ----------------------------------- | ------------------------------ |
+| **Price**           | 💰 Free analysis · export paid once | 💸 $5-10/month                 |
+| **Privacy**         | 🔒 Parsed in your browser           | ⚠️ Sent to cloud servers       |
+| **Instagram Login** | ✅ Not required                     | ❌ Required (risky!)           |
+| **Account Limit**   | ✅ Unlimited (1M+ tested)           | ⚠️ 10k-100k max                |
+| **Data Processing** | ⚡ 5ms (1M accounts)                | 🐌 150ms+                      |
+| **Offline Mode**    | ✅ Works offline                    | ❌ Requires internet           |
+| **Open Source**     | ✅ MIT license                      | ❌ Closed source               |
+| **Ads/Tracking**    | ✅ None                             | ⚠️ Usually present             |
+| **Platform**        | 🌐 Web (all devices)                | 📱 Mobile apps usually         |
 
 ### Why This Matters
 
@@ -197,7 +196,7 @@ Built to handle massive datasets with cutting-edge optimization:
 
 ## 🧪 Quality & Reliability
 
-- **98% Test Coverage** — thoroughly tested codebase
+- **Tested** — the full suite runs in CI on every push
 - **1,601 Tests Passed** — comprehensive test suite covering all features
 - **TypeScript Strict Mode** — type-safe development with full type checking
 - **Modern Stack** — React 18, Vite, shadcn/ui, Tailwind CSS

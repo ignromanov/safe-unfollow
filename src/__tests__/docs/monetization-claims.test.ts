@@ -33,6 +33,19 @@ const LLMS_TXT_EXISTS = existsSync(LLMS_TXT_PATH);
 const LLMS_TXT_TEXT = LLMS_TXT_EXISTS ? readFileSync(LLMS_TXT_PATH, 'utf-8') : '';
 
 /**
+ * `README.md` lives in the repository root, so it is invisible to every `DOCS`-scoped check
+ * in this file — measured 2026-09-08, while scoping the first Zenodo DOI: its badge row said
+ * `Free-Forever` seven weeks after that wording was retired, and its comparison table said
+ * `Free forever` again, both past a gate written to ban exactly that phrase.
+ *
+ * A stale docs page is read by a sceptical visitor. A stale README is read by a visitor AND
+ * copied verbatim into a Zenodo record and a Software Heritage snapshot, neither of which can
+ * be rewritten. Same shape as `public/llms.txt` above: read once, added as a subject to the
+ * checks that should see it, not to `DOCS` — it carries no front matter and is not a docs page.
+ */
+const README_TEXT = readFileSync(join(process.cwd(), 'README.md'), 'utf-8');
+
+/**
  * Claims that were true when written and stopped being true without anyone
  * editing the sentence.
  *
@@ -623,7 +636,11 @@ describe('docs monetization claims', () => {
     // public/llms.txt lives outside docs/ but makes the same claim ("Available in 10
     // languages") and is at least as likely to go stale silently — included as a subject
     // here rather than duplicating this check for one more file.
-    const subjects = [...DOCS, { name: 'public/llms.txt', text: LLMS_TXT_TEXT }];
+    const subjects = [
+      ...DOCS,
+      { name: 'public/llms.txt', text: LLMS_TXT_TEXT },
+      { name: 'README.md', text: README_TEXT },
+    ];
     const pattern = /\b(\d+)\s+languages?\b/gi;
     const offenders = subjects.flatMap(doc => {
       const badCounts = [...doc.text.matchAll(pattern)]
@@ -645,6 +662,18 @@ describe('docs monetization claims', () => {
       ).map(doc => doc.name);
 
       expect(offenders, `${offenders.join(', ')} — ${entry.why}`).toEqual([]);
+    });
+  }
+});
+
+describe('README monetization claims', () => {
+  it('finds a README to check', () => {
+    expect(README_TEXT.length).toBeGreaterThan(1000);
+  });
+
+  for (const entry of BANNED) {
+    it(`never claims ${String(entry.pattern)} in README.md — ${entry.why}`, () => {
+      expect(isOffendingMatch(README_TEXT, entry), entry.why).toBe(false);
     });
   }
 });
