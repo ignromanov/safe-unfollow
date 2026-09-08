@@ -1,11 +1,11 @@
 <div align="center">
   <img src="./public/logo.svg" width="100" height="100" alt="Logo">
-  <h1>Instagram Unfollow Tracker</h1>
+  <h1>SafeUnfollow — Instagram Unfollow Tracker</h1>
 </div>
 
 <br>
 
-![Version: 1.5.0](https://img.shields.io/badge/Version-1.5.0-blue)
+![Version](https://img.shields.io/github/package-json/v/ignromanov/safe-unfollow?label=Version&color=blue)
 ![Privacy: 100% local](https://img.shields.io/badge/Privacy-100%25%20local-success)
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue)
 ![Open Source](https://img.shields.io/badge/Open%20Source-Yes-informational)
