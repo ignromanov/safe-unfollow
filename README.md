@@ -78,12 +78,12 @@ All processing happens **100% locally** in your browser. Your data never leaves 
 - 🔄 **Mutual analysis** — discover who follows you back vs. one-way connections
 - 🏷️ **Smart badges** — Following, Followers, Mutuals, Not following back, Not followed back, Pending, Restricted, Close friends, Unfollowed, Dismissed
 - 🔎 **Lightning-fast search** — trigram/prefix indexes for instant results (even with 1M+ accounts)
-- ⚡ **Optimized for scale** — handles millions of accounts with <5MB memory usage
+- ⚡ **Optimized for scale** — columnar storage and bitsets, built for millions of accounts
 - 📱 **Responsive design** — works perfectly on desktop and mobile
 - 🌙 **Dark mode** — comfortable viewing in any lighting
 - 💾 **Smart caching** — instant reload with IndexedDB persistence
 - 📊 **Sample data** — try it without uploading your own data
-- 🌍 **10 languages** — English, Spanish, Russian, German, Portuguese, Turkish, Hindi, Indonesian, Japanese, Arabic (RTL)
+- 🌍 **10 languages** — English, Spanish, Russian, German, Portuguese, Turkish, French, Indonesian, Japanese, Arabic (RTL)
 - 📲 **PWA support** — install as app, works fully offline
 - 🛡️ **Error recovery** — graceful error handling with recovery options
 
@@ -99,7 +99,7 @@ Available in **10 languages** with full RTL support:
 | Deutsch          | de   | —   |
 | Português        | pt   | —   |
 | Türkçe           | tr   | —   |
-| हिन्दी           | hi   | —   |
+| Français         | fr   | —   |
 | Bahasa Indonesia | id   | —   |
 | 日本語           | ja   | —   |
 | العربية          | ar   | ✅  |
@@ -110,24 +110,24 @@ Available in **10 languages** with full RTL support:
 
 ## 🚀 Why choose this over paid tools?
 
-| Feature             | Instagram Unfollow Tracker          | Paid Apps (Unfollowgram, etc.) |
-| ------------------- | ----------------------------------- | ------------------------------ |
-| **Price**           | 💰 Free analysis · export paid once | 💸 $5-10/month                 |
-| **Privacy**         | 🔒 Parsed in your browser           | ⚠️ Sent to cloud servers       |
-| **Instagram Login** | ✅ Not required                     | ❌ Required (risky!)           |
-| **Account Limit**   | ✅ Unlimited (1M+ tested)           | ⚠️ 10k-100k max                |
-| **Data Processing** | ⚡ 5ms (1M accounts)                | 🐌 150ms+                      |
-| **Offline Mode**    | ✅ Works offline                    | ❌ Requires internet           |
-| **Open Source**     | ✅ MIT license                      | ❌ Closed source               |
-| **Ads/Tracking**    | ✅ None                             | ⚠️ Usually present             |
-| **Platform**        | 🌐 Web (all devices)                | 📱 Mobile apps usually         |
+| Feature             | Instagram Unfollow Tracker                               | Paid Apps (Unfollowgram, etc.) |
+| ------------------- | -------------------------------------------------------- | ------------------------------ |
+| **Price**           | 💰 Free analysis · export paid once                      | 💸 $5-10/month                 |
+| **Privacy**         | 🔒 Parsed in your browser                                | ⚠️ Sent to cloud servers       |
+| **Instagram Login** | ✅ Not required                                          | ❌ Required (risky!)           |
+| **Account Limit**   | ✅ 1M+ by design                                         | ⚠️ 10k-100k max                |
+| **Data Processing** | ⚡ In your browser, no round-trip                        | 🐌 Cloud round-trip            |
+| **Offline Mode**    | ✅ Works offline                                         | ❌ Requires internet           |
+| **Open Source**     | ✅ MIT license                                           | ❌ Closed source               |
+| **Ads/Tracking**    | ⚠️ Ads + analytics — never usernames or your export file | ⚠️ Usually present             |
+| **Platform**        | 🌐 Web (all devices)                                     | 📱 Mobile apps usually         |
 
 ### Why This Matters
 
 - **🔒 100% Private** — all processing happens locally in your browser (IndexedDB)
-- **💰 Completely Free** — no subscriptions, no hidden costs, no limits
+- **💰 Free analysis** — no subscription, no account; the file export is a one-time purchase
 - **🔓 Open Source** — transparent code you can audit and customize
-- **⚡ Fast & Offline** — works without internet, 75x faster filtering than competitors
+- **⚡ Fast & Offline** — works without internet
 - **🛡️ No Account Risk** — no Instagram login required, respects platform rules
 - **🎯 Accurate Results** — clear mutual/non-mutual detection without gimmicks
 - **📈 Scales to millions** — handles 1M+ accounts with ease (vs 100k limit in paid apps)
@@ -182,27 +182,30 @@ Built to handle massive datasets with cutting-edge optimization:
 | **Search (indexed)** | <1ms         | <1ms          | ~1ms        |
 | **Memory Usage**     | ~500 KB      | ~2 MB         | ~5 MB       |
 
+⚠️ Filter speed and search speed are design targets, not measurements — no benchmark harness
+exists in this repo, and the only 1M-scale test mocks IndexedDB entirely and asserts a 500ms
+ceiling. The storage and memory columns are targets on the same footing.
+
 **Technology Stack:**
 
-- **IndexedDB v2** — columnar storage for 40x space reduction
-- **FastBitSet.js** — 32x faster filtering with bitwise operations
+- **IndexedDB v2** — columnar storage: usernames packed into typed arrays, not objects
+- **FastBitSet.js** — one bit per account per badge, filtered with bitwise operations
 - **TanStack Virtual** — renders only visible items (60 FPS scrolling)
-- **Web Workers + Comlink** — type-safe off-thread filtering (INP: 350ms → 180ms)
+- **Web Workers + Comlink** — type-safe off-thread filtering
 - **Trigram/Prefix Indexes** — O(1) search instead of O(n) linear scan
 - **vite-react-ssg** — 73 pre-rendered pages for SEO and instant loads
-- **PWA (Workbox)** — offline-first with 176 precached entries
+- **PWA (Workbox)** — offline-first, the app shell precached at build time
 
 📖 **Deep dive:** [IndexedDB Architecture](INDEXEDDB_ARCHITECTURE.md)
 
 ## 🧪 Quality & Reliability
 
 - **Tested** — the full suite runs in CI on every push
-- **1,601 Tests Passed** — comprehensive test suite covering all features
 - **TypeScript Strict Mode** — type-safe development with full type checking
 - **Modern Stack** — React 18, Vite, shadcn/ui, Tailwind CSS
 - **Code Quality** — ESLint, Husky git hooks, automated quality checks
 - **Error Boundaries** — graceful error handling with recovery UI
-- **PWA** — installable, works offline with 176 precached assets
+- **PWA** — installable, works offline once the shell is cached
 
 ## ❓ FAQ
 
