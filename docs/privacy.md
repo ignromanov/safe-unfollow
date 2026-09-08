@@ -40,7 +40,7 @@ is paid for. None of them receives the export itself — it is never uploaded an
 
 - **Source code**: [github.com/ignromanov/safe-unfollow](https://github.com/ignromanov/safe-unfollow) — MIT, auditable
 - **Network tab**: upload a file with DevTools open; no request carries its contents
-- **Offline**: after the first load the analysis works with the network off
+- **Offline**: run an analysis, then cut the network — everything you have already opened keeps working; a first visit still needs a connection
 
 ## Related
 

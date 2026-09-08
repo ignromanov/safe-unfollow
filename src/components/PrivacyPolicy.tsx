@@ -101,7 +101,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
 
           <h3 className="text-lg font-semibold mt-6 mb-3">2.1 Analytics (Optional)</h3>
           <p className="text-muted-foreground mb-4">
-            We use privacy-friendly analytics services (Vercel Analytics, Umami) that collect:
+            We use one privacy-friendly analytics service, Umami, which collects:
           </p>
           <ul className="list-disc list-inside space-y-2 text-muted-foreground ms-4">
             <li>Page views and navigation patterns</li>

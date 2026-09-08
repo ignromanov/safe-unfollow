@@ -709,9 +709,9 @@ function getPath(value: unknown, path: readonly string[]): unknown {
  * A line ending in `?` is a question, not a claim, and is skipped — the FAQ heading that
  * introduces the narrowed answer would otherwise fail on its own title.
  *
- * `docs/privacy.md` is exempted rather than fixed: its line is inside the claims corpus
- * velum-cdpo rules on and inside PR #234's file at the time of writing. Remove the
- * exemption in the same change that narrows the line.
+ * `docs/privacy.md` was exempted here for one day, because its line sat inside PR #234
+ * while that PR was open. The exemption came out in the change that narrowed the line
+ * (2026-09-08, velum-cdpo) — an exemption is a debt with a named creditor, not a setting.
  *
  * Non-English locales are not read by this regex, per this file's own rule above; the
  * eight hero sentences that were deleted are archived below instead, and their return is
@@ -719,7 +719,6 @@ function getPath(value: unknown, path: readonly string[]): unknown {
  */
 const OFFLINE_CLAIM = /\b(?:offline|without (?:an? )?internet(?: connection)?|network off)\b/i;
 const OFFLINE_QUALIFIER = /\balready\b/i;
-const OFFLINE_EXEMPT_DOCS = new Set(['privacy.md']);
 
 const OFFLINE_KNOWN_VIOLATIONS = [
   '100% Private. Works offline.',
@@ -785,7 +784,7 @@ describe('no page or bundle says the app works offline without saying what has t
   });
 
   const subjects = [
-    ...DOCS.filter(doc => !OFFLINE_EXEMPT_DOCS.has(doc.name)),
+    ...DOCS,
     { name: 'README.md', text: README_TEXT },
     ...(LLMS_TXT_EXISTS ? [{ name: 'public/llms.txt', text: LLMS_TXT_TEXT }] : []),
     ...EN_LOCALE_FILES.map(file => ({
@@ -803,13 +802,6 @@ describe('no page or bundle says the app works offline without saying what has t
       ).toEqual([]);
     });
   }
-
-  it('the exemption still names a page that exists', () => {
-    // Guards the guard: a renamed page would leave the exemption pointing at nothing while
-    // the new name went unchecked.
-    const names = new Set(DOCS.map(doc => doc.name));
-    expect([...OFFLINE_EXEMPT_DOCS].filter(name => !names.has(name))).toEqual([]);
-  });
 
   it('the archived hero sentences name only locales that exist', () => {
     const dirs = new Set(localeDirs());
