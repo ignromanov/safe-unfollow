@@ -343,6 +343,30 @@ const BANNED: BannedEntry[] = [
    * `qualifiedBy` for the same reason the four above carry it: `⚠️ Ads + analytics — never
    * usernames or your export file` names its subject and is a different claim from `✅ None`.
    */
+  /**
+   * Denying collection is arithmetic, not a privacy judgment.
+   *
+   * `src/lib/stats/events.ts` sends `account_count` from eight call sites and
+   * `file_size_mb` from two — ten in total, both derived from the user's export. README
+   * said "**No Data Collection** — we don't collect, send, or store any of your
+   * information" and `docs/faq.md` said "100% local processing, no data collection", both
+   * against those ten. Neither was reachable by any pattern here: the first says "send"
+   * where the `data … sent … anywhere` entry wants "sent", and the second has no verb at
+   * all.
+   *
+   * ⚠️ Scope, deliberately: this is the *collection* claim only. The neighbouring claims
+   * about *locality* — "100% local", "never leaves your device" — are largely true, and
+   * whether a derived count is "your data" is a privacy determination that belongs to
+   * velum-cdpo, not to a regex. Those are filed, not gated.
+   *
+   * Blast radius measured before adding, reading every match across docs/, README and
+   * src/locales/en: exactly the two sentences above, and nothing else.
+   */
+  {
+    pattern: new RegExp(`${NEGATION}${GAP}\\bcollect(?:s|ed|ion|ing)?\\b`, 'i'),
+    why: 'account_count leaves from eight call sites and file_size_mb from two — that is collection',
+    qualifiedBy: QUALIFIER_BOUND,
+  },
   {
     pattern: /\b(?:ads?|advertising|tracking|analytics)\b[^\n]{0,60}\b(?:none|nothing)\b/i,
     why: 'AdSense ships two units on /results and Umami logs every page view — a cell denying either is false',
@@ -522,6 +546,59 @@ const ACCOUNT_LIMIT_ROW = String.raw`^\|\s*\*\*Account (?:size )?limit\*\*\s*\|(
 function accountLimitCell(text: string): string | undefined {
   return new RegExp(ACCOUNT_LIMIT_ROW, 'im').exec(text)?.[1];
 }
+
+/**
+ * The claim that replaced the blanket one is true — and held by nothing until this gate.
+ *
+ * `README.md` and `docs/faq.md` now say the analytics "never receive usernames or your
+ * export file". Checked before it shipped, and it survived the check: `searchPerform` sends
+ * `query_length`, never the query (`events.ts:187`); `usernameLabelResolution` sends a mode
+ * enum, never a handle (`:621`); and a census of every payload property name in that file —
+ * 47 of them — turned up no field carrying a value read from the archive. The
+ * instrumentation transmits shape, not content, on purpose, and `:71-75` says so.
+ *
+ * ⛔ But it survives by today's absence, not by construction. `ErrorBoundary.tsx:43` calls
+ * `analytics.errorBoundary(error.message, …)`, which forwards the message of ANY thrown
+ * Error — including one thrown inside a third-party package — truncated to 200 characters.
+ * That is an open free-text channel pointed straight at Umami. It carries nothing from the
+ * archive today: the only four interpolated throws in `src/` interpolate a badge key, a
+ * guide-step key, an HTTP status and a column name, and none of the six `throw new` sites
+ * under `core/parsers`, `lib/errors`, `lib/indexeddb` or `lib/export` interpolates at all
+ * (verified with a control, because an empty grep is not a measurement). One
+ * `throw new Error(\`bad username: ${name}\`)` falsifies the sentence, in a file nobody
+ * would think to read alongside the README — and by then the README is inside a Zenodo
+ * archive that cannot be rewritten.
+ *
+ * So the channel is pinned rather than the sentence. This repository's convention is that a
+ * free-text analytics field is truncated at the call site with `.slice(0, N)`; the four
+ * below are every such field, and `file_hash_prefix` is included because a digest of the
+ * user's own archive belongs in the same review even though it is neither a username nor
+ * the file. Adding a fifth goes red on purpose: the question it forces is "does the README
+ * still tell the truth", and that question has to be asked while the field is being added.
+ */
+describe('the analytics payload carries shape, not content', () => {
+  const EVENTS = readFileSync(join(process.cwd(), 'src/lib/stats/events.ts'), 'utf-8');
+  const truncatedFields = (): string[] => [
+    ...new Set(
+      [...EVENTS.matchAll(/^\s*([a-z_]+): [A-Za-z][A-Za-z0-9]*\??\.slice\(/gm)].map(m => m[1]),
+    ),
+  ].sort();
+
+  it('finds the truncations the rule is about', () => {
+    // Guards the guard: a changed call-site style would yield an empty set, and the
+    // assertion below would then be comparing nothing to nothing.
+    expect(truncatedFields().length).toBeGreaterThan(0);
+  });
+
+  it('no analytics field carries free text beyond the four on record', () => {
+    expect(
+      truncatedFields(),
+      'a new truncated analytics field appeared. Free text can carry a username. Check it ' +
+        'against the README claim "never receive usernames or your export file" before ' +
+        'adding it here — that sentence is going into a Zenodo archive that cannot be edited.',
+    ).toEqual(['component_stack', 'error_message', 'file_hash_prefix', 'message']);
+  });
+});
 
 describe('every page that states an account limit states the same one', () => {
   /** The claim itself, derived from README — never a second copy typed here. */
