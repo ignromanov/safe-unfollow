@@ -167,7 +167,7 @@ Open the app and click **"Upload ZIP"** to load your Instagram Data Download, or
 ## 🔒 Privacy & Security
 
 - **100% Local Processing** — your data never leaves your device
-- **No Data Collection** — we don't collect, send, or store any of your information
+- **Your export stays put** — the analytics we run never receive usernames or your export file
 - **No Instagram Login** — works with your data export only
 - **Open Source** — you can audit the code yourself
 

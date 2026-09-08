@@ -65,7 +65,7 @@ The app is optimized for massive scale:
 ## Comparison
 
 ### Why is this better than paid services?
-- **Privacy**: 100% local processing, no data collection
+- **Privacy**: 100% local processing, and the analytics we run never receive usernames or your export file
 - **Transparency**: Open source, you can see exactly what it does
 - **No login required**: Uses official Instagram data export
 - **Free to analyze**: Every badge, filter and account — the one paid item is a $7 one-time export unlock
