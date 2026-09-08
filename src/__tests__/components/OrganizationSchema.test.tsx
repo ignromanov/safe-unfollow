@@ -295,6 +295,47 @@ describe('OrganizationSchema', () => {
   });
 
   describe('SoftwareApplication schema', () => {
+    /**
+     * The DOI names the *software*, so it is asserted here and not on the Organization
+     * node. That node's own comment rejects `buymeacoffee.com/ignromanov` because "that
+     * page names a person, and this node is an organisation" — a Zenodo software record
+     * fails the mirror image of the same test.
+     *
+     * The value is the **concept** DOI, which always resolves to the newest version. The
+     * version DOI (…616) pins v1.6.0 and is falsified by the next release, which is the
+     * event during which nobody rereads this file.
+     */
+    it('should carry the concept DOI as a PropertyValue identifier', () => {
+      const { container } = renderWithRouter(<OrganizationSchema />, {
+        initialEntries: ['/'],
+      });
+
+      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
+      const softwareSchema = JSON.parse(scripts[1].textContent!);
+
+      expect(softwareSchema.identifier).toEqual({
+        '@type': 'PropertyValue',
+        propertyID: 'DOI',
+        value: '10.5281/zenodo.22663615',
+      });
+    });
+
+    /**
+     * Guards the distinction rather than the literal: a *version* DOI must never appear
+     * here, whatever its digits. Written as a shape check so it still fires after the
+     * next release mints a new one.
+     */
+    it('should not assert a version-pinned DOI anywhere in the software schema', () => {
+      const { container } = renderWithRouter(<OrganizationSchema />, {
+        initialEntries: ['/'],
+      });
+
+      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
+      const softwareSchema = JSON.parse(scripts[1].textContent!);
+
+      expect(JSON.stringify(softwareSchema)).not.toContain('10.5281/zenodo.22663616');
+    });
+
     it('should have valid SoftwareApplication schema structure', () => {
       const { container } = renderWithRouter(<OrganizationSchema />, {
         initialEntries: ['/'],
