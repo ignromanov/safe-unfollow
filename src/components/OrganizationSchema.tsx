@@ -4,6 +4,27 @@ import { SUPPORTED_LANGUAGES } from '@/config/languages';
 
 const BASE_URL = 'https://safeunfollow.app';
 const GITHUB_URL = 'https://github.com/ignromanov/safe-unfollow';
+
+/**
+ * The Zenodo **concept** DOI, minted 2026-09-08 with the first release. It always resolves to the
+ * newest version; the version DOI (`…22663616`) pins v1.6.0 and is falsified by the next release —
+ * the one event during which nobody rereads this file. `CITATION.cff` carries the same concept DOI
+ * and for the same reason (#230).
+ *
+ * ⛔ It sits on the SoftwareApplication node below, **not** in the Organization's `sameAs`. That
+ * node's own comment rejects a profile because "that page names a person, and this node is an
+ * organisation"; a Zenodo *software* record fails the mirror image of that test. What is asserted
+ * here is an identifier for the software, which is what the record actually names.
+ *
+ * ⚠️ The record URL is deliberately **not** in any `sameAs` yet. This file's rule is that `sameAs`
+ * may only claim assertions that exist and can be indexed, and only the first half is measured:
+ * `https://doi.org/10.5281/zenodo.22663615` redirects to `zenodo.org` (so the DOI is registered),
+ * but the landing page answered **504** on 2026-09-08, so no robots check was possible. Control,
+ * same instrument: a nonsense DOI on that host 404s at `doi.org` and never redirects, so the
+ * redirect is a real signal and the 504 is Zenodo's, not ours. Recheck for a 200 and a robots meta
+ * before adding the URL — the identifier below stands on registration alone and needs neither.
+ */
+const ZENODO_CONCEPT_DOI = '10.5281/zenodo.22663615';
 const CRUNCHBASE_URL = 'https://www.crunchbase.com/organization/safeunfollow';
 
 /**
@@ -149,6 +170,11 @@ export function OrganizationSchema() {
     screenshot: `${BASE_URL}/og-image.png`,
     datePublished: '2025-11-22',
     license: 'https://opensource.org/licenses/MIT',
+    identifier: {
+      '@type': 'PropertyValue',
+      propertyID: 'DOI',
+      value: ZENODO_CONCEPT_DOI,
+    },
     isAccessibleForFree: true,
     offers: {
       '@type': 'Offer',
