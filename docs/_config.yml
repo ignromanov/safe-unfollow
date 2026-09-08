@@ -36,6 +36,7 @@ entity:
   logo: "https://safeunfollow.app/logo.svg"
   same_as:
     - "https://github.com/ignromanov/safe-unfollow"
+    - "https://www.crunchbase.com/organization/safeunfollow"
   description: "SafeUnfollow is a free web app that reads the official Instagram data export in your browser and shows who unfollowed you, who does not follow back, and who is mutual. The export is parsed on your own device and never uploaded, and no Instagram login is required."
   disambiguating_description: "SafeUnfollow is the web app at safeunfollow.app. It is not a browser extension, it does not act inside an Instagram session, and it never follows or unfollows anyone on your behalf."
 

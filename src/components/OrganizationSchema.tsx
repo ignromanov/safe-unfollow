@@ -4,6 +4,7 @@ import { SUPPORTED_LANGUAGES } from '@/config/languages';
 
 const BASE_URL = 'https://safeunfollow.app';
 const GITHUB_URL = 'https://github.com/ignromanov/safe-unfollow';
+const CRUNCHBASE_URL = 'https://www.crunchbase.com/organization/safeunfollow';
 
 /**
  * One stable identifier for the publisher, referenced everywhere it is named.
@@ -21,19 +22,27 @@ const APPLICATION_ID = `${BASE_URL}/#app`;
 /**
  * Profiles that identify *this* entity, not its maintainer.
  *
- * ⛔ One entry, and that is a measured deficit rather than an oversight: the GEO audit of
- * 2026-09-04 scored Brand Authority 12/100 on zero third-party mentions. The queue, each blocked
- * on the operator creating the profile — AlternativeTo, opensourcealternative.to, SaaSHub,
- * Crunchbase — is ranked in `00-the-entity-defects.md` §5, and the Product Hunt listing URL
- * (which exists: Search Console lists `producthunt.com` among our linking hosts) has to be
- * recovered from GSC before it can go here.
+ * ⛔ Two entries, and the second one is here because it was *observed* rather than submitted.
+ * Crunchbase joined 2026-09-07 after the operator opened the profile signed out and got the
+ * filled page back. AlternativeTo and SaaSHub were filled the same evening and still read
+ * "waiting to be reviewed", so they are deliberately absent: a filled form is not a published
+ * assertion about this entity, and `sameAs` may only claim assertions that exist.
+ *
+ * ⚠️ An anonymous `curl` is not the instrument for that check. Crunchbase answers it 403 whatever
+ * User-Agent it carries — a bot block, not a verdict on visibility — so the admissible reading is
+ * a signed-out browser.
+ *
+ * Still queued, each blocked on a profile being created or an editor approving one —
+ * AlternativeTo, opensourcealternative.to, SaaSHub — ranked in `00-the-entity-defects.md` §5, and
+ * the Product Hunt listing URL (which exists: Search Console lists `producthunt.com` among our
+ * linking hosts) has to be recovered from GSC before it can go here.
  *
  * ⚠️ `buymeacoffee.com/ignromanov` is deliberately **not** here, having been proposed and
  * withdrawn the same day. `sameAs` asserts that two URLs name the same entity; that page names a
  * person, and this node is an organisation. On an entity whose whole problem is a name collision,
  * a merely adjacent profile adds noise in exactly the dimension that is already broken.
  */
-const SAME_AS = [GITHUB_URL];
+const SAME_AS = [GITHUB_URL, CRUNCHBASE_URL];
 
 /**
  * The answer to "what is SafeUnfollow", and until 2026-09-07 it named no product.

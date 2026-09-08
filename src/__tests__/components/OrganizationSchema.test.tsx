@@ -204,7 +204,7 @@ describe('OrganizationSchema', () => {
       expect(organizationSchema.logo).toBe('https://safeunfollow.app/logo.svg');
     });
 
-    it('should include sameAs with GitHub URL', () => {
+    it('should include sameAs with every profile that names this entity', () => {
       const { container } = renderWithRouter(<OrganizationSchema />, {
         initialEntries: ['/'],
       });
@@ -212,7 +212,12 @@ describe('OrganizationSchema', () => {
       const scripts = container.querySelectorAll('script[type="application/ld+json"]');
       const organizationSchema = JSON.parse(scripts[0].textContent!);
 
-      expect(organizationSchema.sameAs).toEqual(['https://github.com/ignromanov/safe-unfollow']);
+      // Written out rather than imported: this pins the claim the page actually publishes. A
+      // profile joins the list only once it has been observed public, never when a form was filled.
+      expect(organizationSchema.sameAs).toEqual([
+        'https://github.com/ignromanov/safe-unfollow',
+        'https://www.crunchbase.com/organization/safeunfollow',
+      ]);
     });
 
     it('should include organization description', () => {

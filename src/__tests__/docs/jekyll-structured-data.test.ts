@@ -354,9 +354,12 @@ describe('the docs entity and the app entity are the same entity', () => {
 
   it('claims the same profiles on both surfaces', async () => {
     const e = await entity();
-    // SAME_AS holds identifiers, so the extractor reads the const it is built from.
+    // SAME_AS holds identifiers, so the extractor reads the consts it is built from - and the
+    // order matters, because the two surfaces are separate builds and a reordered list is a
+    // disagreement a reader would otherwise have to resolve by hand.
     const github = componentString('GITHUB_URL');
-    expect(e.same_as).toEqual([github]);
+    const crunchbase = componentString('CRUNCHBASE_URL');
+    expect(e.same_as).toEqual([github, crunchbase]);
   });
 
   it('builds the shared @id from the site URL rather than typing it twice', async () => {
