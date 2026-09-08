@@ -76,6 +76,29 @@ describe('citation metadata', () => {
     ).toBe(PACKAGE.version);
   });
 
+  it('the CHANGELOG names the version package.json names', () => {
+    // The third statement of one version, and the last one to be left ungated.
+    //
+    // On 2026-09-08 the entity work removed the README/CITATION.cff disagreement and could
+    // not close this one: a CHANGELOG entry wants the release date, and the release had not
+    // happened yet. So the tree stood at package.json 1.6.0, CITATION.cff 1.6.0, and a
+    // CHANGELOG whose newest released heading said 1.5.0 — in the one file whose entire job
+    // is to say what shipped, hours before a Zenodo DOI would freeze it.
+    //
+    // Keep a Changelog puts the newest release first, so the first `## [x.y.z]` heading is
+    // the released version. `[Unreleased]` carries no digits and is skipped by the pattern
+    // rather than by position.
+    const released = [...read('CHANGELOG.md').matchAll(/^## \[(\d+\.\d+\.\d+)\]/gm)].map(
+      match => match[1],
+    );
+    expect(released.length, 'CHANGELOG.md has no released version headings to read').toBeGreaterThan(0);
+    expect(
+      released[0],
+      `CHANGELOG.md's newest release is ${released[0]}, package.json says ${PACKAGE.version}. ` +
+        'Add the entry before tagging — a DOI minted from a release cannot be corrected.',
+    ).toBe(PACKAGE.version);
+  });
+
   it('CITATION.cff points at the same repository, site and licence as package.json', async () => {
     const cff = await loadCitation();
     expect(normalizeRepo(String(cff['repository-code']))).toBe(

@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-09-08
+
+First tagged release. Everything from 0.x through 1.5.0 shipped continuously to
+production and was never tagged, so there is no commit range this entry could
+summarise honestly — the per-change history is in the repository's commits, and
+this entry deliberately does not backfill eight months of it.
+
+What the release itself is for: the repository can now be cited. Before it, the
+project named itself four ways and stated three versions at once, and a Zenodo
+DOI is minted from the release event and never re-minted.
+
+### Added
+
+- `CITATION.cff`, and a gate deriving its version, repository, site and licence
+  from `package.json` instead of a second hand-typed copy (#226).
+
+### Fixed
+
+- The README stopped stating design targets as measurements: figures with no
+  derivation in the repository (`40x`, `75x`, `32x`, `5ms at 1M`), an account
+  limit described as unlimited, and a test count off by 2.5x (#227).
+- The language list disagreed with `src/config/languages.ts` in both directions
+  — Hindi named, French missing — past a gate that compared the count and not
+  the members (#227).
+- README and `docs/faq.md` stopped denying data collection the instrumentation
+  performs: `account_count` leaves from eight call sites and `file_size_mb` from
+  two (#228).
+
 ## [1.5.0] - 2026-01-14
 
 ### Added
