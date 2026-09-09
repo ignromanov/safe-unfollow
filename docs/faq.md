@@ -3,7 +3,7 @@ layout: default
 title: "Instagram Unfollow Tracker FAQ: No Login, Free, Private"
 description: 'Answers to common questions about Instagram Unfollow Tracker. Learn how it works without login, why it''s free, and how your data stays private.'
 permalink: /faq/
-last_updated: 2026-09-08
+last_updated: 2026-09-09
 ---
 
 {% include faq-page-schema.html %}
@@ -13,7 +13,7 @@ last_updated: 2026-09-08
 ## Privacy & Security
 
 ### Is it safe? Where do my data go?
-**Your Instagram export never leaves your browser.** The ZIP is opened, parsed and stored on your own device, and no server receives your export. What the rest of the site loads is answered on [the privacy page](/docs/privacy).
+**Your Instagram export never leaves your browser.** [Is an unfollowers tracker safe?](/docs/is-it-safe) is the full answer — five facts you can check for yourself, the last of which needs no trust in us at all. What the rest of the site loads is answered on [the privacy page](/docs/privacy).
 
 ### Do I need my Instagram login/password?
 **No, absolutely not.** You only need the ZIP file from Instagram's official Data Download feature (JSON format). No login credentials required.
