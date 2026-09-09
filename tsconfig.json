@@ -12,10 +12,9 @@
     "noEmit": true,
     "noUncheckedIndexedAccess": true,
     "strict": true,
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "@tests/*": ["src/__tests__/*"]
+      "@/*": ["./src/*"],
+      "@tests/*": ["./src/__tests__/*"]
     },
     "types": ["vitest/globals", "@testing-library/jest-dom"]
   },
