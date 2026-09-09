@@ -15,6 +15,28 @@ concurrency:
 jobs:
   build-test:
     runs-on: ubuntu-latest
+    env:
+      # Placeholders, defined once and referenced by the two steps that need them, so they
+      # cannot drift apart. They exist because Vite substitutes `import.meta.env.VITE_*` at
+      # build time: unset, each of these folds to a constant, the guard behind it folds too,
+      # and Rollup eliminates the code path. Measured 2026-09-09 on commit 2f81de0 — CI's
+      # artefact carried neither the checkout path nor the ad injector, while Vercel's
+      # artefact for the same commit carried both and was 4477 bytes larger with a different
+      # content hash. So this job's `dist/` was not the shape of anything we ship, and the
+      # budget measured against it bounded nothing.
+      #
+      # None of these is a secret: all four are public values a browser reads out of the
+      # shipped bundle. These are not those values — they are stand-ins of the same shape,
+      # because this artefact is thrown away and only its size is read. `test.checkout.` is
+      # the host `lib/export/license.ts` maps to the test License API, so the code takes the
+      # same branch it takes in production rather than the not-configured one.
+      #
+      # Deliberately NOT set here: VITE_UMAMI_WEBSITE_ID. Its own docblock says absence must
+      # be the safe state, because a preview that inherits it writes into the dataset the
+      # live numbers are read from. A byte budget is not worth that risk.
+      BUDGET_CHECKOUT_URL: https://test.checkout.dodopayments.com/buy/pdt_ci_budget_probe
+      BUDGET_ADSENSE_CLIENT: ca-pub-0000000000000000
+      BUDGET_ADSENSE_SLOT: '0000000000'
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -23,8 +45,21 @@ jobs:
           cache: 'npm'
       - run: npm ci --prefer-offline --no-audit
       - run: npm run build --if-present
+        env:
+          VITE_DODO_CHECKOUT_URL: ${{ env.BUDGET_CHECKOUT_URL }}
+          VITE_ADSENSE_CLIENT: ${{ env.BUDGET_ADSENSE_CLIENT }}
+          VITE_ADSENSE_SLOT_RESULTS: ${{ env.BUDGET_ADSENSE_SLOT }}
+          VITE_ADSENSE_SLOT_RESULTS_END: ${{ env.BUDGET_ADSENSE_SLOT }}
       # The only job with a dist/ to measure. Unwired, the budget guard cannot fail.
+      # The two variables below are re-declared for this step because the script asserts the
+      # built chunk actually contains their values — that assertion is what stops an unset
+      # variable from silently shrinking the subject back again. The slot ids are not
+      # re-declared: they shape the build, but nothing measured says their values land in
+      # app-*.js rather than in a route chunk.
       - run: npm run perf:budget
+        env:
+          VITE_DODO_CHECKOUT_URL: ${{ env.BUDGET_CHECKOUT_URL }}
+          VITE_ADSENSE_CLIENT: ${{ env.BUDGET_ADSENSE_CLIENT }}
       # EXPECT_DIST arms the loud path in src/__tests__/utils/dist-gate.ts: this is the one
       # job that builds, so a build suite finding no dist/ here means the build step broke,
       # not that the job never promised one. code-quality.yml deliberately does not set it
