@@ -2,11 +2,13 @@
   "extends": "./tsconfig.json",
   "composite": true,
   "compilerOptions": {
-    // Path mapping for tests
-    "baseUrl": ".",
+    // Path mapping for tests. Relative and without `baseUrl`: with no baseUrl a `paths`
+    // entry resolves against this file's own directory, which is what the removed option
+    // was set to anyway. Vite and Vitest declare the same two aliases by absolute
+    // `path.resolve`, so neither reads this block.
     "paths": {
-      "@/*": ["src/*"],
-      "@tests/*": ["src/__tests__/*"]
+      "@/*": ["./src/*"],
+      "@tests/*": ["./src/__tests__/*"]
     },
     // Maximum leniency for test files - disable all strict type checking
     "strict": false,
