@@ -57,14 +57,19 @@
  *
  * ## The number
  *
- * It lives in package.json's `perf:budget` script. Re-derive it here, never guess it, and
- * record the base you derived it from.
+ * It lives in package.json's `perf:budget` script and is not repeated here -- a note restating
+ * it was wrong within a day of the value moving once already (2026-09-09, #239). What belongs
+ * here is the base and the rule, so the next person can re-derive rather than guess:
  *
- * Current value, derived 2026-09-09: base 427601 -- this machine's own production-shaped
- * build of `main` -- rounded up 1% to 431900. CI is predicted at 427269 by the offset above,
- * so this leaves ~4.6 KB of headroom. That still catches what the gate guards against,
- * because an accidental static import of a library is ten kilobytes and upward, not five
- * hundred bytes.
+ *   base   a production-shaped build of `main`, measured on the machine deriving it
+ *   rule   base x 1.01, rounded up to a whole hundred
+ *
+ * Last derived 2026-09-09 from a base of 427601, which predicts CI at 427269 by the offset
+ * above and leaves ~1% of headroom. That still catches what the gate guards against, because
+ * an accidental static import of a library is ten kilobytes and upward, not five hundred bytes.
+ * ⛔ Re-derive when the *shape* of the bundle changes, not when a diff happens to exceed it:
+ * raising the ceiling by whatever your change cost is the one move the failure suggests and
+ * the one that spent the previous ratchet down to 45 bytes.
  *
  * History: it was a ratchet set to a 2026-06 build, and by 2026-09-09 `main` measured 423195
  * against a budget of 423240. Forty-five bytes of headroom is not a budget: at that margin
