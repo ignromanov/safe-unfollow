@@ -74,7 +74,7 @@ export function Footer() {
                 className="lg:w-16 lg:h-16 shadow-2xl group-hover:rotate-12 transition-transform"
               />
               <span className="text-3xl lg:text-5xl font-display font-extrabold tracking-tight leading-none">
-                SafeUnfollow<span className="text-primary">.app</span>
+                SafeUnfollow<span className="text-primary-strong">.app</span>
               </span>
             </div>
             <p className="text-zinc-500 dark:text-zinc-400 max-w-sm text-base lg:text-lg leading-relaxed font-medium mx-auto lg:mx-0">
@@ -88,14 +88,14 @@ export function Footer() {
             <div className="flex flex-wrap items-center justify-center lg:justify-end gap-x-12 gap-y-6 text-xs lg:text-sm font-black uppercase tracking-widest text-zinc-400">
               <PrefixedLink
                 to="/privacy"
-                className="hover:text-primary transition-colors py-2 px-1 cursor-pointer"
+                className="hover:text-primary-strong transition-colors py-2 px-1 cursor-pointer"
                 onClick={() => analytics.linkClick('privacy-policy')}
               >
                 {t('footer.privacyPolicy')}
               </PrefixedLink>
               <PrefixedLink
                 to="/terms"
-                className="hover:text-primary transition-colors py-2 px-1 cursor-pointer"
+                className="hover:text-primary-strong transition-colors py-2 px-1 cursor-pointer"
                 onClick={() => analytics.linkClick('terms-of-service')}
               >
                 {t('footer.termsOfService')}
@@ -104,7 +104,7 @@ export function Footer() {
                 href="https://safeunfollow.app/docs"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-primary transition-colors py-2 px-1 flex items-center gap-1.5 cursor-pointer"
+                className="hover:text-primary-strong transition-colors py-2 px-1 flex items-center gap-1.5 cursor-pointer"
                 onClick={() => analytics.linkClick('docs')}
               >
                 <BookOpen size={14} aria-hidden="true" />
@@ -115,7 +115,7 @@ export function Footer() {
                 href="https://safeunfollow.app/docs/troubleshooting"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-primary transition-colors py-2 px-1 cursor-pointer"
+                className="hover:text-primary-strong transition-colors py-2 px-1 cursor-pointer"
                 onClick={() => analytics.linkClick('docs-troubleshooting')}
               >
                 {t('footer.troubleshooting')}
@@ -125,7 +125,7 @@ export function Footer() {
                 href="https://safeunfollow.app/docs/accessibility"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-primary transition-colors py-2 px-1 cursor-pointer"
+                className="hover:text-primary-strong transition-colors py-2 px-1 cursor-pointer"
                 onClick={() => analytics.linkClick('docs-accessibility')}
               >
                 {t('footer.accessibility')}
@@ -133,13 +133,13 @@ export function Footer() {
               </a>
               <a
                 href="mailto:hello@safeunfollow.app"
-                className="hover:text-primary transition-colors py-2 px-1 cursor-pointer"
+                className="hover:text-primary-strong transition-colors py-2 px-1 cursor-pointer"
               >
                 {t('footer.contact')}
               </a>
               <button
                 onClick={handleTrackingToggle}
-                className={`cursor-pointer hover:text-primary transition-colors py-2 px-1 flex items-center gap-1.5 ${
+                className={`cursor-pointer hover:text-primary-strong transition-colors py-2 px-1 flex items-center gap-1.5 ${
                   isOptedOut ? 'text-emerald-500' : ''
                 }`}
                 title={isOptedOut ? t('footer.trackingDisabled') : t('footer.trackingEnabled')}
@@ -157,7 +157,7 @@ export function Footer() {
                 href="https://github.com/ignromanov/safe-unfollow"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-primary transition-colors py-2 px-1 flex items-center gap-1.5 cursor-pointer"
+                className="hover:text-primary-strong transition-colors py-2 px-1 flex items-center gap-1.5 cursor-pointer"
                 onClick={() => analytics.linkClick('github')}
               >
                 <GithubMark size={14} />
@@ -201,7 +201,7 @@ export function Footer() {
           <div className="flex flex-wrap items-center justify-center gap-4 lg:gap-10">
             <span>{t('footer.copyright')}</span>
             <span className="hidden lg:block w-1.5 h-1.5 rounded-full bg-border" />
-            <span className="text-primary opacity-90 uppercase tracking-tighter">
+            <span className="text-primary-strong opacity-90 uppercase tracking-tighter">
               {t('footer.license')}
             </span>
           </div>

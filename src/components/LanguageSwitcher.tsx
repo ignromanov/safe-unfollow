@@ -81,7 +81,7 @@ export function LanguageSwitcher() {
               key={lang}
               onClick={() => handleLanguageChange(lang)}
               className={`cursor-pointer ${
-                currentLanguage === lang ? 'bg-primary/10 text-primary font-bold' : ''
+                currentLanguage === lang ? 'bg-primary/10 text-primary-strong font-bold' : ''
               }`}
             >
               <span className="uppercase text-xs font-bold w-6">{lang}</span>

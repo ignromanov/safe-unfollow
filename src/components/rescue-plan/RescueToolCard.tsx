@@ -69,7 +69,7 @@ export function RescueToolCard({ tool, index, onToolClick }: RescueToolCardProps
           <tool.icon
             className={`w-5 h-5 ${tool.color} group-hover:scale-110 transition-transform`}
           />
-          <span className="font-bold text-zinc-900 dark:text-white group-hover:text-primary transition-colors">
+          <span className="font-bold text-zinc-900 dark:text-white group-hover:text-primary-strong transition-colors">
             {tool.name}
           </span>
         </div>

@@ -199,7 +199,7 @@ export function UploadZone({
                 {' '}
                 <button
                   onClick={() => onOpenWizard?.()}
-                  className="inline font-semibold text-primary underline underline-offset-2 hover:text-primary/80"
+                  className="inline font-semibold text-primary-strong underline underline-offset-2 hover:text-primary-strong/80"
                 >
                   {t('zone.seeGuide', { defaultValue: 'See the step-by-step guide' })}
                 </button>
@@ -283,7 +283,7 @@ export function UploadZone({
             <div className="text-center lg:hidden">
               <button
                 onClick={() => onOpenWizard?.()}
-                className="text-xs font-semibold text-primary underline underline-offset-2 hover:text-primary/80"
+                className="text-xs font-semibold text-primary-strong underline underline-offset-2 hover:text-primary-strong/80"
               >
                 {t('zone.notSureLink', {
                   defaultValue: 'Not sure what to upload? See the guide',
@@ -308,7 +308,7 @@ export function UploadZone({
           {/* Most Common Error */}
           <div className="rounded-4xl border border-zinc-200 bg-zinc-50 p-8 dark:border-zinc-800 dark:bg-zinc-900/40">
             <h4 className="mb-4 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-zinc-900 dark:text-white">
-              <Info size={16} className="text-primary" aria-hidden="true" />{' '}
+              <Info size={16} className="text-primary-strong" aria-hidden="true" />{' '}
               {t('errors.commonTitle')}
             </h4>
             <p className="text-xs font-medium leading-relaxed text-zinc-500 md:text-sm">
@@ -317,7 +317,7 @@ export function UploadZone({
             {onOpenWizard && (
               <button
                 onClick={() => onOpenWizard?.()}
-                className="mt-4 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-primary hover:underline"
+                className="mt-4 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-primary-strong hover:underline"
               >
                 {t('errors.learnFix')}{' '}
                 <ArrowLeft className="rotate-180" size={14} aria-hidden="true" />

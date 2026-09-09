@@ -20,7 +20,7 @@ export function Hero({ hasData }: HeroProps) {
   return (
     <section className="py-12 md:py-32 text-center max-w-5xl mx-auto flex flex-col items-center animate-in fade-in duration-700">
       {/* Version Badge */}
-      <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary font-bold text-xs mb-8 md:mb-12 border border-primary/20 backdrop-blur-md shadow-sm">
+      <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary-strong font-bold text-xs mb-8 md:mb-12 border border-primary/20 backdrop-blur-md shadow-sm">
         <span className="relative flex h-2 w-2">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
           <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
@@ -91,7 +91,7 @@ export function Hero({ hasData }: HeroProps) {
         <PrefixedLink
           to="/sample"
           cta="sample"
-          className="cursor-pointer w-full sm:w-auto px-8 py-3 rounded-3xl font-bold text-sm text-zinc-500 dark:text-zinc-400 hover:text-primary transition-all flex items-center justify-center gap-2"
+          className="cursor-pointer w-full sm:w-auto px-8 py-3 rounded-3xl font-bold text-sm text-zinc-500 dark:text-zinc-400 hover:text-primary-strong transition-all flex items-center justify-center gap-2"
         >
           {t('buttons.trySample')}
         </PrefixedLink>

@@ -57,7 +57,7 @@ export function Header({ hasData = false, onClear, activeScreen = AppState.HERO 
             <ShieldCheck size={22} strokeWidth={2.5} />
           </div>
           <span className="font-display font-extrabold text-xl md:text-2xl tracking-tight hidden sm:block">
-            SafeUnfollow<span className="text-primary">.app</span>
+            SafeUnfollow<span className="text-primary-strong">.app</span>
           </span>
         </PrefixedLink>
 

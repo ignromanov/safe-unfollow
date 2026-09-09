@@ -20,7 +20,7 @@ export function TermsOfService({ onBack }: TermsOfServiceProps) {
       <header className="mb-12">
         <div className="flex items-center gap-4 mb-6">
           <div className="p-3 bg-primary/10 rounded-2xl">
-            <ScrollText className="w-8 h-8 text-primary" />
+            <ScrollText className="w-8 h-8 text-primary-strong" />
           </div>
           <h1 className="text-4xl md:text-5xl font-display font-bold">Terms of Service</h1>
         </div>
@@ -73,7 +73,7 @@ export function TermsOfService({ onBack }: TermsOfServiceProps) {
         {/* Section 1 */}
         <section>
           <h2 className="text-2xl font-bold mb-4 flex items-center gap-3">
-            <FileText className="w-6 h-6 text-primary" />
+            <FileText className="w-6 h-6 text-primary-strong" />
             1. Acceptance of Terms
           </h2>
           <p className="text-muted-foreground">
@@ -105,7 +105,10 @@ export function TermsOfService({ onBack }: TermsOfServiceProps) {
             The analysis is free. Downloading your results as a complete CSV or JSON file is an
             optional one-time purchase of $7 — not a subscription — which unlocks the export on up
             to 3 devices. If it is not what you expected, email{' '}
-            <a href="mailto:refunds@safeunfollow.app" className="text-primary hover:underline">
+            <a
+              href="mailto:refunds@safeunfollow.app"
+              className="text-primary-strong hover:underline"
+            >
               refunds@safeunfollow.app
             </a>{' '}
             within 30 days of your purchase and we will refund it in full.
@@ -170,7 +173,7 @@ export function TermsOfService({ onBack }: TermsOfServiceProps) {
               href="https://github.com/ignromanov/safe-unfollow"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary hover:underline"
+              className="text-primary-strong hover:underline"
             >
               GitHub
             </a>
@@ -279,12 +282,12 @@ export function TermsOfService({ onBack }: TermsOfServiceProps) {
         {/* Section 13 */}
         <section>
           <h2 className="text-2xl font-bold mb-4 flex items-center gap-3">
-            <Mail className="w-6 h-6 text-primary" />
+            <Mail className="w-6 h-6 text-primary-strong" />
             13. Contact
           </h2>
           <p className="text-muted-foreground">
             For questions about these Terms of Service, please contact us at:{' '}
-            <a href="mailto:hello@safeunfollow.app" className="text-primary hover:underline">
+            <a href="mailto:hello@safeunfollow.app" className="text-primary-strong hover:underline">
               hello@safeunfollow.app
             </a>
           </p>

@@ -57,7 +57,7 @@ export function DesktopDropZone({
       {isProcessing ? (
         <div className="animate-in fade-in w-full text-center">
           <Loader2
-            className="mx-auto mb-6 h-16 w-16 animate-spin text-primary"
+            className="mx-auto mb-6 h-16 w-16 animate-spin text-primary-strong"
             aria-hidden="true"
           />
           <h3 className="text-2xl font-bold text-zinc-900 dark:text-white md:text-3xl">

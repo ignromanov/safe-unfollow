@@ -129,7 +129,7 @@ export function FAQSection() {
                     aria-expanded={openIndex === index}
                     aria-controls={`faq-answer-${item.key}`}
                   >
-                    <span className="pe-8 group-hover:text-primary transition-colors leading-tight">
+                    <span className="pe-8 group-hover:text-primary-strong transition-colors leading-tight">
                       {item.question}
                     </span>
                     <div
@@ -158,7 +158,7 @@ export function FAQSection() {
                       <p className="mt-4 text-sm">
                         <PrefixedLink
                           to={item.relatedLink.href}
-                          className="text-primary hover:underline"
+                          className="text-primary-strong hover:underline"
                         >
                           {item.relatedLink.text} ›
                         </PrefixedLink>

@@ -83,7 +83,7 @@ export function UploadWaitingState({ onUploadNow, onDismiss }: UploadWaitingStat
           <button
             type="button"
             onClick={onUploadNow}
-            className="inline-flex min-h-[48px] cursor-pointer items-center justify-center rounded-2xl border border-border bg-card px-6 py-3 text-sm font-black text-primary transition-colors hover:bg-primary/10"
+            className="inline-flex min-h-[48px] cursor-pointer items-center justify-center rounded-2xl border border-border bg-card px-6 py-3 text-sm font-black text-primary-strong transition-colors hover:bg-primary/10"
           >
             {t('waiting.uploadNow')}
           </button>

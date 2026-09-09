@@ -46,7 +46,7 @@ export const AccountItem = memo(function AccountItem({
           <User size={24} />
         </div>
         <div className="min-w-0 flex-grow">
-          <span className="font-display font-bold text-base md:text-2xl truncate text-zinc-900 dark:text-white mb-1.5 md:mb-2 leading-tight block hover:text-primary transition-colors">
+          <span className="font-display font-bold text-base md:text-2xl truncate text-zinc-900 dark:text-white mb-1.5 md:mb-2 leading-tight block hover:text-primary-strong transition-colors">
             @{account.username}
           </span>
           {/* Horizontal Badge Scroll on Mobile */}
