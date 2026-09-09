@@ -244,6 +244,22 @@ describe('docs FAQ — the structured data says what the page says', () => {
       .join(' ');
   }
 
+  /**
+   * The raw markdown body under one `### ` heading, or null if the heading is gone.
+   *
+   * `$` under the `m` flag is end-of-LINE, so a lazy body capture stops at the first
+   * newline and every multi-line answer silently truncates. `$(?![\s\S])` is
+   * end-of-input. Found by this gate disagreeing with the generated file; extracted
+   * here so the two callers cannot drift into two different readings of the page.
+   */
+  function bodyUnder(page: string, heading: string): string | null {
+    const match = new RegExp(
+      `^### ${heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\n([\\s\\S]*?)(?=\\n#{2,3} |$(?![\\s\\S]))`,
+      'm',
+    ).exec(page);
+    return match ? match[1] : null;
+  }
+
   const entries: Array<{ name: string; acceptedAnswer: { text: string } }> = JSON_LD.mainEntity;
 
   it('is a FAQPage the page actually carries', () => {
@@ -257,15 +273,9 @@ describe('docs FAQ — the structured data says what the page says', () => {
   });
 
   it.each(entries)('answers $name with the page’s own words', entry => {
-    const body = new RegExp(
-      // `$` under the `m` flag is end-of-LINE, so a lazy body capture stops at the
-      // first newline and every multi-line answer silently truncates. `$(?![\s\S])`
-      // is end-of-input. Found by this gate disagreeing with the generated file.
-      `^### ${entry.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\n([\\s\\S]*?)(?=\\n#{2,3} |$(?![\\s\\S]))`,
-      'm',
-    ).exec(FAQ);
+    const body = bodyUnder(FAQ, entry.name);
     expect(body, `no body found under ${entry.name}`).not.toBeNull();
-    expect(entry.acceptedAnswer.text).toBe(plain(body![1]));
+    expect(entry.acceptedAnswer.text).toBe(plain(body!));
   });
 
   it('leaves the "is it safe" query to the page built for it', () => {
@@ -276,6 +286,41 @@ describe('docs FAQ — the structured data says what the page says', () => {
     expect(readFileSync(join(DOCS_ROOT, 'is-it-safe.md'), 'utf-8')).toContain(
       '{% include faq-schema.html %}',
     );
+  });
+
+  /**
+   * The omission above governs the schema and says nothing about the visible page —
+   * and the visible page is where the duplication actually was. Until 2026-09-09
+   * `faq.md` answered this question in a paragraph that restated `is-it-safe.md`'s
+   * second checkable fact almost clause for clause, closing sentence included, while
+   * being the one page in the docs corpus that did **not** link to it: five internal
+   * pages pointed at `/docs/is-it-safe` and the FAQ answered instead.
+   *
+   * Asserted as routing, not as wording. Lengthening the answer is a copy call and
+   * this gate stays out of it; silently removing the pointer is what would put two of
+   * our URLs back on one query, and that is what goes red.
+   *
+   * ⛔ Sizing this correctly matters more than the fix: `/docs/faq` measured 0 clicks
+   * on 237 impressions in the 91 days to 2026-09-02, so nothing here recovers lost
+   * clicks. `/docs/is-it-safe` shipped 2026-09-03 and is absent from that export
+   * because it did not exist yet — absent, not zero. The point is to consolidate the
+   * internal signal before that page's own history forms.
+   */
+  it('routes the "is it safe" answer to the page built for that query', () => {
+    const answer = bodyUnder(FAQ, 'Is it safe? Where do my data go?');
+    expect(answer, 'the "is it safe" question left faq.md').not.toBeNull();
+    expect(answer, 'faq.md answers "is it safe" without routing to /docs/is-it-safe').toContain(
+      '](/docs/is-it-safe)',
+    );
+
+    // Control. `.toContain` on a body this gate also proves non-null would pass just
+    // as happily if every answer on the page carried the link, or if `bodyUnder` were
+    // returning the whole file — neither of which this test would notice. A sibling
+    // answer that must NOT carry it separates "the pointer is where we put it" from
+    // "the matcher finds it anywhere".
+    const sibling = bodyUnder(FAQ, 'Does it work on mobile?');
+    expect(sibling, 'control heading left faq.md — the control no longer controls').not.toBeNull();
+    expect(sibling).not.toContain('](/docs/is-it-safe)');
   });
 });
 
