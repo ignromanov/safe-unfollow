@@ -342,7 +342,7 @@ export function AccountListSection({
             className={`cursor-pointer p-3.5 rounded-2xl border transition-all shadow-sm shrink-0 ${
               sortOrder === 'desc'
                 ? 'bg-primary text-primary-foreground border-primary'
-                : 'bg-card border-border text-zinc-500 hover:text-primary'
+                : 'bg-card border-border text-zinc-500 hover:text-primary-strong'
             }`}
             title={sortOrder === 'asc' ? t('sort.desc') : t('sort.asc')}
             aria-label={t('sort.ariaLabel', { defaultValue: 'Sort accounts' })}
@@ -439,7 +439,7 @@ export function AccountListSection({
             <Sheet open={isFilterSheetOpen} onOpenChange={setFilterSheetOpen}>
               <SheetTrigger asChild>
                 <button className="cursor-pointer w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl border border-border bg-zinc-50/50 dark:bg-zinc-900/20 text-xs font-black uppercase tracking-widest hover:border-primary/40">
-                  <Filter size={14} className="text-primary" />
+                  <Filter size={14} className="text-primary-strong" />
                   {filters.size > 0
                     ? t('filters.openSheetWithCount', { count: filters.size })
                     : t('filters.openSheet')}

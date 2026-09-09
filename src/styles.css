@@ -19,6 +19,14 @@
   --popover-foreground: oklch(0.15 0.01 264);
   --primary: oklch(0.6 0.18 264);
   --primary-foreground: oklch(0.12 0.01 264);
+  /* The brand colour in its foreground role - text and icons, never a fill.
+     A second token because one lightness cannot serve both: as a foreground it
+     clears 4.5:1 only at L <= 0.56, as a fill (against --primary-foreground,
+     the /90 hover blends and the bg-white/20 pill) only at L >= 0.60. GH#210
+     proposed moving --primary itself to 0.52, which would have taken the fill
+     to 3.36:1. Measured by a11y/primary-text-contrast.test.ts against every
+     surface it lands on, the worst being bg-primary/10 at 4.64:1. */
+  --primary-strong: oklch(0.53 0.18 264);
   --secondary: oklch(0.65 0.2 340);
   --secondary-foreground: oklch(0.15 0.01 264);
   --muted: oklch(0.96 0.005 264);
@@ -56,6 +64,12 @@
   --popover-foreground: oklch(0.98 0.005 264);
   --primary: oklch(0.65 0.16 264);
   --primary-foreground: oklch(0.12 0.01 264);
+  /* Lighter than --primary rather than darker: the dark theme reverses which
+     end of the scale is legible. --accent is the binding surface here, not
+     --background - the brand colour clears the page at 6.15:1 while failing
+     the tinted row at 4.43:1, which is why this value is solved against all
+     five surfaces instead of the two GH#210 measured. */
+  --primary-strong: oklch(0.7 0.16 264);
   --secondary: oklch(0.65 0.18 340);
   --secondary-foreground: oklch(0.98 0.005 264);
   --muted: oklch(0.25 0.02 264);
@@ -105,6 +119,7 @@
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-strong: var(--primary-strong);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);

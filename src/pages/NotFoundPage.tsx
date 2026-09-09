@@ -59,17 +59,20 @@ export function Component() {
           </h4>
           <ul className="space-y-2 text-sm font-medium text-zinc-600 dark:text-zinc-400">
             <li>
-              <a href={`${prefix}/upload?guide=1`} className="hover:text-primary transition-colors">
+              <a
+                href={`${prefix}/upload?guide=1`}
+                className="hover:text-primary-strong transition-colors"
+              >
                 › How to get Instagram data
               </a>
             </li>
             <li>
-              <a href={`${prefix}/upload`} className="hover:text-primary transition-colors">
+              <a href={`${prefix}/upload`} className="hover:text-primary-strong transition-colors">
                 › Upload your data
               </a>
             </li>
             <li>
-              <a href={`${prefix}/sample`} className="hover:text-primary transition-colors">
+              <a href={`${prefix}/sample`} className="hover:text-primary-strong transition-colors">
                 › Try with sample data
               </a>
             </li>

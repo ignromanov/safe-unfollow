@@ -43,7 +43,7 @@ const buttonVariants = cva(
         // Dropping it also means ghost hovers to flat `--accent` in both
         // themes, same as the light side already did.
         ghost: 'hover:bg-accent hover:text-foreground',
-        link: 'text-primary underline-offset-4 hover:underline',
+        link: 'text-primary-strong underline-offset-4 hover:underline',
       },
       size: {
         default: 'h-9 px-4 py-2 has-[>svg]:px-3',

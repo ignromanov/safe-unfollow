@@ -215,13 +215,14 @@ export function Component({ page }: IntentPageProps) {
         <h2 id="other-questions-heading" className="text-xl font-bold tracking-tight mb-4">
           Other questions your export answers
         </h2>
-        {/* Underlined foreground text, not a bare text-primary link: --primary as *text* measures
-            4.06:1 on --card and 3.95:1 on --background in the light theme, both below AA. (The
-            comment shipped in 3f63a32 attributed the 4.05 figure to --background; it belonged to
-            --card, and --background is the worse of the two.) That is a property-wide token
-            question, 65 uses across src/, tracked separately — but nothing obliges a new public
-            page to add three more instances of it while it is open. The shortLabel sits outside
-            the anchor so the link's accessible name stays exactly the sibling's h1. */}
+        {/* Underlined foreground text rather than a coloured link. The original
+            reason is spent: `--primary` as text measured 4.06:1 on --card and
+            3.95:1 on --background, both below AA, so a new public page declined
+            to add three more instances of an open defect. GH#210 closed that by
+            splitting the token, and `text-primary-strong` would clear AA here —
+            so this is now a choice about how a sibling-page list should read,
+            not an avoidance. The shortLabel sits outside the anchor so the
+            link's accessible name stays exactly the sibling's h1. */}
         <ul className="space-y-3">
           {INTENT_PAGES.filter(other => other.slug !== page.slug).map(other => (
             <li key={other.slug} className="leading-relaxed">

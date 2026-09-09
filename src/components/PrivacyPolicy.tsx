@@ -20,7 +20,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
       <header className="mb-12">
         <div className="flex items-center gap-4 mb-6">
           <div className="p-3 bg-primary/10 rounded-2xl">
-            <Shield className="w-8 h-8 text-primary" />
+            <Shield className="w-8 h-8 text-primary-strong" />
           </div>
           <h1 className="text-4xl md:text-5xl font-display font-bold">Privacy Policy</h1>
         </div>
@@ -32,12 +32,12 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
         {/* TL;DR */}
         <section className="bg-primary/5 border border-primary/20 rounded-2xl p-6 md:p-8">
           <h2 className="text-xl font-bold mb-4 flex items-center gap-3">
-            <Lock className="w-5 h-5 text-primary" />
+            <Lock className="w-5 h-5 text-primary-strong" />
             TL;DR — Privacy Summary
           </h2>
           <ul className="space-y-3 text-muted-foreground">
             <li className="flex items-start gap-3">
-              <span className="text-primary font-bold">1.</span>
+              <span className="text-primary-strong font-bold">1.</span>
               <span>
                 <strong className="text-foreground">100% Local Processing</strong> — Your Instagram
                 data never leaves your device. We cannot see, access, or store your follower
@@ -45,21 +45,21 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
               </span>
             </li>
             <li className="flex items-start gap-3">
-              <span className="text-primary font-bold">2.</span>
+              <span className="text-primary-strong font-bold">2.</span>
               <span>
                 <strong className="text-foreground">No Account Required</strong> — No login, no
                 registration, no personal information collected.
               </span>
             </li>
             <li className="flex items-start gap-3">
-              <span className="text-primary font-bold">3.</span>
+              <span className="text-primary-strong font-bold">3.</span>
               <span>
                 <strong className="text-foreground">Optional Analytics</strong> — We use
                 privacy-friendly analytics that you can disable with one click.
               </span>
             </li>
             <li className="flex items-start gap-3">
-              <span className="text-primary font-bold">4.</span>
+              <span className="text-primary-strong font-bold">4.</span>
               <span>
                 <strong className="text-foreground">Ads Keep This Free</strong> — We show ads from
                 Google AdSense, which set their own cookies. They can never be targeted using your
@@ -72,7 +72,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
         {/* Section 1 */}
         <section>
           <h2 className="text-2xl font-bold mb-4 flex items-center gap-3">
-            <Database className="w-6 h-6 text-primary" />
+            <Database className="w-6 h-6 text-primary-strong" />
             1. Data We Process Locally
           </h2>
           <p className="text-muted-foreground mb-4">
@@ -189,7 +189,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
               href="https://github.com/ignromanov/safe-unfollow"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary hover:underline"
+              className="text-primary-strong hover:underline"
             >
               GitHub
             </a>
@@ -209,7 +209,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
               href="https://vercel.com/legal/privacy-policy"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary hover:underline"
+              className="text-primary-strong hover:underline"
             >
               Vercel's Privacy Policy
             </a>
@@ -226,7 +226,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
               href="https://dodopayments.com/privacy-policy"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary hover:underline"
+              className="text-primary-strong hover:underline"
             >
               Dodo Payments' Privacy Policy
             </a>
@@ -299,7 +299,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
               href="https://myadcenter.google.com/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary hover:underline"
+              className="text-primary-strong hover:underline"
             >
               My Ad Center
             </a>
@@ -308,7 +308,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
               href="https://policies.google.com/technologies/partner-sites"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary hover:underline"
+              className="text-primary-strong hover:underline"
             >
               How Google uses information from sites that use its services
             </a>
@@ -405,13 +405,16 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
         {/* Section 9 */}
         <section>
           <h2 className="text-2xl font-bold mb-4 flex items-center gap-3">
-            <Mail className="w-6 h-6 text-primary" />
+            <Mail className="w-6 h-6 text-primary-strong" />
             9. Contact Us
           </h2>
           <p className="text-muted-foreground">
             If you have questions about this Privacy Policy or want to exercise your data rights,
             please contact us at:{' '}
-            <a href="mailto:privacy@safeunfollow.app" className="text-primary hover:underline">
+            <a
+              href="mailto:privacy@safeunfollow.app"
+              className="text-primary-strong hover:underline"
+            >
               privacy@safeunfollow.app
             </a>
           </p>
@@ -419,7 +422,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
 
         {/* Trust Badge */}
         <section className="mt-12 p-6 bg-card border border-border rounded-2xl flex items-center gap-4">
-          <Eye className="w-10 h-10 text-primary flex-shrink-0" />
+          <Eye className="w-10 h-10 text-primary-strong flex-shrink-0" />
           <div>
             <p className="font-bold text-lg">Privacy by Design</p>
             <p className="text-muted-foreground">

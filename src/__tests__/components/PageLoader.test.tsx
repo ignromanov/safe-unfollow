@@ -44,7 +44,11 @@ describe('PageLoader', () => {
       const { container } = render(<PageLoader />);
 
       const svg = container.querySelector('svg');
-      expect(svg).toHaveClass('text-primary');
+      // `text-primary-strong`, not `text-primary`: the brand colour split into
+      // a fill token and a foreground token in GH#210, because one lightness
+      // cannot clear AA in both roles. Contrast is measured in
+      // a11y/primary-text-contrast.test.ts; this only pins which token paints.
+      expect(svg).toHaveClass('text-primary-strong');
     });
 
     it('should center spinner with margin', () => {
@@ -195,7 +199,11 @@ describe('PageLoader', () => {
 
       // Spinner
       expect(svg?.className.baseVal).toContain('animate-spin');
-      expect(svg?.className.baseVal).toContain('text-primary');
+      // `toHaveClass`, not `toContain`: as a substring check this line stayed
+      // green through the GH#210 rename that turned the assertion above red,
+      // and it would pass on `text-primary-foreground` too. A class assertion
+      // that matches its own prefix is not asserting the class.
+      expect(svg).toHaveClass('text-primary-strong');
 
       // Text
       expect(text.className).toContain('text-sm');

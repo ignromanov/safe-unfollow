@@ -321,7 +321,7 @@ export const FilterChips = memo(function FilterChips({
         <div className="mt-6 pt-6 border-t border-border">
           <button
             onClick={() => setShowEmptyFilters(!showEmptyFilters)}
-            className="cursor-pointer flex items-center justify-between w-full text-xs font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-widest hover:text-primary transition-colors"
+            className="cursor-pointer flex items-center justify-between w-full text-xs font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-widest hover:text-primary-strong transition-colors"
           >
             <span>{t('filters.emptyCategories', { count: emptyFilters.length })}</span>
             {showEmptyFilters ? <ChevronUp size={14} /> : <ChevronDown size={14} />}

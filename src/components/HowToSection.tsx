@@ -112,7 +112,7 @@ export function HowToSection() {
                 closing CTA below is a third. */}
             {steps.map((step, idx) => (
               <li key={step.id} className="relative ps-16 md:ps-24">
-                <div className="absolute start-0 top-0 w-12 h-12 md:w-16 md:h-16 rounded-2xl md:rounded-3xl bg-card border-2 border-primary flex items-center justify-center font-black text-lg md:text-2xl text-primary z-10">
+                <div className="absolute start-0 top-0 w-12 h-12 md:w-16 md:h-16 rounded-2xl md:rounded-3xl bg-card border-2 border-primary flex items-center justify-center font-black text-lg md:text-2xl text-primary-strong z-10">
                   {step.id}
                 </div>
                 <div className="space-y-4">
@@ -181,9 +181,14 @@ export function HowToSection() {
                 {t('cta.subtitle')}
               </p>
             </div>
+            {/* A literal colour on a literal surface. `bg-white` does not follow the
+                theme, so a themed foreground on it cannot: `text-primary-strong`
+                resolves to the dark theme's lighter value and measures 2.73:1 on
+                white. Guarded by a11y/primary-text-contrast.test.ts, which reads
+                this literal out of the source and measures it. */}
             <PrefixedLink
               to="/upload?guide=1"
-              className="cursor-pointer w-full md:w-auto px-10 py-5 bg-white text-primary font-black rounded-3xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3 text-lg shadow-xl"
+              className="cursor-pointer w-full md:w-auto px-10 py-5 bg-white text-[oklch(0.53_0.18_264)] font-black rounded-3xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3 text-lg shadow-xl"
             >
               {t('cta.button')} <Play size={22} fill="currentColor" />
             </PrefixedLink>

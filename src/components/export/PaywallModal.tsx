@@ -165,7 +165,7 @@ export function PaywallModal({
                   value buys the artboard's number without inventing a mobile rung
                   the design system does not have. */}
             <DialogTitle className="flex flex-col gap-0.5">
-              <span className="font-display text-[2.75rem] leading-none font-extrabold text-primary sm:text-5xl">
+              <span className="font-display text-[2.75rem] leading-none font-extrabold text-primary-strong sm:text-5xl">
                 {totalLabel}
               </span>
               <span className="text-sm font-semibold text-muted-foreground">
@@ -391,13 +391,14 @@ export function PaywallModal({
           <a
             dir="ltr"
             href={`mailto:${SUPPORT_EMAIL}`}
-            /* Not `text-primary`. That token is `oklch(0.6 0.18 264)` and
-                   measures 3.95:1 on this surface in light mode — a large-text
-                   colour, fine for the 48px number above and under the 4.5:1
-                   this 12px line needs. The underline is what says "link"; the
-                   colour was decoration, and it was decoration costing half a
-                   point of contrast on the dispute-defence line of the
-                   highest-value screen in the product. */
+            /* Deliberately uncoloured, and the reason outlived the defect that
+                   prompted it. It used to read "not `text-primary`, that token
+                   measures 3.95:1 here" — true until GH#210 split the brand
+                   colour in two, and `text-primary-strong` would now clear AA on
+                   this surface. The underline is still what says "link"; colour
+                   would be decoration on the dispute-defence line of the
+                   highest-value screen in the product, so it stays off by choice
+                   rather than by arithmetic. */
             className="text-foreground underline underline-offset-2 hover:no-underline"
           >
             {SUPPORT_EMAIL}

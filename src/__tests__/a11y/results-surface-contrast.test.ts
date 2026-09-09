@@ -31,109 +31,14 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createElement } from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
-import {
-  contrastRatio,
-  oklchToRgb,
-  over,
-  readThemeTokens,
-  token,
-  WCAG_AA_NORMAL,
-  type Rgb,
-} from '@tests/utils/contrast';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { contrastRatio, over, token, WCAG_AA_NORMAL } from '@tests/utils/contrast';
+import { paintedColour, paletteColour, parseOklchTint, THEMES } from '@tests/utils/tailwind-colour';
 import { AppliedFilters } from '@/components/AppliedFilters';
 import { FilterChips } from '@/components/FilterChips';
 import { BADGE_CHIP_STYLES, BADGE_STYLES } from '@/constants/badge-styles';
 import { BADGE_ORDER } from '@/core/badges';
 import type { BadgeKey } from '@/core/types';
 import resultsEN from '@/locales/en/results.json';
-
-type Theme = 'light' | 'dark';
-const THEMES: readonly Theme[] = ['light', 'dark'] as const;
-
-const TAILWIND_THEME_PATH = resolve(process.cwd(), 'node_modules/tailwindcss/theme.css');
-const TAILWIND_THEME_CSS = readFileSync(TAILWIND_THEME_PATH, 'utf8');
-
-/**
- * One Tailwind palette step, read out of the installed dependency rather than
- * copied from it. Its own declarations are percentage-L (`oklch(58.6% 0.253
- * 17.585)`) and may carry `none` for an achromatic hue.
- *
- * Throws when the step is absent or no longer an `oklch()` — a palette this
- * gate cannot read is an unmeasured colour, and a bump that changes the
- * notation must stop the suite rather than quietly keep the old numbers.
- */
-function paletteColour(step: string): Rgb {
-  const declaration = new RegExp(
-    `--color-${step}:\\s*oklch\\(\\s*([\\d.]+)%\\s+([\\d.]+)\\s+([\\d.]+|none)\\s*\\)`
-  );
-  const m = TAILWIND_THEME_CSS.match(declaration);
-  if (!m) throw new Error(`--color-${step} not readable as oklch() in ${TAILWIND_THEME_PATH}`);
-  return oklchToRgb(Number(m[1]) / 100, Number(m[2]), m[3] === 'none' ? 0 : Number(m[3]));
-}
-
-/** `oklch(L C H)` / `oklch(L_C_H_/_A)` — Tailwind escapes its spaces as `_`. */
-const OKLCH = /oklch\(\s*([\d.]+)[\s_]+([\d.]+)[\s_]+([\d.]+)(?:[\s_]*\/[\s_]*([\d.]+))?\s*\)/i;
-
-interface Tint {
-  readonly lch: readonly [number, number, number];
-  readonly rgb: Rgb;
-  readonly alpha: number;
-}
-
-function parseOklchTint(value: string): Tint {
-  const m = value.match(OKLCH);
-  if (!m) throw new Error(`not an oklch() value: ${value}`);
-  const lch = [Number(m[1]), Number(m[2]), Number(m[3])] as const;
-  return { lch, rgb: oklchToRgb(...lch), alpha: m[4] === undefined ? 1 : Number(m[4]) };
-}
-
-/**
- * One Tailwind utility's colour, or `null` when the utility names no colour
- * (`text-xs`, `rounded-full`, ...). Three shapes resolve, in this order:
- * an arbitrary `[oklch(...)]`, a pinned third-party palette step, and one of
- * our own tokens read live out of `src/styles.css`.
- */
-function resolveColour(utility: string, theme: Theme): Tint | null {
-  if (utility.startsWith('[') && utility.endsWith(']')) {
-    return parseOklchTint(utility.slice(1, -1).replace(/_/g, ' '));
-  }
-  if (new RegExp(`--color-${utility}:`).test(TAILWIND_THEME_CSS)) {
-    return { lch: [NaN, NaN, NaN], rgb: paletteColour(utility), alpha: 1 };
-  }
-  if (`--${utility}` in readThemeTokens(theme)) {
-    return { lch: [NaN, NaN, NaN], rgb: token(theme, `--${utility}`), alpha: 1 };
-  }
-  return null;
-}
-
-/**
- * The colour a `prefix-` utility actually paints in `theme`, taken from the
- * element's own class list. `dark:` wins in dark. Throws rather than returning
- * null when nothing resolves: a colour we cannot resolve is an unmeasured
- * colour, and this gate must not go quiet when its subject moves out from
- * under it.
- */
-function paintedColour(className: string, prefix: 'text-' | 'bg-', theme: Theme): Tint {
-  const classes = className.split(/\s+/).filter(Boolean);
-  const pick = (list: string[]) => {
-    for (const utility of list) {
-      const colour = resolveColour(utility, theme);
-      if (colour) return colour;
-    }
-    return null;
-  };
-
-  const dark = pick(
-    classes.filter(c => c.startsWith(`dark:${prefix}`)).map(c => c.slice(`dark:${prefix}`.length))
-  );
-  const base = pick(classes.filter(c => c.startsWith(prefix)).map(c => c.slice(prefix.length)));
-
-  const painted = theme === 'dark' ? (dark ?? base) : base;
-  if (!painted) throw new Error(`no ${prefix} colour resolved in ${theme} from: ${className}`);
-  return painted;
-}
 
 /** The badge hue `BADGE_STYLES` gives the account rows, from source. */
 function rowBadgeHue(badge: string): readonly [number, number, number] {

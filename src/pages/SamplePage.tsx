@@ -44,7 +44,7 @@ export function Component() {
               sampleLoadTriggeredRef.current = false;
               loadSampleData();
             }}
-            className="text-primary hover:underline"
+            className="text-primary-strong hover:underline"
           >
             Try again
           </button>

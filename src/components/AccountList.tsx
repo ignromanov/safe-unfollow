@@ -104,7 +104,7 @@ export const AccountList = memo(function AccountList({
           {onClearFilters && (
             <button
               onClick={onClearFilters}
-              className="mt-4 text-primary font-black uppercase text-xs tracking-widest hover:underline"
+              className="mt-4 text-primary-strong font-black uppercase text-xs tracking-widest hover:underline"
             >
               {/*
                 The specific label only when it is a true description of the tap.
