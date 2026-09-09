@@ -38,18 +38,25 @@
  * workflow's `${{ env.* }}` indirection safe to rely on -- an expansion that silently produced
  * an empty string reds this gate by name instead of shrinking its subject back.
  *
- * ## Three toolchains build one commit at three sizes
+ * ## What builds the artefact changes its size; what varies is which pair differs
  *
  * All of `2f81de0`, measured 2026-09-09:
  *
  *   CI, variables unset, Node 22        424462
- *   local, shaped, Node 24              427601
+ *   local, shaped, Node 24              427601  app-CziQ4DYl.js
+ *   CI, shaped, Node 22                 427601  app-CziQ4DYl.js  <- same content hash
  *   Vercel, shaped, real values         428939
  *
- * So Vercel builds ~1337 bytes heavier than this machine on the same source -- a different
- * figure from the ~332 bytes by which local measured heavier than CI on identical source
- * (GH#235), because that pair differs only in Node. Never read a local absolute against the
- * budget; compare a delta measured on one toolchain.
+ * ⛔ The third row falsified a prediction written into this file twenty minutes before CI
+ * printed it. Applying GH#235's measured ~332-byte local-heavier offset predicted 427269; CI
+ * produced a byte-identical file, same content hash. So that offset is not a standing property
+ * of the two toolchains -- whatever produced it on GH#235's commit (an install difference is
+ * the likelier candidate than the Node version) was not present here. **Do not carry it into a
+ * prediction; measure the pair you care about.**
+ *
+ * Vercel remains ~1337 bytes heavier than both on the same source, with placeholder values
+ * within one byte of the real ones, and nobody in this repository configures that toolchain.
+ * GH#245.
  *
  * The placeholder URL's length is part of the number. It was chosen to sit within one byte
  * of the configured value's: 62 characters against production's 63, so the two artefacts
@@ -64,9 +71,10 @@
  *   base   a production-shaped build of `main`, measured on the machine deriving it
  *   rule   base x 1.01, rounded up to a whole hundred
  *
- * Last derived 2026-09-09 from a base of 427601, which predicts CI at 427269 by the offset
- * above and leaves ~1% of headroom. That still catches what the gate guards against, because
- * an accidental static import of a library is ten kilobytes and upward, not five hundred bytes.
+ * Last derived 2026-09-09 from a base of 427601, which CI then reproduced exactly -- so the
+ * ceiling sits ~1% above the number the gate itself prints. That still catches what the gate
+ * guards against, because an accidental static import of a library is ten kilobytes and upward,
+ * not five hundred bytes.
  * ⛔ Re-derive when the *shape* of the bundle changes, not when a diff happens to exceed it:
  * raising the ceiling by whatever your change cost is the one move the failure suggests and
  * the one that spent the previous ratchet down to 45 bytes.
