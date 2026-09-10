@@ -5,6 +5,7 @@ import { tmpdir } from 'os';
 import { INTENT_PAGES, INTENT_PATHS } from '@/config/intent-pages';
 import { I18N_NAMESPACES } from '@/config/languages';
 import { injectLocalizedMeta } from '../../../vite/ssg-meta-injector';
+import { describeDist } from '../utils/dist-gate';
 import meta from '@/locales/en/meta.json';
 import { INTENT_CONTENT } from '@/pages/intent-content';
 import { INTENT_DEMO } from '@/config/intent-demo-rows';
@@ -16,7 +17,7 @@ const built = existsSync(resolve(distDir, 'index.html'));
  * The logic half: does `injectLocalizedMeta` itself suppress hreflang for an intent path, and
  * does a normal page still get the full set? Fixture-driven — no `dist/` needed — because the
  * regression this task guards against (someone editing the `englishOnly` guard) lives in
- * build-time code that `describe.runIf(built)` below cannot see when CI skips the build
+ * build-time code that the `describeDist` suite below cannot see when CI skips the build
  * (code-quality.yml runs test:coverage with no build — GH#159).
  *
  * A throwaway rootDir stands in for the repo: `injectLocalizedMeta` reads
@@ -84,7 +85,7 @@ describe('injectLocalizedMeta (fixture, always runs)', () => {
   });
 });
 
-describe.runIf(built)('intent landing pages (prerendered)', () => {
+describeDist('intent landing pages (prerendered)', built, () => {
   // The control. /upload IS a ten-locale page, so it MUST carry hreflang — if this fails,
   // the assertions below prove nothing, because the instrument cannot see hreflang at all.
   it('should find hreflang on a ten-locale page', () => {
@@ -161,8 +162,8 @@ describe.runIf(built)('intent landing pages (prerendered)', () => {
         // Not every username in the slice: the card renders a prefix of it, because it now sits
         // above the call to action and each row it draws pushes the button down (PREVIEW_ROWS).
         // This iterated the whole slice until 2026-09-06 and would have gone red in CI while
-        // passing here — these suites are describe.runIf(built) and skip in silence without a
-        // dist/, so a local green says nothing about them.
+        // passing here — this suite needs a dist/ and skips locally without one, so a local
+        // green says nothing about it. Under EXPECT_DIST it fails instead of skipping.
         const rendered = slice.usernames.filter(u => text.includes(`@${u}`));
         expect(rendered.length).toBeGreaterThan(0);
         // A prefix, in order — the rows a crawler sees are the slice's own first N, so a card
