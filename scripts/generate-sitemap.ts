@@ -22,6 +22,7 @@ import {
 } from "../src/config/languages";
 import { INTENT_PATHS } from "../src/config/intent-pages";
 import { noindexRoutes } from "./noindex-routes";
+import { docsPaths } from "./docs-paths";
 
 // Configuration
 const BASE_URL = "https://safeunfollow.app";
@@ -84,22 +85,11 @@ const ROUTE_CONFIG: Record<string, { priority: number; changefreq: string }> = {
 // The Jekyll docs pages. Built separately, served at /docs/*, and never scanned out of dist/ —
 // so this list is both "suppress hreflang" and "add to the sitemap", and the loop below is the
 // second job.
-const DOCS_PATHS = [
-  "/docs",
-  "/docs/user-guide",
-  "/docs/instagram-export",
-  "/docs/faq",
-  "/docs/troubleshooting",
-  "/docs/privacy",
-  "/docs/tech-spec",
-  "/docs/roadmap",
-  "/docs/accessibility",
-  "/docs/is-it-safe",
-  "/docs/compare",
-  "/docs/compare/vs-followsback",
-  "/docs/compare/vs-unfollowgram",
-  "/docs/compare/vs-followers-app",
-];
+//
+// Read from the docs sources rather than typed here. They are absent from dist/ at this point,
+// but present in the working tree, so the one thing that cannot be discovered by scanning the
+// build can still be derived instead of copied — see scripts/docs-paths.ts and GH#187.
+const DOCS_PATHS = docsPaths(resolve(process.cwd(), "docs"));
 
 // Every path served in English only. The intent pages ARE scanned out of dist/ — they are
 // prerendered app routes — so they need the hreflang half and must not join the loop below,
