@@ -167,7 +167,6 @@
       }
     }
   },
-  "formatWarning": "Stelle sicher, dass du JSON (nicht HTML) beim Datenexport ausgewählt hast.",
   "waiting": {
     "title": "Warten auf Instagram...",
     "description": "Instagram bereitet deinen Datenexport vor. Die meisten kommen in 5–30 Minuten per E-Mail; bei großen Konten kann es einige Stunden dauern.",

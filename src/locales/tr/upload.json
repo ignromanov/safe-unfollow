@@ -167,7 +167,6 @@
       }
     }
   },
-  "formatWarning": "Veri dışa aktarımı talep ederken JSON (HTML değil) seçtiğinizden emin olun.",
   "waiting": {
     "title": "Instagram bekleniyor...",
     "description": "Instagram veri dışa aktarımını hazırlıyor. Çoğu 5–30 dakika içinde e-postayla gelir; büyük hesaplarda birkaç saat sürebilir.",

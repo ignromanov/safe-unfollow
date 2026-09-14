@@ -167,7 +167,6 @@
       }
     }
   },
-  "formatWarning": "Pastikan Anda memilih JSON (bukan HTML) saat meminta ekspor data.",
   "waiting": {
     "title": "Menunggu Instagram...",
     "description": "Instagram sedang menyiapkan ekspor data Anda. Sebagian besar tiba lewat email dalam 5–30 menit; akun besar bisa memakan waktu beberapa jam.",
