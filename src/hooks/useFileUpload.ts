@@ -361,7 +361,8 @@ export function useFileUpload() {
           accountCount,
           false,
           discovery?.format,
-          discovery?.mixedRelationshipFormats
+          discovery?.mixedRelationshipFormats,
+          discovery?.duplicateRelationshipShards
         );
 
         // Track return upload (user uploading new data)

@@ -538,7 +538,13 @@ describe('useFileUpload', () => {
         await result.current.handleZipUpload(mockFile);
       });
 
-      expect(analytics.fileUploadSuccess).toHaveBeenCalledWith(2, false, 'json', undefined);
+      expect(analytics.fileUploadSuccess).toHaveBeenCalledWith(
+        2,
+        false,
+        'json',
+        undefined,
+        undefined
+      );
     });
 
     it('carries the mixed-format verdict on fileUploadSuccess (GH#160)', async () => {
@@ -557,7 +563,24 @@ describe('useFileUpload', () => {
         await result.current.handleZipUpload(mockFile);
       });
 
-      expect(analytics.fileUploadSuccess).toHaveBeenCalledWith(2, false, 'json', true);
+      expect(analytics.fileUploadSuccess).toHaveBeenCalledWith(2, false, 'json', true, undefined);
+    });
+
+    it('carries the duplicate-shard verdict on fileUploadSuccess (GH#160 step 2)', async () => {
+      const { parseInstagramZipFile } = await import('@/core/parsers/instagram');
+      const parsed = await vi.mocked(parseInstagramZipFile)(mockFile);
+      vi.mocked(parseInstagramZipFile).mockResolvedValue({
+        ...parsed,
+        discovery: { ...parsed.discovery, duplicateRelationshipShards: true },
+      });
+
+      const { result } = renderHook(() => useFileUpload());
+
+      await act(async () => {
+        await result.current.handleZipUpload(mockFile);
+      });
+
+      expect(analytics.fileUploadSuccess).toHaveBeenCalledWith(2, false, 'json', undefined, true);
     });
 
     it('omits the format on the cache-hit path — nothing was parsed this call', async () => {

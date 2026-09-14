@@ -100,6 +100,12 @@ export const analytics = {
   // `format` (GH#156) is undefined on the cache-hit path by design — nothing was
   // parsed this call, so the export's shape was not observed by it, and sending
   // 'unknown' there would read as a measurement rather than the omission it is.
+  // `duplicateRelationshipShards` (GH#160 step 2) rides on the same rules as
+  // the field below, and is a second series rather than a replacement: that one
+  // asks whether the FORMATS are mixed and read 0 true in 3 767 observations,
+  // while the union both exist for needs two BASE PATHS. Neither predicate
+  // contains the other — formats can mix inside one base, and one base can be
+  // duplicated without any format mixing at all.
   // `mixedRelationshipFormats` (GH#160) is omitted on the same path and for the
   // same reason as `format`, and it is spread on `=== undefined` rather than on
   // truthiness for a reason the boolean makes sharper than `format` ever could:
@@ -110,7 +116,8 @@ export const analytics = {
     accountCount: number,
     fromCache: boolean,
     format?: ExportFormat,
-    mixedRelationshipFormats?: boolean
+    mixedRelationshipFormats?: boolean,
+    duplicateRelationshipShards?: boolean
   ) => {
     const utm = getStoredUTM();
     const entryCta = getEntryCTA();
@@ -121,6 +128,9 @@ export const analytics = {
       ...(mixedRelationshipFormats === undefined
         ? {}
         : { mixed_relationship_formats: mixedRelationshipFormats }),
+      ...(duplicateRelationshipShards === undefined
+        ? {}
+        : { duplicate_relationship_shards: duplicateRelationshipShards }),
       ...(utm.utm_source && { utm_source: utm.utm_source }),
       ...(utm.utm_medium && { utm_medium: utm.utm_medium }),
       ...(utm.utm_campaign && { utm_campaign: utm.utm_campaign }),
