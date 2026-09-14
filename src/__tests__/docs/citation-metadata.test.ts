@@ -54,6 +54,7 @@ describe('citation metadata', () => {
       throw new Error(
         `could not import "yaml" to parse CITATION.cff: ${String(err)}. ` +
           'This check cannot silently pass — fix the import, do not delete the assertion.',
+        { cause: err },
       );
     }
     return parseYAML(read('CITATION.cff'));
