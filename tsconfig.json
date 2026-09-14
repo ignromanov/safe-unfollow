@@ -2,7 +2,11 @@
   "compilerOptions": {
     "target": "ES2020",
     "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": ["ES2020", "ES2022.Error", "DOM", "DOM.Iterable"],
+    // ES2022.Error is the `cause` option on the Error constructor and nothing else — the
+    // narrowest lib that types `new Error(msg, { cause })`. `target` stays ES2020, so no
+    // emit changes; this is types-only. A runtime without `cause` ignores the second
+    // argument rather than throwing, so the degradation is silent and safe.
     "module": "ESNext",
     "skipLibCheck": true,
     "jsx": "react-jsx",

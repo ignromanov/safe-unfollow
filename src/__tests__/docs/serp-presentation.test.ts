@@ -330,6 +330,7 @@ describe('every published page fits the search result it appears in', () => {
         throw new Error(
           `could not import "yaml" to verify ${doc.name} against a real parser: ${String(err)}. ` +
             'This check cannot silently pass — fix the import, do not delete the assertion.',
+          { cause: err },
         );
       }
       const block = /^---\n([\s\S]*?)\n---\n/.exec(doc.text);

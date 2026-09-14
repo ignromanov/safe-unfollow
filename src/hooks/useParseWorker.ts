@@ -35,7 +35,8 @@ export function useParseWorker(): UseParseWorkerReturn {
             workerRef.current = worker;
           } catch (error) {
             throw new Error(
-              `Failed to create worker: ${error instanceof Error ? error.message : 'Unknown error'}`
+              `Failed to create worker: ${error instanceof Error ? error.message : 'Unknown error'}`,
+              { cause: error }
             );
           }
 

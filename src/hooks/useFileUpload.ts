@@ -227,7 +227,7 @@ export function useFileUpload() {
         uploadDate,
       });
 
-      let fileHash: string = '';
+      let fileHash: string;
 
       try {
         // Validate ZIP file before processing
