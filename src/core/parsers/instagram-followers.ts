@@ -181,10 +181,27 @@ export async function parseFollowersFromZip(
    * every one of them then deflates `notFollowingBack` and inflates `mutuals`
    * with no warning attached.
    *
-   * The rule is the one `readRelationshipFileFromZip` already applies to
-   * `following.json`: at each base, JSON first, and read exactly one. Keeping
-   * the two required files on different rules is what made this invisible —
-   * `following` came from one export and `followers` from two.
+   * Keyed on the shard's base NAME, directory stripped (GH#160). Keying on the
+   * path made the rule dedupe only within one directory, so a half-merged
+   * archive — both of Instagram's folder layouts in one ZIP — kept both copies
+   * and unioned them.
+   *
+   * This is NOT the same rule `readRelationshipFileFromZip` applies to
+   * `following`, and saying so here was wrong for as long as it stood. The two
+   * differ in precedence, deliberately and for stated reasons:
+   *
+   *   here            JSON outranks HTML however the two were found, so format
+   *                   decides first and base order only among equals;
+   *   following       each base is tried JSON-then-HTML and the first base
+   *                   holding the file wins, so base decides first
+   *                   (`instagram.ts:219-221` argues why).
+   *
+   * They agree on every archive with one base, which is every archive anyone
+   * has measured. They disagree on a half-merged one whose bases differ in
+   * format — `connections/following.html` beside `followers_and_following/
+   * following.json` — and there `following` and `followers` still come from
+   * different exports. That is step 3 of GH#160 and is not fixed here: which
+   * precedence should win is a decision, not a typo.
    */
   const followersFilesByName = new Map<string, ZipEntry>();
   const warnings: ParseWarning[] = [];
