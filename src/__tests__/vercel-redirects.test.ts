@@ -27,8 +27,18 @@ import { SUPPORTED_LANGUAGES } from '@/config/languages';
  * `src/config/languages.ts` and `/xx/wizard` 404s forever, because the sitemap
  * generator, the route table and the prerender count all derive from that
  * constant and this string does not. That is not a hypothetical class in this
- * repo — GH#87 is it, already realised once: `api/og.ts` carries its own locale
- * table, which has no `fr` and still carries the retired `hi`.
+ * repo — it was realised once in `api/og.ts`, whose own locale table had lost
+ * `fr` and still carried the retired `hi` (GH#87).
+ *
+ * ⛔ That copy was resolved by DELETING the file rather than repairing the list,
+ * and the reason generalises. Nothing pointed at the endpoint: `69e34ee` unwired
+ * it in January over a `@vercel/og` x Vite incompatibility and shipped a static
+ * `og-image.png`, which `index.html` still serves for all ten locales, because
+ * `vite/ssg-meta-injector.ts` emits no `og:image` at all. Repairing the list
+ * would have turned a gate green over a surface that renders nothing, reading as
+ * "the per-locale cards are correct" — the opposite of the truth. The alternation
+ * below is different in the way that decides it: it is live, so it is gated here
+ * rather than deleted.
  */
 
 const ROOT = resolve(__dirname, '../..');
