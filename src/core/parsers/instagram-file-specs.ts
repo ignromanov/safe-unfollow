@@ -222,15 +222,25 @@ export function relationshipFormatOf(fileName: string): RelationshipFormat | nul
 }
 
 /**
- * A relationship file's name without its format — what `following.json` and
- * `following.html` have in common, and the key under which they are the same
- * file written twice.
+ * A relationship file's name without its directory or its format — what
+ * `connections/followers_and_following/followers_1.json` and
+ * `followers_and_following/followers_1.html` have in common, and the key under
+ * which they are the same shard written twice.
+ *
+ * The directory is stripped, and that is the whole of GH#160. Keeping it made
+ * the twin rule dedupe only *within* a base path, so a half-merged archive —
+ * one holding both of Instagram's folder layouts — kept both copies, read both
+ * and unioned them: the union of two snapshots taken weeks apart contains
+ * people who have since unfollowed, deflating `notFollowingBack` and inflating
+ * `mutuals` with no warning attached. The rule was right; its key was one level
+ * too specific.
  *
  * Lowercased, because the pattern that found them is case-insensitive and two
  * spellings of one shard are not two shards.
  */
 export function relationshipFileBase(fileName: string): string {
-  return fileName.replace(RELATIONSHIP_EXTENSION, '').toLowerCase();
+  const afterLastSlash = fileName.slice(fileName.lastIndexOf('/') + 1);
+  return afterLastSlash.replace(RELATIONSHIP_EXTENSION, '').toLowerCase();
 }
 
 /**

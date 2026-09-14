@@ -182,6 +182,13 @@ export interface FileDiscovery {
    * Same reason `datesFitted` is undefined for a parse that read no HTML.
    */
   mixedRelationshipFormats?: boolean;
+  /**
+   * Whether one shard name was supplied by more than one directory — the
+   * condition GH#160's union needs. Optional for the same reason as the field
+   * above: the two pre-analysis exits never looked, and `false` there would be
+   * a fabricated measurement in the denominator of a rate.
+   */
+  duplicateRelationshipShards?: boolean;
   /** All expected files and their status */
   files: FileExpectation[];
 }

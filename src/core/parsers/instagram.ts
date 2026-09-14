@@ -177,6 +177,7 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
         isInstagramExport,
         basePath: analysis.basePath,
         mixedRelationshipFormats: analysis.mixedRelationshipFormats,
+        duplicateRelationshipShards: analysis.duplicateRelationshipShards,
         files: fileExpectations,
       },
       hasMinimalData: false,
@@ -322,6 +323,7 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
     isInstagramExport: true,
     basePath: analysis.basePath,
     mixedRelationshipFormats: analysis.mixedRelationshipFormats,
+    duplicateRelationshipShards: analysis.duplicateRelationshipShards,
     files: fileExpectations,
   };
 

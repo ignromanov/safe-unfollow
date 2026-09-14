@@ -4,7 +4,11 @@
  */
 
 import type { FileDiscovery, ParseWarning, RelationshipFormat } from '@/core/types';
-import { RELATIONSHIP_EXTENSIONS, relationshipFormatOf } from './instagram-file-specs';
+import {
+  RELATIONSHIP_EXTENSIONS,
+  relationshipFileBase,
+  relationshipFormatOf,
+} from './instagram-file-specs';
 
 export interface ZipAnalysis {
   hasConnections: boolean;
@@ -47,6 +51,22 @@ export interface ZipAnalysis {
    * some archives, and doing that without a rate is a guess with a diff.
    */
   mixedRelationshipFormats: boolean;
+  /**
+   * Whether one logical shard was supplied by more than one directory — the
+   * condition GH#160's union actually needs, as opposed to the one
+   * `mixedRelationshipFormats` measures.
+   *
+   * The two are different questions and the difference is not academic. Read
+   * 2026-09-14 over 3 767 observations, `mixedRelationshipFormats` returned 0
+   * `true`; it is a FORMAT predicate, and a half-merged archive whose two bases
+   * are both JSON unions while it reads `false`. Both series are kept: neither
+   * is a superset of the other, and the older one is 13 days of denominator.
+   *
+   * Twins inside a single base are not counted. They share a key and already
+   * collapse to one read, so reporting them would inflate the rate with
+   * archives that parse correctly.
+   */
+  duplicateRelationshipShards: boolean;
 }
 
 /**
@@ -90,10 +110,21 @@ export function analyzeZipStructure(allFiles: string[]): ZipAnalysis {
   // extensions nobody has added yet — and would have answered wrongly and
   // silently. `relationshipFormatOf` reads the name instead of assuming.
   const relationshipFormats = new Set<RelationshipFormat>();
+  // Directories seen per shard name, so that "the same shard twice" is a fact
+  // about the archive rather than a guess from `hasConnections &&
+  // hasFollowersFolder` — a legacy folder holding no relationship file unions
+  // nothing and must not be reported as if it did.
+  const directoriesByShard = new Map<string, Set<string>>();
   for (const name of allFiles) {
     if (!RELATIONSHIP_FILE.test(name)) continue;
     const format = relationshipFormatOf(name);
     if (format !== null) relationshipFormats.add(format);
+
+    const shard = relationshipFileBase(name);
+    const directory = name.slice(0, name.lastIndexOf('/') + 1).toLowerCase();
+    const directories = directoriesByShard.get(shard) ?? new Set<string>();
+    directories.add(directory);
+    directoriesByShard.set(shard, directories);
   }
 
   // The relationship files decide; the archive-wide extension counts are the
@@ -127,6 +158,7 @@ export function analyzeZipStructure(allFiles: string[]): ZipAnalysis {
     format,
     isInstagramExport: hasConnections || hasFollowersFolder,
     mixedRelationshipFormats: relationshipFormats.size > 1,
+    duplicateRelationshipShards: [...directoriesByShard.values()].some(dirs => dirs.size > 1),
   };
 }
 

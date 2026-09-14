@@ -142,6 +142,36 @@ describe('fileUploadSuccess mixed_relationship_formats field (GH#160)', () => {
   });
 });
 
+describe('fileUploadSuccess duplicate_relationship_shards field (GH#160 step 2)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('reports a shard supplied by two bases', () => {
+    analytics.fileUploadSuccess(100, false, 'json', false, true);
+
+    const [, payload] = enqueueEvent.mock.calls[0];
+    expect(payload).toMatchObject({ duplicate_relationship_shards: true });
+  });
+
+  it('reports a clean archive as false rather than omitting it', () => {
+    // Same denominator argument as the field above, and the reason this series
+    // exists at all: `mixed_relationship_formats` is a format predicate and
+    // read 0/3 767 true, while the union it was shipped for needs two BASES.
+    analytics.fileUploadSuccess(100, false, 'json', false, false);
+
+    const [, payload] = enqueueEvent.mock.calls[0];
+    expect(payload).toMatchObject({ duplicate_relationship_shards: false });
+  });
+
+  it('omits it on the cache-hit path, where no archive was analysed', () => {
+    analytics.fileUploadSuccess(100, true);
+
+    const [, payload] = enqueueEvent.mock.calls[0];
+    expect(payload).not.toHaveProperty('duplicate_relationship_shards');
+  });
+});
+
 describe('optionalFileFormatDrift format field (GH#156)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
