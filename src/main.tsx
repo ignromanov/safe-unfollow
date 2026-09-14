@@ -2,6 +2,7 @@ import { ViteReactSSG } from 'vite-react-ssg';
 import { routes } from './routes';
 import { initI18n } from './locales';
 import { loadUmami, loadHeatmapRecorder } from './lib/umami-loader';
+import { installStaleChunkRecovery } from './lib/stale-chunk-recovery';
 // Imported here rather than via @import in styles.css: see the note at the top of that
 // file — Tailwind v4 inlines @import without rebasing url(), Vite's JS pipeline does not.
 import '@fontsource-variable/inter';
@@ -30,6 +31,13 @@ export const createRoot = ViteReactSSG(
     },
   },
   async ({ isClient }) => {
+    // Before initI18n, not after: its locale bundles are dynamic imports too, and a deploy
+    // takes them with everything else. vite-react-ssg awaits this callback and catches nothing,
+    // so a rejection here means hydrate() is never reached — the reader keeps looking at the
+    // prerendered HTML while React never attaches, and ErrorBoundary cannot report it because
+    // ErrorBoundary is inside React. GH#103, GH#59.
+    if (isClient) installStaleChunkRecovery();
+
     // Initialize i18n
     // - SSG (isClient=false): Loads ALL languages for prerendering
     // - Client (isClient=true): Loads only the language from URL

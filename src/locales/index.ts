@@ -144,6 +144,20 @@ export async function initI18n(options?: InitI18nOptions): Promise<void> {
     notifyInitSubscribers();
   })();
 
+  // A promise caches its rejection as durably as its value, so without this line one failed
+  // fetch of the English bundle is permanent for the life of the page rather than for the
+  // length of the outage: every later initI18n() returns this same settled promise and no
+  // request goes out. Clearing it on failure only restores the ability to ask again — it does
+  // not retry by itself, and `isInitialized` is deliberately left false, so nothing downstream
+  // reads a half-built i18n. GH#59.
+  //
+  // The handler is attached here rather than at the call site because the caller is
+  // `main.tsx`'s hydration callback, whose rejection vite-react-ssg does not catch at all.
+  // Attaching it first also means the reset runs before any caller's `await` resumes.
+  initPromise.catch(() => {
+    initPromise = null;
+  });
+
   return initPromise;
 }
 
