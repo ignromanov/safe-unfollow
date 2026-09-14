@@ -26,6 +26,7 @@
 
 ## Documentation
 
+- [Documentation index](https://safeunfollow.app/docs): every page below, and the route from requesting the export to reading the result.
 - [How to download your Instagram data as a ZIP](https://safeunfollow.app/docs/instagram-export): the export request, the settings that matter, and how long Meta takes.
 - [User guide](https://safeunfollow.app/docs/user-guide): uploading, badges, filtering, search.
 - [FAQ](https://safeunfollow.app/docs/faq): what it does and does not do.
@@ -35,9 +36,19 @@
 - [Privacy](https://safeunfollow.app/docs/privacy): what is processed where.
 - [Accessibility](https://safeunfollow.app/docs/accessibility): keyboard, screen reader and RTL support.
 - [Alternatives compared](https://safeunfollow.app/docs/compare): how it differs from trackers that ask for a login.
+- [SafeUnfollow vs followsback.com](https://safeunfollow.app/docs/compare/vs-followsback): both read the official export and neither asks for a password; what differs is the account-size limit, the billing period and whether the client is open source. Their figures are quoted with the date they were checked, on the page.
+- [SafeUnfollow vs Unfollowgram](https://safeunfollow.app/docs/compare/vs-unfollowgram): written for a reader who arrived looking for Unfollowgram. It states no features, plans or prices for it, because its site was serving a maintenance page when the page was checked.
+- [SafeUnfollow vs Followers App](https://safeunfollow.app/docs/compare/vs-followers-app): "Followers App" names several different products, so this page states no prices for any of them; it compares the part that does not vary, which is how a tracker gets your data.
 - [Roadmap](https://safeunfollow.app/docs/roadmap): what is built and what is planned.
 
 ## Start here
 
 - [Open the app](https://safeunfollow.app/)
 - [Upload an export](https://safeunfollow.app/upload)
+
+## Completeness
+
+This file lists every page the documentation sources declare, and a test fails the build if one
+of them is missing from it. A page deliberately left out would be named below on its own bullet,
+as a path with the reason it is excluded, so that an omission is a recorded decision rather than
+an accident nobody can tell from a forgotten edit. Nothing is currently excluded.

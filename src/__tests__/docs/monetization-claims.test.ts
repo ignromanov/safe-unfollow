@@ -1142,9 +1142,15 @@ function missingLinks(links: string[]): string[] {
 }
 
 function trailingSlashLinks(text: string): string[] {
-  return [...text.matchAll(/https:\/\/safeunfollow\.app\/docs\/[A-Za-z0-9/_-]*\//g)].map(
-    m => m[0],
-  );
+  // The lookahead is load-bearing, and its absence was a false positive waiting for the first
+  // nested docs page (GH#248). Without it the match is not anchored to the end of the URL, so
+  // `/docs/compare/vs-followsback` reports its own parent `/docs/compare/` as a slash-terminated
+  // link. Every docs URL in llms.txt was one level deep until then, which is the only reason the
+  // unanchored form ever read as correct. The third control beside it is the point: a real
+  // trailing slash on a nested page is still caught, so this is narrower, not weaker.
+  return [
+    ...text.matchAll(/https:\/\/safeunfollow\.app\/docs\/[A-Za-z0-9/_-]*\/(?![A-Za-z0-9_-])/g),
+  ].map(m => m[0]);
 }
 
 /**
@@ -1288,6 +1294,27 @@ describe('llms.txt states nothing the docs corpus may not state', () => {
     // Same 308 the docs corpus was cleaned of in #184: /docs/faq returns 200, /docs/faq/ redirects.
     const slashed = trailingSlashLinks(LLMS_TXT_TEXT);
     expect(slashed, 'llms.txt links through a redirect').toEqual([]);
+  });
+
+  it('the trailing-slash check catches a slash-terminated link', () => {
+    expect(trailingSlashLinks('[FAQ](https://safeunfollow.app/docs/faq/)')).toEqual([
+      'https://safeunfollow.app/docs/faq/',
+    ]);
+  });
+
+  it('the trailing-slash check does not read a nested path as a redirect', () => {
+    // The false positive GH#248 exposed: before the lookahead, this returned the parent
+    // `/docs/compare/`, so the first legitimate two-level docs page failed a gate it obeyed.
+    expect(trailingSlashLinks('[X](https://safeunfollow.app/docs/compare/vs-followsback)')).toEqual(
+      [],
+    );
+  });
+
+  it('the trailing-slash check still catches a nested page that does end in a slash', () => {
+    // The half that proves the fix narrowed the match rather than disabling it.
+    expect(
+      trailingSlashLinks('[X](https://safeunfollow.app/docs/compare/vs-followsback/)'),
+    ).toEqual(['https://safeunfollow.app/docs/compare/vs-followsback/']);
   });
 
   it('the noindex check can reject a link to a page we tell crawlers to discard', () => {
