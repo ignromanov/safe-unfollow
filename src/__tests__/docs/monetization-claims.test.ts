@@ -649,8 +649,16 @@ describe('every page that states an account limit states the same one', () => {
  * claims are first written — the other nine locales are translations of it, and a
  * regex tuned on English words reads as false coverage on Russian, Japanese or
  * Arabic sentences it cannot actually parse. Applying it there would look like a
- * check and would not be one. What those locales get instead is narrower and does
- * not need to read the language — see `ARCHIVED_FALSE_FAQ_FREE_ANSWER` below.
+ * check and would not be one. That is not a guess any more: the per-language table
+ * GH#82 asked for was built and measured on 2026-09-15, and with a control that
+ * fired in all ten languages it returned 19 matches, every one of them false —
+ * workings in `src/__tests__/locales/claim-key-source-freshness.test.ts`.
+ *
+ * What those locales get instead is narrower and does not need to read the
+ * language, and it is now two things rather than one: `ARCHIVED_FALSE_FAQ_FREE_ANSWER`
+ * below, which stops one retired claim from returning anywhere, and that same file,
+ * which goes red when the English sentence a translation was made from changes at
+ * all. Neither reads a word of the nine languages.
  */
 function jsonStringValues(value: unknown, keyPath: string[] = []): Array<{ keyPath: string; text: string }> {
   if (typeof value === 'string') {
