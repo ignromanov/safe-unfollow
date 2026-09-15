@@ -3,7 +3,6 @@ import { readFileSync, existsSync, mkdtempSync, mkdirSync, writeFileSync, rmSync
 import { resolve, join } from 'path';
 import { tmpdir } from 'os';
 import { INTENT_PAGES, INTENT_PATHS } from '@/config/intent-pages';
-import { I18N_NAMESPACES } from '@/config/languages';
 import { injectLocalizedMeta } from '../../../vite/ssg-meta-injector';
 import { describeDist } from '../utils/dist-gate';
 import meta from '@/locales/en/meta.json';
@@ -47,10 +46,13 @@ function writeFixture(): void {
 
   const manifestDir = join(fixtureRoot, 'dist', '.vite');
   mkdirSync(manifestDir, { recursive: true });
-  const manifest: Record<string, { file: string }> = {};
-  for (const ns of I18N_NAMESPACES) {
-    manifest[`src/locales/en/${ns}.json`] = { file: `assets/${ns}-fake.js` };
-  }
+  // One chunk per language, which is what `manualChunks` now produces. It used to be one
+  // entry per (language, namespace) keyed by source path; Vite stops emitting those keys once
+  // the JSONs are assigned to a manual chunk — measured 2026-09-15, the per-source keys went
+  // 80 -> 0 and were replaced by ten `_locale-<lang>-<hash>.js` entries.
+  const manifest: Record<string, { file: string }> = {
+    '_locale-en-fake.js': { file: 'assets/locale-en-fake.js' },
+  };
   writeFileSync(join(manifestDir, 'manifest.json'), JSON.stringify(manifest));
 }
 

@@ -1,6 +1,18 @@
 import type { BuildOptions } from 'vite';
 
 /**
+ * One chunk per language instead of one per (language, namespace).
+ *
+ * loadLanguageResources.ts imports `./${lang}/${ns}.json` — two variables in the specifier,
+ * which Vite expands to 80 chunks. A page loads eight of them (sixteen when it is not
+ * English), measured 2026-09-14 at 16,695 bytes between them.
+ */
+function getLocaleChunk(id: string): string | undefined {
+  const match = /[/\\]src[/\\]locales[/\\]([a-z-]+)[/\\][a-z]+\.json$/.exec(id);
+  return match ? `locale-${match[1]}` : undefined;
+}
+
+/**
  * Helper: Check if module is a Radix core primitive
  */
 function isRadixCorePrimitive(id: string): boolean {
@@ -27,12 +39,15 @@ function isRadixCorePrimitive(id: string): boolean {
 function getRadixChunk(id: string): string | undefined {
   if (isRadixCorePrimitive(id)) return 'radix-core';
 
+  // Measured 2026-09-15: folding these two removes two requests per page AND takes 184 bytes
+  // off the entry chunk. They were modulepreloaded on every route, so their separate chunks
+  // bought no cache granularity — we deploy ~11.5x/day and the hash changes anyway.
   if (id.includes('@radix-ui/react-dialog') || id.includes('@radix-ui/react-alert-dialog')) {
-    return 'radix-dialog';
+    return 'radix-core';
   }
 
   if (id.includes('@radix-ui/react-dropdown-menu') || id.includes('@radix-ui/react-menu')) {
-    return 'radix-menu';
+    return 'radix-core';
   }
 
   if (id.includes('@radix-ui/react-accordion')) return 'radix-accordion';
@@ -88,6 +103,9 @@ export const buildConfig: BuildOptions = {
       // Manual chunk splitting for better caching
       // Note: react/react-dom excluded - they're externalized during SSR build
       manualChunks: id => {
+        const locale = getLocaleChunk(id);
+        if (locale) return locale;
+
         if (!id.includes('node_modules')) return undefined;
 
         return getRadixChunk(id) ?? getVendorChunk(id);

@@ -4,7 +4,6 @@ import {
   SUPPORTED_LANGUAGES,
   LOCALE_CODES,
   RTL_LANGUAGES,
-  I18N_NAMESPACES,
   getLocaleCode,
   createLanguagePrefixRegex,
   type SupportedLanguage,
@@ -47,19 +46,41 @@ export function dropOnDemandFontPreloads(html: string): string {
  * silent in the network panel and buys nothing, which is exactly the class of bug that
  * survives review.
  */
+function localeChunkHref(lang: string, manifest: Record<string, { file: string }>): string {
+  // Addressed by emitted chunk, not by source path. `manualChunks` groups a language's eight
+  // namespace JSONs into one chunk, and Vite then stops writing the per-source manifest keys
+  // this used to read: measured 2026-09-15, the per-source keys went 80 -> 0 while the
+  // manifest gained ten `_locale-<lang>-<hash>.js` entries. The hash itself contains dashes
+  // (`D9I-ocW2`), so the language cannot be recovered by splitting on one.
+  const pattern = new RegExp(`^assets/locale-${lang}-[^/]+\\.js$`);
+  const files = [
+    ...new Set(
+      Object.values(manifest)
+        .map(e => e.file)
+        .filter(f => pattern.test(f))
+    ),
+  ];
+
+  // Exactly one, never "the first one". Zero means `manualChunks` stopped producing the chunk
+  // and the page would otherwise ship a dead modulepreload, which is silent in the network
+  // panel. More than one means the pattern became ambiguous — a regional code such as `en-gb`
+  // would make `locale-en-*` match two chunks — and picking either would preload the wrong
+  // language for some readers. Both deserve a failed build rather than a quiet guess.
+  if (files.length !== 1) {
+    throw new Error(
+      `vite manifest has ${files.length} chunks matching assets/locale-${lang}-*.js, expected 1`
+    );
+  }
+
+  return `/${files[0]}`;
+}
+
 export function localeChunkHrefs(
   lang: string,
   manifest: Record<string, { file: string }>
 ): string[] {
   const langs = lang === 'en' ? ['en'] : ['en', lang];
-  return langs.flatMap(l =>
-    I18N_NAMESPACES.map(ns => {
-      const key = `src/locales/${l}/${ns}.json`;
-      const entry = manifest[key];
-      if (!entry) throw new Error(`vite manifest has no entry for ${key}`);
-      return `/${entry.file}`;
-    })
-  );
+  return langs.map(l => localeChunkHref(l, manifest));
 }
 
 let manifestCache: Record<string, { file: string }> | null = null;
