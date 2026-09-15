@@ -19,8 +19,14 @@ url: "https://safeunfollow.app"
 #
 # What changed to make it worth doing: the five-engine citation baseline of 2026-09-07 measured
 # four of five AI engines resolving the string "SafeUnfollow" to an unrelated Chrome extension
-# that automates unfollowing. These thirteen pages are the ones `llms.txt` routes engines to and
-# the ones that rank — and until now they asserted no entity at all.
+# that automates unfollowing. The docs pages are the ones `llms.txt` routes engines to and the
+# ones that rank — and until now they asserted no entity at all.
+# ⛔ The count is deliberately not written here. This line said "these thirteen pages" while
+# `llms.txt` routed engines to ten and the sources declared fourteen — one sentence conflating
+# three different sets, none of them derived. The entity node goes on every docs page except
+# `instagram-export.md`, which is exempted below; what `llms.txt` carries is gated against the
+# sources by `llms-txt-lists-every-docs-page.test.ts` (GH#248). Both sets are computed, so a
+# number restated here could only drift away from them.
 # `.claude/analytics/2026-09-07-entity-resolution/00-the-entity-defects.md` §2 and §3.
 #
 # ⛔ These four strings are duplicated from `src/components/OrganizationSchema.tsx`, because
