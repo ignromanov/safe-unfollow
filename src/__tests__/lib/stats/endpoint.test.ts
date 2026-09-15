@@ -34,13 +34,15 @@ describe('resolveUmamiTarget', () => {
     });
   });
 
-  it('resolves the script directory, not the origin, behind the same-origin proxy', () => {
-    // The whole point of the proxy: the tag is served from `/v/script.js` on our
-    // own origin and rewritten to the analytics host. Umami's own tracker derives
-    // its collect endpoint as dirname(script.src), so ours must too. Returning the
-    // origin here would post custom events to `/api/send` — outside the `/v/`
-    // rewrite, where nothing serves them — while Umami's pageviews kept working,
-    // making the dashboard look healthy while every custom event 404'd.
+  it('resolves the script directory, not the origin, when the two differ', () => {
+    // ⛔ Production stopped exercising this on 2026-09-14. The `/v/` proxy was removed,
+    // so the tag now sits at an origin root where directory and origin are the same
+    // string — which is exactly the accident this distinction was written to survive.
+    // Keep the nested fixture: it is the only thing left that can catch a substitution
+    // of origin for dirname. Umami's own tracker derives its collect endpoint as
+    // dirname(script.src), so ours must too; getting it wrong posts every custom event
+    // where nothing serves it while Umami's pageviews keep working, so the dashboard
+    // looks healthy and every custom event 404s.
     injectScript({ src: '/v/script.js', 'data-website-id': WEBSITE_ID });
 
     expect(resolveUmamiTarget()?.baseUrl).toBe(`${window.location.origin}/v`);

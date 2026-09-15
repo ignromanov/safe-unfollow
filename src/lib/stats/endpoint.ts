@@ -13,14 +13,18 @@ export interface UmamiTarget {
    * its origin.
    *
    * This mirrors Umami's own tracker, which derives its collect endpoint as
-   * `currentScript.src.split('/').slice(0, -1).join('/')`. The two agreed only
-   * by accident while the script sat at an origin root, where directory and
-   * origin are the same string. Behind the same-origin proxy they differ —
+   * `currentScript.src.split('/').slice(0, -1).join('/')`. The two agree only by
+   * accident when the script sits at an origin root, where directory and origin are
+   * the same string.
+   *
+   * ⛔ As of 2026-09-14 that accident is back: the same-origin proxy `/v/` was removed
+   * and the tag is served from `https://m.safeunfollow.app/script.js`, so substituting
+   * origin for directory would now be **invisible in production**. It was not before —
    * `/v/script.js` has origin `https://safeunfollow.app` but base
-   * `https://safeunfollow.app/v` — and using the origin would post every custom
-   * event outside the proxied path, where nothing serves it. Umami's own
-   * pageviews would keep working, so the dashboard would look healthy while
-   * every custom event 404'd.
+   * `https://safeunfollow.app/v`, and using the origin posted every custom event outside
+   * the proxied path while Umami's own pageviews kept working, so the dashboard looked
+   * healthy and every custom event 404'd. The nested fixture in
+   * `src/__tests__/lib/stats/endpoint.test.ts` is now the only thing that catches it.
    */
   baseUrl: string;
   websiteId: string;

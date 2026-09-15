@@ -47,7 +47,10 @@ function declaredHeaderKeys(): string[] {
   return config.headers.flatMap(entry => entry.headers).map(header => header.key);
 }
 
-/** The Umami dashboard, and the only origin allowed to frame the site. */
+/**
+ * The self-hosted Umami instance: it serves the tracker and the heatmap recorder,
+ * receives their POSTs, and is the only origin allowed to frame the site.
+ */
 const UMAMI_DASHBOARD_ORIGIN = 'https://m.safeunfollow.app';
 
 /** The default path the analytics tag is served from, read from its loader. */
@@ -119,25 +122,37 @@ describe('vercel.json Content-Security-Policy', () => {
     expect(missing).toEqual([]);
   });
 
-  it('serves analytics same-origin, so the CSP needs no analytics host at all', () => {
+  it('loads analytics from the dashboard origin, and names it in both directives it needs', () => {
     const src = umamiSrc();
 
-    // Derived rather than restated. The tag is loaded from our own origin and
-    // rewritten to the analytics instance by vercel.json, so `'self'` already
-    // covers both the script and its POSTs — naming a host here would be dead
-    // config that silently rots, which is exactly the 2026-08-14 failure.
-    expect(src.startsWith('/')).toBe(true);
+    // The same-origin proxy `/v/` was removed 2026-09-14. Each hop through an external
+    // rewrite bills a separate Edge Request -- measured as three hops against one for a
+    // direct call -- against a limit already 79% over. The price of removing it is that
+    // the analytics origin must now appear in the CSP, which is what this checks.
+    expect(src.startsWith(`${UMAMI_DASHBOARD_ORIGIN}/`)).toBe(true);
 
+    const missing = (['script-src', 'connect-src'] as const).filter(
+      directive => !directives.get(directive)?.includes(UMAMI_DASHBOARD_ORIGIN)
+    );
+
+    // script-src loads the tracker and the recorder; connect-src carries their POSTs and
+    // the recorder config fetch. Present in one and absent from the other is the exact
+    // shape of the 2026-08-14 bug, and here it fails silently: no data, no console error.
+    expect(missing).toEqual([]);
+  });
+
+  it('keeps no rewrite that would re-proxy analytics', () => {
+    // Restoring the rewrite would break nothing visible. It would quietly restore the
+    // triple billing this change removed, which is why this is a test and not a comment.
     const config = JSON.parse(readFileSync(resolve(ROOT, 'vercel.json'), 'utf8')) as {
       rewrites?: { source: string; destination: string }[];
     };
-    const prefix = `/${src.split('/')[1]}`;
-    const proxy = config.rewrites?.find(r => r.source.startsWith(`${prefix}/`));
 
-    // Without this rewrite the tag 404s against our own static build, and the
-    // failure is invisible: no CSP violation, no console error, just no data.
-    expect(proxy, `no vercel.json rewrite serves ${prefix}/`).toBeDefined();
-    expect(proxy?.destination).toMatch(/^https:\/\//);
+    const proxied = (config.rewrites ?? []).filter(r =>
+      r.destination.includes('m.safeunfollow.app')
+    );
+
+    expect(proxied).toEqual([]);
   });
 
   /**
