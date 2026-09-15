@@ -1,5 +1,10 @@
 {
   "version": 2,
+  "git": {
+    "deploymentEnabled": {
+      "dependabot/**": false
+    }
+  },
   "buildCommand": "npm run build && cd docs && bundle install && bundle exec jekyll build -d ../dist/docs",
   "outputDirectory": "dist",
   "installCommand": "npm install",
