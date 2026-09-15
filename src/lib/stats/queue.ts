@@ -76,18 +76,24 @@ export const MAX_BATCH_SIZE = 20;
 let queue: QueuedItem[] = [];
 
 /**
- * Queue one event for delivery.
+ * Whether anything at all may be queued right now.
  *
- * Consent is checked here, on every call, and never at flush time: a visitor
- * who declines mid-session must not have their earlier impressions delivered by
- * a later route change.
+ * One definition for every kind of row, because the third condition is consent:
+ * a gate written twice is a gate that will be extended once. Checked on every
+ * enqueue and never at flush time — a visitor who declines mid-session must not
+ * have their earlier impressions delivered by a later route change.
  */
-export function enqueueEvent(name: AnalyticsEventName, data?: EventData): void {
-  if (import.meta.env.DEV) return;
-  if (typeof window === 'undefined') return;
-  if (isTrackingOptedOut()) return;
+function canCollect(): boolean {
+  if (import.meta.env.DEV) return false;
+  if (typeof window === 'undefined') return false;
+  if (isTrackingOptedOut()) return false;
   // No analytics tag means analytics never loaded — nothing to deliver to.
-  if (resolveUmamiTarget() === null) return;
+  return resolveUmamiTarget() !== null;
+}
+
+/** Queue one event for delivery. */
+export function enqueueEvent(name: AnalyticsEventName, data?: EventData): void {
+  if (!canCollect()) return;
 
   queue.push({ kind: 'event', name, data, url: window.location.pathname });
 
@@ -100,18 +106,28 @@ export function enqueueEvent(name: AnalyticsEventName, data?: EventData): void {
  * Queue one page load's Web Vitals for delivery.
  *
  * Umami's own collector posts this shape directly, one unbatched `fetch` per
- * *pageview* — every SPA route change flushes another. Ours is enqueued instead,
- * so it rides a batch that was going to be sent anyway, and it is emitted once
- * per *hard page load*, which is 3.9x rarer. That difference is the whole reason
- * this exists rather than `data-performance="true"` on the script tag.
+ * *pageview* — every SPA route change flushes another. Ours is emitted once per
+ * *hard page load*, which is 3.9x rarer, and it is enqueued rather than posted so
+ * it can share a request when one is already pending. ⚠️ Usually it cannot:
+ * `useEventQueueFlush` drains the queue on every route change, so by the time a
+ * page hides there is typically nothing left to ride with. Budget it as its own
+ * keepalive POST per hard page load — ~31 000/month against the collector's
+ * ~123 000, which is the reason this exists and not `data-performance="true"`.
  *
- * Same four gates as `enqueueEvent`, in the same order and for the same reasons.
+ * `url` is passed in rather than read here, unlike `enqueueEvent`'s: an event
+ * happens now, while these metrics describe a document that loaded some routes
+ * ago, and `window.location` no longer names it. Measured at 3.91 pageviews per
+ * page load, the average row would otherwise carry its fourth route.
+ *
+ * Same `canCollect` gate as `enqueueEvent`, plus one of its own: a row on which
+ * no metric survived is dropped. It cannot
+ * move a percentile — each is computed over its own column and skips nulls — but
+ * it would still cost a request, a stored row, a step in the journey report
+ * (which does not filter `event_type`) and one unit of the sample count the
+ * Performance tab prints beside its numbers.
  */
-export function enqueuePerformance(metrics: PerformanceMetrics): void {
-  if (import.meta.env.DEV) return;
-  if (typeof window === 'undefined') return;
-  if (isTrackingOptedOut()) return;
-  if (resolveUmamiTarget() === null) return;
+export function enqueuePerformance(metrics: PerformanceMetrics, url: string): void {
+  if (!canCollect()) return;
 
   const deliverable: PerformanceMetrics = {};
   for (const [key, value] of Object.entries(metrics) as [keyof PerformanceMetrics, number][]) {
@@ -120,7 +136,9 @@ export function enqueuePerformance(metrics: PerformanceMetrics): void {
     }
   }
 
-  queue.push({ kind: 'performance', metrics: deliverable, url: window.location.pathname });
+  if (Object.keys(deliverable).length === 0) return;
+
+  queue.push({ kind: 'performance', metrics: deliverable, url });
 
   if (queue.length >= MAX_BATCH_SIZE) {
     flushEvents();

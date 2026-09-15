@@ -25,6 +25,17 @@ import { enqueuePerformance, flushEvents, type PerformanceMetrics } from '@/lib/
  */
 export function initWebVitals(): void {
   const metrics: PerformanceMetrics = {};
+  /**
+   * The route this document loaded on, captured now rather than at delivery.
+   *
+   * LCP, FCP and TTFB describe this load and nothing after it. The row leaves on
+   * `pagehide`, by which time an SPA visit has typically moved on — 3.91
+   * pageviews per page load — so reading `location` there would file the landing
+   * page's load cost under whichever route the visit ended on. CLS and INP do
+   * accumulate across those routes, so no single URL is right for all five; this
+   * one is right for three and matches the pageview the load produced.
+   */
+  const url = window.location.pathname;
   let sent = false;
 
   /**
@@ -36,11 +47,18 @@ export function initWebVitals(): void {
    * decided anywhere. Enqueueing after the other listener already flushed would
    * strand the row in the queue for the rest of the page's life, and a stranded
    * row looks exactly like a page that reported nothing.
+   *
+   * ⚠️ So this row usually travels alone rather than sharing a request: the hook
+   * also drains the queue on every route change, which normally leaves nothing
+   * to ride with. Cost it as one keepalive POST per hard page load.
    */
   const flush = (): void => {
     if (sent) return;
+    // The latch means delivered, not attempted. A page hidden before anything
+    // resolved has nothing to say yet, and must stay able to say it later.
+    if (Object.keys(metrics).length === 0) return;
     sent = true;
-    enqueuePerformance(metrics);
+    enqueuePerformance(metrics, url);
     flushEvents();
   };
 

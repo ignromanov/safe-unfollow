@@ -88,8 +88,10 @@ describe('initWebVitals', () => {
   beforeEach(async () => {
     vi.stubEnv('DEV', false);
     clsFinalizedOnHide = null;
-    // The legacy 3% per-metric event shares this gate; pinning it high keeps the
-    // parallel emitter silent so these assertions see the census payload alone.
+    // The legacy sampled per-metric event shares this gate; pinning it high keeps
+    // the parallel emitter silent so these assertions see the census payload
+    // alone. The rate itself is not restated here — `analytics.webVital` in
+    // `lib/stats/events.ts` is where it is decided.
     vi.spyOn(Math, 'random').mockReturnValue(1);
     localStorage.clear();
     clearEventQueue();
@@ -110,6 +112,9 @@ describe('initWebVitals', () => {
 
   afterEach(() => {
     while (teardown.length > 0) teardown.pop()?.();
+    // jsdom keeps one location for the whole file: a pushState in one test is the
+    // starting route of the next, and the route is now an assertion subject.
+    window.history.pushState({}, '', '/');
     Object.defineProperty(document, 'visibilityState', { value: 'visible', configurable: true });
     document.head.querySelectorAll('script[data-website-id]').forEach(el => el.remove());
     vi.unstubAllEnvs();
@@ -161,6 +166,37 @@ describe('initWebVitals', () => {
 
     const body = lastFetchBody();
     expect(body[0]?.payload.cls).toBeCloseTo(0.0731, 4);
+  });
+
+  it('a hide that found nothing to send must not latch the row out of existence', () => {
+    // The latch has to mean "delivered", not "attempted". A page hidden before
+    // any metric resolved would otherwise disarm itself for the rest of its life,
+    // and a page that reports nothing is indistinguishable from one that was
+    // never measured — which is the exact ambiguity this whole row exists to end.
+    hidePage();
+
+    expect(fetchMock).not.toHaveBeenCalled();
+
+    reporters.TTFB?.({ name: 'TTFB', value: 90, rating: 'good' });
+    window.dispatchEvent(new Event('pagehide'));
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(lastFetchBody()[0]?.payload.ttfb).toBe(90);
+  });
+
+  it('labels the row with the route that loaded the document, not the one it ended on', () => {
+    // pageviews / page-loads measured 3.91, so the average document passes through
+    // roughly four routes before it hides. LCP, FCP and TTFB describe the FIRST of
+    // them; labelling the row with the last migrates the landing page's load cost
+    // onto whichever route the visit ends on, which is exactly the reading the
+    // Performance tab exists to give.
+    reporters.TTFB?.({ name: 'TTFB', value: 120, rating: 'good' });
+    reporters.LCP?.({ name: 'LCP', value: 2100, rating: 'good' });
+    window.history.pushState({}, '', '/results');
+
+    hidePage();
+
+    expect(lastFetchBody()[0]?.payload.url).toBe('/');
   });
 
   it('omits a metric that never fired instead of sending it as a zero', () => {
