@@ -1,3 +1,6 @@
+import { readdirSync, readFileSync } from 'node:fs';
+import { basename, extname, join } from 'node:path';
+
 import { describe, expect, it } from 'vitest';
 
 import { BreadcrumbSchema } from '@/components/BreadcrumbSchema';
@@ -111,6 +114,74 @@ const EMITTERS: Array<[string, () => React.ReactElement, string]> = [
   ['HowToSection', () => <HowToSection />, '/'],
   ['FAQSection', () => <FAQSection />, '/'],
 ];
+
+/**
+ * The list above is hand-enumerated, and the docblock at the top of this file promised it
+ * "will cover a fifth emitter the moment one is added to the list below" — which is a
+ * promise about an author's attention, not about the code. A fifth emitter added without
+ * that edit is not caught and not reported: the gate stays green because it never looks,
+ * which is the same shape as the hand-typed lists in P1 row 14 and #254.
+ *
+ * So the list is coupled to the corpus it claims to cover. The scan reads the comment-
+ * stripped source of everything under `src/` outside `__tests__/`, because a component
+ * that only *mentions* the media type in prose is not an emitter — the inverse of the
+ * 2026-09-14 grep that counted a docblock saying a file does NOT use a spelling.
+ */
+const SRC_DIR = join(process.cwd(), 'src');
+const TESTS_DIR = join(SRC_DIR, '__tests__');
+const LD_JSON = 'application/ld+json';
+
+/** Comments carry prose *about* the code and must not be matched as code. */
+function stripComments(source: string): string {
+  return source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
+}
+
+function emitsJsonLd(source: string): boolean {
+  return stripComments(source).includes(LD_JSON);
+}
+
+function walk(dir: string): string[] {
+  return readdirSync(dir, { withFileTypes: true }).flatMap(entry => {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) return full === TESTS_DIR ? [] : walk(full);
+    return /\.tsx?$/.test(entry.name) ? [full] : [];
+  });
+}
+
+const shippedEmitters = walk(SRC_DIR)
+  .filter(file => emitsJsonLd(readFileSync(file, 'utf8')))
+  .map(file => basename(file, extname(file)))
+  .sort();
+
+describe('the emitter list is the set of emitters that ship', () => {
+  it('tells an emission apart from prose about one', () => {
+    expect(emitsJsonLd(`<script type="${LD_JSON}">{}</script>`)).toBe(true);
+    expect(emitsJsonLd(`/* renders an ${LD_JSON} block */ export const a = 1;`)).toBe(false);
+    expect(emitsJsonLd(`// TODO: emit ${LD_JSON} here\nexport const b = 2;`)).toBe(false);
+    expect(emitsJsonLd('export const c = 3;')).toBe(false);
+  });
+
+  it('reaches real files, and this file is outside its reach', () => {
+    // A walk that returns nothing satisfies the equality below with an empty list on both
+    // sides only if EMITTERS is empty too — but a walk that silently narrows would still
+    // let a real emitter through, so assert it is reading the tree it claims to read.
+    expect(walk(SRC_DIR).length).toBeGreaterThan(50);
+    expect(shippedEmitters.length).toBeGreaterThan(0);
+    // This file carries the literal in its own assertions; counting it would be the gate
+    // reading itself. Assert the exclusion really fires rather than trusting the path.
+    expect(readdirSync(SRC_DIR).includes('__tests__')).toBe(true);
+    expect(walk(SRC_DIR).some(file => file.startsWith(TESTS_DIR))).toBe(false);
+  });
+
+  it('covers every shipped emitter, and every entry still emits', () => {
+    expect(
+      shippedEmitters,
+      'the JSON-LD emitters on disk and the EMITTERS list above have diverged — a new one ' +
+        'is unguarded by both claim gates below, or a listed one no longer emits and its ' +
+        'green says nothing'
+    ).toEqual(EMITTERS.map(([name]) => name).sort());
+  });
+});
 
 describe('shipped structured data does not claim the app works offline', () => {
   it('the detector can go red on the entry that was live', () => {
