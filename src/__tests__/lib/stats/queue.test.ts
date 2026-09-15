@@ -4,6 +4,7 @@ import { AnalyticsEvents } from '@/lib/stats/constants';
 import {
   clearEventQueue,
   enqueueEvent,
+  enqueuePerformance,
   flushEvents,
   getDeliveryStats,
   getQueuedCount,
@@ -318,6 +319,36 @@ describe('event queue', () => {
       const body = lastFetchBody() as Array<{ payload: { name: string } }>;
       expect(body).toHaveLength(2);
       expect(body[1]?.payload.name).toBe('checkout_start');
+    });
+  });
+
+  describe('enqueuePerformance', () => {
+    it('rides the same batch as events, under the performance envelope', () => {
+      enqueuePerformance({ lcp: 1234, cls: 0.05 });
+
+      flushEvents();
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const body = lastFetchBody() as Array<{ type: string; payload: Record<string, unknown> }>;
+      expect(body).toHaveLength(1);
+      expect(body[0]).toMatchObject({
+        type: 'performance',
+        payload: { website: WEBSITE_ID, lcp: 1234, cls: 0.05 },
+      });
+    });
+
+    it('drops a metric the collector would refuse, rather than losing the row with it', () => {
+      // The collector validates the whole envelope: one out-of-range number and
+      // all five metrics are rejected together. `/api/batch` reports that as a
+      // per-index error, which `deliver` counts into `eventsRejected` and nobody
+      // reads — so the page would simply have no performance row, indefinitely.
+      enqueuePerformance({ ttfb: 70000, lcp: 2100 });
+
+      flushEvents();
+
+      const body = lastFetchBody() as Array<{ payload: Record<string, unknown> }>;
+      expect(body[0]?.payload).not.toHaveProperty('ttfb');
+      expect(body[0]?.payload.lcp).toBe(2100);
     });
   });
 });

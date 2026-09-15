@@ -6,11 +6,63 @@ import type { AnalyticsEventName } from './constants';
 export type EventData = Record<string, string | number | boolean>;
 
 interface QueuedEvent {
+  kind: 'event';
   name: AnalyticsEventName;
   data?: EventData;
   /** Captured at enqueue: a flush routinely happens after the route changed. */
   url: string;
 }
+
+/**
+ * The five Web Vitals Umami stores as columns on `website_event`.
+ *
+ * Every field is optional because the report tolerates it: the Performance
+ * query filters on `event_type = 5` and nothing else, and each percentile is
+ * computed over its own column, so a row carrying only `lcp` contributes to LCP
+ * and to nothing else. Absent means absent — never send a `0` for a metric that
+ * did not fire, which would be indistinguishable from a real zero.
+ */
+export interface PerformanceMetrics {
+  lcp?: number;
+  inp?: number;
+  cls?: number;
+  fcp?: number;
+  ttfb?: number;
+}
+
+/**
+ * Upper bound the collector itself enforces on each metric, restated here only
+ * because the alternative is worse.
+ *
+ * Decided by the `type: 'performance'` branch of the collector's request schema
+ * (`src/app/api/send/route.ts` in the umami fork): `lcp`/`inp`/`fcp`/`ttfb` are
+ * `nonnegative().max(60000)`, `cls` is `nonnegative().max(100)`. Validation runs
+ * over the WHOLE envelope, so one number past its ceiling rejects the other four
+ * with it, and `/api/batch` answers with a per-index error that `deliver` counts
+ * into `eventsRejected` and no one reads. Dropping the offending metric keeps the
+ * row and loses one number instead of five.
+ *
+ * ⚠️ Dropping biases that metric's percentiles DOWNWARD, because only the slowest
+ * observations can exceed a ceiling. It cannot move p75 unless more than a
+ * quarter of loads are past it, which for a 60-second TTFB would be a different
+ * emergency.
+ */
+const METRIC_CEILING: Record<keyof PerformanceMetrics, number> = {
+  lcp: 60000,
+  inp: 60000,
+  fcp: 60000,
+  ttfb: 60000,
+  cls: 100,
+};
+
+interface QueuedPerformance {
+  kind: 'performance';
+  metrics: PerformanceMetrics;
+  /** Captured at enqueue, for the same reason as an event's. */
+  url: string;
+}
+
+type QueuedItem = QueuedEvent | QueuedPerformance;
 
 /**
  * Flush once the queue reaches this many events.
@@ -21,7 +73,7 @@ interface QueuedEvent {
  */
 export const MAX_BATCH_SIZE = 20;
 
-let queue: QueuedEvent[] = [];
+let queue: QueuedItem[] = [];
 
 /**
  * Queue one event for delivery.
@@ -37,7 +89,38 @@ export function enqueueEvent(name: AnalyticsEventName, data?: EventData): void {
   // No analytics tag means analytics never loaded — nothing to deliver to.
   if (resolveUmamiTarget() === null) return;
 
-  queue.push({ name, data, url: window.location.pathname });
+  queue.push({ kind: 'event', name, data, url: window.location.pathname });
+
+  if (queue.length >= MAX_BATCH_SIZE) {
+    flushEvents();
+  }
+}
+
+/**
+ * Queue one page load's Web Vitals for delivery.
+ *
+ * Umami's own collector posts this shape directly, one unbatched `fetch` per
+ * *pageview* — every SPA route change flushes another. Ours is enqueued instead,
+ * so it rides a batch that was going to be sent anyway, and it is emitted once
+ * per *hard page load*, which is 3.9x rarer. That difference is the whole reason
+ * this exists rather than `data-performance="true"` on the script tag.
+ *
+ * Same four gates as `enqueueEvent`, in the same order and for the same reasons.
+ */
+export function enqueuePerformance(metrics: PerformanceMetrics): void {
+  if (import.meta.env.DEV) return;
+  if (typeof window === 'undefined') return;
+  if (isTrackingOptedOut()) return;
+  if (resolveUmamiTarget() === null) return;
+
+  const deliverable: PerformanceMetrics = {};
+  for (const [key, value] of Object.entries(metrics) as [keyof PerformanceMetrics, number][]) {
+    if (Number.isFinite(value) && value >= 0 && value <= METRIC_CEILING[key]) {
+      deliverable[key] = value;
+    }
+  }
+
+  queue.push({ kind: 'performance', metrics: deliverable, url: window.location.pathname });
 
   if (queue.length >= MAX_BATCH_SIZE) {
     flushEvents();
@@ -190,17 +273,30 @@ export function flushEvents(): void {
 
   const endpoint = `${target.baseUrl}/api/batch`;
   const body = JSON.stringify(
-    batch.map(event => ({
-      type: 'event',
-      payload: {
-        website: target.websiteId,
-        name: event.name,
-        ...(event.data && { data: event.data }),
-        hostname: window.location.hostname,
-        language: navigator.language,
-        url: event.url,
-      },
-    }))
+    batch.map(item =>
+      item.kind === 'performance'
+        ? {
+            type: 'performance',
+            payload: {
+              website: target.websiteId,
+              hostname: window.location.hostname,
+              language: navigator.language,
+              url: item.url,
+              ...item.metrics,
+            },
+          }
+        : {
+            type: 'event',
+            payload: {
+              website: target.websiteId,
+              name: item.name,
+              ...(item.data && { data: item.data }),
+              hostname: window.location.hostname,
+              language: navigator.language,
+              url: item.url,
+            },
+          }
+    )
   );
 
   // Analytics must never break the app: nothing below is awaited by the caller,
