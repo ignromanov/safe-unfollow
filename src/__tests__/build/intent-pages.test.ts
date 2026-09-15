@@ -20,10 +20,15 @@ const built = existsSync(resolve(distDir, 'index.html'));
  * (code-quality.yml runs test:coverage with no build — GH#159).
  *
  * A throwaway rootDir stands in for the repo: `injectLocalizedMeta` reads
- * `<rootDir>/src/locales/<lang>/meta.json` and `<rootDir>/dist/.vite/manifest.json` (via
- * localeChunkHrefs), so both are written here rather than pointed at the real ones — the real
- * vite manifest only exists after a build, which is exactly the dependency this half must not
- * have.
+ * `<rootDir>/src/locales/<lang>/meta.json`, `<rootDir>/dist/.vite/manifest.json` (via
+ * localeChunkHrefs) and `<rootDir>/vercel.json` (via applyRobotsMeta, GH#257). The first two are
+ * written here rather than pointed at the real ones — the real vite manifest only exists after a
+ * build, which is exactly the dependency this half must not have.
+ *
+ * `vercel.json` is COPIED from the real one instead of being invented, because its header rules
+ * are what decides which pages get `noindex`. A hand-written stand-in would let this fixture and
+ * the shipped site disagree about that set, which is the defect `noindex-routes.ts` exists to
+ * prevent.
  */
 const fixtureRoot = mkdtempSync(join(tmpdir(), 'intent-meta-injector-'));
 
@@ -44,6 +49,12 @@ function writeFixture(): void {
     })
   );
 
+  // The real rules, copied verbatim. See the docblock above for why this one is not invented.
+  writeFileSync(
+    join(fixtureRoot, 'vercel.json'),
+    readFileSync(join(process.cwd(), 'vercel.json'), 'utf-8')
+  );
+
   const manifestDir = join(fixtureRoot, 'dist', '.vite');
   mkdirSync(manifestDir, { recursive: true });
   // One chunk per language, which is what `manualChunks` now produces. It used to be one
@@ -59,8 +70,14 @@ function writeFixture(): void {
 writeFixture();
 afterAll(() => rmSync(fixtureRoot, { recursive: true, force: true }));
 
+/**
+ * The shell as `index.html` ships it, minus the parts nothing here reads. The robots meta is not
+ * decoration: `applyRobotsMeta` (GH#257) throws when that anchor is absent rather than silently
+ * doing nothing, so a page model without it is a page model the injector will reject.
+ */
 const BASE_HTML =
-  '<!doctype html><html lang="en"><head><title>x</title></head><body></body></html>';
+  '<!doctype html><html lang="en"><head><title>x</title>' +
+  '<meta name="robots" content="index, follow" /></head><body></body></html>';
 
 describe('injectLocalizedMeta (fixture, always runs)', () => {
   it('suppresses hreflang and og:locale:alternate for an intent path', async () => {

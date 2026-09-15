@@ -9,6 +9,7 @@ import {
   type SupportedLanguage,
 } from '../src/config/languages.js';
 import { INTENT_PATHS } from '../src/config/intent-pages.js';
+import { noindexRoutes, type NoindexRoutes } from '../scripts/noindex-routes.js';
 
 const BASE_URL = 'https://safeunfollow.app';
 
@@ -96,6 +97,51 @@ function readViteManifest(rootDir: string): Record<string, { file: string }> {
     { file: string }
   >;
   return manifestCache;
+}
+
+/**
+ * The X-Robots-Tag path set, read from `vercel.json` once per build. Cached on the same terms as
+ * the manifest above, and with the same caveat about rootDir.
+ */
+let noindexCache: NoindexRoutes | null = null;
+
+function readNoindexRoutes(rootDir: string): NoindexRoutes {
+  if (noindexCache) return noindexCache;
+  const vercel = JSON.parse(fs.readFileSync(path.join(rootDir, 'vercel.json'), 'utf-8')) as {
+    headers?: Array<{ source: string; headers: Array<{ key: string; value: string }> }>;
+  };
+  noindexCache = noindexRoutes(vercel.headers ?? []);
+  return noindexCache;
+}
+
+/**
+ * Make the page's `robots` meta agree with the `X-Robots-Tag` header `vercel.json` serves for
+ * the same path.
+ *
+ * `index.html` hardcodes `index, follow` and every prerendered page inherited it, including the
+ * twenty that the header tells crawlers to drop (GH#257). Google resolves such a conflict toward
+ * the restrictive directive; Bing and the AI crawlers publish no resolution rule, so the only
+ * state that survives them is both surfaces saying the same thing.
+ *
+ * The path set is not restated here — `scripts/noindex-routes.ts` derives it from `vercel.json`,
+ * and this is its second consumer. `generate-sitemap.ts` was the first; until now every consumer
+ * was a test, which is why the discipline existed and the shipped page was never joined to it.
+ *
+ * @param basePath the route with its locale prefix already removed, as the caller computes it.
+ */
+export function applyRobotsMeta(html: string, basePath: string, noindex: NoindexRoutes): string {
+  const anchor = /<meta\s+name="robots"\s+content="[^"]*"\s*\/?>/;
+  if (!anchor.test(html)) {
+    throw new Error(
+      'ssg-meta-injector: no <meta name="robots" content="..."> to rewrite. Every other ' +
+        'rewrite in this module is a bare String.replace, which returns the input unchanged ' +
+        'when its anchor is missing — for this one that is GH#257 returning silently, with a ' +
+        'noindex page advertising "index, follow" and every gate green. Restore the tag in ' +
+        'index.html, or move this rewrite to wherever the tag now comes from.'
+    );
+  }
+  const content = noindex.matches(basePath) ? 'noindex, follow' : 'index, follow';
+  return html.replace(anchor, `<meta name="robots" content="${content}" />`);
 }
 
 /**
@@ -298,6 +344,10 @@ export async function injectLocalizedMeta(
     /<meta\s+name="description"\s+content="[^"]*"/,
     `<meta name="description" content="${escapedDescription}"`
   );
+
+  // 2a. Make <meta name="robots"> agree with the X-Robots-Tag header for this path (GH#257).
+  // Unlike its neighbours this one throws when its anchor is absent — see applyRobotsMeta.
+  html = applyRobotsMeta(html, basePath, readNoindexRoutes(rootDir));
 
   // 3. Replace <meta name="keywords">
   html = html.replace(
