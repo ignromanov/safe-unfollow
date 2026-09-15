@@ -8,6 +8,7 @@
   "buildCommand": "npm run build && cd docs && bundle install && bundle exec jekyll build -d ../dist/docs",
   "outputDirectory": "dist",
   "installCommand": "npm install",
+  "ignoreCommand": "node scripts/vercel-should-build.mjs",
   "cleanUrls": true,
   "trailingSlash": false,
   "redirects": [
