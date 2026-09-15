@@ -4,6 +4,7 @@ import { AnalyticsEvents } from '@/lib/stats/constants';
 import {
   clearEventQueue,
   enqueueEvent,
+  enqueuePerformance,
   flushEvents,
   getDeliveryStats,
   getQueuedCount,
@@ -318,6 +319,64 @@ describe('event queue', () => {
       const body = lastFetchBody() as Array<{ payload: { name: string } }>;
       expect(body).toHaveLength(2);
       expect(body[1]?.payload.name).toBe('checkout_start');
+    });
+  });
+
+  describe('enqueuePerformance', () => {
+    it('rides the same batch as events, under the performance envelope', () => {
+      enqueuePerformance({ lcp: 1234, cls: 0.05 }, '/upload');
+
+      flushEvents();
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const body = lastFetchBody() as Array<{ type: string; payload: Record<string, unknown> }>;
+      expect(body).toHaveLength(1);
+      expect(body[0]).toMatchObject({
+        type: 'performance',
+        // The caller's route, not the one `window.location` holds at flush time.
+        payload: { website: WEBSITE_ID, url: '/upload', lcp: 1234, cls: 0.05 },
+      });
+    });
+
+    it('drops a metric the collector would refuse, rather than losing the row with it', () => {
+      // The collector validates the whole envelope: one out-of-range number and
+      // all five metrics are rejected together. `/api/batch` reports that as a
+      // per-index error, which `deliver` counts into `eventsRejected` and nobody
+      // reads — so the page would simply have no performance row, indefinitely.
+      enqueuePerformance({ ttfb: 70000, lcp: 2100 }, '/');
+
+      flushEvents();
+
+      const body = lastFetchBody() as Array<{ payload: Record<string, unknown> }>;
+      expect(body[0]?.payload).not.toHaveProperty('ttfb');
+      expect(body[0]?.payload.lcp).toBe(2100);
+    });
+
+    it('is refused by the same consent gate as an event', () => {
+      // The gate is duplicated nowhere: both paths call `canCollect`. This test
+      // exists so that stays true — a fifth condition added for events but not
+      // for the census would leave a visitor who opted out still measured, and
+      // nothing else in the suite would notice.
+      localStorage.setItem('umami-opt-out', 'true');
+
+      enqueuePerformance({ lcp: 1000 }, '/');
+
+      expect(getQueuedCount()).toBe(0);
+    });
+
+    it('queues nothing when no metric survives, rather than a row of five nulls', () => {
+      // Such a row cannot move a percentile — every one of them is computed over
+      // its own column and skips nulls — but it is still a request, a stored row,
+      // a step in the journey report (which does not filter event_type) and one
+      // unit of the sample count the Performance tab prints beside the numbers.
+      enqueuePerformance({}, '/');
+      enqueuePerformance({ ttfb: 70000 }, '/');
+
+      expect(getQueuedCount()).toBe(0);
+
+      flushEvents();
+
+      expect(fetchMock).not.toHaveBeenCalled();
     });
   });
 });
