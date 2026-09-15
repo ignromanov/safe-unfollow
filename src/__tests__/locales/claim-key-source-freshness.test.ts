@@ -180,6 +180,27 @@ const CLAIM_KEYS: readonly ClaimKey[] = [
     reviewed: '2026-09-15',
     en: 'Your export is read in this browser and never uploaded.',
   },
+  {
+    ns: 'results',
+    path: ['export', 'paywall', 'terms'],
+    why: 'the pre-purchase promise: what the money buys, and the only surface that can set the expectation before we take money',
+    reviewed: '2026-09-15',
+    en: 'One-time {{price}}. Unlocks on up to 3 browsers.',
+  },
+  {
+    ns: 'results',
+    path: ['export', 'license', 'keyNote'],
+    why: 'restates the entitlement scope beside the key the buyer has just been given',
+    reviewed: '2026-09-15',
+    en: 'Saved in this browser. Your key works on up to 3 browsers — the link in your purchase email unlocks the next one.',
+  },
+  {
+    ns: 'results',
+    path: ['export', 'license', 'successMeta'],
+    why: "the commercial term on the activated screen — it read 'Paid once' and asserted a settlement the code cannot prove (GH#139)",
+    reviewed: '2026-09-15',
+    en: 'One-time purchase · no subscription',
+  },
 ];
 
 describe('claim-bearing keys are translated from the English sentence on record', () => {

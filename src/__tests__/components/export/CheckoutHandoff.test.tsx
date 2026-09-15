@@ -86,14 +86,14 @@ describe('CheckoutHandoff', () => {
     vi.restoreAllMocks();
   });
 
-  // Surface ownership, pinned. The device cap and the refund are terms of the
+  // Surface ownership, pinned. The browser cap and the refund are terms of the
   // deal and belong to the paywall, which the reader was on one tap ago and
   // which still shows them underneath. Restating them here would put the same
   // two sentences on the screen twice in a row.
   it('should leave the deal terms to the paywall that still shows them', () => {
     renderHandoff();
 
-    expect(screen.queryByText(/3 devices/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/3 browsers/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/refund/i)).not.toBeInTheDocument();
   });
 });

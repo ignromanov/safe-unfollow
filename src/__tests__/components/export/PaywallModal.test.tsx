@@ -99,7 +99,7 @@ describe('PaywallModal handoff', () => {
   it('should keep the deal terms visible underneath the handoff', () => {
     renderModal({ checkoutState: 'opening' });
 
-    expect(screen.getByText(/up to 3 devices/i)).toBeInTheDocument();
+    expect(screen.getByText(/up to 3 browsers/i)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /refunds@/i })).toBeInTheDocument();
   });
 
