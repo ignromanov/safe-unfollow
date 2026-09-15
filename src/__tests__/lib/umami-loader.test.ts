@@ -2,6 +2,13 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 const WEBSITE_ID = 'f204b58f-a5bb-4231-b02b-4cc05f472d02';
 
+/**
+ * The analytics instance, named once. The tag used to be served from the same-origin
+ * proxy `/v/`; that rewrite was removed 2026-09-14 because each hop through it billed a
+ * separate Vercel Edge Request (measured: three hops against one direct).
+ */
+const ANALYTICS_ORIGIN = 'https://m.safeunfollow.app';
+
 describe('umami-loader', () => {
   let localStorageMock: Record<string, string> = {};
   let mockScript: HTMLScriptElement;
@@ -69,8 +76,12 @@ describe('umami-loader', () => {
 
       expect(document.createElement).toHaveBeenCalledWith('script');
       expect(mockScript.defer).toBe(true);
-      expect(mockScript.src).toBe('/v/script.js');
+      expect(mockScript.src).toBe(`${ANALYTICS_ORIGIN}/script.js`);
       expect(mockScript.dataset.websiteId).toBe(WEBSITE_ID);
+      // Passed explicitly rather than left to the tracker, which derives its collect
+      // endpoint from its own src. Same reasoning the recorder already used: a change in
+      // how the script is served must not silently retarget collection.
+      expect(mockScript.dataset.hostUrl).toBe(ANALYTICS_ORIGIN);
       expect(appendChildSpy).toHaveBeenCalledWith(mockScript);
     });
 
@@ -157,7 +168,7 @@ describe('umami-loader', () => {
 
       loadUmami();
 
-      expect(mockScript.src).toBe('/v/script.js');
+      expect(mockScript.src).toBe(`${ANALYTICS_ORIGIN}/script.js`);
     });
 
     it('should use correct website ID', async () => {
@@ -235,7 +246,7 @@ describe('umami-loader', () => {
   });
 
   describe('loadHeatmapRecorder', () => {
-    const CONFIG_URL = `/v/api/websites/${WEBSITE_ID}/recorder`;
+    const CONFIG_URL = `${ANALYTICS_ORIGIN}/api/websites/${WEBSITE_ID}/recorder`;
 
     let fetchMock: ReturnType<typeof vi.fn>;
 
@@ -273,9 +284,9 @@ describe('umami-loader', () => {
       await fireFirstInteraction();
 
       expect(fetchMock).toHaveBeenCalledWith(CONFIG_URL, { credentials: 'omit' });
-      expect(mockScript.src).toBe('/v/recorder.js');
+      expect(mockScript.src).toBe(`${ANALYTICS_ORIGIN}/recorder.js`);
       expect(mockScript.dataset.websiteId).toBe(WEBSITE_ID);
-      expect(mockScript.dataset.hostUrl).toBe('/v');
+      expect(mockScript.dataset.hostUrl).toBe(ANALYTICS_ORIGIN);
       expect(appendChildSpy).toHaveBeenCalledWith(mockScript);
     });
 

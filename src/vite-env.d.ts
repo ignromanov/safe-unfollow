@@ -15,21 +15,23 @@ interface ImportMetaEnv {
    */
   readonly VITE_DODO_CHECKOUT_URL?: string;
   /**
-   * Where the Umami tracker is loaded from. Defaults to the same-origin proxy
-   * `/v/script.js` (see `vercel.json` rewrites). Set to an absolute URL only to
-   * point at an instance that is not proxied. GH#63.
+   * Where the Umami tracker is loaded from. Defaults to the analytics instance
+   * directly; the same-origin proxy `/v/script.js` was removed 2026-09-14 because each
+   * hop through a `vercel.json` external rewrite bills its own Edge Request. Set this
+   * when `TRACKER_SCRIPT_NAME` renames the served file. GH#63.
    */
   readonly VITE_UMAMI_SRC?: string;
   /** Umami website id events are attributed to. GH#63. */
   readonly VITE_UMAMI_WEBSITE_ID?: string;
   /**
-   * Where the Umami heatmap recorder is loaded from. Defaults to the same-origin
-   * proxy `/v/recorder.js`, the same rewrite that serves the tracker. GH#95.
+   * Where the Umami heatmap recorder is loaded from. Defaults to the analytics
+   * instance directly, the same host that serves the tracker. GH#95.
    */
   readonly VITE_UMAMI_RECORDER_SRC?: string;
   /**
-   * Base the recorder resolves `/api/record` and its config endpoint against.
-   * Defaults to the `/v` proxy prefix. GH#95.
+   * Base the tracker and the recorder resolve their collect endpoints against.
+   * Defaults to the analytics origin. Set this when `COLLECT_API_ENDPOINT` moves the
+   * collect path. GH#95.
    */
   readonly VITE_UMAMI_HOST_URL?: string;
 }

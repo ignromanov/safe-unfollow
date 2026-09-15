@@ -7,21 +7,26 @@
 import { SUPPORTED_LANGUAGES } from '@/config/languages';
 
 /**
- * Where the tracker is served from. Default is the same-origin proxy declared
- * in `vercel.json` (`/v/:match*` -> the analytics host), not a third-party
- * origin: the browser only ever sees `safeunfollow.app`, which is the only
- * form of ad-blocker avoidance that actually works — a bare subdomain still
- * ships a third-party origin and the widely-filtered `script.js` filename.
+ * Where the tracker is served from: the analytics instance directly.
  *
- * A relative path also makes `connect-src`/`script-src 'self'` sufficient, so
- * no analytics host appears in the CSP at all.
+ * This was the same-origin proxy `/v/script.js` until 2026-09-14. The proxy was a
+ * `vercel.json` rewrite, and Vercel bills each hop through an external rewrite as a
+ * separate Edge Request — measured as three hops (`x-vercel-id: gru1:gru1:gru1::iad1::`)
+ * against one for a direct call, on an account already 79% over the Hobby limit.
+ *
+ * ⛔ It cost something real to remove. A bare subdomain ships a third-party origin and
+ * the widely-filtered `script.js` filename, so ad-blocker exposure rises. The mitigation
+ * is `TRACKER_SCRIPT_NAME` and `COLLECT_API_ENDPOINT` on the analytics instance, which
+ * are owner actions in the Vercel dashboard, paired with the three `VITE_UMAMI_*`
+ * overrides below. Until both halves are set, expect a step down in measured volume that
+ * is not a traffic result — see `analytics/measurement-boundaries.md`.
+ *
+ * The CSP now names this origin in `script-src` and `connect-src`; it previously needed
+ * no analytics host at all. `src/__tests__/vercel-csp.test.ts` holds both facts together.
  *
  * Overridable per GH#63 so the instance can move without editing this file.
- * Note the proxy's *destination* still lives in `vercel.json`, because Vercel
- * does not interpolate env vars into rewrites — so a host move is a one-line
- * config change there rather than a code change here.
  */
-const UMAMI_SRC = import.meta.env.VITE_UMAMI_SRC || '/v/script.js';
+const UMAMI_SRC = import.meta.env.VITE_UMAMI_SRC || 'https://m.safeunfollow.app/script.js';
 
 /**
  * Website record the events are attributed to. Changed once already, at the
@@ -58,6 +63,17 @@ function isFramed(): boolean {
   return window.top !== window.self;
 }
 
+/**
+ * Base both the tracker and the recorder resolve their collect endpoints against —
+ * `/api/send` for the tracker, `/api/record` and the config endpoint for the recorder.
+ *
+ * Passed explicitly on both rather than left to be derived from `currentScript.src`, so
+ * a change in how the script is served cannot silently retarget collection at another
+ * origin. The recorder already worked this way; the tracker was relying on the
+ * derivation until 2026-09-14, which is why moving the script moved the endpoint with it.
+ */
+const UMAMI_HOST_URL = import.meta.env.VITE_UMAMI_HOST_URL || 'https://m.safeunfollow.app';
+
 export function loadUmami(): void {
   if (!UMAMI_WEBSITE_ID) return;
   if (isOptedOut()) return;
@@ -70,22 +86,16 @@ export function loadUmami(): void {
   script.defer = true;
   script.src = UMAMI_SRC;
   script.dataset.websiteId = UMAMI_WEBSITE_ID;
+  script.dataset.hostUrl = UMAMI_HOST_URL;
   document.head.appendChild(script);
 }
 
 /**
- * Where the heatmap recorder is served from — the same same-origin proxy as the
- * tracker, so `script-src 'self'` already covers it and no CSP entry is needed.
+ * Where the heatmap recorder is served from — the same instance as the tracker, so the
+ * `script-src` entry added for `UMAMI_SRC` covers it too. Was `/v/recorder.js`.
  */
-const UMAMI_RECORDER_SRC = import.meta.env.VITE_UMAMI_RECORDER_SRC || '/v/recorder.js';
-
-/**
- * Base the recorder resolves `/api/record` and its config endpoint against.
- * Passed explicitly instead of leaving the recorder to derive it from its own
- * `currentScript.src`, so a change in how the script is served cannot silently
- * retarget collection at another origin.
- */
-const UMAMI_HOST_URL = import.meta.env.VITE_UMAMI_HOST_URL || '/v';
+const UMAMI_RECORDER_SRC =
+  import.meta.env.VITE_UMAMI_RECORDER_SRC || 'https://m.safeunfollow.app/recorder.js';
 
 /** Locales that carry a URL prefix. English is served at `/`, so `/en` is a 404. */
 const PREFIXED_LANGUAGES: readonly string[] = SUPPORTED_LANGUAGES.filter(lang => lang !== 'en');
