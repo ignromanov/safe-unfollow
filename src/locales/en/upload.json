@@ -167,7 +167,6 @@
       }
     }
   },
-  "formatWarning": "Make sure you selected JSON (not HTML) when requesting your data export.",
   "waiting": {
     "title": "Waiting for Instagram...",
     "description": "Instagram is preparing your data export. Most arrive by email in 5–30 minutes; large accounts can take a few hours.",
