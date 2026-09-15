@@ -278,21 +278,51 @@ describe('paywall refund copy', () => {
 // The activation limit lives in Dodo's dashboard, so this can no more prove the
 // number is right than the price test can. What it prevents is the state this
 // copy was written to fix: the limit is real and was stated nowhere, so a buyer
-// met it for the first time as a `limit_reached` error on their fourth device —
+// met it for the first time as a `limit_reached` error on their fourth browser —
 // a dispute, at roughly five sales each, that the sentence costs nothing to
 // avoid. A locale that drops it sells the same licence without the term.
-describe('paywall device-limit copy', () => {
-  const DEVICES = '3';
+//
+// Read against the authority on 2026-09-15 for the first time, because GH#139
+// turned on whether the number was even right: all four live keys on the product
+// report `activations_limit: 3`. It was, and the noun beside it was not — the
+// entitlement is one activation per browser profile, not per device, and the
+// copy said "devices" on every surface that sold it.
+//
+// Not interpolated, and that is a decision rather than an omission. "Pass it as
+// {{limit}}" is the obvious suggestion and it is wrong in this corpus: a cardinal
+// in Arabic agrees with its noun across three classes (1, 2, 3-10, 11+) and in
+// Russian across three more, so a placeholder would render correct copy for 3 and
+// ungrammatical copy for anything else — breaking at exactly the moment the
+// interpolation exists to help. The number stays written out; this is what stops
+// it drifting instead.
+describe('paywall activation-limit copy', () => {
+  const ACTIVATIONS_LIMIT = '3';
 
+  // `license.blockedTitle` carries the same number and is deliberately not swept:
+  // `ar` and `id` spell it as a word there, so a digit sweep would either fail
+  // them or need a per-language list of spelled numerals — a gate that has to
+  // read the language, which is the shape ruled against in
+  // claim-key-source-freshness.test.ts. Two surfaces are covered in all ten
+  // languages; the third is covered in none, which is the honest split.
   it('states the same activation limit in every supported language', () => {
     for (const language of SUPPORTED_LANGUAGES) {
-      const terms = String(bundleFor(language).export.paywall.terms);
+      const exportCopy = bundleFor(language).export;
 
-      // Any digit that is not part of the price — the price test owns that one.
-      const withoutPrice = terms.replace(/\d+(?:[.,]\d{2})?\s*\$|\$\s*\d+(?:[.,]\d{2})?/g, '');
-      const numbers = withoutPrice.match(/\d+/g) ?? [];
+      const surfaces: readonly (readonly [string, string])[] = [
+        ['paywall.terms', String(exportCopy.paywall.terms)],
+        ['license.keyNote', String(exportCopy.license.keyNote)],
+      ];
 
-      expect(numbers, `${language} terms states a device count`).toContain(DEVICES);
+      for (const [name, text] of surfaces) {
+        // Any digit that is not part of the price — the price test owns that one.
+        const withoutPrice = text.replace(/\d+(?:[.,]\d{2})?\s*\$|\$\s*\d+(?:[.,]\d{2})?/g, '');
+        const numbers = withoutPrice.match(/\d+/g) ?? [];
+
+        expect(
+          numbers,
+          `${language} ${name} no longer states the activation limit. If the Dodo product changed, move ACTIVATIONS_LIMIT and all ten locales in the same commit; if the sentence was reworded, put the number back. Current text: "${text}"`
+        ).toContain(ACTIVATIONS_LIMIT);
+      }
     }
   });
 });
