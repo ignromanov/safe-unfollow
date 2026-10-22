@@ -13,7 +13,6 @@ vi.mock('@/lib/analytics', () => ({
     linkClick: vi.fn(),
     calendarReminderClick: vi.fn(),
     guideOpen: vi.fn(),
-    guideSectionView: vi.fn(),
   },
 }));
 
@@ -400,75 +399,20 @@ describe('GuideDialog', () => {
     });
   });
 
-  describe('guide_section_view', () => {
-    it('emits once when the observer first names a section', () => {
-      open();
-
-      reportActiveSection(3);
-
-      expect(analytics.guideSectionView).toHaveBeenCalledExactlyOnceWith(3);
-    });
-
-    it('does not re-emit while the observer keeps reporting the same section', () => {
-      open();
-
-      reportActiveSection(3);
-      reportActiveSection(3);
-
-      expect(analytics.guideSectionView).toHaveBeenCalledExactlyOnceWith(3);
-    });
-
-    it('emits again when the reported section changes', () => {
+  // guide_section_view was retired on 2026-10-21: it was 23% of every
+  // website_event row while the free analytics database ran out of space. The
+  // mock above no longer carries it, so a call that comes back would throw
+  // inside the effect rather than pass unnoticed.
+  describe('section views', () => {
+    it('sends no per-section event while the reader scrolls through the guide', () => {
       open();
 
       reportActiveSection(3);
       reportActiveSection(5);
 
-      expect(analytics.guideSectionView).toHaveBeenNthCalledWith(1, 3);
-      expect(analytics.guideSectionView).toHaveBeenNthCalledWith(2, 5);
-    });
-
-    it('emits again for a section already reported before the dialog closed', () => {
-      // Guards the user-visible behaviour the `if (!open)` reset produces:
-      // reopening and landing back on the same section the reader left
-      // re-emits, rather than staying silent because the ref never forgot it.
-      //
-      // Does NOT isolate that one branch, and that limitation is worth being
-      // explicit about rather than silent: under separate act() calls per
-      // rerender (the shape below, matching two distinct user interactions —
-      // a close click and a later reopen click are two separate commits, not
-      // one), useActiveStep's own close -> null reset already lands as its
-      // own intermediate commit, so `lastReportedStepRef` reaches null via
-      // the unconditional assignment at the bottom of this effect even with
-      // the `if (!open)` branch removed — this test alone would not catch
-      // that removal. A single `act()` batching both rerenders (simulating a
-      // close and reopen with no commit in between) does distinguish them,
-      // but it FAILS even with the branch restored: React's batching means
-      // the intermediate `open: false` commit is never produced at all in
-      // that shape, so no effect — this one or useActiveStep's — ever runs
-      // against it. That sequence is not reachable through real, separate
-      // browser interactions either, so it is not asserted here. What this
-      // test does check is real: the reopened-same-section case must not go
-      // quiet, however many mechanisms currently cooperate to prevent it.
-      const { rerender } = open();
-      reportActiveSection(3);
-      expect(analytics.guideSectionView).toHaveBeenCalledExactlyOnceWith(3);
-
-      rerender(
-        <GuideDialog
-          open={false}
-          step={null}
-          source="accordion"
-          onGoToStep={vi.fn()}
-          onClose={vi.fn()}
-        />
-      );
-      rerender(
-        <GuideDialog open step={null} source="accordion" onGoToStep={vi.fn()} onClose={vi.fn()} />
-      );
-      reportActiveSection(3);
-
-      expect(analytics.guideSectionView).toHaveBeenCalledTimes(2);
+      expect(analytics.guideOpen).toHaveBeenCalledOnce();
+      expect(analytics.linkClick).not.toHaveBeenCalled();
+      expect(analytics.calendarReminderClick).not.toHaveBeenCalled();
     });
   });
 });

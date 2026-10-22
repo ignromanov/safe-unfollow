@@ -13,48 +13,6 @@ import type { LicenseFailureReason } from '@/lib/export/license';
 import type { FilterSessionSummary } from './filter-session';
 
 /**
- * True the first time this key is seen in this browser tab, false afterwards.
- *
- * The name says "tab" because `sessionStorage` is scoped to one tab and dies
- * with it, while Umami's `session_id` is scoped to a visitor and can span
- * days. The two disagree in the same direction every time: two tabs, or a
- * reopen an hour later, give two `true` rows against one Umami session. A
- * property called `first_view` would read as "first view this session" —
- * false against the only notion of session the dashboard has.
- *
- * `guideSectionView` is the caller, keyed per section per tab. The guide is
- * now one scroll rather than eight routes, so this is what tells "scrolled
- * past" from "read": scrolling up and back down re-enters a section and would
- * otherwise count it as read a second time. Mechanism follows the
- * `analytics_first_pv` precedent below (`pageView`).
- *
- * Unsampled since GH#123, so nothing currently stands between this call and
- * the enqueue. If a gate is ever reintroduced it goes *after* this call, never
- * before: the flag describes the reader's history ("has this section been
- * seen before"), not whether the view got reported. Writing the marker behind
- * a gate would make `first_view_in_tab: true` mean "the first view that
- * happened to be sampled" — expected true-count per session becomes
- * `1 - (1-rate)^n`, which is n-dependent.
- */
-function firstViewInTab(key: string): boolean {
-  if (typeof window === 'undefined') return false;
-  const storageKey = `analytics_first_in_tab_${key}`;
-  // The getter itself throws SecurityError under Safari's "Block all cookies"
-  // and Firefox's "Block cookies and site data", and the one caller
-  // (guideSectionView) runs inside GuideDialog's `[open, activeStep]` effect
-  // — an unguarded throw takes the screen down to report a view. Degrading to
-  // "not first view" under-reports instead, which is the same trade
-  // `getStoredUTM` makes for the identical call (utm.ts).
-  try {
-    if (sessionStorage.getItem(storageKey)) return false;
-    sessionStorage.setItem(storageKey, '1');
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-/**
  * Round a file size to two decimal places for the `file_size_mb` analytics
  * property. Shared so `file_upload_start` and `upload_error_*` report the
  * same file at the same precision.
@@ -303,44 +261,13 @@ export const analytics = {
    * reader and the drop zone; it is now one click away from a block that
    * already renders on `/upload`. This count will be a fraction of the old
    * `guide_entry_view`, and substituting one for the other is a LARGER
-   * discontinuity than the wizard_step_view → guide_section_view rename
-   * below — never report it as "guide opens grew".
+   * discontinuity than the wizard_step_view → guide_section_view rename was
+   * — never report it as "guide opens grew".
    */
   guideOpen: (source: GuideSource, step?: number) => {
     enqueueEvent(AnalyticsEvents.GUIDE_OPEN, {
       source,
       ...(step === undefined ? {} : { step_id: step }),
-    });
-  },
-
-  /**
-   * A section of the guide entering the viewport, inside the one scroll the
-   * dialog now is.
-   *
-   * A NEW NAME rather than a `variant` on the old wizard_step_view: a variant
-   * field would leave step_id:1 meaning two different screens depending on
-   * the date, and every historical query silently wrong. Same precedent
-   * guide_entry_view was chosen under, when GuideEntry replaced wizard step 1
-   * — that event is deleted (GuideEntry dissolved when the wizard became a
-   * dialog) and nothing replaces it; guide_open above stands where it stood,
-   * counting a different population.
-   *
-   * `firstViewInTab`'s key changed with the rename, from `wizard_step_` to
-   * `guide_section_`: the old key is already written into a returning
-   * reader's `sessionStorage`, and reusing it would make their first section
-   * view in a fresh tab report `false`.
-   *
-   * NOT comparable across the rename: the old event measured navigation
-   * between eight routes, where 1→2→1→2 was a real detour that back
-   * navigation could reintroduce. Under one scroll there is no back
-   * navigation — scrolling up and back down simply re-enters a section, which
-   * `first_view_in_tab` still tells from "read for the first time".
-   */
-  guideSectionView: (stepId: number) => {
-    const isFirstView = firstViewInTab(`guide_section_${stepId}`);
-    enqueueEvent(AnalyticsEvents.GUIDE_SECTION_VIEW, {
-      step_id: stepId,
-      first_view_in_tab: isFirstView,
     });
   },
 
