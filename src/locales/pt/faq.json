@@ -115,7 +115,7 @@
     },
     "shareDataSafely": {
       "question": "É seguro enviar download de dados do Instagram para ferramentas de terceiros?",
-      "answer": "Sim, se o app processar seu arquivo localmente no seu navegador e mantiver ele lá. Este rastreador lê seu arquivo ZIP inteiramente no seu dispositivo: o arquivo em si fica neste navegador, e o que sai são apenas estatísticas de visita anônimas. Desconfie de rastreadores de unfollowers baseados em nuvem que pedem para você entregar seu ZIP ou sua senha do Instagram, porque esses enviam seu arquivo para a máquina de outra pessoa. Sempre verifique se o app funciona a partir da exportação oficial e não pede login.",
+      "answer": "Sim, se o app processar seu arquivo localmente no seu navegador e mantiver ele lá. Este rastreador lê seu arquivo ZIP inteiramente no seu dispositivo: o arquivo em si fica neste navegador. Estatísticas de visita anônimas e solicitações de anúncios saem dele, mas nenhuma leva seu arquivo. Desconfie de rastreadores de unfollowers baseados em nuvem que pedem para você entregar seu ZIP ou sua senha do Instagram, porque esses enviam seu arquivo para a máquina de outra pessoa. Sempre verifique se o app funciona a partir da exportação oficial e não pede login.",
       "relatedLink": {
         "text": "Leia nosso compromisso de privacidade",
         "href": "/privacy"

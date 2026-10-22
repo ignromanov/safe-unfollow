@@ -22,7 +22,7 @@
 - Exporting the result to CSV or JSON is a one-time $7 licence key. A free 10-row sample is
   shown before anything is asked for.
 - The site carries advertising and uses privacy-focused analytics for page-level metrics. The
-  Instagram export itself is never sent anywhere, so nothing on the page can read it.
+  Instagram export itself is never sent anywhere, so no ad or analytics request carries it.
 
 ## Documentation
 

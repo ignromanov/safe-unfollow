@@ -34,7 +34,7 @@ SafeUnfollow is the second kind. If real-time alerts are what you actually want,
 | **Platform** | Any browser, desktop or mobile; installable as a PWA |
 | **Source code** | Published under the MIT license |
 
-The site itself is not silent on the network — it loads anonymous page analytics, and the results page carries ads. [What the rest of the site loads is set out on the privacy page](/docs/privacy). The export is the part that stays on your device.
+The site itself is not silent on the network — it loads anonymous page analytics, and the upload and results pages carry ads. [What the rest of the site loads is set out on the privacy page](/docs/privacy). The export is the part that stays on your device.
 
 ## Choosing Between Them
 

@@ -24,7 +24,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
           </div>
           <h1 className="text-4xl md:text-5xl font-display font-bold">Privacy Policy</h1>
         </div>
-        <p className="text-muted-foreground text-lg">Last updated: August 8, 2026</p>
+        <p className="text-muted-foreground text-lg">Last updated: October 22, 2026</p>
       </header>
 
       {/* Content */}
@@ -273,22 +273,28 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
           <div className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
             <p className="text-sm text-emerald-700 dark:text-emerald-400 font-medium">
               Ads are never targeted using your Instagram data. Your export is parsed inside your
-              browser and stored only in IndexedDB — neither we nor Google can read it, so it cannot
-              feed ad targeting even in principle.
+              browser and stored only in IndexedDB, and our code never sends any part of it to us or
+              to Google — no ad request we make carries it.
             </p>
           </div>
           <p className="text-muted-foreground mt-4">
-            Two of those ad units are ours, and both sit on the results screen. Google also serves
-            placements of its own choosing, which can appear on any screen once its script is
-            running — including a full-screen ad shown between pages. We do not select those and
-            cannot list them here.
+            Three of those ad units are ours: one on the upload screen and two on the results
+            screen. Google also serves placements of its own choosing, which can appear on any
+            screen once its script is running — including a full-screen ad shown between pages. We
+            do not select those and cannot list them here.
+          </p>
+          <p className="text-muted-foreground mt-4">
+            The upload screen is where your export is read, so Google's ad script is usually already
+            running in the same page while that happens. Like any script on a web page, it runs
+            alongside our own code rather than walled off from it. What keeps your export out of
+            advertising is that our code never hands it over, not a barrier between the two — which
+            is why the code is open for you to check (section 4.3).
           </p>
           <p className="text-muted-foreground mt-4">
             We never start Google's ad script on the sample-data page, so opening it directly leaves
-            it free of ads. If you have already opened the results screen in the same visit, the
-            script is loaded and Google's own placements can follow you to any screen, including
-            that one; reloading the tab clears it. The upload screen carries one partner link, which
-            is ours and is described in 5.5.
+            it free of ads. If you have already opened the upload or results screen in the same
+            visit, the script is loaded and Google's own placements can follow you to any screen,
+            including that one; reloading the tab clears it.
           </p>
           <p className="text-muted-foreground mt-4">
             If you are in the EEA, UK or Switzerland, a consent dialog from Google's certified
@@ -317,30 +323,17 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
 
           <h3 className="text-lg font-semibold mt-6 mb-3">5.5 Affiliate Links</h3>
           <p className="text-muted-foreground">
-            Some outbound links on this site are affiliate links, including a partner block on the
-            upload screen and the tool suggestions on the results screen. If you buy something after
-            following one, we may earn a commission at no extra cost to you. Every such link is
-            labelled where it appears.
+            This site currently shows no affiliate links. The partner link that used to sit on the
+            upload screen has been replaced by one of the ad units described in section 5.4, and the
+            tool suggestions on the results screen are switched off.
           </p>
           <div className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
             <p className="text-sm text-emerald-700 dark:text-emerald-400 font-medium">
-              Nothing is sent to a partner until you click. The banner image is served from our own
-              domain rather than the partner's, so loading the page does not contact them at all.
+              If an affiliate link returns, it will be labelled where it appears, nothing will be
+              sent to the partner until you click it, and this section will say where it is before
+              it goes live.
             </p>
           </div>
-          <p className="text-muted-foreground mt-4">
-            When you do click, you leave for the partner's site, and from that point their privacy
-            policy applies: like any site you visit, they can see your IP address, your browser, and
-            that you arrived from us, and they may set their own cookies to attribute the referral.
-            We record the click, the offer, its position, and what chose it: your export's account
-            count and how many stopped following you. No identifier of you, and none of its
-            contents, which never leave your browser.
-          </p>
-          <p className="text-muted-foreground mt-4">
-            Which partner offer you see depends on the language you are viewing the site in, because
-            these programmes are not available in every country. We do not claim to use these
-            products ourselves.
-          </p>
 
           <h3 className="text-lg font-semibold mt-6 mb-3">5.6 Feedback Form (Tally)</h3>
           <p className="text-muted-foreground">

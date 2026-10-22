@@ -6,7 +6,7 @@
  * visitor who lands on `/sample` directly — and only for them. Injection is
  * idempotent by tag id and there is no teardown, so once any eligible slot has
  * fired, the script survives client-side navigation to every route, including
- * `/sample` and `/upload`, which declare no slot of their own. Google's Auto
+ * `/sample`, which declares no slot of its own. Google's Auto
  * ads then serve there too; the privacy policy §5.4 is worded around this
  * rather than around the slots we declare. For EEA/UK/CH visitors the
  * script still loads, and Google's certified CMP gates ad serving on the

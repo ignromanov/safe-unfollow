@@ -115,7 +115,7 @@
     },
     "shareDataSafely": {
       "question": "Est-il sûr de téléverser mon téléchargement de données Instagram sur des outils tiers ?",
-      "answer": "Oui, si l'application traite votre fichier localement dans votre navigateur et l'y conserve. Ce suivi lit votre fichier ZIP entièrement sur votre appareil : le fichier lui-même reste dans ce navigateur, et seules des statistiques de visite anonymes en sortent. Méfiez-vous des suivis de désabonnements basés sur le cloud qui vous demandent de remettre votre ZIP ou votre mot de passe Instagram : ceux-là envoient votre fichier sur la machine de quelqu'un d'autre. Vérifiez toujours que l'application part de l'export officiel et ne demande aucun identifiant.",
+      "answer": "Oui, si l'application traite votre fichier localement dans votre navigateur et l'y conserve. Ce suivi lit votre fichier ZIP entièrement sur votre appareil : le fichier lui-même reste dans ce navigateur. Des statistiques de visite anonymes et des requêtes publicitaires en sortent, mais aucune ne contient votre fichier. Méfiez-vous des suivis de désabonnements basés sur le cloud qui vous demandent de remettre votre ZIP ou votre mot de passe Instagram : ceux-là envoient votre fichier sur la machine de quelqu'un d'autre. Vérifiez toujours que l'application part de l'export officiel et ne demande aucun identifiant.",
       "relatedLink": {
         "text": "Lisez notre engagement de confidentialité",
         "href": "/privacy"

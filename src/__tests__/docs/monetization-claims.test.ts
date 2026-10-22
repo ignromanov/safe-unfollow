@@ -270,10 +270,10 @@ const BANNED: BannedEntry[] = [
     pattern: new RegExp(`${NEGATION}${GAP}\\bpremium\\b${GAP}\\bfeatures?\\b`, 'i'),
     why: 'the export is a paid feature',
   },
-  { pattern: new RegExp(`${NEGATION}${GAP}\\bads\\b`, 'i'), why: 'AdSense units ship on / and /results' },
+  { pattern: new RegExp(`${NEGATION}${GAP}\\bads\\b`, 'i'), why: 'AdSense units ship on /upload and /results' },
   {
     pattern: new RegExp(`${NEGATION}${GAP}\\bsponsored\\b${GAP}\\bcontent\\b`, 'i'),
-    why: '/upload carries an affiliate placement',
+    why: 'the AdSense units on /upload and /results are sponsored content',
   },
   {
     pattern: /\bnothing\b[^.\n]{0,25}\bleaves?\b/i,
@@ -369,7 +369,7 @@ const BANNED: BannedEntry[] = [
   },
   {
     pattern: /\b(?:ads?|advertising|tracking|analytics)\b[^\n]{0,60}\b(?:none|nothing)\b/i,
-    why: 'AdSense ships two units on /results and Umami logs every page view — a cell denying either is false',
+    why: 'AdSense ships units on /upload and /results and Umami logs every page view — a cell denying either is false',
     qualifiedBy: QUALIFIER_BOUND,
   },
 ];
@@ -393,7 +393,7 @@ const BANNED: BannedEntry[] = [
  * goes false the moment any third party is added.
  */
 const BANNED_PRIVACY = [
-  { pattern: /no advertising/i, why: 'AdSense serves ads on / and /results' },
+  { pattern: /no advertising/i, why: 'AdSense serves ads on /upload and /results' },
   { pattern: /no tracking cookies?/i, why: 'AdSense sets ad cookies once consent is given' },
   { pattern: /no data sharing/i, why: 'Umami receives events, AdSense receives ad requests' },
   { pattern: /no network requests? after/i, why: 'ad fills, /api/batch and the licence API all run after load' },
@@ -827,6 +827,81 @@ describe('no page or bundle says the app works offline without saying what has t
       // Language-neutral: the loanword is spelled the same in de/es/pt/id, and a new claim in
       // a locale that never had one is the case the archive cannot see.
       expect(strings.filter(text => /\boffline\b/i.test(text))).toEqual([]);
+    });
+  }
+});
+
+/**
+ * A sentence that says where the ads are names every screen that carries one of ours.
+ *
+ * Until PR #284 our units sat on `/results` only, and five public sentences said so —
+ * `is-it-safe.md`, the FAQ JSON-LD in `_includes/faq-schema.html`, two comparison pages and
+ * the AdSense row of `privacy.md`. PR #284 put a unit on `/upload`, the screen where the export
+ * is read, and nothing here could see that any of the five had just gone false: they are
+ * true-when-written inventories, the exact class this file's opening comment describes.
+ *
+ * So the subject is derived, not listed: any line or sentence that names advertising AND a
+ * screen. Such a sentence must mention the upload screen exactly when `UploadZone.tsx`
+ * renders `<UploadAdSlot>` — so the rule also goes red the other way, if the unit is removed
+ * and the copy is not.
+ *
+ * ⚠️ Limit, stated: the unit is a line or a sentence, so a claim hard-wrapped across two lines
+ * of markdown splits into halves that each look innocent. Same limit as `qualificationWindow`.
+ */
+const AD_TERM = /\b(?:ads|ad requests?|ad units?|advertising|adsense)\b/i;
+const SCREEN_TERM = /\b(?:results|upload) (?:page|screen)s?\b|\/(?:results|upload)\b/i;
+const NAMES_UPLOAD = /\bupload\b/i;
+
+const AD_LOCATION_KNOWN_VIOLATIONS = [
+  'what *does* leave your browser is anonymous page-view counting, and ad requests on the results screen.',
+  'The site itself does load anonymous page analytics, and the results page carries ads.',
+  "| Google AdSense | ad requests and advertising cookies, subject to your consent choice | the units we place are on `/results`; Google's own automatic placements can appear on any screen once its script has started |",
+];
+
+function adLocationUnits(text: string): string[] {
+  return text
+    .split(/\n|(?<=[.?!])\s+/)
+    .filter(unit => AD_TERM.test(unit) && SCREEN_TERM.test(unit));
+}
+
+describe('a sentence that locates the ads names the upload screen exactly when it carries one', () => {
+  const uploadUnitShips = /<UploadAdSlot\b/.test(
+    readFileSync(join(process.cwd(), 'src', 'components', 'UploadZone.tsx'), 'utf-8'),
+  );
+  const offences = (text: string): string[] =>
+    adLocationUnits(text).filter(unit => NAMES_UPLOAD.test(unit) !== uploadUnitShips);
+
+  it('the detector finds the sentences that went false with PR #284', () => {
+    // Control: while the upload unit ships, every archived sentence is an offence. If this
+    // goes red, either the detector stopped seeing them or the unit was removed — read which.
+    expect(uploadUnitShips, 'UploadZone.tsx no longer renders <UploadAdSlot>').toBe(true);
+    expect(AD_LOCATION_KNOWN_VIOLATIONS.filter(text => offences(text).length === 0)).toEqual([]);
+  });
+
+  const FAQ_SCHEMA = join(DOCS_ROOT, '_includes', 'faq-schema.html');
+  const subjects = [
+    ...DOCS,
+    { name: 'README.md', text: README_TEXT },
+    { name: '_includes/faq-schema.html', text: readFileSync(FAQ_SCHEMA, 'utf-8') },
+    ...(LLMS_TXT_EXISTS ? [{ name: 'public/llms.txt', text: LLMS_TXT_TEXT }] : []),
+    ...EN_LOCALE_FILES.map(file => ({
+      name: `src/locales/en/${file.name}`,
+      text: file.values.map(value => value.text).join('\n'),
+    })),
+  ];
+
+  it('finds sentences to check', () => {
+    // Guards the guard: a subject set with no ad-location sentence in it passes in silence.
+    expect(subjects.flatMap(doc => adLocationUnits(doc.text)).length).toBeGreaterThan(3);
+  });
+
+  for (const doc of subjects) {
+    it(`${doc.name} locates the ads on every screen that carries one of ours`, () => {
+      expect(
+        offences(doc.text),
+        `${doc.name}: our units are on ${uploadUnitShips ? '/upload and ' : ''}/results ` +
+          '(UploadZone.tsx, AccountListSection.tsx) — a sentence saying where ads are must say so',
+      ).toEqual([]);
     });
   }
 });

@@ -115,7 +115,7 @@
     },
     "shareDataSafely": {
       "question": "Ist es sicher, Instagram-Daten-Download zu Drittanbieter-Tools hochzuladen?",
-      "answer": "Ja, wenn die App deine Datei lokal in deinem Browser verarbeitet und sie dort behält. Dieser Tracker liest deine ZIP-Datei vollständig auf deinem Gerät: die Datei selbst bleibt in diesem Browser, und hinaus gehen nur anonyme Besuchsstatistiken. Sei vorsichtig bei cloud-basierten Entfolger-Trackern, die dich deine ZIP oder dein Instagram-Passwort herausgeben lassen: die schicken deine Datei auf fremde Rechner. Prüfe immer, dass die App mit dem offiziellen Export arbeitet und keine Anmeldung verlangt.",
+      "answer": "Ja, wenn die App deine Datei lokal in deinem Browser verarbeitet und sie dort behält. Dieser Tracker liest deine ZIP-Datei vollständig auf deinem Gerät: die Datei selbst bleibt in diesem Browser. Anonyme Besuchsstatistiken und Werbeanfragen verlassen ihn zwar, aber keine davon enthält deine Datei. Sei vorsichtig bei cloud-basierten Entfolger-Trackern, die dich deine ZIP oder dein Instagram-Passwort herausgeben lassen: die schicken deine Datei auf fremde Rechner. Prüfe immer, dass die App mit dem offiziellen Export arbeitet und keine Anmeldung verlangt.",
       "relatedLink": {
         "text": "Lies unser Datenschutz-Versprechen",
         "href": "/privacy"

@@ -127,9 +127,9 @@ const CLAIM_KEYS: readonly ClaimKey[] = [
   {
     ns: 'faq',
     path: ['items', 'shareDataSafely', 'answer'],
-    why: 'the same subject-naming rule, on the page a sceptical reader reaches for',
-    reviewed: '2026-09-15',
-    en: "Yes, if the app processes your file locally in your browser and keeps it there. This tracker reads your ZIP entirely on your device: the file itself stays in this browser, and only anonymous page analytics ever leave it. Be wary of cloud-based unfollower trackers that ask you to hand over your ZIP or your Instagram password: those send your file to someone else's machine. Always check that the app works from the official export and asks for no login.",
+    why: 'names what leaves the browser — analytics and ad requests, never the file; it denied the ads until 2026-10-22, when one moved onto the upload screen',
+    reviewed: '2026-10-22',
+    en: "Yes, if the app processes your file locally in your browser and keeps it there. This tracker reads your ZIP entirely on your device: the file itself stays in this browser. Anonymous page analytics and ad requests do leave it, but neither carries your file. Be wary of cloud-based unfollower trackers that ask you to hand over your ZIP or your Instagram password: those send your file to someone else's machine. Always check that the app works from the official export and asks for no login.",
   },
   {
     ns: 'faq',
