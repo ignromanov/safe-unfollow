@@ -8,6 +8,8 @@ interface ImportMetaEnv {
   readonly VITE_ADSENSE_SLOT_RESULTS?: string;
   /** AdSense ad unit slot ID for the low-profile unit at the end of Results. */
   readonly VITE_ADSENSE_SLOT_RESULTS_END?: string;
+  /** AdSense ad unit slot ID for the `/upload` body, where the NordVPN block was. */
+  readonly VITE_ADSENSE_SLOT_UPLOAD?: string;
   /**
    * Dodo Payments checkout URL for Pro Export. Empty disables the export UI.
    * Its hostname also selects the License API mode: a `test.` host routes
