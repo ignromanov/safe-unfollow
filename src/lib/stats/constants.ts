@@ -57,12 +57,6 @@ export const AnalyticsEvents = {
   // payload contract and why it is not a success metric.
   GUIDE_OPEN: 'guide_open',
 
-  // A section of the guide entering the viewport inside one scroll. Renamed
-  // from WIZARD_STEP_VIEW (GH#102 PR-3 collapsed the eight wizard routes into
-  // one dialog) — see analytics.guideSectionView for why a new name rather
-  // than a `variant` field.
-  GUIDE_SECTION_VIEW: 'guide_section_view',
-
   // Funnel / Page Views (V10: first-in-session UTM attribution only)
   PAGE_VIEW: 'page_view',
 

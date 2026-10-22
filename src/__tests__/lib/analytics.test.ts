@@ -305,8 +305,6 @@ describe('Analytics', () => {
         expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.CLEAR_DATA, undefined);
       });
 
-      // guide_section_view is batched — see stats/impression-batching.test.ts.
-
       // The switcher reloads the page to fetch the new locale's SSG HTML, and
       // window.umami.track() sends without keepalive — so this event used to
       // announce the navigation that cancelled it. It now takes the batch
@@ -616,7 +614,6 @@ describe('Analytics', () => {
       expect(AnalyticsEvents.HERO_CTA_CONTINUE).toBe('hero_cta_continue');
       expect(AnalyticsEvents.THEME_TOGGLE).toBe('theme_toggle');
       expect(AnalyticsEvents.CLEAR_DATA).toBe('clear_data');
-      expect(AnalyticsEvents.GUIDE_SECTION_VIEW).toBe('guide_section_view');
       expect(AnalyticsEvents.GUIDE_OPEN).toBe('guide_open');
       expect(AnalyticsEvents.ERROR_BOUNDARY).toBe('error_boundary');
       expect(AnalyticsEvents.ROUTE_ERROR).toBe('route_error');
@@ -676,6 +673,10 @@ describe('Analytics', () => {
       // GUIDE_SECTION_VIEW under a new name for the same reason.
       expect(events['GUIDE_ENTRY_VIEW']).toBeUndefined();
       expect(events['WIZARD_STEP_VIEW']).toBeUndefined();
+      // Retired 2026-10-21 with no successor: 23% of every website_event row
+      // when the free analytics database filled up. Its series ends at that
+      // deploy; reintroducing the name would splice a new population onto it.
+      expect(events['GUIDE_SECTION_VIEW']).toBeUndefined();
     });
   });
 

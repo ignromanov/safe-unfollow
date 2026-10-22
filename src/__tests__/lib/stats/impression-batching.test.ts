@@ -137,16 +137,6 @@ describe('promo impression batching', () => {
       expect(trackEvent).not.toHaveBeenCalled();
     });
 
-    it('queues the guide section view — it is an impression, and a scroll unloads nothing', () => {
-      analytics.guideSectionView(3);
-
-      expect(enqueueEvent).toHaveBeenCalledWith('guide_section_view', {
-        step_id: 3,
-        first_view_in_tab: true,
-      });
-      expect(trackEvent).not.toHaveBeenCalled();
-    });
-
     it('queues guide_open, carrying the gesture and the named section', () => {
       analytics.guideOpen('accordion');
       analytics.guideOpen('url', 3);
@@ -198,66 +188,36 @@ describe('promo impression batching', () => {
       expect(trackNavigating).not.toHaveBeenCalled();
     });
 
-    // Two of these (searchPerform, guideSectionView's wizard_step_view lineage)
-    // had a GH#123 gate removed; guideOpen is new to this series and was
-    // unsampled from birth (R8) rather than having one removed. A batched flush
-    // is one request whatever it carries, so the volume argument that justified
-    // a gate does not apply on this transport for any of the three — and all
-    // three are read as counts, which sampling harms rather than helps. The
+    // searchPerform had a GH#123 gate removed; guideOpen is new to this series
+    // and was unsampled from birth (R8) rather than having one removed. A
+    // batched flush is one request whatever it carries, so the volume argument
+    // that justified a gate does not apply on this transport for either — and
+    // both are read as counts, which sampling harms rather than helps. The
     // worst roll must still report.
     //
-    // `filterToggle` was the fourth until its series ended; its replacement,
-    // `filter_session_summary`, is unsampled for the same reason but rides
-    // `trackBeacon` rather than the queue, so it is gated where it lives —
-    // `src/__tests__/hooks/useTimeOnResults.test.tsx`.
-    it('reports the three batched events on any roll — nothing samples them', () => {
+    // guideSectionView was a third until it was retired on 2026-10-21 — see
+    // the describe below. `filterToggle` was a fourth until its series ended;
+    // its replacement, `filter_session_summary`, is unsampled for the same
+    // reason but rides `trackBeacon` rather than the queue, so it is gated
+    // where it lives — `src/__tests__/hooks/useTimeOnResults.test.tsx`.
+    it('reports the batched events on any roll — nothing samples them', () => {
       const random = vi.spyOn(Math, 'random').mockReturnValue(0.99);
 
       analytics.searchPerform(4, 10, 100, false);
-      analytics.guideSectionView(3);
       analytics.guideOpen('accordion');
 
-      expect(enqueueEvent).toHaveBeenCalledTimes(3);
+      expect(enqueueEvent).toHaveBeenCalledTimes(2);
       random.mockRestore();
     });
   });
 
-  // guide_section_view's first_view_in_tab, unsampled since GH#123 (R8).
+  // guide_section_view was retired on 2026-10-21: one row per section per
+  // scroll made it 23% of every website_event row, and the free analytics
+  // database filled up. Its first_view_in_tab marker went with it — the
+  // emitter was that helper's only caller.
   describe('guide section view', () => {
-    it('marks first views per section, so scrolling up and back down is not two funnels', () => {
-      analytics.guideSectionView(2);
-      analytics.guideSectionView(3);
-      analytics.guideSectionView(2);
-
-      expect(enqueueEvent).toHaveBeenNthCalledWith(1, 'guide_section_view', {
-        step_id: 2,
-        first_view_in_tab: true,
-      });
-      expect(enqueueEvent).toHaveBeenNthCalledWith(3, 'guide_section_view', {
-        step_id: 2,
-        first_view_in_tab: false,
-      });
-    });
-
-    // Safari's "Block all cookies" and Firefox's "Block cookies and site
-    // data" make the getter itself throw, and the caller runs inside a mount
-    // effect — an unguarded throw would take the screen down to report a view.
-    it('reports a view rather than throwing when sessionStorage is blocked', () => {
-      vi.stubGlobal('sessionStorage', {
-        getItem: () => {
-          throw new DOMException('The operation is insecure.', 'SecurityError');
-        },
-        setItem: () => {},
-        clear: () => {},
-      });
-
-      expect(() => analytics.guideSectionView(4)).not.toThrow();
-
-      expect(enqueueEvent).toHaveBeenCalledExactlyOnceWith('guide_section_view', {
-        step_id: 4,
-        first_view_in_tab: false,
-      });
-      vi.unstubAllGlobals();
+    it('is no longer an emitter', () => {
+      expect(analytics).not.toHaveProperty('guideSectionView');
     });
   });
 

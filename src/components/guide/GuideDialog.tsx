@@ -180,31 +180,6 @@ export function GuideDialog({ open, step, source, onGoToStep, onClose }: GuideDi
     wasOpenRef.current = open;
   }, [open, source, step]);
 
-  // Fires guide_section_view whenever the observer names a section the reader
-  // has not just left — i.e. it becomes non-null, or changes to a different
-  // one. Not on every render: the observer can report the same section
-  // repeatedly while the reader sits still inside its band. Reset on close,
-  // like useActiveStep's own `active` state above it — otherwise reopening
-  // and landing back on the same section the reader left would silently emit
-  // nothing, because the ref never forgot it.
-  //
-  // Today that reset makes this clause redundant — `active` is already null by
-  // the time a reopening reports, so no test can isolate the branch and none
-  // tries. It is kept as the mirror AND as the fallback: delete useActiveStep's
-  // reset and this becomes the only thing still forgetting, silently, with a
-  // green suite. Said here because a guard its sibling already covers reads
-  // like dead code to whoever finds it next.
-  const lastReportedStepRef = useRef<number | null>(null);
-  useEffect(() => {
-    if (!open) {
-      lastReportedStepRef.current = null;
-      return;
-    }
-    if (activeStep !== null && activeStep !== lastReportedStepRef.current) {
-      analytics.guideSectionView(activeStep);
-    }
-    lastReportedStepRef.current = activeStep;
-  }, [open, activeStep]);
   // Forces the arrival effect below to re-run even when `step` is unchanged —
   // needed because a rail tap on the section the reader is already at (by
   // the URL's account) would otherwise be a no-op scroll.
