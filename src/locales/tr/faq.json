@@ -115,7 +115,7 @@
     },
     "shareDataSafely": {
       "question": "Instagram veri indirmesini üçüncü taraf araçlara yüklemek güvenli mi?",
-      "answer": "Evet, uygulama dosyanızı tarayıcınızda yerel olarak işliyor ve orada tutuyorsa güvenlidir. Bu izleyici ZIP dosyanızı tamamen cihazınızda okur: dosyanın kendisi bu tarayıcıda kalır ve dışarı yalnızca anonim ziyaret istatistikleri çıkar. ZIP'inizi veya Instagram parolanızı teslim etmenizi isteyen bulut tabanlı takipten çıkan izleyicilerine karşı dikkatli olun: onlar dosyanızı başkasının makinesine gönderir. Uygulamanın resmi dışa aktarımdan çalıştığını ve giriş istemediğini her zaman doğrulayın.",
+      "answer": "Evet, uygulama dosyanızı tarayıcınızda yerel olarak işliyor ve orada tutuyorsa güvenlidir. Bu izleyici ZIP dosyanızı tamamen cihazınızda okur: dosyanın kendisi bu tarayıcıda kalır. Dışarı anonim ziyaret istatistikleri ve reklam istekleri çıkar, ancak hiçbiri dosyanızı taşımaz. ZIP'inizi veya Instagram parolanızı teslim etmenizi isteyen bulut tabanlı takipten çıkan izleyicilerine karşı dikkatli olun: onlar dosyanızı başkasının makinesine gönderir. Uygulamanın resmi dışa aktarımdan çalıştığını ve giriş istemediğini her zaman doğrulayın.",
       "relatedLink": {
         "text": "Gizlilik taahhüdümüzü okuyun",
         "href": "/privacy"

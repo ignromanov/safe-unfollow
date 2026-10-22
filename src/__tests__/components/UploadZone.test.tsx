@@ -1,6 +1,6 @@
 import { fireEvent, renderWithRouter, screen } from '@/__tests__/test-utils';
 import userEvent from '@testing-library/user-event';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import uploadEN from '@/locales/en/upload.json';
 import wizardEN from '@/locales/en/wizard.json';
 import { createI18nMock } from '@/__tests__/utils/mockI18n';
@@ -31,7 +31,17 @@ describe('UploadZone', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    // The paid slot renders only when its unit is configured; these tests are
+    // about where it sits, so they configure it.
+    vi.stubEnv('VITE_ADSENSE_CLIENT', 'ca-pub-test');
+    vi.stubEnv('VITE_ADSENSE_SLOT_UPLOAD', '444');
   });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  const PAID_SLOT = '[data-upload-ad-reserve]';
 
   it('should render without crashing', () => {
     renderWithRouter(<UploadZone onUploadStart={mockOnUploadStart} />);
@@ -245,10 +255,10 @@ describe('UploadZone', () => {
     expect(analytics.diagnosticErrorView).toHaveBeenCalled();
   });
 
-  it('places the affiliate block after the drop zone, not against it', () => {
+  it('places the paid slot after the drop zone, not against it', () => {
     const { container } = renderWithRouter(<UploadZone onUploadStart={vi.fn()} />);
 
-    const block = container.querySelector('aside') as HTMLElement;
+    const block = container.querySelector(PAID_SLOT) as HTMLElement;
     const input = container.querySelector('input[type="file"]') as HTMLElement;
     expect(block).not.toBeNull();
     // The drop zone is an interaction target; an offer butted against it invites
@@ -256,7 +266,16 @@ describe('UploadZone', () => {
     expect(input.compareDocumentPosition(block) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
-  it('shows no affiliate block on the diagnostic error screen', () => {
+  // Operator ruling 2026-10-21: the AdSense unit replaces the NordVPN block
+  // (0 conversions on 509 clicks). A sponsored link here means it came back.
+  it('carries the ad unit and no affiliate link in the paid position', () => {
+    const { container } = renderWithRouter(<UploadZone onUploadStart={vi.fn()} />);
+
+    expect(container.querySelector(`${PAID_SLOT} [data-ad-name="upload"]`)).not.toBeNull();
+    expect(container.querySelector('a[rel~="sponsored"]')).toBeNull();
+  });
+
+  it('shows no paid slot on the diagnostic error screen', () => {
     const { container } = renderWithRouter(
       <UploadZone
         onUploadStart={vi.fn()}
@@ -267,7 +286,7 @@ describe('UploadZone', () => {
     // Positive proof the error screen actually rendered — without this, the
     // assertion below would also pass if UploadZone rendered nothing at all.
     expect(analytics.diagnosticErrorView).toHaveBeenCalled();
-    expect(container.querySelector('aside')).toBeNull();
+    expect(container.querySelector(PAID_SLOT)).toBeNull();
   });
 
   it('keeps the paid block above the loading tips, which mount all at once', () => {
@@ -279,7 +298,7 @@ describe('UploadZone', () => {
     // in one frame and everything after it moves down by its full height. The
     // offer must not be in that set — on a 390px viewport the shift was enough
     // to push it off the screen entirely.
-    const block = container.querySelector('aside') as HTMLElement;
+    const block = container.querySelector(PAID_SLOT) as HTMLElement;
     const firstTip = screen.getByText(uploadEN.loadingTips.localProcessing.title);
     expect(block).not.toBeNull();
     expect(block.compareDocumentPosition(firstTip) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
@@ -309,7 +328,7 @@ describe('UploadZone', () => {
     // performs no layout, so the fold position is unmeasurable in this repo.
     const { container } = renderWithRouter(<UploadZone onUploadStart={vi.fn()} />);
 
-    const block = container.querySelector('aside') as HTMLElement;
+    const block = container.querySelector(PAID_SLOT) as HTMLElement;
     // The first of the two mount points: the mobile flow, which is what the
     // ruling was about. The second is the desktop column, which sits beside
     // the drop zone rather than under the offer.

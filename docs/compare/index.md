@@ -35,7 +35,7 @@ The row that matters most is **Priced by**. Three of the four price by account s
 Most unfollow trackers need your Instagram password or an account connection. SafeUnfollow uses Instagram's **official data export** (ZIP file) — no credentials, no account link. Two of the four above take the same route; the difference between us and them is further down the page, not here.
 
 ### The Export Stays In Your Browser
-Your Instagram export is parsed, stored and filtered in your own browser, using IndexedDB and Web Workers. It never leaves your browser. The site itself does load anonymous page analytics, and the results page carries ads — [what the rest of the site loads is set out on the privacy page](/docs/privacy).
+Your Instagram export is parsed, stored and filtered in your own browser, using IndexedDB and Web Workers. It never leaves your browser. The site itself does load anonymous page analytics, and the upload and results pages carry ads — [what the rest of the site loads is set out on the privacy page](/docs/privacy).
 
 ### Built For Large Accounts
 SafeUnfollow uses columnar storage and bitset filtering, and is built and unit-tested for over 1,000,000 accounts, with no network round-trip — filtering runs locally in your browser.

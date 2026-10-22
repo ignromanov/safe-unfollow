@@ -37,7 +37,7 @@ Five claims. Each one links to the thing that proves it.
 4. **These claims are checked automatically.** A test in that repository reads this very page and refuses to release a version where we have promised something sweeping about ads, servers or tracking.
 5. **It keeps working if we don't.** Install it once and it runs with no internet, so an analysis you have already done outlives the website.
 
-And the other direction, stated plainly, because a page like this is worth nothing if it only lists the flattering half: what *does* leave your browser is anonymous page-view counting, and ad requests on the results screen. Neither one receives your Instagram archive. It is never uploaded, so nothing downstream is in a position to read it.
+And the other direction, stated plainly, because a page like this is worth nothing if it only lists the flattering half: what *does* leave your browser is anonymous page-view counting, and ad requests on the upload and results screens. Neither one receives your Instagram archive. It is never uploaded, so nothing downstream is in a position to read it.
 
 ## What it costs, and where the catch would be
 

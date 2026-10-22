@@ -115,7 +115,7 @@
     },
     "shareDataSafely": {
       "question": "Apakah aman mengunggah unduhan data Instagram ke alat pihak ketiga?",
-      "answer": "Ya, jika aplikasi memproses file Anda secara lokal di browser dan menyimpannya di sana. Pelacak ini membaca file ZIP Anda sepenuhnya di perangkat Anda: filenya sendiri tetap di browser ini, dan hanya statistik kunjungan anonim yang keluar. Waspadai pelacak unfollower berbasis cloud yang meminta Anda menyerahkan ZIP atau kata sandi Instagram Anda: mereka mengirim file Anda ke mesin orang lain. Selalu pastikan aplikasi bekerja dari ekspor resmi dan tidak meminta login.",
+      "answer": "Ya, jika aplikasi memproses file Anda secara lokal di browser dan menyimpannya di sana. Pelacak ini membaca file ZIP Anda sepenuhnya di perangkat Anda: filenya sendiri tetap di browser ini. Statistik kunjungan anonim dan permintaan iklan memang keluar, tetapi keduanya tidak membawa file Anda. Waspadai pelacak unfollower berbasis cloud yang meminta Anda menyerahkan ZIP atau kata sandi Instagram Anda: mereka mengirim file Anda ke mesin orang lain. Selalu pastikan aplikasi bekerja dari ekspor resmi dan tidak meminta login.",
       "relatedLink": {
         "text": "Baca komitmen privasi kami",
         "href": "/privacy"

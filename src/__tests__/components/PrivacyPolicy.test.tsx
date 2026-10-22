@@ -1,7 +1,10 @@
+import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { join } from 'node:path';
 import { vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import commonEN from '@/locales/en/common.json';
+import { RESCUE_PLAN_BANNER_ENABLED } from '@/config/feature-flags';
 import { createI18nMock } from '@/__tests__/utils/mockI18n';
 
 vi.mock('react-i18next', () => createI18nMock(commonEN));
@@ -33,7 +36,7 @@ describe('PrivacyPolicy Component', () => {
     it('should render the last updated date', () => {
       render(<PrivacyPolicy onBack={mockOnBack} />);
 
-      expect(screen.getByText(/last updated: august 8, 2026/i)).toBeInTheDocument();
+      expect(screen.getByText(/last updated: october 22, 2026/i)).toBeInTheDocument();
     });
   });
 
@@ -117,17 +120,21 @@ describe('PrivacyPolicy Component', () => {
       expect(screen.getByText(/hosting provider's short-term request log/i)).toBeInTheDocument();
     });
 
-    // The upload screen carries a persistent affiliate block (see
-    // components/upload/UploadAffiliateBlock). The claim that matters is the
-    // timing one — nothing reaches the partner until a click — because it is
-    // what makes a paid placement compatible with this product's promise. Same
-    // reasoning as the AdSense disclosure above: a test, not a convention.
-    it('should disclose affiliate links and that partners are not contacted before a click', () => {
+    // §5.5 used to say the upload screen carried a partner block and the
+    // results screen carried tool suggestions. The second went dark on
+    // 2026-08-06 (RESCUE_PLAN_BANNER_ENABLED) and the first was replaced by an
+    // ad unit on 2026-10-21 (PR #284), and this test kept passing through both
+    // because it pinned the wording, not the fact. What it pins now is the
+    // promise that survives any future link: the timing one, which is what
+    // makes a paid link compatible with this product's promise at all. Whether
+    // the page says a link is shown is bound to the code in the block below.
+    it('should keep the affiliate section and the promise that binds any future link', () => {
       render(<PrivacyPolicy onBack={mockOnBack} />);
 
       expect(screen.getByText(/5\.5 Affiliate Links/i)).toBeInTheDocument();
-      expect(screen.getByText(/Nothing is sent to a partner until you click/i)).toBeInTheDocument();
-      expect(screen.getByText(/served from our own\s+domain/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/nothing will be\s+sent to the partner until you click it/i)
+      ).toBeInTheDocument();
     });
 
     // The results screen carries a Tally feedback link (see
@@ -195,6 +202,71 @@ describe('PrivacyPolicy Component', () => {
       expect(vercelLink).toBeInTheDocument();
       expect(vercelLink).toHaveAttribute('href', 'https://vercel.com/legal/privacy-policy');
       expect(vercelLink).toHaveAttribute('target', '_blank');
+    });
+  });
+
+  // A published inventory and the code it describes belong in one gate. §5.4
+  // said "two of those ad units are ours, and both sit on the results screen"
+  // and §5.5 said the upload screen carried a partner block; PR #284 made both
+  // false in one commit and every assertion above stayed green, because each
+  // pinned a sentence rather than the thing the sentence counts. These read the
+  // count and the placements from the JSX that ships, so the page and the code
+  // now fail together — in either direction, including a link coming back.
+  describe('what the page says we place, against what the code renders', () => {
+    const SRC = join(process.cwd(), 'src');
+
+    function sourceFiles(dir: string): string[] {
+      return readdirSync(dir).flatMap(entry => {
+        const full = join(dir, entry);
+        if (statSync(full).isDirectory()) return entry === '__tests__' ? [] : sourceFiles(full);
+        return full.endsWith('.tsx') ? [full] : [];
+      });
+    }
+
+    const sources = sourceFiles(SRC).map(path => readFileSync(path, 'utf-8'));
+    const rendersAnywhere = (tag: string): boolean =>
+      sources.some(text => new RegExp(`<${tag}\\b`).test(text));
+
+    function pageText(): string {
+      const { container } = render(<PrivacyPolicy onBack={mockOnBack} />);
+      return (container.textContent ?? '').replace(/\s+/g, ' ');
+    }
+
+    const NUMBER_WORDS = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six'];
+
+    it('reads the source tree it is checking', () => {
+      // Guards the guard: an empty file list would make every count below zero
+      // and every "renders" false, which is a page claiming nothing, passing.
+      expect(sources.length).toBeGreaterThan(50);
+      expect(rendersAnywhere('AdSlot')).toBe(true);
+    });
+
+    it('states the number of ad units we declare', () => {
+      const declared = sources.reduce(
+        (sum, text) => sum + (text.match(/<AdSlot\b/g) ?? []).length,
+        0
+      );
+
+      expect(
+        pageText(),
+        `${declared} <AdSlot> elements ship; §5.4 must say how many of the ad units are ours`
+      ).toContain(`${NUMBER_WORDS[declared]} of those ad units are ours`);
+    });
+
+    it('names the upload screen as carrying our unit exactly when UploadZone renders one', () => {
+      const uploadZone = readFileSync(join(SRC, 'components', 'UploadZone.tsx'), 'utf-8');
+      const ships = /<UploadAdSlot\b/.test(uploadZone);
+
+      expect(/one on the upload screen/i.test(pageText())).toBe(ships);
+    });
+
+    it('says no affiliate link is shown exactly when none is rendered', () => {
+      const affiliateShown = rendersAnywhere('UploadAffiliateBlock') || RESCUE_PLAN_BANNER_ENABLED;
+
+      expect(/currently shows no affiliate links/i.test(pageText())).toBe(!affiliateShown);
+      expect(/partner (?:block|link) on the\s+upload screen/i.test(pageText())).toBe(
+        rendersAnywhere('UploadAffiliateBlock')
+      );
     });
   });
 

@@ -3,7 +3,7 @@ layout: default
 title: "Privacy Policy — Your Data Never Leaves Your Device"
 description: 'Where to read the Instagram Unfollow Tracker privacy policy, and the short version — your Instagram export is processed in your browser and never uploaded.'
 permalink: /privacy/
-last_updated: 2026-08-09
+last_updated: 2026-10-22
 ---
 
 # Privacy Policy
@@ -18,7 +18,7 @@ does not restate the policy, because a second copy is a second thing to keep tru
 **Your Instagram export never leaves your browser.** The ZIP is opened, parsed and stored
 locally in IndexedDB.
 There is no account, no Instagram login, and no server that receives your Instagram export —
-which is also why nothing on this page, advertising included, can be targeting it.
+which is also why no advertiser is ever handed it to target with.
 
 That claim is about *your Instagram data*, and only about it. The site itself does talk to a
 handful of third parties, and the canonical policy names what each one receives:
@@ -27,14 +27,13 @@ handful of third parties, and the canonical policy names what each one receives:
 |-----|---------------|-------|
 | Vercel | standard web server logs (IP, timestamp, requested URL) | every page |
 | Umami | page views, product events, and measurements of the export you load — how many accounts it holds and how large the file is. No personal identifiers, no usernames, nothing read from inside the archive | every page |
-| Google AdSense | ad requests and advertising cookies, subject to your consent choice | the units we place are on `/results`; Google's own automatic placements can appear on any screen once its script has started |
+| Google AdSense | ad requests and advertising cookies, subject to your consent choice | the units we place are on `/upload` and `/results`; Google's own automatic placements can appear on any screen once its script has started |
 | Google (Funding Choices) | your consent choice, stored so the banner stops asking | consent regions |
-| Affiliate networks | only what a link click sends, and only if you click | `/upload` |
 | Dodo Payments | your licence key, your email if you buy the export, and — attached to the checkout link — whether you are on a phone or a big screen, the language you are reading in, and your country | export only |
 | Tally | the feedback you type, plus your language, the page you sent it from and the site version — and only if you open the form | `/results`, on click |
 
-Ads run on this site, and `/upload` carries one affiliate link. That is how the free analysis
-is paid for. None of them receives the export itself — it is never uploaded anywhere. Our own analytics do record measurements of it, and the canonical policy names them.
+Ads run on this site, including on `/upload`, the screen where your export is read. That is
+how the free analysis is paid for. None of them receives the export itself — it is never uploaded anywhere. Our own analytics do record measurements of it, and the canonical policy names them.
 
 ## Verify rather than believe
 

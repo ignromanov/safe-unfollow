@@ -199,7 +199,7 @@ Your Instagram data export contains personal information. Here's how we handle i
 - **100% local processing** — Your ZIP file is analyzed entirely in your browser
 - **No server uploads** — your export never leaves your device
 - **No login required** — We never ask for your Instagram password
-- **No tracking of your data** — Only anonymous page analytics, which you can switch off in the footer
+- **Your export stays out of ads and analytics** — the site shows Google ads and records anonymous page analytics, which you can switch off in the footer; your ZIP reaches neither
 - **Open source** — [View the code on GitHub](https://github.com/ignromanov/safe-unfollow)
 
 > Keep your ZIP file secure and don't share it with others. Delete it after analysis if you prefer.

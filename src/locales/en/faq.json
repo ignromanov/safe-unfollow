@@ -115,7 +115,7 @@
     },
     "shareDataSafely": {
       "question": "Is it safe to upload Instagram data download to third-party tools?",
-      "answer": "Yes, if the app processes your file locally in your browser and keeps it there. This tracker reads your ZIP entirely on your device: the file itself stays in this browser, and only anonymous page analytics ever leave it. Be wary of cloud-based unfollower trackers that ask you to hand over your ZIP or your Instagram password: those send your file to someone else's machine. Always check that the app works from the official export and asks for no login.",
+      "answer": "Yes, if the app processes your file locally in your browser and keeps it there. This tracker reads your ZIP entirely on your device: the file itself stays in this browser. Anonymous page analytics and ad requests do leave it, but neither carries your file. Be wary of cloud-based unfollower trackers that ask you to hand over your ZIP or your Instagram password: those send your file to someone else's machine. Always check that the app works from the official export and asks for no login.",
       "relatedLink": {
         "text": "Read our privacy commitment",
         "href": "/privacy"

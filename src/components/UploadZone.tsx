@@ -11,7 +11,7 @@ import { TouchUploadZone } from './upload/TouchUploadZone';
 import { DesktopDropZone } from './upload/DesktopDropZone';
 import { DevErrorSelector } from './upload/DevErrorSelector';
 import { LoadingTips } from './upload/LoadingTips';
-import { UploadAffiliateBlock } from './upload/UploadAffiliateBlock';
+import { UploadAdSlot } from './upload/UploadAdSlot';
 import { CancelUploadButton } from './upload/CancelUploadButton';
 import { UploadGuideBlock } from './upload/UploadGuideBlock';
 import { UploadWaitingState } from './upload/UploadWaitingState';
@@ -254,7 +254,7 @@ export function UploadZone({
               everything after it down by its full height — enough to push this
               block off a 390px screen. Its own comment claims it cannot cause
               CLS, which is true between tips and false for the list. */}
-          <UploadAffiliateBlock />
+          <UploadAdSlot />
 
           {/* Sibling of the drop zone: the desktop zone is a <label>, which
               cannot legally contain the affiliate link, and its fixed
