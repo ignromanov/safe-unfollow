@@ -79,19 +79,21 @@ describe('parsed follow dates reach the row (GH#285)', () => {
       0,
       accounts.length
     );
-    const dated = rows.filter(r => typeof r.badges.following === 'number');
-    expect(dated.length).toBeGreaterThan(0); // the fixture has dates, so the test can fail
-
-    // The store lowercases usernames; compare on lowercased keys on both sides.
-    const following = new Set([...result.data.following].map(u => u.toLowerCase()));
-    const timestamps = new Map(
-      [...result.data.followingTimestamps].map(([u, t]) => [u.toLowerCase(), t])
-    );
-    for (const row of rows) {
-      const u = row.username.toLowerCase();
-      expect(row.badges.following ?? null).toEqual(
-        following.has(u) ? timestamps.get(u) || true : null
-      );
+    // The parser lowercases every username (instagram-utils.ts:30), in the member
+    // sets and in the timestamp maps alike, so rows and parsed keys compare directly.
+    const badges = [
+      ['following', result.data.following, result.data.followingTimestamps],
+      ['followers', result.data.followers, result.data.followersTimestamps],
+    ] as const;
+    for (const [badge, members, timestamps] of badges) {
+      const dated = rows.filter(r => typeof r.badges[badge] === 'number');
+      // the fixture has dates for each badge, so neither loop can pass vacuously
+      expect(dated.length).toBeGreaterThan(0);
+      for (const row of rows) {
+        expect(row.badges[badge] ?? null).toEqual(
+          members.has(row.username) ? timestamps.get(row.username) || true : null
+        );
+      }
     }
   });
 
