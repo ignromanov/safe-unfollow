@@ -254,7 +254,12 @@ export class IndexedDBService {
     const datePromises: Promise<unknown>[] = [];
     for (const badge of TIME_BASED_BADGES) {
       const dates = buildDateColumn(accounts, badge);
-      if (!dates) continue;
+      if (!dates) {
+        // A re-store does not clear the file first: an old positional column left
+        // behind would put its dates on whichever accounts now sit at those indices.
+        datePromises.push(executeDelete(columnsStore, [fileHash, `dates:${badge}`]));
+        continue;
+      }
       const record: DateColumnRecord = {
         fileHash,
         column: `dates:${badge}`,
