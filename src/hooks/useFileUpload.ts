@@ -6,6 +6,7 @@ import type { ParseOutcome } from '@/lib/analytics';
 import { extractErrorCode } from '@/lib/error-classifier';
 import { isValidZipFile } from '@/lib/file-validation';
 import { dbCache, generateFileHash } from '@/lib/indexeddb/indexeddb-cache';
+import { indexedDBService } from '@/lib/indexeddb/indexeddb-service';
 import { parseOnMainThread, parseWithWorker } from '@/lib/parse-orchestration';
 import type { ParseErrorData } from '@/lib/parse-orchestration';
 import { useAppStore } from '@/lib/store';
@@ -345,6 +346,11 @@ export function useFileUpload() {
         }
 
         // Data already cached in IndexedDB by worker during chunked processing
+
+        // The worker's store clears only the worker's caches. This thread may hold
+        // "no date column" entries and row readers for the same hash from before a
+        // re-upload, which would keep dates hidden until a reload.
+        indexedDBService.clearCaches(resultFileHash);
 
         setUploadInfo({
           currentFileName: file.name,
