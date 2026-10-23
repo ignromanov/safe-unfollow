@@ -10,7 +10,7 @@ Instagram Unfollow Tracker uses IndexedDB v2 with columnar storage and bitset-ba
 
 ## Key Features
 
-- ✅ **Columnar Storage** - Separate username, badge, and timestamp columns
+- ✅ **Columnar Storage** - Separate username, badge, and sparse follow-date (`dates:<badge>`) columns
 - ✅ **Bitset Filtering** - 32x faster badge filtering using FastBitSet.js
 - ✅ **Bulk Ingestion** - `storeAllAccounts()` writes every column in one transaction (the "10k account chunks" this line claimed until 2026-08-14 do not exist — see Configuration below)
 - ✅ **Search Indexes** - Trigram and prefix indexes for O(1) search
@@ -114,20 +114,23 @@ interface BitsetRecord {
 > grep -rn "'timestamps'" src/lib src/workers src/hooks  → indexeddb-schema.ts only
 > ```
 >
-> `TimestampRecord` and `TIME_BASED_BADGES` have no production consumer either
-> — `TIME_BASED_BADGES` feeds only `ALL_BADGES`, which nothing outside the tests
-> imports. Per-record timestamps exist only in memory during a parse, on
-> `ParsedAll.followingTimestamps` / `followersTimestamps`, and the one thing
-> that reads them is `detectRelationshipSkew`.
+> `TimestampRecord` has no production consumer either. `TIME_BASED_BADGES` did
+> not at the time of that audit; since GH#285 `storeAllAccounts` iterates it to
+> decide which `dates:<badge>` records to write, so it is live, just not through
+> this store. Per-record timestamps are parsed onto `ParsedAll.followingTimestamps`
+> / `followersTimestamps` and now persist in `columns`; `getAccountsByRange`
+> reads them back.
 >
 > This matters beyond tidiness: a reader planning work against per-record dates
-> will size it against a store that persists them, and it does not.
+> should size it against the `dates:<badge>` records in `columns` (§2), not against
+> this store, which holds nothing.
 >
 > **Ruled 2026-08-25 (operator): wire it, but specify the feature first.** The
 > store is not to be deleted and not to be filled in passing — temporal badges
 > are a product feature and get a written spec before any code. Until that spec
-> lands, treat everything above as a design intent with no implementation, and
-> do not add a caller. Pre-spec:
+> lands, treat everything about this `timestamps` store as a design intent with no
+> implementation, and do not add a caller to the store itself. (Writing and reading
+> follow dates through `columns` is a separate path and is live.) Pre-spec:
 > `.conclave/.claude/plans/2026-08-25-temporal-badges/pre-spec.md`.
 
 Sparse storage for time-based badges.
@@ -268,10 +271,15 @@ interface SearchIndexRecord {
 | ------------------- | ------------------ |
 | Badge bitsets (10)  | ~1.25 MB           |
 | Username column     | ~10 MB             |
-| Timestamp sparse    | ~2 MB              |
+| Follow dates sparse | ~8 MB (estimate)   |
 | Search indexes      | ~4 MB              |
-| **Total IndexedDB** | **~17 MB**         |
+| **Total IndexedDB** | **~23 MB**         |
 | **Runtime (UI)**    | **~5 MB** (LRU)    |
+
+The follow-dates row is a design estimate, not a measurement: each dated member costs
+about 8 bytes (a `Uint32` position plus a `Uint32` Unix-second value), so ~8 MB is the
+realistic worst case at 1M dated followers. The ~17 MB total this table carried before
+GH#285 used ~2 MB for this row.
 
 ## Key Technologies
 
