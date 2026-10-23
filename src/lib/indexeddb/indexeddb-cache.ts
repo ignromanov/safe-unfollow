@@ -33,6 +33,16 @@ class IndexedDBCache {
       return null;
     }
 
+    // A record stored before follow dates moved into `columns` has no date
+    // columns. Serving it would skip the parse and refresh lastAccessed, keeping
+    // the dateless copy alive for as long as the visitor keeps re-uploading.
+    // Report a miss so the file is re-parsed. No clearFile is needed first:
+    // storeAllAccounts overwrites the columns and bitsets for this hash and
+    // deletes any date column the new parse does not produce, in one transaction.
+    if (metadata.datesStored !== true) {
+      return null;
+    }
+
     // Check if cache is still valid (7 days)
     const cacheAge = Date.now() - metadata.lastAccessed;
     const maxAge = 7 * 24 * 60 * 60 * 1000;

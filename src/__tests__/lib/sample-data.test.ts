@@ -99,18 +99,30 @@ describe('Sample Data Loading', () => {
       );
     });
 
-    it('should return existing metadata when sample data already exists', async () => {
-      // Mock existing data
-      const existingMetadata = {
-        fileHash: getSampleFileHash(),
-        fileName: 'Sample Data (Demo)',
-        fileSize: 0,
-        uploadDate: new Date(),
-        accountCount: 1180,
-        lastAccessed: Date.now(),
-        version: 2,
-      };
+    const existingMetadata = {
+      fileHash: getSampleFileHash(),
+      fileName: 'Sample Data (Demo)',
+      fileSize: 0,
+      uploadDate: new Date(),
+      accountCount: 1180,
+      lastAccessed: Date.now(),
+      version: 2,
+      datesStored: true,
+    };
 
+    it('rebuilds sample data stored before dates were persisted (GH#285)', async () => {
+      vi.mocked(indexedDBService.getFileMetadata).mockResolvedValue({
+        ...existingMetadata,
+        datesStored: undefined,
+      });
+
+      await generateAndStoreSampleData();
+
+      expect(indexedDBService.clearFile).toHaveBeenCalledWith(getSampleFileHash());
+      expect(indexedDBService.storeAllAccounts).toHaveBeenCalledTimes(1);
+    });
+
+    it('should return existing metadata when sample data already exists', async () => {
       vi.mocked(indexedDBService.getFileMetadata).mockResolvedValue(existingMetadata);
 
       const result = await generateAndStoreSampleData();
