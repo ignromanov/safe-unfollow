@@ -45,7 +45,8 @@ async function fetchSampleSnapshot(): Promise<SampleDataSnapshot> {
  * Load and store sample data in IndexedDB
  *
  * Returns the file hash for accessing the sample data.
- * Idempotent: if sample data already exists, returns existing metadata.
+ * Idempotent: a cached copy that has follow dates stored (`datesStored`) is reused.
+ * A copy cached before dates were persisted is cleared and rebuilt.
  */
 export async function generateAndStoreSampleData(): Promise<{
   fileHash: string;
@@ -55,11 +56,14 @@ export async function generateAndStoreSampleData(): Promise<{
   const existingMetadata = await indexedDBService.getFileMetadata(SAMPLE_FILE_HASH);
 
   if (existingMetadata) {
-    // Sample data already exists, return existing metadata
-    return {
-      fileHash: SAMPLE_FILE_HASH,
-      accountCount: existingMetadata.accountCount,
-    };
+    if (existingMetadata.datesStored === true) {
+      return {
+        fileHash: SAMPLE_FILE_HASH,
+        accountCount: existingMetadata.accountCount,
+      };
+    }
+    // Cached before follow dates were persisted: drop it and rebuild from the snapshot
+    await indexedDBService.clearFile(SAMPLE_FILE_HASH);
   }
 
   // Fetch snapshot from public/
