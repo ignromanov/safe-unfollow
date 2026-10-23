@@ -46,6 +46,14 @@ describe('buildExportJson', () => {
     ]);
   });
 
+  it('writes badges as presence flags even when the store returns dates (GH#285)', async () => {
+    getAccountsByRange.mockResolvedValueOnce([
+      account('alice', { following: 1704067200, mutuals: true }),
+    ]);
+    const parsed = JSON.parse(await readBlobText(await buildExportJson('hash1', null, 1)));
+    expect(parsed[0].badges).toEqual({ following: true, mutuals: true });
+  });
+
   it('should produce a valid empty array when there are no rows', async () => {
     const blob = await buildExportJson('hash1', [], 0);
     const text = await readBlobText(blob);

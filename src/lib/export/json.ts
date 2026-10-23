@@ -4,8 +4,18 @@
  * full copy of the output in memory.
  */
 
+import type { BadgeKey, BadgeMap } from '@/core/types';
 import { getExportRowCount, iterateAccountsForExport } from './data';
 import type { ExportProgressCallback } from './types';
+
+// Dates leave in dedicated fields in a later PR, never through `badges`.
+function toPresenceFlags(badges: BadgeMap): Partial<Record<BadgeKey, true>> {
+  const flags: Partial<Record<BadgeKey, true>> = {};
+  for (const key of Object.keys(badges) as BadgeKey[]) {
+    if (badges[key]) flags[key] = true;
+  }
+  return flags;
+}
 
 /**
  * Builds a JSON Blob for the given (already filtered) account indices.
@@ -30,7 +40,7 @@ export async function buildExportJson(
       const entry = JSON.stringify({
         username: account.username,
         href: `https://instagram.com/${account.username}`,
-        badges: account.badges,
+        badges: toPresenceFlags(account.badges),
       });
       buffer += isFirst ? entry : `,${entry}`;
       isFirst = false;
