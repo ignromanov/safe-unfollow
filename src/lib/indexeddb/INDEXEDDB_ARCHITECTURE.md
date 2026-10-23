@@ -36,6 +36,7 @@ interface FileMetadataRecord {
   lastAccessed: number; // LRU timestamp
   version: number; // Schema version
   processingTime?: number; // Parse duration (ms)
+  datesStored?: boolean; // true: stored after follow dates moved into `columns` (GH#285)
 }
 
 // Indexes:
@@ -59,6 +60,16 @@ interface ColumnRecord {
 // Indexes:
 // - fileHash (for bulk queries)
 ```
+
+Follow dates (GH#285) live in this store too, as one sparse record per badge under
+`column: 'dates:<badge>'`: `indices` (ascending account positions) and `values`
+(Unix seconds), both `Uint32Array`. They are written in the same transaction as the
+bitsets, and deleted on a re-store when the new export has none for that badge.
+`getAccountsByRange` returns the date as the badge value, `true` where the bit is set
+without a date, and nothing where it is not set. A value outside `[1, 4294967295]`
+(milliseconds, 0, fractions) is dropped, never wrapped.
+`FileMetadataRecord.datesStored` marks files stored after this change; it is `true` even
+when the export carried no dates, and absent on older files, whose rows stay dateless.
 
 **Storage Format:**
 
@@ -91,6 +102,9 @@ interface BitsetRecord {
 #### 4. `timestamps` Store
 
 > ⚠️ **Declared, created in every visitor's browser, and never written or read.**
+> Follow dates no longer depend on it: since GH#285 they persist in `columns` as
+> `dates:<badge>` records (§2). This store is still unwritten, and the temporal
+> _badges_ remain unspecified, see `.conclave/.claude/plans/2026-08-25-temporal-badges/pre-spec.md`.
 > Corrected 2026-08-25 — the section below describes an intent, not the code.
 > `STORE_CONFIGS` still configures the store, so `onupgradeneeded` creates it for
 > everyone, but nothing writes a `TimestampRecord` and nothing reads one:
@@ -183,7 +197,7 @@ interface SearchIndexRecord {
    ├─→ Save file metadata
    ├─→ Build username columns in a single pass
    ├─→ Update badge bitsets
-   └─→ Store timestamps (sparse)
+   └─→ Store follow dates (sparse `dates:<badge>` column records, same transaction)
 
 6. Background Index Building (async)
    ├─→ Build prefix indexes (2-4 char)
