@@ -17,12 +17,15 @@
 import type { AccountBadges, BadgeKey } from '@/core/types';
 import { BitSet, StringColumnBuilder, StringColumnReader } from './bitset';
 import { CacheManager } from './cache-manager';
+import { buildDateColumn, forEachDateInRange, type DateColumn } from './date-column';
 import {
   ALL_BADGES,
   DB_CONFIG,
   STORES,
   STORE_CONFIGS,
+  TIME_BASED_BADGES,
   type ColumnRecord,
+  type DateColumnRecord,
   type FileMetadataRecord,
   type SearchIndexType,
 } from './indexeddb-schema';
@@ -169,7 +172,11 @@ export class IndexedDBService {
   private async markAccountsComplete(db: IDBDatabase, fileHash: string): Promise<void> {
     const existing = await fileStore.getFileMetadata(db, fileHash);
     if (!existing) return;
-    await fileStore.saveFileMetadata(db, { ...existing, accountsComplete: true });
+    await fileStore.saveFileMetadata(db, {
+      ...existing,
+      accountsComplete: true,
+      datesStored: true,
+    });
   }
 
   /**
@@ -242,6 +249,23 @@ export class IndexedDBService {
       }),
     ]);
 
+    // Date columns ride in the same transaction as the bitsets they annotate, so a
+    // badge can never be stored without its dates or the reverse.
+    const datePromises: Promise<unknown>[] = [];
+    for (const badge of TIME_BASED_BADGES) {
+      const dates = buildDateColumn(accounts, badge);
+      if (!dates) continue;
+      const record: DateColumnRecord = {
+        fileHash,
+        column: `dates:${badge}`,
+        indices: dates.indices,
+        values: dates.values,
+        length: dates.indices.length,
+      };
+      datePromises.push(executeWrite(columnsStore, record));
+    }
+    await Promise.all(datePromises);
+
     // Write all bitsets
     const bitsetsStore = tx.objectStore(STORES.BITSETS);
     const bitsetPromises = Array.from(bitsets.entries()).map(([badge, { bitset, count }]) =>
@@ -271,7 +295,54 @@ export class IndexedDBService {
       throw error;
     }
 
+    // Nothing clears the in-memory caches on a write, so an absence cached before
+    // this upload ("no date column") would hide the dates just stored until reload.
+    this.clearCaches(fileHash);
+
     await this.markAccountsComplete(db, fileHash);
+  }
+
+  /**
+   * Read one badge's sparse date column (cached, absence included).
+   */
+  private async getDateColumn(fileHash: string, badge: BadgeKey): Promise<DateColumn | null> {
+    const cacheKey = `${fileHash}:dates:${badge}`;
+    const cached = this.cache.dateColumnCache.get(cacheKey);
+    if (cached !== undefined) return cached;
+
+    const db = await this.init();
+    const store = db.transaction([STORES.COLUMNS], 'readonly').objectStore(STORES.COLUMNS);
+    const record = await executeRead<DateColumnRecord>(store, [fileHash, `dates:${badge}`]);
+
+    const column = record ? { indices: record.indices, values: record.values } : null;
+    this.cache.dateColumnCache.set(cacheKey, column);
+    return column;
+  }
+
+  /**
+   * Replace `true` with the stored date for accounts in [start, end). Only a bit the
+   * bitset already set is overwritten, so a date can never create a badge.
+   */
+  private async overlayDates(
+    fileHash: string,
+    accounts: AccountBadges[],
+    start: number,
+    end: number
+  ): Promise<void> {
+    const columns = await Promise.all(
+      TIME_BASED_BADGES.map(
+        async badge => [badge, await this.getDateColumn(fileHash, badge)] as const
+      )
+    );
+    for (const [badge, column] of columns) {
+      if (!column) continue;
+      forEachDateInRange(column, start, end, (index, timestamp) => {
+        const account = accounts[index - start];
+        if (account && account.badges[badge] === true) {
+          (account.badges as Record<string, number | true>)[badge] = timestamp;
+        }
+      });
+    }
   }
 
   /**
@@ -335,6 +406,8 @@ export class IndexedDBService {
 
       return { username, badges: badges as AccountBadges['badges'] };
     });
+
+    await this.overlayDates(fileHash, accounts, start, actualEnd);
 
     return accounts;
   }
