@@ -1,5 +1,6 @@
 import type { AccountBadges, BadgeKey } from '@/core/types';
 import { indexedDBService } from '@/lib/indexeddb/indexeddb-service';
+import { DB_CONFIG, STORES, TIME_BASED_BADGES } from '@/lib/indexeddb/indexeddb-schema';
 import * as transactionHelpers from '@/lib/indexeddb/transaction-helpers';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -31,6 +32,13 @@ describe('IndexedDBService (Integration Tests)', () => {
     'hash2',
     'hash3',
     'other-hash',
+    'dates-a',
+    'dates-b',
+    'dates-c',
+    'dates-d',
+    'dates-e',
+    'dates-f',
+    'dates-g',
   ]);
 
   beforeEach(async () => {
@@ -842,6 +850,108 @@ describe('IndexedDBService (Integration Tests)', () => {
 
       const retrieved = await indexedDBService.getAccountsByRange(mockFileHash, 0, 1);
       expect(retrieved).toHaveLength(1);
+    });
+  });
+
+  describe('follow dates (GH#285)', () => {
+    const store = async (hash: string, accounts: AccountBadges[]): Promise<void> => {
+      await indexedDBService.saveFileMetadata({
+        fileHash: hash,
+        fileName: 'x.zip',
+        fileSize: 1,
+        uploadDate: new Date(),
+        accountCount: accounts.length,
+        lastAccessed: Date.now(),
+        version: 2,
+      });
+      await indexedDBService.storeAllAccounts(hash, accounts);
+    };
+
+    it('returns the stored date as the badge value, and true where the export had none', async () => {
+      await store('dates-a', [
+        { username: 'alice', badges: { following: 1704067200, followers: true, mutuals: true } },
+        { username: 'bob', badges: { followers: 1700000000 } },
+      ]);
+      const [a, b] = await indexedDBService.getAccountsByRange('dates-a', 0, 2);
+      expect(a!.badges).toEqual({ following: 1704067200, followers: true, mutuals: true });
+      expect(b!.badges).toEqual({ followers: 1700000000 });
+    });
+
+    it('attaches a date to its own account in a range that starts mid-column', async () => {
+      await store(
+        'dates-b',
+        ['a', 'b', 'c', 'd', 'e'].map((u, i) => ({
+          username: u,
+          badges: { followers: i % 2 ? 100 + i : true },
+        }))
+      );
+      const rows = await indexedDBService.getAccountsByRange('dates-b', 2, 4);
+      expect(rows.map(r => r.badges.followers)).toEqual([true, 103]);
+    });
+
+    it('marks the file datesStored even when the export carried no dates at all', async () => {
+      await store('dates-c', [{ username: 'a', badges: { followers: true } }]);
+      expect((await indexedDBService.getFileMetadata('dates-c'))?.datesStored).toBe(true);
+    });
+
+    it('serves fresh dates after a re-store of a hash whose absence was already cached', async () => {
+      await store('dates-d', [{ username: 'a', badges: { followers: true } }]);
+      await indexedDBService.getAccountsByRange('dates-d', 0, 1); // caches "no column"
+      await store('dates-d', [{ username: 'a', badges: { followers: 1704067200 } }]);
+      const [a] = await indexedDBService.getAccountsByRange('dates-d', 0, 1);
+      expect(a!.badges.followers).toBe(1704067200);
+    });
+
+    it('leaves no date behind after clearFile', async () => {
+      await store('dates-e', [{ username: 'a', badges: { followers: 1704067200 } }]);
+      await indexedDBService.getAccountsByRange('dates-e', 0, 1);
+      await indexedDBService.clearFile('dates-e');
+      await store('dates-e', [{ username: 'a', badges: { followers: true } }]);
+      const [a] = await indexedDBService.getAccountsByRange('dates-e', 0, 1);
+      expect(a!.badges.followers).toBe(true);
+    });
+
+    it('drops a date column the re-stored export no longer has', async () => {
+      await store('dates-f', [{ username: 'a', badges: { followers: 1704067200 } }]);
+      await indexedDBService.getAccountsByRange('dates-f', 0, 1);
+      await store('dates-f', [{ username: 'a', badges: { followers: true } }]);
+      const [a] = await indexedDBService.getAccountsByRange('dates-f', 0, 1);
+      expect(a!.badges.followers).toBe(true);
+    });
+
+    it('reads a file stored before dates existed as presence-only', async () => {
+      await store('dates-g', [
+        { username: 'a', badges: { following: 1704067200, followers: true } },
+        { username: 'b', badges: { followers: 1700000000 } },
+      ]);
+      // Simulate the legacy state: no dates:* rows, and a record without datesStored.
+      const db = await new Promise<IDBDatabase>((resolve, reject) => {
+        const req = indexedDB.open(DB_CONFIG.name, DB_CONFIG.version);
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+      const tx = db.transaction([STORES.COLUMNS, STORES.FILES], 'readwrite');
+      for (const badge of TIME_BASED_BADGES) {
+        tx.objectStore(STORES.COLUMNS).delete(['dates-g', `dates:${badge}`]);
+      }
+      const files = tx.objectStore(STORES.FILES);
+      const record = await new Promise<Record<string, unknown>>(resolve => {
+        const req = files.get('dates-g');
+        req.onsuccess = () => resolve(req.result);
+      });
+      delete record.datesStored;
+      files.put(record);
+      await new Promise<void>(resolve => {
+        tx.oncomplete = () => resolve();
+      });
+      db.close();
+
+      indexedDBService.clearCaches('dates-g');
+      const rows = await indexedDBService.getAccountsByRange('dates-g', 0, 2);
+      const values = rows.flatMap(r => Object.values(r.badges));
+      expect(values.length).toBeGreaterThan(0);
+      expect(values.every(v => v === true)).toBe(true);
+      expect((await indexedDBService.getFileMetadata('dates-g'))?.datesStored).toBeUndefined();
     });
   });
 });

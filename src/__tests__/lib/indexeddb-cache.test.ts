@@ -22,6 +22,7 @@ describe('IndexedDBCache', () => {
         accountCount: 100,
         lastAccessed: Date.now() - 1000, // 1 second ago
         version: 2,
+        datesStored: true,
       };
 
       mockIndexedDBService.getFileMetadata.mockResolvedValue(mockMetadata);
@@ -39,6 +40,43 @@ describe('IndexedDBCache', () => {
         },
         timestamp: expect.any(Number),
       });
+    });
+
+    it('treats a fresh record stored before follow dates existed as a miss, so it is re-parsed', async () => {
+      mockIndexedDBService.getFileMetadata.mockResolvedValue({
+        fileHash: 'test-hash',
+        fileName: 'test.zip',
+        fileSize: 1024,
+        uploadDate: new Date('2024-01-01'),
+        accountCount: 100,
+        lastAccessed: Date.now() - 1000,
+        version: 2,
+      });
+      mockIndexedDBService.saveFileMetadata.mockResolvedValue();
+
+      const result = await dbCache.get('test-hash');
+
+      expect(result).toBeNull();
+      // A miss must not refresh lastAccessed: that would extend the stale copy's life.
+      expect(mockIndexedDBService.saveFileMetadata).not.toHaveBeenCalled();
+    });
+
+    it('serves a fresh record whose dates were stored', async () => {
+      mockIndexedDBService.getFileMetadata.mockResolvedValue({
+        fileHash: 'test-hash',
+        fileName: 'test.zip',
+        fileSize: 1024,
+        uploadDate: new Date('2024-01-01'),
+        accountCount: 100,
+        lastAccessed: Date.now() - 1000,
+        version: 2,
+        datesStored: true,
+      });
+      mockIndexedDBService.saveFileMetadata.mockResolvedValue();
+
+      const result = await dbCache.get('test-hash');
+
+      expect(result?.metadata.accountCount).toBe(100);
     });
 
     it('should return null if file does not exist', async () => {
@@ -60,6 +98,7 @@ describe('IndexedDBCache', () => {
         accountCount: 100,
         lastAccessed: eightDaysAgo,
         version: 2,
+        datesStored: true,
       };
 
       mockIndexedDBService.getFileMetadata.mockResolvedValue(mockMetadata);
@@ -78,6 +117,7 @@ describe('IndexedDBCache', () => {
         accountCount: 100,
         lastAccessed: Date.now() - 1000,
         version: 2,
+        datesStored: true,
       };
 
       mockIndexedDBService.getFileMetadata.mockResolvedValue(mockMetadata);
@@ -118,6 +158,7 @@ describe('IndexedDBCache', () => {
           accountCount: 100,
           lastAccessed: sevenDaysAgo,
           version: 2,
+          datesStored: true,
         };
 
         mockIndexedDBService.getFileMetadata.mockResolvedValue(mockMetadata);
@@ -140,6 +181,7 @@ describe('IndexedDBCache', () => {
         accountCount: 100,
         lastAccessed: Date.now(),
         version: 2,
+        datesStored: true,
       };
 
       mockIndexedDBService.getFileMetadata.mockResolvedValue(mockMetadata);

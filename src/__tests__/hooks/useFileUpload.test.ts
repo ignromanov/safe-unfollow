@@ -114,6 +114,33 @@ describe('useFileUpload', () => {
     ] as any);
   });
 
+  it('drops the main thread caches for the hash once the parse has stored it', async () => {
+    const { result } = renderHook(() => useFileUpload());
+
+    await act(async () => {
+      await result.current.handleZipUpload(mockFile);
+    });
+
+    // The store may have run in a worker, which clears only its own caches; a
+    // main thread "no date column" entry for this hash would otherwise survive.
+    expect(mockIndexedDBService.clearCaches).toHaveBeenCalledWith(mockFileHash);
+  });
+
+  it('does not touch the main thread caches when the upload is served from cache', async () => {
+    mockDbCache.get.mockResolvedValue({
+      fileHash: mockFileHash,
+      metadata: { name: 'test.zip', size: 4, uploadDate: new Date(), accountCount: 2 },
+      timestamp: Date.now(),
+    });
+    const { result } = renderHook(() => useFileUpload());
+
+    await act(async () => {
+      await result.current.handleZipUpload(mockFile);
+    });
+
+    expect(mockIndexedDBService.clearCaches).not.toHaveBeenCalled();
+  });
+
   it('should handle ZIP upload successfully', async () => {
     const { result } = renderHook(() => useFileUpload());
 

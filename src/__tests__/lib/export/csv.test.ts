@@ -65,6 +65,14 @@ describe('buildExportCsv', () => {
     expect(lines[2]).toBe('bob,https://instagram.com/bob,0,0,0,0,0,0,0,0,0,0,0');
   });
 
+  it('writes 1 for a badge whose value is a date (GH#285)', async () => {
+    getAccountsByRange.mockResolvedValueOnce([account('alice', { following: 1704067200 })]);
+    const text = await readBlobText(await buildExportCsv('hash1', null, 1));
+    const [header, row] = text.trim().split('\n');
+    const cols = header!.split(',');
+    expect(row!.split(',')[cols.indexOf('following')]).toBe('1');
+  });
+
   it('should escape usernames containing commas or quotes', async () => {
     getAccountsByRange.mockResolvedValueOnce([account('weird,"name')]);
 

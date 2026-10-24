@@ -5,11 +5,14 @@
  * Cache keys use `${fileHash}:${identifier}` format.
  */
 
+import type { DateColumn } from './date-column';
 import type { BitSet, StringColumnReader } from './bitset';
 
 export class CacheManager {
   readonly bitsetCache = new Map<string, BitSet>();
   readonly columnCache = new Map<string, StringColumnReader>();
+  /** null = "read, no column": absence is cached too, so it is read once. */
+  readonly dateColumnCache = new Map<string, DateColumn | null>();
 
   /**
    * Clear in-memory caches for a specific file or all files
@@ -27,7 +30,13 @@ export class CacheManager {
           this.columnCache.delete(key);
         }
       }
+      for (const key of this.dateColumnCache.keys()) {
+        if (key.startsWith(prefix)) {
+          this.dateColumnCache.delete(key);
+        }
+      }
     } else {
+      this.dateColumnCache.clear();
       this.bitsetCache.clear();
       this.columnCache.clear();
     }

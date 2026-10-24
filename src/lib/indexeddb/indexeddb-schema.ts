@@ -94,6 +94,19 @@ export interface FileMetadataRecord {
    */
   accountsComplete?: boolean;
   /**
+   * True once `storeAllAccounts` committed this upload's date columns (GH#285),
+   * including the case where the export carried no dates and none were written:
+   * "dates were looked for" is the fact, not "dates exist".
+   *
+   * Stored here because it must outlive the parse. `/results` is reached long
+   * after `ParseResult` is gone — a returning visitor never re-parses — so this
+   * record is the only place that can tell a file stored before date columns
+   * existed (absent: no dates, render exactly as before) from one stored after.
+   * No DB version bump: the date columns reuse the `columns` store, whose keyPath
+   * accepts any column name.
+   */
+  datesStored?: boolean;
+  /**
    * True when this upload's follow-requests file was found and could not be read,
    * so its `notFollowingBack` badge is overstated (GH#41). See
    * `ParseResult.followRequestsUnreadable` for how the badge inflates.
@@ -183,6 +196,19 @@ export interface ColumnRecord {
   data: Uint8Array; // Packed data buffer
   offsets: Uint32Array; // Offset table for variable-length data (required)
   length: number; // Number of entries
+}
+
+/**
+ * Sparse date column for one time-based badge, stored in the `columns` store
+ * under `dates:<badge>`. `indices` are ascending account positions and `values`
+ * the parallel Unix-seconds timestamps; see `date-column.ts`.
+ */
+export interface DateColumnRecord {
+  fileHash: string;
+  column: `dates:${BadgeKey}`;
+  indices: Uint32Array;
+  values: Uint32Array;
+  length: number; // Member count
 }
 
 export interface BitsetRecord {
