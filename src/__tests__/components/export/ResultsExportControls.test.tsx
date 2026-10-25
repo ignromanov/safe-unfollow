@@ -285,9 +285,7 @@ describe('ResultsExportControls', () => {
       expect(vi.mocked(analytics.paywallView)).toHaveBeenCalledTimes(2);
     });
 
-    // A file that stops short must say so somewhere durable. The modal is gone
-    // the moment it is dismissed; the filename is still there next week.
-    it('should never put the owner of the upload in the file name', async () => {
+    it('should name the file by date only', async () => {
       unlocked(false);
       const user = userEvent.setup();
 
@@ -297,9 +295,10 @@ describe('ResultsExportControls', () => {
       await waitFor(() => expect(vi.mocked(downloadBlob)).toHaveBeenCalled());
       const [, name] = vi.mocked(downloadBlob).mock.calls[0];
       expect(name).toMatch(/^safeunfollow-\d{4}-\d{2}-\d{2}(-sample)?\.csv$/);
-      expect(name).not.toContain('alice_owner');
     });
 
+    // A file that stops short must say so somewhere durable. The modal is gone
+    // the moment it is dismissed; the filename is still there next week.
     it('should mark the capped file in its name', async () => {
       unlocked(false);
       const user = userEvent.setup();

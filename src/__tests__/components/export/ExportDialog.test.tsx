@@ -204,7 +204,7 @@ describe('ExportDialog', () => {
     });
   });
 
-  it('should never put the owner of the upload in the file name', async () => {
+  it('should name the file by date only', async () => {
     const user = userEvent.setup();
     render(<ExportDialog {...defaultProps} />);
 
@@ -213,7 +213,6 @@ describe('ExportDialog', () => {
     await waitFor(() => expect(vi.mocked(downloadBlob)).toHaveBeenCalled());
     const [, name] = vi.mocked(downloadBlob).mock.calls[0];
     expect(name).toMatch(/^safeunfollow-\d{4}-\d{2}-\d{2}\.json$/);
-    expect(name).not.toContain('alice_owner');
   });
 
   it('should let the user retry after a failure', async () => {
