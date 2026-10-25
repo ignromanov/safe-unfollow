@@ -329,12 +329,11 @@ describe('umami-loader', () => {
       }
     );
 
-    it('does not inject when the visitor left the landing page before the config resolved', async () => {
+    it('does not fetch when the visitor left the landing page before the first interaction', async () => {
       const { loadHeatmapRecorder } = await import('@/lib/umami-loader');
 
       loadHeatmapRecorder();
 
-      // The first interaction IS the click that navigates away.
       window.history.pushState({}, '', '/results');
       window.dispatchEvent(new Event('pointerdown'));
       await Promise.resolve();
@@ -342,6 +341,50 @@ describe('umami-loader', () => {
 
       expect(fetchMock).not.toHaveBeenCalled();
       expect(appendChildSpy).not.toHaveBeenCalled();
+    });
+
+    describe('when the config is still in flight at the first interaction', () => {
+      let resolveFetch: (value: unknown) => void;
+
+      /** Interact on the landing page, then optionally move, then let the config land. */
+      async function interactThenResolve(navigateTo?: string): Promise<void> {
+        fetchMock.mockReturnValue(
+          new Promise(resolve => {
+            resolveFetch = resolve;
+          })
+        );
+
+        const { loadHeatmapRecorder } = await import('@/lib/umami-loader');
+
+        loadHeatmapRecorder();
+        window.dispatchEvent(new Event('pointerdown'));
+        await vi.waitFor(() => {
+          expect(fetchMock).toHaveBeenCalled();
+        });
+
+        if (navigateTo) window.history.pushState({}, '', navigateTo);
+
+        resolveFetch({
+          ok: true,
+          json: async () => ({ enabled: true, heatmapEnabled: true, replayEnabled: false }),
+        });
+        // One macrotask drains every microtask injectRecorder still has queued.
+        await new Promise(resolve => setTimeout(resolve, 0));
+      }
+
+      it('injects when the visitor is still on the landing page (control)', async () => {
+        await interactThenResolve();
+
+        expect(appendChildSpy).toHaveBeenCalledWith(mockScript);
+      });
+
+      it('does not inject when the visitor left for /upload before it resolved', async () => {
+        // A CTA's pointerdown fires before its click navigates: the path is still
+        // `/` when the fetch starts and `/upload` by the time it resolves.
+        await interactThenResolve('/upload');
+
+        expect(appendChildSpy).not.toHaveBeenCalled();
+      });
     });
 
     it('refuses to load when the dashboard has replay switched on', async () => {
