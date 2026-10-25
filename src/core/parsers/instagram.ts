@@ -11,6 +11,7 @@ import {
   RELEVANT_FILE_PATTERN,
   htmlTwin,
 } from './instagram-file-specs';
+import { collectDateSources } from './instagram-date-sources';
 import { combineDatesFitted, parseRelationshipFile } from './instagram-html';
 import { escapeRegExp, extractUsernames } from './instagram-utils';
 import { analyzeZipStructure, createCriticalError } from './instagram-zip-analysis';
@@ -95,6 +96,7 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
       // nothing to overstate (GH#41).
       labelResolutionMode: 'not-applicable',
       followRequestsUnreadable: false,
+      dateSources: {},
       // No relationship file was read on this path, so there is no verdict to
       // give — not `no-skew`, which would assert a comparison that never ran.
       truncatedRelationshipFile: 'not-applicable',
@@ -118,6 +120,7 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
       hasMinimalData: false,
       labelResolutionMode: 'not-applicable',
       followRequestsUnreadable: false,
+      dateSources: {},
       // No relationship file was read on this path, so there is no verdict to
       // give — not `no-skew`, which would assert a comparison that never ran.
       truncatedRelationshipFile: 'not-applicable',
@@ -183,6 +186,7 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
       hasMinimalData: false,
       labelResolutionMode: 'not-applicable',
       followRequestsUnreadable: false,
+      dateSources: {},
       // No relationship file was read on this path, so there is no verdict to
       // give — not `no-skew`, which would assert a comparison that never ran.
       truncatedRelationshipFile: 'not-applicable',
@@ -258,10 +262,8 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
   const followingFilePatterns = baseCandidates
     .map(b => `${b}/following.json`)
     .concat(['following.json']);
-  const followingParsed = parseFollowingPayload(
-    await readRelationshipFileFromZip(followingFilePatterns, true),
-    unreadableRequiredPath
-  );
+  const followingRead = await readRelationshipFileFromZip(followingFilePatterns, true);
+  const followingParsed = parseFollowingPayload(followingRead, unreadableRequiredPath);
   const followingUsers = followingParsed.followingUsers;
   warnings.push(...followingParsed.warnings);
   fileExpectations.push(followingParsed.fileExpectation);
@@ -352,6 +354,19 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
     followersParsed.datesFitted,
   ]);
 
+  const dateSources = collectDateSources({
+    following: followingRead?.path,
+    followers: followersParsed.foundFollowerPaths,
+    optional: {
+      pending: optionalParsed.pendingResult.path,
+      permanent: optionalParsed.permanentResult.path,
+      restricted: optionalParsed.restrictedResult.path,
+      close: optionalParsed.closeFriendsResult.path,
+      unfollowed: optionalParsed.unfollowedResult.path,
+      dismissed: optionalParsed.dismissedResult.path,
+    },
+  });
+
   return {
     data: {
       following: new Set(followingUsers),
@@ -372,6 +387,7 @@ export async function parseInstagramZipFile(file: File): Promise<ParseResult> {
     followRequestsUnreadable: optionalParsed.followRequestsUnreadable,
     truncatedRelationshipFile,
     datesFitted,
+    dateSources,
   };
 }
 
