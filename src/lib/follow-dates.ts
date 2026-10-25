@@ -8,7 +8,9 @@ export interface DateLine {
   zone: DateZone;
 }
 
-export const LINE_BADGES: readonly BadgeKey[] = ['following', 'followers', 'pending', 'permanent'];
+const REQUEST_BADGES = ['pending', 'permanent'] as const;
+
+export const LINE_BADGES: readonly BadgeKey[] = ['following', 'followers', ...REQUEST_BADGES];
 
 // A number on a badge without a zone cannot be placed on a calendar, so it is not a date.
 function datedSeconds(badges: BadgeMap, zones: DateZones, key: BadgeKey): number | null {
@@ -19,28 +21,26 @@ function datedSeconds(badges: BadgeMap, zones: DateZones, key: BadgeKey): number
 }
 
 export function pickDateLine(badges: BadgeMap, zones: DateZones): DateLine | null {
-  for (const key of ['pending', 'permanent'] as const) {
-    const seconds = datedSeconds(badges, zones, key);
-    if (seconds !== null) return { key: 'requested', seconds, zone: zones[key] as DateZone };
+  const line = (key: DateLineKey, badge: BadgeKey, seconds: number): DateLine => ({
+    key,
+    seconds,
+    zone: zones[badge] as DateZone,
+  });
+
+  for (const badge of REQUEST_BADGES) {
+    const seconds = datedSeconds(badges, zones, badge);
+    if (seconds !== null) return line('requested', badge, seconds);
   }
 
   const following = datedSeconds(badges, zones, 'following');
   const followers = datedSeconds(badges, zones, 'followers');
   if (following !== null && followers !== null) {
-    const later = followers > following ? 'followers' : 'following';
-    return {
-      key: 'mutual',
-      seconds: Math.max(following, followers),
-      zone: zones[later] as DateZone,
-    };
+    return followers > following
+      ? line('mutual', 'followers', followers)
+      : line('mutual', 'following', following);
   }
-  if (following !== null) {
-    return { key: 'following', seconds: following, zone: zones.following as DateZone };
-  }
-  if (followers !== null) {
-    return { key: 'followers', seconds: followers, zone: zones.followers as DateZone };
-  }
-  return null;
+  if (following !== null) return line('following', 'following', following);
+  return followers !== null ? line('followers', 'followers', followers) : null;
 }
 
 export function reservesDateLine(zones: DateZones | null): boolean {
