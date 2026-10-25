@@ -177,12 +177,12 @@ async function injectRecorder(): Promise<void> {
  * Scope note: this gates where the recorder is *entered*, not where it collects.
  * A visitor who lands on `/` and navigates deeper keeps it, because the recorder
  * has no stop API. Its heatmap payload carries no text or attributes, but it is
- * not free of the page: on every click and scroll `pageH` is the largest
- * `getBoundingClientRect().bottom` of any element in `<body>`, which ignores
- * `overflow` clipping. On `/results` the virtual list's sizer is
+ * not free of the page: on every click and scroll `pageH` is at least the largest
+ * `getBoundingClientRect().bottom` of any element in `<body>`, a measure that
+ * `overflow` clipping does not reduce. On `/results` the virtual list's sizer is
  * `matched rows × row height` tall, so `pageH` there carries the count of
- * matched accounts — data derived from the export. That is why the boundary
- * itself must close before the recorder is switched back on (GH#290).
+ * matched accounts — data derived from the export. So before the recorder is
+ * switched back on, the boundary must close or the heatmap must be disclosed (GH#290).
  * A direct arrival at `/results` never loads it at all. See GH#95, GH#289.
  */
 export function loadHeatmapRecorder(): void {
