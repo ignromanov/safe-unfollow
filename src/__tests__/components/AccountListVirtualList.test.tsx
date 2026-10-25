@@ -274,7 +274,9 @@ describe('AccountList Virtual List', () => {
 
     const wrappers = (container: HTMLElement) => ({
       loaded: container.querySelector('[data-index="0"]') as HTMLElement,
-      skeleton: container.querySelector('.animate-pulse')?.parentElement as HTMLElement,
+      skeleton: container.querySelector(
+        '[role="feed"] > div > div:not([data-index])'
+      ) as HTMLElement,
     });
 
     afterEach(() => {
@@ -334,7 +336,7 @@ describe('AccountList Virtual List', () => {
       const { container, rerender } = render(
         <AccountList {...defaultProps} accountIndices={null} hasLoadedData />
       );
-      expect(wrappers(container).skeleton.style.height).toBe('85px');
+      expect(wrappers(container).skeleton.style.height).toBe('84px');
       virtualizerStub.measure.mockClear();
 
       rerender(
@@ -346,7 +348,7 @@ describe('AccountList Virtual List', () => {
         />
       );
 
-      expect(wrappers(container).skeleton.style.height).toBe('105px');
+      expect(wrappers(container).skeleton.style.height).toBe('104px');
       expect(virtualizerStub.measure).toHaveBeenCalled();
     });
 
@@ -357,7 +359,7 @@ describe('AccountList Virtual List', () => {
         <AccountList {...defaultProps} accountIndices={null} hasLoadedData />
       );
 
-      expect(wrappers(container).skeleton.style.height).toBe('85px');
+      expect(wrappers(container).skeleton.style.height).toBe('84px');
     });
   });
 });
