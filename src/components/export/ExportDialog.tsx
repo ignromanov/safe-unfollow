@@ -8,7 +8,7 @@ import { RevokedLicenseNotice, SupportMailtoLink } from '@/components/export/Rev
 import { useExportWorker } from '@/hooks/useExportWorker';
 import { downloadBlob } from '@/lib/export/download';
 import { validateLicense } from '@/lib/export/license';
-import type { ExportFormat, ExportProgress } from '@/lib/export/types';
+import { assertNever, type ExportFormat, type ExportProgress } from '@/lib/export/types';
 import {
   clearLicense,
   getStoredLicense,
@@ -99,7 +99,7 @@ export function ExportDialog({
     setProgress(null);
 
     try {
-      const blob = await buildExport(format, fileHash, indices, rowCount, setProgress);
+      const blob = await buildExport({ format }, fileHash, indices, rowCount, setProgress);
 
       const outputName = `${filename}.${format}`;
       downloadBlob(blob, outputName);
@@ -131,11 +131,14 @@ export function ExportDialog({
         </div>
       );
     }
-    return format === 'csv' ? (
-      <FileSpreadsheet className="h-4 w-4" />
-    ) : (
-      <FileJson className="h-4 w-4" />
-    );
+    switch (format) {
+      case 'csv':
+        return <FileSpreadsheet className="h-4 w-4" />;
+      case 'json':
+        return <FileJson className="h-4 w-4" />;
+      default:
+        return assertNever(format);
+    }
   };
 
   // One screen at a time, and the header is the screen. Before this the sheet drew a

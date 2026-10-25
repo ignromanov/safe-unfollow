@@ -9,6 +9,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { buildExportCsv } from '@/lib/export/csv';
 import { buildExportJson } from '@/lib/export/json';
+import type { ExportRequest } from '@/lib/export/types';
 
 vi.mock('@/lib/export/csv', () => ({ buildExportCsv: vi.fn() }));
 vi.mock('@/lib/export/json', () => ({ buildExportJson: vi.fn() }));
@@ -26,7 +27,7 @@ describe('export-worker', () => {
   });
 
   it('should build a CSV blob for the csv format', async () => {
-    const result = await exportWorkerApi.buildExport('csv', 'hash1', null, 100);
+    const result = await exportWorkerApi.buildExport({ format: 'csv' }, 'hash1', null, 100);
 
     expect(result).toBe(csvBlob);
     expect(buildExportCsv).toHaveBeenCalledWith('hash1', null, 100, undefined);
@@ -34,7 +35,7 @@ describe('export-worker', () => {
   });
 
   it('should build a JSON blob for the json format', async () => {
-    const result = await exportWorkerApi.buildExport('json', 'hash1', [1, 2], 100);
+    const result = await exportWorkerApi.buildExport({ format: 'json' }, 'hash1', [1, 2], 100);
 
     expect(result).toBe(jsonBlob);
     expect(buildExportJson).toHaveBeenCalledWith('hash1', [1, 2], 100, undefined);
@@ -48,8 +49,14 @@ describe('export-worker', () => {
       return csvBlob;
     });
 
-    await exportWorkerApi.buildExport('csv', 'hash1', null, 1000, onProgress);
+    await exportWorkerApi.buildExport({ format: 'csv' }, 'hash1', null, 1000, onProgress);
 
     expect(onProgress).toHaveBeenCalledWith({ processed: 500, total: 1000 });
+  });
+
+  it('should throw on a format it does not know instead of building another', async () => {
+    await expect(
+      exportWorkerApi.buildExport({ format: 'xml' } as unknown as ExportRequest, 'h', null, 0)
+    ).rejects.toThrow('Unhandled export format: xml');
   });
 });

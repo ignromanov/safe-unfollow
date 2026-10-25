@@ -12,7 +12,7 @@ import * as Comlink from 'comlink';
 
 import { buildExportCsv } from '@/lib/export/csv';
 import { buildExportJson } from '@/lib/export/json';
-import type { ExportFormat, ExportProgressCallback } from '@/lib/export/types';
+import { assertNever, type ExportProgressCallback, type ExportRequest } from '@/lib/export/types';
 
 /**
  * Export Worker API exposed via Comlink
@@ -24,14 +24,20 @@ export const exportWorkerApi = {
    * `indices === null` means "export all accounts".
    */
   async buildExport(
-    format: ExportFormat,
+    request: ExportRequest,
     fileHash: string,
     indices: number[] | null,
     totalCount: number,
     onProgress?: ExportProgressCallback
   ): Promise<Blob> {
-    const build = format === 'csv' ? buildExportCsv : buildExportJson;
-    return build(fileHash, indices, totalCount, onProgress);
+    switch (request.format) {
+      case 'csv':
+        return buildExportCsv(fileHash, indices, totalCount, onProgress);
+      case 'json':
+        return buildExportJson(fileHash, indices, totalCount, onProgress);
+      default:
+        return assertNever(request);
+    }
   },
 };
 

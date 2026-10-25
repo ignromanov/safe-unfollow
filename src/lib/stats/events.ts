@@ -10,6 +10,7 @@ import { getStoredUTM, getEntryCTA } from './utm';
 import type { GuideSource } from '@/hooks/useGuideDialog';
 import type { LabelResolutionMode, RelationshipFormat, RelationshipSkew } from '@/core/types';
 import type { LicenseFailureReason } from '@/lib/export/license';
+import type { ExportFormat as ExportFileFormat } from '@/lib/export/types';
 import type { FilterSessionSummary } from './filter-session';
 
 /**
@@ -648,11 +649,11 @@ export const analytics = {
     trackEvent(AnalyticsEvents.PURCHASE_SUCCESS);
   },
 
-  download: (format: 'csv' | 'json', rowCount: number) => {
+  download: (format: ExportFileFormat, rowCount: number) => {
     trackEvent(AnalyticsEvents.DOWNLOAD, { format, row_count: rowCount });
   },
 
-  exportError: (format: 'csv' | 'json') => {
+  exportError: (format: ExportFileFormat) => {
     trackEvent(AnalyticsEvents.EXPORT_ERROR, { format });
   },
 
