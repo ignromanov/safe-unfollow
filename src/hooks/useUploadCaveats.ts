@@ -7,7 +7,8 @@ import { useEffect, useState } from 'react';
  * Everything `/results` must warn the reader about for this dataset.
  *
  * Two independent reasons a badge count can be wrong, both recorded at parse
- * time and both read back from the same stored record:
+ * time and both read back from the same stored record (alongside the date zones
+ * and the stale-dates marker, described on the fields below):
  *
  * - `followRequestsUnreadable` — a follow-requests file was found and could
  *   not be read, so `notFollowingBack` is overstated (GH#41).
@@ -48,13 +49,13 @@ const NO_CAVEATS: UploadCaveats = {
  * stored record is the only place that outlives the upload, so it is the only
  * place both the fresh and the returning reader can be told the same thing.
  *
- * Both flags default to quiet and stay there on any failure — a missing record,
+ * Every field defaults to quiet and stays there on any failure — a missing record,
  * a record from before the fields existed, or an environment with no
  * IndexedDB. A caveat that appears when nothing is wrong is worse than none at
  * all: it names specific badges as unreliable on a page where every other
  * number is correct.
  *
- * One read for both flags, deliberately. A second hook would be a second
+ * One read for all four fields, deliberately. A second hook would be a second
  * `getFileMetadata` call against the same record on every visit to the page,
  * to answer a question the first call already returned.
  */

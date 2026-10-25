@@ -265,7 +265,7 @@ export class IndexedDBService {
     const datePromises: Promise<unknown>[] = [];
     const dateZones: DateZones = {};
     for (const badge of TIME_BASED_BADGES) {
-      const source = dateSources?.[badge];
+      const source = dateSources[badge];
       const zone = source === 'utc' || source === 'local' ? source : undefined;
       const dates = zone ? buildDateColumn(accounts, badge) : null;
       if (!dates) {

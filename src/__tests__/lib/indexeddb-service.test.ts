@@ -347,9 +347,11 @@ describe('IndexedDBService (Integration Tests)', () => {
       // repeating it here pins the "before" half of the before/after this test compares.
       expect(await indexedDBService.getFileMetadata(mockFileHash)).toBeNull();
 
-      await indexedDBService.storeAllAccounts(mockFileHash, [
-        { username: 'user1', badges: { following: badge() } },
-      ]);
+      await indexedDBService.storeAllAccounts(
+        mockFileHash,
+        [{ username: 'user1', badges: { following: badge() } }],
+        {}
+      );
 
       const retrieved = await indexedDBService.getFileMetadata(mockFileHash);
       expect(retrieved).not.toBeNull();
@@ -372,9 +374,11 @@ describe('IndexedDBService (Integration Tests)', () => {
         .mockRejectedValueOnce(new Error('simulated transaction failure'));
 
       await expect(
-        indexedDBService.storeAllAccounts(mockFileHash, [
-          { username: 'user1', badges: { following: badge() } },
-        ])
+        indexedDBService.storeAllAccounts(
+          mockFileHash,
+          [{ username: 'user1', badges: { following: badge() } }],
+          {}
+        )
       ).rejects.toThrow('simulated transaction failure');
 
       waitSpy.mockRestore();
@@ -400,7 +404,7 @@ describe('IndexedDBService (Integration Tests)', () => {
         { username: 'user3', badges: { followers: badge() } },
       ];
 
-      await indexedDBService.storeAllAccounts(mockFileHash, accounts);
+      await indexedDBService.storeAllAccounts(mockFileHash, accounts, {});
 
       // Verify accounts can be retrieved
       const retrieved = await indexedDBService.getAccountsByRange(mockFileHash, 0, 3);
@@ -417,7 +421,7 @@ describe('IndexedDBService (Integration Tests)', () => {
         { username: 'user2', badges: { followers: badge(), mutuals: badge() } },
       ];
 
-      await indexedDBService.storeAllAccounts(mockFileHash, accounts);
+      await indexedDBService.storeAllAccounts(mockFileHash, accounts, {});
 
       const followingBitset = await indexedDBService.getBadgeBitset(mockFileHash, 'following');
       const followersBitset = await indexedDBService.getBadgeBitset(mockFileHash, 'followers');
@@ -435,7 +439,7 @@ describe('IndexedDBService (Integration Tests)', () => {
     });
 
     it('should handle empty accounts array', async () => {
-      await indexedDBService.storeAllAccounts(mockFileHash, []);
+      await indexedDBService.storeAllAccounts(mockFileHash, [], {});
 
       const retrieved = await indexedDBService.getAccountsByRange(mockFileHash, 0, 10);
 
@@ -448,7 +452,7 @@ describe('IndexedDBService (Integration Tests)', () => {
         { username: 'user2', badges: {} },
       ];
 
-      await indexedDBService.storeAllAccounts(mockFileHash, accounts);
+      await indexedDBService.storeAllAccounts(mockFileHash, accounts, {});
 
       const retrieved = await indexedDBService.getAccountsByRange(mockFileHash, 0, 2);
 
@@ -461,7 +465,7 @@ describe('IndexedDBService (Integration Tests)', () => {
         { username: 'UserTwo', badges: {} },
       ];
 
-      await indexedDBService.storeAllAccounts(mockFileHash, accounts);
+      await indexedDBService.storeAllAccounts(mockFileHash, accounts, {});
 
       const retrieved = await indexedDBService.getAccountsByRange(mockFileHash, 0, 2);
 
@@ -479,7 +483,7 @@ describe('IndexedDBService (Integration Tests)', () => {
       }));
 
       const start = performance.now();
-      await indexedDBService.storeAllAccounts(mockFileHash, largeAccounts);
+      await indexedDBService.storeAllAccounts(mockFileHash, largeAccounts, {});
       const duration = performance.now() - start;
 
       expect(duration).toBeLessThan(5000); // Should complete in reasonable time
@@ -496,7 +500,7 @@ describe('IndexedDBService (Integration Tests)', () => {
         badges: i % 2 === 0 ? { following: badge() } : {},
       }));
 
-      await indexedDBService.storeAllAccounts(mockFileHash, accounts);
+      await indexedDBService.storeAllAccounts(mockFileHash, accounts, {});
     });
 
     it('should retrieve accounts by range', async () => {
@@ -554,7 +558,7 @@ describe('IndexedDBService (Integration Tests)', () => {
         { username: 'user3', badges: { following: badge() } },
       ];
 
-      await indexedDBService.storeAllAccounts(mockFileHash, accounts);
+      await indexedDBService.storeAllAccounts(mockFileHash, accounts, {});
     });
 
     it('should retrieve bitset for badge', async () => {
@@ -616,7 +620,7 @@ describe('IndexedDBService (Integration Tests)', () => {
         { username: 'user4', badges: { followers: badge() } },
       ];
 
-      await indexedDBService.storeAllAccounts(mockFileHash, accounts);
+      await indexedDBService.storeAllAccounts(mockFileHash, accounts, {});
     });
 
     it('should return badge statistics', async () => {
@@ -635,7 +639,7 @@ describe('IndexedDBService (Integration Tests)', () => {
     });
 
     it('should handle empty dataset', async () => {
-      await indexedDBService.storeAllAccounts('empty-hash', []);
+      await indexedDBService.storeAllAccounts('empty-hash', [], {});
 
       const stats = await indexedDBService.getBadgeStats('empty-hash');
 
@@ -704,7 +708,7 @@ describe('IndexedDBService (Integration Tests)', () => {
         { username: 'user2', badges: { followers: badge() } },
       ];
 
-      await indexedDBService.storeAllAccounts(mockFileHash, accounts);
+      await indexedDBService.storeAllAccounts(mockFileHash, accounts, {});
     });
 
     it('should clear all data for a file', async () => {
@@ -737,7 +741,7 @@ describe('IndexedDBService (Integration Tests)', () => {
         { username: 'other1', badges: { following: badge() } },
       ];
 
-      await indexedDBService.storeAllAccounts(otherHash, otherAccounts);
+      await indexedDBService.storeAllAccounts(otherHash, otherAccounts, {});
       await indexedDBService.clearFile(mockFileHash);
 
       const otherRetrieved = await indexedDBService.getAccountsByRange(otherHash, 0, 1);
@@ -749,7 +753,7 @@ describe('IndexedDBService (Integration Tests)', () => {
     beforeEach(async () => {
       const accounts: AccountBadges[] = [{ username: 'user1', badges: { following: badge() } }];
 
-      await indexedDBService.storeAllAccounts(mockFileHash, accounts);
+      await indexedDBService.storeAllAccounts(mockFileHash, accounts, {});
     });
 
     it('should clear all caches', () => {
@@ -843,9 +847,9 @@ describe('IndexedDBService (Integration Tests)', () => {
 
       // Run multiple operations concurrently
       await Promise.all([
-        indexedDBService.storeAllAccounts(mockFileHash, accounts),
-        indexedDBService.storeAllAccounts('hash2', accounts),
-        indexedDBService.storeAllAccounts('hash3', accounts),
+        indexedDBService.storeAllAccounts(mockFileHash, accounts, {}),
+        indexedDBService.storeAllAccounts('hash2', accounts, {}),
+        indexedDBService.storeAllAccounts('hash3', accounts, {}),
       ]);
 
       const retrieved = await indexedDBService.getAccountsByRange(mockFileHash, 0, 1);
@@ -929,20 +933,6 @@ describe('IndexedDBService (Integration Tests)', () => {
       const [a] = await indexedDBService.getAccountsByRange('zones-e', 0, 1);
       expect(a!.badges.followers).toBe(true);
       expect((await indexedDBService.getFileMetadata('zones-e'))?.dateZones).toEqual({});
-    });
-
-    it('treats a runtime-undefined dateSources as no sources', async () => {
-      // `store` would default an explicit undefined to LOCAL, so call the service directly.
-      const accounts: AccountBadges[] = [{ username: 'a', badges: { followers: 5 } }];
-      await store('zones-f', accounts, {});
-      await indexedDBService.storeAllAccounts(
-        'zones-f',
-        accounts,
-        undefined as unknown as DateSources
-      );
-      const [a] = await indexedDBService.getAccountsByRange('zones-f', 0, 1);
-      expect(a!.badges.followers).toBe(true);
-      expect((await indexedDBService.getFileMetadata('zones-f'))?.dateZones).toEqual({});
     });
 
     it('returns the stored date as the badge value, and true where the export had none', async () => {

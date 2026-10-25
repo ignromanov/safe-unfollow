@@ -19,22 +19,22 @@ const RESULTS_SURFACE = {
   'src/components/AccountList.tsx': ACCOUNT_LIST,
 };
 
-const SOURCES = import.meta.glob<string>('/src/**/*.tsx', {
+const SOURCES = import.meta.glob<string>('/src/**/*.{ts,tsx}', {
   query: '?raw',
   import: 'default',
   eager: true,
 });
 
 describe('upload and results stay on separate routes (D10)', () => {
-  it.each(Object.entries(RESULTS_SURFACE))('%s imports no upload surface', (file, source) => {
+  it.each(Object.entries(RESULTS_SURFACE))('%s imports no upload surface', (_file, source) => {
     expect(source, WHY).not.toContain('UploadZone');
     expect(source, WHY).not.toContain('useFileUpload');
-    expect(file).toBeTruthy();
   });
 
   it('useAccountDataSource is imported by AccountList.tsx and nothing else', () => {
     const importers = Object.entries(SOURCES)
       .filter(([path]) => !path.includes('/__tests__/'))
+      .filter(([path]) => path !== '/src/hooks/useAccountDataSource.ts')
       .filter(([, source]) => source.includes('useAccountDataSource'))
       .map(([path]) => path);
     expect(importers, WHY).toEqual(['/src/components/AccountList.tsx']);
