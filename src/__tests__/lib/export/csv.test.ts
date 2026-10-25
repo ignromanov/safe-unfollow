@@ -1,12 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AccountBadges } from '@/core/types';
 
-const { getAccountsByRange } = vi.hoisted(() => ({
+const { getAccountsByRange, getFileMetadata } = vi.hoisted(() => ({
   getAccountsByRange: vi.fn(),
+  getFileMetadata: vi.fn(),
 }));
 
 vi.mock('@/lib/indexeddb/indexeddb-service', () => ({
-  indexedDBService: { getAccountsByRange },
+  indexedDBService: { getAccountsByRange, getFileMetadata },
 }));
 
 const { buildExportCsv, escapeCsvField } = await import('@/lib/export/csv');
@@ -46,6 +47,8 @@ describe('escapeCsvField', () => {
 describe('buildExportCsv', () => {
   beforeEach(() => {
     getAccountsByRange.mockReset();
+    getFileMetadata.mockReset();
+    getFileMetadata.mockResolvedValue(null);
   });
 
   it('should build a header row plus one row per account with href and badge flags', async () => {
@@ -59,10 +62,10 @@ describe('buildExportCsv', () => {
     const lines = text.split('\n');
 
     expect(lines[0]).toBe(
-      'username,href,following,followers,mutuals,notFollowingBack,notFollowedBack,unfollowed,pending,permanent,restricted,close,dismissed'
+      'username,href,following,followers,mutuals,notFollowingBack,notFollowedBack,unfollowed,pending,permanent,restricted,close,dismissed,followingDate,followersDate,pendingDate,permanentDate,restrictedDate,closeDate,dismissedDate'
     );
-    expect(lines[1]).toBe('alice,https://instagram.com/alice,1,0,0,0,0,1,0,0,0,0,0');
-    expect(lines[2]).toBe('bob,https://instagram.com/bob,0,0,0,0,0,0,0,0,0,0,0');
+    expect(lines[1]).toBe('alice,https://instagram.com/alice,1,0,0,0,0,1,0,0,0,0,0,,,,,,,');
+    expect(lines[2]).toBe('bob,https://instagram.com/bob,0,0,0,0,0,0,0,0,0,0,0,,,,,,,');
   });
 
   it('writes 1 for a badge whose value is a date (GH#285)', async () => {
@@ -71,6 +74,51 @@ describe('buildExportCsv', () => {
     const [header, row] = text.trim().split('\n');
     const cols = header!.split(',');
     expect(row!.split(',')[cols.indexOf('following')]).toBe('1');
+  });
+
+  describe('follow dates (GH#285 PR-3)', () => {
+    const SEP30 = 1727654400; // 2024-09-30 00:00:00 UTC
+
+    async function exportRows(accounts: AccountBadges[]) {
+      getAccountsByRange.mockResolvedValueOnce(accounts);
+      const text = await readBlobText(await buildExportCsv('hash1', null, accounts.length));
+      const [header, ...rows] = text
+        .trim()
+        .split('\n')
+        .map(line => line.split(','));
+      const cell = (row: number, column: string) => rows[row]![header!.indexOf(column)];
+      return { header: header!, rows, cell };
+    }
+
+    it('writes a dated badge as its calendar day in <badge>Date', async () => {
+      getFileMetadata.mockResolvedValue({ dateZones: { following: 'utc', followers: 'utc' } });
+      const { cell } = await exportRows([account('alice', { following: SEP30, followers: true })]);
+      expect(cell(0, 'followingDate')).toBe('2024-09-30');
+      expect(cell(0, 'followersDate')).toBe('');
+    });
+
+    it('writes no date for a file stored before date zones existed', async () => {
+      getFileMetadata.mockResolvedValue({ datesStored: true });
+      const { cell } = await exportRows([account('alice', { following: SEP30 })]);
+      expect(cell(0, 'following')).toBe('1');
+      expect(cell(0, 'followingDate')).toBe('');
+    });
+
+    it('keeps every row as wide as the header', async () => {
+      getFileMetadata.mockResolvedValue({ dateZones: { following: 'utc', dismissed: 'utc' } });
+      const { header, rows } = await exportRows([
+        account('alice', { following: SEP30, dismissed: SEP30 }),
+        account('bob'),
+      ]);
+      expect(rows.map(row => row.length)).toEqual([header.length, header.length]);
+    });
+
+    it('reads the date zones once per export, not once per chunk', async () => {
+      getAccountsByRange.mockResolvedValue([]);
+      await buildExportCsv('hash1', null, 2500);
+      expect(getFileMetadata).toHaveBeenCalledTimes(1);
+      expect(getFileMetadata).toHaveBeenCalledWith('hash1');
+    });
   });
 
   it('should escape usernames containing commas or quotes', async () => {
@@ -152,9 +200,9 @@ describe('buildExportCsv', () => {
     const rows = text.split('\n').filter(Boolean);
 
     expect(rows).toHaveLength(1501); // header + 1500 accounts
-    expect(rows[1]).toBe('user0,https://instagram.com/user0,0,0,0,0,0,0,0,0,0,0,0');
-    expect(rows[1000]).toBe('user999,https://instagram.com/user999,0,0,0,0,0,0,0,0,0,0,0');
-    expect(rows[1001]).toBe('user1000,https://instagram.com/user1000,0,0,0,0,0,0,0,0,0,0,0');
-    expect(rows[1500]).toBe('user1499,https://instagram.com/user1499,0,0,0,0,0,0,0,0,0,0,0');
+    expect(rows[1]).toBe('user0,https://instagram.com/user0,0,0,0,0,0,0,0,0,0,0,0,,,,,,,');
+    expect(rows[1000]).toBe('user999,https://instagram.com/user999,0,0,0,0,0,0,0,0,0,0,0,,,,,,,');
+    expect(rows[1001]).toBe('user1000,https://instagram.com/user1000,0,0,0,0,0,0,0,0,0,0,0,,,,,,,');
+    expect(rows[1500]).toBe('user1499,https://instagram.com/user1499,0,0,0,0,0,0,0,0,0,0,0,,,,,,,');
   });
 });
