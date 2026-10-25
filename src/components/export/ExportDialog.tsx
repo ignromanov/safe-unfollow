@@ -272,6 +272,8 @@ export function ExportDialog({
                 {t('export.dialog.jsonHint')}
               </span>
             </Button>
+            {/* GH#285: a blank date cell is "not found in the file", not "never". */}
+            <p className="text-xs text-muted-foreground">{t('export.dialog.datesNote')}</p>
           </>
         ) : null}
 

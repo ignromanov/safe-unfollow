@@ -137,6 +137,30 @@ describe('ExportDialog', () => {
     expect(vi.mocked(analytics.download)).toHaveBeenCalledWith('csv', 42);
   });
 
+  // GH#285 PR-3: an empty date cell must not be read as "never" (copy §3.2).
+  describe('dates note', () => {
+    const note = resultsEN.export.dialog.datesNote;
+
+    it('should explain a blank date under the format buttons', () => {
+      render(<ExportDialog {...defaultProps} />);
+
+      const noteEl = screen.getByText(note);
+      const jsonButton = screen.getByRole('button', { name: jsonButtonName });
+      expect(
+        jsonButton.compareDocumentPosition(noteEl) & Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy();
+    });
+
+    it('should leave the receipt without it', async () => {
+      const user = userEvent.setup();
+      render(<ExportDialog {...defaultProps} />);
+      await user.click(screen.getByRole('button', { name: csvButtonName }));
+
+      expect(await screen.findByText(resultsEN.export.dialog.savedTitle)).toBeInTheDocument();
+      expect(screen.queryByText(note)).not.toBeInTheDocument();
+    });
+  });
+
   it('should confirm the file instead of closing', async () => {
     const onOpenChange = vi.fn();
     const user = userEvent.setup();

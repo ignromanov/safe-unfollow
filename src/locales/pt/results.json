@@ -238,6 +238,7 @@
       "json": "Baixar JSON",
       "csvHint": "Abre no Excel, Google Sheets e Numbers",
       "jsonHint": "Para scripts ou para carregar de volta depois",
+      "datesNote": "Uma data em branco significa que não encontramos data para essa conta no seu arquivo.",
       "generating": "Gerando… {{percent}}%",
       "buildingTitle": "Criando seu arquivo",
       "buildingNote": "Sua exportação é criada aqui, neste navegador.",

@@ -238,6 +238,7 @@
       "json": "Télécharger le JSON",
       "csvHint": "S’ouvre dans Excel, Google Sheets et Numbers",
       "jsonHint": "Pour vos scripts, ou pour le recharger plus tard",
+      "datesNote": "Une date vide signifie que nous n’avons trouvé aucune date pour ce compte dans votre fichier.",
       "generating": "Génération… {{percent}}%",
       "buildingTitle": "Création de votre fichier",
       "buildingNote": "Votre export est créé ici, dans ce navigateur.",

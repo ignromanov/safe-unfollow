@@ -238,6 +238,7 @@
       "json": "Download JSON",
       "csvHint": "Opens in Excel, Google Sheets and Numbers",
       "jsonHint": "For scripts, or loading back in later",
+      "datesNote": "A blank date means we found no date for that account in your file.",
       "generating": "Generating… {{percent}}%",
       "buildingTitle": "Building your file",
       "buildingNote": "Your export is built here, in this browser.",

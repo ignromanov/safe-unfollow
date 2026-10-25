@@ -238,6 +238,7 @@
       "json": "JSON indir",
       "csvHint": "Excel, Google E-Tablolar ve Numbers ile açılır",
       "jsonHint": "Betikler için ya da sonra geri yüklemek için",
+      "datesNote": "Boş bir tarih, dosyanda o hesap için tarih bulamadığımız anlamına gelir.",
       "generating": "Oluşturuluyor… {{percent}}%",
       "buildingTitle": "Dosyan hazırlanıyor",
       "buildingNote": "Dışa aktarımın burada, bu tarayıcıda oluşturuluyor.",
