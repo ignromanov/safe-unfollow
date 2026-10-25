@@ -1,5 +1,6 @@
 import { BADGE_STYLES } from '@/constants/badge-styles';
-import type { AccountBadges, BadgeKey } from '@/core/types';
+import type { AccountBadges, BadgeKey, DateZones } from '@/core/types';
+import { pickDateLine, type FollowDateFormatter } from '@/lib/follow-dates';
 import { User } from 'lucide-react';
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -9,6 +10,10 @@ export interface AccountItemProps {
   index: number;
   totalCount: number;
   onAccountClick?: (badges: string[]) => void;
+  dateZones: DateZones | null;
+  formatDate: FollowDateFormatter;
+  /** One empty line is kept on undated rows so a dated file never changes row height mid-scroll. */
+  reserveDateLine: boolean;
 }
 
 export const AccountItem = memo(function AccountItem({
@@ -16,6 +21,9 @@ export const AccountItem = memo(function AccountItem({
   index,
   totalCount,
   onAccountClick,
+  dateZones,
+  formatDate,
+  reserveDateLine,
 }: AccountItemProps) {
   const { t } = useTranslation('results');
 
@@ -26,6 +34,8 @@ export const AccountItem = memo(function AccountItem({
       .map(([key]) => key);
     onAccountClick(activeBadges);
   };
+
+  const line = dateZones ? pickDateLine(account.badges, dateZones) : null;
 
   const profileUrl = `https://instagram.com/${account.username}`;
 
@@ -64,6 +74,11 @@ export const AccountItem = memo(function AccountItem({
                 </span>
               ))}
           </div>
+          {reserveDateLine && (
+            <p className="mt-1 h-4 text-xs leading-4 truncate text-muted-foreground">
+              {line ? t(`dates.${line.key}`, { date: formatDate(line.seconds, line.zone) }) : null}
+            </p>
+          )}
         </div>
       </div>
     </a>

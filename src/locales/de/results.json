@@ -249,5 +249,12 @@
       "again": "Erneut exportieren",
       "error": "Export fehlgeschlagen. Bitte versuche es erneut."
     }
+  },
+  "dates": {
+    "following": "Folge ich seit dem {{date}}",
+    "followers": "Folgt dir seit dem {{date}}",
+    "mutual": "Gegenseitig seit dem {{date}}",
+    "requested": "Anfrage gesendet am {{date}}",
+    "staleHint": "Lade dein Instagram ZIP erneut hoch, um die Datumsangaben zu sehen. Dieselbe Datei reicht."
   }
 }

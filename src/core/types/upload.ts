@@ -1,3 +1,4 @@
+import type { DateSources } from './badges';
 import type { ParsedAll } from './instagram-models';
 
 /**
@@ -261,6 +262,8 @@ export interface ParseResult {
    * against and why a false positive is the cheaper mistake here.
    */
   truncatedRelationshipFile: RelationshipSkew;
+  /** Per time-based badge, the markup of every file read for it. `'mixed'` = both. */
+  dateSources: DateSources;
   /**
    * Whether the HTML relationship files behind `truncatedRelationshipFile`
    * (GH#156) fit their own month-name tables — see

@@ -249,5 +249,12 @@
       "again": "Exporter à nouveau",
       "error": "L’export a échoué. Veuillez réessayer."
     }
+  },
+  "dates": {
+    "following": "Vous suivez depuis le {{date}}",
+    "followers": "Vous suit depuis le {{date}}",
+    "mutual": "Vous vous suivez depuis le {{date}}",
+    "requested": "Demande envoyée le {{date}}",
+    "staleHint": "Téléversez à nouveau votre ZIP Instagram pour voir les dates d’abonnement. Le même fichier convient."
   }
 }

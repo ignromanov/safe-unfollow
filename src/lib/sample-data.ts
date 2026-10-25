@@ -5,12 +5,22 @@
  * Data is stored in IndexedDB using the same flow as real uploads.
  */
 
-import type { AccountBadges } from '@/core/types';
+import type { AccountBadges, DateSources } from '@/core/types';
 import { indexedDBService } from './indexeddb/indexeddb-service';
+import { TIME_BASED_BADGES } from './indexeddb/indexeddb-schema';
 
 // Sample file hash for demo data (consistent identifier)
 const SAMPLE_FILE_HASH = 'sample-demo-data-v1';
 const SAMPLE_DATA_URL = '/sample-data.json';
+
+/**
+ * The snapshot's dates are synthetic seconds on round UTC hours (e.g. 1704067200 is
+ * 2024-01-01 00:00 UTC). Read as local they would show the previous day to every
+ * visitor west of UTC, so the sample is stored as UTC and reads the same everywhere.
+ */
+export const SAMPLE_DATE_SOURCES: DateSources = Object.fromEntries(
+  TIME_BASED_BADGES.map(badge => [badge, 'utc'])
+);
 
 /** Snapshot format from public/sample-data.json */
 interface SampleDataSnapshot {
@@ -45,8 +55,8 @@ async function fetchSampleSnapshot(): Promise<SampleDataSnapshot> {
  * Load and store sample data in IndexedDB
  *
  * Returns the file hash for accessing the sample data.
- * Idempotent: a cached copy that has follow dates stored (`datesStored`) is reused.
- * A copy cached before dates were persisted is cleared and rebuilt.
+ * Idempotent: a cached copy that has date zones stored (`dateZones`) is reused.
+ * A copy cached before zones were persisted is cleared and rebuilt.
  */
 export async function generateAndStoreSampleData(): Promise<{
   fileHash: string;
@@ -56,13 +66,13 @@ export async function generateAndStoreSampleData(): Promise<{
   const existingMetadata = await indexedDBService.getFileMetadata(SAMPLE_FILE_HASH);
 
   if (existingMetadata) {
-    if (existingMetadata.datesStored === true) {
+    if (existingMetadata.dateZones !== undefined) {
       return {
         fileHash: SAMPLE_FILE_HASH,
         accountCount: existingMetadata.accountCount,
       };
     }
-    // Cached before follow dates were persisted: drop it and rebuild from the snapshot
+    // Cached before date zones were persisted: drop it and rebuild from the snapshot
     await indexedDBService.clearFile(SAMPLE_FILE_HASH);
   }
 
@@ -81,7 +91,7 @@ export async function generateAndStoreSampleData(): Promise<{
   });
 
   // Store accounts using the same method as real uploads
-  await indexedDBService.storeAllAccounts(SAMPLE_FILE_HASH, snapshot.accounts);
+  await indexedDBService.storeAllAccounts(SAMPLE_FILE_HASH, snapshot.accounts, SAMPLE_DATE_SOURCES);
 
   return {
     fileHash: SAMPLE_FILE_HASH,

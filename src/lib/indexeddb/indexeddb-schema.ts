@@ -9,7 +9,7 @@
  * - indexes: Search index cache (prefix/trigram bitsets)
  */
 
-import type { BadgeKey, FileMetadata, RelationshipSkew } from '@/core/types';
+import type { BadgeKey, DateZones, FileMetadata, RelationshipSkew } from '@/core/types';
 
 export const DB_CONFIG = {
   name: 'instagram-tracker-v2',
@@ -96,7 +96,8 @@ export interface FileMetadataRecord {
   /**
    * True once `storeAllAccounts` committed this upload's date columns (GH#285),
    * including the case where the export carried no dates and none were written:
-   * "dates were looked for" is the fact, not "dates exist".
+   * "dates were looked for" is the fact, not "dates exist". It is not the
+   * displayability marker: `dateZones` is.
    *
    * Stored here because it must outlive the parse. `/results` is reached long
    * after `ParseResult` is gone — a returning visitor never re-parses — so this
@@ -106,6 +107,13 @@ export interface FileMetadataRecord {
    * accepts any column name.
    */
   datesStored?: boolean;
+  /**
+   * Present ⇔ written by GH#285 PR-2 or later. `dateZones[b]` present ⇔ a `dates:<b>`
+   * column was stored, and the value is the zone its day must be read in.
+   * `{}` = dates were looked for and none were storable in a single known zone.
+   * Unlike `datesStored`, this is what says whether a date may be displayed.
+   */
+  dateZones?: DateZones;
   /**
    * True when this upload's follow-requests file was found and could not be read,
    * so its `notFollowingBack` badge is overstated (GH#41). See

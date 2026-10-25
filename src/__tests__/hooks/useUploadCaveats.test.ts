@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/lib/indexeddb/indexeddb-service');
@@ -36,7 +36,12 @@ describe('useUploadCaveats', () => {
    * IndexedDB unavailable. Reading those as `no-skew` would report a clean
    * comparison that no parse performed.
    */
-  const QUIET = { followRequestsUnreadable: false, truncatedRelationshipFile: 'not-applicable' };
+  const QUIET = {
+    followRequestsUnreadable: false,
+    truncatedRelationshipFile: 'not-applicable',
+    dateZones: null,
+    datesStale: false,
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -57,7 +62,8 @@ describe('useUploadCaveats', () => {
     const { result } = renderHook(() => useUploadCaveats('hash'));
 
     await waitFor(() => expect(getFileMetadata).toHaveBeenCalled());
-    expect(result.current).toEqual(QUIET);
+    // No caveat, but a record without zones is a stale file for dates.
+    await waitFor(() => expect(result.current).toEqual({ ...QUIET, datesStale: true }));
   });
 
   it('stays quiet when the record is gone', async () => {
@@ -96,10 +102,61 @@ describe('useUploadCaveats', () => {
 
     await waitFor(() =>
       expect(result.current).toEqual({
+        ...QUIET,
+        datesStale: true,
         followRequestsUnreadable: true,
         truncatedRelationshipFile: 'following',
       })
     );
+  });
+
+  it('returns the stored zones and no stale flag', async () => {
+    getFileMetadata.mockResolvedValue(record({ dateZones: { following: 'local' } }));
+
+    const { result } = renderHook(() => useUploadCaveats('hash'));
+
+    await waitFor(() => expect(result.current.dateZones).toEqual({ following: 'local' }));
+    expect(result.current.datesStale).toBe(false);
+  });
+
+  it('marks a record without dateZones stale, and gives it no zones', async () => {
+    getFileMetadata.mockResolvedValue(record({ datesStored: true }));
+
+    const { result } = renderHook(() => useUploadCaveats('hash'));
+
+    await waitFor(() => expect(result.current.datesStale).toBe(true));
+    expect(result.current.dateZones).toBeNull();
+  });
+
+  // The read must have settled before the assertion: a quiet state is also the
+  // initial state, so asserting before the promise resolves observes nothing.
+  const settled = async () => {
+    const hook = renderHook(() => useUploadCaveats('hash'));
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    return hook.result.current;
+  };
+
+  it('is not stale on a missing record', async () => {
+    getFileMetadata.mockResolvedValue(null);
+
+    const caveats = await settled();
+
+    expect(getFileMetadata).toHaveBeenCalledTimes(1);
+    expect(caveats.datesStale).toBe(false);
+    expect(caveats.dateZones).toBeNull();
+  });
+
+  it('is not stale on a failed read', async () => {
+    getFileMetadata.mockRejectedValue(new Error('x'));
+
+    const caveats = await settled();
+
+    expect(getFileMetadata).toHaveBeenCalledTimes(1);
+    expect(caveats.datesStale).toBe(false);
+    expect(caveats.dateZones).toBeNull();
   });
 
   it('does not touch storage without a file hash', () => {

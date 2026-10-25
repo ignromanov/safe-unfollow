@@ -23,6 +23,7 @@ describe('IndexedDBCache', () => {
         lastAccessed: Date.now() - 1000, // 1 second ago
         version: 2,
         datesStored: true,
+        dateZones: {},
       };
 
       mockIndexedDBService.getFileMetadata.mockResolvedValue(mockMetadata);
@@ -40,6 +41,40 @@ describe('IndexedDBCache', () => {
         },
         timestamp: expect.any(Number),
       });
+    });
+
+    it('misses a record that has datesStored but no dateZones (stored before GH#285 PR-2)', async () => {
+      mockIndexedDBService.getFileMetadata.mockResolvedValue({
+        fileHash: 'test-hash',
+        fileName: 'test.zip',
+        fileSize: 1024,
+        uploadDate: new Date('2024-01-01'),
+        accountCount: 100,
+        lastAccessed: Date.now() - 1000,
+        version: 2,
+        datesStored: true,
+      });
+      mockIndexedDBService.saveFileMetadata.mockResolvedValue();
+
+      expect(await dbCache.get('test-hash')).toBeNull();
+      expect(mockIndexedDBService.saveFileMetadata).not.toHaveBeenCalled();
+    });
+
+    it('hits a record with dateZones, even an empty one', async () => {
+      mockIndexedDBService.getFileMetadata.mockResolvedValue({
+        fileHash: 'test-hash',
+        fileName: 'test.zip',
+        fileSize: 1024,
+        uploadDate: new Date('2024-01-01'),
+        accountCount: 100,
+        lastAccessed: Date.now() - 1000,
+        version: 2,
+        datesStored: true,
+        dateZones: {},
+      });
+      mockIndexedDBService.saveFileMetadata.mockResolvedValue();
+
+      expect(await dbCache.get('test-hash')).not.toBeNull();
     });
 
     it('treats a fresh record stored before follow dates existed as a miss, so it is re-parsed', async () => {
@@ -71,6 +106,7 @@ describe('IndexedDBCache', () => {
         lastAccessed: Date.now() - 1000,
         version: 2,
         datesStored: true,
+        dateZones: {},
       });
       mockIndexedDBService.saveFileMetadata.mockResolvedValue();
 
@@ -99,6 +135,7 @@ describe('IndexedDBCache', () => {
         lastAccessed: eightDaysAgo,
         version: 2,
         datesStored: true,
+        dateZones: {},
       };
 
       mockIndexedDBService.getFileMetadata.mockResolvedValue(mockMetadata);
@@ -118,6 +155,7 @@ describe('IndexedDBCache', () => {
         lastAccessed: Date.now() - 1000,
         version: 2,
         datesStored: true,
+        dateZones: {},
       };
 
       mockIndexedDBService.getFileMetadata.mockResolvedValue(mockMetadata);
@@ -159,6 +197,7 @@ describe('IndexedDBCache', () => {
           lastAccessed: sevenDaysAgo,
           version: 2,
           datesStored: true,
+          dateZones: {},
         };
 
         mockIndexedDBService.getFileMetadata.mockResolvedValue(mockMetadata);
@@ -182,6 +221,7 @@ describe('IndexedDBCache', () => {
         lastAccessed: Date.now(),
         version: 2,
         datesStored: true,
+        dateZones: {},
       };
 
       mockIndexedDBService.getFileMetadata.mockResolvedValue(mockMetadata);

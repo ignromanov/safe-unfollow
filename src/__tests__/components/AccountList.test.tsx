@@ -3,8 +3,8 @@ import resultsEN from '@/locales/en/results.json';
 import userEvent from '@testing-library/user-event';
 import { render, screen } from '@testing-library/react';
 
-// The only mock this file needs: the hook reads IndexedDB, which jsdom does not
-// provide. Everything else — the virtualizer, the icons, the copy — runs real,
+// The data-source mock below is the one the empty branch needs: the hook reads
+// IndexedDB, which jsdom does not provide. The icons and the copy run real,
 // because the empty branch is what is under test and it renders none of them.
 //
 // i18n comes from the GLOBAL mock (`vitest.setup.ts:5`), deliberately, and not
@@ -16,6 +16,18 @@ vi.mock('@/hooks/useAccountDataSource', () => ({
   useAccountDataSource: vi.fn(() => ({
     getAccount: vi.fn(),
   })),
+}));
+
+// The virtualizer is stubbed for the follow-date tests at the foot of this file:
+// jsdom has no layout, so the real one renders no rows. The empty-state tests
+// return before any row, so the stub changes nothing for them.
+vi.mock('@tanstack/react-virtual', () => ({
+  useVirtualizer: () => ({
+    getTotalSize: () => 92,
+    getVirtualItems: () => [{ key: '0', index: 0, start: 0, size: 92 }],
+    measure: () => {},
+    measureElement: () => {},
+  }),
 }));
 
 /**
@@ -33,6 +45,7 @@ describe('empty state', () => {
       accountIndices={[]}
       hasLoadedData
       isLoading={false}
+      dateZones={null}
       activeFilter={activeFilter}
       searchActive={searchActive}
       onClearFilters={vi.fn()}
@@ -60,6 +73,7 @@ describe('empty state', () => {
         accountIndices={[]}
         hasLoadedData
         isLoading={false}
+        dateZones={null}
         activeFilter={applied}
         searchActive={false}
         onClearFilters={onClearFilters}
@@ -147,5 +161,33 @@ describe('empty state', () => {
     render(emptyList(undefined));
 
     expect(screen.getByText(resultsEN.empty.noUsers)).toBeInTheDocument();
+  });
+});
+
+describe('follow-date line', () => {
+  const props = {
+    fileHash: 'h',
+    accountCount: 1,
+    accountIndices: null,
+    hasLoadedData: true,
+    isLoading: false,
+  };
+
+  beforeEach(async () => {
+    const { useAccountDataSource } = await import('@/hooks/useAccountDataSource');
+    vi.mocked(useAccountDataSource).mockReturnValue({
+      getAccount: vi.fn(() => ({ username: 'a', badges: { following: 1727654400 } })),
+    } as unknown as ReturnType<typeof useAccountDataSource>);
+  });
+
+  it('renders the line when the file has zones', () => {
+    render(<AccountList {...props} dateZones={{ following: 'utc' }} />);
+    expect(screen.getByText('Following since Sep 30, 2024')).toBeInTheDocument();
+  });
+
+  it('renders no line and no empty box when dateZones is null', () => {
+    const { container } = render(<AccountList {...props} dateZones={null} />);
+    expect(container.querySelector('p')).toBeNull();
+    expect(container.textContent).not.toMatch(/since/);
   });
 });

@@ -18,3 +18,9 @@ export interface AccountBadges {
   username: string;
   badges: BadgeMap;
 }
+
+// Which clock a stored follow date was recorded against: 'utc' dates are shown as the source's
+// own calendar day, 'local' dates in the viewer's zone.
+export type DateZone = 'utc' | 'local';
+export type DateZones = Partial<Record<BadgeKey, DateZone>>;
+export type DateSources = Partial<Record<BadgeKey, DateZone | 'mixed'>>;

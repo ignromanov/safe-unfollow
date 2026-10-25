@@ -10,7 +10,9 @@ import {
   clearSampleData,
   hasSampleData,
   getSampleFileHash,
+  SAMPLE_DATE_SOURCES,
 } from '@/lib/sample-data';
+import { TIME_BASED_BADGES } from '@/lib/indexeddb/indexeddb-schema';
 import { indexedDBService } from '@/lib/indexeddb/indexeddb-service';
 import type { AccountBadges, BadgeKey } from '@/core/types';
 
@@ -95,7 +97,8 @@ describe('Sample Data Loading', () => {
       // Should store accounts from snapshot
       expect(indexedDBService.storeAllAccounts).toHaveBeenCalledWith(
         getSampleFileHash(),
-        mockSampleAccounts
+        mockSampleAccounts,
+        SAMPLE_DATE_SOURCES
       );
     });
 
@@ -108,18 +111,30 @@ describe('Sample Data Loading', () => {
       lastAccessed: Date.now(),
       version: 2,
       datesStored: true,
+      dateZones: { following: 'utc' } as const,
     };
 
     it('rebuilds sample data stored before dates were persisted (GH#285)', async () => {
       vi.mocked(indexedDBService.getFileMetadata).mockResolvedValue({
         ...existingMetadata,
-        datesStored: undefined,
+        dateZones: undefined,
       });
 
       await generateAndStoreSampleData();
 
       expect(indexedDBService.clearFile).toHaveBeenCalledWith(getSampleFileHash());
       expect(indexedDBService.storeAllAccounts).toHaveBeenCalledTimes(1);
+      expect(indexedDBService.storeAllAccounts).toHaveBeenCalledWith(
+        getSampleFileHash(),
+        expect.any(Array),
+        SAMPLE_DATE_SOURCES
+      );
+    });
+
+    it('every time-based badge is utc in the sample sources', () => {
+      expect(SAMPLE_DATE_SOURCES).toEqual(
+        Object.fromEntries(TIME_BASED_BADGES.map(badge => [badge, 'utc']))
+      );
     });
 
     it('should return existing metadata when sample data already exists', async () => {

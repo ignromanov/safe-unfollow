@@ -1,9 +1,12 @@
 import { useAccountDataSource } from '@/hooks/useAccountDataSource';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Ghost } from 'lucide-react';
-import { memo, useCallback, useRef } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { DateZones } from '@/core/types';
+import { createFollowDateFormatter, reservesDateLine } from '@/lib/follow-dates';
 import { AccountItem } from './AccountItem';
+import { estimateRowHeight } from './account-row-geometry';
 import { SkeletonItem } from './SkeletonItem';
 
 /**
@@ -29,6 +32,8 @@ export interface AccountListProps {
   onClearFilters?: () => void;
   /** V7: Callback to track account click with badges for aggregation */
   onAccountClick?: (badges: string[]) => void;
+  /** The file's date zones; null when dates cannot be shown. Read by the row renderer. */
+  dateZones: DateZones | null;
 }
 
 export const AccountList = memo(function AccountList({
@@ -40,9 +45,14 @@ export const AccountList = memo(function AccountList({
   searchActive,
   onClearFilters,
   onAccountClick,
+  dateZones,
 }: AccountListProps) {
-  const { t } = useTranslation('results');
+  const { t, i18n } = useTranslation('results');
   const parentRef = useRef<HTMLDivElement>(null);
+
+  // Built once per language and once per render, so the memoised rows see stable props on scroll.
+  const formatDate = useMemo(() => createFollowDateFormatter(i18n.language), [i18n.language]);
+  const reserveDateLine = reservesDateLine(dateZones);
 
   // Initialize data source for lazy loading (uses passed fileHash, not store)
   const { getAccount } = useAccountDataSource({
@@ -65,12 +75,26 @@ export const AccountList = memo(function AccountList({
     [accountIndices, getAccount]
   );
 
+  // Read once: /results is prerendered, so there is no window on the server, and jsdom has no matchMedia.
+  const [desktop] = useState(
+    () =>
+      typeof window !== 'undefined' &&
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(min-width: 768px)').matches
+  );
+  const rowEstimate = estimateRowHeight({ reserveDateLine, desktop });
+
   const virtualizer = useVirtualizer({
     count: displayCount,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 92,
+    estimateSize: () => rowEstimate,
     overscan: 10,
   });
+
+  // Zones can resolve after the first paint; sizes cached for the old reserve state are stale.
+  useEffect(() => {
+    virtualizer.measure();
+  }, [rowEstimate]);
 
   const virtualItems = virtualizer.getVirtualItems();
 
@@ -147,28 +171,38 @@ export const AccountList = memo(function AccountList({
           {virtualItems.map(virtualItem => {
             const account = getAccountByIndex(virtualItem.index);
 
+            const position = {
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              transform: `translateY(${virtualItem.start}px)`,
+            } as const;
+
+            if (!account) {
+              return (
+                <div key={virtualItem.key} style={{ ...position, height: `${rowEstimate}px` }}>
+                  <SkeletonItem />
+                </div>
+              );
+            }
+
             return (
               <div
                 key={virtualItem.key}
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: `${virtualItem.size}px`,
-                  transform: `translateY(${virtualItem.start}px)`,
-                }}
+                ref={virtualizer.measureElement}
+                data-index={virtualItem.index}
+                style={position}
               >
-                {account ? (
-                  <AccountItem
-                    account={account}
-                    index={virtualItem.index}
-                    totalCount={displayCount}
-                    onAccountClick={onAccountClick}
-                  />
-                ) : (
-                  <SkeletonItem />
-                )}
+                <AccountItem
+                  account={account}
+                  index={virtualItem.index}
+                  totalCount={displayCount}
+                  onAccountClick={onAccountClick}
+                  dateZones={dateZones}
+                  formatDate={formatDate}
+                  reserveDateLine={reserveDateLine}
+                />
               </div>
             );
           })}

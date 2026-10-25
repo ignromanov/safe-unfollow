@@ -175,7 +175,7 @@ export async function parseOnMainThread(
       truncatedRelationshipFile: parseResult.truncatedRelationshipFile,
     });
 
-    await indexedDBService.storeAllAccounts(fileHash, unified);
+    await indexedDBService.storeAllAccounts(fileHash, unified, parseResult.dateSources);
   } catch (dbError) {
     const error = new Error(
       dbError instanceof Error ? dbError.message : 'Failed to save data'

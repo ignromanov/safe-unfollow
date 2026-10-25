@@ -1,17 +1,26 @@
 import { AccountList } from '@/components/AccountList';
 import type { AccountBadges } from '@/core/types';
+import { estimateRowHeight } from '@/components/account-row-geometry';
 import { fireEvent, render, screen } from '@testing-library/react';
+
+const virtualizerStub = vi.hoisted(() => ({
+  measure: vi.fn(),
+  measureElement: vi.fn(),
+  items: [
+    { key: '0', index: 0, start: 0, size: 100 },
+    { key: '1', index: 1, start: 100, size: 100 },
+    { key: '2', index: 2, start: 200, size: 100 },
+  ],
+}));
 
 // Mock @tanstack/react-virtual
 vi.mock('@tanstack/react-virtual', () => ({
   useVirtualizer: vi.fn(() => ({
     getTotalSize: () => 300,
-    getVirtualItems: () => [
-      { key: '0', index: 0, start: 0, size: 100 },
-      { key: '1', index: 1, start: 100, size: 100 },
-      { key: '2', index: 2, start: 200, size: 100 },
-    ],
+    getVirtualItems: () => virtualizerStub.items,
     scrollToIndex: vi.fn(),
+    measure: virtualizerStub.measure,
+    measureElement: virtualizerStub.measureElement,
   })),
 }));
 
@@ -62,6 +71,7 @@ vi.mock('@/hooks/useAccountDataSource', () => ({
 
 describe('AccountList Virtual List', () => {
   const defaultProps = {
+    dateZones: null,
     fileHash: 'test-hash',
     accountCount: 100,
   };
@@ -196,7 +206,13 @@ describe('AccountList Virtual List', () => {
 
   it('caps its height rather than pinning it, so the page below the list is reachable (populated list)', () => {
     const { container } = render(
-      <AccountList fileHash="abc" accountCount={5000} accountIndices={null} hasLoadedData />
+      <AccountList
+        fileHash="abc"
+        accountCount={5000}
+        accountIndices={null}
+        hasLoadedData
+        dateZones={null}
+      />
     );
 
     const card = container.firstChild as HTMLElement;
@@ -211,7 +227,13 @@ describe('AccountList Virtual List', () => {
     // displayCount === 0 branch: a filtered-to-nothing search is the worst case for
     // a pinned height — a full-viewport card with nothing in it. See D9.
     const { container } = render(
-      <AccountList fileHash="abc" accountCount={5000} accountIndices={[]} hasLoadedData />
+      <AccountList
+        fileHash="abc"
+        accountCount={5000}
+        accountIndices={[]}
+        hasLoadedData
+        dateZones={null}
+      />
     );
 
     const card = container.firstChild as HTMLElement;
@@ -222,9 +244,122 @@ describe('AccountList Virtual List', () => {
 
   it('keeps overscroll-contain, which guards Android pull-to-refresh at the list top', () => {
     const { container } = render(
-      <AccountList fileHash="abc" accountCount={5000} accountIndices={null} hasLoadedData />
+      <AccountList
+        fileHash="abc"
+        accountCount={5000}
+        accountIndices={null}
+        hasLoadedData
+        dateZones={null}
+      />
     );
 
     expect(container.querySelector('.overscroll-contain')).not.toBeNull();
+  });
+
+  describe('row measurement', () => {
+    const stubMatchMedia = (matches: boolean) => {
+      vi.stubGlobal(
+        'matchMedia',
+        vi.fn(() => ({ matches }))
+      );
+    };
+
+    // Index 0 has data; index 9 does not, so it renders a skeleton.
+    const loadedAndSkeleton = () => {
+      virtualizerStub.items = [
+        { key: '0', index: 0, start: 0, size: 100 },
+        { key: '9', index: 9, start: 100, size: 100 },
+      ];
+    };
+
+    const wrappers = (container: HTMLElement) => ({
+      loaded: container.querySelector('[data-index="0"]') as HTMLElement,
+      skeleton: container.querySelector(
+        '[role="feed"] > div > div:not([data-index])'
+      ) as HTMLElement,
+    });
+
+    afterEach(() => {
+      vi.unstubAllGlobals();
+      virtualizerStub.items = [
+        { key: '0', index: 0, start: 0, size: 100 },
+        { key: '1', index: 1, start: 100, size: 100 },
+        { key: '2', index: 2, start: 200, size: 100 },
+      ];
+    });
+
+    it('measures a loaded row and gives it no inline height', () => {
+      stubMatchMedia(false);
+      loadedAndSkeleton();
+      const { container } = render(
+        <AccountList {...defaultProps} accountIndices={null} hasLoadedData />
+      );
+
+      const { loaded } = wrappers(container);
+      expect(loaded).not.toBeNull();
+      expect(loaded.style.height).toBe('');
+      expect(loaded.style.transform).toBe('translateY(0px)');
+    });
+
+    it.each([
+      [null, false],
+      [{ following: 'local' as const }, true],
+    ])('holds a skeleton at the estimate for dateZones=%j', (dateZones, reserveDateLine) => {
+      stubMatchMedia(false);
+      loadedAndSkeleton();
+      const { container } = render(
+        <AccountList {...defaultProps} dateZones={dateZones} accountIndices={null} hasLoadedData />
+      );
+
+      const { skeleton } = wrappers(container);
+      expect(skeleton.hasAttribute('data-index')).toBe(false);
+      expect(skeleton.style.height).toBe(
+        `${estimateRowHeight({ reserveDateLine, desktop: false })}px`
+      );
+    });
+
+    it('sizes the skeleton for a desktop viewport', () => {
+      stubMatchMedia(true);
+      loadedAndSkeleton();
+      const { container } = render(
+        <AccountList {...defaultProps} accountIndices={null} hasLoadedData />
+      );
+
+      expect(wrappers(container).skeleton.style.height).toBe(
+        `${estimateRowHeight({ reserveDateLine: false, desktop: true })}px`
+      );
+    });
+
+    it('drops cached sizes when the zones resolve and the estimate changes', () => {
+      stubMatchMedia(false);
+      loadedAndSkeleton();
+      const { container, rerender } = render(
+        <AccountList {...defaultProps} accountIndices={null} hasLoadedData />
+      );
+      expect(wrappers(container).skeleton.style.height).toBe('84px');
+      virtualizerStub.measure.mockClear();
+
+      rerender(
+        <AccountList
+          {...defaultProps}
+          dateZones={{ following: 'local' }}
+          accountIndices={null}
+          hasLoadedData
+        />
+      );
+
+      expect(wrappers(container).skeleton.style.height).toBe('104px');
+      expect(virtualizerStub.measure).toHaveBeenCalled();
+    });
+
+    it('renders when matchMedia does not exist (prerender, jsdom) and uses the mobile estimate', () => {
+      vi.stubGlobal('matchMedia', undefined);
+      loadedAndSkeleton();
+      const { container } = render(
+        <AccountList {...defaultProps} accountIndices={null} hasLoadedData />
+      );
+
+      expect(wrappers(container).skeleton.style.height).toBe('84px');
+    });
   });
 });

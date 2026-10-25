@@ -33,13 +33,14 @@ class IndexedDBCache {
       return null;
     }
 
-    // A record stored before follow dates moved into `columns` has no date
-    // columns. Serving it would skip the parse and refresh lastAccessed, keeping
-    // the dateless copy alive for as long as the visitor keeps re-uploading.
+    // A record without `dateZones` was stored before follow dates carried a zone
+    // (or before they existed), so its dates cannot be shown truthfully. Serving it
+    // would skip the parse and refresh lastAccessed, keeping that copy alive for
+    // as long as the visitor keeps re-uploading.
     // Report a miss so the file is re-parsed. No clearFile is needed first:
     // storeAllAccounts overwrites the columns and bitsets for this hash and
     // deletes any date column the new parse does not produce, in one transaction.
-    if (metadata.datesStored !== true) {
+    if (metadata.dateZones === undefined) {
       return null;
     }
 

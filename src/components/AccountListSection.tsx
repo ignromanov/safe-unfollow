@@ -14,6 +14,7 @@ import { AppliedFilters } from './AppliedFilters';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import { FollowRequestsCaveat } from './FollowRequestsCaveat';
 import { TruncatedFileCaveat } from './TruncatedFileCaveat';
+import { StaleDatesHint } from './StaleDatesHint';
 import { AccountList } from './AccountList';
 import { StatCard } from './StatCard';
 import { InlineDonationCard } from './InlineDonationCard';
@@ -159,7 +160,8 @@ export function AccountListSection({
   // follow-requests file we could not read (GH#41), and a required file that
   // arrived short because a date range was chosen when the export was
   // requested. One read answers both.
-  const { followRequestsUnreadable, truncatedRelationshipFile } = useUploadCaveats(fileHash);
+  const { followRequestsUnreadable, truncatedRelationshipFile, dateZones, datesStale } =
+    useUploadCaveats(fileHash);
 
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [isFilterSheetOpen, setFilterSheetOpen] = useState(false);
@@ -315,6 +317,7 @@ export function AccountListSection({
         <p className="text-zinc-500 text-xs md:text-sm font-bold uppercase tracking-widest">
           {t('header.fileInfo', { filename, count: totalCount })}
         </p>
+        <StaleDatesHint stale={datesStale} isSample={isSample} />
       </div>
 
       {/* Sticky: search and sort only. */}
@@ -526,6 +529,7 @@ export function AccountListSection({
             searchActive={query.length > 0}
             onClearFilters={handleClearFilters}
             onAccountClick={trackClick}
+            dateZones={dateZones}
           />
         </div>
       </div>
