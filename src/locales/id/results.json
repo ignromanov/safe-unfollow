@@ -249,5 +249,12 @@
       "again": "Ekspor lagi",
       "error": "Ekspor gagal. Silakan coba lagi."
     }
+  },
+  "dates": {
+    "following": "Mengikuti sejak {{date}}",
+    "followers": "Mengikuti Anda sejak {{date}}",
+    "mutual": "Saling mengikuti sejak {{date}}",
+    "requested": "Permintaan dikirim {{date}}",
+    "staleHint": "Unggah ZIP Instagram Anda lagi untuk melihat tanggal mengikuti. File yang sama juga bisa."
   }
 }

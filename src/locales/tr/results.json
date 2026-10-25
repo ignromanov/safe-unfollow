@@ -249,5 +249,12 @@
       "again": "Yeniden dışa aktar",
       "error": "Dışa aktarma başarısız oldu. Lütfen tekrar deneyin."
     }
+  },
+  "dates": {
+    "following": "Takip başlangıcı: {{date}}",
+    "followers": "Takipçin oldu: {{date}}",
+    "mutual": "Karşılıklı takip: {{date}}",
+    "requested": "İstek gönderildi: {{date}}",
+    "staleHint": "Takip tarihlerini görmek için Instagram ZIP dosyanı yeniden yükle. Aynı dosya da olur."
   }
 }

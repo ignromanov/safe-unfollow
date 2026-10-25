@@ -249,5 +249,12 @@
       "again": "Exportar de nuevo",
       "error": "La exportación falló. Inténtalo de nuevo."
     }
+  },
+  "dates": {
+    "following": "Siguiendo desde el {{date}}",
+    "followers": "Te sigue desde el {{date}}",
+    "mutual": "Se siguen desde el {{date}}",
+    "requested": "Solicitud enviada el {{date}}",
+    "staleHint": "Vuelve a subir tu ZIP de Instagram para ver las fechas. Sirve el mismo archivo."
   }
 }
