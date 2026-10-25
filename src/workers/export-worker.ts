@@ -11,6 +11,7 @@
 import * as Comlink from 'comlink';
 
 import { buildExportCsv } from '@/lib/export/csv';
+import { buildExportHtml } from '@/lib/export/html';
 import { buildExportJson } from '@/lib/export/json';
 import { assertNever, type ExportProgressCallback, type ExportRequest } from '@/lib/export/types';
 
@@ -35,6 +36,8 @@ export const exportWorkerApi = {
         return buildExportCsv(fileHash, indices, totalCount, onProgress);
       case 'json':
         return buildExportJson(fileHash, indices, totalCount, onProgress);
+      case 'html':
+        return buildExportHtml(fileHash, indices, totalCount, request.report, onProgress);
       default:
         return assertNever(request);
     }

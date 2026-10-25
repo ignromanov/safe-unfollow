@@ -18,6 +18,9 @@ import {
 } from '@/lib/export/unlock';
 import { analytics } from '@/lib/stats';
 
+// The dialog offers the two file formats; the HTML report is wired in with its own request.
+type DialogFormat = Exclude<ExportFormat, 'html'>;
+
 export interface ExportDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -50,7 +53,7 @@ export function ExportDialog({
 }: ExportDialogProps) {
   const { t, i18n } = useTranslation('results');
   const { buildExport } = useExportWorker();
-  const [pendingFormat, setPendingFormat] = useState<ExportFormat | null>(null);
+  const [pendingFormat, setPendingFormat] = useState<DialogFormat | null>(null);
   const [progress, setProgress] = useState<ExportProgress | null>(null);
   const [hasFailed, setHasFailed] = useState(false);
   const [isRevoked, setIsRevoked] = useState(false);
@@ -92,7 +95,7 @@ export function ExportDialog({
     };
   }, []);
 
-  const handleExport = async (format: ExportFormat): Promise<void> => {
+  const handleExport = async (format: DialogFormat): Promise<void> => {
     setPendingFormat(format);
     setHasFailed(false);
     setProgress(null);
@@ -120,7 +123,7 @@ export function ExportDialog({
 
   const isPending = pendingFormat !== null;
 
-  const renderIcon = (format: ExportFormat) => {
+  const renderIcon = (format: DialogFormat) => {
     if (pendingFormat === format) {
       // Wrapper div, not the svg: browsers hardware-accelerate transforms on
       // regular elements but not reliably on SVG nodes.

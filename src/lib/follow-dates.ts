@@ -43,6 +43,15 @@ export function pickDateLine(badges: BadgeMap, zones: DateZones): DateLine | nul
   return followers !== null ? line('followers', 'followers', followers) : null;
 }
 
+/**
+ * A stored record without `dateZones` was written before zones were kept, so its
+ * dates cannot be shown until the file is uploaded again. Asked of a record that
+ * was actually read: no record (loading, failed read) is never "stale".
+ */
+export function datesStale(record: { dateZones?: DateZones } | null): boolean {
+  return record !== null && record.dateZones === undefined;
+}
+
 export function reservesDateLine(zones: DateZones | null): boolean {
   return zones !== null && LINE_BADGES.some(key => zones[key] !== undefined);
 }
