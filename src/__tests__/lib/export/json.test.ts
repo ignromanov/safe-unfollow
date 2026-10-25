@@ -1,12 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AccountBadges } from '@/core/types';
 
-const { getAccountsByRange } = vi.hoisted(() => ({
+const { getAccountsByRange, getFileMetadata } = vi.hoisted(() => ({
   getAccountsByRange: vi.fn(),
+  getFileMetadata: vi.fn(),
 }));
 
 vi.mock('@/lib/indexeddb/indexeddb-service', () => ({
-  indexedDBService: { getAccountsByRange },
+  indexedDBService: { getAccountsByRange, getFileMetadata },
 }));
 
 const { buildExportJson } = await import('@/lib/export/json');
@@ -28,6 +29,8 @@ function readBlobText(blob: Blob): Promise<string> {
 describe('buildExportJson', () => {
   beforeEach(() => {
     getAccountsByRange.mockReset();
+    getFileMetadata.mockReset();
+    getFileMetadata.mockResolvedValue(null);
   });
 
   it('should build a JSON array with username, href, and badges per account', async () => {
@@ -41,8 +44,13 @@ describe('buildExportJson', () => {
     const parsed = JSON.parse(text);
 
     expect(parsed).toEqual([
-      { username: 'alice', href: 'https://instagram.com/alice', badges: { following: true } },
-      { username: 'bob', href: 'https://instagram.com/bob', badges: {} },
+      {
+        username: 'alice',
+        href: 'https://instagram.com/alice',
+        badges: { following: true },
+        dates: {},
+      },
+      { username: 'bob', href: 'https://instagram.com/bob', badges: {}, dates: {} },
     ]);
   });
 
@@ -52,6 +60,23 @@ describe('buildExportJson', () => {
     ]);
     const parsed = JSON.parse(await readBlobText(await buildExportJson('hash1', null, 1)));
     expect(parsed[0].badges).toEqual({ following: true, mutuals: true });
+  });
+
+  it('writes a dates object beside badges, with a key only for a known date (GH#285 PR-3)', async () => {
+    getFileMetadata.mockResolvedValue({ dateZones: { following: 'utc', followers: 'utc' } });
+    getAccountsByRange.mockResolvedValueOnce([
+      account('alice', { following: 1727654400, followers: true, mutuals: true }),
+    ]);
+    const parsed = JSON.parse(await readBlobText(await buildExportJson('hash1', null, 1)));
+    expect(parsed[0].dates).toEqual({ following: '2024-09-30' });
+    expect(parsed[0].badges).toEqual({ following: true, followers: true, mutuals: true });
+  });
+
+  it('writes no dates for a file stored before date zones existed', async () => {
+    getFileMetadata.mockResolvedValue({ datesStored: true });
+    getAccountsByRange.mockResolvedValueOnce([account('alice', { following: 1727654400 })]);
+    const parsed = JSON.parse(await readBlobText(await buildExportJson('hash1', null, 1)));
+    expect(parsed[0].dates).toEqual({});
   });
 
   it('should produce a valid empty array when there are no rows', async () => {
