@@ -39,9 +39,11 @@ describe('both upload caveats reach IndexedDB', () => {
     labelResolutionMode: 'fast-path' as const,
     followRequestsUnreadable: true,
     truncatedRelationshipFile: 'followers' as const,
+    dateSources: { following: 'local' as const },
   };
 
   let saveFileMetadata: ReturnType<typeof vi.fn>;
+  let storeAllAccounts: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
     vi.clearAllMocks();
@@ -61,7 +63,8 @@ describe('both upload caveats reach IndexedDB', () => {
     const mockService = vi.mocked(service.indexedDBService);
     saveFileMetadata = vi.mocked(mockService.saveFileMetadata);
     saveFileMetadata.mockResolvedValue(undefined);
-    vi.mocked(mockService.storeAllAccounts).mockResolvedValue(undefined);
+    storeAllAccounts = vi.mocked(mockService.storeAllAccounts);
+    storeAllAccounts.mockResolvedValue(undefined);
   });
 
   const zipFile = () => new File(['mock zip'], 'export.zip', { type: 'application/zip' });
@@ -77,6 +80,8 @@ describe('both upload caveats reach IndexedDB', () => {
         truncatedRelationshipFile: 'followers',
       })
     );
+    // Dropping this argument stores no date column and still compiles in a test run.
+    expect(storeAllAccounts.mock.calls[0]?.[2]).toEqual({ following: 'local' });
   });
 
   it('the worker persists them', async () => {
@@ -102,5 +107,7 @@ describe('both upload caveats reach IndexedDB', () => {
         truncatedRelationshipFile: 'followers',
       })
     );
+    // Dropping this argument stores no date column and still compiles in a test run.
+    expect(storeAllAccounts.mock.calls[0]?.[2]).toEqual({ following: 'local' });
   });
 });

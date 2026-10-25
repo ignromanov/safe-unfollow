@@ -14,7 +14,7 @@
  * - cache-manager.ts        (in-memory caching)
  */
 
-import type { AccountBadges, BadgeKey, DateSources, DateZone, DateZones } from '@/core/types';
+import type { AccountBadges, BadgeKey, DateSources, DateZones } from '@/core/types';
 import { BitSet, StringColumnBuilder, StringColumnReader } from './bitset';
 import { CacheManager } from './cache-manager';
 import { buildDateColumn, forEachDateInRange, type DateColumn } from './date-column';
@@ -266,8 +266,8 @@ export class IndexedDBService {
     const dateZones: DateZones = {};
     for (const badge of TIME_BASED_BADGES) {
       const source = dateSources?.[badge];
-      const dates =
-        source === 'utc' || source === 'local' ? buildDateColumn(accounts, badge) : null;
+      const zone = source === 'utc' || source === 'local' ? source : undefined;
+      const dates = zone ? buildDateColumn(accounts, badge) : null;
       if (!dates) {
         // A re-store does not clear the file first: an old positional column left
         // behind would put its dates on whichever accounts now sit at those indices.
@@ -282,7 +282,7 @@ export class IndexedDBService {
         length: dates.indices.length,
       };
       datePromises.push(executeWrite(columnsStore, record));
-      dateZones[badge] = source as DateZone;
+      dateZones[badge] = zone;
     }
     await Promise.all(datePromises);
 

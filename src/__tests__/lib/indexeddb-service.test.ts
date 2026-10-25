@@ -928,6 +928,21 @@ describe('IndexedDBService (Integration Tests)', () => {
       await store('zones-e', [{ username: 'a', badges: { followers: 5 } }], { followers: 'mixed' });
       const [a] = await indexedDBService.getAccountsByRange('zones-e', 0, 1);
       expect(a!.badges.followers).toBe(true);
+      expect((await indexedDBService.getFileMetadata('zones-e'))?.dateZones).toEqual({});
+    });
+
+    it('treats a runtime-undefined dateSources as no sources', async () => {
+      // `store` would default an explicit undefined to LOCAL, so call the service directly.
+      const accounts: AccountBadges[] = [{ username: 'a', badges: { followers: 5 } }];
+      await store('zones-f', accounts, {});
+      await indexedDBService.storeAllAccounts(
+        'zones-f',
+        accounts,
+        undefined as unknown as DateSources
+      );
+      const [a] = await indexedDBService.getAccountsByRange('zones-f', 0, 1);
+      expect(a!.badges.followers).toBe(true);
+      expect((await indexedDBService.getFileMetadata('zones-f'))?.dateZones).toEqual({});
     });
 
     it('returns the stored date as the badge value, and true where the export had none', async () => {
