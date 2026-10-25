@@ -36,6 +36,49 @@ export function dropOnDemandFontPreloads(html: string): string {
   });
 }
 
+type ManifestChunk = {
+  file: string;
+  isDynamicEntry?: boolean;
+  imports?: string[];
+};
+
+/**
+ * Strip the modulepreloads vite-react-ssg writes for code a lazy route only loads on demand.
+ *
+ * Its `collectModules` walks a route chunk's `dynamicImports` as well as its `imports`, so the
+ * prerendered /results and /sample began preloading the export dialog, the paywall and the
+ * licence dialog, which the page fetches only when a reader opens them. The cost was measurable:
+ * direct /results LCP +136 ms in GH#292's cold-load runs, and back within noise once these went.
+ *
+ * Kept: the static `imports` closure of the entry and of every route module (`src/pages/*`) the
+ * page already preloads. Dropped: any other chunk the manifest knows. Hrefs it does not know
+ * pass through, because they were judged by nothing here.
+ */
+export function dropDynamicOnlyPreloads(
+  html: string,
+  manifest: Record<string, ManifestChunk>
+): string {
+  const keyByFile = new Map(Object.entries(manifest).map(([key, chunk]) => [chunk.file, key]));
+  const preloaded = [...html.matchAll(/<link rel="modulepreload"[^>]*href="\/([^"]+)"[^>]*>/g)]
+    .map(m => keyByFile.get(m[1]))
+    .filter((key): key is string => key !== undefined);
+  const routes = preloaded.filter(key => key.startsWith('src/pages/'));
+  if (routes.length === 0) return html;
+
+  const keep = new Set<string>();
+  const walk = (key: string) => {
+    if (keep.has(key) || !manifest[key]) return;
+    keep.add(key);
+    manifest[key].imports?.forEach(walk);
+  };
+  ['index.html', ...routes].forEach(walk);
+
+  return html.replace(/<link rel="modulepreload"[^>]*href="\/([^"]+)"[^>]*>/g, (tag, file) => {
+    const key = keyByFile.get(file);
+    return key === undefined || keep.has(key) ? tag : '';
+  });
+}
+
 /**
  * modulepreload hrefs for the locale chunks a page will fetch, English first.
  *
@@ -84,17 +127,17 @@ export function localeChunkHrefs(
   return langs.map(l => localeChunkHref(l, manifest));
 }
 
-let manifestCache: Record<string, { file: string }> | null = null;
+let manifestCache: Record<string, ManifestChunk> | null = null;
 
 // Caches on the first call and ignores rootDir on every later one. Safe today: this hook runs
 // once per `vite build` process, and every call within that process shares the same rootDir.
 // Would need a rootDir-keyed cache if this module were ever reused across builds in one process.
-function readViteManifest(rootDir: string): Record<string, { file: string }> {
+function readViteManifest(rootDir: string): Record<string, ManifestChunk> {
   if (manifestCache) return manifestCache;
   const manifestPath = path.join(rootDir, 'dist', '.vite', 'manifest.json');
   manifestCache = JSON.parse(fs.readFileSync(manifestPath, 'utf-8')) as Record<
     string,
-    { file: string }
+    ManifestChunk
   >;
   return manifestCache;
 }
@@ -403,6 +446,9 @@ export async function injectLocalizedMeta(
 
   // Drop the whole-asset-graph font preloads vite-react-ssg appended before this hook ran
   html = dropOnDemandFontPreloads(html);
+  // ...and the on-demand chunks it preloads for a lazy route (GH#292). Runs before the locale
+  // preloads go in, so those are never judged here.
+  html = dropDynamicOnlyPreloads(html, readViteManifest(rootDir));
 
   // Inject SEO tags before </head>
   return html.replace('</head>', `${seoTags}</head>`);
