@@ -62,6 +62,7 @@ vi.mock('@/hooks/useAccountDataSource', () => ({
 
 describe('AccountList Virtual List', () => {
   const defaultProps = {
+    dateZones: null,
     fileHash: 'test-hash',
     accountCount: 100,
   };
@@ -196,7 +197,13 @@ describe('AccountList Virtual List', () => {
 
   it('caps its height rather than pinning it, so the page below the list is reachable (populated list)', () => {
     const { container } = render(
-      <AccountList fileHash="abc" accountCount={5000} accountIndices={null} hasLoadedData />
+      <AccountList
+        fileHash="abc"
+        accountCount={5000}
+        accountIndices={null}
+        hasLoadedData
+        dateZones={null}
+      />
     );
 
     const card = container.firstChild as HTMLElement;
@@ -211,7 +218,13 @@ describe('AccountList Virtual List', () => {
     // displayCount === 0 branch: a filtered-to-nothing search is the worst case for
     // a pinned height — a full-viewport card with nothing in it. See D9.
     const { container } = render(
-      <AccountList fileHash="abc" accountCount={5000} accountIndices={[]} hasLoadedData />
+      <AccountList
+        fileHash="abc"
+        accountCount={5000}
+        accountIndices={[]}
+        hasLoadedData
+        dateZones={null}
+      />
     );
 
     const card = container.firstChild as HTMLElement;
@@ -222,7 +235,13 @@ describe('AccountList Virtual List', () => {
 
   it('keeps overscroll-contain, which guards Android pull-to-refresh at the list top', () => {
     const { container } = render(
-      <AccountList fileHash="abc" accountCount={5000} accountIndices={null} hasLoadedData />
+      <AccountList
+        fileHash="abc"
+        accountCount={5000}
+        accountIndices={null}
+        hasLoadedData
+        dateZones={null}
+      />
     );
 
     expect(container.querySelector('.overscroll-contain')).not.toBeNull();

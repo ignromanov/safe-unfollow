@@ -51,7 +51,7 @@ export const AccountList = memo(function AccountList({
 
   // Built once per language and once per render, so the memoised rows see stable props on scroll.
   const formatDate = useMemo(() => createFollowDateFormatter(i18n.language), [i18n.language]);
-  const reserveDateLine = reservesDateLine(dateZones ?? null);
+  const reserveDateLine = reservesDateLine(dateZones);
 
   // Initialize data source for lazy loading (uses passed fileHash, not store)
   const { getAccount } = useAccountDataSource({

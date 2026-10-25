@@ -3,8 +3,8 @@ import resultsEN from '@/locales/en/results.json';
 import userEvent from '@testing-library/user-event';
 import { render, screen } from '@testing-library/react';
 
-// The only mock this file needs: the hook reads IndexedDB, which jsdom does not
-// provide. Everything else — the virtualizer, the icons, the copy — runs real,
+// The data-source mock below is the one the empty branch needs: the hook reads
+// IndexedDB, which jsdom does not provide. The icons and the copy run real,
 // because the empty branch is what is under test and it renders none of them.
 //
 // i18n comes from the GLOBAL mock (`vitest.setup.ts:5`), deliberately, and not
@@ -12,18 +12,20 @@ import { render, screen } from '@testing-library/react';
 // understands `{{count, number}}`, which is what production i18next does. The
 // opt-in mock replaces the first occurrence only, so an assertion written
 // against it can pass while the live page renders a raw `{{…}}`.
-// jsdom has no layout, so the real virtualizer renders no rows.
+vi.mock('@/hooks/useAccountDataSource', () => ({
+  useAccountDataSource: vi.fn(() => ({
+    getAccount: vi.fn(),
+  })),
+}));
+
+// The virtualizer is stubbed for the follow-date tests at the foot of this file:
+// jsdom has no layout, so the real one renders no rows. The empty-state tests
+// return before any row, so the stub changes nothing for them.
 vi.mock('@tanstack/react-virtual', () => ({
   useVirtualizer: () => ({
     getTotalSize: () => 92,
     getVirtualItems: () => [{ key: '0', index: 0, start: 0, size: 92 }],
   }),
-}));
-
-vi.mock('@/hooks/useAccountDataSource', () => ({
-  useAccountDataSource: vi.fn(() => ({
-    getAccount: vi.fn(),
-  })),
 }));
 
 /**
@@ -41,6 +43,7 @@ describe('empty state', () => {
       accountIndices={[]}
       hasLoadedData
       isLoading={false}
+      dateZones={null}
       activeFilter={activeFilter}
       searchActive={searchActive}
       onClearFilters={vi.fn()}
@@ -68,6 +71,7 @@ describe('empty state', () => {
         accountIndices={[]}
         hasLoadedData
         isLoading={false}
+        dateZones={null}
         activeFilter={applied}
         searchActive={false}
         onClearFilters={onClearFilters}

@@ -52,6 +52,28 @@ describe('AccountItem date line', () => {
     expect(container.textContent).not.toMatch(/since|sent|\d{4}/);
   });
 
+  it('promise 3: excluded badges neither get a line nor displace the following line', () => {
+    const { container } = row(
+      {
+        following: 1727654400,
+        unfollowed: 1700000000,
+        restricted: 1710000000,
+        close: 1720000000,
+        dismissed: 1730000000,
+      },
+      {
+        dateZones: {
+          following: 'utc',
+          unfollowed: 'utc',
+          restricted: 'utc',
+          close: 'utc',
+          dismissed: 'utc',
+        },
+      }
+    );
+    expect(container.querySelector('p')?.textContent).toBe('Following since Sep 30, 2024');
+  });
+
   it('promise 4: an undated row keeps an empty box; a pre-PR-2 row has no box and no digits', () => {
     const undated = row({ following: true });
     expect(undated.container.querySelector('p')?.textContent).toBe('');
