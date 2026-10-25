@@ -56,7 +56,9 @@ const FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
 };
 
 export function createFollowDateFormatter(lang: string, viewerZone?: string): FollowDateFormatter {
-  const local = new Intl.DateTimeFormat(lang, { ...FORMAT_OPTIONS, timeZone: viewerZone });
-  const utc = new Intl.DateTimeFormat(lang, { ...FORMAT_OPTIONS, timeZone: 'UTC' });
+  const make = (timeZone?: string) =>
+    new Intl.DateTimeFormat(lang, { ...FORMAT_OPTIONS, timeZone });
+  const local = make(viewerZone);
+  const utc = make('UTC');
   return (seconds, zone) => (zone === 'utc' ? utc : local).format(seconds * 1000);
 }

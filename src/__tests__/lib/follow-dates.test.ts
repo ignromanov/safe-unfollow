@@ -28,6 +28,20 @@ describe('pickDateLine', () => {
         { following: 'local', followers: 'utc' }
       )
     ).toEqual({ key: 'mutual', seconds: 200, zone: 'utc' }));
+  it("a mutual tie picks following's zone", () =>
+    expect(
+      pickDateLine(
+        { following: 150, followers: 150, mutuals: true },
+        { following: 'local', followers: 'utc' }
+      )
+    ).toEqual({ key: 'mutual', seconds: 150, zone: 'local' }));
+  it("a mutual with the later following takes following's seconds and zone", () =>
+    expect(
+      pickDateLine(
+        { following: 300, followers: 200, mutuals: true },
+        { following: 'local', followers: 'utc' }
+      )
+    ).toEqual({ key: 'mutual', seconds: 300, zone: 'local' }));
   it('a mutual with one date falls through to that badge', () => {
     expect(pickDateLine({ following: 100, followers: true }, L)?.key).toBe('following');
     expect(pickDateLine({ following: true, followers: 200 }, L)?.key).toBe('followers');
