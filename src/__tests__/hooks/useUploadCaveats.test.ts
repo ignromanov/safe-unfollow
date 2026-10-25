@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/lib/indexeddb/indexeddb-service');
@@ -128,16 +128,35 @@ describe('useUploadCaveats', () => {
     expect(result.current.dateZones).toBeNull();
   });
 
-  it('is not stale on a missing record or a failed read', async () => {
-    getFileMetadata.mockResolvedValue(null);
-    const missing = renderHook(() => useUploadCaveats('hash'));
-    await waitFor(() => expect(getFileMetadata).toHaveBeenCalledTimes(1));
-    expect(missing.result.current.datesStale).toBe(false);
+  // The read must have settled before the assertion: a quiet state is also the
+  // initial state, so asserting before the promise resolves observes nothing.
+  const settled = async () => {
+    const hook = renderHook(() => useUploadCaveats('hash'));
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    return hook.result.current;
+  };
 
+  it('is not stale on a missing record', async () => {
+    getFileMetadata.mockResolvedValue(null);
+
+    const caveats = await settled();
+
+    expect(getFileMetadata).toHaveBeenCalledTimes(1);
+    expect(caveats.datesStale).toBe(false);
+    expect(caveats.dateZones).toBeNull();
+  });
+
+  it('is not stale on a failed read', async () => {
     getFileMetadata.mockRejectedValue(new Error('x'));
-    const failed = renderHook(() => useUploadCaveats('hash'));
-    await waitFor(() => expect(getFileMetadata).toHaveBeenCalledTimes(2));
-    expect(failed.result.current.datesStale).toBe(false);
+
+    const caveats = await settled();
+
+    expect(getFileMetadata).toHaveBeenCalledTimes(1);
+    expect(caveats.datesStale).toBe(false);
+    expect(caveats.dateZones).toBeNull();
   });
 
   it('does not touch storage without a file hash', () => {
