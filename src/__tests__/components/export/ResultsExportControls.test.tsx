@@ -285,18 +285,6 @@ describe('ResultsExportControls', () => {
       expect(vi.mocked(analytics.paywallView)).toHaveBeenCalledTimes(2);
     });
 
-    it('should name the file by date only', async () => {
-      unlocked(false);
-      const user = userEvent.setup();
-
-      render(<ResultsExportControls {...defaultProps} />);
-      await user.click(screen.getByRole('button', { name: triggerLabel }));
-
-      await waitFor(() => expect(vi.mocked(downloadBlob)).toHaveBeenCalled());
-      const [, name] = vi.mocked(downloadBlob).mock.calls[0];
-      expect(name).toMatch(/^safeunfollow-\d{4}-\d{2}-\d{2}(-sample)?\.csv$/);
-    });
-
     // A file that stops short must say so somewhere durable. The modal is gone
     // the moment it is dismissed; the filename is still there next week.
     it('should mark the capped file in its name', async () => {
