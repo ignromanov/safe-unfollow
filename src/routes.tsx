@@ -5,14 +5,34 @@ import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '@/locales';
 import { INTENT_PAGES } from '@/config/intent-pages';
 import IntentPage from './pages/IntentPage';
 
-// Direct imports for parallel loading (no lazy waterfall)
+// Static: these pages are the entry chunk every visitor downloads, so a reader landing on
+// one waits for no second module (8af34d1 made every route static for that reason).
 import HomePage from './pages/HomePage';
 import UploadPage from './pages/UploadPage';
-import ResultsPage from './pages/ResultsPage';
-import SamplePage from './pages/SamplePage';
 import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage';
 import NotFoundPage from './pages/NotFoundPage';
+
+/**
+ * `/results` and `/sample` are route chunks (GH#292). Between them they carry the virtualizer,
+ * the rows, the follow-date line and the caveats, which no other page runs. Kept in the entry,
+ * every visitor paid for them, and most visitors never reach either page.
+ *
+ * Neither reintroduces the waterfall 8af34d1 removed. A direct load gets a `modulepreload` for
+ * the route chunk in its prerendered HTML: vite-react-ssg's `remix` router mode writes one for
+ * every module a route rendered. On the client the library also resolves the matched route's
+ * `lazy` before it hydrates, so the prerendered markup is never hydrated against a missing
+ * component. `src/__tests__/build/results-out-of-entry.test.ts` asserts the preloads, because
+ * this behaviour comes from a library and is not visible in our source.
+ *
+ * There is deliberately no prefetch from /upload. Starting one when the parse starts would
+ * save one chunk fetch after a parse that takes seconds. The cost: a chunk that 404s after a
+ * deploy fires `vite:preloadError`, and `installStaleChunkRecovery` answers that with a reload.
+ * The reload would land mid-parse and throw away the reader's file. Fetched on navigation
+ * instead, the same 404 arrives after the accounts are already in IndexedDB.
+ */
+const loadResultsPage = () => import('./pages/ResultsPage');
+const loadSamplePage = () => import('./pages/SamplePage');
 
 /**
  * Factory for page children — each parent route needs its own object references
@@ -22,8 +42,8 @@ function createPageChildren(): RouteRecord[] {
   return [
     { index: true, element: <HomePage /> },
     { path: 'upload', element: <UploadPage /> },
-    { path: 'results', element: <ResultsPage /> },
-    { path: 'sample', element: <SamplePage /> },
+    { path: 'results', lazy: loadResultsPage },
+    { path: 'sample', lazy: loadSamplePage },
     { path: 'privacy', element: <PrivacyPage /> },
     { path: 'terms', element: <TermsPage /> },
     { path: '404', element: <NotFoundPage /> },

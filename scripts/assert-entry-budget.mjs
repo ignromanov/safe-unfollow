@@ -71,8 +71,10 @@
  *   base   a production-shaped build of `main`, measured on the machine deriving it
  *   rule   base x 1.01, rounded up to a whole hundred
  *
- * Last derived 2026-09-09 from a base of 427601, which CI then reproduced exactly -- so the
- * ceiling sits ~1% above the number the gate itself prints. That still catches what the gate
+ * Last derived 2026-10-25 (GH#292) from a base of 350486: `/results` and `/sample` became route
+ * chunks, which changed the bundle's shape. Before that it was derived 2026-09-09 from 427601,
+ * which CI reproduced exactly. Either way the ceiling sits ~1% above the number the gate itself
+ * prints. That still catches what the gate
  * guards against, because an accidental static import of a library is ten kilobytes and upward,
  * not five hundred bytes.
  * ⛔ Re-derive when the *shape* of the bundle changes, not when a diff happens to exceed it:
