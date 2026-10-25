@@ -249,6 +249,19 @@
       "done": "Done",
       "again": "Export again",
       "error": "Export failed. Please try again."
+    },
+    "report": {
+      "title": "SafeUnfollow report",
+      "madeOn": "Made {{date}}",
+      "uploadedOn": "From an export uploaded {{date}}",
+      "scopeAll": "All accounts · {{total}}",
+      "scopeFiltered": "{{filters}} · {{count}} of {{total}} accounts",
+      "searchNarrowed": "Narrowed by a search",
+      "other": "Other",
+      "sampleLine": "Free sample: {{shown}} of {{total}} accounts. The full report lists all of them.",
+      "ceilingTop": "This report lists the first {{max}} accounts. The CSV export has all of them.",
+      "ceilingSection": "In the CSV export: {{count}} rows",
+      "footer": "Made with SafeUnfollow"
     }
   },
   "dates": {
