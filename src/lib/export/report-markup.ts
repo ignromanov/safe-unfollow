@@ -55,10 +55,22 @@ export function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, ch => ESCAPES[ch] ?? ch);
 }
 
-export function profileUrl(username: string): string {
-  return `https://instagram.com/${username}`;
+// Parse-time normalisation lowercases usernames, so lowercase-only is the contract.
+const USERNAME_PATTERN = /^[a-z0-9._]{1,30}$/;
+
+/**
+ * The only href this module builds from data. Returns null for anything that
+ * could escape the path segment (`/ ? # "` etc.), so a link is never emitted
+ * for a username outside the allowlist.
+ */
+export function profileUrl(username: string): string | null {
+  return USERNAME_PATTERN.test(username) ? `https://instagram.com/${username}` : null;
 }
 
+/**
+ * Opens the document. Leaves `<head>` open on purpose: the caller appends
+ * `</head><body>` itself. The CSP meta must stay the first child of `<head>`.
+ */
 export function renderHead(o: { lang: string; dir: 'ltr' | 'rtl'; title: string }): string {
   return (
     `<!doctype html><html lang="${escapeHtml(o.lang)}" dir="${o.dir}"><head>` +
@@ -77,7 +89,9 @@ export function renderRow(o: {
   dateText: string | null;
   isoDay: string | null;
 }): string {
-  const name = escapeHtml(o.username);
+  const name = `@${escapeHtml(o.username)}`;
+  const url = profileUrl(o.username);
+  const who = url === null ? name : `<a href="${url}" rel="noreferrer">${name}</a>`;
   const labels = o.labels.length
     ? `<span class="labels">${o.labels.map(escapeHtml).join(' · ')}</span>`
     : '';
@@ -87,12 +101,13 @@ export function renderRow(o: {
       : o.isoDay === null
         ? `<span class="date">${escapeHtml(o.dateText)}</span>`
         : `<span class="date"><time datetime="${escapeHtml(o.isoDay)}">${escapeHtml(o.dateText)}</time></span>`;
-  return (
-    `<li class="row"><a href="${escapeHtml(profileUrl(o.username))}" rel="noreferrer">@${name}</a>` +
-    `${labels}${date}</li>`
-  );
+  return `<li class="row">${who}${labels}${date}</li>`;
 }
 
+/**
+ * Opens a collapsible section and its `<ul>`. Only `renderRow` output may sit
+ * between this and `SECTION_CLOSE`, which closes the `<ul>` and the details.
+ */
 export function renderSectionOpen(o: {
   id: string;
   heading: string;
@@ -107,3 +122,8 @@ export function renderSectionOpen(o: {
 }
 
 export const SECTION_CLOSE = '</ul></details>';
+
+/** The one site link in the file; the builder never hand-writes this anchor. */
+export function renderFooter(text: string): string {
+  return `<footer><a href="${REPORT_SITE_URL}" rel="noreferrer">${escapeHtml(text)}</a></footer>`;
+}

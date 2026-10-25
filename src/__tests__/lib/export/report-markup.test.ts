@@ -7,6 +7,7 @@ import {
   SECTION_CLOSE,
   escapeHtml,
   profileUrl,
+  renderFooter,
   renderHead,
   renderRow,
   renderSectionOpen,
@@ -49,9 +50,23 @@ describe('renderHead', () => {
     expect(doc.documentElement.getAttribute('lang')).toBe('ar');
   });
 
-  it('loads nothing external', () => {
-    const html = renderHead({ lang: 'en', dir: 'ltr', title: 'x' });
-    expect(html).not.toMatch(/<(link|script|img)\b/i);
+  it('has exactly the expected head children and nothing external', () => {
+    const doc = head();
+    expect([...doc.head.children].map(e => e.tagName)).toEqual([
+      'META',
+      'META',
+      'META',
+      'META',
+      'TITLE',
+      'STYLE',
+    ]);
+    expect(doc.querySelector('base,iframe,object,embed,link,script,img')).toBeNull();
+  });
+
+  it('escapes quotes in lang without breaking the attribute', () => {
+    const doc = head({ lang: 'en"><script>' });
+    expect(doc.documentElement.getAttribute('lang')).toBe('en"><script>');
+    expect(doc.querySelector('script')).toBeNull();
   });
 });
 
@@ -67,6 +82,58 @@ describe('constants', () => {
   it('pins the site url', () => {
     expect(REPORT_SITE_URL).toBe('https://safeunfollow.app/?from=report');
     expect(profileUrl('a.b')).toBe('https://instagram.com/a.b');
+    expect(profileUrl('a/b')).toBeNull();
+  });
+});
+
+describe('links', () => {
+  const allowed = (href: string | null): boolean =>
+    href === REPORT_SITE_URL || /^https:\/\/instagram\.com\/[a-z0-9._]{1,30}$/.test(href ?? '');
+  const row = (username: string): string =>
+    renderRow({ username, labels: [], dateText: null, isoDay: null });
+
+  it.each(['a/b', 'x?y', '"><script>', 'UPPER', 'a'.repeat(31), '', 'a#b', '..%2f'])(
+    'renders %j as text with no anchor',
+    u => {
+      const doc = parse(row(u));
+      expect(doc.querySelector('a')).toBeNull();
+      expect(doc.querySelector('script')).toBeNull();
+      expect(doc.body.textContent).toBe(`@${u}`);
+    }
+  );
+
+  it.each(['_.', 'user.name_1'])('links valid username %j exactly once', u => {
+    expect(parse(row(u)).querySelectorAll('a')).toHaveLength(1);
+  });
+
+  it('every emitted href is one of the two allowed forms', () => {
+    const html =
+      ['a', 'b.c', 'x/y', 'UP'].map(row).join('') + renderFooter('Made with <SafeUnfollow>');
+    const hrefs = [...parse(html).querySelectorAll('[href]')].map(a => a.getAttribute('href'));
+    expect(hrefs).toHaveLength(3);
+    expect(hrefs.every(allowed)).toBe(true);
+  });
+});
+
+describe('renderFooter', () => {
+  it('renders the site link with rel and escaped text', () => {
+    const a = parse(renderFooter('<b>hi</b>')).querySelector('a');
+    expect(a?.getAttribute('href')).toBe('https://safeunfollow.app/?from=report');
+    expect(a?.getAttribute('rel')).toBe('noreferrer');
+    expect(a?.textContent).toBe('<b>hi</b>');
+    expect(a?.querySelector('b')).toBeNull();
+  });
+});
+
+describe('attribute escaping', () => {
+  it('keeps id and isoDay inside their attributes', () => {
+    const doc = parse(
+      renderSectionOpen({ id: 'a"b', heading: 'h', count: '1', note: null }) +
+        renderRow({ username: 'u', labels: [], dateText: 'd', isoDay: '2024"x' }) +
+        SECTION_CLOSE
+    );
+    expect(doc.querySelector('details')?.getAttribute('id')).toBe('a"b');
+    expect(doc.querySelector('time')?.getAttribute('datetime')).toBe('2024"x');
   });
 });
 
