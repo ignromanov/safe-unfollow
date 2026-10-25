@@ -95,7 +95,8 @@ describe('Sample Data Loading', () => {
       // Should store accounts from snapshot
       expect(indexedDBService.storeAllAccounts).toHaveBeenCalledWith(
         getSampleFileHash(),
-        mockSampleAccounts
+        mockSampleAccounts,
+        {}
       );
     });
 

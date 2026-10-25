@@ -81,7 +81,7 @@ export async function generateAndStoreSampleData(): Promise<{
   });
 
   // Store accounts using the same method as real uploads
-  await indexedDBService.storeAllAccounts(SAMPLE_FILE_HASH, snapshot.accounts);
+  await indexedDBService.storeAllAccounts(SAMPLE_FILE_HASH, snapshot.accounts, {});
 
   return {
     fileHash: SAMPLE_FILE_HASH,

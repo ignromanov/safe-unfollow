@@ -7,7 +7,7 @@ import FOLLOWING_HTML from '../fixtures/instagram-html/following.html?raw';
 import FOLLOWING_JSON from '../fixtures/instagram-html/following.json?raw';
 import { buildAccountBadgeIndex } from '@/core/badges';
 import { parseInstagramZipFile } from '@/core/parsers/instagram';
-import type { AccountBadges } from '@/core/types';
+import type { AccountBadges, DateSources } from '@/core/types';
 import { indexedDBService } from '@/lib/indexeddb/indexeddb-service';
 
 /**
@@ -48,7 +48,11 @@ async function buildExport(format: Format, opts: { unreadableMonths?: boolean } 
   return (await zip.generateAsync({ type: 'blob' })) as File;
 }
 
-async function storeAs(hash: string, accounts: AccountBadges[]): Promise<void> {
+async function storeAs(
+  hash: string,
+  accounts: AccountBadges[],
+  dateSources: DateSources
+): Promise<void> {
   await indexedDBService.saveFileMetadata({
     fileHash: hash,
     fileName: 'x.zip',
@@ -58,7 +62,7 @@ async function storeAs(hash: string, accounts: AccountBadges[]): Promise<void> {
     lastAccessed: Date.now(),
     version: 2,
   });
-  await indexedDBService.storeAllAccounts(hash, accounts);
+  await indexedDBService.storeAllAccounts(hash, accounts, dateSources);
 }
 
 const HASHES = [...FORMATS.map(f => `roundtrip-${f}`), 'roundtrip-undated'];
@@ -72,7 +76,7 @@ describe('parsed follow dates reach the row (GH#285)', () => {
   it.each(FORMATS)('every parsed follow date reaches its row (%s export)', async format => {
     const result = await parseInstagramZipFile(await buildExport(format));
     const accounts = buildAccountBadgeIndex(result.data);
-    await storeAs(`roundtrip-${format}`, accounts);
+    await storeAs(`roundtrip-${format}`, accounts, result.dateSources);
 
     const rows = await indexedDBService.getAccountsByRange(
       `roundtrip-${format}`,
@@ -103,7 +107,7 @@ describe('parsed follow dates reach the row (GH#285)', () => {
     );
     expect(result.datesFitted).toBe(false);
     const accounts = buildAccountBadgeIndex(result.data);
-    await storeAs('roundtrip-undated', accounts);
+    await storeAs('roundtrip-undated', accounts, result.dateSources);
 
     const rows = await indexedDBService.getAccountsByRange('roundtrip-undated', 0, accounts.length);
     expect(rows.some(r => typeof r.badges.following === 'number')).toBe(false);

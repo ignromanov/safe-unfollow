@@ -84,7 +84,7 @@ self.onmessage = async (
       });
 
       // Store all accounts at once (optimized bulk mode)
-      await indexedDBService.storeAllAccounts(fileHash, unified);
+      await indexedDBService.storeAllAccounts(fileHash, unified, parseResult.dateSources);
     } catch (dbError) {
       const errorMessage = dbError instanceof Error ? dbError.message : 'Database error';
       let code = 'INDEXEDDB_ERROR';

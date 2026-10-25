@@ -14,7 +14,7 @@
  * - cache-manager.ts        (in-memory caching)
  */
 
-import type { AccountBadges, BadgeKey } from '@/core/types';
+import type { AccountBadges, BadgeKey, DateSources, DateZone, DateZones } from '@/core/types';
 import { BitSet, StringColumnBuilder, StringColumnReader } from './bitset';
 import { CacheManager } from './cache-manager';
 import { buildDateColumn, forEachDateInRange, type DateColumn } from './date-column';
@@ -169,20 +169,29 @@ export class IndexedDBService {
    * hiding it. No-op if metadata was never saved for this hash (e.g. `storeAllAccounts`
    * called directly, without a preceding `saveFileMetadata` — there is nothing to flip).
    */
-  private async markAccountsComplete(db: IDBDatabase, fileHash: string): Promise<void> {
+  private async markAccountsComplete(
+    db: IDBDatabase,
+    fileHash: string,
+    dateZones: DateZones
+  ): Promise<void> {
     const existing = await fileStore.getFileMetadata(db, fileHash);
     if (!existing) return;
     await fileStore.saveFileMetadata(db, {
       ...existing,
       accountsComplete: true,
       datesStored: true,
+      dateZones,
     });
   }
 
   /**
    * Store all accounts at once (optimized - build bitsets once, write once)
    */
-  async storeAllAccounts(fileHash: string, accounts: AccountBadges[]): Promise<void> {
+  async storeAllAccounts(
+    fileHash: string,
+    accounts: AccountBadges[],
+    dateSources: DateSources
+  ): Promise<void> {
     const db = await this.init();
 
     // Build all columns
@@ -251,9 +260,14 @@ export class IndexedDBService {
 
     // Date columns ride in the same transaction as the bitsets they annotate, so a
     // badge can never be stored without its dates or the reverse.
+    // A column is stored only where its zone is known: a date read from both formats
+    // has no single zone to display it in, so it is dropped rather than shown wrong.
     const datePromises: Promise<unknown>[] = [];
+    const dateZones: DateZones = {};
     for (const badge of TIME_BASED_BADGES) {
-      const dates = buildDateColumn(accounts, badge);
+      const source = dateSources?.[badge];
+      const dates =
+        source === 'utc' || source === 'local' ? buildDateColumn(accounts, badge) : null;
       if (!dates) {
         // A re-store does not clear the file first: an old positional column left
         // behind would put its dates on whichever accounts now sit at those indices.
@@ -268,6 +282,7 @@ export class IndexedDBService {
         length: dates.indices.length,
       };
       datePromises.push(executeWrite(columnsStore, record));
+      dateZones[badge] = source as DateZone;
     }
     await Promise.all(datePromises);
 
@@ -304,7 +319,7 @@ export class IndexedDBService {
     // this upload ("no date column") would hide the dates just stored until reload.
     this.clearCaches(fileHash);
 
-    await this.markAccountsComplete(db, fileHash);
+    await this.markAccountsComplete(db, fileHash, dateZones);
   }
 
   /**

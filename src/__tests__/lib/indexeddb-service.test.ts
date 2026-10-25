@@ -1,4 +1,4 @@
-import type { AccountBadges, BadgeKey } from '@/core/types';
+import type { AccountBadges, BadgeKey, DateSources } from '@/core/types';
 import { indexedDBService } from '@/lib/indexeddb/indexeddb-service';
 import { DB_CONFIG, STORES, TIME_BASED_BADGES } from '@/lib/indexeddb/indexeddb-schema';
 import * as transactionHelpers from '@/lib/indexeddb/transaction-helpers';
@@ -854,7 +854,21 @@ describe('IndexedDBService (Integration Tests)', () => {
   });
 
   describe('follow dates (GH#285)', () => {
-    const store = async (hash: string, accounts: AccountBadges[]): Promise<void> => {
+    const LOCAL: DateSources = {
+      following: 'local',
+      followers: 'local',
+      pending: 'local',
+      permanent: 'local',
+      restricted: 'local',
+      close: 'local',
+      unfollowed: 'local',
+      dismissed: 'local',
+    };
+    const store = async (
+      hash: string,
+      accounts: AccountBadges[],
+      sources: DateSources = LOCAL
+    ): Promise<void> => {
       await indexedDBService.saveFileMetadata({
         fileHash: hash,
         fileName: 'x.zip',
@@ -864,8 +878,57 @@ describe('IndexedDBService (Integration Tests)', () => {
         lastAccessed: Date.now(),
         version: 2,
       });
-      await indexedDBService.storeAllAccounts(hash, accounts);
+      await indexedDBService.storeAllAccounts(hash, accounts, sources);
     };
+
+    it('records the zone of every badge whose column was written', async () => {
+      await store(
+        'zones-a',
+        [{ username: 'a', badges: { following: 1704067200, followers: true } }],
+        {
+          following: 'local',
+          followers: 'local',
+        }
+      );
+      expect((await indexedDBService.getFileMetadata('zones-a'))?.dateZones).toEqual({
+        following: 'local',
+      });
+    });
+
+    it('stores no column and no zone for a badge read from both formats', async () => {
+      await store('zones-b', [{ username: 'a', badges: { following: 1, followers: 2 } }], {
+        following: 'utc',
+        followers: 'mixed',
+      });
+      const [a] = await indexedDBService.getAccountsByRange('zones-b', 0, 1);
+      expect(a!.badges).toEqual({ following: 1, followers: true });
+      expect((await indexedDBService.getFileMetadata('zones-b'))?.dateZones).toEqual({
+        following: 'utc',
+      });
+    });
+
+    it('stores no column for a dated badge the parser named no source for', async () => {
+      await store('zones-c', [{ username: 'a', badges: { close: 9 } }], {});
+      const [a] = await indexedDBService.getAccountsByRange('zones-c', 0, 1);
+      expect(a!.badges.close).toBe(true);
+    });
+
+    it('writes {} when sources exist but no date is storable, and still writes datesStored', async () => {
+      await store('zones-d', [{ username: 'a', badges: { followers: true } }], {
+        followers: 'utc',
+      });
+      const meta = await indexedDBService.getFileMetadata('zones-d');
+      expect(meta?.dateZones).toEqual({});
+      expect(meta?.datesStored).toBe(true);
+    });
+
+    it('a re-store that turns a badge mixed removes its old column', async () => {
+      await store('zones-e', [{ username: 'a', badges: { followers: 5 } }], { followers: 'local' });
+      await indexedDBService.getAccountsByRange('zones-e', 0, 1);
+      await store('zones-e', [{ username: 'a', badges: { followers: 5 } }], { followers: 'mixed' });
+      const [a] = await indexedDBService.getAccountsByRange('zones-e', 0, 1);
+      expect(a!.badges.followers).toBe(true);
+    });
 
     it('returns the stored date as the badge value, and true where the export had none', async () => {
       await store('dates-a', [
