@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import type { TFunction } from 'i18next';
-import { buildReportContext, SLOT } from '@/lib/export/report-context';
+import i18next, { type TFunction } from 'i18next';
+import { buildReportContext, SLOT, type ReportContext } from '@/lib/export/report-context';
+import { REPORT_SECTIONS } from '@/lib/export/report-sections';
+import enResults from '../../../locales/en/results.json';
 
 const t = ((k: string, o?: Record<string, unknown>) =>
   k + JSON.stringify(o ?? {})) as unknown as TFunction<'results'>;
@@ -72,5 +74,56 @@ describe('buildReportContext', () => {
       // @ts-expect-error there is deliberately no query field
       query: 'needle',
     });
+  });
+});
+
+describe('buildReportContext against the real English bundle', () => {
+  const collect = (v: unknown, out: string[] = []): string[] => {
+    if (typeof v === 'string') out.push(v);
+    else if (v && typeof v === 'object') Object.values(v).forEach(x => collect(x, out));
+    return out;
+  };
+
+  const build = async (): Promise<ReportContext> => {
+    const i18n = i18next.createInstance();
+    await i18n.init({
+      lng: 'en',
+      ns: ['results'],
+      defaultNS: 'results',
+      resources: { en: { results: enResults } },
+      interpolation: { escapeValue: false },
+    });
+    return buildReportContext(i18n.getFixedT('en', 'results'), {
+      lang: 'en',
+      filters: ['restricted', 'close'],
+      searchApplied: true,
+      rowCount: 1930,
+      totalCount: 5000,
+      sampleLimit: 10,
+    });
+  };
+
+  it('resolves every string: no raw key reaches the file', async () => {
+    const { strings } = await build();
+    for (const s of collect(strings)) {
+      expect(s).not.toMatch(/^(export\.report|badges|caveat|dates)\./);
+    }
+  });
+
+  it('puts the slot exactly once in each worker-filled string', async () => {
+    const { strings } = await build();
+    const filled = [
+      strings.madeOn,
+      strings.uploadedOn,
+      strings.ceilingTop,
+      strings.ceilingSection,
+      ...Object.values(strings.dateLines),
+    ];
+    for (const s of filled) expect(s.split(SLOT).length - 1).toBe(1);
+  });
+
+  it('names every report section', async () => {
+    const { strings } = await build();
+    for (const s of REPORT_SECTIONS) expect(strings.sectionHeadings[s]).toMatch(/\S/);
   });
 });
