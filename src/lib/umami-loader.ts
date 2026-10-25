@@ -125,11 +125,12 @@ export function isLandingPath(pathname: string): boolean {
 }
 
 async function injectRecorder(): Promise<void> {
-  // The first interaction may itself have been the click that left the landing
-  // page. The recorder hooks pushState/replaceState and exposes no teardown for
-  // heatmap capture, so once it starts it follows every later SPA route in the
-  // same document — re-check the path at the moment of injection, not only when
-  // the listeners were attached.
+  // The recorder hooks pushState/replaceState and exposes no teardown for heatmap
+  // capture, so once it starts it follows every later SPA route in the same
+  // document. The path is therefore checked twice: here, in case navigation beat
+  // the first interaction, and again after the config fetch — a CTA's
+  // `pointerdown` fires before its click navigates, so the fetch usually starts
+  // on `/` and resolves on `/upload`.
   if (!isLandingPath(window.location.pathname)) return;
 
   let config: RecorderConfig;
@@ -155,6 +156,8 @@ async function injectRecorder(): Promise<void> {
   if (config.heatmapEnabled !== true) return;
   if (config.replayEnabled !== false) return;
 
+  if (!isLandingPath(window.location.pathname)) return;
+
   const script = document.createElement('script');
   script.src = UMAMI_RECORDER_SRC;
   script.dataset.websiteId = UMAMI_WEBSITE_ID;
@@ -173,9 +176,14 @@ async function injectRecorder(): Promise<void> {
  *
  * Scope note: this gates where the recorder is *entered*, not where it collects.
  * A visitor who lands on `/` and navigates deeper keeps it, because the recorder
- * has no stop API. Its heatmap payload is coordinates and scroll percentages —
- * no DOM, text or attributes — so what follows them carries nothing personal.
- * A direct arrival at `/results` never loads it at all. See GH#95.
+ * has no stop API. Its heatmap payload carries no text or attributes, but it is
+ * not free of the page: on every click and scroll `pageH` is the largest
+ * `getBoundingClientRect().bottom` of any element in `<body>`, which ignores
+ * `overflow` clipping. On `/results` the virtual list's sizer is
+ * `matched rows × row height` tall, so `pageH` there carries the count of
+ * matched accounts — data derived from the export. That is why the boundary
+ * itself must close before the recorder is switched back on (GH#290).
+ * A direct arrival at `/results` never loads it at all. See GH#95, GH#289.
  */
 export function loadHeatmapRecorder(): void {
   if (!UMAMI_WEBSITE_ID) return;
