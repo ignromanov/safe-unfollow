@@ -238,6 +238,7 @@
       "json": "JSONをダウンロード",
       "csvHint": "Excel・Google スプレッドシート・Numbers で開けます",
       "jsonHint": "スクリプト用、または後で読み込み直す用",
+      "datesNote": "日付が空欄の場合は、ファイル内にそのアカウントの日付が見つからなかったことを意味します。",
       "generating": "生成中… {{percent}}%",
       "buildingTitle": "ファイルを作成しています",
       "buildingNote": "エクスポートはこのブラウザ内で作成されます。",

@@ -238,6 +238,7 @@
       "json": "JSON herunterladen",
       "csvHint": "Öffnet sich in Excel, Google Sheets und Numbers",
       "jsonHint": "Für Skripte oder zum späteren Wiedereinlesen",
+      "datesNote": "Ein leeres Datum heißt, dass wir in deiner Datei für dieses Konto kein Datum gefunden haben.",
       "generating": "Wird erstellt… {{percent}}%",
       "buildingTitle": "Deine Datei wird erstellt",
       "buildingNote": "Dein Export entsteht hier, in diesem Browser.",

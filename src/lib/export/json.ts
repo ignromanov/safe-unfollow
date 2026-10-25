@@ -5,10 +5,12 @@
  */
 
 import type { BadgeKey, BadgeMap } from '@/core/types';
+import { indexedDBService } from '@/lib/indexeddb/indexeddb-service';
 import { getExportRowCount, iterateAccountsForExport } from './data';
+import { exportDates } from './dates';
 import type { ExportProgressCallback } from './types';
 
-// Dates leave in dedicated fields in a later PR, never through `badges`.
+// `badges` stays presence-only (plan D3): dates leave through `dates`, never here.
 function toPresenceFlags(badges: BadgeMap): Partial<Record<BadgeKey, true>> {
   const flags: Partial<Record<BadgeKey, true>> = {};
   for (const key of Object.keys(badges) as BadgeKey[]) {
@@ -33,6 +35,8 @@ export async function buildExportJson(
   const total = getExportRowCount(indices, totalCount);
   let processed = 0;
   let isFirst = true;
+  // Absent on a file stored before #288: such a file has no displayable date.
+  const zones = (await indexedDBService.getFileMetadata(fileHash))?.dateZones ?? null;
 
   for await (const chunk of iterateAccountsForExport(fileHash, indices, totalCount)) {
     let buffer = '';
@@ -41,6 +45,7 @@ export async function buildExportJson(
         username: account.username,
         href: `https://instagram.com/${account.username}`,
         badges: toPresenceFlags(account.badges),
+        dates: exportDates(account.badges, zones),
       });
       buffer += isFirst ? entry : `,${entry}`;
       isFirst = false;

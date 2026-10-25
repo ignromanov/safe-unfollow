@@ -238,6 +238,7 @@
       "json": "تنزيل JSON",
       "csvHint": "يُفتح في Excel و Google Sheets و Numbers",
       "jsonHint": "للسكربتات، أو لإعادة تحميله لاحقًا",
+      "datesNote": "التاريخ الفارغ يعني أننا لم نجد تاريخاً لهذا الحساب في ملفك.",
       "generating": "جارٍ الإنشاء… {{percent}}%",
       "buildingTitle": "جارٍ إنشاء ملفك",
       "buildingNote": "يُنشأ التصدير هنا، داخل هذا المتصفّح.",
