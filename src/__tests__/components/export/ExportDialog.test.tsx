@@ -54,7 +54,6 @@ const defaultProps = {
   fileHash: 'hash1',
   indices: null,
   rowCount: 42,
-  filename: 'my-export',
 };
 
 describe('ExportDialog', () => {
@@ -132,7 +131,10 @@ describe('ExportDialog', () => {
     await user.click(screen.getByRole('button', { name: csvButtonName }));
 
     await waitFor(() => {
-      expect(vi.mocked(downloadBlob)).toHaveBeenCalledWith(blob, 'my-export.csv');
+      expect(vi.mocked(downloadBlob)).toHaveBeenCalledWith(
+        blob,
+        expect.stringMatching(/^safeunfollow-\d{4}-\d{2}-\d{2}\.csv$/)
+      );
     });
     expect(vi.mocked(analytics.download)).toHaveBeenCalledWith('csv', 42);
   });
@@ -202,6 +204,18 @@ describe('ExportDialog', () => {
     });
   });
 
+  it('should never put the owner of the upload in the file name', async () => {
+    const user = userEvent.setup();
+    render(<ExportDialog {...defaultProps} />);
+
+    await user.click(screen.getByRole('button', { name: jsonButtonName }));
+
+    await waitFor(() => expect(vi.mocked(downloadBlob)).toHaveBeenCalled());
+    const [, name] = vi.mocked(downloadBlob).mock.calls[0];
+    expect(name).toMatch(/^safeunfollow-\d{4}-\d{2}-\d{2}\.json$/);
+    expect(name).not.toContain('alice_owner');
+  });
+
   it('should let the user retry after a failure', async () => {
     buildExport.mockRejectedValueOnce(new Error('idb exploded'));
     const user = userEvent.setup();
@@ -214,7 +228,10 @@ describe('ExportDialog', () => {
     await user.click(csvButton);
 
     await waitFor(() => {
-      expect(vi.mocked(downloadBlob)).toHaveBeenCalledWith(blob, 'my-export.csv');
+      expect(vi.mocked(downloadBlob)).toHaveBeenCalledWith(
+        blob,
+        expect.stringMatching(/^safeunfollow-\d{4}-\d{2}-\d{2}\.csv$/)
+      );
     });
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });

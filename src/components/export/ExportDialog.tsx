@@ -7,6 +7,7 @@ import { ExportSheet } from '@/components/export/ExportSheet';
 import { RevokedLicenseNotice, SupportMailtoLink } from '@/components/export/RevokedLicenseNotice';
 import { useExportWorker } from '@/hooks/useExportWorker';
 import { downloadBlob } from '@/lib/export/download';
+import { exportFilename } from '@/lib/export/filename';
 import { validateLicense } from '@/lib/export/license';
 import { assertNever, type ExportFormat, type ExportProgress } from '@/lib/export/types';
 import {
@@ -23,7 +24,6 @@ export interface ExportDialogProps {
   fileHash: string;
   indices: number[] | null;
   rowCount: number;
-  filename: string;
 }
 
 function toPercent(progress: ExportProgress | null): number {
@@ -47,7 +47,6 @@ export function ExportDialog({
   fileHash,
   indices,
   rowCount,
-  filename,
 }: ExportDialogProps) {
   const { t, i18n } = useTranslation('results');
   const { buildExport } = useExportWorker();
@@ -101,7 +100,7 @@ export function ExportDialog({
     try {
       const blob = await buildExport({ format }, fileHash, indices, rowCount, setProgress);
 
-      const outputName = `${filename}.${format}`;
+      const outputName = exportFilename(format, { sample: false });
       downloadBlob(blob, outputName);
       analytics.download(format, rowCount);
       // Not onOpenChange(false). A blob download on iOS Safari can be silent, and 85%
