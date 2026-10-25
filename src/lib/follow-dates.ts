@@ -13,7 +13,7 @@ const REQUEST_BADGES = ['pending', 'permanent'] as const;
 export const LINE_BADGES: readonly BadgeKey[] = ['following', 'followers', ...REQUEST_BADGES];
 
 // A number on a badge without a zone cannot be placed on a calendar, so it is not a date.
-function datedSeconds(badges: BadgeMap, zones: DateZones, key: BadgeKey): number | null {
+export function datedSeconds(badges: BadgeMap, zones: DateZones, key: BadgeKey): number | null {
   const value = badges[key];
   const dated =
     typeof value === 'number' && Number.isInteger(value) && value > 0 && zones[key] !== undefined;
