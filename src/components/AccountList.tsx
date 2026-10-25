@@ -1,9 +1,10 @@
 import { useAccountDataSource } from '@/hooks/useAccountDataSource';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Ghost } from 'lucide-react';
-import { memo, useCallback, useRef } from 'react';
+import { memo, useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { DateZones } from '@/core/types';
+import { createFollowDateFormatter, reservesDateLine } from '@/lib/follow-dates';
 import { AccountItem } from './AccountItem';
 import { SkeletonItem } from './SkeletonItem';
 
@@ -43,9 +44,14 @@ export const AccountList = memo(function AccountList({
   searchActive,
   onClearFilters,
   onAccountClick,
+  dateZones,
 }: AccountListProps) {
-  const { t } = useTranslation('results');
+  const { t, i18n } = useTranslation('results');
   const parentRef = useRef<HTMLDivElement>(null);
+
+  // Built once per language and once per render, so the memoised rows see stable props on scroll.
+  const formatDate = useMemo(() => createFollowDateFormatter(i18n.language), [i18n.language]);
+  const reserveDateLine = reservesDateLine(dateZones ?? null);
 
   // Initialize data source for lazy loading (uses passed fileHash, not store)
   const { getAccount } = useAccountDataSource({
@@ -168,6 +174,9 @@ export const AccountList = memo(function AccountList({
                     index={virtualItem.index}
                     totalCount={displayCount}
                     onAccountClick={onAccountClick}
+                    dateZones={dateZones}
+                    formatDate={formatDate}
+                    reserveDateLine={reserveDateLine}
                   />
                 ) : (
                   <SkeletonItem />

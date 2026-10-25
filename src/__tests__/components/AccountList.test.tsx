@@ -12,6 +12,14 @@ import { render, screen } from '@testing-library/react';
 // understands `{{count, number}}`, which is what production i18next does. The
 // opt-in mock replaces the first occurrence only, so an assertion written
 // against it can pass while the live page renders a raw `{{…}}`.
+// jsdom has no layout, so the real virtualizer renders no rows.
+vi.mock('@tanstack/react-virtual', () => ({
+  useVirtualizer: () => ({
+    getTotalSize: () => 92,
+    getVirtualItems: () => [{ key: '0', index: 0, start: 0, size: 92 }],
+  }),
+}));
+
 vi.mock('@/hooks/useAccountDataSource', () => ({
   useAccountDataSource: vi.fn(() => ({
     getAccount: vi.fn(),
@@ -147,5 +155,33 @@ describe('empty state', () => {
     render(emptyList(undefined));
 
     expect(screen.getByText(resultsEN.empty.noUsers)).toBeInTheDocument();
+  });
+});
+
+describe('follow-date line', () => {
+  const props = {
+    fileHash: 'h',
+    accountCount: 1,
+    accountIndices: null,
+    hasLoadedData: true,
+    isLoading: false,
+  };
+
+  beforeEach(async () => {
+    const { useAccountDataSource } = await import('@/hooks/useAccountDataSource');
+    vi.mocked(useAccountDataSource).mockReturnValue({
+      getAccount: vi.fn(() => ({ username: 'a', badges: { following: 1727654400 } })),
+    } as unknown as ReturnType<typeof useAccountDataSource>);
+  });
+
+  it('renders the line when the file has zones', () => {
+    render(<AccountList {...props} dateZones={{ following: 'utc' }} />);
+    expect(screen.getByText('Following since Sep 30, 2024')).toBeInTheDocument();
+  });
+
+  it('renders no line and no empty box when dateZones is null', () => {
+    const { container } = render(<AccountList {...props} dateZones={null} />);
+    expect(container.querySelector('p')).toBeNull();
+    expect(container.textContent).not.toMatch(/since/);
   });
 });
