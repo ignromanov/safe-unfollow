@@ -3,6 +3,7 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { Ghost } from 'lucide-react';
 import { memo, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { DateZones } from '@/core/types';
 import { AccountItem } from './AccountItem';
 import { SkeletonItem } from './SkeletonItem';
 
@@ -29,6 +30,8 @@ export interface AccountListProps {
   onClearFilters?: () => void;
   /** V7: Callback to track account click with badges for aggregation */
   onAccountClick?: (badges: string[]) => void;
+  /** The file's date zones; null when dates cannot be shown. Read by the row renderer. */
+  dateZones: DateZones | null;
 }
 
 export const AccountList = memo(function AccountList({

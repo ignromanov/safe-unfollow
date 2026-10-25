@@ -36,7 +36,12 @@ describe('useUploadCaveats', () => {
    * IndexedDB unavailable. Reading those as `no-skew` would report a clean
    * comparison that no parse performed.
    */
-  const QUIET = { followRequestsUnreadable: false, truncatedRelationshipFile: 'not-applicable' };
+  const QUIET = {
+    followRequestsUnreadable: false,
+    truncatedRelationshipFile: 'not-applicable',
+    dateZones: null,
+    datesStale: false,
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -57,7 +62,8 @@ describe('useUploadCaveats', () => {
     const { result } = renderHook(() => useUploadCaveats('hash'));
 
     await waitFor(() => expect(getFileMetadata).toHaveBeenCalled());
-    expect(result.current).toEqual(QUIET);
+    // No caveat, but a record without zones is a stale file for dates.
+    await waitFor(() => expect(result.current).toEqual({ ...QUIET, datesStale: true }));
   });
 
   it('stays quiet when the record is gone', async () => {
@@ -96,10 +102,42 @@ describe('useUploadCaveats', () => {
 
     await waitFor(() =>
       expect(result.current).toEqual({
+        ...QUIET,
+        datesStale: true,
         followRequestsUnreadable: true,
         truncatedRelationshipFile: 'following',
       })
     );
+  });
+
+  it('returns the stored zones and no stale flag', async () => {
+    getFileMetadata.mockResolvedValue(record({ dateZones: { following: 'local' } }));
+
+    const { result } = renderHook(() => useUploadCaveats('hash'));
+
+    await waitFor(() => expect(result.current.dateZones).toEqual({ following: 'local' }));
+    expect(result.current.datesStale).toBe(false);
+  });
+
+  it('marks a record without dateZones stale, and gives it no zones', async () => {
+    getFileMetadata.mockResolvedValue(record({ datesStored: true }));
+
+    const { result } = renderHook(() => useUploadCaveats('hash'));
+
+    await waitFor(() => expect(result.current.datesStale).toBe(true));
+    expect(result.current.dateZones).toBeNull();
+  });
+
+  it('is not stale on a missing record or a failed read', async () => {
+    getFileMetadata.mockResolvedValue(null);
+    const missing = renderHook(() => useUploadCaveats('hash'));
+    await waitFor(() => expect(getFileMetadata).toHaveBeenCalledTimes(1));
+    expect(missing.result.current.datesStale).toBe(false);
+
+    getFileMetadata.mockRejectedValue(new Error('x'));
+    const failed = renderHook(() => useUploadCaveats('hash'));
+    await waitFor(() => expect(getFileMetadata).toHaveBeenCalledTimes(2));
+    expect(failed.result.current.datesStale).toBe(false);
   });
 
   it('does not touch storage without a file hash', () => {

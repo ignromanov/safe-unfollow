@@ -74,11 +74,13 @@ vi.mock('@/components/AccountList', () => ({
     accountCount,
     activeFilter,
     searchActive,
+    dateZones,
   }: {
     accountIndices: number[] | null;
     accountCount: number;
     activeFilter?: { label: string };
     searchActive?: boolean;
+    dateZones?: Record<string, string> | null;
   }) => {
     const count = accountIndices === null ? accountCount : accountIndices.length;
     return (
@@ -86,6 +88,7 @@ vi.mock('@/components/AccountList', () => ({
         <p>Accounts ({count})</p>
         <p data-testid="active-filter-label">{activeFilter ? activeFilter.label : 'undefined'}</p>
         <p data-testid="search-active">{String(searchActive)}</p>
+        <p data-testid="date-zones">{JSON.stringify(dateZones)}</p>
         {accountIndices !== null && accountIndices.length === 0 && (
           <p>No accounts match your filters</p>
         )}
@@ -132,6 +135,8 @@ const mockUseUploadCaveats = vi.mocked(useUploadCaveats);
 const caveats = (overrides: Partial<ReturnType<typeof useUploadCaveats>> = {}) => ({
   followRequestsUnreadable: false,
   truncatedRelationshipFile: 'not-applicable' as const,
+  dateZones: null,
+  datesStale: false,
   ...overrides,
 });
 
@@ -560,6 +565,26 @@ describe('AccountListSection', () => {
     // File info is displayed with filename and count (may be in separate elements)
     const container = screen.getByText(resultsEN.header.title).closest('div');
     expect(container).toBeInTheDocument();
+  });
+
+  describe('stale dates hint', () => {
+    const HINT = /Upload your Instagram ZIP again to see follow dates/;
+
+    it('shows the hint for a stale file, and hides it on /sample', () => {
+      mockUseUploadCaveats.mockReturnValue(caveats({ datesStale: true }));
+      const { unmount } = renderWithRouter(<AccountListSection {...defaultProps} />);
+      expect(screen.getByText(HINT)).toBeInTheDocument();
+      unmount();
+
+      renderWithRouter(<AccountListSection {...defaultProps} isSample={true} />);
+      expect(screen.queryByText(HINT)).not.toBeInTheDocument();
+    });
+
+    it('hands the stored zones to AccountList', () => {
+      mockUseUploadCaveats.mockReturnValue(caveats({ dateZones: { following: 'local' } }));
+      renderWithRouter(<AccountListSection {...defaultProps} />);
+      expect(screen.getByTestId('date-zones')).toHaveTextContent('{"following":"local"}');
+    });
   });
 
   it('should show sample data banner when isSample is true', () => {

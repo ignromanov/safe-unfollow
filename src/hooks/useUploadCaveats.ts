@@ -1,5 +1,5 @@
 import { namesTruncatedFile } from '@/core/types';
-import type { RelationshipSkew } from '@/core/types';
+import type { DateZones, RelationshipSkew } from '@/core/types';
 import { indexedDBService } from '@/lib/indexeddb/indexeddb-service';
 import { useEffect, useState } from 'react';
 
@@ -20,6 +20,10 @@ import { useEffect, useState } from 'react';
 export interface UploadCaveats {
   followRequestsUnreadable: boolean;
   truncatedRelationshipFile: RelationshipSkew;
+  /** The file's zones once read; null while loading, on any failure, without a record, or for a pre-PR-2 record. */
+  dateZones: DateZones | null;
+  /** True only when a record WAS read and has no dateZones. Never true on failure or while loading. */
+  datesStale: boolean;
 }
 
 /**
@@ -32,6 +36,8 @@ export interface UploadCaveats {
 const NO_CAVEATS: UploadCaveats = {
   followRequestsUnreadable: false,
   truncatedRelationshipFile: 'not-applicable',
+  dateZones: null,
+  datesStale: false,
 };
 
 /**
@@ -83,10 +89,19 @@ export function useUploadCaveats(fileHash: string | null): UploadCaveats {
         // predicate so the identity-stability trick above keeps working for the
         // quiet majority: `no-skew` and `insufficient-data` must land on
         // NO_CAVEATS too, or `/results` re-renders on every visit again.
+        // `dateZones` is the displayability marker: a record without it was
+        // stored before zones were kept, so its dates cannot be shown until the
+        // file is uploaded again. Asked of a record that was actually read, so a
+        // failed or pending read never claims the file is stale.
+        const dateZones = record?.dateZones ?? null;
+        const datesStale = record !== null && record.dateZones === undefined;
         setCaveats(
-          !followRequestsUnreadable && !namesTruncatedFile(truncatedRelationshipFile)
+          !followRequestsUnreadable &&
+            !namesTruncatedFile(truncatedRelationshipFile) &&
+            dateZones === null &&
+            !datesStale
             ? NO_CAVEATS
-            : { followRequestsUnreadable, truncatedRelationshipFile }
+            : { followRequestsUnreadable, truncatedRelationshipFile, dateZones, datesStale }
         );
       })
       .catch(() => {
