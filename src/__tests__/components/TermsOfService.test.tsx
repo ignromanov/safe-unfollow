@@ -35,7 +35,7 @@ describe('TermsOfService', () => {
     it('should render last updated date', () => {
       render(<TermsOfService {...defaultProps} />);
 
-      expect(screen.getByText('Last updated: October 25, 2026')).toBeInTheDocument();
+      expect(screen.getByText('Last updated: October 26, 2026')).toBeInTheDocument();
     });
   });
 

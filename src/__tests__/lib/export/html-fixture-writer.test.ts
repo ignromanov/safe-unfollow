@@ -94,7 +94,7 @@ describe.skipIf(!OUT)('report fixtures for the owner-device check', () => {
       'report-50k-en.html': await write('report-50k-en.html', 50_000, 'en', enResults),
       'report-3k-ar.html': await write('report-3k-ar.html', 3_000, 'ar', arResults),
     };
-    console.info('report fixture sizes (bytes):', sizes);
+    process.stdout.write(`report fixture sizes (bytes): ${JSON.stringify(sizes)}\n`);
     for (const bytes of Object.values(sizes)) expect(bytes).toBeGreaterThan(0);
   }, 120_000);
 });
