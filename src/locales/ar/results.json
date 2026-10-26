@@ -202,7 +202,7 @@
     },
     "checkout": {
       "privacy": "يبقى ملف تصدير Instagram في هذا المتصفح. صفحة الدفع لا تراه أبدًا.",
-      "summary": "{{rows}} صف، بصيغتَي CSV و JSON، {{price}} مرة واحدة.",
+      "summary": "{{rows}} صف، تقرير وCSV وJSON، {{price}} مرة واحدة.",
       "methods": "تظهر البطاقات وطرق الدفع المحلية في الصفحة التالية."
     },
     "license": {
@@ -217,7 +217,7 @@
       "errorNotFound": "لم نتمكن من العثور على مفتاح الترخيص هذا. تحقق من المفتاح في رسالة الشراء.",
       "errorGeneric": "فشل التفعيل. تحقق من اتصالك وحاول مرة أخرى.",
       "successTitle": "تم فتح التصدير",
-      "successBody": "يمكن لهذا المتصفّح الآن تصدير قائمتك كاملة، بصيغة CSV أو JSON، وكلما شئت.",
+      "successBody": "يمكن لهذا المتصفّح الآن تصدير قائمتك كلما شئت: تقريرًا، أو بصيغة CSV أو JSON.",
       "successMeta": "شراء لمرة واحدة · بلا اشتراك",
       "keyLabel": "مفتاحك",
       "keyNote": "محفوظ في هذا المتصفّح. يعمل مفتاحك على 3 متصفّحات كحد أقصى — والرابط في رسالة الشراء يفتح المتصفّح التالي.",
@@ -238,9 +238,9 @@
       "json": "تنزيل JSON",
       "csvHint": "يُفتح في Excel و Google Sheets و Numbers",
       "jsonHint": "للسكربتات، أو لإعادة تحميله لاحقًا",
-      "html": "Download report",
-      "htmlHint": "Opens on any phone. Print it to save a PDF.",
-      "htmlCeiling": "The report lists up to {{max}} accounts. The CSV has all {{count}}.",
+      "html": "تنزيل التقرير",
+      "htmlHint": "يُفتح في متصفح هاتفك أو حاسوبك. اطبعه لحفظه بصيغة PDF.",
+      "htmlCeiling": "يعرض التقرير حتى {{max}} حساب. ملف CSV يضم كل الحسابات ({{count}}).",
       "datesNote": "التاريخ الفارغ يعني أننا لم نجد تاريخاً لهذا الحساب في ملفك.",
       "generating": "جارٍ الإنشاء… {{percent}}%",
       "buildingTitle": "جارٍ إنشاء ملفك",
@@ -254,22 +254,23 @@
       "error": "فشل التصدير. يرجى المحاولة مرة أخرى."
     },
     "report": {
-      "title": "SafeUnfollow report",
-      "madeOn": "Made {{date}}",
-      "uploadedOn": "From an export uploaded {{date}}",
-      "scopeAll": "All accounts · {{total}}",
-      "scopeFiltered": "{{filters}} · {{count}} of {{total}} accounts",
-      "scopeSearched": "{{count}} of {{total}} accounts",
-      "searchNarrowed": "Narrowed by a search",
-      "other": "Other",
-      "sampleLine": "Free sample: {{shown}} of {{total}} accounts. The full report lists all of them.",
-      "ceilingTop": "This report lists the first {{max}} accounts. The CSV export has all of them.",
-      "ceilingSection": "In the CSV export: {{count}} rows",
-      "footer": "Made with SafeUnfollow",
+      "title": "تقرير SafeUnfollow",
+      "madeOn": "أُنشئ في {{date}}",
+      "uploadedOn": "من ملف تصدير Instagram الذي رفعته في {{date}}",
+      "scopeAll": "كل الحسابات · {{total}}",
+      "scopeFiltered": "{{filters}} · الحسابات: {{count}} من أصل {{total}}",
+      "scopeSearched": "الحسابات: {{count}} من أصل {{total}}",
+      "searchNarrowed": "تم تضييق القائمة بالبحث",
+      "other": "أخرى",
+      "sampleLine": "عينة مجانية: {{shown}} من أصل {{total}}. التصدير الكامل يضم كل الحسابات.",
+      "ceilingTop": "يتوقف هذا التقرير عند {{max}} حساب. القائمة الكاملة في تصدير CSV.",
+      "ceilingSection": "عدد الصفوف في تصدير CSV: {{count}}",
+      "footer": "صُنع باستخدام SafeUnfollow",
       "caveat": {
-        "followRequests": "“Not following back” may be overstated. We could not read your follow-requests file, so accounts you have requested may be listed under “Not following back” instead of “Other”. Followers, Following and Mutuals are unaffected.",
-        "truncatedFollowers": "Your followers list looks incomplete. It begins long after your following list does, which is what happens when an export is requested for a limited date range. If you chose one, ask Instagram for your data again with the date range set to “All time”. The counts in every section below may be off: some too high, some too low.",
-        "truncatedFollowing": "Your following list looks incomplete. It begins long after your followers list does, which is what happens when an export is requested for a limited date range. If you chose one, ask Instagram for your data again with the date range set to “All time”. The counts in every section below may be off: some too high, some too low."
+        "followRequests": "قد يكون «لا يتابعونك» أكبر من الواقع. لم نتمكن من قراءة ملف طلبات المتابعة الخاص بك، لذلك قد تظهر هناك حسابات أرسلت إليها طلب متابعة بدلًا من «أخرى». «لا تتابعهم» و«متبادلون» غير متأثرين.",
+        "truncatedFollowers": "قائمة المتابِعين تبدو غير مكتملة. تبدأ بعد قائمة المتابَعين بوقت طويل، وهذا ما يحدث عندما يُطلب التصدير لنطاق زمني محدود. إذا اخترت نطاقًا، اطلب بياناتك من Instagram مرة أخرى مع ضبط النطاق الزمني على \"كل الوقت\". قد تكون بعض الحسابات في «لا يتابعونك» و«لا تتابعهم» و«متبادلون» في القسم الخطأ أو مفقودة، لذا قد تكون هذه الأعداد أعلى أو أقل من الحقيقة.",
+        "truncatedFollowing": "قائمة المتابَعين تبدو غير مكتملة. تبدأ بعد قائمة المتابِعين بوقت طويل، وهذا ما يحدث عندما يُطلب التصدير لنطاق زمني محدود. إذا اخترت نطاقًا، اطلب بياناتك من Instagram مرة أخرى مع ضبط النطاق الزمني على \"كل الوقت\". قد تكون بعض الحسابات في «لا يتابعونك» و«لا تتابعهم» و«متبادلون» في القسم الخطأ أو مفقودة، لذا قد تكون هذه الأعداد أعلى أو أقل من الحقيقة.",
+        "datesStale": "لا يحتوي هذا التقرير على تواريخ المتابعة: حُفظ ملفك المرفوع قبل أن يبدأ SafeUnfollow بحفظها. ارفع ملف ZIP نفسه من Instagram مرة أخرى، ثم صدّر تقريرًا جديدًا."
       }
     }
   },

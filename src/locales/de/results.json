@@ -202,7 +202,7 @@
     },
     "checkout": {
       "privacy": "Dein Instagram-Export bleibt in diesem Browser. Die Bezahlseite sieht ihn nie.",
-      "summary": "{{rows}} Zeilen · CSV + JSON · {{price}}, einmalig.",
+      "summary": "{{rows}} Zeilen · Bericht + CSV + JSON · {{price}}, einmalig.",
       "methods": "Karten und lokale Zahlungsmethoden erscheinen auf der nächsten Seite."
     },
     "license": {
@@ -217,7 +217,7 @@
       "errorNotFound": "Wir konnten diesen Lizenzschlüssel nicht finden. Überprüfe den Schlüssel in deiner Kauf-E-Mail.",
       "errorGeneric": "Aktivierung fehlgeschlagen. Überprüfe deine Verbindung und versuche es erneut.",
       "successTitle": "Export freigeschaltet",
-      "successBody": "Dieser Browser kann jetzt deine vollständige Liste als CSV oder JSON exportieren, so oft du willst.",
+      "successBody": "Dieser Browser kann deine Liste jetzt so oft exportieren, wie du willst: als Bericht, CSV oder JSON.",
       "successMeta": "Einmaliger Kauf · kein Abo",
       "keyLabel": "Dein Schlüssel",
       "keyNote": "In diesem Browser gespeichert. Dein Schlüssel funktioniert in bis zu 3 Browsern — der Link in deiner Kauf-E-Mail schaltet den nächsten frei.",
@@ -238,9 +238,9 @@
       "json": "JSON herunterladen",
       "csvHint": "Öffnet sich in Excel, Google Sheets und Numbers",
       "jsonHint": "Für Skripte oder zum späteren Wiedereinlesen",
-      "html": "Download report",
-      "htmlHint": "Opens on any phone. Print it to save a PDF.",
-      "htmlCeiling": "The report lists up to {{max}} accounts. The CSV has all {{count}}.",
+      "html": "Bericht herunterladen",
+      "htmlHint": "Öffnet sich im Browser auf Handy oder Computer. Drucke ihn, um ein PDF zu speichern.",
+      "htmlCeiling": "Der Bericht listet bis zu {{max}} Konten. Die CSV enthält alle {{count}}.",
       "datesNote": "Ein leeres Datum heißt, dass wir in deiner Datei für dieses Konto kein Datum gefunden haben.",
       "generating": "Wird erstellt… {{percent}}%",
       "buildingTitle": "Deine Datei wird erstellt",
@@ -254,22 +254,23 @@
       "error": "Export fehlgeschlagen. Bitte versuche es erneut."
     },
     "report": {
-      "title": "SafeUnfollow report",
-      "madeOn": "Made {{date}}",
-      "uploadedOn": "From an export uploaded {{date}}",
-      "scopeAll": "All accounts · {{total}}",
-      "scopeFiltered": "{{filters}} · {{count}} of {{total}} accounts",
-      "scopeSearched": "{{count}} of {{total}} accounts",
-      "searchNarrowed": "Narrowed by a search",
-      "other": "Other",
-      "sampleLine": "Free sample: {{shown}} of {{total}} accounts. The full report lists all of them.",
-      "ceilingTop": "This report lists the first {{max}} accounts. The CSV export has all of them.",
-      "ceilingSection": "In the CSV export: {{count}} rows",
-      "footer": "Made with SafeUnfollow",
+      "title": "SafeUnfollow-Bericht",
+      "madeOn": "Erstellt am {{date}}",
+      "uploadedOn": "Aus dem Instagram-Export, den du am {{date}} hochgeladen hast",
+      "scopeAll": "Alle Konten · {{total}}",
+      "scopeFiltered": "{{filters}} · {{count}} von {{total}} Konten",
+      "scopeSearched": "{{count}} von {{total}} Konten",
+      "searchNarrowed": "Durch eine Suche eingegrenzt",
+      "other": "Sonstige",
+      "sampleLine": "Kostenlose Probe: {{shown}} von {{total}} Konten. Der vollständige Export enthält alle.",
+      "ceilingTop": "Dieser Bericht endet nach {{max}} Konten. Der CSV-Export enthält die vollständige Liste.",
+      "ceilingSection": "Im CSV-Export: {{count}} Zeilen",
+      "footer": "Erstellt mit SafeUnfollow",
       "caveat": {
-        "followRequests": "“Not following back” may be overstated. We could not read your follow-requests file, so accounts you have requested may be listed under “Not following back” instead of “Other”. Followers, Following and Mutuals are unaffected.",
-        "truncatedFollowers": "Your followers list looks incomplete. It begins long after your following list does, which is what happens when an export is requested for a limited date range. If you chose one, ask Instagram for your data again with the date range set to “All time”. The counts in every section below may be off: some too high, some too low.",
-        "truncatedFollowing": "Your following list looks incomplete. It begins long after your followers list does, which is what happens when an export is requested for a limited date range. If you chose one, ask Instagram for your data again with the date range set to “All time”. The counts in every section below may be off: some too high, some too low."
+        "followRequests": "„Folgt dir nicht zurück“ ist möglicherweise zu hoch. Wir konnten deine Datei mit den Follow-Anfragen nicht lesen. Konten, denen du eine Anfrage geschickt hast, können deshalb dort statt unter „Sonstige“ stehen. „Du folgst nicht zurück“ und „Gegenseitig“ sind davon nicht betroffen.",
+        "truncatedFollowers": "Deine Follower-Liste wirkt unvollständig. Sie beginnt deutlich später als deine Gefolgt-Liste, und genau das passiert, wenn ein Export für einen begrenzten Zeitraum angefordert wird. Falls du einen Zeitraum gewählt hast, fordere deine Daten bei Instagram erneut an und setze den Zeitraum auf \"Gesamter Zeitraum\". Einige Konten in „Folgt dir nicht zurück“, „Du folgst nicht zurück“ und „Gegenseitig“ stehen womöglich im falschen Abschnitt oder fehlen, deshalb können diese Zahlen zu hoch oder zu niedrig sein.",
+        "truncatedFollowing": "Deine Gefolgt-Liste wirkt unvollständig. Sie beginnt deutlich später als deine Follower-Liste, und genau das passiert, wenn ein Export für einen begrenzten Zeitraum angefordert wird. Falls du einen Zeitraum gewählt hast, fordere deine Daten bei Instagram erneut an und setze den Zeitraum auf \"Gesamter Zeitraum\". Einige Konten in „Folgt dir nicht zurück“, „Du folgst nicht zurück“ und „Gegenseitig“ stehen womöglich im falschen Abschnitt oder fehlen, deshalb können diese Zahlen zu hoch oder zu niedrig sein.",
+        "datesStale": "Dieser Bericht enthält keine Datumsangaben: Dein Upload wurde gespeichert, bevor SafeUnfollow sie aufbewahrt hat. Lade dasselbe Instagram ZIP erneut hoch und exportiere einen neuen Bericht."
       }
     }
   },

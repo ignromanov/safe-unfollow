@@ -58,7 +58,7 @@
     "unfollowed": "Недавно отписались",
     "notFollowingBack": "Не подписаны в ответ",
     "mutuals": "Взаимные",
-    "notFollowedBack": "Не подписались в ответ",
+    "notFollowedBack": "Ты не подписан(а) в ответ",
     "pending": "Ожидает подтверждения",
     "permanent": "Ожидает (навсегда)",
     "restricted": "Ограниченный доступ",
@@ -202,7 +202,7 @@
     },
     "checkout": {
       "privacy": "Твой экспорт из Instagram остаётся в этом браузере. Платёжная страница его не видит.",
-      "summary": "{{rows}} строк · CSV + JSON · {{price}}, один раз.",
+      "summary": "{{rows}} строк · отчёт + CSV + JSON · {{price}}, один раз.",
       "methods": "Карты и локальные способы оплаты — на следующей странице."
     },
     "license": {
@@ -217,7 +217,7 @@
       "errorNotFound": "Не нашли такой лицензионный ключ. Проверь ключ в письме о покупке.",
       "errorGeneric": "Не удалось активировать. Проверь соединение и попробуй снова.",
       "successTitle": "Экспорт разблокирован",
-      "successBody": "Теперь в этом браузере можно выгрузить весь список — в CSV или JSON, сколько угодно раз.",
+      "successBody": "Теперь в этом браузере можно выгружать список сколько угодно раз: отчётом, в CSV или JSON.",
       "successMeta": "Разовая покупка · без подписки",
       "keyLabel": "Твой ключ",
       "keyNote": "Сохранён в этом браузере. Ключ работает максимум в 3 браузерах — ссылка из письма о покупке откроет следующий.",
@@ -238,9 +238,9 @@
       "json": "Скачать JSON",
       "csvHint": "Открывается в Excel, Google Таблицах и Numbers",
       "jsonHint": "Для скриптов или чтобы загрузить обратно позже",
-      "html": "Download report",
-      "htmlHint": "Opens on any phone. Print it to save a PDF.",
-      "htmlCeiling": "The report lists up to {{max}} accounts. The CSV has all {{count}}.",
+      "html": "Скачать отчёт",
+      "htmlHint": "Открывается в браузере на телефоне или компьютере. Распечатай, чтобы сохранить в PDF.",
+      "htmlCeiling": "В отчёте — до {{max}} аккаунтов. В CSV — все {{count}}.",
       "datesNote": "Пустая дата означает, что в твоём файле для этого аккаунта даты не нашлось.",
       "generating": "Генерация… {{percent}}%",
       "buildingTitle": "Собираем твой файл",
@@ -254,22 +254,23 @@
       "error": "Не удалось выполнить экспорт. Попробуй ещё раз."
     },
     "report": {
-      "title": "SafeUnfollow report",
-      "madeOn": "Made {{date}}",
-      "uploadedOn": "From an export uploaded {{date}}",
-      "scopeAll": "All accounts · {{total}}",
-      "scopeFiltered": "{{filters}} · {{count}} of {{total}} accounts",
-      "scopeSearched": "{{count}} of {{total}} accounts",
-      "searchNarrowed": "Narrowed by a search",
-      "other": "Other",
-      "sampleLine": "Free sample: {{shown}} of {{total}} accounts. The full report lists all of them.",
-      "ceilingTop": "This report lists the first {{max}} accounts. The CSV export has all of them.",
-      "ceilingSection": "In the CSV export: {{count}} rows",
-      "footer": "Made with SafeUnfollow",
+      "title": "Отчёт SafeUnfollow",
+      "madeOn": "Создан {{date}}",
+      "uploadedOn": "По экспорту из Instagram, загруженному {{date}}",
+      "scopeAll": "Все аккаунты · {{total}}",
+      "scopeFiltered": "{{filters}} · аккаунтов: {{count}} из {{total}}",
+      "scopeSearched": "Аккаунтов: {{count}} из {{total}}",
+      "searchNarrowed": "Список сужен поиском",
+      "other": "Другие",
+      "sampleLine": "Бесплатный образец: {{shown}} из {{total}}. В полном экспорте — все аккаунты.",
+      "ceilingTop": "В этом отчёте — первые {{max}} аккаунтов. Полный список — в экспорте CSV.",
+      "ceilingSection": "Строк в экспорте CSV: {{count}}",
+      "footer": "Сделано в SafeUnfollow",
       "caveat": {
-        "followRequests": "“Not following back” may be overstated. We could not read your follow-requests file, so accounts you have requested may be listed under “Not following back” instead of “Other”. Followers, Following and Mutuals are unaffected.",
-        "truncatedFollowers": "Your followers list looks incomplete. It begins long after your following list does, which is what happens when an export is requested for a limited date range. If you chose one, ask Instagram for your data again with the date range set to “All time”. The counts in every section below may be off: some too high, some too low.",
-        "truncatedFollowing": "Your following list looks incomplete. It begins long after your followers list does, which is what happens when an export is requested for a limited date range. If you chose one, ask Instagram for your data again with the date range set to “All time”. The counts in every section below may be off: some too high, some too low."
+        "followRequests": "«Не подписаны в ответ» может быть завышено. Не удалось прочитать файл с заявками на подписку: аккаунты с отправленными заявками могли попасть туда, а не в «Другие». «Ты не подписан(а) в ответ» и «Взаимные» не затронуты.",
+        "truncatedFollowers": "Список подписчиков выглядит неполным. Он начинается намного позже списка подписок — так бывает, когда выгрузку запрашивают за ограниченный период. Если ты выбирал период, запроси данные у Instagram заново, установив диапазон дат «За всё время». Часть аккаунтов в разделах «Не подписаны в ответ», «Ты не подписан(а) в ответ» и «Взаимные» может оказаться не в том разделе или отсутствовать, поэтому эти числа могут быть завышены или занижены.",
+        "truncatedFollowing": "Список подписок выглядит неполным. Он начинается намного позже списка подписчиков — так бывает, когда выгрузку запрашивают за ограниченный период. Если ты выбирал период, запроси данные у Instagram заново, установив диапазон дат «За всё время». Часть аккаунтов в разделах «Не подписаны в ответ», «Ты не подписан(а) в ответ» и «Взаимные» может оказаться не в том разделе или отсутствовать, поэтому эти числа могут быть завышены или занижены.",
+        "datesStale": "В этом отчёте нет дат подписок: твоя загрузка сохранена до того, как SafeUnfollow начал их хранить. Загрузи тот же ZIP-файл Instagram ещё раз и выгрузи новый отчёт."
       }
     }
   },

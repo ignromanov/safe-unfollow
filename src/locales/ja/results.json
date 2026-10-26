@@ -202,7 +202,7 @@
     },
     "checkout": {
       "privacy": "Instagramのエクスポートはこのブラウザに留まります。決済ページがそれを見ることはありません。",
-      "summary": "{{rows}}行・CSV + JSON・{{price}}、一度きり。",
+      "summary": "{{rows}}行・レポート + CSV + JSON・{{price}}、一度きり。",
       "methods": "カードと各国の決済方法は次のページに表示されます。"
     },
     "license": {
@@ -217,7 +217,7 @@
       "errorNotFound": "このライセンスキーが見つかりませんでした。購入時のメールでキーをご確認ください。",
       "errorGeneric": "有効化に失敗しました。接続を確認してもう一度お試しください。",
       "successTitle": "エクスポートが有効になりました",
-      "successBody": "このブラウザで、リスト全体を CSV または JSON で何度でもエクスポートできます。",
+      "successBody": "このブラウザで、リストを何度でもエクスポートできます。形式はレポート、CSV、JSON から選べます。",
       "successMeta": "買い切り · サブスクなし",
       "keyLabel": "あなたのキー",
       "keyNote": "このブラウザに保存されました。キーは最大 3 つのブラウザで有効です。次の 1 つは購入メールのリンクから登録できます。",
@@ -238,9 +238,9 @@
       "json": "JSONをダウンロード",
       "csvHint": "Excel・Google スプレッドシート・Numbers で開けます",
       "jsonHint": "スクリプト用、または後で読み込み直す用",
-      "html": "Download report",
-      "htmlHint": "Opens on any phone. Print it to save a PDF.",
-      "htmlCeiling": "The report lists up to {{max}} accounts. The CSV has all {{count}}.",
+      "html": "レポートをダウンロード",
+      "htmlHint": "スマートフォンやパソコンのブラウザで開けます。印刷すると PDF として保存できます。",
+      "htmlCeiling": "レポートに載るのは最大{{max}}件です。CSVには{{count}}件すべてが含まれます。",
       "datesNote": "日付が空欄の場合は、ファイル内にそのアカウントの日付が見つからなかったことを意味します。",
       "generating": "生成中… {{percent}}%",
       "buildingTitle": "ファイルを作成しています",
@@ -254,22 +254,23 @@
       "error": "エクスポートに失敗しました。もう一度お試しください。"
     },
     "report": {
-      "title": "SafeUnfollow report",
-      "madeOn": "Made {{date}}",
-      "uploadedOn": "From an export uploaded {{date}}",
-      "scopeAll": "All accounts · {{total}}",
-      "scopeFiltered": "{{filters}} · {{count}} of {{total}} accounts",
-      "scopeSearched": "{{count}} of {{total}} accounts",
-      "searchNarrowed": "Narrowed by a search",
-      "other": "Other",
-      "sampleLine": "Free sample: {{shown}} of {{total}} accounts. The full report lists all of them.",
-      "ceilingTop": "This report lists the first {{max}} accounts. The CSV export has all of them.",
-      "ceilingSection": "In the CSV export: {{count}} rows",
-      "footer": "Made with SafeUnfollow",
+      "title": "SafeUnfollow レポート",
+      "madeOn": "作成日：{{date}}",
+      "uploadedOn": "{{date}}にアップロードした Instagram のエクスポートに基づく",
+      "scopeAll": "すべてのアカウント・{{total}}件",
+      "scopeFiltered": "{{filters}}・{{total}}件中{{count}}件",
+      "scopeSearched": "{{total}}件中{{count}}件",
+      "searchNarrowed": "検索で絞り込み済み",
+      "other": "その他",
+      "sampleLine": "無料サンプル：{{total}}件中{{shown}}件。完全版のエクスポートにはすべて含まれます。",
+      "ceilingTop": "このレポートは{{max}}件までです。完全なリストは CSV エクスポートにあります。",
+      "ceilingSection": "CSV エクスポート：{{count}}行",
+      "footer": "SafeUnfollow で作成",
       "caveat": {
-        "followRequests": "“Not following back” may be overstated. We could not read your follow-requests file, so accounts you have requested may be listed under “Not following back” instead of “Other”. Followers, Following and Mutuals are unaffected.",
-        "truncatedFollowers": "Your followers list looks incomplete. It begins long after your following list does, which is what happens when an export is requested for a limited date range. If you chose one, ask Instagram for your data again with the date range set to “All time”. The counts in every section below may be off: some too high, some too low.",
-        "truncatedFollowing": "Your following list looks incomplete. It begins long after your followers list does, which is what happens when an export is requested for a limited date range. If you chose one, ask Instagram for your data again with the date range set to “All time”. The counts in every section below may be off: some too high, some too low."
+        "followRequests": "「フォローバックなし」は実際より多く表示されている可能性があります。フォローリクエストのファイルを読み取れなかったため、リクエスト済みのアカウントが「その他」ではなくそこに含まれている可能性があります。「フォローし返していません」と「相互フォロー」には影響ありません。",
+        "truncatedFollowers": "フォロワーのリストが不完全に見えます。フォロー中のリストよりもかなり後から始まっています。これは、期間を限定してエクスポートを申請したときに起こります。期間を選んだ場合は、日付範囲を「全期間」に設定して、Instagram にもう一度データを申請してください。「フォローバックなし」「フォローし返していません」「相互フォロー」の一部のアカウントは、違うセクションに入っているか、抜けている可能性があります。そのため、これらの件数は多すぎる場合も少なすぎる場合もあります。",
+        "truncatedFollowing": "フォロー中のリストが不完全に見えます。フォロワーのリストよりもかなり後から始まっています。これは、期間を限定してエクスポートを申請したときに起こります。期間を選んだ場合は、日付範囲を「全期間」に設定して、Instagram にもう一度データを申請してください。「フォローバックなし」「フォローし返していません」「相互フォロー」の一部のアカウントは、違うセクションに入っているか、抜けている可能性があります。そのため、これらの件数は多すぎる場合も少なすぎる場合もあります。",
+        "datesStale": "このレポートにはフォローした日付がありません。SafeUnfollow が日付を保存する前にアップロードされたデータだからです。同じ Instagram ZIP をもう一度アップロードしてから、新しいレポートをエクスポートしてください。"
       }
     }
   },

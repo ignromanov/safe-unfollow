@@ -202,7 +202,7 @@
     },
     "checkout": {
       "privacy": "Votre export Instagram reste dans ce navigateur. La page de paiement ne le voit jamais.",
-      "summary": "{{rows}} lignes · CSV + JSON · {{price}}, une seule fois.",
+      "summary": "{{rows}} lignes · rapport + CSV + JSON · {{price}}, une seule fois.",
       "methods": "Les cartes et les moyens de paiement locaux s’affichent sur la page suivante."
     },
     "license": {
@@ -217,7 +217,7 @@
       "errorNotFound": "Nous n’avons pas trouvé cette clé de licence. Vérifiez la clé dans votre e-mail d’achat.",
       "errorGeneric": "Échec de l’activation. Vérifiez votre connexion et réessayez.",
       "successTitle": "Export débloqué",
-      "successBody": "Ce navigateur peut désormais exporter votre liste complète, en CSV ou JSON, autant de fois que vous le souhaitez.",
+      "successBody": "Ce navigateur peut désormais exporter votre liste autant de fois que vous le souhaitez : en rapport, en CSV ou en JSON.",
       "successMeta": "Paiement unique · sans abonnement",
       "keyLabel": "Votre clé",
       "keyNote": "Enregistrée dans ce navigateur. Votre clé fonctionne sur 3 navigateurs maximum — le lien de votre e-mail d’achat débloque le suivant.",
@@ -238,9 +238,9 @@
       "json": "Télécharger le JSON",
       "csvHint": "S’ouvre dans Excel, Google Sheets et Numbers",
       "jsonHint": "Pour vos scripts, ou pour le recharger plus tard",
-      "html": "Download report",
-      "htmlHint": "Opens on any phone. Print it to save a PDF.",
-      "htmlCeiling": "The report lists up to {{max}} accounts. The CSV has all {{count}}.",
+      "html": "Télécharger le rapport",
+      "htmlHint": "S’ouvre dans le navigateur de votre téléphone ou de votre ordinateur. Imprimez-le pour l’enregistrer en PDF.",
+      "htmlCeiling": "Le rapport liste jusqu’à {{max}} comptes. Le CSV les contient tous ({{count}}).",
       "datesNote": "Une date vide signifie que nous n’avons trouvé aucune date pour ce compte dans votre fichier.",
       "generating": "Génération… {{percent}}%",
       "buildingTitle": "Création de votre fichier",
@@ -254,22 +254,23 @@
       "error": "L’export a échoué. Veuillez réessayer."
     },
     "report": {
-      "title": "SafeUnfollow report",
-      "madeOn": "Made {{date}}",
-      "uploadedOn": "From an export uploaded {{date}}",
-      "scopeAll": "All accounts · {{total}}",
-      "scopeFiltered": "{{filters}} · {{count}} of {{total}} accounts",
-      "scopeSearched": "{{count}} of {{total}} accounts",
-      "searchNarrowed": "Narrowed by a search",
-      "other": "Other",
-      "sampleLine": "Free sample: {{shown}} of {{total}} accounts. The full report lists all of them.",
-      "ceilingTop": "This report lists the first {{max}} accounts. The CSV export has all of them.",
-      "ceilingSection": "In the CSV export: {{count}} rows",
-      "footer": "Made with SafeUnfollow",
+      "title": "Rapport SafeUnfollow",
+      "madeOn": "Créé le {{date}}",
+      "uploadedOn": "D’après l’export Instagram que vous avez téléversé le {{date}}",
+      "scopeAll": "Tous les comptes · {{total}}",
+      "scopeFiltered": "{{filters}} · {{count}} sur {{total}} comptes",
+      "scopeSearched": "{{count}} sur {{total}} comptes",
+      "searchNarrowed": "Liste réduite par une recherche",
+      "other": "Autres",
+      "sampleLine": "Échantillon gratuit : {{shown}} sur {{total}} comptes. L’export complet les contient tous.",
+      "ceilingTop": "Ce rapport s’arrête à {{max}} comptes. L’export CSV contient la liste complète.",
+      "ceilingSection": "Dans l’export CSV : {{count}} lignes",
+      "footer": "Réalisé avec SafeUnfollow",
       "caveat": {
-        "followRequests": "“Not following back” may be overstated. We could not read your follow-requests file, so accounts you have requested may be listed under “Not following back” instead of “Other”. Followers, Following and Mutuals are unaffected.",
-        "truncatedFollowers": "Your followers list looks incomplete. It begins long after your following list does, which is what happens when an export is requested for a limited date range. If you chose one, ask Instagram for your data again with the date range set to “All time”. The counts in every section below may be off: some too high, some too low.",
-        "truncatedFollowing": "Your following list looks incomplete. It begins long after your followers list does, which is what happens when an export is requested for a limited date range. If you chose one, ask Instagram for your data again with the date range set to “All time”. The counts in every section below may be off: some too high, some too low."
+        "followRequests": "« Ne vous suivent pas » est peut-être surestimé. Nous n’avons pas pu lire votre fichier de demandes d’abonnement : les comptes à qui vous avez envoyé une demande peuvent figurer là plutôt que dans « Autres ». « Vous ne suivez pas en retour » et « Mutuels » ne sont pas affectés.",
+        "truncatedFollowers": "Votre liste d'abonnés semble incomplète. Elle commence bien après votre liste d'abonnements, ce qui arrive lorsqu'un export est demandé sur une plage de dates limitée. Si vous en avez choisi une, redemandez vos données à Instagram en réglant la plage de dates sur « Tout ». Certains comptes de « Ne vous suivent pas », « Vous ne suivez pas en retour » et « Mutuels » peuvent se trouver dans la mauvaise section ou manquer : ces compteurs peuvent donc être trop élevés ou trop bas.",
+        "truncatedFollowing": "Votre liste d'abonnements semble incomplète. Elle commence bien après votre liste d'abonnés, ce qui arrive lorsqu'un export est demandé sur une plage de dates limitée. Si vous en avez choisi une, redemandez vos données à Instagram en réglant la plage de dates sur « Tout ». Certains comptes de « Ne vous suivent pas », « Vous ne suivez pas en retour » et « Mutuels » peuvent se trouver dans la mauvaise section ou manquer : ces compteurs peuvent donc être trop élevés ou trop bas.",
+        "datesStale": "Ce rapport ne contient pas de dates d’abonnement : votre import a été enregistré avant que SafeUnfollow ne les conserve. Téléversez à nouveau le même ZIP Instagram, puis exportez un nouveau rapport."
       }
     }
   },
