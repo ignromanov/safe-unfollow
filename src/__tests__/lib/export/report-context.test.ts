@@ -33,6 +33,39 @@ describe('buildReportContext', () => {
     expect(buildReportContext(t, base).strings.scope).toContain('export.report.scopeAll');
   });
 
+  it('does not say "all accounts" when only a search narrowed the view', () => {
+    const { scope } = buildReportContext(t, {
+      ...base,
+      searchApplied: true,
+      rowCount: 3,
+      totalCount: 5000,
+    }).strings;
+    expect(scope).toContain('export.report.scopeSearched');
+    expect(scope).not.toContain('scopeAll');
+    expect(scope).toContain('"count":"3"');
+    expect(scope).toContain('"total":"5,000"');
+  });
+
+  it('states a zero count under a search that matched nothing', () => {
+    const { scope } = buildReportContext(t, {
+      ...base,
+      searchApplied: true,
+      rowCount: 0,
+      totalCount: 5000,
+    }).strings;
+    expect(scope).toContain('"count":"0"');
+  });
+
+  it('keeps the filtered scope when a filter and a search are both applied', () => {
+    const { scope } = buildReportContext(t, {
+      ...base,
+      filters: ['close'],
+      searchApplied: true,
+      rowCount: 1,
+    }).strings;
+    expect(scope).toContain('export.report.scopeFiltered');
+  });
+
   it('passes both localized badge names into the filtered scope', () => {
     const { scope } = buildReportContext(t, {
       ...base,
@@ -58,11 +91,11 @@ describe('buildReportContext', () => {
     expect(capped.strings.sampleLine).toContain('export.report.sampleLine');
   });
 
-  it('joins caveat titles to their bodies and leaves the stale hint alone', () => {
+  it('reads the report-specific caveat keys and leaves the stale hint alone', () => {
     const { caveats } = buildReportContext(t, base).strings;
-    expect(caveats.followRequests).toContain('caveat.followRequests.title');
-    expect(caveats.followRequests).toContain('caveat.followRequests.body');
-    expect(caveats.truncatedFollowers).toContain('caveat.truncated.followers.body');
+    expect(caveats.followRequests).toContain('export.report.caveat.followRequests');
+    expect(caveats.truncatedFollowers).toContain('export.report.caveat.truncatedFollowers');
+    expect(caveats.truncatedFollowing).toContain('export.report.caveat.truncatedFollowing');
     expect(caveats.datesStale).toContain('dates.staleHint');
   });
 
@@ -120,6 +153,33 @@ describe('buildReportContext against the real English bundle', () => {
       ...Object.values(strings.dateLines),
     ];
     for (const s of filled) expect(s.split(SLOT).length - 1).toBe(1);
+  });
+
+  it('does not point at marks the report does not have', async () => {
+    const { caveats } = (await build()).strings;
+    expect(caveats.truncatedFollowers).not.toContain('marked below');
+    expect(caveats.truncatedFollowing).not.toContain('marked below');
+    expect(caveats.followRequests).not.toContain('pending-request counts');
+  });
+
+  it('resolves the searched scope line', async () => {
+    const i18n = i18next.createInstance();
+    await i18n.init({
+      lng: 'en',
+      ns: ['results'],
+      defaultNS: 'results',
+      resources: { en: { results: enResults } },
+      interpolation: { escapeValue: false },
+    });
+    const { scope } = buildReportContext(i18n.getFixedT('en', 'results'), {
+      lang: 'en',
+      filters: [],
+      searchApplied: true,
+      rowCount: 0,
+      totalCount: 5000,
+      sampleLimit: null,
+    }).strings;
+    expect(scope).toBe('0 of 5,000 accounts');
   });
 
   it('names every report section', async () => {

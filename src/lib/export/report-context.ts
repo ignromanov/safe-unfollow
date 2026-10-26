@@ -56,7 +56,6 @@ export function buildReportContext(
   const num = new Intl.NumberFormat(o.lang);
   // Keys are composed at runtime from closed unions, which the typed `t` cannot follow.
   const tr = t as unknown as (key: string, opts?: Record<string, unknown>) => string;
-  const withBody = (prefix: string): string => `${tr(`${prefix}.title`)} ${tr(`${prefix}.body`)}`;
 
   const labels: Partial<Record<BadgeKey, string>> = {};
   for (const key of BADGE_ORDER) labels[key] = tr(`badges.${key}`);
@@ -69,14 +68,16 @@ export function buildReportContext(
     DATE_LINE_KEYS.map(k => [k, tr(`dates.${k}`, { date: SLOT })])
   ) as Record<DateLineKey, string>;
 
+  const counts = { count: num.format(o.rowCount), total: num.format(o.totalCount) };
   const scope =
-    o.filters.length === 0
-      ? tr('export.report.scopeAll', { total: num.format(o.totalCount) })
-      : tr('export.report.scopeFiltered', {
+    o.filters.length > 0
+      ? tr('export.report.scopeFiltered', {
           filters: o.filters.map(f => labels[f] ?? f).join(', '),
-          count: num.format(o.rowCount),
-          total: num.format(o.totalCount),
-        });
+          ...counts,
+        })
+      : o.searchApplied
+        ? tr('export.report.scopeSearched', counts)
+        : tr('export.report.scopeAll', { total: counts.total });
 
   return {
     lang: o.lang,
@@ -99,9 +100,9 @@ export function buildReportContext(
       labels,
       dateLines,
       caveats: {
-        followRequests: withBody('caveat.followRequests'),
-        truncatedFollowers: withBody('caveat.truncated.followers'),
-        truncatedFollowing: withBody('caveat.truncated.following'),
+        followRequests: tr('export.report.caveat.followRequests'),
+        truncatedFollowers: tr('export.report.caveat.truncatedFollowers'),
+        truncatedFollowing: tr('export.report.caveat.truncatedFollowing'),
         datesStale: tr('dates.staleHint'),
       },
       ceilingTop: tr('export.report.ceilingTop', { max: SLOT }),

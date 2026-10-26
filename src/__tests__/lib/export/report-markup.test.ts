@@ -102,7 +102,7 @@ describe('links', () => {
     }
   );
 
-  it.each(['_.', 'user.name_1'])('links valid username %j exactly once', u => {
+  it.each(['_.', 'user.name_1', '123'])('links valid username %j exactly once', u => {
     expect(parse(row(u)).querySelectorAll('a')).toHaveLength(1);
   });
 
@@ -186,6 +186,7 @@ describe('sections', () => {
     expect(d?.id).toBe('nfb');
     expect(d?.querySelector('summary')?.textContent).toContain('Not <following> back');
     expect(d?.querySelector('summary')?.textContent).toContain('1,204');
+    expect(d?.querySelector('summary > h2')?.textContent).toBe('Not <following> back');
     expect(d?.textContent).toContain('n');
   });
 

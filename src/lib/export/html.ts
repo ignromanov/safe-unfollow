@@ -54,7 +54,7 @@ function renderBadgeRow(
   zones: DateZones | null,
   format: ReturnType<typeof createFollowDateFormatter>
 ): string {
-  // A badge with no resolved string is dropped: printing the internal key would put an English identifier in the reader's file.
+  // Guards a key missing from the strings object. An unresolved i18n key is caught by the real-bundle test in report-context.test.ts, not here.
   const labels = rowLabels(badges, section).flatMap(key => report.strings.labels[key] ?? []);
   const line = zones ? pickDateLine(badges, zones) : null;
   return renderRow({
@@ -97,8 +97,11 @@ function renderHeader(
 
   let out = `<h1>${escapeHtml(strings.title)}</h1>`;
   out += paragraph(fill(strings.madeOn, day(now)), 'meta');
-  const uploaded = record ? new Date(record.uploadDate).getTime() : null;
-  if (uploaded !== null && toIsoDay(uploaded / 1000, 'local') !== toIsoDay(now / 1000, 'local')) {
+  const uploaded = record ? new Date(record.uploadDate).getTime() : NaN;
+  if (
+    Number.isFinite(uploaded) &&
+    toIsoDay(uploaded / 1000, 'local') !== toIsoDay(now / 1000, 'local')
+  ) {
     out += paragraph(fill(strings.uploadedOn, day(uploaded)), 'meta');
   }
   out += paragraph(strings.scope, 'meta');
@@ -136,8 +139,12 @@ export async function buildExportHtml(
 
   // Pass 1: counts only, so the ceiling and the sample cut are decided before any markup.
   const counts: SectionCounts = { notFollowingBack: 0, notFollowedBack: 0, mutuals: 0, other: 0 };
+  // Progress is one monotone scale over both passes: pass 1 fills the first half, pass 2 the second.
+  let seen = 0;
   for await (const chunk of iterateAccountsForExport(fileHash, indices, totalCount)) {
     for (const { account } of chunk) countSections(counts, account.badges);
+    seen += chunk.length;
+    onProgress?.({ processed: Math.floor(Math.min(seen, total) / 2), total });
   }
   const plan = planReport(counts, {
     maxRows: HTML_REPORT_MAX_ROWS,
@@ -169,7 +176,10 @@ export async function buildExportHtml(
       if (buffer) rowParts.get(section)?.push(buffer);
     }
     processed += chunk.length;
-    onProgress?.({ processed: Math.min(processed, total), total });
+    onProgress?.({
+      processed: Math.floor(total / 2) + Math.floor(Math.min(processed, total) / 2),
+      total,
+    });
   }
   // Pass 2 stops once every budget is spent; the export is still complete.
   onProgress?.({ processed: total, total });

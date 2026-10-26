@@ -2,15 +2,22 @@ import { describe, expect, it } from 'vitest';
 import { SUPPORTED_LANGUAGES } from '@/config/languages';
 import en from '../../locales/en/results.json';
 
-type Report = Record<string, string>;
+type Report = Record<string, unknown>;
 
-const loadReport = async (lang: string): Promise<Report> =>
-  (await import(`../../locales/${lang}/results.json`)).default.export.report;
+const flatten = (o: Report, prefix = ''): Record<string, string> =>
+  Object.entries(o).reduce<Record<string, string>>((acc, [k, v]) => {
+    if (typeof v === 'string') acc[prefix + k] = v;
+    else Object.assign(acc, flatten(v as Report, `${prefix}${k}.`));
+    return acc;
+  }, {});
+
+const loadReport = async (lang: string): Promise<Record<string, string>> =>
+  flatten((await import(`../../locales/${lang}/results.json`)).default.export.report);
 
 const placeholders = (s: string): string[] => (s.match(/\{\{\s*\w+\s*\}\}/g) ?? []).sort();
 
 // Derived from en so a key added there is gated everywhere without editing this file.
-const KEYS = Object.keys((en as { export: { report: Report } }).export.report);
+const KEYS = Object.keys(flatten((en as { export: { report: Report } }).export.report));
 
 describe('export.report copy', () => {
   it('en defines keys at all', () => {

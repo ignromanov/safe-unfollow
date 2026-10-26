@@ -103,3 +103,17 @@ describe('planReport', () => {
     expect(rendered(counts({}), { maxRows: 50_000, sampleLimit: null })).toEqual([]);
   });
 });
+
+describe('planReport exact fit', () => {
+  it('renders everything and truncates nothing when used + total equals the ceiling', () => {
+    const plan = planReport(counts({ notFollowingBack: 30, mutuals: 20 }), {
+      maxRows: 50,
+      sampleLimit: null,
+    });
+    expect(plan.sections.map(s => [s.rendered, s.total])).toEqual([
+      [30, 30],
+      [20, 20],
+    ]);
+    expect(plan.firstSectionTruncated).toBe(false);
+  });
+});

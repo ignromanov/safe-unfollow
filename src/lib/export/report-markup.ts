@@ -25,6 +25,7 @@ h1{font-size:1.5rem;margin:0 0 4px}
 .meta,.note,.date{color:var(--muted);font-size:.875rem}
 details{margin-block:16px;border-block-start:1px solid var(--line)}
 summary{cursor:pointer;padding-block:12px;font-weight:700;font-size:1.125rem}
+summary h2{display:inline;font-size:inherit;margin:0}
 summary .count{margin-inline-start:8px;color:var(--muted);font-weight:400}
 .note{margin:0 0 8px}
 ul{list-style:none;margin:0;padding:0}
@@ -116,7 +117,7 @@ export function renderSectionOpen(o: {
 }): string {
   const note = o.note === null ? '' : `<p class="note">${escapeHtml(o.note)}</p>`;
   return (
-    `<details open id="${escapeHtml(o.id)}"><summary>${escapeHtml(o.heading)}` +
+    `<details open id="${escapeHtml(o.id)}"><summary><h2>${escapeHtml(o.heading)}</h2>` +
     `<span class="count">${escapeHtml(o.count)}</span></summary>${note}<ul>`
   );
 }

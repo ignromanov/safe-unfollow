@@ -245,6 +245,17 @@ describe('buildExportHtml', () => {
       expect(html).not.toContain('UPLOADED_ON');
     });
 
+    it.each([
+      ['undefined', undefined],
+      ['an invalid date', new Date('garbage')],
+    ])('does not throw and omits uploadedOn when uploadDate is %s', async (_name, uploadDate) => {
+      getFileMetadata.mockResolvedValue(record({ uploadDate }));
+      serveList([account('a')]);
+      const html = await build(1);
+      expect(html).toContain('MADE_ON');
+      expect(html).not.toContain('UPLOADED_ON');
+    });
+
     it('shows only madeOn when the record is missing', async () => {
       getFileMetadata.mockResolvedValue(null);
       serveList([account('a')]);
@@ -290,6 +301,13 @@ describe('buildExportHtml', () => {
     expect(html).toContain('<html lang="ar" dir="rtl">');
   });
 
+  it('keeps an ISO datetime on the date line in a right-to-left file', async () => {
+    getFileMetadata.mockResolvedValue(record({ dateZones: { following: 'utc' } }));
+    serveList([account('a', { following: 1_709_256_600 })]);
+    const html = await build(1, makeReport({ lang: 'ar', dir: 'rtl' }));
+    expect(html).toMatch(/<time datetime="\d{4}-\d{2}-\d{2}">/);
+  });
+
   it('shows the scope and, when the search narrowed the view, says so', async () => {
     serveList([account('a')]);
     const report = makeReport();
@@ -304,5 +322,28 @@ describe('buildExportHtml', () => {
     const onProgress = vi.fn();
     await buildExportHtml('hash', null, 2, makeReport(), onProgress);
     expect(onProgress).toHaveBeenLastCalledWith({ processed: 2, total: 2 });
+  });
+
+  it('reports progress during pass 1 too: monotone, strictly inside (0, total) before the end', async () => {
+    const n = 2_500;
+    serve(n, i => account(`u${i}`, { mutuals: true }));
+    const calls: number[] = [];
+    let firstProgressAfterReads = -1;
+    const baseImpl = getAccountsByRange.getMockImplementation();
+    let reads = 0;
+    getAccountsByRange.mockImplementation((...args: unknown[]) => {
+      reads += 1;
+      return baseImpl?.(...args);
+    });
+    await buildExportHtml('hash', null, n, makeReport(), p => {
+      if (calls.length === 0) firstProgressAfterReads = reads;
+      calls.push(p.processed);
+    });
+    const chunksPerPass = reads / 2;
+    // The first progress call lands within pass 1, before any pass-2 read.
+    expect(firstProgressAfterReads).toBeLessThanOrEqual(chunksPerPass);
+    expect(calls.some(c => c > 0 && c < n)).toBe(true);
+    expect(calls).toEqual([...calls].sort((a, b) => a - b));
+    expect(calls.at(-1)).toBe(n);
   });
 });

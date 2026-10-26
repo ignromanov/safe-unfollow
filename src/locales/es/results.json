@@ -259,12 +259,18 @@
       "uploadedOn": "From an export uploaded {{date}}",
       "scopeAll": "All accounts · {{total}}",
       "scopeFiltered": "{{filters}} · {{count}} of {{total}} accounts",
+      "scopeSearched": "{{count}} of {{total}} accounts",
       "searchNarrowed": "Narrowed by a search",
       "other": "Other",
       "sampleLine": "Free sample: {{shown}} of {{total}} accounts. The full report lists all of them.",
       "ceilingTop": "This report lists the first {{max}} accounts. The CSV export has all of them.",
       "ceilingSection": "In the CSV export: {{count}} rows",
-      "footer": "Made with SafeUnfollow"
+      "footer": "Made with SafeUnfollow",
+      "caveat": {
+        "followRequests": "“Not following back” may be overstated. We could not read your follow-requests file, so accounts you have requested may be listed under “Not following back” instead of “Other”. Followers, Following and Mutuals are unaffected.",
+        "truncatedFollowers": "Your followers list looks incomplete. It begins long after your following list does, which is what happens when an export is requested for a limited date range. If you chose one, ask Instagram for your data again with the date range set to “All time”. The counts in every section below may be off: some too high, some too low.",
+        "truncatedFollowing": "Your following list looks incomplete. It begins long after your followers list does, which is what happens when an export is requested for a limited date range. If you chose one, ask Instagram for your data again with the date range set to “All time”. The counts in every section below may be off: some too high, some too low."
+      }
     }
   },
   "dates": {
