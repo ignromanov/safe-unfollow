@@ -24,7 +24,7 @@ export function TermsOfService({ onBack }: TermsOfServiceProps) {
           </div>
           <h1 className="text-4xl md:text-5xl font-display font-bold">Terms of Service</h1>
         </div>
-        <p className="text-muted-foreground text-lg">Last updated: January 9, 2026</p>
+        <p className="text-muted-foreground text-lg">Last updated: October 25, 2026</p>
       </header>
 
       {/* Content */}
