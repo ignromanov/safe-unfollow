@@ -46,7 +46,7 @@ describe('CheckoutHandoff', () => {
     renderHandoff();
 
     expect(screen.getByText(/8,930 rows/)).toBeInTheDocument();
-    expect(screen.getByText(/CSV \+ JSON/)).toBeInTheDocument();
+    expect(screen.getByText(/report \+ CSV \+ JSON/)).toBeInTheDocument();
   });
 
   // We do not verify the processor's method list per country. Showing icons we

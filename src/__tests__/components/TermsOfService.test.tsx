@@ -35,7 +35,7 @@ describe('TermsOfService', () => {
     it('should render last updated date', () => {
       render(<TermsOfService {...defaultProps} />);
 
-      expect(screen.getByText('Last updated: January 9, 2026')).toBeInTheDocument();
+      expect(screen.getByText('Last updated: October 26, 2026')).toBeInTheDocument();
     });
   });
 
@@ -134,6 +134,30 @@ describe('TermsOfService', () => {
 
       const refundLink = screen.getByRole('link', { name: 'refunds@safeunfollow.app' });
       expect(refundLink).toHaveAttribute('href', 'mailto:refunds@safeunfollow.app');
+    });
+  });
+
+  // The licence covers every export format, and earlier buyers keep access to
+  // the HTML report. A clause that names formats sells the licence as narrower
+  // than it is, so the gate bans the class (any format name), not the one list
+  // it replaced. The clause is found by its heading, not by its wording, so a
+  // rewrite that drops the scope sentence goes red instead of passing vacuously.
+  describe('paid export clause', () => {
+    function paidExportClause(): HTMLElement {
+      const heading = screen.getByRole('heading', { name: /2\.1 Paid Export and Refunds/ });
+      const clause = heading.nextElementSibling;
+      if (!(clause instanceof HTMLElement)) throw new Error('§2.1 has no clause after its heading');
+      return clause;
+    }
+
+    it('should sell a complete export file without naming any format', () => {
+      render(<TermsOfService {...defaultProps} />);
+
+      const clause = paidExportClause();
+      expect(clause).toHaveTextContent(
+        /Downloading your results as a complete export file is an optional one-time purchase/
+      );
+      expect(clause).not.toHaveTextContent(/\b(CSV|JSON|HTML|PDF|spreadsheet|report)\b/i);
     });
   });
 

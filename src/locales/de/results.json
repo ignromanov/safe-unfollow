@@ -202,7 +202,7 @@
     },
     "checkout": {
       "privacy": "Dein Instagram-Export bleibt in diesem Browser. Die Bezahlseite sieht ihn nie.",
-      "summary": "{{rows}} Zeilen · CSV + JSON · {{price}}, einmalig.",
+      "summary": "{{rows}} Zeilen · Bericht + CSV + JSON · {{price}}, einmalig.",
       "methods": "Karten und lokale Zahlungsmethoden erscheinen auf der nächsten Seite."
     },
     "license": {
@@ -217,7 +217,7 @@
       "errorNotFound": "Wir konnten diesen Lizenzschlüssel nicht finden. Überprüfe den Schlüssel in deiner Kauf-E-Mail.",
       "errorGeneric": "Aktivierung fehlgeschlagen. Überprüfe deine Verbindung und versuche es erneut.",
       "successTitle": "Export freigeschaltet",
-      "successBody": "Dieser Browser kann jetzt deine vollständige Liste als CSV oder JSON exportieren, so oft du willst.",
+      "successBody": "Dieser Browser kann deine Liste jetzt so oft exportieren, wie du willst: als Bericht, CSV oder JSON.",
       "successMeta": "Einmaliger Kauf · kein Abo",
       "keyLabel": "Dein Schlüssel",
       "keyNote": "In diesem Browser gespeichert. Dein Schlüssel funktioniert in bis zu 3 Browsern — der Link in deiner Kauf-E-Mail schaltet den nächsten frei.",
@@ -238,6 +238,9 @@
       "json": "JSON herunterladen",
       "csvHint": "Öffnet sich in Excel, Google Sheets und Numbers",
       "jsonHint": "Für Skripte oder zum späteren Wiedereinlesen",
+      "html": "Bericht herunterladen",
+      "htmlHint": "Öffnet sich im Browser auf Handy oder Computer. Drucke ihn, um ein PDF zu speichern.",
+      "htmlCeiling": "Der Bericht listet bis zu {{max}} Konten. Die CSV enthält alle {{count}}.",
       "datesNote": "Ein leeres Datum heißt, dass wir in deiner Datei für dieses Konto kein Datum gefunden haben.",
       "generating": "Wird erstellt… {{percent}}%",
       "buildingTitle": "Deine Datei wird erstellt",
@@ -249,6 +252,26 @@
       "done": "Fertig",
       "again": "Erneut exportieren",
       "error": "Export fehlgeschlagen. Bitte versuche es erneut."
+    },
+    "report": {
+      "title": "SafeUnfollow-Bericht",
+      "madeOn": "Erstellt am {{date}}",
+      "uploadedOn": "Aus einem Instagram-Export, geöffnet am {{date}}",
+      "scopeAll": "Alle Konten · {{total}}",
+      "scopeFiltered": "{{filters}} · {{count}} von {{total}} Konten",
+      "scopeSearched": "{{count}} von {{total}} Konten",
+      "searchNarrowed": "Durch eine Suche eingegrenzt",
+      "other": "Sonstige",
+      "sampleLine": "Kostenlose Probe: {{shown}} von {{total}} Konten. Der vollständige Export enthält alle.",
+      "ceilingTop": "Dieser Bericht endet nach {{max}} Konten. Der CSV-Export enthält die vollständige Liste.",
+      "ceilingSection": "Im CSV-Export: {{count}} Zeilen",
+      "footer": "Erstellt mit SafeUnfollow",
+      "caveat": {
+        "followRequests": "„Folgt dir nicht zurück“ ist möglicherweise zu hoch. Wir konnten deine Datei mit den Follow-Anfragen nicht lesen. Konten, denen du eine Anfrage geschickt hast, können deshalb dort statt unter „Sonstige“ stehen. „Du folgst nicht zurück“ und „Gegenseitig“ sind davon nicht betroffen.",
+        "truncatedFollowers": "Deine Follower-Liste wirkt unvollständig. Sie beginnt deutlich später als deine Gefolgt-Liste, und genau das passiert, wenn ein Export für einen begrenzten Zeitraum angefordert wird. Falls du einen Zeitraum gewählt hast, fordere deine Daten bei Instagram erneut an und setze den Zeitraum auf \"Gesamter Zeitraum\". Einige Konten in „Folgt dir nicht zurück“, „Du folgst nicht zurück“ und „Gegenseitig“ stehen womöglich im falschen Abschnitt oder fehlen, deshalb können diese Zahlen zu hoch oder zu niedrig sein.",
+        "truncatedFollowing": "Deine Gefolgt-Liste wirkt unvollständig. Sie beginnt deutlich später als deine Follower-Liste, und genau das passiert, wenn ein Export für einen begrenzten Zeitraum angefordert wird. Falls du einen Zeitraum gewählt hast, fordere deine Daten bei Instagram erneut an und setze den Zeitraum auf \"Gesamter Zeitraum\". Einige Konten in „Folgt dir nicht zurück“, „Du folgst nicht zurück“ und „Gegenseitig“ stehen womöglich im falschen Abschnitt oder fehlen, deshalb können diese Zahlen zu hoch oder zu niedrig sein.",
+        "datesStale": "Dieser Bericht enthält keine Datumsangaben: Der Export wurde geöffnet, bevor SafeUnfollow sie aufbewahrt hat. Öffne dasselbe Instagram ZIP erneut in SafeUnfollow und exportiere einen neuen Bericht."
+      }
     }
   },
   "dates": {

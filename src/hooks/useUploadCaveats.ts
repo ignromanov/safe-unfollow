@@ -1,5 +1,6 @@
 import { namesTruncatedFile } from '@/core/types';
 import type { DateZones, RelationshipSkew } from '@/core/types';
+import { datesStale as isDatesStale } from '@/lib/follow-dates';
 import { indexedDBService } from '@/lib/indexeddb/indexeddb-service';
 import { useEffect, useState } from 'react';
 
@@ -95,7 +96,7 @@ export function useUploadCaveats(fileHash: string | null): UploadCaveats {
         // file is uploaded again. Asked of a record that was actually read, so a
         // failed or pending read never claims the file is stale.
         const dateZones = record?.dateZones ?? null;
-        const datesStale = record !== null && record.dateZones === undefined;
+        const datesStale = isDatesStale(record);
         setCaveats(
           !followRequestsUnreadable &&
             !namesTruncatedFile(truncatedRelationshipFile) &&

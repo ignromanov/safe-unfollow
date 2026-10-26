@@ -202,7 +202,7 @@
     },
     "checkout": {
       "privacy": "Your Instagram export stays in this browser. The payment page never sees it.",
-      "summary": "{{rows}} rows · CSV + JSON · {{price}}, once.",
+      "summary": "{{rows}} rows · report + CSV + JSON · {{price}}, once.",
       "methods": "Cards and local methods are shown on the next page."
     },
     "license": {
@@ -217,7 +217,7 @@
       "errorNotFound": "We could not find this license key. Check the key in your purchase email.",
       "errorGeneric": "Activation failed. Check your connection and try again.",
       "successTitle": "Export unlocked",
-      "successBody": "This browser can now export your full list, as CSV or JSON, as often as you want.",
+      "successBody": "This browser can now export your list as often as you want: as a report, a CSV or a JSON file.",
       "successMeta": "One-time purchase · no subscription",
       "keyLabel": "Your key",
       "keyNote": "Saved in this browser. Your key works on up to 3 browsers — the link in your purchase email unlocks the next one.",
@@ -238,6 +238,9 @@
       "json": "Download JSON",
       "csvHint": "Opens in Excel, Google Sheets and Numbers",
       "jsonHint": "For scripts, or loading back in later",
+      "html": "Download report",
+      "htmlHint": "Opens in a browser on your phone or computer. Print it to save a PDF.",
+      "htmlCeiling": "The report lists up to {{max}} accounts. The CSV has all {{count}}.",
       "datesNote": "A blank date means we found no date for that account in your file.",
       "generating": "Generating… {{percent}}%",
       "buildingTitle": "Building your file",
@@ -249,6 +252,26 @@
       "done": "Done",
       "again": "Export again",
       "error": "Export failed. Please try again."
+    },
+    "report": {
+      "title": "SafeUnfollow report",
+      "madeOn": "Made {{date}}",
+      "uploadedOn": "From an Instagram export opened {{date}}",
+      "scopeAll": "All accounts · {{total}}",
+      "scopeFiltered": "{{filters}} · {{count}} of {{total}} accounts",
+      "scopeSearched": "{{count}} of {{total}} accounts",
+      "searchNarrowed": "Narrowed by a search",
+      "other": "Other",
+      "sampleLine": "Free sample: {{shown}} of {{total}} accounts. The full export has all of them.",
+      "ceilingTop": "This report stops at {{max}} accounts. The CSV export has the full list.",
+      "ceilingSection": "In the CSV export: {{count}} rows",
+      "footer": "Made with SafeUnfollow",
+      "caveat": {
+        "followRequests": "“Not following back” may be overstated. We could not read your follow-requests file, so accounts you sent a request to may be listed there instead of under “Other”. “Not followed back” and “Mutuals” are unaffected.",
+        "truncatedFollowers": "Your followers list looks incomplete. It begins long after your following list does, which is what happens when an export is requested for a limited date range. If you chose one, ask Instagram for your data again with the date range set to “All time”. Some accounts in “Not following back”, “Not followed back” and “Mutuals” may be in the wrong section or missing, so those counts may be too high or too low.",
+        "truncatedFollowing": "Your following list looks incomplete. It begins long after your followers list does, which is what happens when an export is requested for a limited date range. If you chose one, ask Instagram for your data again with the date range set to “All time”. Some accounts in “Not following back”, “Not followed back” and “Mutuals” may be in the wrong section or missing, so those counts may be too high or too low.",
+        "datesStale": "This report has no follow dates: the export was opened before SafeUnfollow kept them. Open the same Instagram ZIP in SafeUnfollow again, then export a new report."
+      }
     }
   },
   "dates": {

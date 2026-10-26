@@ -2,14 +2,17 @@
  * Shared export types — used by the builders, the export worker, and the UI.
  */
 
-export type ExportFormat = 'csv' | 'json';
+import type { ReportContext } from './report-context';
+
+export type ExportFormat = 'csv' | 'json' | 'html';
 
 /**
  * What the worker is asked to build. A union of per-format shapes, not a bare
  * format, so a later format can carry its own options without every other
  * format growing optional fields.
  */
-export type ExportRequest = { format: 'csv' } | { format: 'json' };
+export type ExportRequest =
+  { format: 'csv' } | { format: 'json' } | { format: 'html'; report: ReportContext };
 
 /**
  * Closes a switch over a format. The `never` parameter turns a forgotten case

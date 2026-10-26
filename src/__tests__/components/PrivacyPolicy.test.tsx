@@ -5,6 +5,8 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import commonEN from '@/locales/en/common.json';
 import { RESCUE_PLAN_BANNER_ENABLED } from '@/config/feature-flags';
+import { exportFilename } from '@/lib/export/filename';
+import { REPORT_SITE_URL } from '@/lib/export/report-markup';
 import { createI18nMock } from '@/__tests__/utils/mockI18n';
 
 vi.mock('react-i18next', () => createI18nMock(commonEN));
@@ -36,7 +38,7 @@ describe('PrivacyPolicy Component', () => {
     it('should render the last updated date', () => {
       render(<PrivacyPolicy onBack={mockOnBack} />);
 
-      expect(screen.getByText(/last updated: october 22, 2026/i)).toBeInTheDocument();
+      expect(screen.getByText(/last updated: october 26, 2026/i)).toBeInTheDocument();
     });
   });
 
@@ -152,6 +154,29 @@ describe('PrivacyPolicy Component', () => {
       ).toBeInTheDocument();
       expect(screen.getByText(/Cloudflare Turnstile/i)).toBeInTheDocument();
       expect(screen.getByText(/processes the opener's IP address/i)).toBeInTheDocument();
+    });
+
+    // A downloaded export leaves the browser's sandbox, so "Clear Data" and the
+    // §4.1 protections stop at it — the HTML report made that the common case,
+    // being offered first and readable anywhere. The two facts the page states
+    // about the file are bound to the code that decides them: the link tag
+    // (lumen-cro may strike or rename it; the page must follow) and the name.
+    it('should say an exported file outlives Clear Data and state what the code puts in it', () => {
+      const { container } = render(<PrivacyPolicy onBack={mockOnBack} />);
+
+      expect(screen.getByRole('heading', { name: /4\.4 Files You Export/ })).toBeInTheDocument();
+      expect(screen.getByText(/clearing this site's data does not delete it/i)).toBeInTheDocument();
+      expect(screen.getByText(/stay on your device until you delete them/i)).toBeInTheDocument();
+
+      const policyTag = (container.textContent ?? '').match(/\bfrom=([a-z0-9-]+)/)?.[1] ?? null;
+      expect(policyTag).toBe(new URL(REPORT_SITE_URL).searchParams.get('from'));
+
+      expect(
+        screen.getByText(/Its name carries the download date, never your Instagram/i)
+      ).toBeInTheDocument();
+      expect(exportFilename('html', { sample: false, now: new Date(2026, 9, 25) })).toBe(
+        'safeunfollow-2026-10-25.html'
+      );
     });
 
     it('should render all main sections', () => {

@@ -2,6 +2,7 @@ import { Download } from 'lucide-react';
 import { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import type { BadgeKey } from '@/core/types';
 import { Button } from '@/components/ui/button';
 import { useAdViewability } from '@/hooks/useAdViewability';
 import { useProExport } from '@/hooks/useProExport';
@@ -35,6 +36,10 @@ export interface ResultsExportControlsProps {
   indices: number[] | null;
   /** Total number of accounts in this dataset */
   totalCount: number;
+  /** Badges the reader has applied, for the paid report to name */
+  filters: BadgeKey[];
+  /** Whether a search narrowed the list; the query text never travels */
+  searchApplied: boolean;
 }
 
 /**
@@ -55,6 +60,8 @@ export function ResultsExportControls({
   fileHash,
   indices,
   totalCount,
+  filters,
+  searchApplied,
 }: ResultsExportControlsProps) {
   const { t, i18n } = useTranslation('results');
   const { isEnabled, isUnlocked, checkoutState, startCheckout, resetCheckout } = useProExport();
@@ -325,6 +332,9 @@ export function ResultsExportControls({
             fileHash={fileHash}
             indices={indices}
             rowCount={rowCount}
+            totalCount={totalCount}
+            filters={filters}
+            searchApplied={searchApplied}
           />
         ) : null}
         {isLicenseDialogOpen ? (

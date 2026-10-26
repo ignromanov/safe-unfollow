@@ -202,7 +202,7 @@
     },
     "checkout": {
       "privacy": "Votre export Instagram reste dans ce navigateur. La page de paiement ne le voit jamais.",
-      "summary": "{{rows}} lignes · CSV + JSON · {{price}}, une seule fois.",
+      "summary": "{{rows}} lignes · rapport + CSV + JSON · {{price}}, une seule fois.",
       "methods": "Les cartes et les moyens de paiement locaux s’affichent sur la page suivante."
     },
     "license": {
@@ -217,7 +217,7 @@
       "errorNotFound": "Nous n’avons pas trouvé cette clé de licence. Vérifiez la clé dans votre e-mail d’achat.",
       "errorGeneric": "Échec de l’activation. Vérifiez votre connexion et réessayez.",
       "successTitle": "Export débloqué",
-      "successBody": "Ce navigateur peut désormais exporter votre liste complète, en CSV ou JSON, autant de fois que vous le souhaitez.",
+      "successBody": "Ce navigateur peut désormais exporter votre liste autant de fois que vous le souhaitez : en rapport, en CSV ou en JSON.",
       "successMeta": "Paiement unique · sans abonnement",
       "keyLabel": "Votre clé",
       "keyNote": "Enregistrée dans ce navigateur. Votre clé fonctionne sur 3 navigateurs maximum — le lien de votre e-mail d’achat débloque le suivant.",
@@ -238,6 +238,9 @@
       "json": "Télécharger le JSON",
       "csvHint": "S’ouvre dans Excel, Google Sheets et Numbers",
       "jsonHint": "Pour vos scripts, ou pour le recharger plus tard",
+      "html": "Télécharger le rapport",
+      "htmlHint": "S’ouvre dans le navigateur de votre téléphone ou de votre ordinateur. Imprimez-le pour l’enregistrer en PDF.",
+      "htmlCeiling": "Le rapport liste jusqu’à {{max}} comptes. Le CSV les contient tous ({{count}}).",
       "datesNote": "Une date vide signifie que nous n’avons trouvé aucune date pour ce compte dans votre fichier.",
       "generating": "Génération… {{percent}}%",
       "buildingTitle": "Création de votre fichier",
@@ -249,6 +252,26 @@
       "done": "Terminé",
       "again": "Exporter à nouveau",
       "error": "L’export a échoué. Veuillez réessayer."
+    },
+    "report": {
+      "title": "Rapport SafeUnfollow",
+      "madeOn": "Créé le {{date}}",
+      "uploadedOn": "D’après un export Instagram ouvert le {{date}}",
+      "scopeAll": "Tous les comptes · {{total}}",
+      "scopeFiltered": "{{filters}} · {{count}} sur {{total}} comptes",
+      "scopeSearched": "{{count}} sur {{total}} comptes",
+      "searchNarrowed": "Liste réduite par une recherche",
+      "other": "Autres",
+      "sampleLine": "Échantillon gratuit : {{shown}} sur {{total}} comptes. L’export complet les contient tous.",
+      "ceilingTop": "Ce rapport s’arrête à {{max}} comptes. L’export CSV contient la liste complète.",
+      "ceilingSection": "Dans l’export CSV : {{count}} lignes",
+      "footer": "Réalisé avec SafeUnfollow",
+      "caveat": {
+        "followRequests": "« Ne vous suivent pas » est peut-être surestimé. Nous n’avons pas pu lire votre fichier de demandes d’abonnement : les comptes à qui vous avez envoyé une demande peuvent figurer là plutôt que dans « Autres ». « Vous ne suivez pas en retour » et « Mutuels » ne sont pas affectés.",
+        "truncatedFollowers": "Votre liste d'abonnés semble incomplète. Elle commence bien après votre liste d'abonnements, ce qui arrive lorsqu'un export est demandé sur une plage de dates limitée. Si vous en avez choisi une, redemandez vos données à Instagram en réglant la plage de dates sur « Tout ». Certains comptes de « Ne vous suivent pas », « Vous ne suivez pas en retour » et « Mutuels » peuvent se trouver dans la mauvaise section ou manquer : ces compteurs peuvent donc être trop élevés ou trop bas.",
+        "truncatedFollowing": "Votre liste d'abonnements semble incomplète. Elle commence bien après votre liste d'abonnés, ce qui arrive lorsqu'un export est demandé sur une plage de dates limitée. Si vous en avez choisi une, redemandez vos données à Instagram en réglant la plage de dates sur « Tout ». Certains comptes de « Ne vous suivent pas », « Vous ne suivez pas en retour » et « Mutuels » peuvent se trouver dans la mauvaise section ou manquer : ces compteurs peuvent donc être trop élevés ou trop bas.",
+        "datesStale": "Ce rapport ne contient pas de dates d’abonnement : l’export a été ouvert avant que SafeUnfollow ne les conserve. Rouvrez le même ZIP Instagram dans SafeUnfollow, puis exportez un nouveau rapport."
+      }
     }
   },
   "dates": {

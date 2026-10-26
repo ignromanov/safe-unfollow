@@ -2,6 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import type { BadgeKey } from '@/core/types';
 import resultsEN from '@/locales/en/results.json';
 import { createI18nMock } from '@/__tests__/utils/mockI18n';
 
@@ -15,6 +16,11 @@ vi.mock('@/hooks/useExportWorker', () => ({
 vi.mock('@/lib/export/download', () => ({ downloadBlob: vi.fn() }));
 
 vi.mock('@/lib/export/license', () => ({ validateLicense: vi.fn() }));
+
+vi.mock('@/lib/export/report-context', async importOriginal => {
+  const actual = await importOriginal<typeof import('@/lib/export/report-context')>();
+  return { ...actual, buildReportContext: vi.fn(actual.buildReportContext) };
+});
 
 vi.mock('@/lib/stats', async importOriginal => {
   const actual = await importOriginal<typeof import('@/lib/stats')>();
@@ -32,6 +38,8 @@ vi.mock('@/lib/stats', async importOriginal => {
 import { ExportDialog } from '@/components/export/ExportDialog';
 import { downloadBlob } from '@/lib/export/download';
 import { validateLicense } from '@/lib/export/license';
+import { buildReportContext } from '@/lib/export/report-context';
+import { HTML_REPORT_MAX_ROWS } from '@/lib/export/report-sections';
 import {
   getStoredLicense,
   resetUnlockCache,
@@ -47,6 +55,7 @@ const blob = new Blob(['csv'], { type: 'text/csv;charset=utf-8' });
 // on the label as a substring rather than the full (label + hint) string.
 const csvButtonName = new RegExp(resultsEN.export.dialog.csv, 'i');
 const jsonButtonName = new RegExp(resultsEN.export.dialog.json, 'i');
+const htmlButtonName = new RegExp(resultsEN.export.dialog.html, 'i');
 
 const defaultProps = {
   open: true,
@@ -54,6 +63,9 @@ const defaultProps = {
   fileHash: 'hash1',
   indices: null,
   rowCount: 42,
+  totalCount: 100,
+  filters: [] as BadgeKey[],
+  searchApplied: false,
 };
 
 describe('ExportDialog', () => {
@@ -319,6 +331,76 @@ describe('ExportDialog', () => {
     resolveBuild(blob);
     await waitFor(() => {
       expect(screen.getByText(resultsEN.export.dialog.savedTitle)).toBeInTheDocument();
+    });
+  });
+
+  describe('html report', () => {
+    it('should list the report first, as the primary action', () => {
+      render(<ExportDialog {...defaultProps} />);
+
+      const buttons = screen
+        .getAllByRole('button')
+        .filter(b => /Download/.test(b.textContent ?? ''));
+      expect(buttons[0]).toHaveAccessibleName(htmlButtonName);
+      expect(buttons[0]).toHaveClass('bg-primary');
+      expect(screen.getByRole('button', { name: csvButtonName })).toHaveClass('border');
+      expect(screen.getByRole('button', { name: csvButtonName })).not.toHaveClass('bg-primary');
+      expect(screen.getByRole('button', { name: jsonButtonName })).not.toHaveClass('bg-primary');
+    });
+
+    it('should build the report request and download an .html file', async () => {
+      const user = userEvent.setup();
+      render(<ExportDialog {...defaultProps} />);
+
+      await user.click(screen.getByRole('button', { name: htmlButtonName }));
+
+      await waitFor(() => expect(vi.mocked(downloadBlob)).toHaveBeenCalled());
+      const [request] = buildExport.mock.calls[0];
+      expect(request.format).toBe('html');
+      expect(request.report.sampleLimit).toBeNull();
+      const [, name] = vi.mocked(downloadBlob).mock.calls[0];
+      expect(name).toMatch(/^safeunfollow-\d{4}-\d{2}-\d{2}\.html$/);
+      expect(vi.mocked(analytics.download)).toHaveBeenCalledWith('html', 42);
+    });
+
+    it('should hand the filters and the search fact to the report builder', async () => {
+      const user = userEvent.setup();
+      render(<ExportDialog {...defaultProps} filters={['mutuals']} searchApplied />);
+
+      await user.click(screen.getByRole('button', { name: htmlButtonName }));
+
+      await waitFor(() => expect(vi.mocked(buildReportContext)).toHaveBeenCalled());
+      expect(vi.mocked(buildReportContext).mock.calls[0][1]).toMatchObject({
+        lang: 'en',
+        filters: ['mutuals'],
+        searchApplied: true,
+        rowCount: 42,
+        totalCount: 100,
+        sampleLimit: null,
+      });
+    });
+
+    it('should warn about the ceiling only above it', () => {
+      const note = resultsEN.export.dialog.htmlCeiling
+        .replace('{{max}}', HTML_REPORT_MAX_ROWS.toLocaleString('en'))
+        .replace('{{count}}', (HTML_REPORT_MAX_ROWS + 1).toLocaleString('en'));
+      const { rerender } = render(
+        <ExportDialog {...defaultProps} rowCount={HTML_REPORT_MAX_ROWS + 1} />
+      );
+      expect(screen.getByText(note)).toBeInTheDocument();
+
+      rerender(<ExportDialog {...defaultProps} rowCount={HTML_REPORT_MAX_ROWS} />);
+      expect(screen.queryByText(/The report lists up to/)).not.toBeInTheDocument();
+    });
+
+    it('should report a failed build as an html export error', async () => {
+      buildExport.mockRejectedValueOnce(new Error('boom'));
+      const user = userEvent.setup();
+      render(<ExportDialog {...defaultProps} />);
+
+      await user.click(screen.getByRole('button', { name: htmlButtonName }));
+
+      await waitFor(() => expect(vi.mocked(analytics.exportError)).toHaveBeenCalledWith('html'));
     });
   });
 

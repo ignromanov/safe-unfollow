@@ -1,6 +1,7 @@
-import { Check, CircleAlert, FileJson, FileSpreadsheet, Loader2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Check, CircleAlert, FileJson, FileSpreadsheet, FileText, Loader2 } from 'lucide-react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { BadgeKey } from '@/core/types';
 import { Button } from '@/components/ui/button';
 import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ExportSheet } from '@/components/export/ExportSheet';
@@ -9,7 +10,14 @@ import { useExportWorker } from '@/hooks/useExportWorker';
 import { downloadBlob } from '@/lib/export/download';
 import { exportFilename } from '@/lib/export/filename';
 import { validateLicense } from '@/lib/export/license';
-import { assertNever, type ExportFormat, type ExportProgress } from '@/lib/export/types';
+import { buildReportContext } from '@/lib/export/report-context';
+import { HTML_REPORT_MAX_ROWS } from '@/lib/export/report-sections';
+import {
+  assertNever,
+  type ExportFormat,
+  type ExportProgress,
+  type ExportRequest,
+} from '@/lib/export/types';
 import {
   clearLicense,
   getStoredLicense,
@@ -24,6 +32,44 @@ export interface ExportDialogProps {
   fileHash: string;
   indices: number[] | null;
   rowCount: number;
+  totalCount: number;
+  /** Badges the reader has applied; the report names them. */
+  filters: BadgeKey[];
+  /** Whether a search narrowed the list. The query text itself never crosses. */
+  searchApplied: boolean;
+}
+
+interface FormatButtonProps {
+  primary?: boolean;
+  disabled: boolean;
+  busy: boolean;
+  icon: ReactNode;
+  label: string;
+  hint: string;
+  onClick: () => void;
+}
+
+function FormatButton({ primary, disabled, busy, icon, label, hint, onClick }: FormatButtonProps) {
+  return (
+    <Button
+      variant={primary ? 'default' : 'outline'}
+      size="lg"
+      className="min-h-12 flex-col items-start gap-0.5 rounded-2xl py-2 text-start"
+      disabled={disabled}
+      aria-busy={busy}
+      onClick={onClick}
+    >
+      <span className="flex items-center gap-2 font-bold">
+        {icon}
+        {label}
+      </span>
+      <span
+        className={`text-xs font-normal ${primary ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}
+      >
+        {hint}
+      </span>
+    </Button>
+  );
 }
 
 function toPercent(progress: ExportProgress | null): number {
@@ -47,6 +93,9 @@ export function ExportDialog({
   fileHash,
   indices,
   rowCount,
+  totalCount,
+  filters,
+  searchApplied,
 }: ExportDialogProps) {
   const { t, i18n } = useTranslation('results');
   const { buildExport } = useExportWorker();
@@ -92,13 +141,42 @@ export function ExportDialog({
     };
   }, []);
 
+  const buildRequest = (format: ExportFormat): ExportRequest => {
+    switch (format) {
+      case 'csv':
+        return { format };
+      case 'json':
+        return { format };
+      case 'html':
+        return {
+          format,
+          report: buildReportContext(t, {
+            lang: i18n.language,
+            filters,
+            searchApplied,
+            rowCount,
+            totalCount,
+            sampleLimit: null,
+          }),
+        };
+      default:
+        return assertNever(format);
+    }
+  };
+
   const handleExport = async (format: ExportFormat): Promise<void> => {
     setPendingFormat(format);
     setHasFailed(false);
     setProgress(null);
 
     try {
-      const blob = await buildExport({ format }, fileHash, indices, rowCount, setProgress);
+      const blob = await buildExport(
+        buildRequest(format),
+        fileHash,
+        indices,
+        rowCount,
+        setProgress
+      );
 
       const outputName = exportFilename(format, { sample: false });
       downloadBlob(blob, outputName);
@@ -135,6 +213,8 @@ export function ExportDialog({
         return <FileSpreadsheet className="h-4 w-4" />;
       case 'json':
         return <FileJson className="h-4 w-4" />;
+      case 'html':
+        return <FileText className="h-4 w-4" />;
       default:
         return assertNever(format);
     }
@@ -242,38 +322,39 @@ export function ExportDialog({
       <DialogFooter className="flex-col gap-2 sm:flex-col sm:items-stretch">
         {view === 'idle' || view === 'building' ? (
           <>
-            <Button
-              variant="outline"
-              size="lg"
-              className="min-h-12 flex-col items-start gap-0.5 rounded-2xl py-2 text-start"
+            <FormatButton
+              primary
               disabled={isPending}
-              aria-busy={pendingFormat === 'csv'}
+              busy={pendingFormat === 'html'}
+              icon={renderIcon('html')}
+              label={t('export.dialog.html')}
+              hint={t('export.dialog.htmlHint')}
+              onClick={() => void handleExport('html')}
+            />
+            {rowCount > HTML_REPORT_MAX_ROWS ? (
+              <p className="text-xs text-muted-foreground">
+                {t('export.dialog.htmlCeiling', {
+                  max: HTML_REPORT_MAX_ROWS.toLocaleString(i18n.language),
+                  count: rowCount.toLocaleString(i18n.language),
+                })}
+              </p>
+            ) : null}
+            <FormatButton
+              disabled={isPending}
+              busy={pendingFormat === 'csv'}
+              icon={renderIcon('csv')}
+              label={t('export.dialog.csv')}
+              hint={t('export.dialog.csvHint')}
               onClick={() => void handleExport('csv')}
-            >
-              <span className="flex items-center gap-2 font-bold">
-                {renderIcon('csv')}
-                {t('export.dialog.csv')}
-              </span>
-              <span className="text-xs font-normal text-muted-foreground">
-                {t('export.dialog.csvHint')}
-              </span>
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="min-h-12 flex-col items-start gap-0.5 rounded-2xl py-2 text-start"
+            />
+            <FormatButton
               disabled={isPending}
-              aria-busy={pendingFormat === 'json'}
+              busy={pendingFormat === 'json'}
+              icon={renderIcon('json')}
+              label={t('export.dialog.json')}
+              hint={t('export.dialog.jsonHint')}
               onClick={() => void handleExport('json')}
-            >
-              <span className="flex items-center gap-2 font-bold">
-                {renderIcon('json')}
-                {t('export.dialog.json')}
-              </span>
-              <span className="text-xs font-normal text-muted-foreground">
-                {t('export.dialog.jsonHint')}
-              </span>
-            </Button>
+            />
             {/* GH#285: a blank date cell is "not found in the file", not "never". */}
             <p className="text-xs text-muted-foreground">{t('export.dialog.datesNote')}</p>
           </>

@@ -33,10 +33,16 @@ vi.mock('@/lib/export/csv', () => ({
 vi.mock('@/lib/export/json', () => ({
   buildExportJson: vi.fn(async () => fallbackBlob),
 }));
+vi.mock('@/lib/export/html', () => ({
+  buildExportHtml: vi.fn(async () => fallbackBlob),
+}));
 
 import * as Comlink from 'comlink';
 import { useExportWorker } from '@/hooks/useExportWorker';
 import { buildExportCsv } from '@/lib/export/csv';
+import { buildExportHtml } from '@/lib/export/html';
+import { buildExportJson } from '@/lib/export/json';
+import { makeReport } from '../utils/report-context-fixture';
 
 describe('useExportWorker', () => {
   beforeEach(() => {
@@ -80,6 +86,38 @@ describe('useExportWorker', () => {
 
     expect(blob).toBe(fallbackBlob);
     expect(buildExportCsv).toHaveBeenCalledWith('hash1', null, 100, undefined);
+  });
+
+  it('should fall back to the json builder for a json request', async () => {
+    mockApi.buildExport.mockRejectedValueOnce(new Error('worker exploded'));
+    const { result } = renderHook(() => useExportWorker());
+
+    const blob = await result.current.buildExport({ format: 'json' }, 'hash1', null, 100);
+
+    expect(blob).toBe(fallbackBlob);
+    expect(buildExportJson).toHaveBeenCalledWith('hash1', null, 100, undefined);
+    expect(buildExportCsv).not.toHaveBeenCalled();
+  });
+
+  it('should fall back to the html builder, carrying the request report', async () => {
+    mockApi.buildExport.mockRejectedValueOnce(new Error('worker exploded'));
+    const report = makeReport();
+    const { result } = renderHook(() => useExportWorker());
+
+    const blob = await result.current.buildExport({ format: 'html', report }, 'hash1', null, 100);
+
+    expect(blob).toBe(fallbackBlob);
+    expect(buildExportHtml).toHaveBeenCalledWith('hash1', null, 100, report, undefined);
+    expect(buildExportJson).not.toHaveBeenCalled();
+  });
+
+  it('should reject an unknown format on the fallback path instead of building another', async () => {
+    mockApi.buildExport.mockRejectedValueOnce(new Error('worker exploded'));
+    const { result } = renderHook(() => useExportWorker());
+
+    await expect(
+      result.current.buildExport({ format: 'xml' } as never, 'hash1', null, 100)
+    ).rejects.toThrow('Unhandled export format: xml');
   });
 
   it('should fall back when the worker cannot be constructed', async () => {

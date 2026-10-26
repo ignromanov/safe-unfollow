@@ -58,7 +58,7 @@
     "unfollowed": "Son takibi bırakanlar",
     "notFollowingBack": "Geri takip etmeyenler",
     "mutuals": "Karşılıklı takip",
-    "notFollowedBack": "Seni takip etmeyenler",
+    "notFollowedBack": "Geri takip etmediklerin",
     "pending": "Bekleyen istek",
     "permanent": "Bekleyen (kalıcı)",
     "restricted": "Kısıtlanmış",
@@ -202,7 +202,7 @@
     },
     "checkout": {
       "privacy": "Instagram dışa aktarman bu tarayıcıda kalır. Ödeme sayfası onu asla görmez.",
-      "summary": "{{rows}} satır · CSV + JSON · tek seferlik {{price}}.",
+      "summary": "{{rows}} satır · rapor + CSV + JSON · tek seferlik {{price}}.",
       "methods": "Kartlar ve yerel ödeme yöntemleri sonraki sayfada gösterilir."
     },
     "license": {
@@ -217,7 +217,7 @@
       "errorNotFound": "Bu lisans anahtarını bulamadık. Satın alma e-postandaki anahtarı kontrol et.",
       "errorGeneric": "Etkinleştirme başarısız oldu. Bağlantını kontrol et ve tekrar dene.",
       "successTitle": "Dışa aktarım açıldı",
-      "successBody": "Bu tarayıcı artık tüm listeni CSV veya JSON olarak istediğin kadar dışa aktarabilir.",
+      "successBody": "Bu tarayıcı artık listeni istediğin kadar dışa aktarabilir: rapor, CSV veya JSON olarak.",
       "successMeta": "Tek seferlik ödeme · abonelik yok",
       "keyLabel": "Anahtarın",
       "keyNote": "Bu tarayıcıya kaydedildi. Anahtarın en fazla 3 tarayıcıda çalışır — satın alma e-postandaki bağlantı bir sonrakini açar.",
@@ -238,6 +238,9 @@
       "json": "JSON indir",
       "csvHint": "Excel, Google E-Tablolar ve Numbers ile açılır",
       "jsonHint": "Betikler için ya da sonra geri yüklemek için",
+      "html": "Raporu indir",
+      "htmlHint": "Telefonda ya da bilgisayarda tarayıcıda açılır. PDF olarak kaydetmek için yazdır.",
+      "htmlCeiling": "Rapor en fazla {{max}} hesap listeler. CSV'de {{count}} hesabın tamamı var.",
       "datesNote": "Boş bir tarih, dosyanda o hesap için tarih bulamadığımız anlamına gelir.",
       "generating": "Oluşturuluyor… {{percent}}%",
       "buildingTitle": "Dosyan hazırlanıyor",
@@ -249,6 +252,26 @@
       "done": "Tamam",
       "again": "Yeniden dışa aktar",
       "error": "Dışa aktarma başarısız oldu. Lütfen tekrar deneyin."
+    },
+    "report": {
+      "title": "SafeUnfollow raporu",
+      "madeOn": "Oluşturulma: {{date}}",
+      "uploadedOn": "{{date}} tarihinde açılan bir Instagram dışa aktarımından",
+      "scopeAll": "Tüm hesaplar · {{total}}",
+      "scopeFiltered": "{{filters}} · {{total}} hesaptan {{count}} hesap",
+      "scopeSearched": "{{total}} hesaptan {{count}} hesap",
+      "searchNarrowed": "Bir aramayla daraltıldı",
+      "other": "Diğer",
+      "sampleLine": "Ücretsiz örnek: {{total}} hesaptan {{shown}} hesap. Tam dışa aktarmada hepsi var.",
+      "ceilingTop": "Bu rapor {{max}} hesapta duruyor. Tam liste CSV dışa aktarmasında.",
+      "ceilingSection": "CSV dışa aktarmasında: {{count}} satır",
+      "footer": "SafeUnfollow ile oluşturuldu",
+      "caveat": {
+        "followRequests": "“Geri takip etmeyenler” olduğundan fazla görünüyor olabilir. Takip istekleri dosyanı okuyamadık, bu yüzden istek gönderdiğin hesaplar “Diğer” yerine orada listelenebilir. “Geri takip etmediklerin” ve “Karşılıklı takip” bundan etkilenmedi.",
+        "truncatedFollowers": "Takipçi listen eksik görünüyor. Takip ettiklerin listesinden çok daha geç başlıyor; bu da dışa aktarma sınırlı bir tarih aralığı için istendiğinde olur. Bir aralık seçtiysen verilerini Instagram'dan yeniden iste ve tarih aralığını \"Tüm zamanlar\" olarak ayarla. “Geri takip etmeyenler”, “Geri takip etmediklerin” ve “Karşılıklı takip” bölümlerindeki bazı hesaplar yanlış bölümde ya da eksik olabilir; bu yüzden bu sayılar fazla yüksek veya fazla düşük olabilir.",
+        "truncatedFollowing": "Takip ettiklerin listesi eksik görünüyor. Takipçi listenden çok daha geç başlıyor; bu da dışa aktarma sınırlı bir tarih aralığı için istendiğinde olur. Bir aralık seçtiysen verilerini Instagram'dan yeniden iste ve tarih aralığını \"Tüm zamanlar\" olarak ayarla. “Geri takip etmeyenler”, “Geri takip etmediklerin” ve “Karşılıklı takip” bölümlerindeki bazı hesaplar yanlış bölümde ya da eksik olabilir; bu yüzden bu sayılar fazla yüksek veya fazla düşük olabilir.",
+        "datesStale": "Bu raporda takip tarihleri yok: dışa aktarım, SafeUnfollow tarihleri saklamaya başlamadan önce açıldı. Aynı Instagram ZIP dosyasını SafeUnfollow'da yeniden aç, sonra yeni bir rapor dışa aktar."
+      }
     }
   },
   "dates": {

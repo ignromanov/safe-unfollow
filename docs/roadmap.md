@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "Instagram Unfollow Tracker Roadmap: Planned Features"
-description: 'See what''s coming next for Instagram Unfollow Tracker. Historical comparison, CSV export, Chrome extension, and more planned features.'
+description: 'See what''s coming next for Instagram Unfollow Tracker. Historical comparison, a Chrome extension, and more planned features.'
 permalink: /roadmap/
 last_updated: 2026-09-08
 ---
@@ -60,7 +60,7 @@ last_updated: 2026-09-08
 ## v1.6 (Next Priority) 🔄
 
 ### Data Export
-- ✅ **CSV/JSON export** — ships today: free 10-row sample, then a one-time unlock (price shown on the button in your currency) for the full file
+- ✅ **CSV, JSON and HTML report export** — ships today: free 10-row sample, then a one-time unlock (price shown on the button in your currency) for the full list
 - 🔄 **Export customization** — Choose which columns to include
 
 ### Upload UX Improvements
@@ -186,7 +186,7 @@ ceiling. Languages and Tests are real, measured counts.
 Want to help with development? See our [CONTRIBUTING.md](https://github.com/ignromanov/safe-unfollow/blob/main/CONTRIBUTING.md) guide.
 
 ### Priority Areas for Contributors
-1. **CSV/JSON export** — High impact, well-defined scope
+1. **Export customization** — choose which columns to include
 2. **Upload UX** — JSON vs HTML quiz, mobile file picker hints
 3. **Historical tracking** — Compare multiple data exports
 4. **More languages** — Add translations for new languages

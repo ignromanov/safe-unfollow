@@ -45,6 +45,10 @@ async function buildOnMainThread(
       const { buildExportJson } = await import('@/lib/export/json');
       return buildExportJson(fileHash, indices, totalCount, onProgress);
     }
+    case 'html': {
+      const { buildExportHtml } = await import('@/lib/export/html');
+      return buildExportHtml(fileHash, indices, totalCount, request.report, onProgress);
+    }
     default:
       return assertNever(request);
   }
