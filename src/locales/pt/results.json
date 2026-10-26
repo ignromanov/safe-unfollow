@@ -256,7 +256,7 @@
     "report": {
       "title": "Relatório do SafeUnfollow",
       "madeOn": "Gerado em {{date}}",
-      "uploadedOn": "A partir da exportação do Instagram que você enviou em {{date}}",
+      "uploadedOn": "A partir de uma exportação do Instagram aberta em {{date}}",
       "scopeAll": "Todas as contas · {{total}}",
       "scopeFiltered": "{{filters}} · {{count}} de {{total}} contas",
       "scopeSearched": "{{count}} de {{total}} contas",
@@ -270,7 +270,7 @@
         "followRequests": "“Não te seguem de volta” pode estar inflado. Não conseguimos ler o seu arquivo de solicitações de seguir, então contas para as quais você enviou uma solicitação podem aparecer ali em vez de em “Outras”. “Você não segue de volta” e “Mútuos” não são afetados.",
         "truncatedFollowers": "A sua lista de seguidores parece incompleta. Ela começa muito depois da sua lista de seguindo, que é o que acontece quando uma exportação é pedida para um período limitado. Se você escolheu um período, peça os seus dados ao Instagram de novo com o período definido como \"Todo o período\". Algumas contas em “Não te seguem de volta”, “Você não segue de volta” e “Mútuos” podem estar na seção errada ou faltar, então essas contagens podem estar altas ou baixas demais.",
         "truncatedFollowing": "A sua lista de seguindo parece incompleta. Ela começa muito depois da sua lista de seguidores, que é o que acontece quando uma exportação é pedida para um período limitado. Se você escolheu um período, peça os seus dados ao Instagram de novo com o período definido como \"Todo o período\". Algumas contas em “Não te seguem de volta”, “Você não segue de volta” e “Mútuos” podem estar na seção errada ou faltar, então essas contagens podem estar altas ou baixas demais.",
-        "datesStale": "Este relatório não tem datas: o seu envio foi salvo antes de o SafeUnfollow guardá-las. Envie o mesmo ZIP do Instagram de novo e exporte um relatório novo."
+        "datesStale": "Este relatório não tem datas: a exportação foi aberta antes de o SafeUnfollow guardá-las. Abra o mesmo ZIP do Instagram no SafeUnfollow de novo e exporte um relatório novo."
       }
     }
   },

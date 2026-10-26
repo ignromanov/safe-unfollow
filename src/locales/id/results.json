@@ -256,7 +256,7 @@
     "report": {
       "title": "Laporan SafeUnfollow",
       "madeOn": "Dibuat {{date}}",
-      "uploadedOn": "Dari ekspor Instagram yang Anda unggah {{date}}",
+      "uploadedOn": "Dari ekspor Instagram yang dibuka {{date}}",
       "scopeAll": "Semua akun · {{total}}",
       "scopeFiltered": "{{filters}} · {{count}} dari {{total}} akun",
       "scopeSearched": "{{count}} dari {{total}} akun",
@@ -270,7 +270,7 @@
         "followRequests": "“Tidak mengikuti balik” mungkin terlalu tinggi. Kami tidak dapat membaca file permintaan mengikuti Anda, jadi akun yang sudah Anda kirimi permintaan bisa tercantum di sana, bukan di “Lainnya”. “Tidak diikuti balik” dan “Saling mengikuti” tidak terpengaruh.",
         "truncatedFollowers": "Daftar pengikut Anda tampak tidak lengkap. Daftar ini dimulai jauh setelah daftar yang Anda ikuti, dan itulah yang terjadi ketika ekspor diminta untuk rentang tanggal terbatas. Jika Anda memilih rentang tanggal, minta data Anda lagi ke Instagram dengan rentang tanggal diatur ke \"Sepanjang waktu\". Sebagian akun di “Tidak mengikuti balik”, “Tidak diikuti balik”, dan “Saling mengikuti” mungkin berada di bagian yang salah atau tidak tercantum, jadi jumlahnya bisa terlalu tinggi atau terlalu rendah.",
         "truncatedFollowing": "Daftar yang Anda ikuti tampak tidak lengkap. Daftar ini dimulai jauh setelah daftar pengikut Anda, dan itulah yang terjadi ketika ekspor diminta untuk rentang tanggal terbatas. Jika Anda memilih rentang tanggal, minta data Anda lagi ke Instagram dengan rentang tanggal diatur ke \"Sepanjang waktu\". Sebagian akun di “Tidak mengikuti balik”, “Tidak diikuti balik”, dan “Saling mengikuti” mungkin berada di bagian yang salah atau tidak tercantum, jadi jumlahnya bisa terlalu tinggi atau terlalu rendah.",
-        "datesStale": "Laporan ini tidak memuat tanggal mengikuti: unggahan Anda tersimpan sebelum SafeUnfollow mulai mencatatnya. Unggah ZIP Instagram yang sama lagi, lalu ekspor laporan baru."
+        "datesStale": "Laporan ini tidak memuat tanggal mengikuti: ekspor ini dibuka sebelum SafeUnfollow mulai mencatatnya. Buka lagi ZIP Instagram yang sama di SafeUnfollow, lalu ekspor laporan baru."
       }
     }
   },

@@ -256,7 +256,7 @@
     "report": {
       "title": "Rapport SafeUnfollow",
       "madeOn": "Créé le {{date}}",
-      "uploadedOn": "D’après l’export Instagram que vous avez téléversé le {{date}}",
+      "uploadedOn": "D’après un export Instagram ouvert le {{date}}",
       "scopeAll": "Tous les comptes · {{total}}",
       "scopeFiltered": "{{filters}} · {{count}} sur {{total}} comptes",
       "scopeSearched": "{{count}} sur {{total}} comptes",
@@ -270,7 +270,7 @@
         "followRequests": "« Ne vous suivent pas » est peut-être surestimé. Nous n’avons pas pu lire votre fichier de demandes d’abonnement : les comptes à qui vous avez envoyé une demande peuvent figurer là plutôt que dans « Autres ». « Vous ne suivez pas en retour » et « Mutuels » ne sont pas affectés.",
         "truncatedFollowers": "Votre liste d'abonnés semble incomplète. Elle commence bien après votre liste d'abonnements, ce qui arrive lorsqu'un export est demandé sur une plage de dates limitée. Si vous en avez choisi une, redemandez vos données à Instagram en réglant la plage de dates sur « Tout ». Certains comptes de « Ne vous suivent pas », « Vous ne suivez pas en retour » et « Mutuels » peuvent se trouver dans la mauvaise section ou manquer : ces compteurs peuvent donc être trop élevés ou trop bas.",
         "truncatedFollowing": "Votre liste d'abonnements semble incomplète. Elle commence bien après votre liste d'abonnés, ce qui arrive lorsqu'un export est demandé sur une plage de dates limitée. Si vous en avez choisi une, redemandez vos données à Instagram en réglant la plage de dates sur « Tout ». Certains comptes de « Ne vous suivent pas », « Vous ne suivez pas en retour » et « Mutuels » peuvent se trouver dans la mauvaise section ou manquer : ces compteurs peuvent donc être trop élevés ou trop bas.",
-        "datesStale": "Ce rapport ne contient pas de dates d’abonnement : votre import a été enregistré avant que SafeUnfollow ne les conserve. Téléversez à nouveau le même ZIP Instagram, puis exportez un nouveau rapport."
+        "datesStale": "Ce rapport ne contient pas de dates d’abonnement : l’export a été ouvert avant que SafeUnfollow ne les conserve. Rouvrez le même ZIP Instagram dans SafeUnfollow, puis exportez un nouveau rapport."
       }
     }
   },

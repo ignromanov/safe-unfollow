@@ -256,7 +256,7 @@
     "report": {
       "title": "SafeUnfollow report",
       "madeOn": "Made {{date}}",
-      "uploadedOn": "From the Instagram export you uploaded {{date}}",
+      "uploadedOn": "From an Instagram export opened {{date}}",
       "scopeAll": "All accounts · {{total}}",
       "scopeFiltered": "{{filters}} · {{count}} of {{total}} accounts",
       "scopeSearched": "{{count}} of {{total}} accounts",
@@ -270,7 +270,7 @@
         "followRequests": "“Not following back” may be overstated. We could not read your follow-requests file, so accounts you sent a request to may be listed there instead of under “Other”. “Not followed back” and “Mutuals” are unaffected.",
         "truncatedFollowers": "Your followers list looks incomplete. It begins long after your following list does, which is what happens when an export is requested for a limited date range. If you chose one, ask Instagram for your data again with the date range set to “All time”. Some accounts in “Not following back”, “Not followed back” and “Mutuals” may be in the wrong section or missing, so those counts may be too high or too low.",
         "truncatedFollowing": "Your following list looks incomplete. It begins long after your followers list does, which is what happens when an export is requested for a limited date range. If you chose one, ask Instagram for your data again with the date range set to “All time”. Some accounts in “Not following back”, “Not followed back” and “Mutuals” may be in the wrong section or missing, so those counts may be too high or too low.",
-        "datesStale": "This report has no follow dates: your upload was saved before SafeUnfollow kept them. Upload the same Instagram ZIP again, then export a new report."
+        "datesStale": "This report has no follow dates: the export was opened before SafeUnfollow kept them. Open the same Instagram ZIP in SafeUnfollow again, then export a new report."
       }
     }
   },

@@ -256,7 +256,7 @@
     "report": {
       "title": "SafeUnfollow-Bericht",
       "madeOn": "Erstellt am {{date}}",
-      "uploadedOn": "Aus dem Instagram-Export, den du am {{date}} hochgeladen hast",
+      "uploadedOn": "Aus einem Instagram-Export, geöffnet am {{date}}",
       "scopeAll": "Alle Konten · {{total}}",
       "scopeFiltered": "{{filters}} · {{count}} von {{total}} Konten",
       "scopeSearched": "{{count}} von {{total}} Konten",
@@ -270,7 +270,7 @@
         "followRequests": "„Folgt dir nicht zurück“ ist möglicherweise zu hoch. Wir konnten deine Datei mit den Follow-Anfragen nicht lesen. Konten, denen du eine Anfrage geschickt hast, können deshalb dort statt unter „Sonstige“ stehen. „Du folgst nicht zurück“ und „Gegenseitig“ sind davon nicht betroffen.",
         "truncatedFollowers": "Deine Follower-Liste wirkt unvollständig. Sie beginnt deutlich später als deine Gefolgt-Liste, und genau das passiert, wenn ein Export für einen begrenzten Zeitraum angefordert wird. Falls du einen Zeitraum gewählt hast, fordere deine Daten bei Instagram erneut an und setze den Zeitraum auf \"Gesamter Zeitraum\". Einige Konten in „Folgt dir nicht zurück“, „Du folgst nicht zurück“ und „Gegenseitig“ stehen womöglich im falschen Abschnitt oder fehlen, deshalb können diese Zahlen zu hoch oder zu niedrig sein.",
         "truncatedFollowing": "Deine Gefolgt-Liste wirkt unvollständig. Sie beginnt deutlich später als deine Follower-Liste, und genau das passiert, wenn ein Export für einen begrenzten Zeitraum angefordert wird. Falls du einen Zeitraum gewählt hast, fordere deine Daten bei Instagram erneut an und setze den Zeitraum auf \"Gesamter Zeitraum\". Einige Konten in „Folgt dir nicht zurück“, „Du folgst nicht zurück“ und „Gegenseitig“ stehen womöglich im falschen Abschnitt oder fehlen, deshalb können diese Zahlen zu hoch oder zu niedrig sein.",
-        "datesStale": "Dieser Bericht enthält keine Datumsangaben: Dein Upload wurde gespeichert, bevor SafeUnfollow sie aufbewahrt hat. Lade dasselbe Instagram ZIP erneut hoch und exportiere einen neuen Bericht."
+        "datesStale": "Dieser Bericht enthält keine Datumsangaben: Der Export wurde geöffnet, bevor SafeUnfollow sie aufbewahrt hat. Öffne dasselbe Instagram ZIP erneut in SafeUnfollow und exportiere einen neuen Bericht."
       }
     }
   },
