@@ -24,7 +24,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
           </div>
           <h1 className="text-4xl md:text-5xl font-display font-bold">Privacy Policy</h1>
         </div>
-        <p className="text-muted-foreground text-lg">Last updated: October 22, 2026</p>
+        <p className="text-muted-foreground text-lg">Last updated: October 25, 2026</p>
       </header>
 
       {/* Content */}
@@ -194,6 +194,28 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
               GitHub
             </a>
             .
+          </p>
+
+          {/* Every claim about the report here is one html-privacy-gate.test.ts
+              enforces on the generated file. Whether a given viewer honours the
+              file's CSP is not verified, so nothing here says requests are
+              blocked — only what the file contains and what it asks for. */}
+          <h3 className="text-lg font-semibold mt-6 mb-3">4.4 Files You Export</h3>
+          <p className="text-muted-foreground">
+            When you download an export, the file is built inside your browser and saved straight to
+            your device; it is not sent anywhere on the way. Once saved, it is an ordinary file: the
+            browser protections above no longer apply to it, clearing this site's data does not
+            delete it, and anyone you share it with can read the accounts it lists. Its name carries
+            the download date, never your Instagram username.
+          </p>
+          <p className="text-muted-foreground mt-4">
+            The HTML report contains no scripts and nothing it would load from the internet — no
+            images, fonts or styles from elsewhere — and it carries a rule telling the browser that
+            opens it not to let the page load anything. Its links, to Instagram profiles and one
+            back to this site, work like any other link: following one opens that site. The link
+            back to this site carries the tag <code>from=report</code>, the same in every report, so
+            our analytics can count visits that come from reports. Nothing from your file is added
+            to it.
           </p>
         </section>
 
@@ -368,7 +390,8 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
           <ul className="list-disc list-inside space-y-2 text-muted-foreground ms-4">
             <li>
               <strong className="text-foreground">Delete your data:</strong> Clear your browser's
-              IndexedDB storage or use the "Clear Data" button in the app
+              IndexedDB storage or use the "Clear Data" button in the app. Files you have exported
+              stay on your device until you delete them yourself (section 4.4)
             </li>
             <li>
               <strong className="text-foreground">Opt out of analytics:</strong> Click "Don't Track
