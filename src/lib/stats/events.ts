@@ -616,8 +616,11 @@ export const analytics = {
   // `capped` is the number that says whether the free tier is doing its job or
   // eating it: false means the reader's whole view fitted inside the allowance
   // and no paywall was shown, because there was nothing left to sell.
-  freeExportDownload: (capped: boolean) => {
-    trackEvent(AnalyticsEvents.FREE_EXPORT_DOWNLOAD, { capped });
+  // `export_format`, not `format`: upload events use `format` for the archive's
+  // shape, where 'html' means an HTML Instagram export. 'csv' stays in the type
+  // for the event's history — the free sample has been HTML since GH#286 PR-3.
+  freeExportDownload: (capped: boolean, exportFormat: 'html' | 'csv') => {
+    trackEvent(AnalyticsEvents.FREE_EXPORT_DOWNLOAD, { capped, export_format: exportFormat });
   },
 
   // locale and row_count are the two dimensions the paywall cannot be tuned

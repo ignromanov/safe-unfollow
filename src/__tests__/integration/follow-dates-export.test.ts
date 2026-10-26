@@ -10,9 +10,11 @@ import { parseInstagramZipFile } from '@/core/parsers/instagram';
 import type { DateZone } from '@/core/types';
 import { buildExportCsv } from '@/lib/export/csv';
 import { toIsoDay } from '@/lib/export/dates';
-import { capIndicesForFreeExport } from '@/lib/export/free-tier';
+import { FREE_EXPORT_ROWS } from '@/lib/export/free-tier';
+import { buildExportHtml } from '@/lib/export/html';
 import { buildExportJson } from '@/lib/export/json';
 import { indexedDBService } from '@/lib/indexeddb/indexeddb-service';
+import { makeReport, readBlobText as readReport } from '../utils/report-context-fixture';
 
 /**
  * GH#285 PR-3: the date a reader sees on a row leaves in the file as the same day.
@@ -133,13 +135,13 @@ describe.each(FORMATS)('follow dates leave in the export (GH#285 PR-3) - %s', fo
     );
   });
 
+  // Since GH#286 PR-3 the free sample is the HTML report told to stop at ten.
   it('the free sample carries the dates, through the same builder', async () => {
     const hash = `free-${format}`;
     const total = await store(hash, format);
-    const sample = await csvRows(
-      await buildExportCsv(hash, capIndicesForFreeExport(null, total), total)
+    const html = await readReport(
+      await buildExportHtml(hash, null, total, makeReport({ sampleLimit: FREE_EXPORT_ROWS }))
     );
-    expect(sample.length).toBeGreaterThan(0);
-    expect(sample.some(r => isDay(r.followingDate) || isDay(r.followersDate))).toBe(true);
+    expect(html).toMatch(/DATE_(following|followers|mutual|requested) [^<]*\d/);
   });
 });

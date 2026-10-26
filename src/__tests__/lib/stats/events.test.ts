@@ -330,3 +330,23 @@ describe('filterSessionSummary payload and transport', () => {
     expect(enqueueEvent).not.toHaveBeenCalled();
   });
 });
+
+/**
+ * GH#286 §7.7. `export_format`, not `format`: upload events already use `format`
+ * for the archive's shape, where `'html'` means an HTML Instagram export, so a
+ * query on `format='html'` without an event filter would mix the two.
+ */
+describe('freeExportDownload export_format (GH#286)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('names the format of the file handed over, under its own key', () => {
+    analytics.freeExportDownload(true, 'html');
+
+    expect(trackEvent).toHaveBeenCalledWith('free_export_download', {
+      capped: true,
+      export_format: 'html',
+    });
+  });
+});

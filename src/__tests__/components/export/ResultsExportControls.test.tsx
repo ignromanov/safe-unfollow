@@ -26,8 +26,14 @@ vi.mock('@/lib/stats', async importOriginal => {
   };
 });
 
+// Mocked only so a test can prove nothing reaches it: the free path builds the
+// report through the worker and has no CSV fallback (GH#286 design §7.5).
 vi.mock('@/lib/export/csv', () => ({ buildExportCsv: vi.fn() }));
 vi.mock('@/lib/export/download', () => ({ downloadBlob: vi.fn() }));
+const buildExport = vi.fn();
+vi.mock('@/hooks/useExportWorker', () => ({
+  useExportWorker: () => ({ buildExport }),
+}));
 
 import { ResultsExportControls } from '@/components/export/ResultsExportControls';
 import { useProExport } from '@/hooks/useProExport';
@@ -43,6 +49,8 @@ const defaultProps = {
   fileHash: 'hash1',
   indices: null,
   totalCount: 42,
+  filters: [],
+  searchApplied: false,
 };
 
 const triggerLabel = resultsEN.export.trigger;
@@ -100,7 +108,7 @@ function unlocked(isUnlocked: boolean) {
 describe('ResultsExportControls', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(buildExportCsv).mockResolvedValue(new Blob(['username\n']));
+    buildExport.mockResolvedValue(new Blob(['<!doctype html>']));
     observed = [];
     realObserver = globalThis.IntersectionObserver;
     globalThis.IntersectionObserver = class {
@@ -243,15 +251,20 @@ describe('ResultsExportControls', () => {
 
       await waitFor(() => expect(vi.mocked(downloadBlob)).toHaveBeenCalled());
 
-      // The first ten of what the reader is looking at, built by the same
-      // builder the paid export uses — the sample has to be a smaller version
-      // of the thing being sold, not a second code path.
-      expect(vi.mocked(buildExportCsv)).toHaveBeenCalledWith(
+      // The paid report over the reader's whole view, told to stop at ten. The
+      // builder picks the ten in report order and keeps every section's full
+      // count — which it can only do if it is handed the whole view, not a
+      // pre-cut slice of storage indices (GH#286 design §3.5).
+      expect(buildExport).toHaveBeenCalledWith(
+        expect.objectContaining({
+          format: 'html',
+          report: expect.objectContaining({ sampleLimit: FREE_EXPORT_ROWS }),
+        }),
         defaultProps.fileHash,
-        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        null,
         defaultProps.totalCount
       );
-      expect(vi.mocked(analytics.freeExportDownload)).toHaveBeenCalledWith(true);
+      expect(vi.mocked(analytics.freeExportDownload)).toHaveBeenCalledWith(true, 'html');
       expect(await screen.findByText(paywallLabel)).toBeInTheDocument();
       // The two dimensions the paywall is tuned against, read from the state
       // the component already holds — asserted here because tsconfig excludes
@@ -297,7 +310,7 @@ describe('ResultsExportControls', () => {
       await waitFor(() =>
         expect(vi.mocked(downloadBlob)).toHaveBeenCalledWith(
           expect.any(Blob),
-          expect.stringMatching(/^safeunfollow-\d{4}-\d{2}-\d{2}-sample\.csv$/)
+          expect.stringMatching(/^safeunfollow-\d{4}-\d{2}-\d{2}-sample\.html$/)
         )
       );
     });
@@ -315,15 +328,19 @@ describe('ResultsExportControls', () => {
       await waitFor(() =>
         expect(vi.mocked(downloadBlob)).toHaveBeenCalledWith(
           expect.any(Blob),
-          expect.stringMatching(/^safeunfollow-\d{4}-\d{2}-\d{2}\.csv$/)
+          expect.stringMatching(/^safeunfollow-\d{4}-\d{2}-\d{2}\.html$/)
         )
       );
-      expect(vi.mocked(buildExportCsv)).toHaveBeenCalledWith(
+      expect(buildExport).toHaveBeenCalledWith(
+        expect.objectContaining({
+          format: 'html',
+          report: expect.objectContaining({ sampleLimit: null }),
+        }),
         defaultProps.fileHash,
         [4, 8, 15],
         defaultProps.totalCount
       );
-      expect(vi.mocked(analytics.freeExportDownload)).toHaveBeenCalledWith(false);
+      expect(vi.mocked(analytics.freeExportDownload)).toHaveBeenCalledWith(false, 'html');
       expect(screen.queryByText(paywallLabel)).not.toBeInTheDocument();
       expect(vi.mocked(analytics.paywallView)).not.toHaveBeenCalled();
     });
@@ -523,7 +540,7 @@ describe('ResultsExportControls', () => {
 
       expect(status).toHaveTextContent(
         resultsEN.export.saved.full
-          .replace('{{filename}}', exportFilename('csv', { sample: false }))
+          .replace('{{filename}}', exportFilename('html', { sample: false }))
           .replace('{{total}}', '3')
       );
     });
@@ -542,7 +559,7 @@ describe('ResultsExportControls', () => {
       await screen.findByRole('status');
 
       let release: (blob: Blob) => void = () => {};
-      vi.mocked(buildExportCsv).mockReturnValueOnce(
+      buildExport.mockReturnValueOnce(
         new Promise<Blob>(resolve => {
           release = resolve;
         })
@@ -552,23 +569,51 @@ describe('ResultsExportControls', () => {
 
       expect(screen.queryByRole('status')).not.toBeInTheDocument();
 
-      release(new Blob(['username\n']));
+      release(new Blob(['<!doctype html>']));
       await waitFor(() => expect(screen.getByRole('status')).toBeInTheDocument());
+    });
+
+    // The sample is the paid report's first page, so it has to say what view it
+    // is a page of. The search text never travels — only that one narrowed it.
+    it('should describe the reader own filters and search in the report', async () => {
+      unlocked(false);
+      const user = userEvent.setup();
+
+      render(
+        <ResultsExportControls
+          {...defaultProps}
+          indices={[4, 8, 15]}
+          filters={['notFollowingBack']}
+          searchApplied
+        />
+      );
+      await user.click(screen.getByRole('button', { name: triggerLabel }));
+
+      await waitFor(() => expect(buildExport).toHaveBeenCalled());
+      const [request] = buildExport.mock.calls[0];
+      expect(request.report.strings.scope).toContain(resultsEN.badges.notFollowingBack);
+      expect(request.report.strings.searchNarrowed).toBe(resultsEN.export.report.searchNarrowed);
+      expect(request.report.lang).toBe('en');
     });
 
     // A dead click is the worst outcome here: it is the step the whole funnel
     // narrows to, and IndexedDB on this codebase has a known no-timeout hang.
     it('should surface a failure instead of silently doing nothing', async () => {
       unlocked(false);
-      vi.mocked(buildExportCsv).mockRejectedValueOnce(new Error('idb gone'));
+      buildExport.mockRejectedValueOnce(new Error('idb gone'));
       const user = userEvent.setup();
 
       render(<ResultsExportControls {...defaultProps} />);
       await user.click(screen.getByRole('button', { name: triggerLabel }));
 
       expect(await screen.findByRole('alert')).toHaveTextContent(resultsEN.export.dialog.error);
-      expect(vi.mocked(analytics.exportError)).toHaveBeenCalledWith('csv');
+      expect(vi.mocked(analytics.exportError)).toHaveBeenCalledWith('html');
+      // No fallback to a CSV sample: a reader handed a different file than the
+      // one the paywall describes is a silently wrong file, and a fallback
+      // would also hide a failing device from the click → download guard.
       expect(vi.mocked(downloadBlob)).not.toHaveBeenCalled();
+      expect(vi.mocked(buildExportCsv)).not.toHaveBeenCalled();
+      expect(vi.mocked(analytics.freeExportDownload)).not.toHaveBeenCalled();
       expect(screen.queryByText(paywallLabel)).not.toBeInTheDocument();
     });
 
@@ -578,7 +623,7 @@ describe('ResultsExportControls', () => {
     it('should not start a second build while one is in flight', async () => {
       unlocked(false);
       let release: (blob: Blob) => void = () => {};
-      vi.mocked(buildExportCsv).mockReturnValueOnce(
+      buildExport.mockReturnValueOnce(
         new Promise<Blob>(resolve => {
           release = resolve;
         })
@@ -602,10 +647,10 @@ describe('ResultsExportControls', () => {
       // nothing, because the guard is a ref rather than the render state.
       await userEvent.setup({ pointerEventsCheck: 0 }).click(trigger);
 
-      expect(vi.mocked(buildExportCsv)).toHaveBeenCalledTimes(1);
+      expect(buildExport).toHaveBeenCalledTimes(1);
       expect(vi.mocked(analytics.exportClick)).toHaveBeenCalledTimes(1);
 
-      release(new Blob(['username\n']));
+      release(new Blob(['<!doctype html>']));
 
       // Waiting on the button rather than on the download: the file lands one
       // render before the control releases, and a second export is legitimate
@@ -614,7 +659,7 @@ describe('ResultsExportControls', () => {
       expect(vi.mocked(downloadBlob)).toHaveBeenCalledTimes(1);
 
       await user.click(trigger);
-      await waitFor(() => expect(vi.mocked(buildExportCsv)).toHaveBeenCalledTimes(2));
+      await waitFor(() => expect(buildExport).toHaveBeenCalledTimes(2));
     });
   });
 
