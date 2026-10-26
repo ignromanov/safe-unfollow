@@ -514,6 +514,8 @@ export function AccountListSection({
                 fileHash={fileHash}
                 indices={sortedIndices}
                 totalCount={totalCount}
+                filters={BADGE_ORDER.filter(badge => filters.has(badge))}
+                searchApplied={query.trim() !== ''}
               />
             )}
           </div>

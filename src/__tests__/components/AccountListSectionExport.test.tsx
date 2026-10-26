@@ -11,11 +11,20 @@ import { AccountListSection } from '@/components/AccountListSection';
 import { useAccountFiltering } from '@/hooks/useAccountFiltering';
 import { useProExport } from '@/hooks/useProExport';
 import { downloadBlob } from '@/lib/export/download';
+import { buildReportContext } from '@/lib/export/report-context';
 
 vi.mock('@/hooks/useAccountFiltering');
 vi.mock('@/hooks/useProExport');
 vi.mock('@/lib/export/csv', () => ({ buildExportCsv: vi.fn(async () => new Blob(['csv'])) }));
 vi.mock('@/lib/export/download', () => ({ downloadBlob: vi.fn() }));
+vi.mock('@/lib/export/report-context', async importOriginal => {
+  const actual = await importOriginal<typeof import('@/lib/export/report-context')>();
+  return { ...actual, buildReportContext: vi.fn(actual.buildReportContext) };
+});
+const buildExportSpy = vi.fn(async (request: unknown) => new Blob([JSON.stringify(request)]));
+vi.mock('@/hooks/useExportWorker', () => ({
+  useExportWorker: () => ({ buildExport: buildExportSpy }),
+}));
 vi.mock('@/hooks/useLanguagePrefix', () => ({ useLanguagePrefix: () => '' }));
 
 vi.mock('@/components/FilterChips', () => ({
@@ -187,5 +196,30 @@ describe('AccountListSection — export trigger placement', () => {
 
     expect(screen.getByText(stateLineText)).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: triggerLabel })).not.toBeInTheDocument();
+  });
+});
+
+describe('AccountListSection — the search query stays on the screen', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockUseAccountFiltering.mockReturnValue({ ...createFilteringMock(), query: 'zzqueryzz' });
+    mockUseProExport.mockReturnValue({ isEnabled: true, isUnlocked: true, startCheckout: vi.fn() });
+  });
+
+  it('should tell the report a search applied without handing it the text', async () => {
+    const user = userEvent.setup();
+    renderWithRouter(<AccountListSection {...defaultProps} />);
+
+    await user.click(screen.getByRole('button', { name: triggerLabel }));
+    await user.click(
+      await screen.findByRole('button', { name: new RegExp(resultsEN.export.dialog.html, 'i') })
+    );
+
+    await waitFor(() => expect(vi.mocked(downloadBlob)).toHaveBeenCalled());
+    const args = vi.mocked(buildReportContext).mock.calls[0];
+    expect(JSON.stringify(args.slice(1))).not.toContain('zzqueryzz');
+    expect(args[1].searchApplied).toBe(true);
+    const [blob] = vi.mocked(downloadBlob).mock.calls[0];
+    expect(await (blob as Blob).text()).not.toContain('zzqueryzz');
   });
 });
