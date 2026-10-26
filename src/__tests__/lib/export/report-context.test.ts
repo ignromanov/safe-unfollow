@@ -77,6 +77,21 @@ describe('buildReportContext', () => {
     expect(scope).toContain('badges.close');
   });
 
+  // Filters are OR'd, so the list must read as a disjunction in the report's language.
+  it.each([
+    ['en', ' or '],
+    ['id', ' atau '],
+    ['ar', ' أو '],
+  ])('joins filter names as a disjunction in %s', (lang, joiner) => {
+    const { scope } = buildReportContext(t, {
+      ...base,
+      lang,
+      filters: ['restricted', 'close'],
+      rowCount: 2,
+    }).strings;
+    expect(scope).toContain(`badges.restricted{}${joiner}badges.close{}`);
+  });
+
   it('marks a narrowing search only when one was applied', () => {
     expect(buildReportContext(t, base).strings.searchNarrowed).toBeNull();
     expect(
@@ -91,12 +106,12 @@ describe('buildReportContext', () => {
     expect(capped.strings.sampleLine).toContain('export.report.sampleLine');
   });
 
-  it('reads the report-specific caveat keys and leaves the stale hint alone', () => {
+  it('reads the report-specific caveat keys, the stale one included', () => {
     const { caveats } = buildReportContext(t, base).strings;
     expect(caveats.followRequests).toContain('export.report.caveat.followRequests');
     expect(caveats.truncatedFollowers).toContain('export.report.caveat.truncatedFollowers');
     expect(caveats.truncatedFollowing).toContain('export.report.caveat.truncatedFollowing');
-    expect(caveats.datesStale).toContain('dates.staleHint');
+    expect(caveats.datesStale).toContain('export.report.caveat.datesStale');
   });
 
   it('carries no query text: the options have nowhere to put one', () => {

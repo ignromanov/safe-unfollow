@@ -72,7 +72,10 @@ export function buildReportContext(
   const scope =
     o.filters.length > 0
       ? tr('export.report.scopeFiltered', {
-          filters: o.filters.map(f => labels[f] ?? f).join(', '),
+          // Filters are OR'd: a disjunction in the report's language says so ("A or B").
+          filters: new Intl.ListFormat(o.lang, { type: 'disjunction' }).format(
+            o.filters.map(f => labels[f] ?? f)
+          ),
           ...counts,
         })
       : o.searchApplied
@@ -103,7 +106,7 @@ export function buildReportContext(
         followRequests: tr('export.report.caveat.followRequests'),
         truncatedFollowers: tr('export.report.caveat.truncatedFollowers'),
         truncatedFollowing: tr('export.report.caveat.truncatedFollowing'),
-        datesStale: tr('dates.staleHint'),
+        datesStale: tr('export.report.caveat.datesStale'),
       },
       ceilingTop: tr('export.report.ceilingTop', { max: SLOT }),
       ceilingSection: tr('export.report.ceilingSection', { count: SLOT }),
