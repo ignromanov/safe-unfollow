@@ -371,6 +371,7 @@ describe('ExportDialog', () => {
 
       await waitFor(() => expect(vi.mocked(buildReportContext)).toHaveBeenCalled());
       expect(vi.mocked(buildReportContext).mock.calls[0][1]).toMatchObject({
+        lang: 'en',
         filters: ['mutuals'],
         searchApplied: true,
         rowCount: 42,

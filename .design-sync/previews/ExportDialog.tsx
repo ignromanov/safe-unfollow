@@ -10,6 +10,9 @@ export function Default() {
       fileHash="preview-hash"
       indices={null}
       rowCount={214}
+      totalCount={214}
+      filters={[]}
+      searchApplied={false}
     />
   );
 }
@@ -24,7 +27,10 @@ export function LargeDataset() {
       onOpenChange={() => {}}
       fileHash="preview-hash"
       indices={null}
-      rowCount={48213}
+      rowCount={61240}
+      totalCount={61240}
+      filters={[]}
+      searchApplied={false}
     />
   );
 }
