@@ -94,8 +94,12 @@ describeDist(
           ([key, chunk]) =>
             chunk.isDynamicEntry && !key.startsWith('src/pages/') && !key.startsWith('_locale-')
         );
-        // Control: such chunks exist, so "none is preloaded" is not vacuous.
-        expect(onDemand.map(([key]) => key)).toContain('src/components/export/ExportDialog.tsx');
+        // Control: such chunks exist, so "none is preloaded" is not vacuous. Matched by file, not by
+        // key: once the report builder imports modules the dialog also imports, the dialog's chunk is
+        // shared and the manifest keys it `_ExportDialog-<hash>.js` instead of its source path.
+        expect(onDemand.some(([, chunk]) => /\/ExportDialog-[\w-]+\.js$/.test(chunk.file))).toBe(
+          true
+        );
         const doc = readFileSync(join(dist, html), 'utf8');
         for (const [key, chunk] of onDemand) expect(doc, key).not.toContain(chunk.file);
       }
