@@ -145,7 +145,7 @@ describe('AccountListSection — export trigger placement', () => {
 
     await waitFor(() => expect(vi.mocked(downloadBlob)).toHaveBeenCalled());
     const [, name] = vi.mocked(downloadBlob).mock.calls[0];
-    expect(name).toMatch(/^safeunfollow-\d{4}-\d{2}-\d{2}(-sample)?\.csv$/);
+    expect(name).toMatch(/^safeunfollow-\d{4}-\d{2}-\d{2}(-sample)?\.html$/);
     expect(name).not.toContain('alice_owner');
   });
 

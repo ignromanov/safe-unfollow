@@ -67,23 +67,17 @@ export function isFreeExportCapped(indices: number[] | null, totalCount: number)
 }
 
 /**
- * The rows the free export actually writes.
+ * How many rows the free report renders, or `null` for all of them.
  *
  * Derived from `isFreeExportCapped` rather than deciding for itself, because
  * the two answers have to agree by construction: a view that gets no paywall
  * must also get no `-sample` suffix and no truncation, and a caller holding one
  * of those beliefs while the file holds the other is a silently wrong file.
  *
- * The rows land in ascending index order regardless of the on-screen sort,
- * because `iterateAccountsForExport` normalises order. That matches the paid
- * export rather than the screen, which is the consistency that matters: the
- * sample must look like a smaller version of what is being sold.
+ * A limit rather than a slice of indices: the report builder is handed the whole
+ * view and picks the rows itself, in report order, because only it knows which
+ * section each account lands in and every section heading keeps its full count.
  */
-export function capIndicesForFreeExport(indices: number[] | null, totalCount: number): number[] {
-  const size = viewSize(indices, totalCount);
-  const length = isFreeExportCapped(indices, totalCount) ? FREE_EXPORT_ROWS : size;
-
-  if (indices !== null) return indices.slice(0, length);
-
-  return Array.from({ length }, (_, index) => index);
+export function freeReportSampleLimit(indices: number[] | null, totalCount: number): number | null {
+  return isFreeExportCapped(indices, totalCount) ? FREE_EXPORT_ROWS : null;
 }

@@ -5,15 +5,17 @@ import { useTranslation } from 'react-i18next';
 import type { BadgeKey } from '@/core/types';
 import { Button } from '@/components/ui/button';
 import { useAdViewability } from '@/hooks/useAdViewability';
+import { useExportWorker } from '@/hooks/useExportWorker';
 import { useProExport } from '@/hooks/useProExport';
 import { downloadBlob } from '@/lib/export/download';
 import { exportFilename } from '@/lib/export/filename';
 import { registerExportOpener } from '@/lib/export/export-opener';
 import {
-  capIndicesForFreeExport,
   FREE_EXPORT_ROWS,
+  freeReportSampleLimit,
   isFreeExportCapped,
 } from '@/lib/export/free-tier';
+import { buildReportContext } from '@/lib/export/report-context';
 import { analytics } from '@/lib/stats';
 
 // Lazy: the paywall, the export dialog and everything they pull in (export
@@ -65,6 +67,7 @@ export function ResultsExportControls({
 }: ResultsExportControlsProps) {
   const { t, i18n } = useTranslation('results');
   const { isEnabled, isUnlocked, checkoutState, startCheckout, resetCheckout } = useProExport();
+  const { buildExport } = useExportWorker();
   const [isPaywallOpen, setIsPaywallOpen] = useState(false);
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [isLicenseDialogOpen, setIsLicenseDialogOpen] = useState(false);
@@ -106,15 +109,14 @@ export function ResultsExportControls({
 
   const rowCount = indices === null ? totalCount : indices.length;
 
-  // Warm the chunks on intent. A locked click now does real work before it
-  // shows anything, so the CSV builder is on that path too, not just the modal.
+  // Warm the chunks on intent. The report builder is not warmed here: it runs
+  // in the export worker, which `useExportWorker` creates on the first build.
   const preloadModal = (): void => {
     if (isUnlocked) {
       void import('./ExportDialog');
       return;
     }
     void import('./PaywallModal');
-    void import('@/lib/export/csv');
   };
 
   /**
@@ -160,25 +162,39 @@ export function ResultsExportControls({
     setHasError(false);
     setSaved(null);
     try {
-      // Dynamic: the builder reaches into IndexedDB, and a static import would
-      // put that in the main bundle for every visitor who never exports.
-      const { buildExportCsv } = await import('@/lib/export/csv');
-
       const capped = isFreeExportCapped(indices, totalCount);
-      const blob = await buildExportCsv(
+      // The paid report, told where to stop. The whole view goes in, not a
+      // slice of it: the builder picks the sample in report order and keeps
+      // every section's full count, which a pre-cut slice would falsify.
+      //
+      // No fallback to a CSV sample when this throws. The reader would get a
+      // different file than the one the paywall describes, and the
+      // click → download guard would stop showing a failing device.
+      const blob = await buildExport(
+        {
+          format: 'html',
+          report: buildReportContext(t, {
+            lang: i18n.language,
+            filters,
+            searchApplied,
+            rowCount,
+            totalCount,
+            sampleLimit: freeReportSampleLimit(indices, totalCount),
+          }),
+        },
         fileHash,
-        capIndicesForFreeExport(indices, totalCount),
+        indices,
         totalCount
       );
 
       // The modal is gone once dismissed; the filename is still in the
       // Downloads folder next week saying the file stops short.
-      const savedFilename = exportFilename('csv', { sample: capped });
+      const savedFilename = exportFilename('html', { sample: capped });
       downloadBlob(blob, savedFilename);
       // One name, used for the file and for whatever names it back. A receipt
       // pointing at a different file than the one on disk is worse than none.
       setSaved({ filename: savedFilename, total: rowCount, capped });
-      analytics.freeExportDownload(capped);
+      analytics.freeExportDownload(capped, 'html');
 
       if (capped) {
         analytics.paywallView(i18n.language, rowCount);
@@ -186,7 +202,7 @@ export function ResultsExportControls({
       }
     } catch {
       setHasError(true);
-      analytics.exportError('csv');
+      analytics.exportError('html');
     } finally {
       isRunningRef.current = false;
       setIsBusy(false);
@@ -247,7 +263,7 @@ export function ResultsExportControls({
             click opened an invoice, the loudest button on the page would have
             been a lure: maximum pull toward a paywall the reader had been given
             no reason to trust. Since the click builds and hands over a real
-            ten-row CSV first — and the paywall appears afterwards, only when
+            ten-row report first — and the paywall appears afterwards, only when
             the file was actually capped — the loudest action here is a free one
             that delivers. Revert Phase 2 and this treatment has to go back to
             `outline` in the same commit.
