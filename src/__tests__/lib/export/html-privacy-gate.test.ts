@@ -6,6 +6,7 @@
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AccountBadges } from '@/core/types';
+import { SLOT } from '@/lib/export/report-context';
 import { REPORT_CSP, REPORT_SITE_URL } from '@/lib/export/report-markup';
 import { makeReport, readBlobText } from '../../utils/report-context-fixture';
 
@@ -118,14 +119,18 @@ async function fixtures(): Promise<Record<string, string>> {
   const run = async (name: string, over: Parameters<typeof makeReport>[0] = {}): Promise<void> => {
     const report = makeReport(over);
     report.strings.searchNarrowed = 'SEARCH_NARROWED';
+    report.strings.sampleLine = over.sampleLimit ? 'SAMPLE_LINE' : null;
     serve(HOSTILE);
     out[name] = await readBlobText(await buildExportHtml('h', null, HOSTILE.length, report));
   };
 
   getFileMetadata.mockResolvedValue(RECORD);
   ceiling.value = 3;
-  await run('ceiling');
-  ceiling.value = 50_000;
+  try {
+    await run('ceiling');
+  } finally {
+    ceiling.value = 50_000;
+  }
   await run('sample', { sampleLimit: 2 });
   await run('rtl', { lang: 'ar', dir: 'rtl' });
   getFileMetadata.mockResolvedValue({ ...RECORD, dateZones: undefined });
@@ -155,6 +160,7 @@ describe('html report privacy gate', () => {
     const files = await fixtures();
     expect(files['ceiling']).toContain('CEILING_TOP');
     expect(files['sample']).not.toContain('CEILING_TOP');
+    expect(files['sample']).toContain('SAMPLE_LINE');
     expect(files['stale']).toContain('CAVEAT_DATES_STALE');
     expect(files['ceiling']).toContain('<time');
     expect(files['ceiling']).toContain('CAVEAT_FOLLOW_REQUESTS');
@@ -171,6 +177,99 @@ describe('html report privacy gate', () => {
   });
 });
 
+describe('strings html.ts writes itself are escaped', () => {
+  const H = '<img src=x onerror=1>"><b>&';
+  const tag = (key: string): string => `${key} ${H}`;
+
+  function hostileReport(): ReturnType<typeof makeReport> {
+    const report = makeReport();
+    const st = report.strings;
+    st.title = tag('TITLE');
+    st.madeOn = `${tag('MADE')} ${SLOT}`;
+    st.uploadedOn = `${tag('UPLOADED')} ${SLOT}`;
+    st.scope = tag('SCOPE');
+    st.searchNarrowed = tag('SEARCH');
+    st.sampleLine = tag('SAMPLE');
+    st.sectionHeadings = {
+      notFollowingBack: tag('H_NFB'),
+      notFollowedBack: tag('H_NFDB'),
+      mutuals: tag('H_MUT'),
+      other: tag('H_OTHER'),
+    };
+    st.labels = { pending: tag('LBL_PENDING') };
+    st.dateLines = {
+      following: `${tag('DL_FOLLOWING')} ${SLOT}`,
+      followers: `${tag('DL_FOLLOWERS')} ${SLOT}`,
+      mutual: `${tag('DL_MUTUAL')} ${SLOT}`,
+      requested: `${tag('DL_REQUESTED')} ${SLOT}`,
+    };
+    st.caveats = {
+      followRequests: tag('CV_REQ'),
+      truncatedFollowers: tag('CV_FOLLOWERS'),
+      truncatedFollowing: tag('CV_FOLLOWING'),
+      datesStale: tag('CV_STALE'),
+    };
+    st.ceilingTop = `${tag('CEIL_TOP')} ${SLOT}`;
+    st.ceilingSection = `${tag('CEIL_SECTION')} ${SLOT}`;
+    st.footer = tag('FOOTER');
+    return report;
+  }
+
+  it('shows hostile copy as literal text and builds no element from it', async () => {
+    serve(HOSTILE);
+    const built: string[] = [];
+    ceiling.value = 3;
+    try {
+      getFileMetadata.mockResolvedValue({ ...RECORD, truncatedRelationshipFile: 'followers' });
+      built.push(
+        await readBlobText(await buildExportHtml('h', null, HOSTILE.length, hostileReport()))
+      );
+      getFileMetadata.mockResolvedValue({
+        ...RECORD,
+        dateZones: undefined,
+        truncatedRelationshipFile: 'following',
+      });
+      built.push(
+        await readBlobText(await buildExportHtml('h', null, HOSTILE.length, hostileReport()))
+      );
+    } finally {
+      ceiling.value = 50_000;
+    }
+
+    const seen = new Set<string>();
+    for (const html of built) {
+      expect(findNetworkHazards(html)).toEqual([]);
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      expect(doc.querySelector('img, b')).toBeNull();
+      const text = `${doc.title}\n${doc.body.textContent ?? ''}`;
+      for (const m of text.matchAll(/([A-Z_]+) <img src=x onerror=1>"><b>&/g)) seen.add(m[1] ?? '');
+    }
+    for (const key of [
+      'TITLE',
+      'MADE',
+      'UPLOADED',
+      'SCOPE',
+      'SEARCH',
+      'SAMPLE',
+      'H_NFB',
+      'H_NFDB',
+      'H_MUT',
+      'H_OTHER',
+      'LBL_PENDING',
+      'DL_REQUESTED',
+      'CV_REQ',
+      'CV_FOLLOWERS',
+      'CV_FOLLOWING',
+      'CV_STALE',
+      'CEIL_TOP',
+      'CEIL_SECTION',
+      'FOOTER',
+    ]) {
+      expect(seen, key).toContain(key);
+    }
+  });
+});
+
 describe('findNetworkHazards (red-proof)', () => {
   let good: string;
 
@@ -181,8 +280,6 @@ describe('findNetworkHazards (red-proof)', () => {
     serve([account('alice', { mutuals: true })]);
     good = await readBlobText(await buildExportHtml('h', null, 1, makeReport()));
   });
-
-  const inBody = (markup: string): string => good.replace('</main>', `${markup}</main>`);
 
   it('passes the known-good file', () => {
     expect(findNetworkHazards(good)).toEqual([]);
@@ -273,10 +370,5 @@ describe('findNetworkHazards (red-proof)', () => {
 
   it.each(POISON)('reports %s', (_name, poison, expected) => {
     expect(findNetworkHazards(poison(good))).toContain(expected);
-  });
-
-  it('keeps the poison helper honest', () => {
-    expect(inBody('<p>fine</p>')).not.toBe(good);
-    expect(findNetworkHazards(inBody('<p>fine</p>'))).toEqual([]);
   });
 });

@@ -8,11 +8,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { buildExportCsv } from '@/lib/export/csv';
+import { buildExportHtml } from '@/lib/export/html';
 import { buildExportJson } from '@/lib/export/json';
+import { makeReport } from '../utils/report-context-fixture';
 import type { ExportRequest } from '@/lib/export/types';
 
 vi.mock('@/lib/export/csv', () => ({ buildExportCsv: vi.fn() }));
 vi.mock('@/lib/export/json', () => ({ buildExportJson: vi.fn() }));
+vi.mock('@/lib/export/html', () => ({ buildExportHtml: vi.fn() }));
 
 import { exportWorkerApi } from '@/workers/export-worker';
 
@@ -40,6 +43,19 @@ describe('export-worker', () => {
     expect(result).toBe(jsonBlob);
     expect(buildExportJson).toHaveBeenCalledWith('hash1', [1, 2], 100, undefined);
     expect(buildExportCsv).not.toHaveBeenCalled();
+  });
+
+  it('should build an HTML blob for the html format, passing the report through', async () => {
+    const htmlBlob = new Blob(['<html>'], { type: 'text/html;charset=utf-8' });
+    vi.mocked(buildExportHtml).mockResolvedValue(htmlBlob);
+    const report = makeReport();
+
+    const result = await exportWorkerApi.buildExport({ format: 'html', report }, 'hash1', [3], 100);
+
+    expect(result).toBe(htmlBlob);
+    expect(buildExportHtml).toHaveBeenCalledWith('hash1', [3], 100, report, undefined);
+    expect(buildExportCsv).not.toHaveBeenCalled();
+    expect(buildExportJson).not.toHaveBeenCalled();
   });
 
   it('should forward the progress callback to the builder', async () => {

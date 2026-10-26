@@ -54,7 +54,8 @@ function renderBadgeRow(
   zones: DateZones | null,
   format: ReturnType<typeof createFollowDateFormatter>
 ): string {
-  const labels = rowLabels(badges, section).map(key => report.strings.labels[key] ?? key);
+  // A badge with no resolved string is dropped: printing the internal key would put an English identifier in the reader's file.
+  const labels = rowLabels(badges, section).flatMap(key => report.strings.labels[key] ?? []);
   const line = zones ? pickDateLine(badges, zones) : null;
   return renderRow({
     username,
@@ -86,12 +87,12 @@ function renderHeader(
   record: Record_,
   report: ReportContext,
   sections: SectionPlan[],
-  firstSectionTruncated: boolean
+  firstSectionTruncated: boolean,
+  now: number
 ): string {
   const { strings, lang } = report;
   const num = new Intl.NumberFormat(lang);
   const format = createFollowDateFormatter(lang);
-  const now = Date.now();
   const day = (ms: number): string => format(ms / 1000, 'local');
 
   let out = `<h1>${escapeHtml(strings.title)}</h1>`;
@@ -174,10 +175,15 @@ export async function buildExportHtml(
   onProgress?.({ processed: total, total });
 
   const num = new Intl.NumberFormat(report.lang);
+  const now = Date.now();
+  const madeDate = format(now / 1000, 'local');
   const parts: string[] = [
-    renderHead({ lang: report.lang, dir: report.dir, title: report.strings.title }) +
-      '</head><body><main>',
-    renderHeader(record, report, plan.sections, plan.firstSectionTruncated),
+    renderHead({
+      lang: report.lang,
+      dir: report.dir,
+      title: `${report.strings.title} · ${madeDate}`,
+    }) + '</head><body><main>',
+    renderHeader(record, report, plan.sections, plan.firstSectionTruncated, now),
   ];
   for (const s of plan.sections) {
     parts.push(

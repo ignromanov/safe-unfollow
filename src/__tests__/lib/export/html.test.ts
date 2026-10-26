@@ -1,7 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { AccountBadges, DateZones } from '@/core/types';
+import type { AccountBadges } from '@/core/types';
 import { createFollowDateFormatter } from '@/lib/follow-dates';
-import { toIsoDay } from '@/lib/export/dates';
 import { makeReport, readBlobText } from '../../utils/report-context-fixture';
 
 const { getAccountsByRange, getFileMetadata } = vi.hoisted(() => ({
@@ -89,27 +88,31 @@ describe('buildExportHtml', () => {
     expect(html.indexOf('>@a2<')).toBeLessThan(html.indexOf('>@a5<'));
   });
 
-  it('shows full section totals when a sample renders fewer rows', async () => {
+  it('shows full section totals, and a sample is the first rows in report order, not storage order', async () => {
+    // Storage order is the reverse of report order, so a storage-prefix sample picks mutuals.
     const list = [
-      ...Array.from({ length: 4 }, (_, i) => account(`n${i}`, { notFollowingBack: true })),
-      ...Array.from({ length: 20 }, (_, i) => account(`m${i}`, { notFollowedBack: true })),
-      ...Array.from({ length: 100 }, (_, i) => account(`x${i}`, { mutuals: true })),
+      ...Array.from({ length: 12 }, (_, i) => account(`a${i}`, { mutuals: true })),
+      ...Array.from({ length: 20 }, (_, i) => account(`b${i}`, { notFollowedBack: true })),
+      ...Array.from({ length: 4 }, (_, i) => account(`c${i}`, { notFollowingBack: true })),
     ];
     serveList(list);
     const report = makeReport({ sampleLimit: 10 });
     report.strings.sampleLine = 'SAMPLE_LINE';
     const html = await build(list.length, report);
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const bySection = (id: string): string[] =>
+      [...doc.querySelectorAll(`#${id} li.row a`)].map(a => a.textContent ?? '');
 
+    expect(bySection('notFollowingBack')).toEqual(['@c0', '@c1', '@c2', '@c3']);
+    expect(bySection('notFollowedBack')).toEqual(['@b0', '@b1', '@b2', '@b3', '@b4', '@b5']);
+    expect(bySection('mutuals')).toEqual([]);
     expect(rows(html)).toBe(10);
     for (const [id, count] of [
       ['notFollowingBack', '4'],
       ['notFollowedBack', '20'],
-      ['mutuals', '100'],
+      ['mutuals', '12'],
     ] as const) {
-      const section = html.slice(html.indexOf(`id="${id}"`));
-      expect(section.slice(0, section.indexOf('</summary>'))).toContain(
-        `<span class="count">${count}</span>`
-      );
+      expect(doc.querySelector(`#${id} .count`)?.textContent).toBe(count);
     }
     expect(html).toContain('SAMPLE_LINE');
     // The sample line speaks for the cut; sections carry no ceiling note under a sample.
@@ -122,20 +125,36 @@ describe('buildExportHtml', () => {
     expect(await build(1)).not.toContain('SAMPLE_LINE');
   });
 
-  it('writes the same day the CSV writes for the row', async () => {
-    const seconds = 1_700_000_000;
-    const zones: DateZones = { following: 'local' };
-    getFileMetadata.mockResolvedValue(record({ dateZones: zones }));
-    serveList([account('dated', { following: seconds })]);
+  // 01:30 UTC on 1 March is still 29 February west of UTC, so the two zones disagree on the day
+  // wherever the machine is west of Greenwich; run under TZ=America/Asuncion to see the split.
+  it('writes the same day in the HTML as in the CSV, in both zones', async () => {
+    const seconds = 1_709_256_600;
+    getFileMetadata.mockResolvedValue(
+      record({ dateZones: { following: 'local', followers: 'utc' } })
+    );
+    const list = [account('loc', { following: seconds }), account('utc', { followers: seconds })];
 
-    const html = await build(1);
-    const iso = toIsoDay(seconds, 'local');
-    const text = createFollowDateFormatter('en')(seconds, 'local');
-    expect(html).toContain(`<time datetime="${iso}">DATE_following ${text}</time>`);
+    serveList(list);
+    const doc = new DOMParser().parseFromString(await build(2), 'text/html');
+    const htmlDay = (name: string): string | null | undefined =>
+      [...doc.querySelectorAll('li.row')]
+        .find(li => li.querySelector('a')?.textContent === `@${name}`)
+        ?.querySelector('time')
+        ?.getAttribute('datetime');
 
-    serveList([account('dated', { following: seconds })]);
-    const csv = await readBlobText(await buildExportCsv('hash', null, 1));
-    expect(csv).toContain(`,${iso}`);
+    serveList(list);
+    const csv = (await readBlobText(await buildExportCsv('hash', null, 2))).trim().split('\n');
+    const header = (csv[0] ?? '').split(',');
+    const cell = (name: string, column: string): string | undefined =>
+      csv
+        .slice(1)
+        .find(r => r.startsWith(`${name},`))
+        ?.split(',')[header.indexOf(column)];
+
+    expect(htmlDay('loc')).toBeTruthy();
+    expect(htmlDay('loc')).toBe(cell('loc', 'followingDate'));
+    expect(htmlDay('utc')).toBeTruthy();
+    expect(htmlDay('utc')).toBe(cell('utc', 'followersDate'));
   });
 
   it('adds caveats above the first section', async () => {
@@ -172,6 +191,26 @@ describe('buildExportHtml', () => {
     const html = await build(1);
     expect(html).not.toContain('CAVEAT_DATES_STALE');
     expect(html).not.toContain('<time');
+  });
+
+  it('puts the date in the <title> and keeps the <h1> as the bare title', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(2026, 9, 25, 12, 0, 0));
+    serveList([account('a')]);
+    const html = await build(1);
+    const made = createFollowDateFormatter('en')(
+      new Date(2026, 9, 25, 12).getTime() / 1000,
+      'local'
+    );
+    expect(html).toContain(`<title>REPORT_TITLE · ${made}</title>`);
+    expect(html).toContain('<h1>REPORT_TITLE</h1>');
+  });
+
+  it('drops a label that has no resolved string instead of printing the internal key', async () => {
+    serveList([account('a', { mutuals: true, close: true, restricted: true })]);
+    const html = await build(1);
+    expect(html).toContain('LBL_CLOSE');
+    expect(html).not.toContain('restricted');
   });
 
   it('closes the document with exactly one site link carrying the footer', async () => {
