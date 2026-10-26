@@ -37,7 +37,7 @@ Instagram may split followers into multiple files (`followers_1.json`, `follower
 
 ### What file formats are supported?
 - **Input**: Instagram Data Download ZIP files (JSON or HTML; JSON is what the guide recommends)
-- **Output**: Free 10-row sample, then a one-time unlock (price shown on the button in your currency) for the full CSV/JSON file
+- **Output**: Free 10-row sample, then a one-time unlock (price shown on the button in your currency) for the full list as CSV or JSON, plus a readable HTML report
 
 ## Technical
 
@@ -123,7 +123,7 @@ Currently, the app analyzes one export at a time. Historical tracking with multi
 Results are 100% accurate based on your Instagram data export. The app shows the exact state of your followers/following at the time you downloaded the data.
 
 ### Can I export my results?
-Yes. CSV/JSON export ships today: download a free 10-row sample, then unlock the full file with a one-time payment (price shown on the button in your currency).
+Yes. Export ships today: download a free 10-row sample, then unlock the full list with a one-time payment (price shown on the button in your currency). The paid export comes as CSV, JSON, or an HTML report you can open in a browser and print to PDF.
 
 ### Does the app work with private accounts?
 Yes, the app works with any Instagram account type (public, private, business). It only processes the follower/following data from your export.
