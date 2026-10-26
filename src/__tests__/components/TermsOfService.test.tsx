@@ -137,6 +137,19 @@ describe('TermsOfService', () => {
     });
   });
 
+  // The licence covers every export format, and earlier buyers keep access to
+  // the HTML report. Naming only CSV and JSON here would sell the licence as
+  // narrower than it is. Assert against the rendered clause, not the source.
+  describe('paid export clause', () => {
+    it('should not enumerate the export formats the licence covers', () => {
+      render(<TermsOfService {...defaultProps} />);
+
+      const clause = screen.getByText(/Downloading your results as a complete/);
+      expect(clause).not.toHaveTextContent(/CSV or JSON/);
+      expect(clause).toHaveTextContent(/complete export file/);
+    });
+  });
+
   describe('content details', () => {
     it('should mention that service processes data locally', () => {
       render(<TermsOfService {...defaultProps} />);

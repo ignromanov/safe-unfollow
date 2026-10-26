@@ -102,9 +102,9 @@ export function TermsOfService({ onBack }: TermsOfServiceProps) {
               address and the window in step with export.paywall.refund. */}
           <h3 className="text-lg font-semibold mt-6 mb-3">2.1 Paid Export and Refunds</h3>
           <p className="text-muted-foreground">
-            The analysis is free. Downloading your results as a complete CSV or JSON file is an
-            optional one-time purchase of $7 — not a subscription — which unlocks the export on up
-            to 3 devices. If it is not what you expected, email{' '}
+            The analysis is free. Downloading your results as a complete export file is an optional
+            one-time purchase of $7 — not a subscription — which unlocks the export on up to 3
+            devices. If it is not what you expected, email{' '}
             <a
               href="mailto:refunds@safeunfollow.app"
               className="text-primary-strong hover:underline"
