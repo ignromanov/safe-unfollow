@@ -1,5 +1,6 @@
 import { vi, beforeEach, describe, it, expect } from 'vitest';
-import { screen } from '@tests/utils/testUtils';
+import userEvent from '@testing-library/user-event';
+import { screen, waitFor } from '@tests/utils/testUtils';
 import { renderWithRouter } from '@/__tests__/test-utils';
 import resultsEN from '@/locales/en/results.json';
 import { createI18nMock } from '@/__tests__/utils/mockI18n';
@@ -9,9 +10,12 @@ vi.mock('react-i18next', () => createI18nMock(resultsEN));
 import { AccountListSection } from '@/components/AccountListSection';
 import { useAccountFiltering } from '@/hooks/useAccountFiltering';
 import { useProExport } from '@/hooks/useProExport';
+import { downloadBlob } from '@/lib/export/download';
 
 vi.mock('@/hooks/useAccountFiltering');
 vi.mock('@/hooks/useProExport');
+vi.mock('@/lib/export/csv', () => ({ buildExportCsv: vi.fn(async () => new Blob(['csv'])) }));
+vi.mock('@/lib/export/download', () => ({ downloadBlob: vi.fn() }));
 vi.mock('@/hooks/useLanguagePrefix', () => ({ useLanguagePrefix: () => '' }));
 
 vi.mock('@/components/FilterChips', () => ({
@@ -118,6 +122,22 @@ describe('AccountListSection — export trigger placement', () => {
     vi.clearAllMocks();
     mockUseAccountFiltering.mockReturnValue(createFilteringMock());
     enableExport();
+  });
+
+  // Meta names the ZIP after the account owner, and this is the level where that
+  // name enters the page as `filename`. Nothing below may let it reach the file.
+  it('should not name the downloaded file after the uploaded ZIP', async () => {
+    const user = userEvent.setup();
+    renderWithRouter(
+      <AccountListSection {...defaultProps} filename="instagram-alice_owner-2026-10-01-xyz.zip" />
+    );
+
+    await user.click(screen.getByRole('button', { name: triggerLabel }));
+
+    await waitFor(() => expect(vi.mocked(downloadBlob)).toHaveBeenCalled());
+    const [, name] = vi.mocked(downloadBlob).mock.calls[0];
+    expect(name).toMatch(/^safeunfollow-\d{4}-\d{2}-\d{2}(-sample)?\.csv$/);
+    expect(name).not.toContain('alice_owner');
   });
 
   // The ask used to sit above the list, before the visitor had seen what they

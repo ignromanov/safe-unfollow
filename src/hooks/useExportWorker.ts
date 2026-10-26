@@ -13,14 +13,14 @@
 import * as Comlink from 'comlink';
 import { useCallback, useEffect, useRef } from 'react';
 
-import type { ExportFormat, ExportProgressCallback } from '@/lib/export/types';
+import { assertNever, type ExportProgressCallback, type ExportRequest } from '@/lib/export/types';
 import { logger } from '@/lib/logger';
 import type { ExportWorkerApi } from '@/workers/export-worker';
 
 export interface UseExportWorkerResult {
   /** Builds the export file, off the main thread when possible */
   buildExport: (
-    format: ExportFormat,
+    request: ExportRequest,
     fileHash: string,
     indices: number[] | null,
     totalCount: number,
@@ -29,19 +29,25 @@ export interface UseExportWorkerResult {
 }
 
 async function buildOnMainThread(
-  format: ExportFormat,
+  request: ExportRequest,
   fileHash: string,
   indices: number[] | null,
   totalCount: number,
   onProgress?: ExportProgressCallback
 ): Promise<Blob> {
   // Dynamic import so the fallback path costs nothing when the worker works
-  if (format === 'csv') {
-    const { buildExportCsv } = await import('@/lib/export/csv');
-    return buildExportCsv(fileHash, indices, totalCount, onProgress);
+  switch (request.format) {
+    case 'csv': {
+      const { buildExportCsv } = await import('@/lib/export/csv');
+      return buildExportCsv(fileHash, indices, totalCount, onProgress);
+    }
+    case 'json': {
+      const { buildExportJson } = await import('@/lib/export/json');
+      return buildExportJson(fileHash, indices, totalCount, onProgress);
+    }
+    default:
+      return assertNever(request);
   }
-  const { buildExportJson } = await import('@/lib/export/json');
-  return buildExportJson(fileHash, indices, totalCount, onProgress);
 }
 
 export function useExportWorker(): UseExportWorkerResult {
@@ -63,7 +69,7 @@ export function useExportWorker(): UseExportWorkerResult {
 
   const buildExport = useCallback(
     async (
-      format: ExportFormat,
+      request: ExportRequest,
       fileHash: string,
       indices: number[] | null,
       totalCount: number,
@@ -88,7 +94,7 @@ export function useExportWorker(): UseExportWorkerResult {
         // nature, and a fixed timeout would abort the one export size this
         // feature is sold for. Only a dead worker is raced here.
         const running = apiRef.current.buildExport(
-          format,
+          request,
           fileHash,
           indices,
           totalCount,
@@ -106,7 +112,7 @@ export function useExportWorker(): UseExportWorkerResult {
         workerRef.current = null;
         apiRef.current = null;
         loadFailureRef.current = null;
-        return buildOnMainThread(format, fileHash, indices, totalCount, onProgress);
+        return buildOnMainThread(request, fileHash, indices, totalCount, onProgress);
       }
     },
     []

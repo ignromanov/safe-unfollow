@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useAdViewability } from '@/hooks/useAdViewability';
 import { useProExport } from '@/hooks/useProExport';
 import { downloadBlob } from '@/lib/export/download';
+import { exportFilename } from '@/lib/export/filename';
 import { registerExportOpener } from '@/lib/export/export-opener';
 import {
   capIndicesForFreeExport,
@@ -34,8 +35,6 @@ export interface ResultsExportControlsProps {
   indices: number[] | null;
   /** Total number of accounts in this dataset */
   totalCount: number;
-  /** Base name for the generated file, without extension */
-  filename: string;
 }
 
 /**
@@ -56,7 +55,6 @@ export function ResultsExportControls({
   fileHash,
   indices,
   totalCount,
-  filename,
 }: ResultsExportControlsProps) {
   const { t, i18n } = useTranslation('results');
   const { isEnabled, isUnlocked, checkoutState, startCheckout, resetCheckout } = useProExport();
@@ -168,7 +166,7 @@ export function ResultsExportControls({
 
       // The modal is gone once dismissed; the filename is still in the
       // Downloads folder next week saying the file stops short.
-      const savedFilename = `${filename}${capped ? '-sample' : ''}.csv`;
+      const savedFilename = exportFilename('csv', { sample: capped });
       downloadBlob(blob, savedFilename);
       // One name, used for the file and for whatever names it back. A receipt
       // pointing at a different file than the one on disk is worse than none.
@@ -327,7 +325,6 @@ export function ResultsExportControls({
             fileHash={fileHash}
             indices={indices}
             rowCount={rowCount}
-            filename={filename}
           />
         ) : null}
         {isLicenseDialogOpen ? (

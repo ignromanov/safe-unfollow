@@ -48,10 +48,16 @@ describe('useExportWorker', () => {
   it('should build the export through the worker', async () => {
     const { result } = renderHook(() => useExportWorker());
 
-    const blob = await result.current.buildExport('csv', 'hash1', null, 100);
+    const blob = await result.current.buildExport({ format: 'csv' }, 'hash1', null, 100);
 
     expect(blob).toBe(workerBlob);
-    expect(mockApi.buildExport).toHaveBeenCalledWith('csv', 'hash1', null, 100, undefined);
+    expect(mockApi.buildExport).toHaveBeenCalledWith(
+      { format: 'csv' },
+      'hash1',
+      null,
+      100,
+      undefined
+    );
     expect(buildExportCsv).not.toHaveBeenCalled();
   });
 
@@ -59,7 +65,7 @@ describe('useExportWorker', () => {
     const onProgress = vi.fn();
     const { result } = renderHook(() => useExportWorker());
 
-    await result.current.buildExport('csv', 'hash1', null, 100, onProgress);
+    await result.current.buildExport({ format: 'csv' }, 'hash1', null, 100, onProgress);
 
     expect(vi.mocked(Comlink.proxy)).toHaveBeenCalledWith(onProgress);
   });
@@ -70,7 +76,7 @@ describe('useExportWorker', () => {
     mockApi.buildExport.mockRejectedValueOnce(new Error('worker exploded'));
     const { result } = renderHook(() => useExportWorker());
 
-    const blob = await result.current.buildExport('csv', 'hash1', null, 100);
+    const blob = await result.current.buildExport({ format: 'csv' }, 'hash1', null, 100);
 
     expect(blob).toBe(fallbackBlob);
     expect(buildExportCsv).toHaveBeenCalledWith('hash1', null, 100, undefined);
@@ -82,7 +88,7 @@ describe('useExportWorker', () => {
     });
     const { result } = renderHook(() => useExportWorker());
 
-    const blob = await result.current.buildExport('csv', 'hash1', null, 100);
+    const blob = await result.current.buildExport({ format: 'csv' }, 'hash1', null, 100);
 
     expect(blob).toBe(fallbackBlob);
   });
@@ -90,15 +96,15 @@ describe('useExportWorker', () => {
   it('should reuse a single worker across calls', async () => {
     const { result } = renderHook(() => useExportWorker());
 
-    await result.current.buildExport('csv', 'hash1', null, 100);
-    await result.current.buildExport('json', 'hash1', null, 100);
+    await result.current.buildExport({ format: 'csv' }, 'hash1', null, 100);
+    await result.current.buildExport({ format: 'json' }, 'hash1', null, 100);
 
     expect(vi.mocked(Comlink.wrap)).toHaveBeenCalledTimes(1);
   });
 
   it('should terminate the worker on unmount', async () => {
     const { result, unmount } = renderHook(() => useExportWorker());
-    await result.current.buildExport('csv', 'hash1', null, 100);
+    await result.current.buildExport({ format: 'csv' }, 'hash1', null, 100);
 
     expect(() => unmount()).not.toThrow();
   });
@@ -110,7 +116,7 @@ describe('useExportWorker', () => {
     mockApi.buildExport.mockReturnValue(new Promise(() => {}));
 
     const { result } = renderHook(() => useExportWorker());
-    const pending = result.current.buildExport('csv', 'hash1', null, 100);
+    const pending = result.current.buildExport({ format: 'csv' }, 'hash1', null, 100);
 
     const worker = vi.mocked(Comlink.wrap).mock.calls[0][0] as Worker;
     worker.dispatchEvent(new ErrorEvent('error', { message: 'Failed to fetch chunk' }));
@@ -120,7 +126,7 @@ describe('useExportWorker', () => {
 
     // The dead worker must not be reused, or the next export hangs on it again
     mockApi.buildExport.mockResolvedValue(workerBlob);
-    await result.current.buildExport('csv', 'hash1', null, 100);
+    await result.current.buildExport({ format: 'csv' }, 'hash1', null, 100);
 
     expect(vi.mocked(Comlink.wrap)).toHaveBeenCalledTimes(2);
   });

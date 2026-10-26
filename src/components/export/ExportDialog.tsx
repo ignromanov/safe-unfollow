@@ -7,8 +7,9 @@ import { ExportSheet } from '@/components/export/ExportSheet';
 import { RevokedLicenseNotice, SupportMailtoLink } from '@/components/export/RevokedLicenseNotice';
 import { useExportWorker } from '@/hooks/useExportWorker';
 import { downloadBlob } from '@/lib/export/download';
+import { exportFilename } from '@/lib/export/filename';
 import { validateLicense } from '@/lib/export/license';
-import type { ExportFormat, ExportProgress } from '@/lib/export/types';
+import { assertNever, type ExportFormat, type ExportProgress } from '@/lib/export/types';
 import {
   clearLicense,
   getStoredLicense,
@@ -23,7 +24,6 @@ export interface ExportDialogProps {
   fileHash: string;
   indices: number[] | null;
   rowCount: number;
-  filename: string;
 }
 
 function toPercent(progress: ExportProgress | null): number {
@@ -47,7 +47,6 @@ export function ExportDialog({
   fileHash,
   indices,
   rowCount,
-  filename,
 }: ExportDialogProps) {
   const { t, i18n } = useTranslation('results');
   const { buildExport } = useExportWorker();
@@ -99,9 +98,9 @@ export function ExportDialog({
     setProgress(null);
 
     try {
-      const blob = await buildExport(format, fileHash, indices, rowCount, setProgress);
+      const blob = await buildExport({ format }, fileHash, indices, rowCount, setProgress);
 
-      const outputName = `${filename}.${format}`;
+      const outputName = exportFilename(format, { sample: false });
       downloadBlob(blob, outputName);
       analytics.download(format, rowCount);
       // Not onOpenChange(false). A blob download on iOS Safari can be silent, and 85%
@@ -131,11 +130,14 @@ export function ExportDialog({
         </div>
       );
     }
-    return format === 'csv' ? (
-      <FileSpreadsheet className="h-4 w-4" />
-    ) : (
-      <FileJson className="h-4 w-4" />
-    );
+    switch (format) {
+      case 'csv':
+        return <FileSpreadsheet className="h-4 w-4" />;
+      case 'json':
+        return <FileJson className="h-4 w-4" />;
+      default:
+        return assertNever(format);
+    }
   };
 
   // One screen at a time, and the header is the screen. Before this the sheet drew a

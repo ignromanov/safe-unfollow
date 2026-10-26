@@ -33,6 +33,7 @@ import { ResultsExportControls } from '@/components/export/ResultsExportControls
 import { useProExport } from '@/hooks/useProExport';
 import { buildExportCsv } from '@/lib/export/csv';
 import { downloadBlob } from '@/lib/export/download';
+import { exportFilename } from '@/lib/export/filename';
 import { FREE_EXPORT_ROWS } from '@/lib/export/free-tier';
 import { analytics } from '@/lib/stats';
 
@@ -42,7 +43,6 @@ const defaultProps = {
   fileHash: 'hash1',
   indices: null,
   totalCount: 42,
-  filename: 'my-export',
 };
 
 const triggerLabel = resultsEN.export.trigger;
@@ -297,7 +297,7 @@ describe('ResultsExportControls', () => {
       await waitFor(() =>
         expect(vi.mocked(downloadBlob)).toHaveBeenCalledWith(
           expect.any(Blob),
-          'my-export-sample.csv'
+          expect.stringMatching(/^safeunfollow-\d{4}-\d{2}-\d{2}-sample\.csv$/)
         )
       );
     });
@@ -313,7 +313,10 @@ describe('ResultsExportControls', () => {
       await user.click(screen.getByRole('button', { name: triggerLabel }));
 
       await waitFor(() =>
-        expect(vi.mocked(downloadBlob)).toHaveBeenCalledWith(expect.any(Blob), 'my-export.csv')
+        expect(vi.mocked(downloadBlob)).toHaveBeenCalledWith(
+          expect.any(Blob),
+          expect.stringMatching(/^safeunfollow-\d{4}-\d{2}-\d{2}\.csv$/)
+        )
       );
       expect(vi.mocked(buildExportCsv)).toHaveBeenCalledWith(
         defaultProps.fileHash,
@@ -520,7 +523,7 @@ describe('ResultsExportControls', () => {
 
       expect(status).toHaveTextContent(
         resultsEN.export.saved.full
-          .replace('{{filename}}', 'my-export.csv')
+          .replace('{{filename}}', exportFilename('csv', { sample: false }))
           .replace('{{total}}', '3')
       );
     });

@@ -514,7 +514,6 @@ export function AccountListSection({
                 fileHash={fileHash}
                 indices={sortedIndices}
                 totalCount={totalCount}
-                filename={filename.replace(/\.[^/.]+$/, '') || 'safeunfollow-export'}
               />
             )}
           </div>

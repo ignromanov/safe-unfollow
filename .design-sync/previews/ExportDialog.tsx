@@ -1,8 +1,7 @@
 import { ExportDialog } from 'safe-unfollow';
 
-// Real usage: AccountListSection strips the extension off the uploaded ZIP
-// name before passing it down (`filename.replace(/\.[^/.]+$/, '')`), so the
-// dialog always receives a bare base name, never `.zip`.
+// The dialog names the file itself (`exportFilename`: download date only, never
+// the account owner), so there is no file name to pass in.
 export function Default() {
   return (
     <ExportDialog
@@ -11,7 +10,6 @@ export function Default() {
       fileHash="preview-hash"
       indices={null}
       rowCount={214}
-      filename="instagram-johndoe-20260615"
     />
   );
 }
@@ -27,7 +25,6 @@ export function LargeDataset() {
       fileHash="preview-hash"
       indices={null}
       rowCount={48213}
-      filename="instagram-creator-20260701"
     />
   );
 }
