@@ -9,6 +9,8 @@
  * site link, all `rel="noreferrer"`.
  */
 
+import type { ReportSection } from './report-sections';
+
 export const REPORT_CSP =
   "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'";
 
@@ -153,9 +155,12 @@ export function renderRow(o: {
 }): string {
   const name = `@${escapeHtml(o.username)}`;
   const url = profileUrl(o.username);
-  const who = url === null ? name : `<a href="${url}" rel="noreferrer">${name}</a>`;
+  const who =
+    url === null
+      ? `<span class="u">${name}</span>`
+      : `<a href="${url}" rel="noreferrer">${name}</a>`;
   const labels = o.labels.length
-    ? `<span class="labels">${o.labels.map(escapeHtml).join(' · ')}</span>`
+    ? `<span class="labels">${o.labels.map(l => `<span>${escapeHtml(l)}</span>`).join('')}</span>`
     : '';
   const date =
     o.dateText === null
@@ -166,26 +171,110 @@ export function renderRow(o: {
   return `<li class="row">${who}${labels}${date}</li>`;
 }
 
+export type IconName = ReportSection | 'shield' | 'lock' | 'alert' | 'arrow';
+
+// Lucide shapes only: the privacy gate allows nothing else inside an <svg>.
+export const ICON_PATHS: Readonly<Record<IconName, string>> = {
+  shield:
+    '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="m9 12 2 2 4-4"></path>',
+  notFollowingBack:
+    '<polyline points="22 17 13.5 8.5 8.5 13.5 2 7"></polyline><polyline points="16 17 22 17 22 11"></polyline>',
+  notFollowedBack:
+    '<path d="M9 10h.01"></path><path d="M15 10h.01"></path><path d="M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z"></path>',
+  mutuals:
+    '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>',
+  other:
+    '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path>',
+  lock: '<rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path>',
+  alert:
+    '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path>',
+  arrow: '<path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path>',
+};
+
+export function renderIcon(name: IconName): string {
+  return `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${ICON_PATHS[name]}</svg>`;
+}
+
+export function renderTitle(title: string): string {
+  return `<div class="top"><span class="mark">${renderIcon('shield')}</span><h1>${escapeHtml(title)}</h1></div>`;
+}
+
+export interface Tile {
+  section: ReportSection;
+  count: string;
+  label: string;
+  explain: string;
+}
+
+export function renderTiles(tiles: Tile[]): string {
+  if (tiles.length === 0) return '';
+  const items = tiles
+    .map(
+      t =>
+        `<div class="tile t-${t.section}"><span class="n">${escapeHtml(t.count)}</span>` +
+        `<span class="k">${renderIcon(t.section)}${escapeHtml(t.label)}</span>` +
+        `<span class="x">${escapeHtml(t.explain)}</span></div>`
+    )
+    .join('');
+  return `<div class="tiles">${items}</div>`;
+}
+
+export function renderCallout(text: string): string {
+  return `<div class="callout">${renderIcon('alert')}<p>${escapeHtml(text)}</p></div>`;
+}
+
+export interface SampleBlock {
+  head: string;
+  body: string;
+  shown: number;
+  total: number;
+  barLabel: string;
+  cta: string;
+  ctaSub: string;
+}
+
+/** The free-sample block. `total` is never 0: it renders only when the list is capped. */
+export function renderSample(o: SampleBlock): string {
+  const pct = Math.max((o.shown / o.total) * 100, 0.5).toFixed(2);
+  return (
+    `<aside class="sample"><h2>${renderIcon('lock')}${escapeHtml(o.head)}</h2>` +
+    `<p>${escapeHtml(o.body)}</p>` +
+    `<div class="bar"><span style="inline-size:${pct}%"></span></div>` +
+    `<div class="barlabel">${escapeHtml(o.barLabel)}</div>` +
+    `<a class="cta" href="${REPORT_SITE_URL}" rel="noreferrer">${escapeHtml(o.cta)}${renderIcon('arrow')}</a>` +
+    `<span class="ctasub">${escapeHtml(o.ctaSub)}</span></aside>`
+  );
+}
+
+export function renderMore(text: string): string {
+  return `<li class="more">${renderIcon('lock')}${escapeHtml(text)}</li>`;
+}
+
 /**
- * Opens a collapsible section and its `<ul>`. Only `renderRow` output may sit
- * between this and `SECTION_CLOSE`, which closes the `<ul>` and the details.
+ * Opens a collapsible section and its `<ul>`. Only `renderRow` and `renderMore`
+ * output may sit between this and `SECTION_CLOSE`, which closes the `<ul>` and the details.
  */
 export function renderSectionOpen(o: {
-  id: string;
+  id: ReportSection;
   heading: string;
   count: string;
+  explain: string;
   note: string | null;
 }): string {
   const note = o.note === null ? '' : `<p class="note">${escapeHtml(o.note)}</p>`;
   return (
-    `<details open id="${escapeHtml(o.id)}"><summary><h2>${escapeHtml(o.heading)}</h2>` +
-    `<span class="count">${escapeHtml(o.count)}</span></summary>${note}<ul>`
+    `<details open id="${o.id}"><summary><span class="ico">${renderIcon(o.id)}</span>` +
+    `<h2>${escapeHtml(o.heading)}</h2><span class="count">${escapeHtml(o.count)}</span></summary>` +
+    `<p class="x2">${escapeHtml(o.explain)}</p>${note}<ul>`
   );
 }
 
 export const SECTION_CLOSE = '</ul></details>';
 
 /** The one site link in the file; the builder never hand-writes this anchor. */
-export function renderFooter(text: string): string {
-  return `<footer><a href="${REPORT_SITE_URL}" rel="noreferrer">${escapeHtml(text)}</a></footer>`;
+export function renderFooter(text: string, privacy: string): string {
+  return (
+    `<footer><span class="mark">${renderIcon('shield')}</span><p>${escapeHtml(privacy)}</p>` +
+    `<a href="${REPORT_SITE_URL}" rel="noreferrer">${escapeHtml(text)}</a></footer>`
+  );
 }
