@@ -46,6 +46,8 @@ const FORBIDDEN_ATTRIBUTES = new Set([
   'ping',
 ]);
 const FORBIDDEN_ELEMENTS = new Set(['link', 'base', 'script', 'iframe', 'object', 'embed']);
+const FETCHING_CSS = /image-set\(|src\(|@font-face/i;
+const SVG_SHAPES = new Set(['path', 'polyline', 'circle', 'rect', 'line']);
 const PROFILE_HREF = /^https:\/\/instagram\.com\/[a-z0-9._]{1,30}$/;
 
 function findNetworkHazards(html: string): string[] {
@@ -61,11 +63,20 @@ function findNetworkHazards(html: string): string[] {
     if (tag === 'style' && /url\(|@import/i.test(el.textContent ?? '')) {
       found.push('style:url-or-import');
     }
+    if (tag === 'style' && FETCHING_CSS.test(el.textContent ?? '')) {
+      found.push('style:fetching-css');
+    }
+    if (tag !== 'svg' && el.closest('svg') && !SVG_SHAPES.has(el.localName.toLowerCase())) {
+      found.push(`svg-child:${el.localName.toLowerCase()}`);
+    }
     for (const attr of el.attributes) {
       const name = attr.name.toLowerCase();
       if (FORBIDDEN_ATTRIBUTES.has(name)) found.push(`attr:${name}`);
       if (name.startsWith('on')) found.push(`attr:${name}`);
       if (/url\(/i.test(attr.value)) found.push(`attr-url:${name}`);
+      if (name === 'style' && FETCHING_CSS.test(attr.value)) {
+        found.push(`attr-fetching-css:${name}`);
+      }
       if (name === 'href' && !PROFILE_HREF.test(attr.value) && attr.value !== REPORT_SITE_URL) {
         found.push(`href:${attr.value}`);
       }
@@ -366,9 +377,61 @@ describe('findNetworkHazards (red-proof)', () => {
       h => h.replace('default-src &#39;none&#39;', 'default-src *'),
       'csp-not-first',
     ],
+    [
+      'css image-set',
+      h => h.replace('</style>', 'a{background:image-set("https://t.example/a.png" 1x)}</style>'),
+      'style:fetching-css',
+    ],
+    [
+      'css -webkit-image-set',
+      h => h.replace('</style>', 'a{background:-webkit-image-set("x" 1x)}</style>'),
+      'style:fetching-css',
+    ],
+    [
+      'css src()',
+      h => h.replace('</style>', 'a{background:src("x")}</style>'),
+      'style:fetching-css',
+    ],
+    [
+      'css @font-face',
+      h => h.replace('</style>', '@font-face{font-family:x}</style>'),
+      'style:fetching-css',
+    ],
+    [
+      'style attribute image-set',
+      h => h.replace('</main>', '<p style="background:image-set(&quot;x&quot; 1x)">x</p></main>'),
+      'attr-fetching-css:style',
+    ],
+    [
+      'svg set',
+      h =>
+        h.replace(
+          '</main>',
+          '<svg><set attributeName="href" to="https://e.example/"/></svg></main>'
+        ),
+      'svg-child:set',
+    ],
+    [
+      'svg foreignObject',
+      h => h.replace('</main>', '<svg><foreignObject></foreignObject></svg></main>'),
+      'svg-child:foreignobject',
+    ],
+    [
+      'svg animate',
+      h => h.replace('</main>', '<svg><animate attributeName="x"/></svg></main>'),
+      'svg-child:animate',
+    ],
+    ['svg image', h => h.replace('</main>', '<svg><image/></svg></main>'), 'svg-child:image'],
+    ['svg anchor', h => h.replace('</main>', '<svg><a></a></svg></main>'), 'svg-child:a'],
   ];
 
   it.each(POISON)('reports %s', (_name, poison, expected) => {
     expect(findNetworkHazards(poison(good))).toContain(expected);
+  });
+
+  it('accepts a shape-only, aria-hidden svg', () => {
+    const icon =
+      '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M1 1"/><polyline points="1 1"/><circle cx="1" cy="1" r="1"/><rect width="1" height="1"/><line x1="0" y1="0" x2="1" y2="1"/></svg>';
+    expect(findNetworkHazards(good.replace('</main>', `${icon}</main>`))).toEqual([]);
   });
 });
