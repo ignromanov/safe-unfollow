@@ -165,9 +165,15 @@ export async function parseFollowersFromZip(
   // Both extensions, because both are readable, and wider than any spec's
   // `fileNames` on purpose: an export sharded into `followers_4` and beyond is
   // read today and must keep being read, in either format.
+  //
+  // `[^/]*`, never `.*`: these are anchored against the whole entry path, and
+  // `.*` crosses `/`. In the older layout, where `followers_and_following/`
+  // sits at the archive root, the root glob then matched every file in that
+  // folder — `following.html` was read as a followers shard and the reader was
+  // told everyone follows them back (GH#302).
   const followersGlobs = baseCandidates
-    .map(b => `${b}/followers_.*\\.${RELATIONSHIP_EXTENSIONS}`)
-    .concat([`followers_.*\\.${RELATIONSHIP_EXTENSIONS}`]);
+    .map(b => `${b}/followers_[^/]*\\.${RELATIONSHIP_EXTENSIONS}`)
+    .concat([`followers_[^/]*\\.${RELATIONSHIP_EXTENSIONS}`]);
   const followersRaw: RawItem[] = [];
   const followersSeen = new Set<string>();
   /**
