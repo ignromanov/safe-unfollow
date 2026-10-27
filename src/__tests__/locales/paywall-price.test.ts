@@ -117,9 +117,9 @@ describe('paywall sample-size copy', () => {
 
       // `gap` is the one line that survives the bar being hidden from assistive
       // technology, so it is the only statement of the boundary a screen reader
-      // reaches. It states both ends: the row the free file stops at, and the
-      // total the export takes. A locale that spells either out keeps saying
-      // "row 10" after the constant moves, to the one reader who cannot check
+      // reaches. It states both ends: how many accounts the free report lists,
+      // and the total the export takes. A locale that spells either out keeps
+      // saying "10" after the constant moves, to the one reader who cannot check
       // it against the picture.
       const gap = String(bundleFor(language).export.paywall.gap);
       expect(gap, `${language} paywall.gap`).toContain('{{rows}}');

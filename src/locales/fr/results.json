@@ -180,16 +180,16 @@
   },
   "export": {
     "trigger": "Exporter",
-    "freeHint": "Gratuit — les {{rows}} premières lignes",
+    "freeHint": "Gratuit — un rapport avec les {{rows}} premiers comptes",
     "saved": {
-      "capped": "{{filename}} enregistré — les {{rows}} premières lignes sur {{total}}",
-      "full": "{{filename}} enregistré — toutes les {{total}} lignes"
+      "capped": "{{filename}} enregistré — les {{rows}} premiers comptes sur {{total}}",
+      "full": "{{filename}} enregistré — les {{total}} comptes"
     },
     "paywall": {
       "listLabel": "comptes dans ce filtre",
       "legendSample": "Déjà à vous — les {{rows}} premières",
       "legendRest": "Le reste de votre liste",
-      "gap": "Votre fichier gratuit s’arrête à la ligne {{rows}}. L’export prend les {{total}} — un fichier, un paiement, pas d’abonnement.",
+      "gap": "Votre rapport gratuit donne tous les totaux, mais ne liste que les {{rows}} premiers comptes. L’export liste les {{total}}, en rapport, en CSV ou en JSON — un paiement, pas d’abonnement.",
       "cta": "Débloquer l’export — {{price}}",
       "opening": "Ouverture du paiement…",
       "failed": "Le paiement ne s’est pas ouvert — réessayez",
@@ -237,7 +237,7 @@
       "csv": "Télécharger le CSV",
       "json": "Télécharger le JSON",
       "csvHint": "S’ouvre dans Excel, Google Sheets et Numbers",
-      "jsonHint": "Pour vos scripts, ou pour le recharger plus tard",
+      "jsonHint": "Pour vos scripts et vos propres outils",
       "html": "Télécharger le rapport",
       "htmlHint": "S’ouvre dans le navigateur de votre téléphone ou de votre ordinateur. Imprimez-le pour l’enregistrer en PDF.",
       "htmlCeiling": "Le rapport liste jusqu’à {{max}} comptes. Le CSV les contient tous ({{count}}).",
@@ -268,8 +268,8 @@
       "footer": "Réalisé avec SafeUnfollow",
       "caveat": {
         "followRequests": "« Ne vous suivent pas » est peut-être surestimé. Nous n’avons pas pu lire votre fichier de demandes d’abonnement : les comptes à qui vous avez envoyé une demande peuvent figurer là plutôt que dans « Autres ». « Vous ne suivez pas en retour » et « Mutuels » ne sont pas affectés.",
-        "truncatedFollowers": "Votre liste d'abonnés semble incomplète. Elle commence bien après votre liste d'abonnements, ce qui arrive lorsqu'un export est demandé sur une plage de dates limitée. Si vous en avez choisi une, redemandez vos données à Instagram en réglant la plage de dates sur « Tout ». Certains comptes de « Ne vous suivent pas », « Vous ne suivez pas en retour » et « Mutuels » peuvent se trouver dans la mauvaise section ou manquer : ces compteurs peuvent donc être trop élevés ou trop bas.",
-        "truncatedFollowing": "Votre liste d'abonnements semble incomplète. Elle commence bien après votre liste d'abonnés, ce qui arrive lorsqu'un export est demandé sur une plage de dates limitée. Si vous en avez choisi une, redemandez vos données à Instagram en réglant la plage de dates sur « Tout ». Certains comptes de « Ne vous suivent pas », « Vous ne suivez pas en retour » et « Mutuels » peuvent se trouver dans la mauvaise section ou manquer : ces compteurs peuvent donc être trop élevés ou trop bas.",
+        "truncatedFollowers": "Votre liste d’abonnés semble incomplète. Elle commence bien après votre liste d’abonnements, ce qui arrive lorsqu’un export est demandé sur une plage de dates limitée. Si vous en avez choisi une, redemandez vos données à Instagram en réglant la plage de dates sur « Tout ». Certains comptes de « Ne vous suivent pas », « Vous ne suivez pas en retour » et « Mutuels » peuvent se trouver dans la mauvaise section ou manquer : ces compteurs peuvent donc être trop élevés ou trop bas.",
+        "truncatedFollowing": "Votre liste d’abonnements semble incomplète. Elle commence bien après votre liste d’abonnés, ce qui arrive lorsqu’un export est demandé sur une plage de dates limitée. Si vous en avez choisi une, redemandez vos données à Instagram en réglant la plage de dates sur « Tout ». Certains comptes de « Ne vous suivent pas », « Vous ne suivez pas en retour » et « Mutuels » peuvent se trouver dans la mauvaise section ou manquer : ces compteurs peuvent donc être trop élevés ou trop bas.",
         "datesStale": "Ce rapport ne contient pas de dates d’abonnement : l’export a été ouvert avant que SafeUnfollow ne les conserve. Rouvrez le même ZIP Instagram dans SafeUnfollow, puis exportez un nouveau rapport."
       }
     }

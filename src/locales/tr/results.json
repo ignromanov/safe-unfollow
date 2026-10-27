@@ -180,16 +180,16 @@
   },
   "export": {
     "trigger": "Dışa aktar",
-    "freeHint": "Ücretsiz — ilk {{rows}} satır",
+    "freeHint": "Ücretsiz — ilk {{rows}} hesabı içeren rapor",
     "saved": {
-      "capped": "{{filename}} kaydedildi — {{total}} satırın ilk {{rows}} satırı",
-      "full": "{{filename}} kaydedildi — {{total}} satırın tamamı"
+      "capped": "{{filename}} kaydedildi — {{total}} hesabın ilk {{rows}} hesabı",
+      "full": "{{filename}} kaydedildi — {{total}} hesabın tamamı"
     },
     "paywall": {
       "listLabel": "hesap bu filtreye uyuyor",
       "legendSample": "Sende — ilk {{rows}}",
       "legendRest": "Listenin geri kalanı",
-      "gap": "Ücretsiz dosyan {{rows}}. satırda bitiyor. Dışa aktarma {{total}} satırın tamamını alır — tek dosya, tek ödeme, abonelik değil.",
+      "gap": "Ücretsiz raporunda tüm sayılar var ama yalnızca ilk {{rows}} hesap listeleniyor. Dışa aktarma {{total}} hesabın tamamını listeler; rapor, CSV veya JSON olarak — tek ödeme, abonelik değil.",
       "cta": "Dışa aktarmayı aç — {{price}}",
       "opening": "Ödeme açılıyor…",
       "failed": "Ödeme açılmadı — tekrar dene",
@@ -237,7 +237,7 @@
       "csv": "CSV indir",
       "json": "JSON indir",
       "csvHint": "Excel, Google E-Tablolar ve Numbers ile açılır",
-      "jsonHint": "Betikler için ya da sonra geri yüklemek için",
+      "jsonHint": "Betikler ve kendi araçların için",
       "html": "Raporu indir",
       "htmlHint": "Telefonda ya da bilgisayarda tarayıcıda açılır. PDF olarak kaydetmek için yazdır.",
       "htmlCeiling": "Rapor en fazla {{max}} hesap listeler. CSV'de {{count}} hesabın tamamı var.",
@@ -263,7 +263,7 @@
       "searchNarrowed": "Bir aramayla daraltıldı",
       "other": "Diğer",
       "sampleLine": "Ücretsiz örnek: {{total}} hesaptan {{shown}} hesap. Tam dışa aktarmada hepsi var.",
-      "ceilingTop": "Bu rapor {{max}} hesapta duruyor. Tam liste CSV dışa aktarmasında.",
+      "ceilingTop": "Bu rapor en fazla {{max}} hesap gösterir. Tam liste CSV dışa aktarmasında.",
       "ceilingSection": "CSV dışa aktarmasında: {{count}} satır",
       "footer": "SafeUnfollow ile oluşturuldu",
       "caveat": {

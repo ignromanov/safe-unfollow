@@ -180,16 +180,16 @@
   },
   "export": {
     "trigger": "Exportar",
-    "freeHint": "Gratis — las primeras {{rows}} filas",
+    "freeHint": "Gratis — un informe con las primeras {{rows}} cuentas",
     "saved": {
-      "capped": "Guardado {{filename}} — las primeras {{rows}} de {{total}} filas",
-      "full": "Guardado {{filename}} — todas las {{total}} filas"
+      "capped": "Guardado {{filename}} — las primeras {{rows}} de {{total}} cuentas",
+      "full": "Guardado {{filename}} — todas las {{total}} cuentas"
     },
     "paywall": {
       "listLabel": "cuentas en este filtro",
       "legendSample": "Ya tuyo — las primeras {{rows}}",
       "legendRest": "El resto de tu lista",
-      "gap": "Tu archivo gratuito termina en la fila {{rows}}. La exportación se lleva las {{total}} — un archivo, un pago, no es una suscripción.",
+      "gap": "Tu informe gratuito tiene todos los totales, pero solo lista las primeras {{rows}} cuentas. La exportación lista las {{total}}, como informe, CSV o JSON — un pago, no es una suscripción.",
       "cta": "Desbloquear exportación — {{price}}",
       "opening": "Abriendo el pago…",
       "failed": "El pago no se abrió: inténtalo de nuevo",
@@ -237,7 +237,7 @@
       "csv": "Descargar CSV",
       "json": "Descargar JSON",
       "csvHint": "Se abre en Excel, Google Sheets y Numbers",
-      "jsonHint": "Para scripts o para volver a cargarlo más tarde",
+      "jsonHint": "Para scripts y tus propias herramientas",
       "html": "Descargar informe",
       "htmlHint": "Se abre en el navegador, también en el teléfono. Imprímelo para guardarlo en PDF.",
       "htmlCeiling": "El informe muestra hasta {{max}} cuentas. El CSV las tiene todas ({{count}}).",
