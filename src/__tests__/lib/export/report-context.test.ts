@@ -99,11 +99,11 @@ describe('buildReportContext', () => {
     ).toContain('export.report.searchNarrowed');
   });
 
-  it('has a sample line only for a capped export', () => {
-    expect(buildReportContext(t, base).strings.sampleLine).toBeNull();
+  it('has a sample block only for a capped export', () => {
+    expect(buildReportContext(t, base).strings.sample).toBeNull();
     const capped = buildReportContext(t, { ...base, sampleLimit: 10 });
     expect(capped.sampleLimit).toBe(10);
-    expect(capped.strings.sampleLine).toContain('export.report.sampleLine');
+    expect(capped.strings.sample?.body).toContain('export.report.sample.body');
   });
 
   it('reads the report-specific caveat keys, the stale one included', () => {
@@ -200,5 +200,62 @@ describe('buildReportContext against the real English bundle', () => {
   it('names every report section', async () => {
     const { strings } = await build();
     for (const s of REPORT_SECTIONS) expect(strings.sectionHeadings[s]).toMatch(/\S/);
+  });
+});
+
+describe('report strings against the real English bundle', () => {
+  const collect = (v: unknown, out: string[] = []): string[] => {
+    if (typeof v === 'string') out.push(v);
+    else if (v && typeof v === 'object') Object.values(v).forEach(x => collect(x, out));
+    return out;
+  };
+
+  const build = async (sampleLimit: number | null, rowCount = 3000) => {
+    const i18n = i18next.createInstance();
+    await i18n.init({
+      lng: 'en',
+      ns: ['results'],
+      defaultNS: 'results',
+      resources: { en: { results: enResults } },
+      interpolation: { escapeValue: false },
+    });
+    return buildReportContext(i18n.getFixedT('en', 'results'), {
+      lang: 'en',
+      filters: [],
+      searchApplied: false,
+      rowCount,
+      totalCount: rowCount,
+      sampleLimit,
+    }).strings;
+  };
+
+  it('builds no sample block when sampleLimit is null', async () => {
+    expect((await build(null)).sample).toBeNull();
+  });
+
+  it('fills the sample body with formatted numbers', async () => {
+    expect((await build(10)).sample?.body).toBe(
+      'This file lists 10 of 3,000 accounts. The full export lists all of them.'
+    );
+  });
+
+  it('keeps the slot in sample.more for the worker', async () => {
+    expect((await build(10)).sample?.more).toBe(`+${SLOT} more in the full export`);
+  });
+
+  it('has an explainer for every report section', async () => {
+    const { explain } = await build(null);
+    expect(REPORT_SECTIONS.every(s => explain[s].length > 0)).toBe(true);
+  });
+
+  it('prints the privacy line velum-cdpo approved, verbatim', async () => {
+    expect((await build(null)).privacyLine).toBe(
+      'SafeUnfollow made this report in a browser and never sent the Instagram export behind it anywhere.'
+    );
+  });
+
+  it('no report string says "full report"', () => {
+    const report = (enResults as { export: { report: unknown } }).export.report;
+    for (const s of collect(report)) expect(s).not.toMatch(/full report/i);
   });
 });

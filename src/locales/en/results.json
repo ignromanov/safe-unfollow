@@ -262,7 +262,20 @@
       "scopeSearched": "{{count}} of {{total}} accounts",
       "searchNarrowed": "Narrowed by a search",
       "other": "Other",
-      "sampleLine": "Free sample: {{shown}} of {{total}} accounts. The full export has all of them.",
+      "explain": {
+        "notFollowingBack": "You follow them. They don’t follow you.",
+        "notFollowedBack": "They follow you. You don’t follow them.",
+        "mutuals": "You follow each other.",
+        "other": "On other lists in your export, such as requests you sent or accounts you unfollowed."
+      },
+      "sample": {
+        "head": "Free sample",
+        "body": "This file lists {{shown}} of {{total}} accounts. The full export lists all of them.",
+        "more": "+{{count}} more in the full export",
+        "cta": "Get the full export",
+        "ctaSub": "In SafeUnfollow: Export → Unlock export. One payment, no subscription."
+      },
+      "privacyLine": "SafeUnfollow made this report in a browser and never sent the Instagram export behind it anywhere.",
       "ceilingTop": "This report stops at {{max}} accounts. The CSV export has the full list.",
       "ceilingSection": "In the CSV export: {{count}} rows",
       "footer": "Made with SafeUnfollow",

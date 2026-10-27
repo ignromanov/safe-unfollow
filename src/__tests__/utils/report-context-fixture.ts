@@ -16,10 +16,13 @@ export function makeReport(overrides: Partial<ReportContext> = {}): ReportContex
       uploadedOn: `UPLOADED_ON ${SLOT}`,
       scope: 'SCOPE_LINE',
       searchNarrowed: null,
-      sampleLine: null,
       sectionHeadings: Object.fromEntries(
         REPORT_SECTIONS.map(s => [s, `HEADING_${s}`])
       ) as ReportContext['strings']['sectionHeadings'],
+      explain: Object.fromEntries(
+        REPORT_SECTIONS.map(s => [s, `EXPLAIN_${s}`])
+      ) as ReportContext['strings']['explain'],
+      sample: null,
       labels: { pending: 'LBL_PENDING', close: 'LBL_CLOSE' },
       dateLines: Object.fromEntries(
         DATE_LINE_KEYS.map(k => [k, `DATE_${k} ${SLOT}`])
@@ -33,6 +36,7 @@ export function makeReport(overrides: Partial<ReportContext> = {}): ReportContex
       ceilingTop: `CEILING_TOP ${SLOT}`,
       ceilingSection: `CEILING_SECTION ${SLOT}`,
       footer: 'FOOTER_TEXT',
+      privacyLine: 'PRIVACY_LINE',
     },
     ...overrides,
   };

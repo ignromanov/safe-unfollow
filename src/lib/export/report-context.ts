@@ -15,8 +15,10 @@ export interface ReportStrings {
   uploadedOn: string;
   scope: string;
   searchNarrowed: string | null;
-  sampleLine: string | null;
   sectionHeadings: Record<ReportSection, string>;
+  explain: Record<ReportSection, string>;
+  /** null exactly when sampleLimit is null; `body` arrives filled, `more` keeps SLOT for the worker. */
+  sample: { head: string; body: string; more: string; cta: string; ctaSub: string } | null;
   labels: Partial<Record<BadgeKey, string>>;
   dateLines: Record<DateLineKey, string>;
   caveats: {
@@ -28,6 +30,7 @@ export interface ReportStrings {
   ceilingTop: string;
   ceilingSection: string;
   footer: string;
+  privacyLine: string;
 }
 
 export interface ReportContext {
@@ -64,6 +67,10 @@ export function buildReportContext(
     REPORT_SECTIONS.map(s => [s, tr(s === 'other' ? 'export.report.other' : `badges.${s}`)])
   ) as Record<ReportSection, string>;
 
+  const explain = Object.fromEntries(
+    REPORT_SECTIONS.map(s => [s, tr(`export.report.explain.${s}`)])
+  ) as Record<ReportSection, string>;
+
   const dateLines = Object.fromEntries(
     DATE_LINE_KEYS.map(k => [k, tr(`dates.${k}`, { date: SLOT })])
   ) as Record<DateLineKey, string>;
@@ -92,14 +99,21 @@ export function buildReportContext(
       uploadedOn: tr('export.report.uploadedOn', { date: SLOT }),
       scope,
       searchNarrowed: o.searchApplied ? tr('export.report.searchNarrowed') : null,
-      sampleLine:
+      sample:
         o.sampleLimit === null
           ? null
-          : tr('export.report.sampleLine', {
-              shown: num.format(o.sampleLimit),
-              total: num.format(o.rowCount),
-            }),
+          : {
+              head: tr('export.report.sample.head'),
+              body: tr('export.report.sample.body', {
+                shown: num.format(o.sampleLimit),
+                total: num.format(o.rowCount),
+              }),
+              more: tr('export.report.sample.more', { count: SLOT }),
+              cta: tr('export.report.sample.cta'),
+              ctaSub: tr('export.report.sample.ctaSub'),
+            },
       sectionHeadings,
+      explain,
       labels,
       dateLines,
       caveats: {
@@ -111,6 +125,7 @@ export function buildReportContext(
       ceilingTop: tr('export.report.ceilingTop', { max: SLOT }),
       ceilingSection: tr('export.report.ceilingSection', { count: SLOT }),
       footer: tr('export.report.footer'),
+      privacyLine: tr('export.report.privacyLine'),
     },
   };
 }

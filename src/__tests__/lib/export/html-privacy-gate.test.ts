@@ -130,7 +130,15 @@ async function fixtures(): Promise<Record<string, string>> {
   const run = async (name: string, over: Parameters<typeof makeReport>[0] = {}): Promise<void> => {
     const report = makeReport(over);
     report.strings.searchNarrowed = 'SEARCH_NARROWED';
-    report.strings.sampleLine = over.sampleLimit ? 'SAMPLE_LINE' : null;
+    report.strings.sample = over.sampleLimit
+      ? {
+          head: 'SAMPLE_HEAD',
+          body: 'SAMPLE_BODY',
+          more: `MORE ${SLOT}`,
+          cta: 'SAMPLE_CTA',
+          ctaSub: 'SAMPLE_CTA_SUB',
+        }
+      : null;
     serve(HOSTILE);
     out[name] = await readBlobText(await buildExportHtml('h', null, HOSTILE.length, report));
   };
@@ -200,7 +208,13 @@ describe('strings html.ts writes itself are escaped', () => {
     st.uploadedOn = `${tag('UPLOADED')} ${SLOT}`;
     st.scope = tag('SCOPE');
     st.searchNarrowed = tag('SEARCH');
-    st.sampleLine = tag('SAMPLE');
+    st.sample = {
+      head: tag('SAMPLE_HEAD'),
+      body: tag('SAMPLE_BODY'),
+      more: `${tag('SAMPLE_MORE')} ${SLOT}`,
+      cta: tag('SAMPLE_CTA'),
+      ctaSub: tag('SAMPLE_CTA_SUB'),
+    };
     st.sectionHeadings = {
       notFollowingBack: tag('H_NFB'),
       notFollowedBack: tag('H_NFDB'),
