@@ -60,7 +60,7 @@ last_updated: 2026-09-08
 ## v1.6 (Next Priority) 🔄
 
 ### Data Export
-- ✅ **CSV, JSON and HTML report export** — ships today: free 10-row sample, then a one-time unlock (price shown on the button in your currency) for the full list
+- ✅ **CSV, JSON and HTML report export** — ships today: free sample report (every count, the first 10 accounts), then a one-time unlock ($7 or less — the button shows your price) for the full list
 - 🔄 **Export customization** — Choose which columns to include
 
 ### Upload UX Improvements
@@ -116,7 +116,7 @@ last_updated: 2026-09-08
   third parties do receive is spelled out below and in the Privacy Policy
 
 ### Commercial Features
-- ❌ **Subscriptions** — Finding your unfollowers is free in full, forever. The only paid item is a one-time unlock (price shown on the button in your currency) for downloading the list as a file, and the download gives you a free sample first
+- ❌ **Subscriptions** — Finding your unfollowers is free in full, forever. The only paid item is a one-time unlock ($7 or less — the button shows your price) for downloading the list as a file, and the download gives you a free sample first
 - ❌ **Paywalling the analysis** — Every badge, filter and account stays free however large your export is
 - ❌ **Data monetization** — No selling or monetizing user data, and no advertiser ever receives it
 

@@ -19,8 +19,9 @@
 ## What it costs
 
 - The analysis is free in full: every badge, every filter, every account, at any export size.
-- Exporting the result to CSV or JSON is a one-time $7 licence key. A free 10-row sample is
-  shown before anything is asked for.
+- Exporting the result — as a readable report, CSV or JSON — is a one-time licence key,
+  $7 or less depending on country. A free sample report (every count, the first 10
+  accounts) downloads before anything is asked for.
 - The site carries advertising and uses privacy-focused analytics for page-level metrics. The
   Instagram export itself is never sent anywhere, so no ad or analytics request carries it.
 

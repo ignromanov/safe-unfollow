@@ -180,16 +180,16 @@
   },
   "export": {
     "trigger": "Export",
-    "freeHint": "Free — the first {{rows}} rows",
+    "freeHint": "Free — a report with the first {{rows}} accounts",
     "saved": {
-      "capped": "Saved {{filename}} — the first {{rows}} of {{total}} rows",
-      "full": "Saved {{filename}} — all {{total}} rows"
+      "capped": "Saved {{filename}} — the first {{rows}} of {{total}} accounts",
+      "full": "Saved {{filename}} — all {{total}} accounts"
     },
     "paywall": {
       "listLabel": "accounts matched by this filter",
       "legendSample": "Yours — first {{rows}}",
       "legendRest": "The rest of your list",
-      "gap": "Your free file stops at row {{rows}}. The export takes all {{total}} — one file, one payment, not a subscription.",
+      "gap": "Your free report has all the counts but lists only the first {{rows}} accounts. The export lists all {{total}}, as a report, CSV or JSON — one payment, not a subscription.",
       "cta": "Unlock export — {{price}}",
       "opening": "Opening checkout…",
       "failed": "Checkout didn't open — try again",
@@ -237,7 +237,7 @@
       "csv": "Download CSV",
       "json": "Download JSON",
       "csvHint": "Opens in Excel, Google Sheets and Numbers",
-      "jsonHint": "For scripts, or loading back in later",
+      "jsonHint": "For scripts and your own tools",
       "html": "Download report",
       "htmlHint": "Opens in a browser on your phone or computer. Print it to save a PDF.",
       "htmlCeiling": "The report lists up to {{max}} accounts. The CSV has all {{count}}.",

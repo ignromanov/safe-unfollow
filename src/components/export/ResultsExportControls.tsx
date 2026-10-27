@@ -296,9 +296,17 @@ export function ResultsExportControls({
             (this seat's addition: an uncapped receipt says "all {{total}}
             rows" right below, and "the first {{rows}}" above it would then be
             false). $7 stays out of this line on purpose — see
-            `runFreeExport`'s docstring above. */}
+            `runFreeExport`'s docstring above.
+
+            `max-w-44`, because this column is `shrink-0` and whatever is widest
+            in it sets its width. Once the hint names the report (GH#286 PR-4)
+            it runs to ~290px in fr/de/pt, and at 360px that left the "Showing
+            N accounts" line opposite it 0–16px. Capped, the hint wraps under
+            the button instead, and the state line keeps >=108px.
+            `text-balance` stops a one-glyph tail: ja wrapped レポート as
+            レポ|ート. */}
         {!isUnlocked && !saved && (
-          <p className="text-end text-xs text-muted-foreground">
+          <p className="max-w-44 text-end text-xs text-balance text-muted-foreground">
             {t('export.freeHint', { rows: FREE_EXPORT_ROWS })}
           </p>
         )}

@@ -41,7 +41,7 @@ And the other direction, stated plainly, because a page like this is worth nothi
 
 ## What it costs, and where the catch would be
 
-The analysis is free in full — every badge, every filter, every account, however large your following. No account, no subscription, no trial that ends. The one paid item is a one-time unlock for saving your list as CSV, JSON or an HTML report, and its price is on the button, in your own currency.
+The analysis is free in full — every badge, every filter, every account, however large your following. No account, no subscription, no trial that ends. The one paid item is a one-time unlock for saving your list as CSV, JSON or an HTML report, and it costs $7 or less — the button shows your price.
 
 Size is not the catch either: it is built and unit-tested for exports of a million accounts, which is where tools that cap you at ten thousand quietly stop.
 

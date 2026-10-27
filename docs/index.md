@@ -51,7 +51,7 @@ Instagram Unfollow Tracker is a **100% private** tool that analyzes your Instagr
 
 - **Privacy First**: Your Instagram export is read in the browser and never uploaded
 - **No Login Required**: Uses official Instagram data export
-- **Free to analyze**: Every badge, filter and account, at any export size — the one paid item is a $7 one-time export unlock
+- **Free to analyze**: Every badge, filter and account, at any export size — the one paid item is a one-time export unlock, $7 or less
 - **Open Source**: Transparent and auditable code
 
 ### What It Shows

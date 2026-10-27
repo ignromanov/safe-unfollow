@@ -180,16 +180,16 @@
   },
   "export": {
     "trigger": "Ekspor",
-    "freeHint": "Gratis — {{rows}} baris pertama",
+    "freeHint": "Gratis — laporan dengan {{rows}} akun pertama",
     "saved": {
-      "capped": "{{filename}} tersimpan — {{rows}} baris pertama dari {{total}}",
-      "full": "{{filename}} tersimpan — semua {{total}} baris"
+      "capped": "{{filename}} tersimpan — {{rows}} akun pertama dari {{total}}",
+      "full": "{{filename}} tersimpan — semua {{total}} akun"
     },
     "paywall": {
       "listLabel": "akun sesuai filter ini",
       "legendSample": "Sudah milik Anda — {{rows}} pertama",
       "legendRest": "Sisa daftar Anda",
-      "gap": "File gratis Anda berhenti di baris {{rows}}. Ekspor mengambil seluruh {{total}} — satu file, satu pembayaran, bukan langganan.",
+      "gap": "Laporan gratis Anda memuat semua jumlah, tetapi hanya mencantumkan {{rows}} akun pertama. Ekspor mencantumkan seluruh {{total}}, sebagai laporan, CSV, atau JSON — satu pembayaran, bukan langganan.",
       "cta": "Buka ekspor — {{price}}",
       "opening": "Membuka pembayaran…",
       "failed": "Pembayaran tidak terbuka — coba lagi",
@@ -237,7 +237,7 @@
       "csv": "Unduh CSV",
       "json": "Unduh JSON",
       "csvHint": "Bisa dibuka di Excel, Google Sheets, dan Numbers",
-      "jsonHint": "Untuk skrip, atau dimuat kembali nanti",
+      "jsonHint": "Untuk skrip dan alat Anda sendiri",
       "html": "Unduh laporan",
       "htmlHint": "Bisa dibuka di browser ponsel atau komputer. Cetak untuk menyimpannya sebagai PDF.",
       "htmlCeiling": "Laporan memuat hingga {{max}} akun. CSV memuat seluruh {{count}} akun.",
@@ -256,14 +256,14 @@
     "report": {
       "title": "Laporan SafeUnfollow",
       "madeOn": "Dibuat {{date}}",
-      "uploadedOn": "Dari ekspor Instagram yang dibuka {{date}}",
+      "uploadedOn": "Dari ekspor Instagram yang dibuka pada {{date}}",
       "scopeAll": "Semua akun · {{total}}",
       "scopeFiltered": "{{filters}} · {{count}} dari {{total}} akun",
       "scopeSearched": "{{count}} dari {{total}} akun",
       "searchNarrowed": "Dipersempit dengan pencarian",
       "other": "Lainnya",
       "sampleLine": "Sampel gratis: {{shown}} dari {{total}} akun. Ekspor lengkap memuat semuanya.",
-      "ceilingTop": "Laporan ini berhenti di {{max}} akun. Ekspor CSV memuat daftar lengkapnya.",
+      "ceilingTop": "Laporan ini hanya menampilkan hingga {{max}} akun. Ekspor CSV memuat daftar lengkapnya.",
       "ceilingSection": "Di ekspor CSV: {{count}} baris",
       "footer": "Dibuat dengan SafeUnfollow",
       "caveat": {

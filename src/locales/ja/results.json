@@ -180,16 +180,16 @@
   },
   "export": {
     "trigger": "エクスポート",
-    "freeHint": "無料 — 最初の{{rows}}行",
+    "freeHint": "無料 — 最初の{{rows}}件を載せたレポート",
     "saved": {
-      "capped": "{{filename}} を保存しました — {{total}}行のうち最初の{{rows}}行",
-      "full": "{{filename}} を保存しました — 全{{total}}行"
+      "capped": "{{filename}} を保存しました — {{total}}件のうち最初の{{rows}}件",
+      "full": "{{filename}} を保存しました — 全{{total}}件"
     },
     "paywall": {
       "listLabel": "件がこのフィルターに一致",
       "legendSample": "取得済み — 最初の{{rows}}件",
       "legendRest": "リストの残り",
-      "gap": "無料ファイルは{{rows}}行目で終わります。エクスポートは{{total}}件すべてを含みます — ファイル1つ、支払い1回、サブスクなし。",
+      "gap": "無料レポートには件数がすべて載っていますが、アカウントは最初の{{rows}}件だけです。エクスポートなら{{total}}件すべてを、レポート、CSV、JSON のいずれかで — 支払い1回、サブスクなし。",
       "cta": "エクスポートを解除 — {{price}}",
       "opening": "決済ページを開いています…",
       "failed": "決済ページが開きませんでした — もう一度お試しください",
@@ -237,7 +237,7 @@
       "csv": "CSVをダウンロード",
       "json": "JSONをダウンロード",
       "csvHint": "Excel・Google スプレッドシート・Numbers で開けます",
-      "jsonHint": "スクリプト用、または後で読み込み直す用",
+      "jsonHint": "スクリプトや自作ツール用",
       "html": "レポートをダウンロード",
       "htmlHint": "スマートフォンやパソコンのブラウザで開けます。印刷すると PDF として保存できます。",
       "htmlCeiling": "レポートに載るのは最大{{max}}件です。CSVには{{count}}件すべてが含まれます。",
