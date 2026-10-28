@@ -86,7 +86,7 @@ function prerenderedPages(): string[] {
     .sort();
 }
 
-/** cleanUrls is on and trailingSlash is off (vercel.json), so es/upload.html serves /es/upload. */
+/** html_handling is drop-trailing-slash (wrangler.jsonc), so es/upload.html serves /es/upload. */
 function urlPathOf(rel: string): string {
   const withoutExt = rel.replace(/\.html$/, '');
   return withoutExt === 'index' ? '/' : `/${withoutExt}`;

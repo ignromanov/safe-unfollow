@@ -40,7 +40,7 @@ export function UploadAffiliateBlock(): ReactElement | null {
           describe the page it sits on. Google honours the attribute on `span`, `div`
           and `section` only, which is why it is on a wrapper and not on the `<aside>`
           whose semantics are otherwise right. The creative itself is refused
-          separately, by `X-Robots-Tag: noindex` on `/affiliate/*` in `vercel.json`. */}
+          separately, by `X-Robots-Tag: noindex` on `/affiliate/*` in `public/_headers`. */}
       <div data-nosnippet>
         <a
           href={offer.url}

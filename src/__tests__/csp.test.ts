@@ -3,8 +3,10 @@ import { resolve } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { readHeaderRules, readRedirectRules } from '../../scripts/static-config';
+
 /**
- * The CSP ships as one long string in `vercel.json` and is enforced only in
+ * The CSP ships as one long string in `public/_headers` and is enforced only in
  * production, so a missing source is invisible until a visitor's console
  * reports it. Two were missing at once on 2026-08-14 — Funding Choices could
  * not `connect`, and Google's invalid-traffic script could not load — and both
@@ -16,15 +18,11 @@ import { describe, expect, it } from 'vitest';
 const ROOT = resolve(__dirname, '../..');
 
 function readCspDirectives(): Map<string, string[]> {
-  const config = JSON.parse(readFileSync(resolve(ROOT, 'vercel.json'), 'utf8')) as {
-    headers: Array<{ source: string; headers: Array<{ key: string; value: string }> }>;
-  };
-
-  const csp = config.headers
+  const csp = readHeaderRules(ROOT)
     .flatMap(entry => entry.headers)
     .find(header => header.key === 'Content-Security-Policy');
 
-  if (!csp) throw new Error('vercel.json declares no Content-Security-Policy header');
+  if (!csp) throw new Error('public/_headers declares no Content-Security-Policy header');
 
   return new Map(
     csp.value
@@ -38,13 +36,11 @@ function readCspDirectives(): Map<string, string[]> {
   );
 }
 
-/** Every header key `vercel.json` declares, across all of its source rules. */
+/** Every header key `public/_headers` declares, across all of its rules. */
 function declaredHeaderKeys(): string[] {
-  const config = JSON.parse(readFileSync(resolve(ROOT, 'vercel.json'), 'utf8')) as {
-    headers: Array<{ source: string; headers: Array<{ key: string; value: string }> }>;
-  };
-
-  return config.headers.flatMap(entry => entry.headers).map(header => header.key);
+  return readHeaderRules(ROOT)
+    .flatMap(entry => entry.headers)
+    .map(header => header.key);
 }
 
 /**
@@ -74,8 +70,8 @@ function umamiSrc(): string {
  * nonce policy would, and that is a privacy-trust call, not an engineering one.
  *
  * A nonce policy is also not currently implementable: the CSP ships as one
- * static header in vercel.json, the site has no middleware, and a nonce has to
- * be minted per request. Adopting one means putting a serverless hop in front
+ * static header in public/_headers, the site has no Worker script, and a nonce has to
+ * be minted per request. Adopting one means putting a Worker script in front
  * of a static site — a cost worth naming before anyone recommends it again.
  */
 const REQUIRED: Array<{ host: string; directives: string[]; why: string }> = [
@@ -113,7 +109,7 @@ const REQUIRED: Array<{ host: string; directives: string[]; why: string }> = [
   },
 ];
 
-describe('vercel.json Content-Security-Policy', () => {
+describe('public/_headers Content-Security-Policy', () => {
   const directives = readCspDirectives();
 
   it.each(REQUIRED)('allows $host where it is needed — $why', ({ host, directives: needed }) => {
@@ -144,11 +140,7 @@ describe('vercel.json Content-Security-Policy', () => {
   it('keeps no rewrite that would re-proxy analytics', () => {
     // Restoring the rewrite would break nothing visible. It would quietly restore the
     // triple billing this change removed, which is why this is a test and not a comment.
-    const config = JSON.parse(readFileSync(resolve(ROOT, 'vercel.json'), 'utf8')) as {
-      rewrites?: { source: string; destination: string }[];
-    };
-
-    const proxied = (config.rewrites ?? []).filter(r =>
+    const proxied = readRedirectRules(ROOT).filter(r =>
       r.destination.includes('m.safeunfollow.app')
     );
 
@@ -169,7 +161,7 @@ describe('vercel.json Content-Security-Policy', () => {
    * evidence, not the defect.
    *
    * Reopening this means updating docs/privacy.md, whose Third-Party Hosting
-   * section names Vercel alone.
+   * section names the host (Cloudflare) alone.
    */
   it.each([
     { host: 'https://fonts.googleapis.com', directive: 'style-src' },
@@ -229,7 +221,7 @@ describe('vercel.json Content-Security-Policy', () => {
    * therefore blocks the report, and the fix is an allowlist of exactly one
    * origin — the dashboard that renders it. Anything wider is a clickjacking
    * surface across the whole site, `/results` and the checkout dialog included,
-   * because the header rule matches `/(.*)`.
+   * because the header rule matches `/*`.
    */
   it('lets the analytics dashboard frame the site, and nothing else', () => {
     expect(directives.get('frame-ancestors')).toEqual([UMAMI_DASHBOARD_ORIGIN]);

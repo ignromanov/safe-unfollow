@@ -21,7 +21,7 @@ export interface AffiliateCreativeVariant {
   /** Self-hosted path under `public/`. Never a third-party URL: hot-linking
    *  would send every visitor's IP to the network before any click.
    *
-   *  Versioned filename (`-v2-`) because `vercel.json` caches `/affiliate/*`
+   *  Versioned filename (`-v2-`) because `public/_headers` caches `/affiliate/*`
    *  immutably for a year: reusing a path would leave returning visitors on the
    *  old creative until the cache expired. The name is the version. */
   src: string;

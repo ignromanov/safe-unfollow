@@ -41,8 +41,8 @@ describe('PrefixedLink', () => {
   });
 
   it('emits no trailing slash for the home link under a language prefix', () => {
-    // `'/ru' + '/'` would be `/ru/`, and vercel.json sets trailingSlash:false — the
-    // browser would be 308-redirected to `/ru`, costing a round trip in exactly the
+    // `'/ru' + '/'` would be `/ru/`, and wrangler.jsonc drops trailing slashes — the
+    // browser would be redirected to `/ru`, costing a round trip in exactly the
     // pre-hydration window this component exists to serve. Client-side navigation
     // normalised that away; an href does not.
     renderWithRouter(<PrefixedLink to="/">Home</PrefixedLink>, { initialEntries: ['/ru'] });

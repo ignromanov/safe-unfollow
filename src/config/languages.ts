@@ -108,7 +108,6 @@ export const NON_ENGLISH_LANGUAGES = SUPPORTED_LANGUAGES.filter(lang => lang !==
  * 2026-09-02.
  *
  * Usage examples:
- * - Vercel rewrites: `/:lang(${LANGUAGE_REGEX_PATTERN})/:path*`
  * - Route matching: see createLanguagePrefixRegex() below, which builds it
  */
 export const LANGUAGE_REGEX_PATTERN = NON_ENGLISH_LANGUAGES.join('|');

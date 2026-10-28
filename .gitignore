@@ -97,6 +97,7 @@ temp/
 
 # Deployment
 .vercel/
+.wrangler/
 .netlify/
 
 # Vite cache

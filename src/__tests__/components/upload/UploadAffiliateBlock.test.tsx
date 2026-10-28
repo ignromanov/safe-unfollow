@@ -58,7 +58,7 @@ describe('UploadAffiliateBlock', () => {
    * What this buys: the Ad chip, the pitch line and the disclosure stop being
    * candidates for the `/upload` snippet, so the page cannot be summarised in search
    * by the advertisement sitting in it. The image itself is refused separately, by
-   * `X-Robots-Tag` in `vercel.json` — see `affiliate-creative.test.ts`.
+   * `X-Robots-Tag` in `public/_headers` — see `affiliate-creative.test.ts`.
    */
   it('marks the whole placement as advertising a snippet must not quote', () => {
     const { container } = render(<UploadAffiliateBlock />);

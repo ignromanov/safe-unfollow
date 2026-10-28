@@ -2,7 +2,7 @@
  * Which `/docs/*` URLs exist, read from the Jekyll sources rather than listed again.
  *
  * `scripts/generate-sitemap.ts` discovers every other page by scanning `dist/` for built HTML.
- * The docs cannot be found that way: `vercel.json` runs `npm run build && cd docs && jekyll
+ * The docs cannot be found that way: `npm run build:all` runs `npm run build && cd docs && jekyll
  * build`, so when the sitemap is generated `dist/docs/` does not exist yet. The generator
  * therefore has to state these URLs itself, and it used to state them as a hand-typed array of
  * fourteen strings — agreeing with the filesystem by luck, with nothing enforcing it (GH#187).
@@ -10,7 +10,7 @@
  * The sources, though, are right there: `docs/*.md` is in the working tree at generation time.
  * So the list is derived from the two files that actually decide it — each page's `permalink`
  * and `_config.yml`'s `baseurl` — and a fifteenth page reaches the sitemap by existing. Same
- * move as `noindex-routes.ts` against `vercel.json`, and its own module for the same stated
+ * move as `noindex-routes.ts` against `public/_headers`, and its own module for the same stated
  * reason: `generate-sitemap.ts` ends in a bare `main();`, so a test importing it would run it.
  *
  * ⛔ Every silent failure mode here produces a SHORTER sitemap, and a short sitemap is
@@ -81,7 +81,7 @@ function permalinkOf(file: string, docsDir: string): string {
 }
 
 /**
- * Every `/docs/*` base path the site serves, in the slash-free form Vercel actually serves and
+ * Every `/docs/*` base path the site serves, in the slash-free form the host actually serves and
  * the sitemap must carry (`docs/_config.yml` records why `jekyll-sitemap` was removed over
  * exactly that difference).
  *

@@ -166,7 +166,7 @@ describe('architecture facts — derived, not copied', () => {
     // this number are floors (`font-loading.test.ts` and `sitemap-no-wizard.test.ts`
     // both assert `> 50`), so an INCREASE is invisible to them by construction.
     //
-    // `/404` is not a route addition: vite-react-ssg emits it for Vercel's static
+    // `/404` is not a route addition: vite-react-ssg emits it for the host's static
     // fallback and `routes.tsx` declares a `/404` path of its own, so it is already
     // inside `paths`.
     expect(

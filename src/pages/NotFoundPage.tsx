@@ -9,7 +9,7 @@ import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
  *
  * Shows when user navigates to non-existent route.
  * Uses <a href> instead of <button onClick> to work before React hydration
- * (important for Vercel's static 404.html fallback).
+ * (important for the static 404.html fallback, `not_found_handling` in wrangler.jsonc).
  */
 export function Component() {
   const prefix = useLanguagePrefix();

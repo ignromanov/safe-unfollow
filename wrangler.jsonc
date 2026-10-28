@@ -1,0 +1,20 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Assets-only Worker: no script, so every request is a static-asset request and
+  // public/_headers and public/_redirects apply to all of them.
+  "name": "safe-unfollow",
+  "compatibility_date": "2026-10-27",
+  "assets": {
+    "directory": "./dist",
+    // Vercel's `cleanUrls: true` + `trailingSlash: false`: /upload serves upload.html,
+    // /upload/ and /upload.html redirect to /upload.
+    "html_handling": "drop-trailing-slash",
+    // Serves the nearest 404.html with a 404 status, as Vercel's static fallback did.
+    "not_found_handling": "404-page",
+  },
+  "routes": [{ "pattern": "safeunfollow.app", "custom_domain": true }],
+  // workers.dev stays on for branch previews; _headers marks it noindex.
+  "workers_dev": true,
+  "preview_urls": true,
+  "observability": { "enabled": true },
+}

@@ -44,7 +44,7 @@ function toPosix(p: string): string {
   return p.split(sep).join('/');
 }
 
-/** cleanUrls is on and trailingSlash is off (vercel.json), so public/x.html serves /x. */
+/** html_handling is drop-trailing-slash (wrangler.jsonc), so public/x.html serves /x. */
 function urlPathOf(rel: string): string {
   const withoutExt = rel.replace(/\.html$/, '');
   return withoutExt === 'index' ? '/' : `/${withoutExt}`;

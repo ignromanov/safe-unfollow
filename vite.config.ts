@@ -4,6 +4,7 @@ import { fileURLToPath } from "url";
 import { VitePWA } from "vite-plugin-pwa";
 import { defineConfig } from "vite";
 import { buildConfig } from "./vite/build-config";
+import { buildVersion, scrubPreviewEnv } from "./vite/build-env";
 import { pwaConfig } from "./vite/pwa-config";
 import { injectLocalizedMeta } from "./vite/ssg-meta-injector";
 import pkg from "./package.json";
@@ -11,15 +12,17 @@ import pkg from "./package.json";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Before Vite resolves `import.meta.env`, which it reads from process.env after loading
+// this file. See vite/build-env.ts.
+scrubPreviewEnv(process.env);
+
 export default defineConfig({
   // Build version for the Tally feedback hidden field (src/lib/feedback/tally.ts).
-  // Vercel's build environment exposes the commit sha, not `VITE_`-prefixed, so it
-  // is read here at build time and inlined — never a runtime env read.
+  // Workers Builds exposes the commit sha, not `VITE_`-prefixed, so it is read here at
+  // build time and inlined — never a runtime env read.
   define: {
-    __APP_VERSION__: JSON.stringify(
-      process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? pkg.version
-    ),
-    // The semver, always — `__APP_VERSION__` above resolves to a commit sha in Vercel builds,
+    __APP_VERSION__: JSON.stringify(buildVersion(process.env, pkg.version)),
+    // The semver, always — `__APP_VERSION__` above resolves to a commit sha in CI builds,
     // which is the wrong shape for `SoftwareApplication.softwareVersion` in the JSON-LD
     // (src/components/OrganizationSchema.tsx). That field held a hand-typed '1.5.0' against a
     // package.json reading '1.6.0' until 2026-09-07.
@@ -57,7 +60,7 @@ export default defineConfig({
       preload: "body",       // Move full CSS to end of <body> (CSP-safe, no inline onload handler)
     },
 
-    // Add the 404 page for Vercel's static fallback. Nothing else is added
+    // Add the 404 page for the static fallback (`not_found_handling` in wrangler.jsonc). Nothing else is added
     // back here any more: this hook used to append eight `/wizard/step/N`
     // pages per language — 80 of the 90 `/wizard` URLs, every one of them
     // canonicalized to a single page — and the guide is a dialog on /upload
@@ -71,7 +74,7 @@ export default defineConfig({
     async onPageRendered(route, renderedHTML) {
       return injectLocalizedMeta(route, renderedHTML, __dirname);
     },
-    // Note: vite-react-ssg generates 404.html directly at dist root (Vercel convention)
+    // Note: vite-react-ssg generates 404.html directly at dist root, where Workers looks for it
   },
   build: buildConfig,
 });

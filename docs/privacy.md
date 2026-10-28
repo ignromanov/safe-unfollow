@@ -25,7 +25,7 @@ handful of third parties, and the canonical policy names what each one receives:
 
 | Who | What they get | Where |
 |-----|---------------|-------|
-| Vercel | standard web server logs (IP, timestamp, requested URL) | every page |
+| Cloudflare | standard web server logs (IP, timestamp, requested URL) | every page |
 | Umami | page views, product events, and measurements of the export you load — how many accounts it holds and how large the file is. No personal identifiers, no usernames, nothing read from inside the archive | every page |
 | Google AdSense | ad requests and advertising cookies, subject to your consent choice | the units we place are on `/upload` and `/results`; Google's own automatic placements can appear on any screen once its script has started |
 | Google (Funding Choices) | your consent choice, stored so the banner stops asking | consent regions |

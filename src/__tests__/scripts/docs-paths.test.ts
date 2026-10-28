@@ -8,7 +8,7 @@ import { docsPaths } from '../../../scripts/docs-paths';
 
 /**
  * `sitemap.xml` is the only thing that tells Google a `/docs/*` page exists: the Jekyll site is
- * built separately (`vercel.json` runs `npm run build && cd docs && jekyll build`), so at
+ * built separately (`npm run build:all` runs `npm run build && cd docs && jekyll build`), so at
  * sitemap-generation time `dist/docs/` does not exist and the generator's `scanHtmlFiles` cannot
  * discover these pages even in principle.
  *
@@ -19,7 +19,7 @@ import { docsPaths } from '../../../scripts/docs-paths';
  *
  * This tests the derivation that replaces it. The sources ARE present at generation time —
  * only the *built* docs are missing — so the list can be read rather than checked, which is the
- * same move `noindex-routes.ts` makes against `vercel.json`.
+ * same move `noindex-routes.ts` makes against `public/_headers`.
  *
  * ⛔ The refusals are the load-bearing half. Every silent failure mode here produces a *shorter*
  * sitemap, and a shorter sitemap is invisible: no page 404s, no build fails, nothing points a
@@ -52,7 +52,7 @@ const page = (permalink: string) => `---\ntitle: "x"\npermalink: ${permalink}\n-
 describe('the docs paths the sitemap advertises', () => {
   it('maps the index page onto the baseurl itself', () => {
     // docs/index.md declares `permalink: /`, and the page is served at /docs — not /docs/ and
-    // not /. Vercel serves the slash-free form (docs/_config.yml says why jekyll-sitemap was
+    // not /. The host serves the slash-free form (docs/_config.yml says why jekyll-sitemap was
     // removed), so this is the shape the sitemap must carry.
     expect(docsPaths(fixture({ 'index.md': page('/') }))).toEqual(['/docs']);
   });
