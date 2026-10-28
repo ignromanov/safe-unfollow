@@ -8,7 +8,7 @@ import { pathToFileURL } from 'node:url';
  * pattern setting, so the build and preview commands ask this script first:
  *
  *   build:   node scripts/skip-build.mjs || npm run build:all
- *   preview: node scripts/skip-build.mjs || npx wrangler versions upload
+ *   preview: node scripts/skip-build.mjs || npx wrangler preview
  *
  * Path-based skipping (`.github/`, root *.md) is the dashboard's Build watch paths, which
  * see the pushed diff; this script cannot, because the build clone carries no previous sha.

@@ -20,5 +20,11 @@
   // workers.dev stays on for branch previews; _headers marks it noindex.
   "workers_dev": true,
   "preview_urls": true,
+  // Branch builds run `wrangler preview` (Worker Previews), which refuses to run without
+  // this block. It is empty because an assets-only Worker has no bindings or vars to
+  // point at staging. Preview URLs are <preview>-safe-unfollow.<subdomain>.workers.dev,
+  // so the workers.dev noindex rule in _headers covers them, and Cloudflare adds
+  // X-Robots-Tag: noindex to workers.dev Preview URLs on its own.
+  "previews": {},
   "observability": { "enabled": true },
 }
