@@ -54,7 +54,11 @@ function FormatButton({ primary, disabled, busy, icon, label, hint, onClick }: F
     <Button
       variant={primary ? 'default' : 'outline'}
       size="lg"
-      className="min-h-12 flex-col items-start gap-0.5 rounded-2xl py-2 text-start"
+      // `h-auto whitespace-normal` undo two Button base rules that suit one-line
+      // labels and break a two-line one: nowrap made the hint set the sheet's
+      // width (483px of content at 390px in en, 587px in de), and the fixed
+      // `size="lg"` height would clip the wrapped line.
+      className="h-auto min-h-12 flex-col items-start gap-0.5 rounded-2xl py-2 text-start whitespace-normal"
       disabled={disabled}
       aria-busy={busy}
       onClick={onClick}
@@ -239,7 +243,9 @@ export function ExportDialog({
       {view === 'idle' ? (
         <DialogHeader className="text-start pe-8">
           <DialogTitle>{t('export.dialog.title')}</DialogTitle>
-          <DialogDescription>{t('export.dialog.rowCount', { count: rowCount })}</DialogDescription>
+          <DialogDescription>
+            {t('export.dialog.rowCount', { count: rowCount.toLocaleString(i18n.language) })}
+          </DialogDescription>
         </DialogHeader>
       ) : null}
 

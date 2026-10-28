@@ -202,11 +202,11 @@
     },
     "checkout": {
       "privacy": "Your Instagram export stays in this browser. The payment page never sees it.",
-      "summary": "{{rows}} rows · report + CSV + JSON · {{price}}, once.",
+      "summary": "{{rows}} accounts · report + CSV + JSON · {{price}}, once.",
       "methods": "Cards and local methods are shown on the next page."
     },
     "license": {
-      "title": "Activate your export",
+      "title": "Unlock your export",
       "activating": "Unlocking…",
       "manualDescription": "Enter the license key from your purchase email to unlock the export in this browser.",
       "placeholder": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
@@ -245,9 +245,9 @@
       "generating": "Generating… {{percent}}%",
       "buildingTitle": "Building your file",
       "buildingNote": "Your export is built here, in this browser.",
-      "progress": "{{done}} of {{total}} rows",
+      "progress": "{{done}} of {{total}} accounts",
       "savedTitle": "Saved to your device",
-      "savedBody": "{{filename}} — all {{total}} rows.",
+      "savedBody": "{{filename}} — all {{total}} accounts.",
       "savedWhere": "Check your Downloads folder. On iPhone, look in Files › Downloads.",
       "done": "Done",
       "again": "Export again",

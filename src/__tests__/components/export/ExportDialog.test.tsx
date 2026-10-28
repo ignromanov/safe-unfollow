@@ -529,3 +529,33 @@ describe('ExportDialog', () => {
     expect(doneButton.className).toMatch(/\bborder\b/);
   });
 });
+
+describe('ExportDialog — fits a phone and formats its count', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    buildExport.mockResolvedValue(blob);
+  });
+
+  // `count` went into the sentence raw, so the one dialog a buyer opens read
+  // "1500 accounts" while every other surface in the product says "1,500".
+  it('formats the account count for the locale', () => {
+    render(<ExportDialog {...defaultProps} rowCount={1500} />);
+
+    expect(
+      screen.getByText(resultsEN.export.dialog.rowCount.replace('{{count}}', '1,500'))
+    ).toBeInTheDocument();
+  });
+
+  // The Button base class is `whitespace-nowrap`. A format button carries a
+  // sentence-long hint, and at 390px nowrap made the dialog's content 483px wide
+  // (en) and 587px (de), so the paid dialog ran off the sheet. jsdom does no
+  // layout, so this pins the class that lets the hint wrap. The width itself
+  // was measured in a real browser, before and after.
+  it('lets every format button wrap its hint instead of widening the sheet', () => {
+    render(<ExportDialog {...defaultProps} />);
+
+    for (const name of [htmlButtonName, csvButtonName, jsonButtonName]) {
+      expect(screen.getByRole('button', { name })).toHaveClass('whitespace-normal');
+    }
+  });
+});

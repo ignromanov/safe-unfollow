@@ -202,11 +202,11 @@
     },
     "checkout": {
       "privacy": "Instagram dışa aktarman bu tarayıcıda kalır. Ödeme sayfası onu asla görmez.",
-      "summary": "{{rows}} satır · rapor + CSV + JSON · tek seferlik {{price}}.",
+      "summary": "{{rows}} hesap · rapor + CSV + JSON · tek seferlik {{price}}.",
       "methods": "Kartlar ve yerel ödeme yöntemleri sonraki sayfada gösterilir."
     },
     "license": {
-      "title": "Dışa aktarımını etkinleştir",
+      "title": "Dışa aktarımını aç",
       "activating": "Açılıyor…",
       "manualDescription": "Bu tarayıcıda dışa aktarımın kilidini açmak için satın alma e-postandaki lisans anahtarını gir.",
       "placeholder": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
@@ -245,9 +245,9 @@
       "generating": "Oluşturuluyor… {{percent}}%",
       "buildingTitle": "Dosyan hazırlanıyor",
       "buildingNote": "Dışa aktarımın burada, bu tarayıcıda oluşturuluyor.",
-      "progress": "{{total}} satırın {{done}} tanesi",
+      "progress": "{{total}} hesabın {{done}} tanesi",
       "savedTitle": "Cihazına kaydedildi",
-      "savedBody": "{{filename}} — {{total}} satırın tamamı.",
+      "savedBody": "{{filename}} — {{total}} hesabın tamamı.",
       "savedWhere": "İndirilenler klasörüne bak. iPhone’da Dosyalar › İndirilenler içinde.",
       "done": "Tamam",
       "again": "Yeniden dışa aktar",

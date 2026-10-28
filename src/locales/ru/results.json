@@ -202,11 +202,11 @@
     },
     "checkout": {
       "privacy": "Твой экспорт из Instagram остаётся в этом браузере. Платёжная страница его не видит.",
-      "summary": "{{rows}} строк · отчёт + CSV + JSON · {{price}}, один раз.",
+      "summary": "Аккаунтов: {{rows}} · отчёт + CSV + JSON · {{price}}, один раз.",
       "methods": "Карты и локальные способы оплаты — на следующей странице."
     },
     "license": {
-      "title": "Активация экспорта",
+      "title": "Разблокировка экспорта",
       "activating": "Разблокируем…",
       "manualDescription": "Введи лицензионный ключ из письма о покупке, чтобы разблокировать экспорт в этом браузере.",
       "placeholder": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
@@ -245,9 +245,9 @@
       "generating": "Генерация… {{percent}}%",
       "buildingTitle": "Собираем твой файл",
       "buildingNote": "Экспорт собирается прямо здесь, в этом браузере.",
-      "progress": "{{done}} из {{total}} строк",
+      "progress": "Аккаунтов: {{done}} из {{total}}",
       "savedTitle": "Сохранено на твоём устройстве",
-      "savedBody": "{{filename}} — все {{total}} строк.",
+      "savedBody": "{{filename}} — все аккаунты ({{total}}).",
       "savedWhere": "Загляни в папку «Загрузки». На iPhone — «Файлы › Загрузки».",
       "done": "Готово",
       "again": "Экспортировать снова",
