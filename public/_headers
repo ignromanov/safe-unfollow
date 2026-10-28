@@ -85,5 +85,5 @@ https://:name.:subdomain.workers.dev/*
   Cache-Control: public, max-age=2592000
 /sw.js
   Cache-Control: public, max-age=3600, must-revalidate
-/workbox-*
+/workbox-*.js
   Cache-Control: public, max-age=31536000, immutable
