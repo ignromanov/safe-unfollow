@@ -73,6 +73,13 @@ const tonePairs = (tokens: Tokens): [string, string][] =>
       [`--${n}`, '--card'],
     ]);
 
+function ruleFor(css: string, sel: string): string {
+  for (const m of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    if ((m[1] as string).split(',').some(x => x.trim() === sel)) return m[2] as string;
+  }
+  return '';
+}
+
 describe('REPORT_CSS contrast', () => {
   it.each(themes)('%s: every listed pair clears 4.5:1', (_name, tokens) => {
     check(tokens, PAIRS);
@@ -93,5 +100,11 @@ describe('REPORT_CSS contrast', () => {
   it('derives at least four tone pairs', () => {
     expect(tonePairs(light).length).toBeGreaterThanOrEqual(8);
     expect(tonePairs(dark).length).toBeGreaterThanOrEqual(8);
+  });
+
+  it('isolates usernames as LTR, linked or not', () => {
+    for (const sel of ['.row a', '.row .u']) {
+      expect(ruleFor(REPORT_CSS, sel), sel).toMatch(/direction:ltr;?.*unicode-bidi:isolate/);
+    }
   });
 });
