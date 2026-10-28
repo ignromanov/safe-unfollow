@@ -273,7 +273,7 @@
         "body": "This file lists {{shown}} of {{total}} accounts. The full export lists all of them.",
         "more": "+{{count}} more in the full export",
         "cta": "Get the full export",
-        "ctaSub": "In SafeUnfollow: Export → Unlock export. One payment, no subscription."
+        "ctaSub": "In SafeUnfollow: Export › Unlock export. One payment, no subscription."
       },
       "privacyLine": "SafeUnfollow made this report in a browser and never sent the Instagram export behind it anywhere.",
       "ceilingTop": "This report stops at {{max}} accounts. The CSV export has the full list.",

@@ -282,7 +282,7 @@
         "body": "Este archivo incluye {{shown}} de {{total}} cuentas. La exportación completa las incluye todas.",
         "more": "+{{count}} más en la exportación completa",
         "cta": "Obtener la exportación completa",
-        "ctaSub": "En SafeUnfollow: Exportar → Desbloquear exportación. Un solo pago, sin suscripción."
+        "ctaSub": "En SafeUnfollow: Exportar › Desbloquear exportación. Un solo pago, sin suscripción."
       },
       "privacyLine": "SafeUnfollow creó este informe en un navegador y nunca envió a ninguna parte la exportación de Instagram de la que procede."
     }

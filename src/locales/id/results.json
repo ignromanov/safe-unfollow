@@ -282,7 +282,7 @@
         "body": "File ini memuat {{shown}} dari {{total}} akun. Ekspor lengkap memuat semuanya.",
         "more": "+{{count}} lagi di ekspor lengkap",
         "cta": "Dapatkan ekspor lengkap",
-        "ctaSub": "Di SafeUnfollow: Ekspor → Buka ekspor. Sekali bayar, tanpa langganan."
+        "ctaSub": "Di SafeUnfollow: Ekspor › Buka ekspor. Sekali bayar, tanpa langganan."
       },
       "privacyLine": "SafeUnfollow membuat laporan ini di browser dan tidak pernah mengirim ekspor Instagram yang menjadi sumbernya ke mana pun."
     }

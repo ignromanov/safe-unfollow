@@ -282,7 +282,7 @@
         "body": "Bu dosyada {{total}} hesaptan {{shown}} hesap var. Tam dışa aktarmada hepsi var.",
         "more": "Tam dışa aktarmada +{{count}} hesap daha",
         "cta": "Tam dışa aktarmayı al",
-        "ctaSub": "SafeUnfollow'da: Dışa aktar → Dışa aktarmayı aç. Tek ödeme, abonelik yok."
+        "ctaSub": "SafeUnfollow'da: Dışa aktar › Dışa aktarmayı aç. Tek ödeme, abonelik yok."
       },
       "privacyLine": "SafeUnfollow bu raporu bir tarayıcıda oluşturdu ve dayandığı Instagram dışa aktarımını hiçbir yere göndermedi."
     }

@@ -282,7 +282,7 @@
         "body": "Diese Datei listet {{shown}} von {{total}} Konten. Der vollständige Export enthält alle.",
         "more": "+{{count}} weitere im vollständigen Export",
         "cta": "Vollständigen Export holen",
-        "ctaSub": "In SafeUnfollow: Exportieren → Export freischalten. Einmal zahlen, kein Abo."
+        "ctaSub": "In SafeUnfollow: Exportieren › Export freischalten. Einmal zahlen, kein Abo."
       },
       "privacyLine": "SafeUnfollow hat diesen Bericht in einem Browser erstellt und den zugrunde liegenden Instagram-Export nirgendwohin gesendet."
     }
