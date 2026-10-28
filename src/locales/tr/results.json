@@ -262,7 +262,6 @@
       "scopeSearched": "{{total}} hesaptan {{count}} hesap",
       "searchNarrowed": "Bir aramayla daraltıldı",
       "other": "Diğer",
-      "sampleLine": "Ücretsiz örnek: {{total}} hesaptan {{shown}} hesap. Tam dışa aktarmada hepsi var.",
       "ceilingTop": "Bu rapor en fazla {{max}} hesap gösterir. Tam liste CSV dışa aktarmasında.",
       "ceilingSection": "CSV dışa aktarmasında: {{count}} satır",
       "footer": "SafeUnfollow ile oluşturuldu",
@@ -271,7 +270,21 @@
         "truncatedFollowers": "Takipçi listen eksik görünüyor. Takip ettiklerin listesinden çok daha geç başlıyor; bu da dışa aktarma sınırlı bir tarih aralığı için istendiğinde olur. Bir aralık seçtiysen verilerini Instagram'dan yeniden iste ve tarih aralığını \"Tüm zamanlar\" olarak ayarla. “Geri takip etmeyenler”, “Geri takip etmediklerin” ve “Karşılıklı takip” bölümlerindeki bazı hesaplar yanlış bölümde ya da eksik olabilir; bu yüzden bu sayılar fazla yüksek veya fazla düşük olabilir.",
         "truncatedFollowing": "Takip ettiklerin listesi eksik görünüyor. Takipçi listenden çok daha geç başlıyor; bu da dışa aktarma sınırlı bir tarih aralığı için istendiğinde olur. Bir aralık seçtiysen verilerini Instagram'dan yeniden iste ve tarih aralığını \"Tüm zamanlar\" olarak ayarla. “Geri takip etmeyenler”, “Geri takip etmediklerin” ve “Karşılıklı takip” bölümlerindeki bazı hesaplar yanlış bölümde ya da eksik olabilir; bu yüzden bu sayılar fazla yüksek veya fazla düşük olabilir.",
         "datesStale": "Bu raporda takip tarihleri yok: dışa aktarım, SafeUnfollow tarihleri saklamaya başlamadan önce açıldı. Aynı Instagram ZIP dosyasını SafeUnfollow'da yeniden aç, sonra yeni bir rapor dışa aktar."
-      }
+      },
+      "explain": {
+        "notFollowingBack": "Sen onları takip ediyorsun. Onlar seni takip etmiyor.",
+        "notFollowedBack": "Onlar seni takip ediyor. Sen onları takip etmiyorsun.",
+        "mutuals": "Birbirinizi takip ediyorsunuz.",
+        "other": "Dışa aktarımındaki diğer listelerde: örneğin gönderdiğin istekler veya takipten çıktığın hesaplar."
+      },
+      "sample": {
+        "head": "Ücretsiz örnek",
+        "body": "Bu dosyada {{total}} hesaptan {{shown}} hesap var. Tam dışa aktarmada hepsi var.",
+        "more": "Tam dışa aktarmada +{{count}} hesap daha",
+        "cta": "Tam dışa aktarmayı al",
+        "ctaSub": "SafeUnfollow'da: Dışa aktar › Dışa aktarmayı aç. Tek ödeme, abonelik yok."
+      },
+      "privacyLine": "SafeUnfollow bu raporu bir tarayıcıda oluşturdu ve dayandığı Instagram dışa aktarımını hiçbir yere göndermedi."
     }
   },
   "dates": {

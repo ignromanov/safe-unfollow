@@ -262,7 +262,6 @@
       "scopeSearched": "{{count}} dari {{total}} akun",
       "searchNarrowed": "Dipersempit dengan pencarian",
       "other": "Lainnya",
-      "sampleLine": "Sampel gratis: {{shown}} dari {{total}} akun. Ekspor lengkap memuat semuanya.",
       "ceilingTop": "Laporan ini hanya menampilkan hingga {{max}} akun. Ekspor CSV memuat daftar lengkapnya.",
       "ceilingSection": "Di ekspor CSV: {{count}} baris",
       "footer": "Dibuat dengan SafeUnfollow",
@@ -271,7 +270,21 @@
         "truncatedFollowers": "Daftar pengikut Anda tampak tidak lengkap. Daftar ini dimulai jauh setelah daftar yang Anda ikuti, dan itulah yang terjadi ketika ekspor diminta untuk rentang tanggal terbatas. Jika Anda memilih rentang tanggal, minta data Anda lagi ke Instagram dengan rentang tanggal diatur ke \"Sepanjang waktu\". Sebagian akun di “Tidak mengikuti balik”, “Tidak diikuti balik”, dan “Saling mengikuti” mungkin berada di bagian yang salah atau tidak tercantum, jadi jumlahnya bisa terlalu tinggi atau terlalu rendah.",
         "truncatedFollowing": "Daftar yang Anda ikuti tampak tidak lengkap. Daftar ini dimulai jauh setelah daftar pengikut Anda, dan itulah yang terjadi ketika ekspor diminta untuk rentang tanggal terbatas. Jika Anda memilih rentang tanggal, minta data Anda lagi ke Instagram dengan rentang tanggal diatur ke \"Sepanjang waktu\". Sebagian akun di “Tidak mengikuti balik”, “Tidak diikuti balik”, dan “Saling mengikuti” mungkin berada di bagian yang salah atau tidak tercantum, jadi jumlahnya bisa terlalu tinggi atau terlalu rendah.",
         "datesStale": "Laporan ini tidak memuat tanggal mengikuti: ekspor ini dibuka sebelum SafeUnfollow mulai mencatatnya. Buka lagi ZIP Instagram yang sama di SafeUnfollow, lalu ekspor laporan baru."
-      }
+      },
+      "explain": {
+        "notFollowingBack": "Anda mengikuti akun ini. Akun ini tidak mengikuti Anda.",
+        "notFollowedBack": "Akun ini mengikuti Anda. Anda tidak mengikutinya.",
+        "mutuals": "Anda dan akun ini saling mengikuti.",
+        "other": "Ada di daftar lain dalam ekspor Anda, seperti permintaan yang Anda kirim atau akun yang berhenti Anda ikuti."
+      },
+      "sample": {
+        "head": "Sampel gratis",
+        "body": "File ini memuat {{shown}} dari {{total}} akun. Ekspor lengkap memuat semuanya.",
+        "more": "+{{count}} lagi di ekspor lengkap",
+        "cta": "Dapatkan ekspor lengkap",
+        "ctaSub": "Di SafeUnfollow: Ekspor › Buka ekspor. Sekali bayar, tanpa langganan."
+      },
+      "privacyLine": "SafeUnfollow membuat laporan ini di browser dan tidak pernah mengirim ekspor Instagram yang menjadi sumbernya ke mana pun."
     }
   },
   "dates": {

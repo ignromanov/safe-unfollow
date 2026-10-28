@@ -262,7 +262,6 @@
       "scopeSearched": "{{count}} von {{total}} Konten",
       "searchNarrowed": "Durch eine Suche eingegrenzt",
       "other": "Sonstige",
-      "sampleLine": "Kostenlose Probe: {{shown}} von {{total}} Konten. Der vollständige Export enthält alle.",
       "ceilingTop": "Dieser Bericht endet nach {{max}} Konten. Der CSV-Export enthält die vollständige Liste.",
       "ceilingSection": "Im CSV-Export: {{count}} Zeilen",
       "footer": "Erstellt mit SafeUnfollow",
@@ -271,7 +270,21 @@
         "truncatedFollowers": "Deine Follower-Liste wirkt unvollständig. Sie beginnt deutlich später als deine Gefolgt-Liste, und genau das passiert, wenn ein Export für einen begrenzten Zeitraum angefordert wird. Falls du einen Zeitraum gewählt hast, fordere deine Daten bei Instagram erneut an und setze den Zeitraum auf \"Gesamter Zeitraum\". Einige Konten in „Folgt dir nicht zurück“, „Du folgst nicht zurück“ und „Gegenseitig“ stehen womöglich im falschen Abschnitt oder fehlen, deshalb können diese Zahlen zu hoch oder zu niedrig sein.",
         "truncatedFollowing": "Deine Gefolgt-Liste wirkt unvollständig. Sie beginnt deutlich später als deine Follower-Liste, und genau das passiert, wenn ein Export für einen begrenzten Zeitraum angefordert wird. Falls du einen Zeitraum gewählt hast, fordere deine Daten bei Instagram erneut an und setze den Zeitraum auf \"Gesamter Zeitraum\". Einige Konten in „Folgt dir nicht zurück“, „Du folgst nicht zurück“ und „Gegenseitig“ stehen womöglich im falschen Abschnitt oder fehlen, deshalb können diese Zahlen zu hoch oder zu niedrig sein.",
         "datesStale": "Dieser Bericht enthält keine Datumsangaben: Der Export wurde geöffnet, bevor SafeUnfollow sie aufbewahrt hat. Öffne dieselbe Instagram-ZIP-Datei erneut in SafeUnfollow und exportiere einen neuen Bericht."
-      }
+      },
+      "explain": {
+        "notFollowingBack": "Du folgst diesen Konten. Sie folgen dir nicht.",
+        "notFollowedBack": "Diese Konten folgen dir. Du folgst ihnen nicht.",
+        "mutuals": "Ihr folgt euch gegenseitig.",
+        "other": "Auf anderen Listen in deinem Export, etwa gesendete Anfragen oder Konten, denen du nicht mehr folgst."
+      },
+      "sample": {
+        "head": "Kostenlose Probe",
+        "body": "Diese Datei listet {{shown}} von {{total}} Konten. Der vollständige Export enthält alle.",
+        "more": "+{{count}} weitere im vollständigen Export",
+        "cta": "Vollständigen Export holen",
+        "ctaSub": "In SafeUnfollow: Exportieren › Export freischalten. Einmal zahlen, kein Abo."
+      },
+      "privacyLine": "SafeUnfollow hat diesen Bericht in einem Browser erstellt und den zugrunde liegenden Instagram-Export nirgendwohin gesendet."
     }
   },
   "dates": {

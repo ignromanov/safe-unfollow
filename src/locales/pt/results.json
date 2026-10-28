@@ -262,7 +262,6 @@
       "scopeSearched": "{{count}} de {{total}} contas",
       "searchNarrowed": "Restringido por uma busca",
       "other": "Outras",
-      "sampleLine": "Amostra grátis: {{shown}} de {{total}} contas. A exportação completa tem todas.",
       "ceilingTop": "Este relatório para em {{max}} contas. A exportação CSV tem a lista completa.",
       "ceilingSection": "Na exportação CSV: {{count}} linhas",
       "footer": "Feito com SafeUnfollow",
@@ -271,7 +270,21 @@
         "truncatedFollowers": "A sua lista de seguidores parece incompleta. Ela começa muito depois da sua lista de quem você segue, que é o que acontece quando uma exportação é pedida para um período limitado. Se você escolheu um período, peça os seus dados ao Instagram de novo com o período definido como \"Todo o período\". Algumas contas em “Não te seguem de volta”, “Você não segue de volta” e “Mútuos” podem estar na seção errada ou faltar, então essas contagens podem estar altas ou baixas demais.",
         "truncatedFollowing": "A sua lista de quem você segue parece incompleta. Ela começa muito depois da sua lista de seguidores, que é o que acontece quando uma exportação é pedida para um período limitado. Se você escolheu um período, peça os seus dados ao Instagram de novo com o período definido como \"Todo o período\". Algumas contas em “Não te seguem de volta”, “Você não segue de volta” e “Mútuos” podem estar na seção errada ou faltar, então essas contagens podem estar altas ou baixas demais.",
         "datesStale": "Este relatório não tem datas: a exportação foi aberta antes de o SafeUnfollow guardá-las. Abra o mesmo ZIP do Instagram no SafeUnfollow de novo e exporte um relatório novo."
-      }
+      },
+      "explain": {
+        "notFollowingBack": "Você segue essas contas. Elas não seguem você.",
+        "notFollowedBack": "Essas contas seguem você. Você não as segue.",
+        "mutuals": "Vocês se seguem mutuamente.",
+        "other": "Em outras listas da sua exportação, como solicitações que você enviou ou contas que deixou de seguir."
+      },
+      "sample": {
+        "head": "Amostra grátis",
+        "body": "Este arquivo lista {{shown}} de {{total}} contas. A exportação completa tem todas.",
+        "more": "+{{count}} na exportação completa",
+        "cta": "Obter a exportação completa",
+        "ctaSub": "No SafeUnfollow: Exportar › Desbloquear exportação. Pagamento único, sem assinatura."
+      },
+      "privacyLine": "O SafeUnfollow criou este relatório em um navegador e nunca enviou para lugar nenhum a exportação do Instagram que deu origem a ele."
     }
   },
   "dates": {

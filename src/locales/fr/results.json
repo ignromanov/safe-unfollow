@@ -262,7 +262,6 @@
       "scopeSearched": "{{count}} sur {{total}} comptes",
       "searchNarrowed": "Liste réduite par une recherche",
       "other": "Autres",
-      "sampleLine": "Échantillon gratuit : {{shown}} sur {{total}} comptes. L’export complet les contient tous.",
       "ceilingTop": "Ce rapport s’arrête à {{max}} comptes. L’export CSV contient la liste complète.",
       "ceilingSection": "Dans l’export CSV : {{count}} lignes",
       "footer": "Réalisé avec SafeUnfollow",
@@ -271,7 +270,21 @@
         "truncatedFollowers": "Votre liste d’abonnés semble incomplète. Elle commence bien après votre liste d’abonnements, ce qui arrive lorsqu’un export est demandé sur une plage de dates limitée. Si vous en avez choisi une, redemandez vos données à Instagram en réglant la plage de dates sur « Tout ». Certains comptes de « Ne vous suivent pas », « Vous ne suivez pas en retour » et « Mutuels » peuvent se trouver dans la mauvaise section ou manquer : ces compteurs peuvent donc être trop élevés ou trop bas.",
         "truncatedFollowing": "Votre liste d’abonnements semble incomplète. Elle commence bien après votre liste d’abonnés, ce qui arrive lorsqu’un export est demandé sur une plage de dates limitée. Si vous en avez choisi une, redemandez vos données à Instagram en réglant la plage de dates sur « Tout ». Certains comptes de « Ne vous suivent pas », « Vous ne suivez pas en retour » et « Mutuels » peuvent se trouver dans la mauvaise section ou manquer : ces compteurs peuvent donc être trop élevés ou trop bas.",
         "datesStale": "Ce rapport ne contient pas de dates d’abonnement : l’export a été ouvert avant que SafeUnfollow ne les conserve. Rouvrez le même ZIP Instagram dans SafeUnfollow, puis exportez un nouveau rapport."
-      }
+      },
+      "explain": {
+        "notFollowingBack": "Vous suivez ces comptes. Ils ne vous suivent pas.",
+        "notFollowedBack": "Ces comptes vous suivent. Vous ne les suivez pas.",
+        "mutuals": "Vous vous suivez mutuellement.",
+        "other": "Dans d’autres listes de votre export, comme les demandes envoyées ou les comptes que vous ne suivez plus."
+      },
+      "sample": {
+        "head": "Échantillon gratuit",
+        "body": "Ce fichier contient {{shown}} comptes sur {{total}}. L’export complet les contient tous.",
+        "more": "+{{count}} de plus dans l’export complet",
+        "cta": "Obtenir l’export complet",
+        "ctaSub": "Dans SafeUnfollow : Exporter › Débloquer l’export. Un seul paiement, sans abonnement."
+      },
+      "privacyLine": "SafeUnfollow a créé ce rapport dans un navigateur et n’a jamais envoyé nulle part l’export Instagram dont il est issu."
     }
   },
   "dates": {
