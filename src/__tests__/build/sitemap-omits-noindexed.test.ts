@@ -4,7 +4,7 @@ import { join, resolve } from 'node:path';
 import { expect, it } from 'vitest';
 import { describeDist } from '../utils/dist-gate';
 
-import { noindexRoutes, type VercelHeaderRule } from '../../../scripts/noindex-routes';
+import { shippedNoindexRoutes } from '../../../scripts/noindex-routes';
 
 /**
  * The unit gate proves the derivation; this proves the artefact, which is the only thing Google
@@ -21,16 +21,13 @@ const sitemapPath = join(dist, 'sitemap.xml');
 const built = existsSync(dist) && existsSync(sitemapPath);
 
 /**
- * Read from `vercel.json` the same way `noindex-routes.test.ts` and `generate-sitemap.ts` do,
+ * Read from `public/_headers` the same way `noindex-routes.test.ts` and `generate-sitemap.ts` do,
  * rather than hand-listing `['results', 'sample']` a third time — that shape is exactly what
  * `noindex-routes.ts`'s own docstring calls "one stub behind reality". `exact` holds base paths
  * with their leading slash already on (e.g. `/results`); strip it to match this file's `/${route}$`
  * pattern.
  */
-const VERCEL = JSON.parse(readFileSync(join(process.cwd(), 'vercel.json'), 'utf-8')) as {
-  headers: VercelHeaderRule[];
-};
-const NOINDEXED_ROUTES = [...noindexRoutes(VERCEL.headers).exact].map(path => path.slice(1));
+const NOINDEXED_ROUTES = [...shippedNoindexRoutes().exact].map(path => path.slice(1));
 
 describeDist('the sitemap does not advertise a noindexed route', built, () => {
   const xml = built ? readFileSync(sitemapPath, 'utf-8') : '';

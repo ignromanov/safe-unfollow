@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 
 import { SUPPORTED_LANGUAGES } from '@/config/languages';
 
-import { noindexRoutes, type VercelHeaderRule } from '../../../scripts/noindex-routes';
+import { shippedNoindexRoutes } from '../../../scripts/noindex-routes';
 
 const DOCS_ROOT = join(process.cwd(), 'docs');
 
@@ -107,7 +107,7 @@ const README_TEXT = readFileSync(join(process.cwd(), 'README.md'), 'utf-8');
  * `database`, and "data sent anywhere" were simply absent — `footer.description`
  * said "No server, no logs, just your data and your device" and `donation.body`
  * said "No login. No server. No data sent anywhere." in shipped copy, both
- * false at the same vendors (Vercel serves the site and keeps access logs,
+ * false at the same vendors (Cloudflare serves the site and keeps access logs,
  * Umami writes events to a Supabase database, AdSense receives ad requests),
  * and no pattern here could see either sentence because none of those words
  * were in the list to begin with.
@@ -292,12 +292,12 @@ const BANNED: BannedEntry[] = [
   // file**" — is a different claim from one that doesn't.
   {
     pattern: new RegExp(`${NEGATION}${GAP}\\bservers?\\b`, 'i'),
-    why: 'Vercel serves the site end to end — there is a server',
+    why: 'Cloudflare serves the site end to end — there is a server',
     qualifiedBy: QUALIFIER_BOUND,
   },
   {
     pattern: new RegExp(`${NEGATION}${GAP}\\blogs?\\b`, 'i'),
-    why: 'Vercel keeps access logs and Umami logs every event',
+    why: 'Cloudflare keeps access logs and Umami logs every event',
     qualifiedBy: QUALIFIER_BOUND,
   },
   {
@@ -1242,7 +1242,7 @@ function trailingSlashLinks(text: string): string[] {
  * resolve to a page this repo builds, and `/` and `/upload` are not docs pages). This one exists
  * to catch a different failure: `llms.txt`'s "Start here" block links to `/` and `/upload`
  * today, and nothing stops a future edit from adding `/results` there too — a URL this same
- * branch tells crawlers to discard (`noindex-routes.ts` / `vercel.json`). A machine reader has
+ * branch tells crawlers to discard (`noindex-routes.ts` / `public/_headers`). A machine reader has
  * no way to know that; it would just start pointing at a page we asked it not to index.
  */
 function allSafeunfollowLinks(text: string): string[] {
@@ -1253,10 +1253,7 @@ function allSafeunfollowLinks(text: string): string[] {
  * Read the same way `noindex-routes.test.ts` and the sitemap artefact gate do, rather than
  * listing `/results` and `/sample` a third time.
  */
-const VERCEL = JSON.parse(
-  readFileSync(join(process.cwd(), 'vercel.json'), 'utf-8'),
-) as { headers: VercelHeaderRule[] };
-const NOINDEXED = noindexRoutes(VERCEL.headers);
+const NOINDEXED = shippedNoindexRoutes();
 
 /**
  * `NOINDEXED.matches()` takes a base path with any locale prefix already stripped — that is the

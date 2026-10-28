@@ -8,7 +8,7 @@ import { describeDist } from '../utils/dist-gate';
 
 /**
  * `sitemap.xml` is the only thing that tells a crawler a `/docs/*` page exists, and until GH#187
- * nothing asserted that it lists any of them. The docs are built separately (`vercel.json`:
+ * nothing asserted that it lists any of them. The docs are built separately (`npm run build:all`:
  * `npm run build && cd docs && jekyll build`), so the generator cannot discover them by scanning
  * `dist/` and has to add them from a list — which is now derived from the sources rather than
  * typed out. This is the artefact-level half: that the derived list actually reaches the file.

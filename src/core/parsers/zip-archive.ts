@@ -1,5 +1,5 @@
 // The -native entry point, not the package root. The default build ships only
-// a WASM codec; our CSP (vercel.json:69) grants no wasm-unsafe-eval, and a
+// a WASM codec; our CSP (public/_headers) grants no wasm-unsafe-eval, and a
 // blocked WebAssembly.instantiate() is caught and retried against native
 // CompressionStream rather than pure JS - which that build does not contain.
 // This entry is native DecompressionStream first, pure-JS zlib second, no WASM:

@@ -12,7 +12,7 @@
  * - Generates robots.txt
  */
 
-import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "fs";
+import { existsSync, readdirSync, statSync, writeFileSync } from "fs";
 import { resolve, relative } from "path";
 
 // Import from shared config (single source of truth)
@@ -21,7 +21,7 @@ import {
   type SupportedLanguage,
 } from "../src/config/languages";
 import { INTENT_PATHS } from "../src/config/intent-pages";
-import { noindexRoutes } from "./noindex-routes";
+import { shippedNoindexRoutes } from "./noindex-routes";
 import { docsPaths } from "./docs-paths";
 
 // Configuration
@@ -30,13 +30,9 @@ const DIST_DIR = resolve(process.cwd(), "dist");
 const PUBLIC_DIR = resolve(process.cwd(), "public");
 
 // A route served with X-Robots-Tag: noindex is not advertised in the sitemap. Read from
-// vercel.json rather than listed again here, so the header and the sitemap cannot disagree —
-// and note this is checked on the BASE path, so one rule covers all ten locale variants.
-const NOINDEX_ROUTES = noindexRoutes(
-  (JSON.parse(readFileSync(resolve(process.cwd(), "vercel.json"), "utf-8")) as {
-    headers?: Array<{ source: string; headers: Array<{ key: string; value: string }> }>;
-  }).headers ?? []
-);
+// public/_headers rather than listed again here, so the header and the sitemap cannot disagree —
+// and note this is checked on the BASE path, so the ten per-locale rules collapse onto one.
+const NOINDEX_ROUTES = shippedNoindexRoutes();
 
 // Use shared type
 type Language = SupportedLanguage;
@@ -61,7 +57,7 @@ const ROUTE_CONFIG: Record<string, { priority: number; changefreq: string }> = {
   "/": { priority: 1.0, changefreq: "weekly" },
   "/upload": { priority: 0.8, changefreq: "monthly" },
   "/waiting": { priority: 0.6, changefreq: "monthly" },
-  // /results and /sample are served X-Robots-Tag: noindex (vercel.json) and are excluded from
+  // /results and /sample are served X-Robots-Tag: noindex (public/_headers) and are excluded from
   // the sitemap by that header, not by this map — which only ever supplied priority.
   "/privacy": { priority: 0.5, changefreq: "yearly" },
   "/terms": { priority: 0.5, changefreq: "yearly" },
@@ -365,7 +361,7 @@ ${entries.join("\n\n")}
   console.log(`   Total URLs: ${urlEntries.length}`);
   console.log(`   - Static pages: ${urlEntries.length - docsCount}`);
   console.log(`   - Docs pages (English only): ${docsCount}`);
-  console.log(`   - Skipped (noindex per vercel.json): ${skippedNoindex.length}`);
+  console.log(`   - Skipped (noindex per public/_headers): ${skippedNoindex.length}`);
   console.log(`   Base paths: ${Array.from(basePaths).join(", ")}`);
   console.log(`   Languages: ${SUPPORTED_LANGUAGES.join(", ")}`);
   console.log(`✅ robots.txt generated: dist/robots.txt`);

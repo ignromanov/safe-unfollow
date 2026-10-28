@@ -97,6 +97,7 @@ temp/
 
 # Deployment
 .vercel/
+.wrangler/
 .netlify/
 
 # Vite cache
@@ -194,3 +195,7 @@ ds-bundle
 worktrees
 .design
 .cmux
+
+# Hosting scripts the build and Workers Builds run (see wrangler.jsonc)
+!scripts/static-config.ts
+!scripts/skip-build.mjs

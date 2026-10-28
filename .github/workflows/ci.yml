@@ -51,6 +51,9 @@ jobs:
           VITE_ADSENSE_SLOT_RESULTS: ${{ env.BUDGET_ADSENSE_SLOT }}
           VITE_ADSENSE_SLOT_RESULTS_END: ${{ env.BUDGET_ADSENSE_SLOT }}
           VITE_ADSENSE_SLOT_UPLOAD: ${{ env.BUDGET_ADSENSE_SLOT }}
+      # Packages dist/ exactly as Workers Builds will, against wrangler.jsonc, without
+      # uploading anything: a malformed config or an unservable asset fails here.
+      - run: npx wrangler deploy --dry-run
       # The only job with a dist/ to measure. Unwired, the budget guard cannot fail.
       # The two variables below are re-declared for this step because the script asserts the
       # built chunk actually contains their values — that assertion is what stops an unset

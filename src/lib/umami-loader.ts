@@ -22,7 +22,7 @@ import { SUPPORTED_LANGUAGES } from '@/config/languages';
  * is not a traffic result — see `analytics/measurement-boundaries.md`.
  *
  * The CSP now names this origin in `script-src` and `connect-src`; it previously needed
- * no analytics host at all. `src/__tests__/vercel-csp.test.ts` holds both facts together.
+ * no analytics host at all. `src/__tests__/csp.test.ts` holds both facts together.
  *
  * Overridable per GH#63 so the instance can move without editing this file.
  */

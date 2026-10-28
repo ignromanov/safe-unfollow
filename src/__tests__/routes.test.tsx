@@ -64,7 +64,7 @@ describe('Routes Configuration', () => {
   it('defines no wizard route in any language', () => {
     // `/wizard` and the eight `/wizard/step/N` deep links were the guide's own
     // pages until GH#102 made it a dialog on /upload. They are permanent
-    // redirects in vercel.json now, and a route here would shadow one for
+    // redirects in public/_redirects now, and a route here would shadow one for
     // any reader already inside the SPA: React Router would answer the
     // navigation client-side and the redirect would never be requested.
     const wizardPaths = routes.flatMap(route =>

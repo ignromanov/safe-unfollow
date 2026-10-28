@@ -69,7 +69,7 @@ export const ACCOUNTS_CENTER_URL =
  * Restoring the first step also restores the identity `id N -> /wizard/step-N`
  * that the ids briefly lost: these files have kept their names since the guide
  * was eight routes (GH#102), so the 30-day asset cache
- * (vercel.json "/wizard/step-(.*)") keeps hitting and the mapping needs no
+ * (public/_headers "/wizard/step-*") keeps hitting and the mapping needs no
  * table to explain it.
  *
  * Exactly one step is a warning, and it is step 4, not the format step. Until

@@ -21,11 +21,11 @@ const built = existsSync(resolve(distDir, 'index.html'));
  *
  * A throwaway rootDir stands in for the repo: `injectLocalizedMeta` reads
  * `<rootDir>/src/locales/<lang>/meta.json`, `<rootDir>/dist/.vite/manifest.json` (via
- * localeChunkHrefs) and `<rootDir>/vercel.json` (via applyRobotsMeta, GH#257). The first two are
+ * localeChunkHrefs) and `<rootDir>/public/_headers` (via applyRobotsMeta, GH#257). The first two are
  * written here rather than pointed at the real ones — the real vite manifest only exists after a
  * build, which is exactly the dependency this half must not have.
  *
- * `vercel.json` is COPIED from the real one instead of being invented, because its header rules
+ * `public/_headers` is COPIED from the real one instead of being invented, because its header rules
  * are what decides which pages get `noindex`. A hand-written stand-in would let this fixture and
  * the shipped site disagree about that set, which is the defect `noindex-routes.ts` exists to
  * prevent.
@@ -50,9 +50,10 @@ function writeFixture(): void {
   );
 
   // The real rules, copied verbatim. See the docblock above for why this one is not invented.
+  mkdirSync(join(fixtureRoot, 'public'), { recursive: true });
   writeFileSync(
-    join(fixtureRoot, 'vercel.json'),
-    readFileSync(join(process.cwd(), 'vercel.json'), 'utf-8')
+    join(fixtureRoot, 'public', '_headers'),
+    readFileSync(join(process.cwd(), 'public', '_headers'), 'utf-8')
   );
 
   const manifestDir = join(fixtureRoot, 'dist', '.vite');

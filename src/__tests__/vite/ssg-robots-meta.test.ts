@@ -4,11 +4,11 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import { applyRobotsMeta } from '../../../vite/ssg-meta-injector';
-import { noindexRoutes, type VercelHeaderRule } from '../../../scripts/noindex-routes';
+import { shippedNoindexRoutes as readShippedNoindexRoutes } from '../../../scripts/noindex-routes';
 
 /**
  * `index.html:188` hardcodes `<meta name="robots" content="index, follow" />` and every
- * prerendered page inherits it — including the twenty paths `vercel.json` serves with
+ * prerendered page inherits it — including the twenty paths `public/_headers` serves with
  * `X-Robots-Tag: noindex` (GH#257). Google resolves a header/meta conflict toward the
  * restrictive directive, so its read stays interpretable; Bing and the AI crawlers publish no
  * such rule, and Bing Webmaster is on the citation path. The only state that survives a crawler
@@ -28,10 +28,7 @@ const ROOT = join(process.cwd());
 
 /** The real rules, not a hand-written fixture — the same read `generate-sitemap.ts` performs. */
 function shippedNoindexRoutes() {
-  const vercel = JSON.parse(readFileSync(join(ROOT, 'vercel.json'), 'utf-8')) as {
-    headers?: VercelHeaderRule[];
-  };
-  return noindexRoutes(vercel.headers ?? []);
+  return readShippedNoindexRoutes(ROOT);
 }
 
 /** The anchor as `index.html` actually writes it, read from the file rather than retyped. */
@@ -57,7 +54,7 @@ describe('applyRobotsMeta', () => {
    * The control, and it comes first: every assertion below is vacuous against an empty set.
    * `noindex-routes.ts` already throws on a site-wide rule for the mirror-image reason.
    */
-  it('derives a non-empty noindex set from the shipped vercel.json', () => {
+  it('derives a non-empty noindex set from the shipped _headers', () => {
     expect(routes.exact.size).toBeGreaterThan(0);
     expect(routes.matches('/results')).toBe(true);
     expect(routes.matches('/sample')).toBe(true);

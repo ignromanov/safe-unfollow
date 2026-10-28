@@ -9,7 +9,7 @@ import {
   type SupportedLanguage,
 } from '../src/config/languages.js';
 import { INTENT_PATHS } from '../src/config/intent-pages.js';
-import { noindexRoutes, type NoindexRoutes } from '../scripts/noindex-routes.js';
+import { shippedNoindexRoutes, type NoindexRoutes } from '../scripts/noindex-routes.js';
 
 const BASE_URL = 'https://safeunfollow.app';
 
@@ -143,22 +143,19 @@ function readViteManifest(rootDir: string): Record<string, ManifestChunk> {
 }
 
 /**
- * The X-Robots-Tag path set, read from `vercel.json` once per build. Cached on the same terms as
+ * The X-Robots-Tag path set, read from `public/_headers` once per build. Cached on the same terms as
  * the manifest above, and with the same caveat about rootDir.
  */
 let noindexCache: NoindexRoutes | null = null;
 
 function readNoindexRoutes(rootDir: string): NoindexRoutes {
   if (noindexCache) return noindexCache;
-  const vercel = JSON.parse(fs.readFileSync(path.join(rootDir, 'vercel.json'), 'utf-8')) as {
-    headers?: Array<{ source: string; headers: Array<{ key: string; value: string }> }>;
-  };
-  noindexCache = noindexRoutes(vercel.headers ?? []);
+  noindexCache = shippedNoindexRoutes(rootDir);
   return noindexCache;
 }
 
 /**
- * Make the page's `robots` meta agree with the `X-Robots-Tag` header `vercel.json` serves for
+ * Make the page's `robots` meta agree with the `X-Robots-Tag` header `public/_headers` serves for
  * the same path.
  *
  * `index.html` hardcodes `index, follow` and every prerendered page inherited it, including the
@@ -166,7 +163,7 @@ function readNoindexRoutes(rootDir: string): NoindexRoutes {
  * the restrictive directive; Bing and the AI crawlers publish no resolution rule, so the only
  * state that survives them is both surfaces saying the same thing.
  *
- * The path set is not restated here — `scripts/noindex-routes.ts` derives it from `vercel.json`,
+ * The path set is not restated here — `scripts/noindex-routes.ts` derives it from `_headers`,
  * and this is its second consumer. `generate-sitemap.ts` was the first; until now every consumer
  * was a test, which is why the discipline existed and the shipped page was never joined to it.
  *
@@ -366,7 +363,7 @@ export async function injectLocalizedMeta(
     ${preloadTags}
   `;
 
-  // OG image URL - static image for all languages (API doesn't work with Vercel SSG)
+  // OG image URL - static image for all languages (no per-locale image endpoint)
   const ogImageUrl = `${BASE_URL}/og-image.png`;
 
   // Replace all meta tags in HTML

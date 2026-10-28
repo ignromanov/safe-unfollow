@@ -5,11 +5,11 @@ import { expect, it } from 'vitest';
 import { describeDist } from '../utils/dist-gate';
 
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '../../config/languages';
-import { noindexRoutes, type VercelHeaderRule } from '../../../scripts/noindex-routes';
+import { shippedNoindexRoutes } from '../../../scripts/noindex-routes';
 
 /**
  * Every prerendered page shipped `<meta name="robots" content="index, follow" />`, inherited
- * from `index.html`, including the twenty paths `vercel.json` serves with
+ * from `index.html`, including the twenty paths `public/_headers` serves with
  * `X-Robots-Tag: noindex` (GH#257). Measured on production 2026-09-15: `/results` returned the
  * header and the opposite directive in the body, simultaneously.
  *
@@ -62,7 +62,7 @@ function prerenderedPages(): string[] {
     .sort();
 }
 
-/** cleanUrls is on and trailingSlash is off (vercel.json), so es/upload.html serves /es/upload. */
+/** html_handling is drop-trailing-slash (wrangler.jsonc), so es/upload.html serves /es/upload. */
 function urlPathOf(rel: string): string {
   const withoutExt = rel.replace(/\.html$/, '');
   return withoutExt === 'index' ? '/' : `/${withoutExt}`;
@@ -77,11 +77,8 @@ function basePathOf(urlPath: string): string {
   return isLocale ? urlPath.slice(`/${first}`.length) || '/' : urlPath;
 }
 
-/** Read from `vercel.json` the same way the generator and the injector do, not hand-listed. */
-const VERCEL = JSON.parse(readFileSync(join(root, 'vercel.json'), 'utf-8')) as {
-  headers?: VercelHeaderRule[];
-};
-const NOINDEX = noindexRoutes(VERCEL.headers ?? []);
+/** Read from `public/_headers` the same way the generator and the injector do, not hand-listed. */
+const NOINDEX = shippedNoindexRoutes(root);
 
 function robotsContentOf(html: string): string | undefined {
   return /<meta\s+name="robots"\s+content="([^"]*)"/.exec(html)?.[1];

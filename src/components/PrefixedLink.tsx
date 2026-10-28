@@ -36,7 +36,7 @@ export interface PrefixedLinkProps extends Omit<LinkProps, 'to'> {
  * written once, unprefixed, at the call site.
  *
  * The home link is the one case plain concatenation gets wrong: `'/ru' + '/'` is `/ru/`,
- * and `vercel.json` sets `trailingSlash: false`, so the browser would be 308-redirected to
+ * and `wrangler.jsonc` drops trailing slashes (`html_handling`), so the browser would be redirected to
  * `/ru` — an extra round trip in exactly the pre-hydration window this component exists to
  * make work, on the slow mobile connections that are 85% of traffic. Client-side
  * navigation normalised that away and hid it; an `href` does not.

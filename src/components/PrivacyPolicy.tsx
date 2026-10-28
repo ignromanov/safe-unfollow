@@ -24,7 +24,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
           </div>
           <h1 className="text-4xl md:text-5xl font-display font-bold">Privacy Policy</h1>
         </div>
-        <p className="text-muted-foreground text-lg">Last updated: October 26, 2026</p>
+        <p className="text-muted-foreground text-lg">Last updated: October 27, 2026</p>
       </header>
 
       {/* Content */}
@@ -223,17 +223,17 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
         <section>
           <h2 className="text-2xl font-bold mb-4">5. Third-Party Services</h2>
 
-          <h3 className="text-lg font-semibold mt-6 mb-3">5.1 Hosting (Vercel)</h3>
+          <h3 className="text-lg font-semibold mt-6 mb-3">5.1 Hosting (Cloudflare)</h3>
           <p className="text-muted-foreground">
-            Our website is hosted on Vercel. They may collect standard web server logs (IP
+            Our website is hosted on Cloudflare. They may collect standard web server logs (IP
             addresses, request timestamps) as part of their infrastructure. See{' '}
             <a
-              href="https://vercel.com/legal/privacy-policy"
+              href="https://www.cloudflare.com/privacypolicy/"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary-strong hover:underline"
             >
-              Vercel's Privacy Policy
+              Cloudflare's Privacy Policy
             </a>
             .
           </p>

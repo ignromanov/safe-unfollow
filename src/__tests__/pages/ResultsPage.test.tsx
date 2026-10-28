@@ -344,7 +344,7 @@ describe('ResultsPage', () => {
   describe('SSR/hydration parity', () => {
     it('renders the skeleton on the server even when the store already holds a successful file', () => {
       // `/results` ships prerendered from an empty store (dist/results.html, no rewrite in
-      // vercel.json). getServerSnapshot is the only thing standing between a returning
+      // wrangler.jsonc). getServerSnapshot is the only thing standing between a returning
       // visitor and a first render that disagrees with that prerendered HTML.
       useAppStore.setState({ uploadStatus: 'success', fileMetadata: FILE });
 

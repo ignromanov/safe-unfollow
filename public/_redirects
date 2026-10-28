@@ -1,0 +1,32 @@
+# Cloudflare Workers static-assets redirects (developers.cloudflare.com/workers/static-assets/redirects/).
+# [source] [destination] [status]. The top-most matching rule wins; static rules before dynamic.
+# Locale rules are spelled out per language (no regex groups here); a test checks each list
+# against SUPPORTED_LANGUAGES. 308 is what Vercel's `permanent: true` emitted.
+
+/assets/scr-full-mac.png /docs/assets/analysis-result.png 308
+/assets/scr-drop-data-mac.png /docs/assets/upload-zip.png 308
+/hi / 308
+
+# The wizard routes (GH#102): the guide is a dialog on /upload now.
+/wizard /upload 308
+/ar/wizard /ar/upload 308
+/de/wizard /de/upload 308
+/es/wizard /es/upload 308
+/fr/wizard /fr/upload 308
+/id/wizard /id/upload 308
+/ja/wizard /ja/upload 308
+/pt/wizard /pt/upload 308
+/ru/wizard /ru/upload 308
+/tr/wizard /tr/upload 308
+
+/hi/* /:splat 308
+/wizard/step/:step /upload 308
+/ar/wizard/step/:step /ar/upload 308
+/de/wizard/step/:step /de/upload 308
+/es/wizard/step/:step /es/upload 308
+/fr/wizard/step/:step /fr/upload 308
+/id/wizard/step/:step /id/upload 308
+/ja/wizard/step/:step /ja/upload 308
+/pt/wizard/step/:step /pt/upload 308
+/ru/wizard/step/:step /ru/upload 308
+/tr/wizard/step/:step /tr/upload 308

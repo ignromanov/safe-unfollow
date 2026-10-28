@@ -181,8 +181,8 @@ describeDist('prerendered CTA hrefs', hrefBuilt, () => {
     ({ page, prefix }) => {
       const html = readFileSync(join(dist, page), 'utf-8');
       for (const href of LANDING_HREFS) {
-        // The home link must carry NO trailing slash: vercel.json sets trailingSlash:false,
-        // so `/ru/` is a 308 to `/ru` — a wasted round trip in the very window these
+        // The home link must carry NO trailing slash: wrangler.jsonc drops trailing slashes,
+        // so `/ru/` is a redirect to `/ru` — a wasted round trip in the very window these
         // anchors exist to serve. English has no prefix, so it stays plain `/`.
         const expected = href === '/' ? prefix || '/' : `${prefix}${href}`;
         expect(html, `${page} is missing href="${expected}"`).toContain(`href="${expected}"`);

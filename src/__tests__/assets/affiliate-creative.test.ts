@@ -7,6 +7,8 @@ import { resolveAffiliateOffer } from '@/config/affiliate-offers';
 
 import type { AffiliateCreativeVariant } from '@/config/affiliate-offers';
 
+import { readHeaderRules } from '../../../scripts/static-config';
+
 /** 80 KB. The bandwidth diet (PR #7) exists; a banner must not undo it. */
 const BUDGET_BYTES = 80 * 1024;
 
@@ -74,12 +76,8 @@ const variants: ReadonlyArray<readonly [string, AffiliateCreativeVariant]> = [
  */
 describe('the affiliate creative is hosted, not published', () => {
   it('serves /affiliate/* with X-Robots-Tag: noindex', () => {
-    const config = JSON.parse(readFileSync(resolve(process.cwd(), 'vercel.json'), 'utf-8')) as {
-      headers: { source: string; headers: { key: string; value: string }[] }[];
-    };
-
-    const rule = config.headers.find(entry => entry.source === '/affiliate/(.*)');
-    expect(rule, 'vercel.json declares no header rule for /affiliate/(.*)').toBeDefined();
+    const rule = readHeaderRules().find(entry => entry.source === '/affiliate/*');
+    expect(rule, 'public/_headers declares no header rule for /affiliate/*').toBeDefined();
 
     const tag = rule?.headers.find(header => header.key === 'X-Robots-Tag');
     expect(tag?.value, 'the creative is indexable').toContain('noindex');
@@ -104,7 +102,7 @@ describe('affiliate creative', () => {
   });
 
   it.each(variants)('%s: is versioned, so an immutable cache stays safe', (_label, variant) => {
-    // `vercel.json` caches `/affiliate/*` for a year with `immutable`. Reusing a
+    // `public/_headers` caches `/affiliate/*` for a year with `immutable`. Reusing a
     // filename after that rule exists would pin returning visitors to the old
     // creative until their cache expired, with no way to push a correction.
     expect(variant.src).toMatch(/-v\d+-/);

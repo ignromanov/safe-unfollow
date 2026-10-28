@@ -13,8 +13,8 @@ import { useNavigate } from 'react-router-dom';
  * Results page (account list)
  *
  * This page IS prerendered, contrary to what this comment said until GH#49's follow-up:
- * `dist/results.html` is emitted on every build and `vercel.json` carries no rewrite for
- * `/results`, so with `cleanUrls` that file is what a visitor is served and what React
+ * `dist/results.html` is emitted on every build and `public/_redirects` carries no rewrite for
+ * `/results`, so with `html_handling` that file is what a visitor is served and what React
  * hydrates against. It is built from an empty store, so every store read here goes
  * through `useStoreSSR` and renders the no-data branch while hydrating — by construction,
  * not by relying on zustand persist's undocumented `getInitialState` pinning.

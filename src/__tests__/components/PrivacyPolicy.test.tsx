@@ -38,7 +38,7 @@ describe('PrivacyPolicy Component', () => {
     it('should render the last updated date', () => {
       render(<PrivacyPolicy onBack={mockOnBack} />);
 
-      expect(screen.getByText(/last updated: october 26, 2026/i)).toBeInTheDocument();
+      expect(screen.getByText(/last updated: october 27, 2026/i)).toBeInTheDocument();
     });
   });
 
@@ -220,13 +220,13 @@ describe('PrivacyPolicy Component', () => {
       expect(githubLink).toHaveAttribute('rel', 'noopener noreferrer');
     });
 
-    it('should render the Vercel privacy policy link', () => {
+    it('should render the Cloudflare privacy policy link', () => {
       render(<PrivacyPolicy onBack={mockOnBack} />);
 
-      const vercelLink = screen.getByRole('link', { name: /vercel's privacy policy/i });
-      expect(vercelLink).toBeInTheDocument();
-      expect(vercelLink).toHaveAttribute('href', 'https://vercel.com/legal/privacy-policy');
-      expect(vercelLink).toHaveAttribute('target', '_blank');
+      const hostLink = screen.getByRole('link', { name: /cloudflare's privacy policy/i });
+      expect(hostLink).toBeInTheDocument();
+      expect(hostLink).toHaveAttribute('href', 'https://www.cloudflare.com/privacypolicy/');
+      expect(hostLink).toHaveAttribute('target', '_blank');
     });
   });
 

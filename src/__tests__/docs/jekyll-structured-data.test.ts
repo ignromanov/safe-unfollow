@@ -292,7 +292,7 @@ describe('the docs layout emits structured data', () => {
    *
    * What the strip actually guards: without it, `page_canonical_url` (built from
    * `canonical_path`) and every ancestor `item` URL would carry the trailing slash Jekyll's
-   * pretty permalinks add — and Vercel's `trailingSlash: false` 308-redirects that URL away from
+   * pretty permalinks add — and the host's `drop-trailing-slash` handling redirects that URL away from
    * itself. The `@id`/`url` in the WebPage node and the `<link rel="canonical">` above it (built
    * from the same `canonical_path`) would then name an address that does not serve, disagreeing
    * with the URL search engines are actually shown — the same class of defect PR #204 fixed one

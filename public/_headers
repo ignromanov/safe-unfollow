@@ -1,0 +1,89 @@
+# Cloudflare Workers static-assets header rules (developers.cloudflare.com/workers/static-assets/headers/).
+# A request matching several rules gets the headers of all of them. Limit: 100 rules.
+#
+# Read by scripts/static-config.ts: the X-Robots-Tag rules below decide which routes the
+# sitemap omits and which prerendered pages carry <meta name="robots" content="noindex">.
+# Locale rules are spelled out per language (no regex groups here); a test checks each
+# list against SUPPORTED_LANGUAGES.
+
+/*
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  X-Content-Type-Options: nosniff
+  X-XSS-Protection: 1; mode=block
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://m.safeunfollow.app https://pagead2.googlesyndication.com https://*.googlesyndication.com https://fundingchoicesmessages.google.com https://*.adtrafficquality.google https://tally.so; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://m.safeunfollow.app https://live.dodopayments.com https://test.dodopayments.com https://*.doubleclick.net https://*.googlesyndication.com https://*.adtrafficquality.google https://fundingchoicesmessages.google.com; frame-src 'self' https://*.doubleclick.net https://*.googlesyndication.com https://*.adtrafficquality.google https://fundingchoicesmessages.google.com https://www.google.com https://tally.so; frame-ancestors https://m.safeunfollow.app; base-uri 'self'; form-action 'self'
+
+# The worker's own workers.dev host and its preview URLs are copies of the site.
+https://:name.:subdomain.workers.dev/*
+  X-Robots-Tag: noindex
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/wizard/step-*
+  Cache-Control: public, max-age=2592000
+
+/affiliate/*
+  Cache-Control: public, max-age=31536000, immutable
+  X-Robots-Tag: noindex
+
+/results
+  X-Robots-Tag: noindex
+/sample
+  X-Robots-Tag: noindex
+/ar/results
+  X-Robots-Tag: noindex
+/ar/sample
+  X-Robots-Tag: noindex
+/de/results
+  X-Robots-Tag: noindex
+/de/sample
+  X-Robots-Tag: noindex
+/es/results
+  X-Robots-Tag: noindex
+/es/sample
+  X-Robots-Tag: noindex
+/fr/results
+  X-Robots-Tag: noindex
+/fr/sample
+  X-Robots-Tag: noindex
+/id/results
+  X-Robots-Tag: noindex
+/id/sample
+  X-Robots-Tag: noindex
+/ja/results
+  X-Robots-Tag: noindex
+/ja/sample
+  X-Robots-Tag: noindex
+/pt/results
+  X-Robots-Tag: noindex
+/pt/sample
+  X-Robots-Tag: noindex
+/ru/results
+  X-Robots-Tag: noindex
+/ru/sample
+  X-Robots-Tag: noindex
+/tr/results
+  X-Robots-Tag: noindex
+/tr/sample
+  X-Robots-Tag: noindex
+
+/favicon.ico
+  Cache-Control: public, max-age=2592000
+/favicon-96x96.png
+  Cache-Control: public, max-age=2592000
+/favicon.svg
+  Cache-Control: public, max-age=2592000
+/apple-touch-icon.png
+  Cache-Control: public, max-age=2592000
+/android-chrome-*
+  Cache-Control: public, max-age=2592000
+/manifest.webmanifest
+  Cache-Control: public, max-age=2592000
+/logo.svg
+  Cache-Control: public, max-age=2592000
+/registerSW.js
+  Cache-Control: public, max-age=2592000
+/sw.js
+  Cache-Control: public, max-age=3600, must-revalidate
+/workbox-*.js
+  Cache-Control: public, max-age=31536000, immutable

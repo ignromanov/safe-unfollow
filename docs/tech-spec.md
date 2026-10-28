@@ -27,7 +27,7 @@ A privacy-focused, local web application that analyzes Instagram Data Download (
 - **100% local processing**: All data processing happens in the browser
 - **No Instagram login**: Uses official Instagram data export only
 - **Open source**: MIT license, full transparency and auditability
-- **Privacy-respecting analytics**: Umami (anonymous) + Vercel (performance only)
+- **Privacy-respecting analytics**: Umami (anonymous)
 
 ---
 
@@ -57,7 +57,7 @@ A privacy-focused, local web application that analyzes Instagram Data Download (
 ### Build & Deployment
 | Technology | Purpose |
 |------------|---------|
-| **Vercel** | Hosting with Edge Functions |
+| **Cloudflare Workers** | Static-asset hosting (`wrangler.jsonc`, `public/_headers`, `public/_redirects`) |
 | **vite-plugin-pwa** | PWA with 176 precached assets |
 | **@fontsource** | Self-hosted fonts (Inter, Plus Jakarta Sans) |
 | **@vercel/og** | Dynamic OG image generation |

@@ -19,7 +19,7 @@ interface ImportMetaEnv {
   /**
    * Where the Umami tracker is loaded from. Defaults to the analytics instance
    * directly; the same-origin proxy `/v/script.js` was removed 2026-09-14 because each
-   * hop through a `vercel.json` external rewrite bills its own Edge Request. Set this
+   * hop through a (then Vercel) external rewrite billed its own Edge Request. Set this
    * when `TRACKER_SCRIPT_NAME` renames the served file. GH#63.
    */
   readonly VITE_UMAMI_SRC?: string;
@@ -44,14 +44,14 @@ interface ImportMeta {
 
 /**
  * Build version, inlined by `define` in vite.config.ts: the short commit sha in
- * Vercel builds, `package.json`'s version otherwise. Used as the Tally feedback
+ * Workers Builds, `package.json`'s version otherwise. Used as the Tally feedback
  * form's `version` hidden field (src/lib/feedback/tally.ts) — never per-user.
  */
 declare const __APP_VERSION__: string;
 
 /**
  * `package.json`'s semver, inlined by `define` in vite.config.ts and vitest.config.ts.
- * Distinct from `__APP_VERSION__`, which becomes a commit sha in Vercel builds: this one is
+ * Distinct from `__APP_VERSION__`, which becomes a commit sha in CI builds: this one is
  * published as `SoftwareApplication.softwareVersion` in the home page's JSON-LD, where a sha
  * would be a malformed version string.
  */
