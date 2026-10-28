@@ -16,10 +16,15 @@ import { getExportRowCount, iterateAccountsForExport } from './data';
 import { toIsoDay } from './dates';
 import {
   escapeHtml,
+  renderCallout,
   renderFooter,
   renderHead,
+  renderMore,
   renderRow,
+  renderSample,
   renderSectionOpen,
+  renderTiles,
+  renderTitle,
   SECTION_CLOSE,
 } from './report-markup';
 import { SLOT, type ReportContext } from './report-context';
@@ -30,6 +35,7 @@ import {
   reportSection,
   rowLabels,
   type ReportSection,
+  type ReportPlan,
   type SectionCounts,
   type SectionPlan,
 } from './report-sections';
@@ -70,24 +76,22 @@ function renderBadgeRow(
 function renderCaveats(record: Record_, report: ReportContext): string {
   const { caveats } = report.strings;
   let out = '';
-  if (record?.followRequestsUnreadable) out += paragraph(caveats.followRequests, 'note');
+  if (record?.followRequestsUnreadable) out += renderCallout(caveats.followRequests);
   if (record && namesTruncatedFile(record.truncatedRelationshipFile ?? 'not-applicable')) {
-    out += paragraph(
+    out += renderCallout(
       record.truncatedRelationshipFile === 'followers'
         ? caveats.truncatedFollowers
-        : caveats.truncatedFollowing,
-      'note'
+        : caveats.truncatedFollowing
     );
   }
-  if (datesStale(record)) out += paragraph(caveats.datesStale, 'note');
+  if (datesStale(record)) out += renderCallout(caveats.datesStale);
   return out;
 }
 
 function renderHeader(
   record: Record_,
   report: ReportContext,
-  sections: SectionPlan[],
-  firstSectionTruncated: boolean,
+  plan: ReportPlan,
   now: number
 ): string {
   const { strings, lang } = report;
@@ -95,27 +99,42 @@ function renderHeader(
   const format = createFollowDateFormatter(lang);
   const day = (ms: number): string => format(ms / 1000, 'local');
 
-  let out = `<h1>${escapeHtml(strings.title)}</h1>`;
-  out += paragraph(fill(strings.madeOn, day(now)), 'meta');
+  const meta = [fill(strings.madeOn, day(now))];
   const uploaded = record ? new Date(record.uploadDate).getTime() : NaN;
   if (
     Number.isFinite(uploaded) &&
     toIsoDay(uploaded / 1000, 'local') !== toIsoDay(now / 1000, 'local')
   ) {
-    out += paragraph(fill(strings.uploadedOn, day(uploaded)), 'meta');
+    meta.push(fill(strings.uploadedOn, day(uploaded)));
   }
+  let out = renderTitle(strings.title);
+  out += paragraph(meta.join(' · '), 'meta');
   out += paragraph(strings.scope, 'meta');
   if (strings.searchNarrowed !== null) out += paragraph(strings.searchNarrowed, 'meta');
-  if (strings.sampleLine !== null) out += paragraph(strings.sampleLine, 'meta');
-  if (sections.length > 0) {
-    const summary = sections
-      .map(s => `${strings.sectionHeadings[s.section]}: ${num.format(s.total)}`)
-      .join(' · ');
-    out += paragraph(summary, 'meta');
+  out += renderTiles(
+    plan.sections.map(s => ({
+      section: s.section,
+      count: num.format(s.total),
+      label: strings.sectionHeadings[s.section],
+      explain: strings.explain[s.section],
+    }))
+  );
+  if (strings.sample !== null && plan.sections.some(s => s.rendered < s.total)) {
+    const shown = plan.sections.reduce((sum, s) => sum + s.rendered, 0);
+    const total = plan.sections.reduce((sum, s) => sum + s.total, 0);
+    out += renderSample({
+      head: strings.sample.head,
+      body: strings.sample.body,
+      shown,
+      total,
+      barLabel: `${num.format(shown)} / ${num.format(total)}`,
+      cta: strings.sample.cta,
+      ctaSub: strings.sample.ctaSub,
+    });
   }
   out += renderCaveats(record, report);
-  if (firstSectionTruncated) {
-    out += paragraph(fill(strings.ceilingTop, num.format(HTML_REPORT_MAX_ROWS)), 'note');
+  if (plan.firstSectionTruncated) {
+    out += renderCallout(fill(strings.ceilingTop, num.format(HTML_REPORT_MAX_ROWS)));
   }
   return out;
 }
@@ -124,6 +143,23 @@ function sectionNote(plan: SectionPlan, report: ReportContext): string | null {
   // Under a sample the sample line already says rows were left out.
   if (report.sampleLimit !== null || plan.rendered >= plan.total) return null;
   return fill(report.strings.ceilingSection, new Intl.NumberFormat(report.lang).format(plan.total));
+}
+
+function sectionParts(s: SectionPlan, report: ReportContext, rows: string[]): string[] {
+  const num = new Intl.NumberFormat(report.lang);
+  const { sample } = report.strings;
+  const open = renderSectionOpen({
+    id: s.section,
+    heading: report.strings.sectionHeadings[s.section],
+    count: num.format(s.total),
+    explain: report.strings.explain[s.section],
+    note: sectionNote(s, report),
+  });
+  const more =
+    sample !== null && s.rendered < s.total
+      ? [renderMore(fill(sample.more, num.format(s.total - s.rendered)))]
+      : [];
+  return [open, ...rows, ...more, SECTION_CLOSE];
 }
 
 export async function buildExportHtml(
@@ -184,7 +220,6 @@ export async function buildExportHtml(
   // Pass 2 stops once every budget is spent; the export is still complete.
   onProgress?.({ processed: total, total });
 
-  const num = new Intl.NumberFormat(report.lang);
   const now = Date.now();
   const madeDate = format(now / 1000, 'local');
   const parts: string[] = [
@@ -193,20 +228,14 @@ export async function buildExportHtml(
       dir: report.dir,
       title: `${report.strings.title} · ${madeDate}`,
     }) + '</head><body><main>',
-    renderHeader(record, report, plan.sections, plan.firstSectionTruncated, now),
+    renderHeader(record, report, plan, now),
   ];
   for (const s of plan.sections) {
-    parts.push(
-      renderSectionOpen({
-        id: s.section,
-        heading: report.strings.sectionHeadings[s.section],
-        count: num.format(s.total),
-        note: sectionNote(s, report),
-      }),
-      ...(rowParts.get(s.section) ?? []),
-      SECTION_CLOSE
-    );
+    parts.push(...sectionParts(s, report, rowParts.get(s.section) ?? []));
   }
-  parts.push(renderFooter(report.strings.footer), '</main></body></html>');
+  parts.push(
+    renderFooter(report.strings.footer, report.strings.privacyLine),
+    '</main></body></html>'
+  );
   return new Blob(parts, { type: 'text/html;charset=utf-8' });
 }

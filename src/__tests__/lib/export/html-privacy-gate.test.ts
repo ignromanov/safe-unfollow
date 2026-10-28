@@ -151,6 +151,8 @@ async function fixtures(): Promise<Record<string, string>> {
     ceiling.value = 50_000;
   }
   await run('sample', { sampleLimit: 2 });
+  // A limit of 2 over HOSTILE leaves every later section with zero rendered rows.
+  await run('sample-all-cut', { sampleLimit: 2 });
   await run('rtl', { lang: 'ar', dir: 'rtl' });
   getFileMetadata.mockResolvedValue({ ...RECORD, dateZones: undefined });
   await run('stale');
@@ -179,7 +181,10 @@ describe('html report privacy gate', () => {
     const files = await fixtures();
     expect(files['ceiling']).toContain('CEILING_TOP');
     expect(files['sample']).not.toContain('CEILING_TOP');
-    expect(files['sample']).toContain('SAMPLE_LINE');
+    expect(files['sample']).toContain('SAMPLE_HEAD');
+    expect(files['sample']).toContain('SAMPLE_CTA');
+    expect(files['sample-all-cut']).toContain('MORE');
+    expect(files['sample-all-cut']).toContain('PRIVACY_LINE');
     expect(files['stale']).toContain('CAVEAT_DATES_STALE');
     expect(files['ceiling']).toContain('<time');
     expect(files['ceiling']).toContain('CAVEAT_FOLLOW_REQUESTS');
@@ -237,6 +242,13 @@ describe('strings html.ts writes itself are escaped', () => {
     st.ceilingTop = `${tag('CEIL_TOP')} ${SLOT}`;
     st.ceilingSection = `${tag('CEIL_SECTION')} ${SLOT}`;
     st.footer = tag('FOOTER');
+    st.privacyLine = tag('PRIVACY');
+    st.explain = {
+      notFollowingBack: tag('X_NFB'),
+      notFollowedBack: tag('X_NFDB'),
+      mutuals: tag('X_MUT'),
+      other: tag('X_OTHER'),
+    };
     return report;
   }
 
@@ -275,7 +287,14 @@ describe('strings html.ts writes itself are escaped', () => {
       'UPLOADED',
       'SCOPE',
       'SEARCH',
-      'SAMPLE',
+      'SAMPLE_HEAD',
+      'SAMPLE_BODY',
+      'SAMPLE_MORE',
+      'SAMPLE_CTA',
+      'SAMPLE_CTA_SUB',
+      'PRIVACY',
+      'X_NFB',
+      'X_MUT',
       'H_NFB',
       'H_NFDB',
       'H_MUT',

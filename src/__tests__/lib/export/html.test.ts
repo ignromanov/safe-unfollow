@@ -1,6 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AccountBadges } from '@/core/types';
 import { createFollowDateFormatter } from '@/lib/follow-dates';
+import { SLOT } from '@/lib/export/report-context';
+import { REPORT_SITE_URL } from '@/lib/export/report-markup';
 import { makeReport, readBlobText } from '../../utils/report-context-fixture';
 
 const { getAccountsByRange, getFileMetadata } = vi.hoisted(() => ({
@@ -14,6 +16,8 @@ vi.mock('@/lib/indexeddb/indexeddb-service', () => ({
 
 const { buildExportHtml } = await import('@/lib/export/html');
 const { buildExportCsv } = await import('@/lib/export/csv');
+const { readFileSync } = await import('node:fs');
+const { resolve } = await import('node:path');
 
 function account(username: string, badges: AccountBadges['badges'] = {}): AccountBadges {
   return { username, badges };
@@ -46,6 +50,22 @@ async function build(
 ): Promise<string> {
   return readBlobText(await buildExportHtml('hash', indices, n, report));
 }
+
+function sampled(limit: number): ReturnType<typeof makeReport> {
+  const report = makeReport({ sampleLimit: limit });
+  report.strings.sample = {
+    head: 'SAMPLE_HEAD',
+    body: 'SAMPLE_BODY',
+    more: `MORE ${SLOT}`,
+    cta: 'SAMPLE_CTA',
+    ctaSub: 'SAMPLE_CTA_SUB',
+  };
+  return report;
+}
+
+const parse = (html: string): Document => new DOMParser().parseFromString(html, 'text/html');
+const siteAnchors = (html: string): Element[] =>
+  [...parse(html).querySelectorAll('a')].filter(a => a.getAttribute('href') === REPORT_SITE_URL);
 
 const rows = (html: string): number => html.split('<li class="row">').length - 1;
 
@@ -96,8 +116,7 @@ describe('buildExportHtml', () => {
       ...Array.from({ length: 4 }, (_, i) => account(`c${i}`, { notFollowingBack: true })),
     ];
     serveList(list);
-    const report = makeReport({ sampleLimit: 10 });
-    report.strings.sampleLine = 'SAMPLE_LINE';
+    const report = sampled(10);
     const html = await build(list.length, report);
     const doc = new DOMParser().parseFromString(html, 'text/html');
     const bySection = (id: string): string[] =>
@@ -114,15 +133,57 @@ describe('buildExportHtml', () => {
     ] as const) {
       expect(doc.querySelector(`#${id} .count`)?.textContent).toBe(count);
     }
-    expect(html).toContain('SAMPLE_LINE');
-    // The sample line speaks for the cut; sections carry no ceiling note under a sample.
+    expect(doc.querySelector('aside.sample')?.textContent).toContain('SAMPLE_HEAD');
+    // The sample block speaks for the cut; sections carry no ceiling note under a sample.
     expect(html).not.toContain('CEILING_SECTION');
     expect(html).not.toContain('CEILING_TOP');
   });
 
-  it('carries no sample line for a paid file', async () => {
+  it('a paid file has no sample block and no +K rows', async () => {
     serveList([account('a', { mutuals: true })]);
-    expect(await build(1)).not.toContain('SAMPLE_LINE');
+    const html = await build(1);
+    expect(html).not.toContain('class="sample"');
+    expect(html).not.toContain('class="more"');
+  });
+
+  it('a sample that cuts several sections closes each with one +K row', async () => {
+    serveList([
+      ...Array.from({ length: 4 }, (_, i) => account(`c${i}`, { notFollowingBack: true })),
+      ...Array.from({ length: 3 }, (_, i) => account(`b${i}`, { notFollowedBack: true })),
+      ...Array.from({ length: 5 }, (_, i) => account(`a${i}`, { mutuals: true })),
+    ]);
+    const doc = parse(await build(12, sampled(6)));
+    const more = (id: string): string[] =>
+      [...doc.querySelectorAll(`#${id} li.more`)].map(li => li.textContent ?? '');
+    expect(more('notFollowingBack')).toEqual([]);
+    expect(more('notFollowedBack')).toEqual(['MORE 1']);
+    expect(more('mutuals')).toEqual(['MORE 5']);
+  });
+
+  it('tiles follow the present sections and carry totals, not rendered counts', async () => {
+    serveList(Array.from({ length: 12 }, (_, i) => account(`a${i}`, { mutuals: true })));
+    const doc = parse(await build(12, sampled(10)));
+    const tiles = doc.querySelectorAll('.tile');
+    expect(tiles).toHaveLength(1);
+    expect(tiles[0]?.classList.contains('t-mutuals')).toBe(true);
+    expect(tiles[0]?.querySelector('.n')?.textContent).toBe('12');
+  });
+
+  it('an empty view still closes with the footer and has no tiles, sample or sections', async () => {
+    serveList([account('a', { mutuals: true })]);
+    const html = await build(1, sampled(10), []);
+    const doc = parse(html);
+    expect(doc.querySelector('.tile')).toBeNull();
+    expect(doc.querySelector('.sample')).toBeNull();
+    expect(doc.querySelector('details')).toBeNull();
+    expect(doc.querySelector('footer')?.textContent).toContain('FOOTER_TEXT');
+  });
+
+  it('caveats render as callouts', async () => {
+    getFileMetadata.mockResolvedValue(record({ followRequestsUnreadable: true }));
+    serveList([account('a', { mutuals: true })]);
+    const doc = parse(await build(1));
+    expect(doc.querySelector('.callout')?.textContent).toContain('CAVEAT_FOLLOW_REQUESTS');
   });
 
   // 01:30 UTC on 1 March is still 29 February west of UTC, so the two zones disagree on the day
@@ -204,6 +265,7 @@ describe('buildExportHtml', () => {
     );
     expect(html).toContain(`<title>REPORT_TITLE · ${made}</title>`);
     expect(html).toContain('<h1>REPORT_TITLE</h1>');
+    expect(html).toContain('<div class="top">');
   });
 
   it('drops a label that has no resolved string instead of printing the internal key', async () => {
@@ -213,12 +275,34 @@ describe('buildExportHtml', () => {
     expect(html).not.toContain('restricted');
   });
 
-  it('closes the document with exactly one site link carrying the footer', async () => {
+  it('a paid file has exactly one site link, and it is the last link', async () => {
     serveList([account('a', { mutuals: true })]);
     const html = await build(1);
-    const link = '<a href="https://safeunfollow.app/?from=report" rel="noreferrer">';
-    expect(html.split(link).length - 1).toBe(1);
-    expect(html).toContain(`${link}FOOTER_TEXT</a>`);
+    expect(siteAnchors(html)).toHaveLength(1);
+    const links = [...parse(html).querySelectorAll('a')];
+    expect(links.at(-1)?.getAttribute('href')).toBe(REPORT_SITE_URL);
+    expect(links.at(-1)?.textContent).toBe('FOOTER_TEXT');
+  });
+
+  it('an uncapped free file has exactly one site link', async () => {
+    serveList([account('a', { mutuals: true })]);
+    const html = await build(1, makeReport({ sampleLimit: null }));
+    expect(parse(html).querySelector('.sample')).toBeNull();
+    expect(siteAnchors(html)).toHaveLength(1);
+  });
+
+  it('a capped sample has two site links, the extra one is the sample CTA', async () => {
+    serveList(Array.from({ length: 12 }, (_, i) => account(`a${i}`, { mutuals: true })));
+    const html = await build(12, sampled(10));
+    const doc = parse(html);
+    expect(siteAnchors(html)).toHaveLength(2);
+    expect(doc.querySelector('aside.sample a.cta')?.getAttribute('href')).toBe(REPORT_SITE_URL);
+    expect([...doc.querySelectorAll('a')].at(-1)?.textContent).toBe('FOOTER_TEXT');
+  });
+
+  it('html.ts never writes the site URL itself', () => {
+    const src = readFileSync(resolve(__dirname, '../../../lib/export/html.ts'), 'utf8');
+    expect(src).not.toMatch(/safeunfollow\.app/);
   });
 
   describe('header dates', () => {
