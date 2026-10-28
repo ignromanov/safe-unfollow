@@ -180,16 +180,16 @@
   },
   "export": {
     "trigger": "Exportar",
-    "freeHint": "Grátis — as primeiras {{rows}} linhas",
+    "freeHint": "Grátis — um relatório com as primeiras {{rows}} contas",
     "saved": {
-      "capped": "{{filename}} salvo — as primeiras {{rows}} de {{total}} linhas",
-      "full": "{{filename}} salvo — todas as {{total}} linhas"
+      "capped": "{{filename}} salvo — as primeiras {{rows}} de {{total}} contas",
+      "full": "{{filename}} salvo — todas as {{total}} contas"
     },
     "paywall": {
       "listLabel": "contas neste filtro",
       "legendSample": "Já é seu — as primeiras {{rows}}",
       "legendRest": "O resto da sua lista",
-      "gap": "Seu arquivo gratuito termina na linha {{rows}}. A exportação leva todas as {{total}} — um arquivo, um pagamento, não é uma assinatura.",
+      "gap": "Seu relatório gratuito traz todos os totais, mas lista só as primeiras {{rows}} contas. A exportação lista todas as {{total}}, como relatório, CSV ou JSON — um pagamento, não é uma assinatura.",
       "cta": "Desbloquear exportação — {{price}}",
       "opening": "Abrindo o pagamento…",
       "failed": "O pagamento não abriu — tente de novo",
@@ -237,7 +237,7 @@
       "csv": "Baixar CSV",
       "json": "Baixar JSON",
       "csvHint": "Abre no Excel, Google Sheets e Numbers",
-      "jsonHint": "Para scripts ou para carregar de volta depois",
+      "jsonHint": "Para scripts e suas próprias ferramentas",
       "html": "Baixar relatório",
       "htmlHint": "Abre no navegador do celular ou do computador. Imprima para salvar em PDF.",
       "htmlCeiling": "O relatório lista até {{max}} contas. O CSV tem todas as {{count}}.",
@@ -267,8 +267,8 @@
       "footer": "Feito com SafeUnfollow",
       "caveat": {
         "followRequests": "“Não te seguem de volta” pode estar inflado. Não conseguimos ler o seu arquivo de solicitações de seguir, então contas para as quais você enviou uma solicitação podem aparecer ali em vez de em “Outras”. “Você não segue de volta” e “Mútuos” não são afetados.",
-        "truncatedFollowers": "A sua lista de seguidores parece incompleta. Ela começa muito depois da sua lista de seguindo, que é o que acontece quando uma exportação é pedida para um período limitado. Se você escolheu um período, peça os seus dados ao Instagram de novo com o período definido como \"Todo o período\". Algumas contas em “Não te seguem de volta”, “Você não segue de volta” e “Mútuos” podem estar na seção errada ou faltar, então essas contagens podem estar altas ou baixas demais.",
-        "truncatedFollowing": "A sua lista de seguindo parece incompleta. Ela começa muito depois da sua lista de seguidores, que é o que acontece quando uma exportação é pedida para um período limitado. Se você escolheu um período, peça os seus dados ao Instagram de novo com o período definido como \"Todo o período\". Algumas contas em “Não te seguem de volta”, “Você não segue de volta” e “Mútuos” podem estar na seção errada ou faltar, então essas contagens podem estar altas ou baixas demais.",
+        "truncatedFollowers": "A sua lista de seguidores parece incompleta. Ela começa muito depois da sua lista de quem você segue, que é o que acontece quando uma exportação é pedida para um período limitado. Se você escolheu um período, peça os seus dados ao Instagram de novo com o período definido como \"Todo o período\". Algumas contas em “Não te seguem de volta”, “Você não segue de volta” e “Mútuos” podem estar na seção errada ou faltar, então essas contagens podem estar altas ou baixas demais.",
+        "truncatedFollowing": "A sua lista de quem você segue parece incompleta. Ela começa muito depois da sua lista de seguidores, que é o que acontece quando uma exportação é pedida para um período limitado. Se você escolheu um período, peça os seus dados ao Instagram de novo com o período definido como \"Todo o período\". Algumas contas em “Não te seguem de volta”, “Você não segue de volta” e “Mútuos” podem estar na seção errada ou faltar, então essas contagens podem estar altas ou baixas demais.",
         "datesStale": "Este relatório não tem datas: a exportação foi aberta antes de o SafeUnfollow guardá-las. Abra o mesmo ZIP do Instagram no SafeUnfollow de novo e exporte um relatório novo."
       },
       "explain": {

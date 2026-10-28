@@ -180,16 +180,16 @@
   },
   "export": {
     "trigger": "Exportieren",
-    "freeHint": "Kostenlos — die ersten {{rows}} Zeilen",
+    "freeHint": "Kostenlos — ein Bericht mit den ersten {{rows}} Konten",
     "saved": {
-      "capped": "{{filename}} gespeichert — die ersten {{rows}} von {{total}} Zeilen",
-      "full": "{{filename}} gespeichert — alle {{total}} Zeilen"
+      "capped": "{{filename}} gespeichert — die ersten {{rows}} von {{total}} Konten",
+      "full": "{{filename}} gespeichert — alle {{total}} Konten"
     },
     "paywall": {
       "listLabel": "Konten in dieser Auswahl",
       "legendSample": "Schon deins — die ersten {{rows}}",
       "legendRest": "Der Rest deiner Liste",
-      "gap": "Deine kostenlose Datei endet bei Zeile {{rows}}. Der Export nimmt alle {{total}} — eine Datei, eine Zahlung, kein Abo.",
+      "gap": "Dein kostenloser Bericht zeigt alle Zahlen, listet aber nur die ersten {{rows}} Konten. Der Export listet alle {{total}} — als Bericht, CSV oder JSON, eine Zahlung, kein Abo.",
       "cta": "Export freischalten — {{price}}",
       "opening": "Bezahlseite wird geöffnet…",
       "failed": "Die Bezahlseite hat sich nicht geöffnet — erneut versuchen",
@@ -237,7 +237,7 @@
       "csv": "CSV herunterladen",
       "json": "JSON herunterladen",
       "csvHint": "Öffnet sich in Excel, Google Sheets und Numbers",
-      "jsonHint": "Für Skripte oder zum späteren Wiedereinlesen",
+      "jsonHint": "Für Skripte und eigene Tools",
       "html": "Bericht herunterladen",
       "htmlHint": "Öffnet sich im Browser auf Handy oder Computer. Drucke ihn, um ein PDF zu speichern.",
       "htmlCeiling": "Der Bericht listet bis zu {{max}} Konten. Die CSV enthält alle {{count}}.",
@@ -269,7 +269,7 @@
         "followRequests": "„Folgt dir nicht zurück“ ist möglicherweise zu hoch. Wir konnten deine Datei mit den Follow-Anfragen nicht lesen. Konten, denen du eine Anfrage geschickt hast, können deshalb dort statt unter „Sonstige“ stehen. „Du folgst nicht zurück“ und „Gegenseitig“ sind davon nicht betroffen.",
         "truncatedFollowers": "Deine Follower-Liste wirkt unvollständig. Sie beginnt deutlich später als deine Gefolgt-Liste, und genau das passiert, wenn ein Export für einen begrenzten Zeitraum angefordert wird. Falls du einen Zeitraum gewählt hast, fordere deine Daten bei Instagram erneut an und setze den Zeitraum auf \"Gesamter Zeitraum\". Einige Konten in „Folgt dir nicht zurück“, „Du folgst nicht zurück“ und „Gegenseitig“ stehen womöglich im falschen Abschnitt oder fehlen, deshalb können diese Zahlen zu hoch oder zu niedrig sein.",
         "truncatedFollowing": "Deine Gefolgt-Liste wirkt unvollständig. Sie beginnt deutlich später als deine Follower-Liste, und genau das passiert, wenn ein Export für einen begrenzten Zeitraum angefordert wird. Falls du einen Zeitraum gewählt hast, fordere deine Daten bei Instagram erneut an und setze den Zeitraum auf \"Gesamter Zeitraum\". Einige Konten in „Folgt dir nicht zurück“, „Du folgst nicht zurück“ und „Gegenseitig“ stehen womöglich im falschen Abschnitt oder fehlen, deshalb können diese Zahlen zu hoch oder zu niedrig sein.",
-        "datesStale": "Dieser Bericht enthält keine Datumsangaben: Der Export wurde geöffnet, bevor SafeUnfollow sie aufbewahrt hat. Öffne dasselbe Instagram ZIP erneut in SafeUnfollow und exportiere einen neuen Bericht."
+        "datesStale": "Dieser Bericht enthält keine Datumsangaben: Der Export wurde geöffnet, bevor SafeUnfollow sie aufbewahrt hat. Öffne dieselbe Instagram-ZIP-Datei erneut in SafeUnfollow und exportiere einen neuen Bericht."
       },
       "explain": {
         "notFollowingBack": "Du folgst diesen Konten. Sie folgen dir nicht.",
@@ -292,6 +292,6 @@
     "followers": "Folgt dir seit dem {{date}}",
     "mutual": "Gegenseitig seit dem {{date}}",
     "requested": "Anfrage gesendet am {{date}}",
-    "staleHint": "Lade dein Instagram ZIP erneut hoch, um die Datumsangaben zu sehen. Dieselbe Datei reicht."
+    "staleHint": "Lade deine Instagram-ZIP-Datei erneut hoch, um die Datumsangaben zu sehen. Dieselbe Datei reicht."
   }
 }
