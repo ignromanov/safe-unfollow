@@ -7,9 +7,13 @@ type Env = Record<string, string | undefined>;
 /** The production branch: the one whose builds `wrangler deploy` promotes. */
 export const PRODUCTION_BRANCH = 'main';
 
-/** Short commit sha on Workers Builds, `package.json`'s version anywhere else. */
+/**
+ * Short commit sha on Workers Builds (or on Vercel, which keeps serving the domain until
+ * the cut-over), `package.json`'s version anywhere else.
+ */
 export function buildVersion(env: Env, pkgVersion: string): string {
-  return env.WORKERS_CI_COMMIT_SHA?.slice(0, 7) || pkgVersion;
+  const sha = env.WORKERS_CI_COMMIT_SHA || env.VERCEL_GIT_COMMIT_SHA;
+  return sha?.slice(0, 7) || pkgVersion;
 }
 
 /**

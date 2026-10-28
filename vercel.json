@@ -1,0 +1,235 @@
+{
+  "version": 2,
+  "git": {
+    "deploymentEnabled": {
+      "dependabot/**": false
+    }
+  },
+  "buildCommand": "npm run build && cd docs && bundle install && bundle exec jekyll build -d ../dist/docs",
+  "outputDirectory": "dist",
+  "installCommand": "npm install",
+  "ignoreCommand": "node scripts/vercel-should-build.mjs",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "instagram-unfollow-tracker.vercel.app"
+        }
+      ],
+      "destination": "https://safeunfollow.app/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/assets/scr-full-mac.png",
+      "destination": "/docs/assets/analysis-result.png",
+      "permanent": true
+    },
+    {
+      "source": "/assets/scr-drop-data-mac.png",
+      "destination": "/docs/assets/upload-zip.png",
+      "permanent": true
+    },
+    {
+      "source": "/hi",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/hi/:path*",
+      "destination": "/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/wizard/step/:step",
+      "destination": "/upload",
+      "permanent": true
+    },
+    {
+      "source": "/:lang(ar|de|es|fr|id|ja|pt|ru|tr)/wizard/step/:step",
+      "destination": "/:lang/upload",
+      "permanent": true
+    },
+    {
+      "source": "/wizard",
+      "destination": "/upload",
+      "permanent": true
+    },
+    {
+      "source": "/:lang(ar|de|es|fr|id|ja|pt|ru|tr)/wizard",
+      "destination": "/:lang/upload",
+      "permanent": true
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/docs/:path*",
+      "destination": "/docs/:path*"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains; preload"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://m.safeunfollow.app https://vercel.live https://pagead2.googlesyndication.com https://*.googlesyndication.com https://fundingchoicesmessages.google.com https://*.adtrafficquality.google https://tally.so; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://m.safeunfollow.app https://live.dodopayments.com https://test.dodopayments.com https://vercel.live https://*.doubleclick.net https://*.googlesyndication.com https://*.adtrafficquality.google https://fundingchoicesmessages.google.com; frame-src 'self' https://vercel.live https://*.doubleclick.net https://*.googlesyndication.com https://*.adtrafficquality.google https://fundingchoicesmessages.google.com https://www.google.com https://tally.so; frame-ancestors https://m.safeunfollow.app; base-uri 'self'; form-action 'self'"
+        }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/wizard/step-(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=2592000"
+        }
+      ]
+    },
+    {
+      "source": "/affiliate/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
+    },
+    {
+      "source": "/:path(results|sample)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
+    },
+    {
+      "source": "/:lang(ar|de|es|fr|id|ja|pt|ru|tr)/:path(results|sample)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
+    },
+    {
+      "source": "/favicon.ico",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=2592000"
+        }
+      ]
+    },
+    {
+      "source": "/favicon-96x96.png",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=2592000"
+        }
+      ]
+    },
+    {
+      "source": "/apple-touch-icon.png",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=2592000"
+        }
+      ]
+    },
+    {
+      "source": "/android-chrome-(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=2592000"
+        }
+      ]
+    },
+    {
+      "source": "/manifest.webmanifest",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=2592000"
+        }
+      ]
+    },
+    {
+      "source": "/favicon.svg",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=2592000"
+        }
+      ]
+    },
+    {
+      "source": "/logo.svg",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=2592000"
+        }
+      ]
+    },
+    {
+      "source": "/registerSW.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=2592000"
+        }
+      ]
+    },
+    {
+      "source": "/sw.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/workbox-:hash.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ]
+}

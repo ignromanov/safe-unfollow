@@ -12,8 +12,9 @@
     // Serves the nearest 404.html with a 404 status, as Vercel's static fallback did.
     "not_found_handling": "404-page",
   },
-  // No `routes` yet: safeunfollow.app is still served by Vercel while this Worker is
-  // checked on workers.dev. The cut-over adds
+  // No `routes` yet: safeunfollow.app is still served by Vercel (vercel.json stays until
+  // then, so a merge to main keeps production unchanged) while this Worker is checked on
+  // workers.dev. The cut-over adds
   //   "routes": [{ "pattern": "safeunfollow.app", "custom_domain": true }]
   // and, because the zone is already on Cloudflare, takes the apex on the next deploy.
   // workers.dev stays on for branch previews; _headers marks it noindex.
