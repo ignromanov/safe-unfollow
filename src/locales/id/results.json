@@ -202,11 +202,11 @@
     },
     "checkout": {
       "privacy": "Ekspor Instagram Anda tetap di browser ini. Halaman pembayaran tidak pernah melihatnya.",
-      "summary": "{{rows}} baris · laporan + CSV + JSON · {{price}}, sekali bayar.",
+      "summary": "{{rows}} akun · laporan + CSV + JSON · {{price}}, sekali bayar.",
       "methods": "Kartu dan metode pembayaran lokal ditampilkan di halaman berikutnya."
     },
     "license": {
-      "title": "Aktifkan ekspor Anda",
+      "title": "Buka ekspor Anda",
       "activating": "Membuka…",
       "manualDescription": "Masukkan kunci lisensi dari email pembelian Anda untuk membuka ekspor di browser ini.",
       "placeholder": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
@@ -245,9 +245,9 @@
       "generating": "Membuat… {{percent}}%",
       "buildingTitle": "Menyiapkan file Anda",
       "buildingNote": "Ekspor Anda dibuat di sini, di browser ini.",
-      "progress": "{{done}} dari {{total}} baris",
+      "progress": "{{done}} dari {{total}} akun",
       "savedTitle": "Tersimpan di perangkat Anda",
-      "savedBody": "{{filename}} — semua {{total}} baris.",
+      "savedBody": "{{filename}} — semua {{total}} akun.",
       "savedWhere": "Cek folder Unduhan Anda. Di iPhone, lihat di File › Unduhan.",
       "done": "Selesai",
       "again": "Ekspor lagi",

@@ -45,7 +45,8 @@ describe('CheckoutHandoff', () => {
   it('should say what is being bought, in the reader own number format', () => {
     renderHandoff();
 
-    expect(screen.getByText(/8,930 rows/)).toBeInTheDocument();
+    // "accounts", not "rows": the reader's unit everywhere else in the flow.
+    expect(screen.getByText(/8,930 accounts/)).toBeInTheDocument();
     expect(screen.getByText(/report \+ CSV \+ JSON/)).toBeInTheDocument();
   });
 

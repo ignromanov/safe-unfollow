@@ -202,7 +202,7 @@
     },
     "checkout": {
       "privacy": "Instagramのエクスポートはこのブラウザに留まります。決済ページがそれを見ることはありません。",
-      "summary": "{{rows}}行・レポート + CSV + JSON・{{price}}、一度きり。",
+      "summary": "{{rows}}件・レポート + CSV + JSON・{{price}}、一度きり。",
       "methods": "カードと各国の決済方法は次のページに表示されます。"
     },
     "license": {
@@ -245,9 +245,9 @@
       "generating": "生成中… {{percent}}%",
       "buildingTitle": "ファイルを作成しています",
       "buildingNote": "エクスポートはこのブラウザ内で作成されます。",
-      "progress": "{{total}} 行中 {{done}} 行",
+      "progress": "{{total}}件中{{done}}件",
       "savedTitle": "デバイスに保存しました",
-      "savedBody": "{{filename}} — 全 {{total}} 行。",
+      "savedBody": "{{filename}} — 全{{total}}件。",
       "savedWhere": "「ダウンロード」フォルダをご確認ください。iPhone では「ファイル」›「ダウンロード」にあります。",
       "done": "完了",
       "again": "もう一度エクスポート",
