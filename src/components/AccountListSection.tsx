@@ -174,11 +174,11 @@ export function AccountListSection({
   );
 
   // The ROUTER's search string, never `window.location.search`. `unlock.ts`
-  // calls `window.history.replaceState` on every /results view to strip the
-  // licence and checkout params, and @remix-run/router resyncs only on
-  // `popstate` — which `replaceState` does not fire. From that call onward the
-  // two disagree permanently, and the sessions where they disagree are the ones
-  // that bought an export.
+  // strips the licence and checkout params with `window.history.replaceState`,
+  // and @remix-run/router resyncs only on `popstate` — which `replaceState` does
+  // not fire. `main.tsx` now strips before the router exists (GH#312), so the
+  // two start out agreeing; any later bare `replaceState` would split them again,
+  // and the sessions where they disagree are the ones that bought an export.
   const { search } = useLocation();
 
   // Apply sort order to filtered indices (null = show all)

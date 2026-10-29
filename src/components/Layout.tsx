@@ -72,18 +72,21 @@ export function Layout({ lang }: LayoutProps) {
   // never commits, so this never ran, and the param is still in the URL for
   // the render that does commit.
   //
-  // Layout-phase rather than passive, and this is load-bearing: stripping must
-  // beat anything that can observe the URL. useLayoutAnalytics fires its
-  // pageview from a passive useEffect, and every passive effect in the tree
-  // runs after every layout effect — so the key is out of the address bar
-  // before analytics can read it, whatever order the hooks are declared in.
+  // The URL is not stripped here. No effect can be early enough: Umami's vendor
+  // tracker is a script outside React, injected by `loadUmami()` before
+  // hydration and async once inserted, so it can record `location.href` before
+  // any commit — and did, on two real checkout returns (GH#312). `main.tsx`
+  // strips before the router exists and before `loadUmami()`, and holds the key
+  // in memory; this reads it from there. Ordering against useLayoutAnalytics'
+  // passive effect therefore no longer matters, and the read is layout-phase
+  // only so the dialog opens before paint.
   useIsomorphicLayoutEffect(() => {
     if (hasConsumedLicenseParam.current) return;
     hasConsumedLicenseParam.current = true;
 
-    // Stripping is always safe and must happen even when the feature flag is
-    // off — otherwise a key lingers in the address bar and in Umami's
-    // auto-tracked pageview URL. Only the dialog is gated on the flag.
+    // Consumed even when the feature flag is off, so a key never outlives the
+    // first commit, in memory or — without the bootstrap — in the address bar.
+    // Only the dialog is gated on the flag.
     const key = consumeLicenseParam();
     if (!isExportFeatureEnabled() || key === null) return;
 

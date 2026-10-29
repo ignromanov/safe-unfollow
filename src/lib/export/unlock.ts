@@ -225,15 +225,24 @@ export function clearLicense(): void {
 }
 
 /**
- * Reads `?license_key=` from the current URL and strips the whole checkout
- * return payload, leaving unrelated params (UTM tags and the like) intact.
- * Stripping immediately keeps both the key and the buyer's identity out of
- * history entries, the referrer, and any analytics that read location.search.
- *
- * Returns the raw key; activation is the caller's job.
+ * The key `stripCheckoutReturnParams` took out of the URL, waiting for
+ * `consumeLicenseParam`. In memory only: it dies with the page, like the URL
+ * it came from would have.
  */
-export function consumeLicenseParam(): string | null {
-  if (typeof window === 'undefined') return null;
+let heldLicenseKey: string | null = null;
+
+/**
+ * Strips the whole checkout return payload from the current URL, leaving
+ * unrelated params (UTM tags and the like) intact, and holds the key for
+ * `consumeLicenseParam`. Activates nothing and stores nothing.
+ *
+ * `main.tsx` calls this before the router is created and before any
+ * third-party script is injected — the only point early enough. Umami's
+ * tracker is inserted from JS, so it is async whatever its `defer` says, and
+ * a cached copy can read `location.href` before React commits anything (GH#312).
+ */
+export function stripCheckoutReturnParams(): void {
+  if (typeof window === 'undefined') return;
 
   const url = new URL(window.location.href);
   const rawKey = url.searchParams.get(LICENSE_QUERY_PARAM);
@@ -249,6 +258,23 @@ export function consumeLicenseParam(): string | null {
   if (strippedAny) {
     window.history.replaceState({}, '', url.pathname + url.search + url.hash);
   }
+
+  if (rawKey !== null) heldLicenseKey = rawKey;
+}
+
+/**
+ * Takes the licence key the checkout return carried, once. The bootstrap has
+ * normally stripped the URL already and this reads the held key; it strips
+ * again itself so a caller that runs without the bootstrap still leaves
+ * nothing in the address bar.
+ *
+ * Returns the raw key; activation is the caller's job.
+ */
+export function consumeLicenseParam(): string | null {
+  stripCheckoutReturnParams();
+
+  const rawKey = heldLicenseKey;
+  heldLicenseKey = null;
 
   if (rawKey === null) return null;
 

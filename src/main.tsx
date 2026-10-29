@@ -3,11 +3,19 @@ import { routes } from './routes';
 import { initI18n } from './locales';
 import { loadUmami, loadHeatmapRecorder } from './lib/umami-loader';
 import { installStaleChunkRecovery } from './lib/stale-chunk-recovery';
+import { stripCheckoutReturnParams } from './lib/export/unlock';
 // Imported here rather than via @import in styles.css: see the note at the top of that
 // file — Tailwind v4 inlines @import without rebasing url(), Vite's JS pipeline does not.
 import '@fontsource-variable/inter';
 import '@fontsource-variable/plus-jakarta-sans';
 import './styles.css';
+
+// Before ViteReactSSG, not in its callback: on the client it builds the router from
+// `window.location` before awaiting the callback, and a later replaceState never resyncs
+// it. And before loadUmami, whose tracker is async once inserted from JS and records the
+// URL it finds — the checkout return's licence key, email and payment id reached Umami
+// that way on two real visits (GH#312). No-op without a window, i.e. at SSG time.
+stripCheckoutReturnParams();
 
 /**
  * SSG Entry Point

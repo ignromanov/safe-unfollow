@@ -613,6 +613,25 @@ describe('Layout', () => {
       expect(window.location.search).toBe('');
     });
 
+    // GH#312: in production main.tsx strips the URL before the router and the
+    // Umami tracker exist, so Layout mounts on a clean URL and must take the key
+    // from memory — including when the render phase runs twice, the 2026-08-21
+    // shape above, since a discarded render must not spend the held key either.
+    it('should open the dialog from the key the bootstrap held, with the URL already clean', async () => {
+      const { stripCheckoutReturnParams } = await import('@/lib/export/unlock');
+      window.history.replaceState(
+        {},
+        '',
+        '/results?license_key=38b1460a-5104-4067-a91d-77b872934d51&email=buyer%40example.invalid'
+      );
+      stripCheckoutReturnParams();
+      expect(window.location.search).toBe('');
+
+      renderLayout('/results', undefined, { strict: true });
+
+      expect(await screen.findByTestId('license-dialog')).toBeInTheDocument();
+    });
+
     it('should not render the license dialog without the param', () => {
       window.history.replaceState({}, '', '/results');
 
