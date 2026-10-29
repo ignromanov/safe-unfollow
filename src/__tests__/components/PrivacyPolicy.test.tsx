@@ -243,6 +243,17 @@ describe('PrivacyPolicy Component', () => {
       expect(ovhLink).toHaveAttribute('target', '_blank');
       expect(container.textContent).not.toMatch(/no backend\s+database/i);
     });
+
+    // Umami keys a session on a hash of IP, UA and a monthly salt, so a month of
+    // visits links together: pseudonymous, not anonymous (velum-cdpo, 2026-10-29).
+    it('should not call the analytics anonymized', () => {
+      const { container } = render(<PrivacyPolicy onBack={mockOnBack} />);
+
+      expect(container.textContent).not.toMatch(/anonymi[sz]ed/i);
+      expect(
+        screen.getByText(/They never store your IP address or anything that names you/i)
+      ).toBeInTheDocument();
+    });
   });
 
   // A published inventory and the code it describes belong in one gate. §5.4

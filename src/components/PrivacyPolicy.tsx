@@ -96,7 +96,8 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
         <section>
           <h2 className="text-2xl font-bold mb-4">2. Data We Collect</h2>
           <p className="text-muted-foreground mb-4">
-            We collect minimal, anonymized analytics to improve the service:
+            We collect minimal analytics to improve the service. They never store your IP address or
+            anything that names you:
           </p>
 
           <h3 className="text-lg font-semibold mt-6 mb-3">2.1 Analytics (Optional)</h3>
@@ -105,7 +106,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
           </p>
           <ul className="list-disc list-inside space-y-2 text-muted-foreground ms-4">
             <li>Page views and navigation patterns</li>
-            <li>Device type and browser (anonymized)</li>
+            <li>Device type and browser</li>
             <li>
               Your country, estimated from your IP address. The IP address itself is not stored
             </li>
