@@ -108,7 +108,7 @@ const README_TEXT = readFileSync(join(process.cwd(), 'README.md'), 'utf-8');
  * said "No server, no logs, just your data and your device" and `donation.body`
  * said "No login. No server. No data sent anywhere." in shipped copy, both
  * false at the same vendors (Cloudflare serves the site and keeps access logs,
- * Umami writes events to a Supabase database, AdSense receives ad requests),
+ * Umami writes events to a database on our own server, AdSense receives ad requests),
  * and no pattern here could see either sentence because none of those words
  * were in the list to begin with.
  *
@@ -302,7 +302,7 @@ const BANNED: BannedEntry[] = [
   },
   {
     pattern: new RegExp(`${NEGATION}${GAP}\\bdatabases?\\b`, 'i'),
-    why: "Umami's events land in a Supabase database",
+    why: "Umami's events land in a database on our own server",
     qualifiedBy: QUALIFIER_BOUND,
   },
   {
@@ -408,11 +408,16 @@ const BANNED_PRIVACY = [
  * points at the canonical policy cannot drift from it, and a page that restates the
  * policy will not fit. The old copy was 5,089 bytes. Raising this is allowed, but it has
  * to be a decision, not a side effect.
+ *
+ * Raised 3,500 → 3,800 on 2026-10-29, as that decision: the analytics move to our own
+ * server added a recipient row (OVHcloud) and widened two others (Cloudflare, Umami),
+ * taking the page to 3,571 bytes. The recipient table is the one thing this page must
+ * keep complete; the ceiling still sits well under the 5,089-byte copy it exists to stop.
  */
 const CANONICAL_PRIVACY_URL = /safeunfollow\.app\/privacy/;
 const COMPARE_DOCS = DOCS.filter(doc => /^compare[\\/]/.test(doc.name));
 
-const DOCS_PRIVACY_MAX_BYTES = 3500;
+const DOCS_PRIVACY_MAX_BYTES = 3800;
 
 /**
  * The published docs escaped both of `product.md`'s standing bans: a performance figure
