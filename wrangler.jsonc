@@ -12,11 +12,14 @@
     // Serves the nearest 404.html with a 404 status, as Vercel's static fallback did.
     "not_found_handling": "404-page",
   },
-  // safeunfollow.app moved here from Vercel on 2026-10-30. The domain was attached through
-  // the API first (it replaced Vercel's A record in one step); this entry keeps every later
-  // deploy agreeing with it. workers.dev stays on for branch previews; _headers marks it
-  // noindex.
-  "routes": [{ "pattern": "safeunfollow.app", "custom_domain": true }],
+  // safeunfollow.app moved here from Vercel on 2026-10-30, as a zone route rather than a
+  // custom domain: a custom domain cannot take over a hostname that already has a DNS
+  // record without deleting it first, and a resolver asking in that gap caches the
+  // absence. Instead the existing A record was switched to proxied, so the Worker
+  // intercepts every request and the record's address (Vercel's) is never contacted.
+  // Rollback is the same record back to DNS only. workers.dev stays on for branch
+  // previews, which Cloudflare Access closes to account members; _headers marks it noindex.
+  "routes": [{ "pattern": "safeunfollow.app/*", "zone_name": "safeunfollow.app" }],
   "workers_dev": true,
   "preview_urls": true,
   // Branch builds run `wrangler preview` (Worker Previews), which refuses to run without
