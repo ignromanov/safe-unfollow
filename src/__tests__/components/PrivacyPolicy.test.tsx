@@ -38,7 +38,7 @@ describe('PrivacyPolicy Component', () => {
     it('should render the last updated date', () => {
       render(<PrivacyPolicy onBack={mockOnBack} />);
 
-      expect(screen.getByText(/last updated: october 27, 2026/i)).toBeInTheDocument();
+      expect(screen.getByText(/last updated: october 29, 2026/i)).toBeInTheDocument();
     });
   });
 
@@ -227,6 +227,32 @@ describe('PrivacyPolicy Component', () => {
       expect(hostLink).toBeInTheDocument();
       expect(hostLink).toHaveAttribute('href', 'https://www.cloudflare.com/privacypolicy/');
       expect(hostLink).toHaveAttribute('target', '_blank');
+    });
+
+    // Umami moved off Vercel/Supabase onto a VM we rent from OVHcloud, so the
+    // policy gained a recipient and lost "There is no backend database" — both
+    // halves of that change are pinned here, or the old sentence can come back.
+    it('should name OVHcloud as the analytics host and not deny a database', () => {
+      const { container } = render(<PrivacyPolicy onBack={mockOnBack} />);
+
+      const ovhLink = screen.getByRole('link', { name: /ovhcloud's privacy policy/i });
+      expect(ovhLink).toHaveAttribute(
+        'href',
+        'https://www.ovhcloud.com/en-ca/terms-and-conditions/privacy-policy/'
+      );
+      expect(ovhLink).toHaveAttribute('target', '_blank');
+      expect(container.textContent).not.toMatch(/no backend\s+database/i);
+    });
+
+    // Umami keys a session on a hash of IP, UA and a monthly salt, so a month of
+    // visits links together: pseudonymous, not anonymous (velum-cdpo, 2026-10-29).
+    it('should not call the analytics anonymized', () => {
+      const { container } = render(<PrivacyPolicy onBack={mockOnBack} />);
+
+      expect(container.textContent).not.toMatch(/anonymi[sz]ed/i);
+      expect(
+        screen.getByText(/They never store your IP address or anything that names you/i)
+      ).toBeInTheDocument();
     });
   });
 

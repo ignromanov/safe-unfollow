@@ -3,7 +3,7 @@ layout: default
 title: "Privacy Policy — Your Data Never Leaves Your Device"
 description: 'Where to read the Instagram Unfollow Tracker privacy policy, and the short version — your Instagram export is processed in your browser and never uploaded.'
 permalink: /privacy/
-last_updated: 2026-10-22
+last_updated: 2026-10-29
 ---
 
 # Privacy Policy
@@ -25,8 +25,9 @@ handful of third parties, and the canonical policy names what each one receives:
 
 | Who | What they get | Where |
 |-----|---------------|-------|
-| Cloudflare | standard web server logs (IP, timestamp, requested URL) | every page |
-| Umami | page views, product events, and measurements of the export you load — how many accounts it holds and how large the file is. No personal identifiers, no usernames, nothing read from inside the archive | every page |
+| Cloudflare | standard web server logs (IP, timestamp, requested URL) for the site and for our analytics server, which it sits in front of; nightly backups of the analytics database, deleted after 30 days | every page |
+| Umami | page views, product events, and measurements of the export you load — how many accounts it holds and how large the file is. No personal identifiers, no usernames, nothing read from inside the archive. Runs on our own server at OVHcloud in Canada; location is stored as country only, and records are kept 25 months | every page |
+| OVHcloud (Canada) | the disk our analytics server runs on — the Umami database lives there | every page |
 | Google AdSense | ad requests and advertising cookies, subject to your consent choice | the units we place are on `/upload` and `/results`; Google's own automatic placements can appear on any screen once its script has started |
 | Google (Funding Choices) | your consent choice, stored so the banner stops asking | consent regions |
 | Dodo Payments | your licence key, your email if you buy the export, and — attached to the checkout link — whether you are on a phone or a big screen, the language you are reading in, and your country | export only |
