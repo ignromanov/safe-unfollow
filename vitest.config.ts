@@ -10,7 +10,7 @@ const __dirname = path.dirname(__filename);
 
 export default defineConfig({
   // Mirrors vite.config.ts's define for the same global — see its comment.
-  // Tests never run through Vercel's build, so there is no commit sha to read;
+  // Tests never run through Workers Builds, so there is no commit sha to read;
   // a fixed string is enough since no test asserts a particular version value.
   define: {
     __APP_VERSION__: JSON.stringify("test"),
@@ -115,7 +115,6 @@ export default defineConfig({
       "postcss.config.js",
       "eslint.config.js",
       "components.json",
-      "vercel.json",
       "codecov.yml",
 
       // Lock files and package files
@@ -179,7 +178,6 @@ export default defineConfig({
         "postcss.config.js",
         "eslint.config.js",
         "components.json",
-        "vercel.json",
         "codecov.yml",
 
         // Documentation

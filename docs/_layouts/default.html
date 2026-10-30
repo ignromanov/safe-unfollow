@@ -27,8 +27,8 @@
     <meta name="description" content="{{ head_description | escape }}">
 
     {%- comment -%}
-      Vercel serves this site with trailingSlash: false, so /docs/faq/ 308-redirects
-      to /docs/faq. Jekyll's pretty permalinks end in a slash, so page.url alone would
+      The site drops trailing slashes (wrangler.jsonc, html_handling), so /docs/faq/
+      redirects to /docs/faq. Jekyll's pretty permalinks end in a slash, so page.url alone would
       point every canonical at a URL that redirects away from itself. Strip it.
     {%- endcomment -%}
     {%- capture canonical_path -%}{{ site.baseurl }}{{ page.url }}{%- endcapture -%}
