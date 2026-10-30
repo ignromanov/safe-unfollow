@@ -12,12 +12,14 @@
     // Serves the nearest 404.html with a 404 status, as Vercel's static fallback did.
     "not_found_handling": "404-page",
   },
-  // No `routes` yet: safeunfollow.app is still served by Vercel (vercel.json stays until
-  // then, so a merge to main keeps production unchanged) while this Worker is checked on
-  // workers.dev. The cut-over adds
-  //   "routes": [{ "pattern": "safeunfollow.app", "custom_domain": true }]
-  // and, because the zone is already on Cloudflare, takes the apex on the next deploy.
-  // workers.dev stays on for branch previews; _headers marks it noindex.
+  // safeunfollow.app moved here from Vercel on 2026-10-30, as a zone route rather than a
+  // custom domain: a custom domain cannot take over a hostname that already has a DNS
+  // record without deleting it first, and a resolver asking in that gap caches the
+  // absence. Instead the existing A record was switched to proxied, so the Worker
+  // intercepts every request and the record's address (Vercel's) is never contacted.
+  // Rollback is the same record back to DNS only. workers.dev stays on for branch
+  // previews, which Cloudflare Access closes to account members; _headers marks it noindex.
+  "routes": [{ "pattern": "safeunfollow.app/*", "zone_name": "safeunfollow.app" }],
   "workers_dev": true,
   "preview_urls": true,
   // Branch builds run `wrangler preview` (Worker Previews), which refuses to run without
@@ -26,5 +28,7 @@
   // so the workers.dev noindex rule in _headers covers them, and Cloudflare adds
   // X-Robots-Tag: noindex to workers.dev Preview URLs on its own.
   "previews": {},
-  "observability": { "enabled": true },
+  // Off: an assets-only Worker runs no code, so there is nothing to observe, and request
+  // logs would hold full URLs, including a checkout return's query string (GH#312).
+  "observability": { "enabled": false },
 }
