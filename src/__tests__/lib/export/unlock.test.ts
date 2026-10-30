@@ -12,6 +12,7 @@ import {
   resetValidationFlag,
   shouldValidateThisSession,
   storeLicense,
+  stripCheckoutReturnParams,
   subscribeUnlock,
 } from '@/lib/export/unlock';
 
@@ -400,6 +401,62 @@ describe('export/unlock', () => {
 
       expect(consumeLicenseParam()).toBe(KEY);
       expect(consumeLicenseParam()).toBeNull();
+    });
+  });
+
+  // GH#312: main.tsx strips before the router and the Umami tracker exist, and
+  // Layout reads the key afterwards from memory, not from the URL.
+  describe('stripCheckoutReturnParams', () => {
+    // The held key is module state; a case that only strips must not hand it to the next.
+    afterEach(() => {
+      consumeLicenseParam();
+    });
+
+    it('should strip the whole checkout return and keep unrelated params', () => {
+      window.history.replaceState(
+        {},
+        '',
+        `/results?utm_source=email&license_key=${KEY}&payment_id=pay_FAKE&status=succeeded&email=buyer%40example.invalid`
+      );
+
+      stripCheckoutReturnParams();
+
+      expect(window.location.search).toBe('?utm_source=email');
+    });
+
+    it('should hold the key for consumeLicenseParam once the URL is already clean', () => {
+      window.history.replaceState({}, '', `/results?license_key=${KEY}`);
+
+      stripCheckoutReturnParams();
+      expect(window.location.search).toBe('');
+
+      expect(consumeLicenseParam()).toBe(KEY);
+      expect(consumeLicenseParam()).toBeNull();
+    });
+
+    it('should hold an empty key as empty, for Layout to refuse', () => {
+      window.history.replaceState({}, '', '/results?license_key=');
+
+      stripCheckoutReturnParams();
+
+      expect(consumeLicenseParam()).toBe('');
+    });
+
+    it('should hold nothing when the return carried no key', () => {
+      window.history.replaceState({}, '', '/results?payment_id=pay_FAKE&status=failed');
+
+      stripCheckoutReturnParams();
+
+      expect(window.location.search).toBe('');
+      expect(consumeLicenseParam()).toBeNull();
+    });
+
+    it('should not store anything by itself', () => {
+      window.history.replaceState({}, '', `/results?license_key=${KEY}`);
+
+      stripCheckoutReturnParams();
+
+      expect(isExportUnlocked()).toBe(false);
     });
   });
 
