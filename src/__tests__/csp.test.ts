@@ -237,4 +237,17 @@ describe('public/_headers Content-Security-Policy', () => {
   it('declares no X-Frame-Options, which frame-ancestors supersedes', () => {
     expect(declaredHeaderKeys()).not.toContain('X-Frame-Options');
   });
+
+  /**
+   * Same value as the browsers' default, stated so that it does not depend on the
+   * default: a full URL can carry a checkout return's query string (GH#312), and
+   * this policy keeps it to the origin on every cross-origin request.
+   */
+  it('sends only the origin as a referrer across origins', () => {
+    const value = readHeaderRules(ROOT)
+      .flatMap(entry => entry.headers)
+      .find(header => header.key === 'Referrer-Policy')?.value;
+
+    expect(value).toBe('strict-origin-when-cross-origin');
+  });
 });

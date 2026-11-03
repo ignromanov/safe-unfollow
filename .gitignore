@@ -137,10 +137,7 @@ scripts/*
 # Local Umami DB backups (never commit — contains analytics data)
 umami-backup-*.sql.gz
 
-# Retention script must ship despite the scripts/ ignore above (CI runs it)
-!scripts/umami-retention.sql
-
-# Same reason: the sitemap generator imports this at build time, so an ignored copy
+# Must ship despite the scripts/ ignore above: the sitemap generator imports this at build time, so an ignored copy
 # would leave `npm run build` importing a module the repository does not contain.
 # ⛔ Four other files under scripts/ are tracked only because they predate the
 # `scripts/*` rule above — nothing in this config says they must ship. A new script
