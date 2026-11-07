@@ -3,7 +3,7 @@ layout: default
 title: "How the Instagram Unfollow Tracker Works: Architecture"
 description: 'How the tracker works: 100% local processing, IndexedDB columnar storage, BitSet filtering, and how it is built to hold 1M+ accounts.'
 permalink: /tech-spec/
-last_updated: 2026-09-08
+last_updated: 2026-11-07
 ---
 
 # Technical Specification
@@ -27,7 +27,7 @@ A privacy-focused, local web application that analyzes Instagram Data Download (
 - **100% local processing**: All data processing happens in the browser
 - **No Instagram login**: Uses official Instagram data export only
 - **Open source**: MIT license, full transparency and auditability
-- **Privacy-respecting analytics**: Umami (anonymous)
+- **Optional analytics**: Self-hosted Umami and pageview-only Google Analytics 4 (disabled via "Don't Track Me")
 
 ---
 
@@ -326,8 +326,8 @@ connections/followers_and_following/
 
 ### Data Privacy
 - **The export is never transmitted**: parsing and filtering run entirely in the browser
-- **Anonymous analytics**: Umami (no personal data)
-- **Cookies**: theme preference, and — once the visitor consents — Google's advertising and
+- **Optional analytics**: Self-hosted Umami (no personal data) and pageview-only Google Analytics 4 (Google Signals off)
+- **Cookies**: theme preference, Google Analytics `_ga` visit cookies (consent-gated in EEA/UK/CH and cleared on opt-out), and — once the visitor consents — Google's advertising and
   consent cookies. None of them can reach the Instagram export, which never leaves the device
 - **Secure defaults**: Privacy-first configuration
 

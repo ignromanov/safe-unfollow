@@ -24,7 +24,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
           </div>
           <h1 className="text-4xl md:text-5xl font-display font-bold">Privacy Policy</h1>
         </div>
-        <p className="text-muted-foreground text-lg">Last updated: October 29, 2026</p>
+        <p className="text-muted-foreground text-lg">Last updated: November 7, 2026</p>
       </header>
 
       {/* Content */}
@@ -102,7 +102,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
 
           <h3 className="text-lg font-semibold mt-6 mb-3">2.1 Analytics (Optional)</h3>
           <p className="text-muted-foreground mb-4">
-            We use one privacy-friendly analytics service, Umami, which collects:
+            We use self-hosted Umami and pageview-only Google Analytics 4 (section 5.7), collecting:
           </p>
           <ul className="list-disc list-inside space-y-2 text-muted-foreground ms-4">
             <li>Page views and navigation patterns</li>
@@ -112,13 +112,13 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             </li>
             <li>Referral sources</li>
             <li>
-              Your export's account count and file size — never a username, never its contents
+              In Umami only: your export's account count and file size — never a username, never its
+              contents
             </li>
           </ul>
           <p className="text-muted-foreground mt-4">
-            <strong className="text-foreground">You can disable all analytics</strong> by clicking
-            "Don't Track Me" in the footer. Your preference is stored locally and respected
-            immediately.
+            <strong className="text-foreground">You can disable analytics</strong> via "Don't Track
+            Me" in the footer.
           </p>
           <p className="text-muted-foreground mt-4">
             Umami runs on our own server, a virtual machine we rent from OVHcloud in Canada.
@@ -127,7 +127,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             30 days. We keep analytics records for 25 months, then delete them.
           </p>
 
-          <h3 className="text-lg font-semibold mt-6 mb-3">2.2 Local Storage</h3>
+          <h3 className="text-lg font-semibold mt-6 mb-3">2.2 Local Storage and Cookies</h3>
           <p className="text-muted-foreground">
             We store the following in your browser's local storage:
           </p>
@@ -142,9 +142,8 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             </li>
           </ul>
           <p className="text-muted-foreground mt-4">
-            In the EEA, UK and Switzerland, Google's consent tool additionally stores your
-            advertising consent choice on your device so it does not have to ask again on every
-            visit (see section 5.4).
+            Google Analytics 4 sets <code>_ga</code> cookies when active (section 5.7), and Google's
+            consent tool stores your ad choice (see section 5.4).
           </p>
         </section>
 
@@ -393,6 +392,17 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
           <p className="text-muted-foreground mt-4">
             Tally uses Cloudflare Turnstile to check that whoever opened the form is not a bot, and
             Turnstile processes the opener's IP address to do that check.
+          </p>
+
+          <h3 className="text-lg font-semibold mt-6 mb-3">
+            5.7 Audience Measurement (Google Analytics 4)
+          </h3>
+          <p className="text-muted-foreground">
+            To verify monthly sessions for ad networks, we run Google Analytics 4 (
+            <code>G-JQFNBYQQXZ</code>) with Google Signals and ad personalization off. It logs page
+            views and traffic sources, and never receives any custom events or measurements from
+            your Instagram export. Consent Mode v2 denies <code>_ga</code> cookies in the EEA, UK
+            and Switzerland until granted; "Don't Track Me" disables it and clears them.
           </p>
         </section>
 

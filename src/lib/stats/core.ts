@@ -11,7 +11,7 @@ import { clearEventQueue } from './queue';
 export { isTrackingOptedOut };
 
 /**
- * Opt out of tracking - Umami script will not load
+ * Opt out of tracking - Umami and GA4 scripts will not collect
  */
 export function optOutOfTracking(): void {
   if (typeof window === 'undefined') return;
@@ -19,8 +19,9 @@ export function optOutOfTracking(): void {
   // Cleared, not flushed: consent withdrawn now also covers what is already
   // pending from before the visitor changed their mind.
   clearEventQueue();
-  // Remove existing umami instance if present
+  // Remove existing umami instance if present and disable GA4 + expire _ga cookies
   delete window.umami;
+  void import('../ga4-loader').then(({ disableGa4 }) => disableGa4());
 }
 
 /**

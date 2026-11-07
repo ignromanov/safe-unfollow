@@ -3,7 +3,7 @@ layout: default
 title: "How to Use Instagram Unfollow Tracker — Complete Guide"
 description: 'Complete guide to using Instagram Unfollow Tracker. Upload your ZIP file, filter unfollowers, search accounts, and understand badges. Free and private.'
 permalink: /user-guide/
-last_updated: 2026-09-08
+last_updated: 2026-11-07
 ---
 
 # User Guide
@@ -122,7 +122,7 @@ Instagram Unfollow Tracker is a privacy-focused tool that analyzes your Instagra
 ### Your Data
 - **Never leaves your device**: All processing happens in your browser
 - **Local storage only**: Data stored in IndexedDB (browser-local)
-- **Privacy-respecting analytics**: Anonymous usage stats only (Umami)
+- **Optional analytics**: Usage and traffic stats via Umami and pageview-only Google Analytics 4 (one-click opt-out in the footer)
 - **Open source**: You can review the code yourself
 
 ### Best Practices

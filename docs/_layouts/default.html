@@ -281,6 +281,49 @@
             font-size: 14px;
         }
     </style>
+    <script>
+      (function () {
+        if (location.hostname !== 'safeunfollow.app' || window.top !== window.self) return;
+        try {
+          if (localStorage.getItem('umami-opt-out') === 'true') {
+            window['ga-disable-G-JQFNBYQQXZ'] = true;
+            return;
+          }
+        } catch (e) {}
+        window.suGaQueue = window.suGaQueue || [];
+        function gtag() {
+          window.suGaQueue.push(arguments);
+        }
+        window.gtag = gtag;
+        gtag('consent', 'default', {
+          ad_storage: 'denied',
+          ad_user_data: 'denied',
+          ad_personalization: 'denied',
+          analytics_storage: 'denied',
+          region: [
+            'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IS',
+            'IE', 'IT', 'LV', 'LI', 'LT', 'LU', 'MT', 'NL', 'NO', 'PL', 'PT', 'RO', 'SK', 'SI',
+            'ES', 'SE', 'GB', 'CH'
+          ],
+          wait_for_update: 500
+        });
+        gtag('consent', 'default', {
+          ad_storage: 'denied',
+          ad_user_data: 'denied',
+          ad_personalization: 'denied'
+        });
+        gtag('set', 'ads_data_redaction', true);
+        gtag('js', new Date());
+        gtag('config', 'G-JQFNBYQQXZ', {
+          allow_google_signals: false,
+          allow_ad_personalization_signals: false
+        });
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-JQFNBYQQXZ&l=suGaQueue';
+        document.head.appendChild(s);
+      })();
+    </script>
 </head>
 <body>
     <div class="container">
