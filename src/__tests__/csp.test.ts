@@ -107,6 +107,21 @@ const REQUIRED: Array<{ host: string; directives: string[]; why: string }> = [
     // — see the negative test below.
     why: 'the Tally feedback widget: loads an embed script and renders an iframe',
   },
+  {
+    host: 'https://www.googletagmanager.com',
+    directives: ['script-src', 'connect-src'],
+    why: 'Google Analytics 4 gtag.js script loader and tag configuration',
+  },
+  {
+    host: 'https://*.google-analytics.com',
+    directives: ['connect-src'],
+    why: 'Google Analytics 4 measurement collection endpoints (incl. regional region1.*)',
+  },
+  {
+    host: 'https://*.analytics.google.com',
+    directives: ['connect-src'],
+    why: 'Google Analytics 4 regional collection endpoints',
+  },
 ];
 
 describe('public/_headers Content-Security-Policy', () => {

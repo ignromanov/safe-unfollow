@@ -7,6 +7,7 @@ import commonEN from '@/locales/en/common.json';
 import { RESCUE_PLAN_BANNER_ENABLED } from '@/config/feature-flags';
 import { exportFilename } from '@/lib/export/filename';
 import { REPORT_SITE_URL } from '@/lib/export/report-markup';
+import { GA4_MEASUREMENT_ID } from '@/lib/ga4-loader';
 import { createI18nMock } from '@/__tests__/utils/mockI18n';
 
 vi.mock('react-i18next', () => createI18nMock(commonEN));
@@ -38,7 +39,7 @@ describe('PrivacyPolicy Component', () => {
     it('should render the last updated date', () => {
       render(<PrivacyPolicy onBack={mockOnBack} />);
 
-      expect(screen.getByText(/last updated: october 29, 2026/i)).toBeInTheDocument();
+      expect(screen.getByText(/last updated: november 7, 2026/i)).toBeInTheDocument();
     });
   });
 
@@ -154,6 +155,20 @@ describe('PrivacyPolicy Component', () => {
       ).toBeInTheDocument();
       expect(screen.getByText(/Cloudflare Turnstile/i)).toBeInTheDocument();
       expect(screen.getByText(/processes the opener's IP address/i)).toBeInTheDocument();
+    });
+
+    it('should disclose Google Analytics 4 with the live measurement id and opt-out guarantee', () => {
+      render(<PrivacyPolicy onBack={mockOnBack} />);
+
+      expect(
+        screen.getByText(/5\.7 Audience Measurement \(Google Analytics 4\)/i)
+      ).toBeInTheDocument();
+      expect(screen.getByText(GA4_MEASUREMENT_ID)).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          /never receives any custom\s+events or measurements from your Instagram export/i
+        )
+      ).toBeInTheDocument();
     });
 
     // A downloaded export leaves the browser's sandbox, so "Clear Data" and the
