@@ -4,6 +4,7 @@ import { resolve } from 'node:path';
 import { describe, it, expect } from 'vitest';
 
 import { NON_ENGLISH_LANGUAGES } from '@/config/languages';
+import { FUNDING_CHOICES_SCRIPT_SRC, GA4_MEASUREMENT_ID, GA4_SCRIPT_ID } from '@/lib/ga4-loader';
 import { TRACKING_OPT_OUT_KEY } from '@/lib/stats/constants';
 import { PENDING_CTA_KEY } from '@/lib/stats/cta-capture';
 
@@ -113,5 +114,47 @@ describe('index.html CTA capture', () => {
     // enqueueEvent checks this key on every call. New code that stores a click for a
     // visitor who opted out would be writing where the rest of analytics does not.
     expect(ctaScript).toContain(TRACKING_OPT_OUT_KEY);
+  });
+});
+
+const gaScript = (() => {
+  const scripts = html.match(/<script>[\s\S]*?<\/script>/g) ?? [];
+  const found = scripts.find(script => script.includes(GA4_MEASUREMENT_ID));
+  if (!found) throw new Error('GA4 head bootstrap script not found in index.html');
+  return found;
+})();
+
+describe('index.html GA4 & Funding Choices <head> bootstrap', () => {
+  it('runs after the language redirect so redirected visits do not double-fire', () => {
+    expect(html.indexOf(redirectScript)).toBeLessThan(html.indexOf(gaScript));
+  });
+
+  it('uses standard window.dataLayer without &l= queue renaming so Funding Choices CMP connects', () => {
+    expect(gaScript).toContain('window.dataLayer');
+    expect(gaScript).toContain(GA4_SCRIPT_ID);
+    expect(gaScript).not.toContain('&l=');
+  });
+
+  it('honours umami-opt-out and sets the ga-disable kill switch before injecting any script', () => {
+    expect(gaScript).toContain(TRACKING_OPT_OUT_KEY);
+    expect(gaScript).toContain("window['ga-disable-' + GA_ID] = true");
+  });
+
+  it('strips Dodo checkout PII from page_location copy without mutating window.location (GH#312)', () => {
+    for (const param of ['license_key', 'payment_id', 'subscription_id', 'status', 'email']) {
+      expect(gaScript).toContain(`'${param}'`);
+    }
+    expect(gaScript).toContain('page_location: cleanUrl');
+    // Must not overwrite location.href or history.replaceState before stripCheckoutReturnParams() runs.
+    expect(gaScript).not.toMatch(/location\.(?:href|replace|assign)\s*[=(]/);
+    expect(gaScript).not.toContain('replaceState');
+  });
+
+  it('loads standalone Funding Choices CMP everywhere except /sample and /:lang/sample (§5.4)', () => {
+    expect(gaScript).toContain(FUNDING_CHOICES_SCRIPT_SRC);
+    expect(gaScript).toContain('googlefcPresent');
+    expect(gaScript).toMatch(
+      /!\s*\/\(\?:\^\|\\\/\)sample\(\?:\\\/\|\$\)\/\.test\(location\.pathname\)/
+    );
   });
 });

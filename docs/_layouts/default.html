@@ -290,9 +290,9 @@
             return;
           }
         } catch (e) {}
-        window.suGaQueue = window.suGaQueue || [];
+        window.dataLayer = window.dataLayer || [];
         function gtag() {
-          window.suGaQueue.push(arguments);
+          window.dataLayer.push(arguments);
         }
         window.gtag = gtag;
         gtag('consent', 'default', {
@@ -319,9 +319,28 @@
           allow_ad_personalization_signals: false
         });
         var s = document.createElement('script');
+        s.id = 'ga4-gtag-js';
         s.async = true;
-        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-JQFNBYQQXZ&l=suGaQueue';
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-JQFNBYQQXZ';
         document.head.appendChild(s);
+        var fc = document.createElement('script');
+        fc.id = 'google-fc-cmp';
+        fc.async = true;
+        fc.src = 'https://fundingchoicesmessages.google.com/i/pub-5976295812261948?ers=1';
+        document.head.appendChild(fc);
+        (function signalGooglefcPresent() {
+          if (!window.frames['googlefcPresent']) {
+            if (document.body) {
+              var iframe = document.createElement('iframe');
+              iframe.style.cssText =
+                'width:0;height:0;border:none;z-index:-1000;left:-1000px;top:-1000px;display:none';
+              iframe.name = 'googlefcPresent';
+              document.body.appendChild(iframe);
+            } else {
+              setTimeout(signalGooglefcPresent, 0);
+            }
+          }
+        })();
       })();
     </script>
 </head>

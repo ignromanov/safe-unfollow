@@ -115,7 +115,12 @@ const REQUIRED: Array<{ host: string; directives: string[]; why: string }> = [
   {
     host: 'https://*.google-analytics.com',
     directives: ['connect-src'],
-    why: 'Google Analytics 4 measurement collection endpoints (incl. regional region1.*)',
+    why: 'Google Analytics 4 measurement collection endpoints (www.* and regional region1.*)',
+  },
+  {
+    host: 'https://analytics.google.com',
+    directives: ['connect-src'],
+    why: 'Google Analytics 4 bare-domain g/collect endpoint (not matched by *.analytics.google.com)',
   },
   {
     host: 'https://*.analytics.google.com',
