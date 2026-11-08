@@ -1,36 +1,43 @@
 /**
- * Google Analytics 4 (`gtag.js`) runtime loader.
+ * Google Analytics 4 (`gtag.js`) runtime helper & opt-out kill switch.
  *
- * Added 2026-11-07 so third-party ad networks (Mediavine / Journey, Snigel, Setupad) can
- * verify 30-day session volume via read-only GA4 OAuth. Scope is deliberately minimal:
+ * Initial page-load bootstrap lives in `<head>` of `index.html` (and
+ * `docs/_layouts/default.html`) so Google's tag scanner finds `G-JQFNBYQQXZ`
+ * in static HTML and fast mobile visits fire before React hydration.
  *
+ * Scope and privacy invariants:
  * 1. Runs ONLY on the production origin (`safeunfollow.app`), never on localhost or
  *    `*.workers.dev` preview deployments.
- * 2. Runs ONLY in `src/main.tsx` after `stripCheckoutReturnParams()`, so checkout return
- *    query parameters (`license_key`, buyer `email`, `payment_id` — GH#312) are removed
- *    from `window.location` before `gtag.js` reads the page URL.
+ * 2. Strips checkout return query parameters (`license_key`, buyer `email`,
+ *    `payment_id`, `subscription_id`, `status` — GH#312) on a URL copy passed as
+ *    `page_location` without mutating `window.location` before `stripCheckoutReturnParams()`.
  * 3. Honours the site-wide `"Don't Track Me"` opt-out (`umami-opt-out`), sets Google's
  *    official `window['ga-disable-<ID>'] = true` kill-switch, and expires `_ga` cookies
  *    on opt-out.
- * 4. Sets Google Consent Mode v2 defaults (`analytics_storage: 'denied'` in EEA/UK/CH
- *    until Google's Funding Choices CMP updates consent; `ad_storage`, `ad_user_data`,
- *    and `ad_personalization` denied globally for GA4) with Google Signals disabled.
+ * 4. Uses standard `window.dataLayer` so Google's certified Funding Choices CMP
+ *    delivers Consent Mode v2 `analytics_storage` updates in EEA/UK/CH; standalone
+ *    `gtag.js` (without GTM `gtm.js`) ignores plain `{ event }` objects pushed by Tally.
  * 5. Emits zero custom events: no export metadata, counts, or archive shapes are ever
  *    passed to Google Analytics.
- * 6. Uses a dedicated command queue (`&l=suGaQueue` on `gtag/js` + `window.suGaQueue`)
- *    instead of Google's default global queue name so Tally's `embed.js` feedback popup
- *    bridge stays completely inert and never forwards form submissions into GA4
- *    (enforced by `src/__tests__/lib/feedback/tally-analytics-bridge.test.ts`).
  */
 
 import { isTrackingOptedOut } from './stats/consent';
 
 export const GA4_MEASUREMENT_ID = 'G-JQFNBYQQXZ';
-export const GA4_QUEUE_NAME = 'suGaQueue';
 export const GA4_SCRIPT_ID = 'ga4-gtag-js';
-export const GA4_SCRIPT_SRC = `https://www.googletagmanager.com/gtag/js?id=${GA4_MEASUREMENT_ID}&l=${GA4_QUEUE_NAME}`;
+export const GA4_SCRIPT_SRC = `https://www.googletagmanager.com/gtag/js?id=${GA4_MEASUREMENT_ID}`;
+export const FUNDING_CHOICES_SCRIPT_ID = 'google-fc-cmp';
+export const FUNDING_CHOICES_SCRIPT_SRC =
+  'https://fundingchoicesmessages.google.com/i/pub-5976295812261948?ers=1';
 
 const PRODUCTION_HOSTNAME = 'safeunfollow.app';
+const CHECKOUT_RETURN_PARAMS = [
+  'license_key',
+  'payment_id',
+  'subscription_id',
+  'status',
+  'email',
+] as const;
 
 /** EEA (27 EU + IS, LI, NO) + UK + CH — regions governed by ePrivacy / GDPR cookie consent. */
 const EEA_UK_CH_REGIONS = [
@@ -70,7 +77,7 @@ const EEA_UK_CH_REGIONS = [
 
 declare global {
   interface Window {
-    suGaQueue?: unknown[];
+    dataLayer?: unknown[];
     gtag?: (...args: unknown[]) => void;
   }
 }
@@ -80,13 +87,29 @@ function isFramed(): boolean {
 }
 
 /**
- * Push a command onto `window.suGaQueue` in the exact `Arguments` object shape `gtag.js`
+ * Push a command onto `window.dataLayer` in the exact `Arguments` object shape `gtag.js`
  * requires (pushing a plain JS Array is silently ignored by `gtag.js`).
  */
 function pushGtag(..._args: unknown[]): void {
-  window.suGaQueue = window.suGaQueue || [];
+  window.dataLayer = window.dataLayer || [];
   // eslint-disable-next-line prefer-rest-params
-  window.suGaQueue.push(arguments);
+  window.dataLayer.push(arguments);
+}
+
+/**
+ * Return `href` with Dodo checkout return parameters removed so `page_location`
+ * never leaks `license_key`, `payment_id`, or buyer `email` (GH#312).
+ */
+export function sanitizeGaPageLocation(href: string): string {
+  try {
+    const parsed = new URL(href);
+    for (const key of CHECKOUT_RETURN_PARAMS) {
+      parsed.searchParams.delete(key);
+    }
+    return parsed.toString();
+  } catch {
+    return href;
+  }
 }
 
 /**
@@ -114,7 +137,8 @@ export function disableGa4(): void {
 }
 
 /**
- * Inject `gtag.js` once for eligible production visits.
+ * Programmatic fallback injector mirroring the `<head>` snippet in `index.html`.
+ * Idempotent by `#ga4-gtag-js`.
  */
 export function loadGa4(): void {
   if (typeof window === 'undefined' || typeof document === 'undefined') return;
@@ -128,11 +152,9 @@ export function loadGa4(): void {
 
   if (document.getElementById(GA4_SCRIPT_ID)) return;
 
-  window.suGaQueue = window.suGaQueue || [];
+  window.dataLayer = window.dataLayer || [];
   window.gtag = window.gtag || pushGtag;
 
-  // Regional Consent Mode v2 default: EEA/UK/CH starts denied until Funding Choices CMP
-  // updates consent; ad profiling signals stay denied globally on the GA4 stream.
   window.gtag('consent', 'default', {
     ad_storage: 'denied',
     ad_user_data: 'denied',
@@ -149,6 +171,7 @@ export function loadGa4(): void {
   window.gtag('set', 'ads_data_redaction', true);
   window.gtag('js', new Date());
   window.gtag('config', GA4_MEASUREMENT_ID, {
+    page_location: sanitizeGaPageLocation(window.location.href),
     allow_google_signals: false,
     allow_ad_personalization_signals: false,
   });

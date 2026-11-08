@@ -122,6 +122,129 @@
       window.__VITE_REACT_SSG_STATIC_LOADER_MANIFEST__ = {};
     </script>
 
+    <!-- Google tag (gtag.js) + Google Funding Choices CMP (EEA/UK/CH).
+         Placed in <head> AFTER the language-redirect IIFE above so:
+         1. Language redirects happen before firing a page_view.
+         2. Google's tag scanner sees G-JQFNBYQQXZ in static HTML and early mobile
+            visits are counted before React hydration.
+         3. Checkout return params (license_key, payment_id, subscription_id, status,
+            email — GH#312) are stripped from a copy passed as `page_location`
+            WITHOUT mutating `window.location`, leaving `license_key` intact for
+            `stripCheckoutReturnParams()` in `src/main.tsx`.
+         4. Standard `window.dataLayer` is used so Google Funding Choices CMP delivers
+            Consent Mode v2 `analytics_storage` updates natively in EEA/UK/CH;
+            standalone `gtag.js` (no GTM) ignores Tally's plain `{ event }` objects.
+         5. Funding Choices (`google-fc-cmp`) is skipped on `/sample` and `/:lang/sample`
+            so opening sample data directly loads zero ad/CMP scripts (§5.4). -->
+    <script>
+      (function () {
+        var GA_ID = 'G-JQFNBYQQXZ';
+        if (location.hostname !== 'safeunfollow.app' || window.top !== window.self) return;
+        try {
+          if (localStorage.getItem('umami-opt-out') === 'true') {
+            window['ga-disable-' + GA_ID] = true;
+            return;
+          }
+        } catch (e) {}
+
+        window.dataLayer = window.dataLayer || [];
+        function gtag() {
+          window.dataLayer.push(arguments);
+        }
+        window.gtag = gtag;
+
+        gtag('consent', 'default', {
+          ad_storage: 'denied',
+          ad_user_data: 'denied',
+          ad_personalization: 'denied',
+          analytics_storage: 'denied',
+          region: [
+            'AT',
+            'BE',
+            'BG',
+            'HR',
+            'CY',
+            'CZ',
+            'DK',
+            'EE',
+            'FI',
+            'FR',
+            'DE',
+            'GR',
+            'HU',
+            'IS',
+            'IE',
+            'IT',
+            'LV',
+            'LI',
+            'LT',
+            'LU',
+            'MT',
+            'NL',
+            'NO',
+            'PL',
+            'PT',
+            'RO',
+            'SK',
+            'SI',
+            'ES',
+            'SE',
+            'GB',
+            'CH',
+          ],
+          wait_for_update: 500,
+        });
+        gtag('consent', 'default', {
+          ad_storage: 'denied',
+          ad_user_data: 'denied',
+          ad_personalization: 'denied',
+        });
+        gtag('set', 'ads_data_redaction', true);
+
+        var cleanUrl = location.href;
+        try {
+          var u = new URL(location.href);
+          var strip = ['license_key', 'payment_id', 'subscription_id', 'status', 'email'];
+          for (var i = 0; i < strip.length; i++) u.searchParams.delete(strip[i]);
+          cleanUrl = u.toString();
+        } catch (e) {}
+
+        gtag('js', new Date());
+        gtag('config', GA_ID, {
+          page_location: cleanUrl,
+          allow_google_signals: false,
+          allow_ad_personalization_signals: false,
+        });
+
+        var gs = document.createElement('script');
+        gs.id = 'ga4-gtag-js';
+        gs.async = true;
+        gs.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;
+        document.head.appendChild(gs);
+
+        if (!/(?:^|\/)sample(?:\/|$)/.test(location.pathname)) {
+          var fc = document.createElement('script');
+          fc.id = 'google-fc-cmp';
+          fc.async = true;
+          fc.src = 'https://fundingchoicesmessages.google.com/i/pub-5976295812261948?ers=1';
+          document.head.appendChild(fc);
+          (function signalGooglefcPresent() {
+            if (!window.frames['googlefcPresent']) {
+              if (document.body) {
+                var iframe = document.createElement('iframe');
+                iframe.style.cssText =
+                  'width:0;height:0;border:none;z-index:-1000;left:-1000px;top:-1000px;display:none';
+                iframe.name = 'googlefcPresent';
+                document.body.appendChild(iframe);
+              } else {
+                setTimeout(signalGooglefcPresent, 0);
+              }
+            }
+          })();
+        }
+      })();
+    </script>
+
     <!-- Preload critical fonts to reduce LCP -->
     <link
       rel="preload"

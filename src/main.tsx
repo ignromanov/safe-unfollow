@@ -53,12 +53,8 @@ export const createRoot = ViteReactSSG(
 
     // Client-side only initialization
     if (isClient) {
-      // Load analytics (respects user opt-out)
+      // Load analytics (respects user opt-out; GA4 initializes directly in index.html <head>)
       loadUmami();
-
-      // Google Analytics 4 (pageview-only audience verification; production origin only,
-      // respects user opt-out, runs after stripCheckoutReturnParams() above).
-      import('./lib/ga4-loader').then(({ loadGa4 }) => loadGa4());
 
       // Heatmap recorder — landing page only, after the first interaction (GH#95)
       loadHeatmapRecorder();
