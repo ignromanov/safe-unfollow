@@ -39,8 +39,10 @@ describe('Routes Configuration', () => {
       expect(paths).toContain('upload');
       expect(paths).toContain('results');
       expect(paths).toContain('sample');
-      expect(paths).toContain('privacy');
-      expect(paths).toContain('terms');
+      // English only since v1.7.0 (plan task 08a): /xx/privacy and /xx/terms are 308s in
+      // public/_redirects, and a route here would answer them client-side instead.
+      expect(paths).not.toContain('privacy');
+      expect(paths).not.toContain('terms');
     });
   });
 

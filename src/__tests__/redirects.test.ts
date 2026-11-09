@@ -105,6 +105,28 @@ describe('_redirects wizard redirects', () => {
   });
 });
 
+describe('_redirects localized legal pages', () => {
+  it('every non-English /:lang/privacy and /:lang/terms redirects 308 to the English page', () => {
+    // Plan 2026-11-09 task 08a (R5): the legal text is English-only, so a locale URL under its
+    // own hreflang claimed a translation that does not exist. Both slash shapes, every locale,
+    // derived from SUPPORTED_LANGUAGES: an eleventh locale without its four lines fails here.
+    const legal = redirects.filter(rule => /^\/[a-z]{2}\/(privacy|terms)\/?$/.test(rule.source));
+    const expected = LOCALIZED.flatMap(lang =>
+      ['privacy', 'terms'].flatMap(page => [
+        `/${lang}/${page} /${page} 308`,
+        `/${lang}/${page}/ /${page} 308`,
+      ])
+    );
+    expect(legal.map(r => `${r.source} ${r.destination} ${r.status}`).sort()).toEqual(
+      expected.sort()
+    );
+  });
+
+  it('redirects no English legal page anywhere', () => {
+    expect(redirects.filter(r => /^\/(privacy|terms)\/?$/.test(r.source))).toEqual([]);
+  });
+});
+
 describe('_headers wizard asset cache header', () => {
   it('caches the step assets by their hyphenated prefix, never the removed routes', () => {
     const rule = headers.find(entry => entry.source.startsWith('/wizard/'));

@@ -9,6 +9,7 @@ import {
   type SupportedLanguage,
 } from '../src/config/languages.js';
 import { INTENT_PATHS } from '../src/config/intent-pages.js';
+import { LEGAL_PATHS } from '../src/config/legal-pages.js';
 import { shippedNoindexRoutes, type NoindexRoutes } from '../scripts/noindex-routes.js';
 
 const BASE_URL = 'https://safeunfollow.app';
@@ -313,7 +314,7 @@ export async function injectLocalizedMeta(
   // Pages that exist in English only advertise no alternates. Emitting the full
   // SUPPORTED_LANGUAGES list here would name nine URLs no build emits — the same defect
   // scripts/generate-sitemap.ts records at its EXCLUDE_PATTERNS comment, from the other end.
-  const englishOnly = INTENT_PATHS.includes(basePath);
+  const englishOnly = INTENT_PATHS.includes(basePath) || LEGAL_PATHS.includes(basePath);
 
   // Generate hreflang links
   const hreflangLinks = englishOnly

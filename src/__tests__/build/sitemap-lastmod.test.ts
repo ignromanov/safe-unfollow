@@ -55,7 +55,7 @@ describeDist('sitemap lastmod is derived from content', built, () => {
 
   it('no lastmod equals the build date unless that content changed that day', () => {
     const all = entries();
-    expect(all.length).toBeGreaterThan(50);
+    expect(all.length).toBeGreaterThan(30); // 39 since v1.7.0 dropped the 18 localized legal URLs
     for (const e of all.filter(x => !x.loc.startsWith(`${BASE_URL}/docs`))) {
       expect(e.lastmod, e.loc).toBe(RELEASE_DATE);
     }

@@ -40,6 +40,23 @@ describe('PrefixedLink', () => {
     );
   });
 
+  it('never prefixes a legal page: /privacy and /terms exist in English only', () => {
+    // Plan 2026-11-09 task 08a (R5): /xx/privacy and /xx/terms are 308s to the English page,
+    // so a prefixed link would spend a redirect on every click and advertise a dead address.
+    for (const lang of NON_ENGLISH_LANGUAGES) {
+      const { unmount } = renderWithRouter(
+        <>
+          <PrefixedLink to="/privacy">Privacy</PrefixedLink>
+          <PrefixedLink to="/terms#refunds">Terms</PrefixedLink>
+        </>,
+        { initialEntries: [`/${lang}/upload`] }
+      );
+      expect(screen.getByRole('link', { name: 'Privacy' })).toHaveAttribute('href', '/privacy');
+      expect(screen.getByRole('link', { name: 'Terms' })).toHaveAttribute('href', '/terms#refunds');
+      unmount();
+    }
+  });
+
   it('emits no trailing slash for the home link under a language prefix', () => {
     // `'/ru' + '/'` would be `/ru/`, and wrangler.jsonc drops trailing slashes — the
     // browser would be redirected to `/ru`, costing a round trip in exactly the

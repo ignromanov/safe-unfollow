@@ -44,10 +44,23 @@ function createPageChildren(): RouteRecord[] {
     { path: 'upload', element: <UploadPage /> },
     { path: 'results', lazy: loadResultsPage },
     { path: 'sample', lazy: loadSamplePage },
-    { path: 'privacy', element: <PrivacyPage /> },
-    { path: 'terms', element: <TermsPage /> },
     { path: '404', element: <NotFoundPage /> },
     { path: '*', element: <NotFoundPage /> },
+  ];
+}
+
+/**
+ * The legal pages, English only since v1.7.0 (plan 2026-11-09-seo-aeo-geo, task 08a).
+ *
+ * The policy and terms are hard-coded English, so the nine locale copies told engines a
+ * translation exists when it does not. `/xx/privacy` and `/xx/terms` are 308s to these pages in
+ * public/_redirects; a route under a locale would answer that navigation client-side and the
+ * redirect would never be requested. Paths: src/config/legal-pages.ts.
+ */
+function createLegalPageChildren(): RouteRecord[] {
+  return [
+    { path: 'privacy', element: <PrivacyPage /> },
+    { path: 'terms', element: <TermsPage /> },
   ];
 }
 
@@ -73,17 +86,16 @@ function createIntentPageChildren(): RouteRecord[] {
 /**
  * Route definitions for SSG prerendering
  *
- * Structure (7 prerendered routes per language):
+ * Structure (5 prerendered routes per language):
  * - / (hero)
  * - /upload (file upload, and the export guide it opens as a dialog)
  * - /results
  * - /sample
- * - /privacy
- * - /terms
  * - /404
+ * plus, in English only, /privacy, /terms and the intent pages.
  *
  * The `*` catch-all is stripped by vite-react-ssg (it skips any path containing
- * ':' or '*'), so the real build emits 10 languages x 7 + 3 English-only = 73 prerendered routes.
+ * ':' or '*'). The prerendered count is not restated here: count the HTML under dist/.
  *
  * Nine more used to be `/wizard` and `/wizard/step/1..8`, prerendered per
  * language by an `includedRoutes` hook — 90 of the sitemap's 163 entries, 80 of
@@ -109,7 +121,11 @@ export const routes: RouteRecord[] = [
     element: <Layout />,
     errorElement: <RouteErrorPage />,
     entry: 'src/components/Layout.tsx',
-    children: [...createIntentPageChildren(), ...createPageChildren()],
+    children: [
+      ...createIntentPageChildren(),
+      ...createLegalPageChildren(),
+      ...createPageChildren(),
+    ],
   },
   // Language-prefixed routes (es, ru, de, etc.)
   ...SUPPORTED_LANGUAGES.filter(lang => lang !== 'en').map((lang): RouteRecord => ({

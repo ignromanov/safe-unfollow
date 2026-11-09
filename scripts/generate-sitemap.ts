@@ -23,6 +23,7 @@ import {
   type SupportedLanguage,
 } from "../src/config/languages";
 import { INTENT_PATHS } from "../src/config/intent-pages";
+import { LEGAL_PATHS } from "../src/config/legal-pages";
 import { shippedNoindexRoutes } from "./noindex-routes";
 import { docsLastUpdated, docsPaths } from "./docs-paths";
 import { citationReleaseDate } from "../vite/build-env";
@@ -92,8 +93,9 @@ const DOCS_PATHS = docsPaths(resolve(process.cwd(), "docs"));
 
 // Every path served in English only. The intent pages ARE scanned out of dist/ — they are
 // prerendered app routes — so they need the hreflang half and must not join the loop below,
-// which would be a second reason for them to be in the sitemap.
-const ENGLISH_ONLY_PATHS = [...DOCS_PATHS, ...INTENT_PATHS];
+// which would be a second reason for them to be in the sitemap. The legal pages joined them in
+// v1.7.0: their locale copies are 308s now (src/config/legal-pages.ts).
+const ENGLISH_ONLY_PATHS = [...DOCS_PATHS, ...INTENT_PATHS, ...LEGAL_PATHS];
 
 const DEFAULT_CONFIG = { priority: 0.7, changefreq: "monthly" };
 

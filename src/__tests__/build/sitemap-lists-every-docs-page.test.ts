@@ -39,7 +39,7 @@ describeDist('the sitemap lists every docs page the sources declare', built, () 
   it('reads a sitemap with entries in it', () => {
     // Guards the guard: against an empty sitemap the equality below would hold only if the docs
     // tree were also empty, and both readings of "no entries" would pass as agreement.
-    expect(locations.length).toBeGreaterThan(50);
+    expect(locations.length).toBeGreaterThan(30); // 39 since v1.7.0 dropped the 18 localized legal URLs
   });
 
   it('reads a docs tree with pages in it', () => {

@@ -111,7 +111,7 @@ describeDist('dist robots.txt', built, () => {
         /<loc>https:\/\/safeunfollow\.app([^<]*)<\/loc>/g
       ),
     ].map(m => m[1] || '/');
-    expect(locs.length).toBeGreaterThan(50);
+    expect(locs.length).toBeGreaterThan(30); // 39 since v1.7.0 dropped the 18 localized legal URLs
     expect(locs.filter(path => !allowed(rules, path))).toEqual([]);
   });
 
