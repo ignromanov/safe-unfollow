@@ -47,8 +47,8 @@ export const INTENT_CONTENT: Record<IntentSlug, IntentContent> = {
   'who-doesnt-follow-me-back': {
     answer: (
       <>
-        Everyone you follow who doesn't follow you — read from the two lists in your own Instagram
-        data export, the people you follow and the people who follow you.
+        SafeUnfollow lists everyone you follow who doesn't follow you, read from the two lists in
+        your own Instagram data export: the people you follow and the people who follow you.
       </>
     ),
     intro: (
@@ -145,8 +145,8 @@ export const INTENT_CONTENT: Record<IntentSlug, IntentContent> = {
   'instagram-pending-follow-requests': {
     answer: (
       <>
-        Instagram does not show you the follow requests you have sent and that were never accepted —
-        but your data export lists every one of them.
+        SafeUnfollow shows every follow request you sent that was never accepted, read from your
+        Instagram data export. Instagram itself has no screen that lists them.
       </>
     ),
     intro: (
@@ -227,8 +227,8 @@ export const INTENT_CONTENT: Record<IntentSlug, IntentContent> = {
   'instagram-mutual-followers': {
     answer: (
       <>
-        Your export holds both lists — who you follow and who follows you — so the accounts in both
-        are your mutuals: exact for an "All time" export, with no estimating.
+        SafeUnfollow counts an account as mutual when it is in both lists of your export, who you
+        follow and who follows you. The count is exact for an "All time" export, with no estimating.
       </>
     ),
     intro: (

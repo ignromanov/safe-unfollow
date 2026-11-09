@@ -312,10 +312,10 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
 
           <h3 className="text-lg font-semibold mt-6 mb-3">5.4 Advertising (Google AdSense)</h3>
           <p className="text-muted-foreground">
-            This service is free and has no paid tier. Ads from Google AdSense cover its running
-            costs. Google, as a third-party vendor, uses cookies and similar technologies to serve
-            and measure those ads, and receives the data any web request carries — your IP address,
-            browser and the page URL the ad appears on.
+            The analysis is free at any export size. Ads from Google AdSense, and an optional paid
+            export, cover its running costs. Google, as a third-party vendor, uses cookies and
+            similar technologies to serve and measure those ads, and receives the data any web
+            request carries — your IP address, browser and the page URL the ad appears on.
           </p>
           <div className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
             <p className="text-sm text-emerald-700 dark:text-emerald-400 font-medium">

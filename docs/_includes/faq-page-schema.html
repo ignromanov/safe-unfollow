@@ -1,15 +1,14 @@
 {%- comment -%}
-  FAQPage for /docs/faq, whose thirty-two visible questions carried no structured
-  data at all while the two-question `faq-schema.html` sat on /docs/is-it-safe.
+  FAQPage for /docs/faq. GENERATED from faq.md: every `name` is a verbatim `### `
+  heading and every `text` is that heading's own body, flattened the way
+  `responsive-layout.test.ts` flattens it. Edit faq.md, then regenerate; the gate
+  re-derives both sides from the page and goes red if this file is stale.
 
-  Every `name` here is a verbatim `### ` heading in faq.md and every `text` is
-  that heading's own body, flattened. Google requires schema/page parity, and
-  `responsive-layout.test.ts` re-derives both from faq.md rather than trusting
-  this file — edit the page and the gate tells you this went stale.
-
-  "Is it safe? Where do my data go?" is deliberately absent: /docs/is-it-safe is
-  a whole page on that query with its own FAQPage, and two of our URLs competing
-  for it is the cannibalisation this omission avoids.
+  Every visible question is marked up (operator ruling 2026-11-09: the markup is
+  read by AI agents, not only by Google, whose FAQ rich results ended 2026-05-07).
+  One exception: "Is it safe? Where do my data go?" — /docs/is-it-safe is a whole
+  page on that query with its own FAQPage, and two of our URLs competing for it is
+  the cannibalisation this omission avoids.
 {%- endcomment -%}
 <script type="application/ld+json">
 {
@@ -22,7 +21,7 @@
       "name": "Do I need my Instagram login/password?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "No, absolutely not. You only need the ZIP file from Instagram's official Data Download feature (JSON format). No login credentials required."
+        "text": "No. SafeUnfollow needs only the ZIP file from Instagram's official Data Download feature, in JSON or HTML. No login credentials required."
       }
     },
     {
@@ -30,7 +29,15 @@
       "name": "What data does the app access?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "The app only processes the \"Followers and Following\" section from your Instagram data export. It doesn't access posts, messages, photos, or any other personal content."
+        "text": "SafeUnfollow reads only the \"Followers and Following\" section of your Instagram data export. It doesn't access posts, messages, photos, or any other personal content."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is SafeUnfollow.app related to safeunfollow.com or to a browser extension called SafeUnfollow?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "SafeUnfollow is the web app at safeunfollow.app. SafeUnfollow.app is not affiliated with safeunfollow.com or with any browser extension named SafeUnfollow. We do not publish a browser extension. Nothing we publish acts inside your Instagram account or asks for your Instagram login."
       }
     },
     {
@@ -51,6 +58,14 @@
     },
     {
       "@type": "Question",
+      "name": "What file formats are supported?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Input: Instagram Data Download ZIP files (JSON or HTML; JSON is what the guide recommends) Output: Free sample report (every count, the first 10 accounts), then a one-time unlock ($7 or less — the button shows your price) for the full list as a readable report, CSV or JSON"
+      }
+    },
+    {
+      "@type": "Question",
       "name": "Can I use it offline?",
       "acceptedAnswer": {
         "@type": "Answer",
@@ -62,7 +77,191 @@
       "name": "Does it work on mobile?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes, the UI is fully responsive. However, for large archives (10k+ accounts), desktop is more convenient due to better performance and screen space."
+        "text": "Yes. SafeUnfollow's layout is fully responsive, and most of its visitors use it on a phone. For large archives (10k+ accounts), desktop is more convenient due to better performance and screen space."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What browsers are supported?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Modern browsers with JavaScript enabled: Chrome 90+ Firefox 88+ Safari 14+ Edge 90+"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How many accounts can it handle?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "SafeUnfollow is built for very large exports: 1,000,000+ accounts — built and unit-tested for exports of 1,000,000+ accounts Tested on a synthetic export of 1,000,000 accounts: about 21 seconds from choosing the file to results, in desktop Chrome (November 2026). One desktop run; no phone has been tested at that size Filter speed: stays interactive for any badge combination, even at 1M accounts Search speed: near-instant with trigram/prefix indexes Storage: ~5 MB for 1M accounts (design target, ~40x compression) Memory: ~5 MB runtime usage (design target)"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why is this better than paid services?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Privacy: 100% local processing, and the analytics we run never receive usernames or your export file Transparency: Open source, you can see exactly what it does No login required: Uses official Instagram data export Free to analyze: Every badge, filter and account — the one paid item is a one-time export unlock, $7 or less Customizable: Modify the code for your needs"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does it compare to Instagram's built-in features?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Instagram doesn't provide unfollow tracking features. SafeUnfollow fills that gap using your own exported data, giving you insights Instagram doesn't offer."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "The app shows \"No data found\" - what should I do?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "1. The format is not the cause. Both JSON and HTML exports have been read since August 2026 — upload the file you already have rather than requesting a new one. 2. Check that you selected the \"Followers and following\" section 3. Verify the ZIP contains a connections/followers_and_following/ folder, holding either following.json or following.html 4. Try the \"Load sample\" button to test the app functionality"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "My download is taking too long to process",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Large archives (20k+ accounts) may take 5-10 seconds to process Close other browser tabs to free up memory Use desktop browser for better performance"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "The counts don't match what I see in Instagram",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "This is normal and expected: Instagram's live data changes constantly The export is a snapshot from when you requested it Some accounts may have been deleted or made private since the export The app shows the state at the time of your data export"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How to contribute or report a bug?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Issues: GitHub Issues Pull Requests: See CONTRIBUTING.md Security: For security matters, see SECURITY.md"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I modify the code for my needs?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Absolutely! The project is open source (MIT license). You can: Fork the repository Modify the code Deploy your own version Contribute improvements back"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is there a roadmap for new features?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes! See Project Roadmap for upcoming features. Already live: ✅ PWA support — install as an app from the browser menu ✅ 10 languages — including Arabic with RTL support ✅ 3-way theme — light/dark/system"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I compare data from different time periods?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Currently, the app analyzes one export at a time. Historical tracking with multiple data imports is planned; see the roadmap."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How accurate are the results?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "SafeUnfollow's results match your Instagram data export exactly. The app shows the exact state of your followers/following at the time you downloaded the data."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I export my results?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Export ships today: download a free sample report (every count, the first 10 accounts), then unlock the full list with a one-time payment ($7 or less — the button shows your price). The paid export comes as CSV, JSON, or an HTML report you can open in a browser and print to PDF."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does the app work with private accounts?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, the app works with any Instagram account type (public, private, business). It only processes the follower/following data from your export."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why does the app need JavaScript?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The app processes your Instagram data entirely in your browser using JavaScript. This ensures your data never leaves your device and provides the best privacy protection."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What if Instagram changes their data format?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The app is designed to handle various Instagram export formats. If Instagram changes their format, we'll update the app to support the new format."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is my data stored anywhere?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Your Instagram data is stored locally in your browser's IndexedDB for fast access. It never leaves your device. You can clear data anytime by clearing browser data or uploading a new file."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What languages are supported?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The app is available in 10 languages: English, Spanish, Russian, German, Portuguese, Turkish, Indonesian, Japanese, Arabic (with RTL support), and French. The app auto-detects your browser language."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I install it as an app?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes! The app is a PWA (Progressive Web App). Click \"Install\" in your browser to add it to your home screen."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How can I contribute to the project?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Code contributions: See CONTRIBUTING.md Bug reports: GitHub Issues Feature requests: GitHub Discussions Documentation: Help improve guides and add examples"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is there a community or forum?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes! Join our GitHub Discussions for: Feature discussions User support Community tips and tricks Development updates"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How often is the app updated?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Updates are released regularly based on community feedback and development progress. Check the roadmap for upcoming features."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I suggest new features?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Absolutely! We welcome feature suggestions. Please use GitHub Discussions to share your ideas."
       }
     }
   ]

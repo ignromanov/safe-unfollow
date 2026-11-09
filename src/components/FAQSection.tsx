@@ -37,6 +37,7 @@ export const FAQ_KEYS = [
   'zipFile', // "What is data download" - educational
   'htmlExport', // "Do I need to re-export as JSON" - format question, beside zipFile
   'accountSafety', // "Is account safe" - trust
+  'notAffiliated', // "Is SafeUnfollow.app related to safeunfollow.com / the extension" - entity disambiguation
   'downloadTime', // NEW: "How long to receive" - practical
   'scale', // "How many accounts" - differentiator
   'free', // "Is it free" - objection handling

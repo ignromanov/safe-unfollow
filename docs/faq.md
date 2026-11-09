@@ -3,7 +3,7 @@ layout: default
 title: "Instagram Unfollow Tracker FAQ: No Login, Free, Private"
 description: 'Answers to common questions about Instagram Unfollow Tracker. Learn how it works without login, why it''s free, and how your data stays private.'
 permalink: /faq/
-last_updated: 2026-09-09
+last_updated: 2026-11-09
 ---
 
 {% include faq-page-schema.html %}
@@ -16,10 +16,13 @@ last_updated: 2026-09-09
 **Your Instagram export never leaves your browser.** [Is an unfollowers tracker safe?](/docs/is-it-safe) is the full answer — five facts you can check for yourself, the last of which needs no trust in us at all. What the rest of the site loads is answered on [the privacy page](/docs/privacy).
 
 ### Do I need my Instagram login/password?
-**No, absolutely not.** You only need the ZIP file from Instagram's official Data Download feature (JSON format). No login credentials required.
+**No.** SafeUnfollow needs only the ZIP file from Instagram's official Data Download feature, in JSON or HTML. No login credentials required.
 
 ### What data does the app access?
-The app only processes the "Followers and Following" section from your Instagram data export. It doesn't access posts, messages, photos, or any other personal content.
+SafeUnfollow reads only the "Followers and Following" section of your Instagram data export. It doesn't access posts, messages, photos, or any other personal content.
+
+### Is SafeUnfollow.app related to safeunfollow.com or to a browser extension called SafeUnfollow?
+SafeUnfollow is the web app at safeunfollow.app. SafeUnfollow.app is not affiliated with safeunfollow.com or with any browser extension named SafeUnfollow. We do not publish a browser extension. Nothing we publish acts inside your Instagram account or asks for your Instagram login.
 
 ## Functionality
 
@@ -45,7 +48,7 @@ Instagram may split followers into multiple files (`followers_1.json`, `follower
 **Partly.** Pages and analyses you have already run keep working with the network off — the app caches what it has fetched, not the whole site. A first visit, and the first upload, need a connection. All computation is client-side either way.
 
 ### Does it work on mobile?
-**Yes, the UI is fully responsive.** However, for large archives (10k+ accounts), desktop is more convenient due to better performance and screen space.
+**Yes.** SafeUnfollow's layout is fully responsive, and most of its visitors use it on a phone. For large archives (10k+ accounts), desktop is more convenient due to better performance and screen space.
 
 ### What browsers are supported?
 Modern browsers with JavaScript enabled:
@@ -55,8 +58,9 @@ Modern browsers with JavaScript enabled:
 - Edge 90+
 
 ### How many accounts can it handle?
-The app is optimized for massive scale:
+SafeUnfollow is built for very large exports:
 - **1,000,000+ accounts** — built and unit-tested for exports of 1,000,000+ accounts
+- **Tested on a synthetic export of 1,000,000 accounts**: about 21 seconds from choosing the file to results, in desktop Chrome (November 2026). One desktop run; no phone has been tested at that size
 - **Filter speed**: stays interactive for any badge combination, even at 1M accounts
 - **Search speed**: near-instant with trigram/prefix indexes
 - **Storage**: ~5 MB for 1M accounts (design target, ~40x compression)
@@ -72,7 +76,7 @@ The app is optimized for massive scale:
 - **Customizable**: Modify the code for your needs
 
 ### How does it compare to Instagram's built-in features?
-Instagram doesn't provide unfollow tracking features. This tool fills that gap using your own exported data, giving you insights Instagram doesn't offer.
+Instagram doesn't provide unfollow tracking features. SafeUnfollow fills that gap using your own exported data, giving you insights Instagram doesn't offer.
 
 ## Troubleshooting
 
@@ -117,10 +121,10 @@ Yes! See [Project Roadmap](/docs/roadmap) for upcoming features. Already live:
 ## Advanced Usage
 
 ### Can I compare data from different time periods?
-Currently, the app analyzes one export at a time. Historical tracking with multiple data imports is planned for v1.7.
+Currently, the app analyzes one export at a time. Historical tracking with multiple data imports is planned; see the [roadmap](/docs/roadmap).
 
 ### How accurate are the results?
-Results are 100% accurate based on your Instagram data export. The app shows the exact state of your followers/following at the time you downloaded the data.
+SafeUnfollow's results match your Instagram data export exactly. The app shows the exact state of your followers/following at the time you downloaded the data.
 
 ### Can I export my results?
 Yes. Export ships today: download a free sample report (every count, the first 10 accounts), then unlock the full list with a one-time payment ($7 or less — the button shows your price). The paid export comes as CSV, JSON, or an HTML report you can open in a browser and print to PDF.
