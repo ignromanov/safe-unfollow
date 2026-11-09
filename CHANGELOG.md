@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-11-09
+
+### Added
+
+- Search engines and AI assistants get one description of SafeUnfollow on every
+  indexable page: the app, its founder, and the profiles that name it (GitHub,
+  Crunchbase, Product Hunt, the Zenodo DOI, Instagram). It states that
+  SafeUnfollow.app is not affiliated with safeunfollow.com or with any browser
+  extension named SafeUnfollow.
+- The FAQ answers how SafeUnfollow.app relates to those two names, in all ten
+  languages. Every question on `/docs/faq` but one is now marked up for machines
+  exactly as it reads on the page; the exception, "Is it safe?", has its own page.
+- The Instagram export guide (`/docs/instagram-export`) explains each file in the
+  archive, for JSON and HTML exports alike.
+
+### Changed
+
+- The privacy policy and the terms have one address each, `/privacy` and
+  `/terms`. Their nine localized addresses redirect there permanently; the text,
+  which was only ever in English, is unchanged.
+- Copy that asked you to upload your export and also said it is never uploaded
+  now says what it means: you pick the file, and it is never sent to a server.
+
+### Fixed
+
+- The sitemap dates each page by when its content changed, not by the day of the
+  last deploy.
+- Crawlers are asked to skip `/results` and `/sample`, which hold no content
+  until you load an export.
+
 ## [1.6.0] - 2026-09-08
 
 First tagged release. Everything from 0.x through 1.5.0 shipped continuously to

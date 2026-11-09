@@ -100,6 +100,60 @@ describe('citation metadata', () => {
     ).toBe(PACKAGE.version);
   });
 
+  it('docs/tech-spec.md states the package.json version', () => {
+    // The published spec states its version twice: the header line and the closing line.
+    const spec = read('docs/tech-spec.md');
+    const stated = [
+      ...spec.matchAll(/\*\*Version:\*\*\s*v?(\d+\.\d+\.\d+)/g),
+      ...spec.matchAll(/reflects v(\d+\.\d+\.\d+) architecture/g),
+    ].map(match => match[1]);
+    expect(stated.length, 'docs/tech-spec.md states no version to compare').toBeGreaterThanOrEqual(2);
+    expect(new Set(stated)).toEqual(new Set([PACKAGE.version]));
+  });
+
+  /**
+   * The hero badge reads "V1.6 Optimized for …" in ten locales: a version typed into copy, the
+   * one place a reader sees it, and the one no release step touches. Code derives the version
+   * (`__PKG_VERSION__`); copy cannot, so this compares it. Comments are stripped from code so a
+   * docblock recording an old version is not read as a claim.
+   */
+  it('no hand-written version string in src disagrees with package.json', () => {
+    const [major, minor] = PACKAGE.version.split('.');
+    const offenders: string[] = [];
+    const bundles = import.meta.glob<Record<string, unknown>>('../../locales/*/*.json', {
+      eager: true,
+      import: 'default',
+    });
+    const walk = (value: unknown, where: string): void => {
+      if (typeof value === 'string') {
+        for (const m of value.matchAll(/\bV(\d+)\.(\d+)(?:\.\d+)?\b/g)) {
+          if (m[1] !== major || m[2] !== minor) offenders.push(`${where}: ${m[0]}`);
+        }
+      } else if (value && typeof value === 'object') {
+        for (const [k, v] of Object.entries(value)) walk(v, `${where}.${k}`);
+      }
+    };
+    for (const [file, bundle] of Object.entries(bundles)) walk(bundle, file.replace(/^.*locales\//, ''));
+    // Control: the badge is really scanned, so a clean result means agreement, not absence.
+    expect(JSON.stringify(bundles['../../locales/en/hero.json'])).toMatch(/\bV\d+\.\d+\b/);
+
+    const code = import.meta.glob<string>(['../../**/*.{ts,tsx}', '!../../__tests__/**'], {
+      eager: true,
+      query: '?raw',
+      import: 'default',
+    });
+    for (const [file, source] of Object.entries(code)) {
+      const stripped = source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
+      for (const m of stripped.matchAll(/['"`]v?(\d+\.\d+\.\d+)['"`]/g)) {
+        if (m[1] !== PACKAGE.version && /version/i.test(stripped.slice(Math.max(0, m.index! - 60), m.index!))) {
+          offenders.push(`${file}: ${m[0]}`);
+        }
+      }
+    }
+    expect(Object.keys(code).length).toBeGreaterThan(50);
+    expect(offenders).toEqual([]);
+  });
+
   it('CITATION.cff points at the same repository, site and licence as package.json', async () => {
     const cff = await loadCitation();
     expect(normalizeRepo(String(cff['repository-code']))).toBe(
