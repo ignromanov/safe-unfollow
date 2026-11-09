@@ -3,12 +3,12 @@ layout: default
 title: "How the Instagram Unfollow Tracker Works: Architecture"
 description: 'How the tracker works: 100% local processing, IndexedDB columnar storage, BitSet filtering, and how it is built to hold 1M+ accounts.'
 permalink: /tech-spec/
-last_updated: 2026-11-07
+last_updated: 2026-11-09
 ---
 
 # Technical Specification
 
-**Version:** 1.5.0
+**Version:** 1.7.0
 
 ## 1. Project Overview
 
@@ -193,6 +193,19 @@ true: the engine is built and unit-tested against a 1M-account bitset.
 | INP | under 200 ms |
 | LCP | under 2.5 s |
 
+### What has been measured or shipped
+
+Each row is a claim we make elsewhere, with how it was established and what it does not cover.
+
+| Claim | Method | Source | Date | Limitations |
+|---|---|---|---|---|
+| Tested on a synthetic export of 1,000,000 accounts: about 21 seconds from choosing the file to results, in desktop Chrome | Chrome DevTools Performance trace of the production site, from the file being chosen (71.3 s) to `/results` rendering (about 92.5 s) | One recorded run on a MacBook Pro 16" (Intel Core i9, 32 GB), Chrome 156; synthetic export of 500,000 following and 450,000 followers | November 2026 | One run, one desktop, one browser. Synthetic data, generated to the parser's schema. No phone has run it. Peak page heap was 598 MB, and worker memory may not be included |
+| Reads both JSON and HTML exports | The parser reads `.html` files through a built-in converter | [PR #152](https://github.com/ignromanov/safe-unfollow/pull/152) | 2026-08-29 | JSON is read most reliably; an unusual HTML export can fail |
+| Shows the follow date the export recorded | Dates are read from the export's own `timestamp` fields | [PR #288](https://github.com/ignromanov/safe-unfollow/pull/288) | 2026-10-25 | Only what the file recorded; no date is inferred |
+| Open source (MIT), archived with a DOI | Each release is deposited on Zenodo | [doi.org/10.5281/zenodo.22663615](https://doi.org/10.5281/zenodo.22663615) | since 2026-09-08 | The DOI always resolves to the newest version |
+| Available in 10 languages | The locale list the build prerenders | `src/config/languages.ts` | current | Legal pages are in English only |
+| Every badge and filter is free at any export size | Only saving the full list as a file is paid | `src/lib/export/` | current | Exporting the full list is a one-time purchase, priced by country |
+
 ### Optimization Strategies
 - **Columnar storage**: 40x space reduction vs row-based
 - **BitSet filtering**: 32x faster than boolean arrays
@@ -367,4 +380,4 @@ npm run code:check   # lint:strict + type-check
 
 ---
 
-*This specification reflects v1.5.0 architecture. See CHANGELOG.md for version history.*
+*This specification reflects v1.7.0 architecture. See CHANGELOG.md for version history.*

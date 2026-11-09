@@ -3,7 +3,7 @@ layout: default
 title: 'Is an Unfollowers Tracker Safe? What to Check First'
 description: 'No login, no password. Your export stays in the browser, and the code that reads it is open source on GitHub.'
 permalink: /is-it-safe/
-last_updated: 2026-09-03
+last_updated: 2026-11-09
 ---
 
 {% include faq-schema.html %}
@@ -32,18 +32,28 @@ So a tracker is safe when three things are true at once: it never asks for your 
 Five claims. Each one links to the thing that proves it.
 
 1. **There is no password field.** Not on the upload page, not anywhere else — the product has no login at all. [Open the upload page](/upload?guide=1) and look.
-2. **Your export never leaves your browser.** The ZIP is opened and searched on your device, and the results are stored there too. What the rest of the site loads is a separate question, answered on [the privacy page](/docs/privacy).
+2. **Your export is never sent to a server.** The ZIP is opened and searched on your device, and the results are stored there too. What the rest of the site loads is a separate question, answered on [the privacy page](/docs/privacy).
 3. **You can read the code.** All of it, MIT licensed, [on GitHub](https://github.com/ignromanov/safe-unfollow) — including the part that opens your archive.
 4. **These claims are checked automatically.** A test in that repository reads this very page and refuses to release a version where we have promised something sweeping about ads, servers or tracking.
-5. **It keeps working if we don't.** Install it once and it runs with no internet, so an analysis you have already done outlives the website.
+5. **It is archived.** Every release is deposited on [Zenodo under one DOI](https://doi.org/10.5281/zenodo.22663615), so the code that read your file stays open to inspection even if this site goes away.
 
-And the other direction, stated plainly, because a page like this is worth nothing if it only lists the flattering half: what *does* leave your browser is anonymous page-view counting, and ad requests on the upload and results screens. Neither one receives your Instagram archive. It is never uploaded, so nothing downstream is in a position to read it.
+And the other direction, stated plainly, because a page like this is worth nothing if it only lists the flattering half: what *does* leave your browser is analytics and ad requests. Our analytics record page views and your export's account count and file size, never a username. Google ads load on the upload and results screens. Our code never sends the export to a server, so none of them receives your Instagram archive.
+
+### The evidence for claim 2
+
+| | |
+|---|---|
+| **Claim** | The export is never sent to a server. |
+| **Method** | Open DevTools, then Network, then pick your export and watch. No request carries the file. |
+| **Source** | The [open-source parser](https://github.com/ignromanov/safe-unfollow), which runs in a Web Worker in your browser, and [privacy policy](/privacy) §5. |
+| **Date** | Checked 2026-11-09 |
+| **Limitations** | Some pages load Google ads and analytics, which receive what any web request carries (IP address, browser, page URL). Our analytics also record your export's account count and file size, never a username. |
 
 ## What it costs, and where the catch would be
 
 The analysis is free in full — every badge, every filter, every account, however large your following. No account, no subscription, no trial that ends. The one paid item is a one-time unlock for saving your list as CSV, JSON or an HTML report, and it costs $7 or less — the button shows your price.
 
-Size is not the catch either: it is built and unit-tested for exports of a million accounts, which is where tools that cap you at ten thousand quietly stop.
+Size is not the catch either. It is built and unit-tested for exports of a million accounts, and it was tested on a synthetic export of 1,000,000 accounts: about 21 seconds from choosing the file to results, in desktop Chrome (November 2026). That was one desktop run, and no phone has been tested at that size.
 
 ## What SafeUnfollow is not
 
