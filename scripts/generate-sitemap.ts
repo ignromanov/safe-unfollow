@@ -9,10 +9,12 @@
  * - Auto-discovers all pages from dist/
  * - Generates hreflang links for i18n
  * - Per-route priority and changefreq
- * - Generates robots.txt
+ *
+ * robots.txt is NOT generated here. `public/robots.txt` is the one source and Vite copies it into
+ * dist/ verbatim; until v1.7.0 this script overwrote that copy with a second, different file.
  */
 
-import { existsSync, readdirSync, statSync, writeFileSync } from "fs";
+import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from "fs";
 import { resolve, relative } from "path";
 
 // Import from shared config (single source of truth)
@@ -22,7 +24,8 @@ import {
 } from "../src/config/languages";
 import { INTENT_PATHS } from "../src/config/intent-pages";
 import { shippedNoindexRoutes } from "./noindex-routes";
-import { docsPaths } from "./docs-paths";
+import { docsLastUpdated, docsPaths } from "./docs-paths";
+import { citationReleaseDate } from "../vite/build-env";
 
 // Configuration
 const BASE_URL = "https://safeunfollow.app";
@@ -268,17 +271,6 @@ function generateUrlEntry(
 }
 
 /**
- * Generate robots.txt content
- */
-function generateRobotsTxt(): string {
-  return `User-agent: *
-Allow: /
-
-Sitemap: ${BASE_URL}/sitemap.xml
-`;
-}
-
-/**
  * Main function
  */
 function main(): void {
@@ -335,10 +327,18 @@ function main(): void {
     return a.basePath.localeCompare(b.basePath) || a.lang.localeCompare(b.lang);
   });
 
-  // Generate sitemap XML
-  const lastmod = new Date().toISOString().split("T")[0];
+  // Generate sitemap XML.
+  //
+  // lastmod comes from content, never from the build clock: it was the build date until v1.7.0,
+  // which told crawlers every page changed on every deploy. A docs page takes its front-matter
+  // `last_updated`; every app route takes CITATION.cff's `date-released`, the day its content
+  // last shipped. Two builds of one commit therefore write the same file.
+  const docsDates = docsLastUpdated(resolve(process.cwd(), "docs"));
+  const releaseDate = citationReleaseDate(
+    readFileSync(resolve(process.cwd(), "CITATION.cff"), "utf-8")
+  );
   const entries = urlEntries.map((e) =>
-    generateUrlEntry(e.url, e.basePath, e.lang, lastmod)
+    generateUrlEntry(e.url, e.basePath, e.lang, docsDates.get(e.basePath) ?? releaseDate)
   );
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
@@ -352,7 +352,6 @@ ${entries.join("\n\n")}
 
   // Write files
   writeFileSync(resolve(DIST_DIR, "sitemap.xml"), sitemap, "utf-8");
-  writeFileSync(resolve(DIST_DIR, "robots.txt"), generateRobotsTxt(), "utf-8");
 
   // Summary
   const basePaths = new Set(urlEntries.map((e) => e.basePath));
@@ -364,7 +363,6 @@ ${entries.join("\n\n")}
   console.log(`   - Skipped (noindex per public/_headers): ${skippedNoindex.length}`);
   console.log(`   Base paths: ${Array.from(basePaths).join(", ")}`);
   console.log(`   Languages: ${SUPPORTED_LANGUAGES.join(", ")}`);
-  console.log(`✅ robots.txt generated: dist/robots.txt`);
 }
 
 main();

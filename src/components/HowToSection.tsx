@@ -73,7 +73,8 @@ export function HowToSection() {
       position: step.id,
       name: step.title,
       text: step.description,
-      image: step.visual ? `${step.visual}-600w-poster.jpg` : undefined,
+      // Absolute: a JSON-LD consumer reading this block has no base URL to resolve against.
+      image: step.visual ? `https://safeunfollow.app${step.visual}-600w-poster.jpg` : undefined,
     })),
   };
 
