@@ -150,7 +150,7 @@ describe('GuideDialog', () => {
     // where that is the single load-bearing promise.
     open();
 
-    expect(screen.getByText(/never uploaded/i)).toBeInTheDocument();
+    expect(screen.getByText(/never sends the file to a server/i)).toBeInTheDocument();
   });
 
   it('ends with the reminder, not with an upload it cannot honour', async () => {
