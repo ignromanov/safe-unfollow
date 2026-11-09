@@ -11,7 +11,7 @@
     },
     "whoDoesntFollowBack": {
       "question": "Instagram'da beni geri takip etmeyenler kimler?",
-      "answer": "SafeUnfollow, Instagram dışa aktarımındaki iki listeyi karşılaştırarak seni geri takip etmeyenleri gösterir. Takip ettiğin ama seni takip etmeyen hesaplar \"Geri takip etmiyor\" filtresinde görünür. Analiz ücretsizdir, SafeUnfollow Instagram girişini asla istemez ve dosya tarayıcında kalır.",
+      "answer": "SafeUnfollow, Instagram dışa aktarımındaki iki listeyi karşılaştırarak seni geri takip etmeyenleri gösterir. Takip ettiğin ama seni takip etmeyen hesaplar \"Geri takip etmeyenler\" filtresinde görünür. Analiz ücretsizdir ve Instagram girişi gerektirmez.",
       "relatedLink": {
         "text": "Geri takip etmeyenleri gör",
         "href": "/upload?filter=notFollowingBack"
@@ -35,7 +35,7 @@
     },
     "withoutDownload": {
       "question": "Veri indirmeden veya uygulama olmadan Instagram takipten çıkanları kontrol edebilir miyim?",
-      "answer": "Hayır. Instagram'da takipten çıkanlar listesi yok; ya listelerini elle karşılaştırırsın ya da resmi veri indirmeyi kullanırsın. SafeUnfollow ikincisini senin için yapar. Analiz ücretsizdir ve SafeUnfollow Instagram şifreni ya da girişini asla istemez.",
+      "answer": "Hayır. Instagram'da takipten çıkanlar listesi yok; ya listelerini elle karşılaştırırsın ya da resmi veri indirmeyi kullanırsın. SafeUnfollow ikincisini senin için yapar ve Instagram şifreni ya da girişini asla istemez. Analiz ücretsizdir.",
       "relatedLink": {
         "text": "Verilerinizi nasıl alacağınızı öğrenin",
         "href": "/upload?guide=1"
@@ -43,7 +43,7 @@
     },
     "privacy": {
       "question": "Instagram takipten çıkan izleyici giriş yapmadan nasıl çalışır?",
-      "answer": "SafeUnfollow giriş gerektirmez, çünkü resmi Instagram veri dışa aktarımını tarayıcında okur ve dışa aktarım orada kalır. Analitiğimiz sayfa görüntülemelerini ve dışa aktarımın hesap sayısı ile boyutunu kaydeder, kullanıcı adını asla. Bunları alt bilgiden kapatabilirsin.",
+      "answer": "SafeUnfollow giriş gerektirmez, çünkü resmi Instagram veri dışa aktarımını tarayıcında okur ve dosya orada kalır. Analitiğimiz sayfa görüntülemelerini ve dışa aktarımın hesap sayısı ile boyutunu kaydeder, kullanıcı adını asla. Bunları alt bilgiden kapatabilirsin.",
       "relatedLink": {
         "text": "Gizlilik politikamızı okuyun",
         "href": "/privacy"
@@ -63,7 +63,7 @@
     },
     "zipFile": {
       "question": "Instagram veri indirme nedir ve neden kullanmalıyım?",
-      "answer": "Instagram'ın veri indirmesi (Meta Hesaplar Merkezi'nde), takipçi ve takip listelerin dahil hesap bilgilerini dışa aktarmak için Meta'nın resmi aracıdır. Bu verilere şifreni kimseye vermeden ulaşmanı sağlar. SafeUnfollow bu dışa aktarımı okur, başka hiçbir şeyi değil.",
+      "answer": "Instagram'ın veri indirmesi (Meta Hesaplar Merkezi'nde), takipçi ve takip listelerin dahil hesap bilgilerini dışa aktarmak için Meta'nın resmi aracıdır. Bu araçla verilerine şifreni kimseye vermeden ulaşırsın. SafeUnfollow bu dışa aktarımı okur, başka hiçbir şeyi değil.",
       "relatedLink": {
         "text": "Adım adım kılavuzumuzu takip edin",
         "href": "/upload?guide=1"
@@ -71,7 +71,7 @@
     },
     "htmlExport": {
       "question": "JSON yerine HTML dışa aktardım. Tekrar dışa aktarmam gerekiyor mu?",
-      "answer": "Hayır. SafeUnfollow zaten her iki formatı da okuyor. HTML dışa aktarımları da çalışır, ancak en güvenilir şekilde JSON formatını okuruz, bu yüzden kılavuz hâlâ JSON'u önerir. Zaten elindeki ZIP dosyasını seç.",
+      "answer": "Hayır. SafeUnfollow, JSON'un yanı sıra HTML dışa aktarımlarını da okur. Kılavuz yine de JSON'u önerir, çünkü en güvenilir okuduğumuz format odur. Zaten elindeki ZIP dosyasını seç.",
       "relatedLink": {
         "text": "Dışa aktarımınızı nasıl alacağınızı öğrenin",
         "href": "/upload?guide=1"
@@ -91,7 +91,7 @@
     },
     "downloadTime": {
       "question": "Instagram veri indirmemi almam ne kadar sürer?",
-      "answer": "Meta verilerini genellikle 5-30 dakika içinde e-postayla gönderir; büyük hesaplarda veya yoğun dönemlerde birkaç saat sürebilir. ZIP elinde olunca SafeUnfollow onu bir sunucuda değil kendi tarayıcında okur, yani sıra beklemezsin. Büyük dışa aktarımların okunması küçüklerden daha uzun sürer.",
+      "answer": "Meta verilerini genellikle 5-30 dakika içinde e-postayla gönderir; büyük hesaplarda veya yoğun dönemlerde birkaç saat sürebilir. ZIP elinde olunca SafeUnfollow onu bir sunucuda değil kendi tarayıcında okur, yani sıra beklemezsin.",
       "relatedLink": {
         "text": "Takvim hatırlatıcısı ekle",
         "href": "/upload?step=8"
@@ -99,7 +99,7 @@
     },
     "scale": {
       "question": "Ne büyüklükte Instagram hesap dışa aktarımı analiz edebilirsiniz?",
-      "answer": "SafeUnfollow, 1.000.000 hesaplık sentetik bir dışa aktarımda denendi: masaüstü Chrome'da dosyayı seçmekten sonuçlara kadar yaklaşık 21 saniye (Kasım 2026). Bu tek bir masaüstü denemesiydi, bu boyutta hiçbir telefon denenmedi. Sütunlu depolama ve bitset'ler, liste büyüdükçe filtrelemeyi duyarlı tutar.",
+      "answer": "SafeUnfollow, 1.000.000 hesaplık sentetik bir dışa aktarımda denendi: masaüstü Chrome'da dosyayı seçmekten sonuçlara kadar yaklaşık 21 saniye (Kasım 2026). Bu tek bir masaüstü denemesiydi, bu boyutta hiçbir telefon denenmedi. Sütunlu depolama ve bitset'ler sayesinde filtreleme, liste büyüdükçe de hızlı yanıt verir.",
       "relatedLink": {
         "text": "Örnek verilerle deneyin",
         "href": "/sample"
@@ -107,11 +107,11 @@
     },
     "free": {
       "question": "Ücretsiz Instagram takipten çıkan izleyicileri var mı?",
-      "answer": "Evet. SafeUnfollow'un analizi ücretsizdir: tüm rozetler, filtreler ve hesaplar, kayıt ve sınır olmadan. Ücretli olan tek şey, filtrelenmiş listeni dosya olarak dışa aktarmak: tek seferlik bir ödeme, fiyatı düğmenin üzerinde yazar. Listeyi görüntülemek her zaman ücretsizdir. Kod açık kaynaktır (MIT)."
+      "answer": "Evet. SafeUnfollow'un analizi ücretsizdir: tüm rozetler, filtreler ve hesaplar, kayıt ve sınır olmadan. Ücretli olan tek şey filtrelenmiş listeni dosya olarak dışa aktarmaktır; bu, fiyatı düğmede yazan tek seferlik bir ödemeyle açılır. Listeyi görüntülemek her zaman ücretsizdir. Kod açık kaynaktır (MIT)."
     },
     "analyzeData": {
       "question": "Takipten çıkanları bulmak için Instagram veri indirmemi nasıl analiz ederim?",
-      "answer": "SafeUnfollow, Instagram ZIP'ini tarayıcında açar ve takipçi ile takip listelerini karşılaştırır. Takipten çıkanları, geri takip etmeyenleri, karşılıklı takipçileri ve daha fazlasını görmek için dosyayı buradan seç. Karşılaştırma bir sunucuda değil, cihazında çalışır.",
+      "answer": "SafeUnfollow, Instagram ZIP'ini tarayıcında açar ve takipçi ile takip listelerini karşılaştırır. Takipten çıkanları, geri takip etmeyenleri, karşılıklı takipçileri ve bekleyen takip isteklerini görmek için dosyayı buradan seç. Karşılaştırma bir sunucuda değil, cihazında çalışır.",
       "relatedLink": {
         "text": "Dosyanızı şimdi yükleyin",
         "href": "/upload"
@@ -119,7 +119,7 @@
     },
     "shareDataSafely": {
       "question": "Instagram veri indirmesini üçüncü taraf araçlara yüklemek güvenli mi?",
-      "answer": "Evet, araç dosyanı tarayıcında tutuyorsa. SafeUnfollow ZIP'ini cihazında okur ve dosya bu tarayıcıda kalır. Anonim ziyaret istatistikleri ve reklam istekleri dışarı çıkar, ancak hiçbiri dosyanı taşımaz. Instagram şifreni isteyen izleyicilerden kaçın.",
+      "answer": "Evet, araç dosyanı tarayıcında tutuyorsa. SafeUnfollow ZIP'ini cihazında okur ve dosya bu tarayıcıda kalır. Anonim ziyaret istatistikleri ve reklam istekleri dışarı çıkar, ancak hiçbiri dosyanı taşımaz. Instagram şifreni isteyen takipçi araçlarından kaçın.",
       "relatedLink": {
         "text": "Gizlilik taahhüdümüzü okuyun",
         "href": "/privacy"
@@ -135,11 +135,11 @@
     },
     "betterThanPaid": {
       "question": "SafeUnfollow ücretli uygulamalardan daha mı iyi?",
-      "answer": "SafeUnfollow çoğu kişiye daha uygundur, çünkü analiz ücretsizdir, Instagram girişi gerektirmez ve tarayıcında çalışır. Filtrelenmiş listeni dosya olarak dışa aktarmak tek seferlik bir ödemedir. Gerçek zamanlı izleme sunan ücretli uygulamalar hesabına erişim ister, bu da Instagram'ın Hizmet Koşullarını ihlal eder."
+      "answer": "Seni geri takip etmeyenleri görmek için evet. SafeUnfollow'un analizi ücretsizdir ve Instagram girişi gerektirmez. Seni gerçek zamanlı olarak uyaramaz. Gerçek zamanlı çalışan ücretli uygulamalar hesabına erişim ister, bu da Instagram'ın Hizmet Koşullarını ihlal eder. Filtrelenmiş listeni dosya olarak dışa aktarmak tek seferlik bir ödemeyle açılır."
     },
     "mobileUse": {
       "question": "SafeUnfollow'u iPhone veya Android'da kullanabilir miyim?",
-      "answer": "Evet. SafeUnfollow iPhone ve Android'deki Safari, Chrome ve Firefox dahil her mobil tarayıcıda çalışır. Dışa aktarımını Instagram uygulamasında talep et, Meta'nın e-postasından ZIP'i indir ve safeunfollow.app'te seç. Ziyaretçilerinin çoğu telefondan geldiği için düzen önce telefon için tasarlandı."
+      "answer": "Evet. SafeUnfollow iPhone ve Android'deki Safari, Chrome ve Firefox dahil her mobil tarayıcıda çalışır. Dışa aktarımını Instagram uygulamasında talep et, Meta'nın e-postasından ZIP'i indir ve safeunfollow.app'te seç. Ziyaretçilerimizin çoğu telefondan geldiği için düzen önce telefon için tasarlandı."
     }
   }
 }

@@ -136,14 +136,14 @@ const CLAIM_KEYS: readonly ClaimKey[] = [
     path: ['items', 'betterThanPaid', 'answer'],
     why: 'carries the account limit, the one-time unlock and a real-time claim about rivals',
     reviewed: '2026-11-09',
-    en: "SafeUnfollow suits most people better, because the analysis is free, needs no Instagram login and runs in your browser. Exporting your filtered list as a file is a one-time unlock. Paid apps with real-time monitoring need access to your account, which breaks Instagram's Terms of Service.",
+    en: "For checking who doesn't follow you back, yes. SafeUnfollow's analysis is free and needs no Instagram login. It cannot alert you in real time. Real-time paid apps need access to your account, which breaks Instagram's Terms of Service. Exporting your filtered list as a file is a one-time unlock.",
   },
   {
     ns: 'faq',
     path: ['items', 'downloadTime', 'answer'],
     why: 'the speed claim GH#82 names: rewritten in English, stale in five locales for two commits',
     reviewed: '2026-11-09',
-    en: 'Meta usually emails your data within 5-30 minutes, and larger accounts or busy periods can take a few hours. Once you have the ZIP, SafeUnfollow reads it in your own browser rather than on a server, so there is no queue. Bigger exports take longer to read than small ones.',
+    en: 'Meta usually emails your data within 5-30 minutes, and larger accounts or busy periods can take a few hours. Once you have the ZIP, SafeUnfollow reads it in your own browser rather than on a server, so there is no queue.',
   },
   {
     ns: 'faq',
@@ -157,7 +157,7 @@ const CLAIM_KEYS: readonly ClaimKey[] = [
     path: ['items', 'htmlExport', 'answer'],
     why: 'the format claim #152 reversed — `formatWarning` survived this reversal in ten locales (GH#88)',
     reviewed: '2026-11-09',
-    en: "No. SafeUnfollow already reads both formats. HTML exports also work, but JSON is the format we read most reliably, so it's still what the guide recommends. Select the ZIP you already have.",
+    en: 'No. SafeUnfollow reads HTML exports as well as JSON. The guide still recommends JSON because it is the format we read most reliably. Select the ZIP you already have.',
   },
   {
     ns: 'hero',

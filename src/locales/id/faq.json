@@ -11,7 +11,7 @@
     },
     "whoDoesntFollowBack": {
       "question": "Siapa yang tidak follow back saya di Instagram?",
-      "answer": "SafeUnfollow menunjukkan siapa yang tidak follow back dengan membandingkan dua daftar di ekspor Instagram Anda. Akun yang Anda ikuti tetapi tidak mengikuti Anda muncul di filter \"Tidak follow back\". Analisisnya gratis, SafeUnfollow tidak pernah meminta login Instagram Anda, dan filenya tetap di browser Anda.",
+      "answer": "SafeUnfollow menunjukkan siapa yang tidak follow back dengan membandingkan dua daftar di ekspor Instagram Anda. Akun yang Anda ikuti tetapi tidak mengikuti Anda muncul di filter \"Tidak follow back\". Analisisnya gratis dan tidak memerlukan login Instagram.",
       "relatedLink": {
         "text": "Lihat siapa yang tidak follow back",
         "href": "/upload?filter=notFollowingBack"
@@ -35,7 +35,7 @@
     },
     "withoutDownload": {
       "question": "Bisakah saya memeriksa unfollower Instagram tanpa mengunduh data atau aplikasi?",
-      "answer": "Tidak. Instagram tidak punya daftar unfollower, jadi Anda bisa membandingkan daftar secara manual atau memakai unduhan data resmi. SafeUnfollow menjalankan cara kedua untuk Anda. Analisisnya gratis, dan SafeUnfollow tidak pernah meminta kata sandi atau login Instagram Anda.",
+      "answer": "Tidak. Instagram tidak punya daftar unfollower, jadi Anda bisa membandingkan daftar secara manual atau memakai unduhan data resmi. SafeUnfollow menjalankan cara kedua untuk Anda. Analisisnya gratis, dan Anda tidak pernah diminta kata sandi atau login Instagram.",
       "relatedLink": {
         "text": "Pelajari cara mendapatkan data Anda",
         "href": "/upload?guide=1"
@@ -43,7 +43,7 @@
     },
     "privacy": {
       "question": "Bagaimana pelacak unfollower Instagram bekerja tanpa login?",
-      "answer": "SafeUnfollow bekerja tanpa login karena membaca ekspor data Instagram resmi Anda di browser, tempat ekspor itu tetap berada. Analitik kami mencatat tampilan halaman serta jumlah akun dan ukuran ekspor, tidak pernah username. Anda bisa mematikannya di footer.",
+      "answer": "SafeUnfollow bekerja tanpa login karena membaca ekspor data Instagram resmi Anda di browser, tempat ekspor itu tetap berada. Analitik kami mencatat tampilan halaman serta jumlah akun dan ukuran ekspor, dan tidak pernah mencatat username. Anda bisa mematikannya di footer.",
       "relatedLink": {
         "text": "Baca kebijakan privasi kami",
         "href": "/privacy"
@@ -63,7 +63,7 @@
     },
     "zipFile": {
       "question": "Apa itu unduhan data Instagram dan mengapa menggunakannya?",
-      "answer": "Unduhan data Instagram, di Pusat Akun Meta, adalah alat resmi Meta untuk mengekspor informasi akun Anda, termasuk daftar pengikut dan mengikuti. Dengan alat ini Anda mendapatkan data tersebut tanpa memberikan kata sandi kepada siapa pun. SafeUnfollow membaca ekspor ini dan tidak yang lain.",
+      "answer": "Unduhan data Instagram, di Pusat Akun Meta, adalah alat resmi Meta untuk mengekspor informasi akun Anda, termasuk daftar pengikut dan mengikuti. Dengan alat ini Anda mendapatkan data tersebut tanpa memberikan kata sandi kepada siapa pun. SafeUnfollow hanya membaca ekspor ini.",
       "relatedLink": {
         "text": "Ikuti panduan langkah demi langkah kami",
         "href": "/upload?guide=1"
@@ -71,7 +71,7 @@
     },
     "htmlExport": {
       "question": "Saya mengekspor HTML, bukan JSON. Apakah saya perlu mengekspor ulang?",
-      "answer": "Tidak. SafeUnfollow sudah membaca kedua format. Ekspor HTML juga berfungsi, tetapi JSON adalah format yang paling andal kami baca, jadi itu yang tetap direkomendasikan panduan. Pilih ZIP yang sudah Anda miliki.",
+      "answer": "Tidak. SafeUnfollow membaca ekspor HTML maupun JSON. Panduan tetap menyarankan JSON karena format itulah yang paling andal kami baca. Pilih ZIP yang sudah Anda miliki.",
       "relatedLink": {
         "text": "Pelajari cara mendapatkan ekspor Anda",
         "href": "/upload?guide=1"
@@ -87,11 +87,11 @@
     },
     "notAffiliated": {
       "question": "Apakah SafeUnfollow.app terkait dengan safeunfollow.com atau ekstensi browser bernama SafeUnfollow?",
-      "answer": "SafeUnfollow adalah aplikasi web di safeunfollow.app. SafeUnfollow.app tidak berafiliasi dengan safeunfollow.com maupun ekstensi browser mana pun bernama SafeUnfollow. Kami tidak menerbitkan ekstensi browser. Tidak ada yang kami terbitkan yang bertindak di dalam akun Instagram Anda atau meminta login Instagram Anda."
+      "answer": "SafeUnfollow adalah aplikasi web di safeunfollow.app. SafeUnfollow.app tidak berafiliasi dengan safeunfollow.com maupun ekstensi browser mana pun bernama SafeUnfollow. Kami tidak menerbitkan ekstensi browser. Tak satu pun yang kami terbitkan bertindak di dalam akun Instagram Anda atau meminta login Instagram Anda."
     },
     "downloadTime": {
       "question": "Berapa lama waktu untuk menerima unduhan data Instagram saya?",
-      "answer": "Meta biasanya mengirim data Anda lewat email dalam 5-30 menit, dan akun besar atau saat sibuk bisa memakan waktu beberapa jam. Setelah ZIP ada di tangan Anda, SafeUnfollow membacanya di browser Anda sendiri, bukan di server, jadi tidak ada antrean. Ekspor yang besar butuh waktu lebih lama dibaca daripada yang kecil.",
+      "answer": "Meta biasanya mengirim data Anda lewat email dalam 5-30 menit, dan akun besar atau saat sibuk bisa memakan waktu beberapa jam. Setelah ZIP ada di tangan Anda, SafeUnfollow membacanya di browser Anda sendiri, bukan di server, jadi tidak ada antrean.",
       "relatedLink": {
         "text": "Tambah pengingat kalender",
         "href": "/upload?step=8"
@@ -111,7 +111,7 @@
     },
     "analyzeData": {
       "question": "Bagaimana cara menganalisis unduhan data Instagram saya untuk menemukan unfollower?",
-      "answer": "SafeUnfollow membongkar ZIP Instagram Anda di browser dan membandingkan daftar pengikut dengan daftar yang Anda ikuti. Pilih file di sini untuk melihat unfollower, akun yang tidak follow back, mutual, dan lainnya. Perbandingannya berjalan di perangkat Anda, bukan di server.",
+      "answer": "SafeUnfollow mengekstrak ZIP Instagram Anda di browser dan membandingkan daftar pengikut dengan daftar yang Anda ikuti. Pilih file di sini untuk melihat unfollower, akun yang tidak follow back, mutual, dan permintaan follow yang tertunda. Perbandingannya berjalan di perangkat Anda, bukan di server.",
       "relatedLink": {
         "text": "Unggah file Anda sekarang",
         "href": "/upload"
@@ -119,7 +119,7 @@
     },
     "shareDataSafely": {
       "question": "Apakah aman mengunggah unduhan data Instagram ke alat pihak ketiga?",
-      "answer": "Ya, jika alatnya menyimpan file Anda di browser. SafeUnfollow membaca ZIP Anda di perangkat, dan filenya tetap di browser ini. Statistik kunjungan anonim dan permintaan iklan memang keluar, tetapi keduanya tidak membawa file Anda. Hindari pelacak yang meminta kata sandi Instagram Anda.",
+      "answer": "Ya, jika alatnya menyimpan file Anda di browser. SafeUnfollow membaca ZIP Anda di perangkat, dan filenya tetap di browser ini. Statistik kunjungan anonim dan permintaan iklan memang keluar dari browser, tetapi keduanya tidak membawa file Anda. Hindari pelacak yang meminta kata sandi Instagram Anda.",
       "relatedLink": {
         "text": "Baca komitmen privasi kami",
         "href": "/privacy"
@@ -127,7 +127,7 @@
     },
     "withoutPassword": {
       "question": "Bagaimana SafeUnfollow bekerja tanpa password Instagram saya?",
-      "answer": "SafeUnfollow bekerja tanpa kata sandi Anda karena membaca ekspor data resmi Instagram, bukan akun Anda. Anda mengunduh data pengikut sebagai ZIP dari Pusat Akun Meta, lalu memilihnya di sini. Browser Anda membaca file di dalamnya dan membandingkan pengikut dengan yang diikuti. SafeUnfollow tidak pernah memanggil API Instagram.",
+      "answer": "SafeUnfollow bekerja tanpa kata sandi Anda karena membaca ekspor data resmi Instagram, bukan akun Anda. Anda mengunduh data pengikut sebagai ZIP dari Pusat Akun Meta, lalu memilihnya di sini. Browser Anda membaca file di dalamnya dan membandingkan pengikut dengan yang diikuti. Aplikasi ini tidak pernah memanggil API Instagram.",
       "relatedLink": {
         "text": "Lihat panduan ekspor",
         "href": "/upload?guide=1"
@@ -135,7 +135,7 @@
     },
     "betterThanPaid": {
       "question": "Apakah SafeUnfollow lebih baik dari aplikasi berbayar?",
-      "answer": "SafeUnfollow lebih cocok bagi kebanyakan orang, karena analisisnya gratis, tanpa login Instagram, dan berjalan di browser Anda. Mengekspor daftar terfilter sebagai file adalah sekali bayar untuk membukanya. Aplikasi berbayar dengan pemantauan real-time memerlukan akses ke akun Anda, dan itu melanggar Ketentuan Layanan Instagram."
+      "answer": "Untuk mengecek siapa yang tidak follow back, ya. Analisis SafeUnfollow gratis dan tidak memerlukan login Instagram. Hanya saja, tidak ada pemberitahuan real-time. Aplikasi berbayar yang memantau secara real-time memerlukan akses ke akun Anda, dan itu melanggar Ketentuan Layanan Instagram. Mengekspor daftar terfilter sebagai file dibuka dengan sekali bayar."
     },
     "mobileUse": {
       "question": "Bisakah saya menggunakan SafeUnfollow di iPhone atau Android?",

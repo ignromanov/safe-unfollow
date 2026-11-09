@@ -216,6 +216,11 @@ DOI is minted from the release event and never re-minted.
 
 ### Performance
 
+> Added 2026-11-09: the figures in this section and the "40x space reduction" above were
+> design targets, never measured end to end. 1.6.0 retracted them from the README. The one
+> measured 1M figure, with its method and limits, is in `docs/tech-spec.md` under
+> "What has been measured or shipped".
+
 - Filter speed (1M accounts): **2-5ms** (was ~150ms) - **75x faster**
 - Search speed (indexed): **~1ms** (was ~3000ms) - **100x faster**
 - Storage size (1M accounts): **~5 MB** (was ~200 MB) - **40x smaller**

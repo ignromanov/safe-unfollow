@@ -11,7 +11,7 @@
     },
     "whoDoesntFollowBack": {
       "question": "Quem não me segue de volta no Instagram?",
-      "answer": "O SafeUnfollow mostra quem não segue você de volta comparando as duas listas da sua exportação do Instagram. As contas que você segue e que não seguem você aparecem no filtro \"Não segue de volta\". A análise é grátis, o SafeUnfollow nunca pede seu login do Instagram e o arquivo fica no seu navegador.",
+      "answer": "O SafeUnfollow mostra quem não segue você de volta comparando as duas listas da sua exportação do Instagram. As contas que você segue e que não seguem você aparecem no filtro \"Não segue de volta\". A análise é grátis e não exige login do Instagram.",
       "relatedLink": {
         "text": "Ver quem não segue de volta",
         "href": "/upload?filter=notFollowingBack"
@@ -35,7 +35,7 @@
     },
     "withoutDownload": {
       "question": "Posso verificar unfollowers do Instagram sem baixar dados ou apps?",
-      "answer": "Não. O Instagram não tem uma lista de unfollowers, então você compara suas listas à mão ou usa o download oficial de dados. O SafeUnfollow faz a segunda opção por você. A análise é grátis, e o SafeUnfollow nunca pede sua senha nem seu login do Instagram.",
+      "answer": "Não. O Instagram não tem uma lista de unfollowers, então você compara suas listas à mão ou usa o download oficial de dados. O SafeUnfollow cuida da segunda opção para você. A análise é grátis, e ele nunca pede sua senha nem seu login do Instagram.",
       "relatedLink": {
         "text": "Aprenda como obter seus dados",
         "href": "/upload?guide=1"
@@ -43,7 +43,7 @@
     },
     "privacy": {
       "question": "Como o rastreador de unfollowers do Instagram funciona sem login?",
-      "answer": "O SafeUnfollow funciona sem login porque lê sua exportação oficial de dados do Instagram no seu navegador, onde ela fica. Nossas estatísticas registram visitas às páginas e a quantidade de contas e o tamanho da exportação, nunca um nome de usuário. Você pode desligá-las no rodapé.",
+      "answer": "O SafeUnfollow funciona sem login porque lê sua exportação oficial de dados do Instagram no seu navegador, onde ela fica. Nossas estatísticas registram visitas às páginas, o número de contas da exportação e o tamanho dela, nunca um nome de usuário. Você pode desligá-las no rodapé.",
       "relatedLink": {
         "text": "Leia nossa política de privacidade",
         "href": "/privacy"
@@ -71,7 +71,7 @@
     },
     "htmlExport": {
       "question": "Exportei em HTML em vez de JSON. Preciso exportar de novo?",
-      "answer": "Não. O SafeUnfollow já lê os dois formatos. Exportações em HTML também funcionam, mas o JSON é o formato que lemos com mais confiabilidade, por isso continua sendo o que o guia recomenda. Selecione o ZIP que você já tem.",
+      "answer": "Não. O SafeUnfollow lê exportações em HTML, além das em JSON. O guia continua recomendando JSON porque é o formato que lemos com mais confiabilidade. Selecione o ZIP que você já tem.",
       "relatedLink": {
         "text": "Como obter sua exportação",
         "href": "/upload?guide=1"
@@ -91,7 +91,7 @@
     },
     "downloadTime": {
       "question": "Quanto tempo leva para receber meu download de dados do Instagram?",
-      "answer": "A Meta costuma enviar seus dados por email em 5-30 minutos, e contas maiores ou períodos de muito uso podem levar algumas horas. Com o ZIP em mãos, o SafeUnfollow o lê no seu próprio navegador e não em um servidor, então não há fila. Exportações maiores demoram mais para ser lidas do que as pequenas.",
+      "answer": "A Meta costuma enviar seus dados por email em 5 a 30 minutos, e contas maiores ou períodos de muito uso podem levar algumas horas. Com o ZIP em mãos, o SafeUnfollow o lê no seu próprio navegador e não em um servidor, então não há fila.",
       "relatedLink": {
         "text": "Adicionar lembrete ao calendário",
         "href": "/upload?step=8"
@@ -111,7 +111,7 @@
     },
     "analyzeData": {
       "question": "Como analisar meu download de dados do Instagram para encontrar unfollowers?",
-      "answer": "O SafeUnfollow descompacta seu ZIP do Instagram no navegador e compara suas listas de seguidores e seguindo. Selecione o arquivo aqui para ver unfollowers, contas que não seguem de volta, mútuos e mais. A comparação roda no seu dispositivo e não em um servidor.",
+      "answer": "O SafeUnfollow descompacta seu ZIP do Instagram no navegador e compara suas listas de seguidores e seguindo. Selecione o arquivo aqui para ver unfollowers, contas que não seguem de volta, mútuos e solicitações pendentes. A comparação roda no seu dispositivo e não em um servidor.",
       "relatedLink": {
         "text": "Envie seu arquivo agora",
         "href": "/upload"
@@ -135,11 +135,11 @@
     },
     "betterThanPaid": {
       "question": "O SafeUnfollow é melhor que apps pagos?",
-      "answer": "O SafeUnfollow serve melhor para a maioria das pessoas, porque a análise é grátis, não exige login do Instagram e roda no seu navegador. Exportar sua lista filtrada como arquivo é um desbloqueio único. Apps pagos com monitoramento em tempo real precisam de acesso à sua conta, o que viola os Termos de Serviço do Instagram."
+      "answer": "Para ver quem não segue você de volta, sim. A análise do SafeUnfollow é grátis e não exige login do Instagram. Ele não consegue alertar você em tempo real. Apps pagos com alertas em tempo real precisam de acesso à sua conta, o que viola os Termos de Serviço do Instagram. Exportar sua lista filtrada como arquivo é um desbloqueio único."
     },
     "mobileUse": {
       "question": "Posso usar o SafeUnfollow no iPhone ou Android?",
-      "answer": "Sim. O SafeUnfollow funciona em qualquer navegador móvel, incluindo Safari, Chrome e Firefox no iPhone e no Android. Peça sua exportação no app do Instagram, baixe o ZIP do email da Meta e selecione-o em safeunfollow.app. A maioria dos visitantes está no celular, então o layout foi feito primeiro para o celular."
+      "answer": "Sim. O SafeUnfollow funciona em qualquer navegador móvel, incluindo Safari, Chrome e Firefox no iPhone e no Android. Peça sua exportação no app do Instagram, baixe o ZIP do email da Meta e selecione-o em safeunfollow.app. A maioria dos visitantes acessa pelo celular, então o layout foi pensado primeiro para ele."
     }
   }
 }

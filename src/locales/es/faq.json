@@ -11,7 +11,7 @@
     },
     "whoDoesntFollowBack": {
       "question": "¿Quién no me sigue de vuelta en Instagram?",
-      "answer": "SafeUnfollow muestra quién no te sigue de vuelta comparando las dos listas de tu exportación de Instagram. Las cuentas que sigues y que no te siguen aparecen en el filtro «No te sigue». El análisis es gratis, SafeUnfollow nunca te pide iniciar sesión en Instagram y el archivo se queda en tu navegador.",
+      "answer": "SafeUnfollow muestra quién no te sigue de vuelta comparando las dos listas de tu exportación de Instagram. Las cuentas que sigues y que no te siguen aparecen en el filtro «No te sigue». El análisis es gratis y no requiere iniciar sesión en Instagram.",
       "relatedLink": {
         "text": "Ver quién no te sigue de vuelta",
         "href": "/upload?filter=notFollowingBack"
@@ -35,7 +35,7 @@
     },
     "withoutDownload": {
       "question": "¿Puedo ver unfollowers de Instagram sin descargar datos o apps?",
-      "answer": "No. Instagram no tiene una lista de unfollowers, así que o comparas tus listas a mano o usas la descarga oficial de datos. SafeUnfollow hace lo segundo por ti. El análisis es gratis y SafeUnfollow nunca te pide tu contraseña ni que inicies sesión en Instagram.",
+      "answer": "No. Instagram no tiene una lista de unfollowers, así que o comparas tus listas a mano o usas la descarga oficial de datos. SafeUnfollow hace lo segundo por ti. El análisis es gratis y nunca se te pide la contraseña ni que inicies sesión en Instagram.",
       "relatedLink": {
         "text": "Aprende cómo obtener tus datos",
         "href": "/upload?guide=1"
@@ -43,7 +43,7 @@
     },
     "privacy": {
       "question": "¿Cómo funciona el rastreador de unfollowers sin iniciar sesión?",
-      "answer": "SafeUnfollow funciona sin iniciar sesión porque lee tu exportación oficial de datos de Instagram en tu navegador, donde esta se queda. Nuestras estadísticas registran las visitas a las páginas y el número de cuentas y el tamaño de la exportación, nunca un nombre de usuario. Puedes desactivarlas en el pie de página.",
+      "answer": "SafeUnfollow funciona sin iniciar sesión porque lee tu exportación oficial de datos de Instagram en tu navegador, donde esta se queda. Nuestras estadísticas registran las visitas a las páginas, además del número de cuentas y el tamaño de la exportación, nunca un nombre de usuario. Puedes desactivarlas en el pie de página.",
       "relatedLink": {
         "text": "Lee nuestra política de privacidad",
         "href": "/privacy"
@@ -71,7 +71,7 @@
     },
     "htmlExport": {
       "question": "Exporté en HTML en lugar de JSON. ¿Necesito exportar de nuevo?",
-      "answer": "No. SafeUnfollow ya lee ambos formatos. Las exportaciones en HTML también funcionan, pero JSON es el formato que leemos de forma más confiable, así que sigue siendo el que recomienda la guía. Selecciona el ZIP que ya tienes.",
+      "answer": "No. SafeUnfollow lee las exportaciones en HTML además de las de JSON. La guía sigue recomendando JSON porque es el formato que leemos de forma más confiable. Selecciona el ZIP que ya tienes.",
       "relatedLink": {
         "text": "Cómo obtener tu exportación",
         "href": "/upload?guide=1"
@@ -91,7 +91,7 @@
     },
     "downloadTime": {
       "question": "¿Cuánto tiempo tarda en llegar mi descarga de datos de Instagram?",
-      "answer": "Meta suele enviarte los datos por email en 5-30 minutos, y las cuentas grandes o los periodos de mucha carga pueden tardar unas horas. Cuando ya tienes el ZIP, SafeUnfollow lo lee en tu propio navegador y no en un servidor, así que no hay cola. Una exportación grande tarda más en leerse que una pequeña.",
+      "answer": "Meta suele enviarte los datos por email en 5-30 minutos, y las cuentas grandes o los periodos de mucha carga pueden tardar unas horas. Cuando ya tienes el ZIP, SafeUnfollow lo lee en tu propio navegador y no en un servidor, así que no hay cola.",
       "relatedLink": {
         "text": "Añadir recordatorio al calendario",
         "href": "/upload?step=8"
@@ -111,7 +111,7 @@
     },
     "analyzeData": {
       "question": "¿Cómo analizo mi descarga de datos de Instagram para encontrar unfollowers?",
-      "answer": "SafeUnfollow desempaqueta tu ZIP de Instagram en el navegador y compara tus listas de seguidores y seguidos. Selecciona aquí el archivo para ver unfollowers, cuentas que no te siguen de vuelta, mutuos y más. La comparación se ejecuta en tu dispositivo y no en un servidor.",
+      "answer": "SafeUnfollow desempaqueta tu ZIP de Instagram en el navegador y compara tus listas de seguidores y seguidos. Selecciona aquí el archivo para ver unfollowers, cuentas que no te siguen de vuelta, mutuos y solicitudes pendientes. La comparación se ejecuta en tu dispositivo y no en un servidor.",
       "relatedLink": {
         "text": "Sube tu archivo ahora",
         "href": "/upload"
@@ -127,7 +127,7 @@
     },
     "withoutPassword": {
       "question": "¿Cómo funciona SafeUnfollow sin mi contraseña de Instagram?",
-      "answer": "SafeUnfollow funciona sin tu contraseña porque lee la exportación oficial de datos de Instagram en lugar de tu cuenta. Descargas tus datos como ZIP desde el Centro de cuentas de Meta y lo seleccionas aquí. Tu navegador lee los archivos de dentro y compara seguidores con seguidos. Nunca llama a la API de Instagram.",
+      "answer": "SafeUnfollow funciona sin tu contraseña porque lee la exportación oficial de datos de Instagram en lugar de tu cuenta. Descargas tus datos de seguidores como ZIP desde el Centro de cuentas de Meta y lo seleccionas aquí. Tu navegador lee los archivos de dentro y compara seguidores con seguidos. La app nunca llama a la API de Instagram.",
       "relatedLink": {
         "text": "Ver guía de exportación",
         "href": "/upload?guide=1"
@@ -135,7 +135,7 @@
     },
     "betterThanPaid": {
       "question": "¿SafeUnfollow es mejor que las apps de pago?",
-      "answer": "Para la mayoría de la gente, SafeUnfollow es mejor, porque el análisis es gratis, no requiere iniciar sesión en Instagram y se ejecuta en tu navegador. Exportar tu lista filtrada como archivo es un desbloqueo de pago único. Las apps de pago con supervisión en tiempo real necesitan acceso a tu cuenta, lo que viola los Términos de Servicio de Instagram."
+      "answer": "Para saber quién no te sigue de vuelta, sí. El análisis de SafeUnfollow es gratis y no requiere iniciar sesión en Instagram. La app no puede avisarte en tiempo real. Las apps de pago que avisan en tiempo real necesitan acceso a tu cuenta, lo que viola los Términos de Servicio de Instagram. Exportar tu lista filtrada como archivo es un desbloqueo de pago único."
     },
     "mobileUse": {
       "question": "¿Puedo usar SafeUnfollow en iPhone o Android?",

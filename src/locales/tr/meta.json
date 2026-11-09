@@ -2,12 +2,12 @@
   "title": "Instagram takipten çıkanlar: ücretsiz, programsız, şifresiz",
   "description": "Instagram'da takipten çıkanları şifresiz öğren. Resmi Instagram veri dışa aktarımını yükle: analiz tarayıcının içinde çalışır, dosya cihazdan çıkmaz. Ücretsiz.",
   "ogTitle": "Instagram takipten çıkanlar: ücretsiz, programsız, şifresiz",
-  "twitterDescription": "Instagram'da takipten çıkanları şifresiz öğren. ZIP'ini seç: SafeUnfollow onu tarayıcında okur, dışa aktarımı asla bir sunucuya göndermez. Programsız.",
+  "twitterDescription": "Instagram'da takipten çıkanları programsız ve şifresiz öğren. ZIP'ini seç, SafeUnfollow onu tarayıcında okur ve dışa aktarımı asla bir sunucuya göndermez.",
   "keywords": "instagram takipten çıkanlar, kim takipten çıktı, takipten çıkanları görme, instagram zip analiz, şifresiz takipçi kontrol, programsız takip analizi",
   "routes": {
     "/upload": {
       "title": "Instagram ZIP yükle: takipten çıkanları gör, ücretsiz",
-      "description": "Verini zaten dışa aktardın mı? ZIP'i seç, takipten çıkanları ücretsiz gör. JSON ve HTML ikisi de çalışır; SafeUnfollow dosyayı asla bir sunucuya göndermez.",
+      "description": "Instagram verini zaten dışa aktardın mı? ZIP'i seç, takipten çıkanları ücretsiz gör. JSON da HTML de çalışır; SafeUnfollow dosyayı asla bir sunucuya göndermez.",
       "ogTitle": "Instagram ZIP yükle: takipten çıkanları gör, ücretsiz"
     },
     "/sample": {

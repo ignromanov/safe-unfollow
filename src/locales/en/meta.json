@@ -2,7 +2,7 @@
   "title": "Instagram Unfollowers: Free ZIP, No Login | SafeUnfollow",
   "description": "Check who unfollowed you on Instagram without logging in. Upload your official Instagram data export: the analysis runs inside your browser. Free to use.",
   "ogTitle": "Instagram Unfollowers: Free ZIP Upload, No Login",
-  "twitterDescription": "Check who unfollowed you on Instagram without logging in. Select your ZIP and SafeUnfollow reads it in your browser, never sending the export to a server.",
+  "twitterDescription": "Check who unfollowed you on Instagram without logging in. Select your ZIP and SafeUnfollow reads it in your browser and never sends the export to a server.",
   "keywords": "instagram unfollowers, who unfollowed me instagram, instagram unfollow tracker, check unfollowers without login, instagram zip file analyzer",
   "routes": {
     "/upload": {

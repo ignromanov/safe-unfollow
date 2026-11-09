@@ -68,9 +68,9 @@ const SAME_AS = [
  * namesake Chrome extension, whose store description is more specific than this one was.
  */
 const ORGANIZATION_DESCRIPTION =
-  'SafeUnfollow is a free web app that reads the official Instagram data export in your browser ' +
-  'and shows who unfollowed you, who does not follow back, and who is mutual. The export is ' +
-  'parsed on your own device and never uploaded, and no Instagram login is required.';
+  'SafeUnfollow is a web app that reads the official Instagram data export in your browser and ' +
+  'shows who unfollowed you, who does not follow back, and who is mutual. The analysis is free ' +
+  'and needs no Instagram login. SafeUnfollow never sends the export to a server.';
 
 /**
  * `disambiguatingDescription` is schema.org's own field for "a short description of the item used
@@ -193,11 +193,11 @@ export function OrganizationSchema() {
       publisher: { '@id': ORGANIZATION_ID },
       featureList: [
         'Find who unfollowed you on Instagram',
-        'Analyze up to 1,000,000+ accounts',
-        '100% local processing - data never leaves your device',
+        'Tested on a synthetic export of 1,000,000 accounts',
+        'Reads the export in your browser and never sends the file to a server',
         'No login or password required',
         'Uses official Instagram data export (ZIP file)',
-        'Free and open-source (MIT license)',
+        'Free analysis, open source (MIT license)',
       ],
       keywords:
         'instagram unfollow tracker, who unfollowed me on instagram, instagram unfollowers, instagram data export analyzer',

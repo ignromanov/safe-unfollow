@@ -2,12 +2,12 @@
   "title": "Instagramでフォローを外された人を確認｜無料・ログイン不要",
   "description": "Instagram（インスタ）でフォローを外された人を、ログインなしで確認できます。公式のデータエクスポート（ZIP）をアップロードすると、解析はブラウザの中だけで動き、ファイルは端末から出ません。無料で使えます。",
   "ogTitle": "Instagramでフォローを外された人を確認｜無料・ログイン不要",
-  "twitterDescription": "インスタでフォローを外された人を、ログインなしで確認。ZIPを選ぶとSafeUnfollowがブラウザ内で読み込み、エクスポートをサーバーに送信することはありません。",
+  "twitterDescription": "インスタで誰にフォローを外されたかを、ログインなしで確認。ZIPを選ぶとSafeUnfollowがブラウザ内で読み込み、エクスポートをサーバーに送信することはありません。",
   "keywords": "instagram フォローを外された, インスタ フォロー解除された, 誰がフォロー外した instagram, アンフォローチェッカー, instagram zip 分析, ログイン不要 フォロー確認",
   "routes": {
     "/upload": {
       "title": "Instagram ZIPをアップロード｜フォローを外した人を無料で確認",
-      "description": "Instagramのデータエクスポートをお持ちなら、ZIPを選択するだけで、フォローを外した人を無料で確認できます。JSONもHTMLも読み込めます。SafeUnfollowがファイルをサーバーに送信することはありません。",
+      "description": "Instagramのデータエクスポートをお持ちなら、ZIPを選択すると、誰にフォローを外されたかを無料で確認できます。JSONもHTMLも読み込めます。SafeUnfollowがファイルをサーバーに送信することはありません。",
       "ogTitle": "Instagram ZIPをアップロード｜フォローを外した人を無料で確認"
     },
     "/sample": {

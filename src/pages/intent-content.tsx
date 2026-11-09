@@ -228,7 +228,7 @@ export const INTENT_CONTENT: Record<IntentSlug, IntentContent> = {
     answer: (
       <>
         SafeUnfollow counts an account as mutual when it is in both lists of your export, who you
-        follow and who follows you. The count is exact for an "All time" export, with no estimating.
+        follow and who follows you. The count is exact for an "All time" export.
       </>
     ),
     intro: (

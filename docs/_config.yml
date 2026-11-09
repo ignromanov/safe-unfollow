@@ -54,7 +54,7 @@ entity:
     - "https://www.producthunt.com/products/instagram-unfollow-tracker"
     - "https://doi.org/10.5281/zenodo.22663615"
     - "https://www.instagram.com/safeunfollow"
-  description: "SafeUnfollow is a free web app that reads the official Instagram data export in your browser and shows who unfollowed you, who does not follow back, and who is mutual. The export is parsed on your own device and never uploaded, and no Instagram login is required."
+  description: "SafeUnfollow is a web app that reads the official Instagram data export in your browser and shows who unfollowed you, who does not follow back, and who is mutual. The analysis is free and needs no Instagram login. SafeUnfollow never sends the export to a server."
   disambiguating_description: "SafeUnfollow is the web app at safeunfollow.app. It reads the Instagram data export you choose and never acts inside your Instagram account. SafeUnfollow.app is not affiliated with safeunfollow.com or with any browser extension named SafeUnfollow."
   founder:
     name: "Ignat Romanov"
