@@ -4,7 +4,7 @@ import { join, resolve } from 'node:path';
 
 import { afterAll, describe, expect, it } from 'vitest';
 
-import { docsPaths } from '../../../scripts/docs-paths';
+import { docsLastUpdated, docsPaths } from '../../../scripts/docs-paths';
 
 /**
  * `sitemap.xml` is the only thing that tells Google a `/docs/*` page exists: the Jekyll site is
@@ -165,10 +165,33 @@ describe('the sitemap generator is the thing that consumes it', () => {
   const generator = readFileSync(resolve(__dirname, '../../../scripts/generate-sitemap.ts'), 'utf-8');
 
   it('imports the derivation', () => {
-    expect(generator).toMatch(/import\s*\{\s*docsPaths\s*\}\s*from\s*["']\.\/docs-paths["']/);
+    expect(generator).toMatch(/import\s*\{[^}]*\bdocsPaths\b[^}]*\}\s*from\s*["']\.\/docs-paths["']/);
   });
 
   it('builds DOCS_PATHS by calling it', () => {
     expect(generator).toMatch(/DOCS_PATHS\s*=\s*docsPaths\(/);
+  });
+});
+
+describe('the lastmod each docs page gives the sitemap', () => {
+  const dated = (permalink: string, date: string) =>
+    `---\ntitle: "x"\npermalink: ${permalink}\nlast_updated: ${date}\n---\n\nbody\n`;
+
+  it('docs URLs take lastmod from front-matter last_updated', () => {
+    const root = fixture({ 'index.md': dated('/', '2026-09-08'), 'faq.md': dated('/faq/', '2026-11-09') });
+    expect(Object.fromEntries(docsLastUpdated(root))).toEqual({
+      '/docs': '2026-09-08',
+      '/docs/faq': '2026-11-09',
+    });
+  });
+
+  it('refuses a page with no last_updated rather than dating it today', () => {
+    expect(() => docsLastUpdated(fixture({ 'faq.md': page('/faq/') }))).toThrow(/last_updated/);
+  });
+
+  it('dates every real docs page', () => {
+    const real = docsLastUpdated(REAL_DOCS);
+    expect([...real.keys()].sort()).toEqual([...docsPaths(REAL_DOCS)].sort());
+    for (const date of real.values()) expect(date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 });

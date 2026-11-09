@@ -80,14 +80,8 @@ function permalinkOf(file: string, docsDir: string): string {
   return permalink;
 }
 
-/**
- * Every `/docs/*` base path the site serves, in the slash-free form the host actually serves and
- * the sitemap must carry (`docs/_config.yml` records why `jekyll-sitemap` was removed over
- * exactly that difference).
- *
- * @param docsDir the Jekyll source root — `docs/` in this repo.
- */
-export function docsPaths(docsDir: string): string[] {
+/** A page's served base path and its source file. */
+function docsPages(docsDir: string): Array<{ path: string; file: string }> {
   const config = BASEURL.exec(readFileSync(resolve(docsDir, "_config.yml"), "utf-8"));
   const baseurl = config ? unquote(config[1]!) : "";
   if (baseurl === "") {
@@ -98,13 +92,14 @@ export function docsPaths(docsDir: string): string[] {
     );
   }
 
-  const paths = markdownPages(docsDir).map(file => {
+  const pages = markdownPages(docsDir).map(file => {
     const permalink = permalinkOf(file, docsDir);
     // `permalink: /` is the index page, served at the baseurl itself.
-    return permalink === "/" ? baseurl : `${baseurl}${permalink}`.replace(/\/$/, "");
+    const path = permalink === "/" ? baseurl : `${baseurl}${permalink}`.replace(/\/$/, "");
+    return { path, file };
   });
 
-  if (paths.length === 0) {
+  if (pages.length === 0) {
     throw new Error(
       `docs-paths: found no docs pages under ${docsDir}. Returning an empty list would drop ` +
         "every /docs/* URL from the sitemap in one commit, and nothing downstream can tell " +
@@ -112,5 +107,40 @@ export function docsPaths(docsDir: string): string[] {
     );
   }
 
-  return paths;
+  return pages;
+}
+
+/**
+ * Every `/docs/*` base path the site serves, in the slash-free form the host actually serves and
+ * the sitemap must carry (`docs/_config.yml` records why `jekyll-sitemap` was removed over
+ * exactly that difference).
+ *
+ * @param docsDir the Jekyll source root — `docs/` in this repo.
+ */
+export function docsPaths(docsDir: string): string[] {
+  return docsPages(docsDir).map(page => page.path);
+}
+
+/** `last_updated: 2026-09-08` in a page's front matter, quoted or not. */
+const LAST_UPDATED = /^last_updated:\s*["']?(\d{4}-\d{2}-\d{2})["']?\s*$/m;
+
+/**
+ * Each docs base path mapped to its front-matter `last_updated`: the sitemap's `<lastmod>` for
+ * that page. Throws on a page without one rather than falling back to today — a build-date
+ * lastmod is what this replaced (plan 2026-11-09-seo-aeo-geo, task 08b).
+ */
+export function docsLastUpdated(docsDir: string): Map<string, string> {
+  return new Map(
+    docsPages(docsDir).map(({ path, file }) => {
+      const frontMatter = FRONT_MATTER.exec(readFileSync(file, "utf-8"));
+      const date = frontMatter ? LAST_UPDATED.exec(frontMatter[1]!)?.[1] : undefined;
+      if (!date) {
+        throw new Error(
+          `docs-paths: ${file.slice(docsDir.length + 1)} declares no last_updated (YYYY-MM-DD). ` +
+            "The sitemap dates each docs page from it; give the page the date its content changed."
+        );
+      }
+      return [path, date] as const;
+    })
+  );
 }
