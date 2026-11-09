@@ -56,3 +56,9 @@ declare const __APP_VERSION__: string;
  * would be a malformed version string.
  */
 declare const __PKG_VERSION__: string;
+
+/**
+ * `CITATION.cff`'s `date-released`, inlined by `define` in vite.config.ts and vitest.config.ts.
+ * Published as `SoftwareApplication.dateModified`: a release date, never a build date.
+ */
+declare const __RELEASE_DATE__: string;

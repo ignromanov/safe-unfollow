@@ -1,9 +1,11 @@
 import react from "@vitejs/plugin-react";
+import { readFileSync } from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { defineConfig } from "vitest/config";
 
 import pkg from "./package.json";
+import { citationReleaseDate } from "./vite/build-env";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,6 +19,10 @@ export default defineConfig({
     // Not a fixed string, unlike the line above: this one is asserted against package.json in
     // src/__tests__/components/OrganizationSchema.test.tsx, which is the point of deriving it.
     __PKG_VERSION__: JSON.stringify(pkg.version),
+    // Same derivation as vite.config.ts, asserted against CITATION.cff in OrganizationSchema.test.tsx.
+    __RELEASE_DATE__: JSON.stringify(
+      citationReleaseDate(readFileSync(path.join(__dirname, "CITATION.cff"), "utf-8"))
+    ),
   },
   plugins: [react()],
   resolve: {

@@ -30,3 +30,15 @@ export function scrubPreviewEnv(env: Env): void {
     delete env.VITE_UMAMI_WEBSITE_ID;
   }
 }
+
+/**
+ * `date-released` from `CITATION.cff`, the one place the release date is written. Published as
+ * `SoftwareApplication.dateModified` (src/components/OrganizationSchema.tsx), so the JSON-LD
+ * freshness date moves with a release and never with a build — a build-date `dateModified`
+ * would claim a change on every deploy.
+ */
+export function citationReleaseDate(citation: string): string {
+  const date = /^date-released:\s*'?(\d{4}-\d{2}-\d{2})'?\s*$/m.exec(citation)?.[1];
+  if (!date) throw new Error('CITATION.cff carries no date-released in YYYY-MM-DD form');
+  return date;
+}

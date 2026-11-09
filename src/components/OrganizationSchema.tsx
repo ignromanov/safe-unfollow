@@ -1,80 +1,61 @@
 import { useLocation } from 'react-router-dom';
 
-import { SUPPORTED_LANGUAGES } from '@/config/languages';
+import { SUPPORTED_LANGUAGES, createLanguagePrefixRegex } from '@/config/languages';
 
 const BASE_URL = 'https://safeunfollow.app';
 const GITHUB_URL = 'https://github.com/ignromanov/safe-unfollow';
 
 /**
  * The Zenodo **concept** DOI, minted 2026-09-08 with the first release. It always resolves to the
- * newest version; the version DOI (`…22663616`) pins v1.6.0 and is falsified by the next release —
- * the one event during which nobody rereads this file. `CITATION.cff` carries the same concept DOI
- * and for the same reason (#230).
- *
- * ⛔ It sits on the SoftwareApplication node below, **not** in the Organization's `sameAs`. That
- * node's own comment rejects a profile because "that page names a person, and this node is an
- * organisation"; a Zenodo *software* record fails the mirror image of that test. What is asserted
- * here is an identifier for the software, which is what the record actually names.
- *
- * ⚠️ The record URL is deliberately **not** in any `sameAs` yet. This file's rule is that `sameAs`
- * may only claim assertions that exist and can be indexed, and only the first half is measured:
- * `https://doi.org/10.5281/zenodo.22663615` redirects to `zenodo.org` (so the DOI is registered),
- * but the landing page answered **504** on 2026-09-08, so no robots check was possible. Control,
- * same instrument: a nonsense DOI on that host 404s at `doi.org` and never redirects, so the
- * redirect is a real signal and the 504 is Zenodo's, not ours. Recheck for a 200 and a robots meta
- * before adding the URL — the identifier below stands on registration alone and needs neither.
+ * newest version; the version DOI (`…22663616`) pins v1.6.0. `CITATION.cff` carries the same
+ * concept DOI and for the same reason (#230). Used twice below: as the software's `identifier`,
+ * and as a `sameAs` URL on the Organization.
  */
 const ZENODO_CONCEPT_DOI = '10.5281/zenodo.22663615';
-const CRUNCHBASE_URL = 'https://www.crunchbase.com/organization/safeunfollow';
 
 /**
- * One stable identifier for the publisher, referenced everywhere it is named.
+ * One stable identifier per node, and every other mention of that node is a bare `{'@id': …}`.
  *
- * Before this existed the file minted **three** anonymous `Organization` nodes — the standalone
- * one, `author`, and `provider` — all called "SafeUnfollow" and none of them the same node to a
- * consumer building an entity graph. Measured 2026-09-07: four of five AI engines resolve the
- * string "SafeUnfollow" to an unrelated Chrome extension, so publishing three unlinked stubs of
- * ourselves is the last thing this entity needs.
+ * Before 2026-09-07 the file minted three anonymous `Organization` nodes — the standalone one,
+ * `author`, and `provider` — none of them the same node to a consumer building an entity graph.
+ * Since v1.7.0 every node sits in one `@graph` on the same page, so a reference resolves inside
+ * the document and needs no inline copy. `docs/_config.yml` builds the same ids from the same
+ * site URL; `jekyll-structured-data.test.ts` keeps the two surfaces equal.
  * `.claude/analytics/2026-09-07-entity-resolution/00-the-entity-defects.md` §3(a).
  */
 const ORGANIZATION_ID = `${BASE_URL}/#organization`;
-const APPLICATION_ID = `${BASE_URL}/#app`;
+const FOUNDER_ID = `${BASE_URL}/#founder`;
+const SOFTWARE_ID = `${BASE_URL}/#software`;
+const WEBSITE_ID = `${BASE_URL}/#website`;
+
+const ALTERNATE_NAMES = ['SafeUnfollow.app', 'Instagram Unfollow Tracker'];
 
 /**
- * Profiles that identify *this* entity, not its maintainer.
+ * Profiles that identify *this* entity, not its maintainer. Order and values fixed by lumen-cro in
+ * `.claude/plans/2026-11-09-seo-aeo-geo/plan/01-entity-schema.md`.
  *
- * ⛔ Two entries, and the second one is here because it was *observed* rather than submitted.
- * Crunchbase joined 2026-09-07 on the strength of the operator opening the profile signed out and
- * getting the filled page back — evidence that was insufficient, which is the point of this note.
- * Re-checked 2026-09-08 by fetching the page and reading its head: no robots meta, self-canonical.
- * It stays, now on a measurement rather than on an inference.
+ * ⛔ `sameAs` may only claim assertions that exist and can be indexed, and filled, reachable and
+ * indexable are three separate facts. Measured 2026-09-08: SaaSHub served a complete profile under
+ * a `noindex` meta; AlternativeTo 404'd to the public while the signed-in submitter saw a page. The
+ * check is a fetch, never "the operator can see it". An anonymous `curl` is not always the
+ * instrument either: Crunchbase answers it 403 whatever the User-Agent, so a 403 needs a control
+ * fetch of a nonsense slug on the same host before it is read as a verdict.
  *
- * ⛔ Filled, reachable and indexable are three separate facts. Measured 2026-09-08:
- *   SaaSHub        200, names the product 77 times, and carries a `noindex` robots meta while the
- *                  submission is pending — a complete profile that no index will ever read.
- *   AlternativeTo  404 to the public. The submission produced no page at all; the browser tab that
- *                  showed one belonged to the signed-in submitter.
- * A page a human can read in an incognito window may still be excluded from every index by one tag
- * that renders nothing, so "the operator can see it" is not the check. The check is a fetch, and
- * `sameAs` may only claim assertions that exist and can be indexed.
+ * ⛔ The Zenodo entry is the **concept** DOI, which always resolves to the newest version. The
+ * redirect lands on the version record (`zenodo.org/records/22663616` at v1.6.0); pasting what the
+ * browser shows pins one release and is falsified by the next — the event during which nobody
+ * rereads this file. Cleared for `sameAs` 2026-09-14 (200, `/records/` not disallowed by robots).
  *
- * ⚠️ An anonymous `curl` is not always the instrument either, and its failures imitate findings.
- * Crunchbase answers it 403 whatever User-Agent it carries; AlternativeTo answers 403 with a
- * `noindex` meta that belongs to the bot-block page itself — a control fetch of a nonsense slug on
- * that host returns the identical 403. Any 403 here needs that control before it is read as a
- * verdict, and a signed-out browser is what settles it.
- *
- * Still queued, each blocked on a profile being created or an editor approving one —
- * AlternativeTo, opensourcealternative.to, SaaSHub — ranked in `00-the-entity-defects.md` §5, and
- * the Product Hunt listing URL (which exists: Search Console lists `producthunt.com` among our
- * linking hosts) has to be recovered from GSC before it can go here.
- *
- * ⚠️ `buymeacoffee.com/ignromanov` is deliberately **not** here, having been proposed and
- * withdrawn the same day. `sameAs` asserts that two URLs name the same entity; that page names a
- * person, and this node is an organisation. On an entity whose whole problem is a name collision,
- * a merely adjacent profile adds noise in exactly the dimension that is already broken.
+ * ⚠️ `buymeacoffee.com/ignromanov` stays out: it names a person, and this node is an organisation.
+ * The founder's own profiles belong on the Person node below.
  */
-const SAME_AS = [GITHUB_URL, CRUNCHBASE_URL];
+const SAME_AS = [
+  GITHUB_URL,
+  'https://www.crunchbase.com/organization/safeunfollow',
+  'https://www.producthunt.com/products/instagram-unfollow-tracker',
+  `https://doi.org/${ZENODO_CONCEPT_DOI}`,
+  'https://www.instagram.com/safeunfollow',
+];
 
 /**
  * The answer to "what is SafeUnfollow", and until 2026-09-07 it named no product.
@@ -94,123 +75,138 @@ const ORGANIZATION_DESCRIPTION =
  * `disambiguatingDescription` is schema.org's own field for "a short description of the item used
  * to disambiguate from other, similar items". A separately published Chrome extension shares this
  * name and automates unfollowing inside a live Instagram session — behaviour our positioning
- * exists to warn against — and three of five engines attribute it to us. This is the one property
- * in the vocabulary aimed at that, and it was unused.
+ * exists to warn against — and three of five engines attribute it to us.
+ *
+ * Rewritten for v1.7.0 (plan task 01, lumen-cro's wording): the previous text was a three-item
+ * negation list. `docs/_config.yml` carries the identical string, gated by
+ * `jekyll-structured-data.test.ts`.
  */
 const DISAMBIGUATING_DESCRIPTION =
-  'SafeUnfollow is the web app at safeunfollow.app. It is not a browser extension, it does not ' +
-  'act inside an Instagram session, and it never follows or unfollows anyone on your behalf.';
+  'SafeUnfollow is the web app at safeunfollow.app. It reads the Instagram data export you ' +
+  'choose and never acts inside your Instagram account.';
 
 /**
- * Organization and SoftwareApplication schema for SEO
- * Provides structured data about the app for rich SERP results
- * Includes E-E-A-T signals: license, version, repository
+ * Base paths that carry no entity node: the two routes `public/_headers` serves with
+ * `X-Robots-Tag: noindex`. Restated here because the component runs in the browser and cannot
+ * read `_headers`; `src/__tests__/build/entity-graph.test.ts` derives the set from `_headers` and
+ * fails when a prerendered page disagrees with it.
+ */
+const NO_ENTITY_PATHS = new Set(['/results', '/sample']);
+
+const LANGUAGE_PREFIX = createLanguagePrefixRegex();
+
+/**
+ * The entity graph, one `@graph` in one script:
+ *   - Organization + Person (founder) on every indexable route;
+ *   - WebSite + SoftwareApplication on `/` and each `/:lang` home only;
+ *   - nothing on `/results`, `/sample` and their locale variants.
+ * Placement is lumen-cro's call, `.claude/plans/2026-11-09-seo-aeo-geo/plan/01-entity-schema.md`.
  */
 export function OrganizationSchema() {
-  const location = useLocation();
+  const { pathname } = useLocation();
+  const basePath = pathname.replace(LANGUAGE_PREFIX, '/').replace(/(.)\/+$/, '$1');
 
-  // Only render on home page to avoid duplicate schemas
-  const isHomePage =
-    location.pathname === '/' || location.pathname.match(/^\/[a-z]{2}\/?$/) !== null;
-
-  if (!isHomePage) {
+  if (NO_ENTITY_PATHS.has(basePath)) {
     return null;
   }
 
-  // Organization schema - who made this
-  const organizationSchema = {
-    '@context': 'https://schema.org',
+  const organization = {
     '@type': 'Organization',
     '@id': ORGANIZATION_ID,
     name: 'SafeUnfollow',
-    alternateName: 'Instagram Unfollow Tracker',
+    alternateName: ALTERNATE_NAMES,
     url: BASE_URL,
     logo: `${BASE_URL}/logo.svg`,
     sameAs: SAME_AS,
     description: ORGANIZATION_DESCRIPTION,
     disambiguatingDescription: DISAMBIGUATING_DESCRIPTION,
+    founder: { '@id': FOUNDER_ID },
   };
 
-  /**
-   * `author`, `provider` and `publisher` are written out in full *and* carry the shared `@id`.
-   *
-   * Deliberately belt-and-braces. A consumer that merges by `@id` sees one organisation; a
-   * consumer that does not still receives a complete node and needs to resolve nothing. The GEO
-   * plan of 2026-09-04 (§4 A1) refused `Organization` on the docs surface precisely because
-   * cross-document `@id` resolution could not be confirmed from a primary source — that objection
-   * is answered by never requiring resolution, not by dropping the identifier.
-   */
-  const publisherRef = {
-    '@type': 'Organization',
-    '@id': ORGANIZATION_ID,
-    name: 'SafeUnfollow',
-    url: BASE_URL,
-  };
-
-  // SoftwareApplication schema - what this app is
-  const softwareSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'SoftwareApplication',
-    '@id': APPLICATION_ID,
-    name: 'Instagram Unfollow Tracker',
-    alternateName: 'SafeUnfollow',
-    applicationCategory: 'UtilityApplication',
-    applicationSubCategory: 'Privacy Tool',
-    operatingSystem: 'Web Browser',
-    // Derived, never typed: this field read '1.5.0' while package.json said '1.6.0'. A hardcoded
-    // copy of a fact that lives somewhere else is the defect class CLAUDE.md bans by name, and a
-    // stale version is a freshness anti-signal on a surface whose whole point is freshness.
-    // `__PKG_VERSION__` is the semver; `__APP_VERSION__` is a commit sha in production builds and
-    // is the wrong shape for this property.
-    softwareVersion: __PKG_VERSION__,
-    browserRequirements: 'Requires JavaScript and a browser with IndexedDB support.',
-    inLanguage: [...SUPPORTED_LANGUAGES],
-    url: BASE_URL,
-    downloadUrl: BASE_URL,
-    screenshot: `${BASE_URL}/og-image.png`,
-    datePublished: '2025-11-22',
-    license: 'https://opensource.org/licenses/MIT',
-    identifier: {
-      '@type': 'PropertyValue',
-      propertyID: 'DOI',
-      value: ZENODO_CONCEPT_DOI,
-    },
-    isAccessibleForFree: true,
-    offers: {
-      '@type': 'Offer',
-      price: '0',
-      priceCurrency: 'USD',
-    },
-    author: publisherRef,
-    provider: publisherRef,
-    publisher: publisherRef,
-    featureList: [
-      'Find who unfollowed you on Instagram',
-      'Analyze up to 1,000,000+ accounts',
-      '100% local processing - data never leaves your device',
-      'No login or password required',
-      'Uses official Instagram data export (ZIP file)',
-      'Free and open-source (MIT license)',
+  const founder = {
+    '@type': 'Person',
+    '@id': FOUNDER_ID,
+    name: 'Ignat Romanov',
+    url: 'https://lasipan.cc/',
+    jobTitle: 'Builder & Web3 Frontend Engineer',
+    description:
+      'Builder & Web3 Frontend Engineer — crafting privacy-first tools for the decentralized economy.',
+    sameAs: [
+      'https://github.com/ignromanov',
+      'https://lasipan.cc/',
+      'https://www.linkedin.com/in/ignat-romanov',
+      'https://x.com/romignov',
     ],
-    keywords:
-      'instagram unfollow tracker, who unfollowed me on instagram, instagram unfollowers, instagram data export analyzer',
   };
+
+  const graph: object[] = [organization, founder];
+
+  if (basePath === '/') {
+    // Google still reads WebSite for the site name shown above a result. No SearchAction: the
+    // sitelinks search box was retired in November 2024.
+    graph.push({
+      '@type': 'WebSite',
+      '@id': WEBSITE_ID,
+      name: 'SafeUnfollow',
+      alternateName: ['SafeUnfollow.app', 'safeunfollow.app'],
+      url: `${BASE_URL}/`,
+      publisher: { '@id': ORGANIZATION_ID },
+    });
+    graph.push({
+      '@type': 'SoftwareApplication',
+      '@id': SOFTWARE_ID,
+      name: 'SafeUnfollow',
+      alternateName: ALTERNATE_NAMES,
+      disambiguatingDescription: DISAMBIGUATING_DESCRIPTION,
+      applicationCategory: 'UtilityApplication',
+      applicationSubCategory: 'Privacy Tool',
+      operatingSystem: 'Web Browser',
+      // Derived, never typed: this field read '1.5.0' while package.json said '1.6.0'.
+      // `__PKG_VERSION__` is the semver; `__APP_VERSION__` is a commit sha in production builds.
+      softwareVersion: __PKG_VERSION__,
+      // CITATION.cff's date-released (vite/build-env.ts): a release date, never a build date.
+      dateModified: __RELEASE_DATE__,
+      browserRequirements: 'Requires JavaScript and a browser with IndexedDB support.',
+      inLanguage: [...SUPPORTED_LANGUAGES],
+      url: BASE_URL,
+      downloadUrl: BASE_URL,
+      screenshot: `${BASE_URL}/og-image.png`,
+      datePublished: '2025-11-22',
+      license: 'https://opensource.org/licenses/MIT',
+      identifier: {
+        '@type': 'PropertyValue',
+        propertyID: 'DOI',
+        value: ZENODO_CONCEPT_DOI,
+      },
+      isAccessibleForFree: true,
+      offers: {
+        '@type': 'Offer',
+        price: '0',
+        priceCurrency: 'USD',
+      },
+      author: { '@id': FOUNDER_ID },
+      provider: { '@id': ORGANIZATION_ID },
+      publisher: { '@id': ORGANIZATION_ID },
+      featureList: [
+        'Find who unfollowed you on Instagram',
+        'Analyze up to 1,000,000+ accounts',
+        '100% local processing - data never leaves your device',
+        'No login or password required',
+        'Uses official Instagram data export (ZIP file)',
+        'Free and open-source (MIT license)',
+      ],
+      keywords:
+        'instagram unfollow tracker, who unfollowed me on instagram, instagram unfollowers, instagram data export analyzer',
+    });
+  }
 
   // Safe: JSON.stringify escapes special chars, data is hardcoded (not user input)
   return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(organizationSchema),
-        }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(softwareSchema),
-        }}
-      />
-    </>
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{
+        __html: JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }),
+      }}
+    />
   );
 }

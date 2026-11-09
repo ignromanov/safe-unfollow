@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildVersion, scrubPreviewEnv } from '../../../vite/build-env';
+import { buildVersion, citationReleaseDate, scrubPreviewEnv } from '../../../vite/build-env';
 
 describe('buildVersion', () => {
   it('is the short commit sha on Workers Builds', () => {
@@ -34,5 +34,17 @@ describe('scrubPreviewEnv', () => {
     const env = { VITE_UMAMI_WEBSITE_ID: ID };
     scrubPreviewEnv(env);
     expect(env.VITE_UMAMI_WEBSITE_ID).toBe(ID);
+  });
+});
+
+describe('citationReleaseDate', () => {
+  it('reads a quoted or bare date-released', () => {
+    expect(citationReleaseDate("version: 1.7.0\ndate-released: '2026-11-09'\n")).toBe('2026-11-09');
+    expect(citationReleaseDate('date-released: 2026-11-09\n')).toBe('2026-11-09');
+  });
+
+  it('throws rather than publishing an empty dateModified', () => {
+    expect(() => citationReleaseDate('version: 1.7.0\n')).toThrow(/date-released/);
+    expect(() => citationReleaseDate("date-released: 'soon'\n")).toThrow(/date-released/);
   });
 });

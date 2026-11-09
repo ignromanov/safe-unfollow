@@ -1,685 +1,225 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { describe, it, expect } from 'vitest';
 import { renderWithRouter } from '../test-utils';
 import { OrganizationSchema } from '@/components/OrganizationSchema';
 import { SUPPORTED_LANGUAGES } from '@/config/languages';
+import { INTENT_PATHS } from '@/config/intent-pages';
 
 import pkg from '../../../package.json';
 
 /**
- * One JSON-LD read, shared by the assertions below.
+ * The entity graph: Organization, its founder (Person), and — on the home pages only — the
+ * WebSite and the SoftwareApplication, all in one `@graph` and linked by `@id`.
  *
- * `scripts[0]` is the Organization node, `scripts[1]` the SoftwareApplication — the component
- * emits exactly two, which `rendering` above pins.
+ * Rewritten 2026-11-09 for v1.7.0 (`.claude/plans/2026-11-09-seo-aeo-geo/plan/01-entity-schema.md`).
+ * The previous file asserted two separate script tags by index (`scripts[0]`, `scripts[1]`) and
+ * pinned the home-only guard route by route; both shapes are gone, so every case reads nodes by
+ * `@type` out of the one graph instead of by position.
  */
-function readSchemas(): { organization: OrgNode; software: AppNode } {
-  const { container } = renderWithRouter(<OrganizationSchema />, { initialEntries: ['/'] });
-  const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-  return {
-    organization: JSON.parse(scripts[0].textContent!) as OrgNode,
-    software: JSON.parse(scripts[1].textContent!) as AppNode,
-  };
+
+const BASE = 'https://safeunfollow.app';
+const ORGANIZATION_ID = `${BASE}/#organization`;
+const FOUNDER_ID = `${BASE}/#founder`;
+const SOFTWARE_ID = `${BASE}/#software`;
+const WEBSITE_ID = `${BASE}/#website`;
+
+type Node = Record<string, unknown> & { '@type': string; '@id': string };
+
+function scriptsAt(path: string): NodeListOf<HTMLScriptElement> {
+  const { container } = renderWithRouter(<OrganizationSchema />, { initialEntries: [path] });
+  return container.querySelectorAll('script[type="application/ld+json"]');
 }
 
-type OrgRef = { '@type': string; '@id': string; name: string; url: string };
-type OrgNode = OrgRef & { description: string; disambiguatingDescription: string };
-type AppNode = {
-  '@id': string;
-  softwareVersion: string;
-  inLanguage: string[];
-  author: OrgRef;
-  provider: OrgRef;
-  publisher: OrgRef;
-};
+function graphAt(path: string): Node[] {
+  const scripts = scriptsAt(path);
+  if (scripts.length === 0) return [];
+  expect(scripts, `${path}: the graph must be one script, not several`).toHaveLength(1);
+  const parsed = JSON.parse(scripts[0].textContent!) as { '@context': string; '@graph': Node[] };
+  expect(parsed['@context']).toBe('https://schema.org');
+  return parsed['@graph'];
+}
+
+function node(graph: Node[], type: string): Node {
+  const found = graph.filter(n => n['@type'] === type);
+  expect(found, `expected exactly one ${type} node`).toHaveLength(1);
+  return found[0];
+}
+
+const types = (path: string) => graphAt(path).map(n => n['@type']);
+
+const LOCALE_HOMES = SUPPORTED_LANGUAGES.filter(l => l !== 'en').flatMap(l => [`/${l}`, `/${l}/`]);
+const NOINDEXED = SUPPORTED_LANGUAGES.flatMap(l =>
+  ['results', 'sample'].map(p => (l === 'en' ? `/${p}` : `/${l}/${p}`))
+);
+
+/** `date-released` from CITATION.cff — the one place the release date is written. */
+const CITATION_DATE = /^date-released:\s*'?(\d{4}-\d{2}-\d{2})'?\s*$/m.exec(
+  readFileSync(join(process.cwd(), 'CITATION.cff'), 'utf-8')
+)?.[1];
 
 describe('OrganizationSchema', () => {
-  describe('rendering', () => {
-    it('should render without crashing on home page', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      expect(scripts.length).toBe(2); // Organization + SoftwareApplication
+  describe('placement', () => {
+    it('emits the full graph on / and on every locale home', () => {
+      for (const path of ['/', ...LOCALE_HOMES]) {
+        expect(types(path), path).toEqual([
+          'Organization',
+          'Person',
+          'WebSite',
+          'SoftwareApplication',
+        ]);
+      }
     });
 
-    it('should render two script tags on home page', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      expect(scripts).toHaveLength(2);
+    it('/upload and the intent pages carry the Organization and Person nodes', () => {
+      for (const path of ['/upload', '/es/upload', '/privacy', '/terms', ...INTENT_PATHS]) {
+        expect(types(path), path).toEqual(['Organization', 'Person']);
+      }
     });
 
-    it('should not render on non-home pages', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/sample'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      expect(scripts.length).toBe(0);
+    it('/results and /sample carry no node, in every locale', () => {
+      for (const path of NOINDEXED) {
+        expect(scriptsAt(path), path).toHaveLength(0);
+        expect(scriptsAt(`${path}/`), `${path}/`).toHaveLength(0);
+      }
     });
 
-    it('should not render on /upload page', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/upload'],
-      });
-
-      expect(container.querySelector('script')).not.toBeInTheDocument();
-    });
-
-    it('should not render on /results page', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/results'],
-      });
-
-      expect(container.querySelector('script')).not.toBeInTheDocument();
-    });
-
-    it('should not render on /privacy page', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/privacy'],
-      });
-
-      expect(container.querySelector('script')).not.toBeInTheDocument();
+    it('an intent slug is not mistaken for a locale home', () => {
+      // `/^\/[a-z]{2}\/?$/` was the old home test; derive the prefix from SUPPORTED_LANGUAGES so
+      // a two-letter path that is not a locale gets the inner-page graph.
+      expect(types('/xx')).toEqual(['Organization', 'Person']);
     });
   });
 
-  describe('language-prefixed home pages', () => {
-    it('should render on English home page /', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
-      });
+  describe('Organization', () => {
+    const org = () => node(graphAt('/'), 'Organization');
 
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      expect(scripts.length).toBe(2);
+    it('is the one organisation, named SafeUnfollow', () => {
+      expect(org()['@id']).toBe(ORGANIZATION_ID);
+      expect(org().name).toBe('SafeUnfollow');
+      expect(org().url).toBe(BASE);
+      expect(org().logo).toBe(`${BASE}/logo.svg`);
+      expect(org().alternateName).toEqual(['SafeUnfollow.app', 'Instagram Unfollow Tracker']);
     });
 
-    it('should render on Spanish home page /es', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/es'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      expect(scripts.length).toBe(2);
-    });
-
-    it('should render on Spanish home page /es/', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/es/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      expect(scripts.length).toBe(2);
-    });
-
-    it('should render on Russian home page /ru', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/ru'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      expect(scripts.length).toBe(2);
-    });
-
-    it('should render on Portuguese home page /pt/', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/pt/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      expect(scripts.length).toBe(2);
-    });
-
-    it('should render on German home page /de', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/de'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      expect(scripts.length).toBe(2);
-    });
-
-    it('should render on Japanese home page /ja/', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/ja/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      expect(scripts.length).toBe(2);
-    });
-
-    it('should not render on language-prefixed non-home pages', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/es/sample'],
-      });
-
-      expect(container.querySelector('script')).not.toBeInTheDocument();
-    });
-  });
-
-  describe('Organization schema', () => {
-    it('should have valid Organization schema structure', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      const organizationSchema = JSON.parse(scripts[0].textContent!);
-
-      expect(organizationSchema['@context']).toBe('https://schema.org');
-      expect(organizationSchema['@type']).toBe('Organization');
-    });
-
-    it('should include organization name', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      const organizationSchema = JSON.parse(scripts[0].textContent!);
-
-      expect(organizationSchema.name).toBe('SafeUnfollow');
-    });
-
-    it('should include organization URL', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      const organizationSchema = JSON.parse(scripts[0].textContent!);
-
-      expect(organizationSchema.url).toBe('https://safeunfollow.app');
-    });
-
-    it('should include organization logo', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      const organizationSchema = JSON.parse(scripts[0].textContent!);
-
-      expect(organizationSchema.logo).toBe('https://safeunfollow.app/logo.svg');
-    });
-
-    it('should include sameAs with every profile that names this entity', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      const organizationSchema = JSON.parse(scripts[0].textContent!);
-
-      // Written out rather than imported: this pins the claim the page actually publishes. A
-      // profile joins the list only once it has been observed public, never when a form was filled.
-      expect(organizationSchema.sameAs).toEqual([
+    it('lists the five sameAs URLs and no zenodo /records/ URL', () => {
+      // Written out rather than imported: this pins the claim the page publishes.
+      expect(org().sameAs).toEqual([
         'https://github.com/ignromanov/safe-unfollow',
         'https://www.crunchbase.com/organization/safeunfollow',
+        'https://www.producthunt.com/products/instagram-unfollow-tracker',
+        'https://doi.org/10.5281/zenodo.22663615',
+        'https://www.instagram.com/safeunfollow',
       ]);
+      // The concept DOI lands on the version record; pasting what the browser shows pins one
+      // release and is falsified by the next. Checked across the whole graph, every route.
+      for (const path of ['/', '/upload']) {
+        const text = JSON.stringify(graphAt(path));
+        expect(text).not.toMatch(/zenodo\.org\/records\//);
+        expect(text).not.toContain('10.5281/zenodo.22663616');
+      }
     });
 
-    it('should include organization description', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      const organizationSchema = JSON.parse(scripts[0].textContent!);
-
-      // Not pinned to a literal, deliberately. Copy changes; what must not change is that this
-      // field answers "what is SafeUnfollow" with a product rather than a category. It read
-      // "Privacy-first tools for social media data analysis. All processing happens locally in
-      // your browser." until 2026-09-07 — a sentence naming no product, no platform and no
-      // domain, on the field a name match lands on first. Same shape as PR #203/#204: guard the
-      // class, never the wording.
-      const description = organizationSchema.description;
+    it('answers "what is SafeUnfollow" with a product, not a category', () => {
+      // Class, not wording: the field read "Privacy-first tools for social media data analysis"
+      // until 2026-09-07 — no product, no platform, no domain.
+      const description = org().description as string;
       expect(description).toMatch(/instagram/i);
       expect(description).toMatch(/unfollow/i);
       expect(description).toMatch(/browser/i);
     });
 
-    /** The control: the sentence this gate exists to reject must actually fail it. */
     it('the description gate goes red on a category-only sentence', () => {
       const superseded =
         'Privacy-first tools for social media data analysis. All processing happens locally in your browser.';
-      expect(
-        [/instagram/i, /unfollow/i].every(pattern => pattern.test(superseded)),
-        'the superseded description would still pass — the gate is not testing its own subject'
-      ).toBe(false);
-    });
-
-    it('names one organization, not three', () => {
-      const { organization, software } = readSchemas();
-
-      // Before 2026-09-07 the file minted three anonymous `Organization` nodes — the standalone
-      // one, `author` and `provider` — none of which a graph consumer could merge. This is the
-      // assertion that keeps them one node; a fourth reference added without the shared `@id`
-      // fails here rather than silently splitting the entity again.
-      const expectedId = 'https://safeunfollow.app/#organization';
-      expect(organization['@id']).toBe(expectedId);
-      for (const [role, ref] of [
-        ['author', software.author],
-        ['provider', software.provider],
-        ['publisher', software.publisher],
-      ] as const) {
-        expect(ref['@id'], `${role} does not carry the shared Organization @id`).toBe(expectedId);
-        // Written out in full as well as identified: a consumer that does not resolve `@id`
-        // must still receive a usable node. See the component's comment on publisherRef.
-        expect(ref['@type'], `${role} is not typed`).toBe('Organization');
-        expect(ref.name, `${role} has no name`).toBe('SafeUnfollow');
-      }
-      expect(software['@id']).toBe('https://safeunfollow.app/#app');
-    });
-
-    it('states what this entity is not', () => {
-      const { organization } = readSchemas();
-
-      // A separately published Chrome extension shares this name and automates unfollowing
-      // inside a live Instagram session; the citation baseline of 2026-09-07 measured three of
-      // five AI engines attributing that behaviour to us. `disambiguatingDescription` is
-      // schema.org's own field for exactly this and was unused.
-      const disambiguation = organization.disambiguatingDescription;
-      expect(disambiguation, 'no disambiguatingDescription is published').toBeTruthy();
-      expect(disambiguation).toMatch(/safeunfollow\.app/);
-      expect(disambiguation).toMatch(/not a browser extension/i);
-    });
-
-    it('carries the product name as an alternate name', () => {
-      const { organization } = readSchemas();
-      expect((organization as unknown as { alternateName: string }).alternateName).toBe(
-        'Instagram Unfollow Tracker'
-      );
+      expect([/instagram/i, /unfollow/i].every(p => p.test(superseded))).toBe(false);
     });
   });
 
-  describe('SoftwareApplication schema', () => {
-    /**
-     * The DOI names the *software*, so it is asserted here and not on the Organization
-     * node. That node's own comment rejects `buymeacoffee.com/ignromanov` because "that
-     * page names a person, and this node is an organisation" — a Zenodo software record
-     * fails the mirror image of the same test.
-     *
-     * The value is the **concept** DOI, which always resolves to the newest version. The
-     * version DOI (…616) pins v1.6.0 and is falsified by the next release, which is the
-     * event during which nobody rereads this file.
-     */
-    it('should carry the concept DOI as a PropertyValue identifier', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
+  describe('Person', () => {
+    it('carries the founder values verbatim', () => {
+      expect(node(graphAt('/upload'), 'Person')).toEqual({
+        '@type': 'Person',
+        '@id': FOUNDER_ID,
+        name: 'Ignat Romanov',
+        url: 'https://lasipan.cc/',
+        jobTitle: 'Builder & Web3 Frontend Engineer',
+        description:
+          'Builder & Web3 Frontend Engineer — crafting privacy-first tools for the decentralized economy.',
+        sameAs: [
+          'https://github.com/ignromanov',
+          'https://lasipan.cc/',
+          'https://www.linkedin.com/in/ignat-romanov',
+          'https://x.com/romignov',
+        ],
       });
+    });
+  });
 
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      const softwareSchema = JSON.parse(scripts[1].textContent!);
+  describe('WebSite', () => {
+    it('names the site SafeUnfollow and carries no SearchAction', () => {
+      expect(node(graphAt('/'), 'WebSite')).toEqual({
+        '@type': 'WebSite',
+        '@id': WEBSITE_ID,
+        name: 'SafeUnfollow',
+        alternateName: ['SafeUnfollow.app', 'safeunfollow.app'],
+        url: `${BASE}/`,
+        publisher: { '@id': ORGANIZATION_ID },
+      });
+    });
+  });
 
-      expect(softwareSchema.identifier).toEqual({
+  describe('SoftwareApplication', () => {
+    const app = () => node(graphAt('/'), 'SoftwareApplication');
+
+    it('names the application SafeUnfollow and carries the disambiguating description', () => {
+      expect(app()['@id']).toBe(SOFTWARE_ID);
+      expect(app().name).toBe('SafeUnfollow');
+      expect(app().alternateName).toEqual(['SafeUnfollow.app', 'Instagram Unfollow Tracker']);
+      const disambiguation = app().disambiguatingDescription as string;
+      expect(disambiguation.startsWith('SafeUnfollow is the web app at safeunfollow.app.')).toBe(
+        true
+      );
+      expect(disambiguation).toMatch(/never acts inside your Instagram account/);
+      // The Organization states the same sentence; one entity, one disambiguation.
+      expect(node(graphAt('/'), 'Organization').disambiguatingDescription).toBe(disambiguation);
+    });
+
+    it('links founder, author, publisher by @id only', () => {
+      const graph = graphAt('/');
+      expect(node(graph, 'Organization').founder).toEqual({ '@id': FOUNDER_ID });
+      expect(app().author).toEqual({ '@id': FOUNDER_ID });
+      expect(app().publisher).toEqual({ '@id': ORGANIZATION_ID });
+      expect(app().provider).toEqual({ '@id': ORGANIZATION_ID });
+      // One node per @id across the whole graph — a second inline copy would split the entity.
+      const ids = graph.map(n => n['@id']);
+      expect(new Set(ids).size).toBe(ids.length);
+    });
+
+    it('dateModified equals CITATION.cff date-released', () => {
+      expect(CITATION_DATE, 'CITATION.cff has no date-released').toBeTruthy();
+      expect(app().dateModified).toBe(CITATION_DATE);
+    });
+
+    it('states the package.json version and every served locale', () => {
+      expect(app().softwareVersion).toBe(pkg.version);
+      expect(app().inLanguage).toEqual([...SUPPORTED_LANGUAGES]);
+    });
+
+    it('carries the concept DOI as a PropertyValue identifier', () => {
+      expect(app().identifier).toEqual({
         '@type': 'PropertyValue',
         propertyID: 'DOI',
         value: '10.5281/zenodo.22663615',
       });
     });
 
-    /**
-     * Guards the distinction rather than the literal: a *version* DOI must never appear
-     * here, whatever its digits. Written as a shape check so it still fires after the
-     * next release mints a new one.
-     */
-    it('should not assert a version-pinned DOI anywhere in the software schema', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      const softwareSchema = JSON.parse(scripts[1].textContent!);
-
-      expect(JSON.stringify(softwareSchema)).not.toContain('10.5281/zenodo.22663616');
-    });
-
-    it('should have valid SoftwareApplication schema structure', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      const softwareSchema = JSON.parse(scripts[1].textContent!);
-
-      expect(softwareSchema['@context']).toBe('https://schema.org');
-      expect(softwareSchema['@type']).toBe('SoftwareApplication');
-    });
-
-    it('should include application name', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      const softwareSchema = JSON.parse(scripts[1].textContent!);
-
-      expect(softwareSchema.name).toBe('Instagram Unfollow Tracker');
-    });
-
-    it('should include alternate name', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      const softwareSchema = JSON.parse(scripts[1].textContent!);
-
-      expect(softwareSchema.alternateName).toBe('SafeUnfollow');
-    });
-
-    it('should include application category', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      const softwareSchema = JSON.parse(scripts[1].textContent!);
-
-      expect(softwareSchema.applicationCategory).toBe('UtilityApplication');
-      expect(softwareSchema.applicationSubCategory).toBe('Privacy Tool');
-    });
-
-    it('should include operating system', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      const softwareSchema = JSON.parse(scripts[1].textContent!);
-
-      expect(softwareSchema.operatingSystem).toBe('Web Browser');
-    });
-
-    it('should include software version', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      const softwareSchema = JSON.parse(scripts[1].textContent!);
-
-      // Derived, not typed. This assertion read `'1.5.0'` while package.json said `1.6.0`, so
-      // the gate held the drift in place instead of catching it — the class `progress.md`
-      // records five times over. `__PKG_VERSION__` is defined from package.json in both
-      // vite.config.ts and vitest.config.ts.
-      expect(softwareSchema.softwareVersion).toBe(pkg.version);
-    });
-
-    it('declares every locale the app actually serves', () => {
-      const { software } = readSchemas();
-
-      // Derived from the same constant the router and the locale bundles use, so a language
-      // added or retired cannot leave a stale list in machine-readable form. `hi` was retired
-      // 2026-08-08; a hand-typed array here would still be advertising it.
-      expect(software.inLanguage).toEqual([...SUPPORTED_LANGUAGES]);
-      expect(software.inLanguage).not.toContain('hi');
-    });
-
-    it('should include date published', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      const softwareSchema = JSON.parse(scripts[1].textContent!);
-
-      expect(softwareSchema.datePublished).toBe('2025-11-22');
-    });
-
-    it('should include MIT license', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      const softwareSchema = JSON.parse(scripts[1].textContent!);
-
-      expect(softwareSchema.license).toBe('https://opensource.org/licenses/MIT');
-    });
-
-    it('should indicate free access', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      const softwareSchema = JSON.parse(scripts[1].textContent!);
-
-      expect(softwareSchema.isAccessibleForFree).toBe(true);
-    });
-
-    it('should include free offer with $0 price', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      const softwareSchema = JSON.parse(scripts[1].textContent!);
-
-      expect(softwareSchema.offers).toEqual({
-        '@type': 'Offer',
-        price: '0',
-        priceCurrency: 'USD',
-      });
-    });
-
-    it('should include author information', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      const softwareSchema = JSON.parse(scripts[1].textContent!);
-
-      expect(softwareSchema.author).toEqual({
-        '@type': 'Organization',
-        '@id': 'https://safeunfollow.app/#organization',
-        name: 'SafeUnfollow',
-        url: 'https://safeunfollow.app',
-      });
-    });
-
-    it('should include provider information', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      const softwareSchema = JSON.parse(scripts[1].textContent!);
-
-      expect(softwareSchema.provider).toEqual({
-        '@type': 'Organization',
-        '@id': 'https://safeunfollow.app/#organization',
-        name: 'SafeUnfollow',
-        url: 'https://safeunfollow.app',
-      });
-    });
-
-    it('should include screenshot URL', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      const softwareSchema = JSON.parse(scripts[1].textContent!);
-
-      expect(softwareSchema.screenshot).toBe('https://safeunfollow.app/og-image.png');
-    });
-
-    it('should include URL and downloadUrl', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      const softwareSchema = JSON.parse(scripts[1].textContent!);
-
-      expect(softwareSchema.url).toBe('https://safeunfollow.app');
-      expect(softwareSchema.downloadUrl).toBe('https://safeunfollow.app');
-    });
-  });
-
-  describe('feature list', () => {
-    it('should include comprehensive feature list', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      const softwareSchema = JSON.parse(scripts[1].textContent!);
-
-      expect(softwareSchema.featureList).toHaveLength(6);
-    });
-
-    it('should include key privacy feature', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      const softwareSchema = JSON.parse(scripts[1].textContent!);
-
-      expect(softwareSchema.featureList).toContain(
-        '100% local processing - data never leaves your device'
-      );
-    });
-
-    it('should include no login feature', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      const softwareSchema = JSON.parse(scripts[1].textContent!);
-
-      expect(softwareSchema.featureList).toContain('No login or password required');
-    });
-
-    it('should include scale feature', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      const softwareSchema = JSON.parse(scripts[1].textContent!);
-
-      expect(softwareSchema.featureList).toContain('Analyze up to 1,000,000+ accounts');
-    });
-
-    it('should include open source feature', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      const softwareSchema = JSON.parse(scripts[1].textContent!);
-
-      expect(softwareSchema.featureList).toContain('Free and open-source (MIT license)');
-    });
-  });
-
-  describe('keywords', () => {
-    it('should include SEO keywords', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      const softwareSchema = JSON.parse(scripts[1].textContent!);
-
-      expect(softwareSchema.keywords).toContain('instagram unfollow tracker');
-      expect(softwareSchema.keywords).toContain('who unfollowed me on instagram');
-      expect(softwareSchema.keywords).toContain('instagram unfollowers');
-    });
-
-    it('should include data export keyword', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      const softwareSchema = JSON.parse(scripts[1].textContent!);
-
-      expect(softwareSchema.keywords).toContain('instagram data export analyzer');
-    });
-  });
-
-  describe('schema validation', () => {
-    it('should produce valid JSON for both schemas', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-
-      // Should not throw when parsing
-      expect(() => JSON.parse(scripts[0].textContent!)).not.toThrow();
-      expect(() => JSON.parse(scripts[1].textContent!)).not.toThrow();
-    });
-
-    it('should have all required Organization properties', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      const organizationSchema = JSON.parse(scripts[0].textContent!);
-
-      expect(organizationSchema).toHaveProperty('@context');
-      expect(organizationSchema).toHaveProperty('@type');
-      expect(organizationSchema).toHaveProperty('name');
-      expect(organizationSchema).toHaveProperty('url');
-    });
-
-    it('should have all required SoftwareApplication properties', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      const softwareSchema = JSON.parse(scripts[1].textContent!);
-
-      expect(softwareSchema).toHaveProperty('@context');
-      expect(softwareSchema).toHaveProperty('@type');
-      expect(softwareSchema).toHaveProperty('name');
-      expect(softwareSchema).toHaveProperty('url');
-      expect(softwareSchema).toHaveProperty('applicationCategory');
-      expect(softwareSchema).toHaveProperty('operatingSystem');
-    });
-  });
-
-  describe('edge cases', () => {
-    it('should handle trailing slash on home page', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      expect(scripts.length).toBe(2);
-    });
-
-    it('should not render on nested routes', () => {
-      // Two segments, so the name stays honest and this stops duplicating
-      // 'should not render on /upload page' above. It read '/wizard/step-1'
-      // until GH#102 — a hyphen, which was never a route; the fixture only
-      // ever needed to be "not home".
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/id/upload'],
-      });
-
-      expect(container.querySelector('script')).not.toBeInTheDocument();
-    });
-
-    it('should render only once on home page (no duplicates)', () => {
-      const { container } = renderWithRouter(<OrganizationSchema />, {
-        initialEntries: ['/'],
-      });
-
-      const scripts = container.querySelectorAll('script[type="application/ld+json"]');
-      expect(scripts.length).toBe(2); // Exactly 2, no more
+    it('keeps the free offer, the licence and the first-publication date', () => {
+      expect(app().offers).toEqual({ '@type': 'Offer', price: '0', priceCurrency: 'USD' });
+      expect(app().isAccessibleForFree).toBe(true);
+      expect(app().license).toBe('https://opensource.org/licenses/MIT');
+      expect(app().datePublished).toBe('2025-11-22');
     });
   });
 });
