@@ -184,7 +184,7 @@
   "loadingTips": {
     "localProcessing": {
       "title": "Deine Datei verlässt dieses Gerät nie",
-      "desc": "Alles läuft in deinem Browser — nichts wird hochgeladen."
+      "desc": "SafeUnfollow liest deinen Export vollständig in deinem Browser und schickt die Datei nie an einen Server."
     },
     "revokeAccess": {
       "title": "Schneller Datenschutz-Tipp",

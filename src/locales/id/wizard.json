@@ -26,7 +26,7 @@
     "cta": "Buka Pusat Akun",
     "trust": {
       "noLogin": "Tanpa login. Tanpa kata sandi. Tidak ada yang perlu dihubungkan.",
-      "local": "Ekspormu dibaca di browser ini dan tidak pernah diunggah."
+      "local": "SafeUnfollow membaca ekspor Anda di browser ini dan tidak pernah mengirim filenya ke server."
     },
     "recipe": {
       "title": "Yang harus dipilih di dialog Instagram",

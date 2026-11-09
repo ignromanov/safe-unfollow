@@ -2,12 +2,12 @@
   "title": "Quién dejó de seguirte en Instagram: gratis, sin contraseña",
   "description": "Descubre quién dejó de seguirte en Instagram sin iniciar sesión. Sube tu exportación oficial de datos: el análisis ocurre dentro de tu navegador. Gratis.",
   "ogTitle": "Quién dejó de seguirte en Instagram: gratis, sin contraseña",
-  "twitterDescription": "Descubre quién dejó de seguirte en Instagram sin iniciar sesión. Sube tu ZIP: el análisis ocurre en tu navegador y la exportación nunca sale de ahí. Gratis.",
+  "twitterDescription": "Descubre quién dejó de seguirte en Instagram sin iniciar sesión. Selecciona tu ZIP: SafeUnfollow lo lee en tu navegador y nunca lo envía a un servidor.",
   "keywords": "quién dejó de seguirte instagram, quién no te sigue instagram, rastreador de unfollowers, ver unfollowers sin iniciar sesión, analizador de zip de instagram",
   "routes": {
     "/upload": {
       "title": "¿Ya tienes tu ZIP de Instagram? Mira quién dejó de seguirte",
-      "description": "Sube tu exportación de Instagram (ZIP) y ve gratis quién dejó de seguirte, sin iniciar sesión. Funciona con JSON y HTML. El archivo no sale de tu navegador.",
+      "description": "¿Ya tienes tu exportación? Selecciona el ZIP y ve gratis quién dejó de seguirte. Funciona con JSON y HTML; SafeUnfollow nunca envía el archivo a un servidor.",
       "ogTitle": "¿Ya tienes tu ZIP de Instagram? Mira quién dejó de seguirte"
     },
     "/sample": {

@@ -184,7 +184,7 @@
   "loadingTips": {
     "localProcessing": {
       "title": "Votre fichier ne quitte jamais cet appareil",
-      "desc": "L'analyse se fait entièrement dans votre navigateur — rien n'est envoyé."
+      "desc": "SafeUnfollow analyse votre export entièrement dans votre navigateur et n'envoie jamais le fichier à un serveur."
     },
     "revokeAccess": {
       "title": "Astuce confidentialité rapide",

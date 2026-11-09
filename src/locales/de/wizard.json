@@ -26,7 +26,7 @@
     "cta": "Kontenübersicht öffnen",
     "trust": {
       "noLogin": "Keine Anmeldung. Kein Passwort. Nichts zu verbinden.",
-      "local": "Dein Export wird in diesem Browser gelesen und nie hochgeladen."
+      "local": "SafeUnfollow liest deinen Export in diesem Browser und schickt die Datei nie an einen Server."
     },
     "recipe": {
       "title": "Was du im Instagram-Dialog auswählen musst",

@@ -26,7 +26,7 @@
     "cta": "Hesaplar Merkezi'ni aç",
     "trust": {
       "noLogin": "Giriş yok. Şifre yok. Bağlanacak hiçbir şey yok.",
-      "local": "Dışa aktarımın bu tarayıcıda okunur ve asla yüklenmez."
+      "local": "SafeUnfollow dışa aktarımını bu tarayıcıda okur ve dosyayı asla bir sunucuya göndermez."
     },
     "recipe": {
       "title": "Instagram iletişim kutusunda ne seçilmeli",

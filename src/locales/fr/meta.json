@@ -2,12 +2,12 @@
   "title": "Désabonnements Instagram : gratuit, sans compte",
   "description": "Découvrez qui s'est désabonné de vous sur Instagram sans mot de passe. Téléversez votre export Instagram : l'analyse se fait dans votre navigateur. Gratuit.",
   "ogTitle": "Désabonnements Instagram : gratuit, sans compte",
-  "twitterDescription": "Découvrez qui s'est désabonné de vous sur Instagram, sans mot de passe. Téléversez votre ZIP : l'analyse se fait dans le navigateur, le fichier n'en sort pas.",
+  "twitterDescription": "Voyez qui s'est désabonné sur Instagram, sans mot de passe. Sélectionnez votre ZIP : SafeUnfollow le lit dans votre navigateur, sans l'envoyer à un serveur.",
   "keywords": "désabonnements instagram, qui s'est désabonné instagram, suivi désabonnements, voir les désabonnements sans compte, analyseur zip instagram",
   "routes": {
     "/upload": {
       "title": "Vous avez votre ZIP Instagram ? Voyez qui s'est désabonné",
-      "description": "Téléversez votre export Instagram : JSON ou HTML fonctionnent. Voyez gratuitement qui s'est désabonné, sans mot de passe. Le fichier ne quitte pas l'appareil.",
+      "description": "Export Instagram déjà fait ? Sélectionnez le ZIP et voyez gratuitement qui s'est désabonné. JSON ou HTML. SafeUnfollow n'envoie jamais le fichier à un serveur.",
       "ogTitle": "Vous avez votre ZIP Instagram ? Voyez qui s'est désabonné"
     },
     "/sample": {
