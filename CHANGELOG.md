@@ -19,8 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The FAQ answers how SafeUnfollow.app relates to those two names, in all ten
   languages. Every question on `/docs/faq` but one is now marked up for machines
   exactly as it reads on the page; the exception, "Is it safe?", has its own page.
-- The Instagram export guide (`/docs/instagram-export`) explains each file in the
-  archive, for JSON and HTML exports alike.
+- The Instagram export guide (`/docs/instagram-export`) names the files in the
+  archive that SafeUnfollow reads and says what each one holds, for JSON and HTML
+  exports alike.
 
 ### Changed
 
