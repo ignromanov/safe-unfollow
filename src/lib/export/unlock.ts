@@ -146,6 +146,9 @@ export function buildCheckoutUrl(locale: string): string | null {
     // where 69% of arrivals leave before choosing a payment method at all.
     url.searchParams.set('showDiscounts', 'false');
 
+    // Single Page Checkout puts wallets (Apple/Google Pay) at top with minimal address fields.
+    url.searchParams.set('singlePage', 'true');
+
     url.searchParams.set(
       'metadata_device',
       window.innerWidth >= DESKTOP_MIN_WIDTH_PX ? 'desktop' : 'mobile'

@@ -179,12 +179,13 @@ describe('export/unlock', () => {
 
     // We run no discount codes. The field is pure friction on the one form
     // where 69% of arrivals leave before choosing a payment method at all.
-    it('should hide the discount field', () => {
+    it('should hide the discount field and enable single page checkout', () => {
       vi.stubEnv('VITE_DODO_CHECKOUT_URL', CHECKOUT);
 
       const built = new URL(buildCheckoutUrl('en') ?? '');
 
       expect(built.searchParams.get('showDiscounts')).toBe('false');
+      expect(built.searchParams.get('singlePage')).toBe('true');
     });
 
     // The join our funnel has never had: every settled and failed payment so
@@ -223,6 +224,7 @@ describe('export/unlock', () => {
         'metadata_locale',
         'redirect_url',
         'showDiscounts',
+        'singlePage',
       ];
       const sent = [...built.searchParams.keys()];
 
