@@ -181,9 +181,27 @@ describe('OrganizationSchema', () => {
       expect(disambiguation.startsWith('SafeUnfollow is the web app at safeunfollow.app.')).toBe(
         true
       );
-      expect(disambiguation).toMatch(/never acts inside your Instagram account/);
+      expect(disambiguation).toMatch(/never acts inside your Instagram account\./);
       // The Organization states the same sentence; one entity, one disambiguation.
       expect(node(graphAt('/'), 'Organization').disambiguatingDescription).toBe(disambiguation);
+    });
+
+    it('names the lookalike once, after the identity sentence, and never as a URL', () => {
+      // velum-cdpo, plan/velum-verdicts.md Q1: the licensed sentence verbatim, last; no link, no
+      // URL-typed field, nothing said about the other party.
+      const disambiguation = app().disambiguatingDescription as string;
+      expect(
+        disambiguation.endsWith(
+          'SafeUnfollow.app is not affiliated with safeunfollow.com or with any browser extension named SafeUnfollow.'
+        )
+      ).toBe(true);
+      expect(disambiguation.match(/safeunfollow\.com/g)).toHaveLength(1);
+      expect(disambiguation).not.toMatch(/[([]\s*safeunfollow\.com|href/);
+      const urlFields = graphAt('/').flatMap(n =>
+        ['url', 'sameAs', 'logo', 'downloadUrl', 'screenshot'].flatMap(k => [n[k] ?? []].flat())
+      );
+      expect(urlFields.length).toBeGreaterThan(5);
+      expect(urlFields.filter(u => String(u).includes('safeunfollow.com'))).toEqual([]);
     });
 
     it('links founder, author, publisher by @id only', () => {

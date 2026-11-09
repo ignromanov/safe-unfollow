@@ -78,12 +78,16 @@ const ORGANIZATION_DESCRIPTION =
  * exists to warn against — and three of five engines attribute it to us.
  *
  * Rewritten for v1.7.0 (plan task 01, lumen-cro's wording): the previous text was a three-item
- * negation list. `docs/_config.yml` carries the identical string, gated by
+ * negation list. The last sentence is velum-cdpo's licensed non-affiliation line, verbatim
+ * (`plan/velum-verdicts.md` Q1/2b): it comes after the identity sentence, because engines drop
+ * negations when they compress; it is plain text, never a link or a URL-typed field. The operator
+ * confirms the fact before merge. `docs/_config.yml` carries the identical string, gated by
  * `jekyll-structured-data.test.ts`.
  */
 const DISAMBIGUATING_DESCRIPTION =
   'SafeUnfollow is the web app at safeunfollow.app. It reads the Instagram data export you ' +
-  'choose and never acts inside your Instagram account.';
+  'choose and never acts inside your Instagram account. SafeUnfollow.app is not affiliated with ' +
+  'safeunfollow.com or with any browser extension named SafeUnfollow.';
 
 /**
  * Base paths that carry no entity node: the two routes `public/_headers` serves with
