@@ -334,19 +334,6 @@ describe('the docs layout emits structured data', () => {
  * This is the only thing keeping them equal. There is no shared module to import.
  */
 describe('the docs entity and the app entity are the same entity', () => {
-  /** Reads a `const NAME = 'a' + 'b';` chain out of the component's source and joins it. */
-  function componentString(name: string): string {
-    const COMPONENT = readFileSync(
-      join(process.cwd(), 'src', 'components', 'OrganizationSchema.tsx'),
-      'utf-8'
-    );
-    const declaration = new RegExp(`const ${name} =([\\s\\S]*?);\\n`).exec(COMPONENT)?.[1];
-    expect(declaration, `${name} not found in OrganizationSchema.tsx`).toBeTruthy();
-    const parts = [...declaration!.matchAll(/'((?:[^'\\\\]|\\\\.)*)'/g)].map(m => m[1]);
-    expect(parts.length, `${name} yielded no string literals`).toBeGreaterThan(0);
-    return parts.join('');
-  }
-
   async function entity(): Promise<Record<string, unknown>> {
     const { parse: parseYAML } = await import('yaml');
     const parsed = parseYAML(CONFIG) as { entity?: Record<string, unknown> };
@@ -356,8 +343,9 @@ describe('the docs entity and the app entity are the same entity', () => {
 
   it('describes the organisation identically on both surfaces', async () => {
     const e = await entity();
-    expect(e.description).toBe(componentString('ORGANIZATION_DESCRIPTION'));
-    expect(e.disambiguating_description).toBe(componentString('DISAMBIGUATING_DESCRIPTION'));
+    const org = appNode('Organization');
+    expect(e.description).toBe(org.description);
+    expect(e.disambiguating_description).toBe(org.disambiguatingDescription);
   });
 
   /**
@@ -434,9 +422,9 @@ describe('the docs entity and the app entity are the same entity', () => {
 
   /** The control: the extractor must be able to see a difference, or it proves nothing. */
   it('the comparison can go red', () => {
-    expect(componentString('ORGANIZATION_DESCRIPTION')).not.toBe(
-      componentString('DISAMBIGUATING_DESCRIPTION')
-    );
+    const org = appNode('Organization');
+    expect(org.description).toBeTruthy();
+    expect(org.description).not.toBe(org.disambiguatingDescription);
   });
 });
 

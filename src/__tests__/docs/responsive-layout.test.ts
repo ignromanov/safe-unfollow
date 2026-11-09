@@ -278,6 +278,26 @@ describe('docs FAQ — the structured data says what the page says', () => {
     expect(entry.acceptedAnswer.text).toBe(plain(body!));
   });
 
+  /**
+   * The other direction. The two cases above check every schema entry against the page, and
+   * would stay green over a schema of one entry. Operator ruling 2026-11-09 (plan
+   * 2026-11-09-seo-aeo-geo, Global Constraints): every visible question carries its schema twin,
+   * verbatim, because the markup is read by AI agents and Google's FAQ rich results ended
+   * 2026-05-07. The one exception is named and asserted below.
+   */
+  it('every faq.md question except the is-it-safe one has a FAQPage entry with its body as text', () => {
+    const headings = [...FAQ.matchAll(/^### (.+)$/gm)].map(m => m[1].trim());
+    const expected = headings.filter(h => h !== 'Is it safe? Where do my data go?');
+    // Control: the exception is really on the page, so the filter removed exactly one heading.
+    expect(headings.length - expected.length).toBe(1);
+    expect(entries.map(e => e.name)).toEqual(expected);
+    for (const name of expected) {
+      expect(entries.find(e => e.name === name)?.acceptedAnswer.text, name).toBe(
+        plain(bodyUnder(FAQ, name)!),
+      );
+    }
+  });
+
   it('leaves the "is it safe" query to the page built for it', () => {
     // /docs/is-it-safe is a whole page on that intent and carries its own
     // FAQPage. Two of our URLs competing for one query splits the authority

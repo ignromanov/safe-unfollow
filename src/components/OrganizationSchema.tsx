@@ -1,5 +1,6 @@
 import { useLocation } from 'react-router-dom';
 
+import { NON_AFFILIATION } from '@/config/entity';
 import { SUPPORTED_LANGUAGES, createLanguagePrefixRegex } from '@/config/languages';
 
 const BASE_URL = 'https://safeunfollow.app';
@@ -86,8 +87,7 @@ const ORGANIZATION_DESCRIPTION =
  */
 const DISAMBIGUATING_DESCRIPTION =
   'SafeUnfollow is the web app at safeunfollow.app. It reads the Instagram data export you ' +
-  'choose and never acts inside your Instagram account. SafeUnfollow.app is not affiliated with ' +
-  'safeunfollow.com or with any browser extension named SafeUnfollow.';
+  `choose and never acts inside your Instagram account. ${NON_AFFILIATION}`;
 
 /**
  * Base paths that carry no entity node: the two routes `public/_headers` serves with
