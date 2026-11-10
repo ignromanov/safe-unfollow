@@ -448,6 +448,30 @@ export async function injectLocalizedMeta(
   // preloads go in, so those are never judged here.
   html = dropDynamicOnlyPreloads(html, readViteManifest(rootDir));
 
-  // Inject SEO tags before </head>
-  return html.replace('</head>', `${seoTags}</head>`);
+  // Inject SEO tags before </head>, then drop the developer comments from the head
+  return stripHeadComments(html.replace('</head>', `${seoTags}</head>`));
+}
+
+/**
+ * Drop developer comments from the prerendered `<head>`.
+ *
+ * `index.html` documents its own decisions (GH#99, GH#36, the CSP and font notes) and every
+ * prerendered page used to ship those ~5 KB verbatim — ~2.2 KB gzip per page, in the first
+ * round-trip. The source keeps them; only the output loses them.
+ *
+ * Scoped to `<head>` on purpose: React 18 SSR writes `<!-- -->` text-node separators inside
+ * `#root`, and stripping those makes hydration mismatch. Inline `<script>` bodies are passed
+ * through untouched so a `<!--` inside a JS string is never mistaken for a comment. IE
+ * conditional comments (`<!--[if`) are kept.
+ */
+export function stripHeadComments(html: string): string {
+  const headEnd = html.indexOf('</head>');
+  if (headEnd === -1) return html;
+  const head = html
+    .slice(0, headEnd)
+    .replace(
+      /(<script\b[\s\S]*?<\/script>)|<!--(?!\[if)[\s\S]*?-->\s*/g,
+      (_match, script: string | undefined) => script ?? ''
+    );
+  return head + html.slice(headEnd);
 }

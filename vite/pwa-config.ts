@@ -6,15 +6,10 @@ import type { VitePWAOptions } from 'vite-plugin-pwa';
  */
 export const pwaConfig: Partial<VitePWAOptions> = {
   registerType: 'autoUpdate',
-  includeAssets: [
-    'favicon.ico',
-    'favicon.svg',
-    'favicon-96x96.png',
-    'apple-touch-icon.png',
-    'android-chrome-192x192.png',
-    'android-chrome-512x512.png',
-    'logo.svg',
-  ],
+  // No `includeAssets`, and no manifest-icon injection: workbox.globPatterns below already
+  // picks up every icon, and either source wrote the same files into the precache manifest
+  // a second time.
+  includeManifestIcons: false,
   manifest: {
     id: '/',
     name: 'Safe Unfollow - Instagram Tracker',
