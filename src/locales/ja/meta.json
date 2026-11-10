@@ -15,20 +15,10 @@
       "description": "サンプルデータでInstagram Unfollow Trackerを試せます。バッジ、フィルター、検索の動きを、ファイルをアップロードせずに、アカウントも作らずに確認できます。",
       "ogTitle": "Instagram Unfollow Trackerを試す｜無料デモ"
     },
-    "/privacy": {
-      "title": "プライバシーポリシー｜エクスポートは端末から出ません",
-      "description": "SafeUnfollowのプライバシーポリシー。何が当方に届き、何が届かないかを説明します。Instagramのエクスポートはブラウザの中で読み込まれ、端末に残ります。",
-      "ogTitle": "プライバシーポリシー｜エクスポートは端末から出ません"
-    },
     "/results": {
       "title": "Instagramでフォローを外された人の分析結果",
       "description": "Instagramでフォローを外された人の分析結果を表示します。バッジで絞り込み、アカウントを検索して、誰にフォローを外されたかを確認できます。",
       "ogTitle": "Instagramでフォローを外された人の分析結果"
-    },
-    "/terms": {
-      "title": "利用規約",
-      "description": "SafeUnfollowの利用規約。100%ローカル処理の無料オープンソースInstagramアンフォロートラッカー。",
-      "ogTitle": "利用規約"
     }
   }
 }

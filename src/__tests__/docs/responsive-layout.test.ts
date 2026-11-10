@@ -230,7 +230,14 @@ describe('docs FAQ — the structured data says what the page says', () => {
     /<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(SCHEMA)![1],
   );
 
-  /** Flattens one question's markdown body the way the schema stores it. */
+  /**
+   * Flattens one question's markdown body the way the schema stores it.
+   *
+   * A list item becomes a sentence: it ends in a full stop unless it already ends in
+   * punctuation. Joined with bare spaces, "Chose JSON format … Chose only the …
+   * section Downloaded …" ran three items into one unpunctuated string, and an engine
+   * that cuts an answer into sentences cut it in the wrong places.
+   */
   function plain(markdown: string): string {
     return markdown
       .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
@@ -240,7 +247,11 @@ describe('docs FAQ — the structured data says what the page says', () => {
       .split('\n')
       .map(line => line.trim())
       .filter(Boolean)
-      .map(line => (line.startsWith('- ') ? line.slice(2).trim() : line))
+      .map(line => {
+        if (!line.startsWith('- ')) return line;
+        const item = line.slice(2).trim();
+        return /[.!?:;]$/.test(item) ? item : `${item}.`;
+      })
       .join(' ');
   }
 

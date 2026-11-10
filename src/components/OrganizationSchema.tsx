@@ -1,6 +1,12 @@
 import { useLocation } from 'react-router-dom';
 
-import { NON_AFFILIATION } from '@/config/entity';
+import {
+  FOUNDER_ID,
+  NON_AFFILIATION,
+  ORGANIZATION_ID,
+  SOFTWARE_ID,
+  WEBSITE_ID,
+} from '@/config/entity';
 import { SUPPORTED_LANGUAGES, createLanguagePrefixRegex } from '@/config/languages';
 
 const BASE_URL = 'https://safeunfollow.app';
@@ -24,10 +30,7 @@ const ZENODO_CONCEPT_DOI = '10.5281/zenodo.22663615';
  * site URL; `jekyll-structured-data.test.ts` keeps the two surfaces equal.
  * `.claude/analytics/2026-09-07-entity-resolution/00-the-entity-defects.md` §3(a).
  */
-const ORGANIZATION_ID = `${BASE_URL}/#organization`;
-const FOUNDER_ID = `${BASE_URL}/#founder`;
-const SOFTWARE_ID = `${BASE_URL}/#software`;
-const WEBSITE_ID = `${BASE_URL}/#website`;
+// The ids themselves live in `src/config/entity.ts`, shared with the other JSON-LD blocks.
 
 const ALTERNATE_NAMES = ['SafeUnfollow.app', 'Instagram Unfollow Tracker'];
 
@@ -174,8 +177,9 @@ export function OrganizationSchema() {
       dateModified: __RELEASE_DATE__,
       browserRequirements: 'Requires JavaScript and a browser with IndexedDB support.',
       inLanguage: [...SUPPORTED_LANGUAGES],
+      // No `downloadUrl`: schema.org defines it as the URL of a binary to download, and a web
+      // app has none. It pointed at the home page.
       url: BASE_URL,
-      downloadUrl: BASE_URL,
       screenshot: `${BASE_URL}/og-image.png`,
       datePublished: '2025-11-22',
       license: 'https://opensource.org/licenses/MIT',

@@ -15,20 +15,10 @@
       "description": "Teste Instagram Unfollow Tracker mit Beispieldaten. Sieh, wie Abzeichen, Filter und Suche funktionieren, ohne etwas hochzuladen und ohne Konto.",
       "ogTitle": "Instagram Unfollow Tracker testen: kostenlose Demo"
     },
-    "/privacy": {
-      "title": "Datenschutz: dein Export verlässt dein Gerät nicht",
-      "description": "SafeUnfollow Datenschutzerklärung: was uns erreicht und was nicht. Dein Instagram-Export wird im Browser gelesen und bleibt auf deinem Gerät.",
-      "ogTitle": "Datenschutz: dein Export verlässt dein Gerät nicht"
-    },
     "/results": {
       "title": "Deine Instagram-Entfolger-Ergebnisse",
       "description": "Sieh dir deine Instagram-Entfolger-Analyse an: filtere nach Abzeichen, durchsuche Konten und sieh, wer dir entfolgt hat.",
       "ogTitle": "Deine Instagram-Entfolger-Ergebnisse"
-    },
-    "/terms": {
-      "title": "Nutzungsbedingungen",
-      "description": "Nutzungsbedingungen von SafeUnfollow. Kostenloser Open-Source Instagram-Unfollow-Tracker mit 100% lokaler Verarbeitung.",
-      "ogTitle": "Nutzungsbedingungen"
     }
   }
 }

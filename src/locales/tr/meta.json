@@ -15,20 +15,10 @@
       "description": "Örnek verilerle Instagram Unfollow Tracker'ı dene. Rozetlerin, filtrelerin ve aramanın nasıl çalıştığını gör, hiçbir dosya yüklemeden ve hesap açmadan.",
       "ogTitle": "Instagram Unfollow Tracker'ı dene: ücretsiz demo"
     },
-    "/privacy": {
-      "title": "Gizlilik Politikası: dışa aktarımın cihazından çıkmaz",
-      "description": "SafeUnfollow gizlilik politikası: bize ne ulaşıyor, ne ulaşmıyor. Instagram dışa aktarımın tarayıcının içinde okunur ve cihazından hiç çıkmaz.",
-      "ogTitle": "Gizlilik Politikası: dışa aktarımın cihazından çıkmaz"
-    },
     "/results": {
       "title": "Instagram'da takipten çıkanlar: sonuçların",
       "description": "Instagram takipten çıkanlar analizinin sonuçlarını incele. Rozetlere göre filtrele, hesaplarda ara ve seni kimin takipten çıkardığını gör.",
       "ogTitle": "Instagram'da takipten çıkanlar: sonuçların"
-    },
-    "/terms": {
-      "title": "Hizmet Şartları",
-      "description": "SafeUnfollow hizmet şartları. %100 yerel işleme ile ücretsiz, açık kaynaklı Instagram takipten çıkanlar izleyicisi.",
-      "ogTitle": "Hizmet Şartları"
     }
   }
 }

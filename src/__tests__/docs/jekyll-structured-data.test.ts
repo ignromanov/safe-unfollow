@@ -413,11 +413,9 @@ describe('the docs entity and the app entity are the same entity', () => {
     expect(e.id).toBe(`${e.url as string}/#organization`);
     expect(e.website_id).toBe(`${e.url as string}/#website`);
     expect(e.founder_id).toBe(`${e.url as string}/#founder`);
-    const COMPONENT = readFileSync(
-      join(process.cwd(), 'src', 'components', 'OrganizationSchema.tsx'),
-      'utf-8'
-    );
-    expect(COMPONENT).toContain('`${BASE_URL}/#organization`');
+    // The ids moved to src/config/entity.ts so FAQPage, HowTo and the intent pages share them.
+    const ENTITY = readFileSync(join(process.cwd(), 'src', 'config', 'entity.ts'), 'utf-8');
+    expect(ENTITY).toContain('`${SITE_URL}/#organization`');
   });
 
   /** The control: the extractor must be able to see a difference, or it proves nothing. */

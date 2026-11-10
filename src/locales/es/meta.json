@@ -15,20 +15,10 @@
       "description": "Mira con datos de ejemplo cómo funcionan las insignias, los filtros y la búsqueda. No hace falta subir nada tuyo. La demo es gratis y no pide iniciar sesión.",
       "ogTitle": "Prueba la demo gratis del rastreador de unfollowers"
     },
-    "/privacy": {
-      "title": "Privacidad: tu exportación nunca sale de tu dispositivo",
-      "description": "Política de privacidad de SafeUnfollow: qué nos llega y qué no. Tu exportación de Instagram se lee dentro de tu navegador y se queda en tu dispositivo.",
-      "ogTitle": "Privacidad: tu exportación nunca sale de tu dispositivo"
-    },
     "/results": {
       "title": "Tus resultados: quién dejó de seguirte en Instagram",
       "description": "Consulta el resultado de tu análisis: quién dejó de seguirte, quién no te sigue y quiénes son mutuos. Filtra por insignias y busca cuentas dentro de la lista.",
       "ogTitle": "Tus resultados: quién dejó de seguirte en Instagram"
-    },
-    "/terms": {
-      "title": "Términos de servicio",
-      "description": "Términos de servicio de SafeUnfollow: un rastreador gratis y de código abierto que lee tu exportación de Instagram en tu propio navegador, sin contraseña.",
-      "ogTitle": "Términos de servicio"
     }
   }
 }

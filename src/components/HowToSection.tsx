@@ -4,6 +4,7 @@ import { PrefixedLink } from '@/components/PrefixedLink';
 import { ResponsiveGif } from '@/components/ResponsiveGif';
 import { GUIDE_STEPS } from '@/config/wizard-steps';
 import { analytics } from '@/lib/analytics';
+import { SOFTWARE_ID, WEBSITE_ID } from '@/config/entity';
 
 interface HowToStep {
   id: number;
@@ -56,6 +57,10 @@ export function HowToSection() {
     '@context': 'https://schema.org',
     '@type': 'HowTo',
     name: t('schema.name'),
+    // Joined to OrganizationSchema's nodes by id, so this block is part of the page's graph.
+    // No `publisher`: the WebSite node already names it, and this file ships in the entry chunk.
+    isPartOf: { '@id': WEBSITE_ID },
+    about: { '@id': SOFTWARE_ID },
     description: t('schema.description'),
     totalTime: 'PT5M',
     estimatedCost: {

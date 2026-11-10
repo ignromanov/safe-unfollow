@@ -34,7 +34,7 @@ SafeUnfollow is the web app at safeunfollow.app. SafeUnfollow.app is not affilia
 
 ### Why are some accounts missing?
 Instagram may split followers into multiple files (`followers_1.json`, `followers_2.json`, etc.). The app automatically merges these files when found. If your archive structure is unusual, ensure you:
-- Selected JSON format when downloading
+- Chose JSON format when downloading (HTML is read too, but JSON most reliably)
 - Chose only the "Followers and Following" section
 - Downloaded "All time" data range
 

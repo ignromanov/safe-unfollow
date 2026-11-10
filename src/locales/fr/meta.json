@@ -15,20 +15,10 @@
       "description": "Essayez Instagram Unfollow Tracker avec des données d'exemple. Voyez les badges, les filtres et la recherche en action, sans rien téléverser ni créer de compte.",
       "ogTitle": "Essayer Instagram Unfollow Tracker : démo gratuite"
     },
-    "/privacy": {
-      "title": "Confidentialité : votre export ne quitte pas l'appareil",
-      "description": "Politique de confidentialité SafeUnfollow : ce qui nous parvient et ce qui ne nous parvient pas. Votre export Instagram est lu dans votre navigateur et y reste.",
-      "ogTitle": "Confidentialité : votre export ne quitte pas l'appareil"
-    },
     "/results": {
       "title": "Vos résultats de désabonnements Instagram",
       "description": "Consultez les résultats de votre analyse Instagram : filtrez par badges, recherchez des comptes et voyez qui s'est désabonné de vous.",
       "ogTitle": "Vos résultats de désabonnements Instagram"
-    },
-    "/terms": {
-      "title": "Conditions d'utilisation | SafeUnfollow",
-      "description": "Conditions d'utilisation de SafeUnfollow. Outil gratuit et open-source avec traitement 100% local.",
-      "ogTitle": "Conditions d'utilisation"
     }
   }
 }

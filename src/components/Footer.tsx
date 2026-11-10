@@ -193,10 +193,21 @@ export function Footer() {
 
         {/* Bottom Section */}
         <div className="mt-8 lg:mt-10 flex flex-col lg:flex-row items-center justify-between gap-4 border-t border-border pt-6 text-sm text-zinc-400 font-bold">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-center gap-2">
             {t('footer.madeWithLove')}{' '}
             <Heart size={16} className="text-rose-500 fill-current animate-pulse" />{' '}
             {t('footer.forTheCommunity')}
+            {/* The visible half of the JSON-LD `#founder` Person (OrganizationSchema.tsx): a
+                name marked up but shown nowhere is markup the page does not carry. A proper
+                name, so it is not translated, and no "by" that would need ten translations. */}
+            <span aria-hidden="true">·</span>
+            <a
+              href="https://lasipan.cc/"
+              rel="author"
+              className="hover:text-primary-strong hover:underline underline-offset-4 transition-colors"
+            >
+              Ignat Romanov
+            </a>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-4 lg:gap-10">
             <span>{t('footer.copyright')}</span>

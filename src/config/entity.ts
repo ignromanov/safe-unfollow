@@ -12,3 +12,15 @@
  */
 export const NON_AFFILIATION =
   'SafeUnfollow.app is not affiliated with safeunfollow.com or with any browser extension named SafeUnfollow.';
+
+/**
+ * One `@id` per entity node. `OrganizationSchema.tsx` defines the nodes; every other JSON-LD block
+ * on a page (FAQPage, HowTo, an intent page's WebPage) points at them with a bare `{'@id': …}`, so
+ * a consumer joins the separate `<script>` blocks into one graph instead of reading islands.
+ * `docs/_config.yml` builds the same ids; `jekyll-structured-data.test.ts` keeps them equal.
+ */
+const SITE_URL = 'https://safeunfollow.app';
+export const ORGANIZATION_ID = `${SITE_URL}/#organization`;
+export const FOUNDER_ID = `${SITE_URL}/#founder`;
+export const SOFTWARE_ID = `${SITE_URL}/#software`;
+export const WEBSITE_ID = `${SITE_URL}/#website`;

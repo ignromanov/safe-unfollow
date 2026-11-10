@@ -8,6 +8,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import { analytics } from '@/lib/analytics';
 import { PrefixedLink } from '@/components/PrefixedLink';
 import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
+import { SOFTWARE_ID, WEBSITE_ID } from '@/config/entity';
 
 interface FAQItem {
   key: string;
@@ -75,6 +76,14 @@ export function FAQSection() {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
     inLanguage: i18n.language,
+    // Joined to OrganizationSchema's nodes by id, so this block is part of the page's graph.
+    // No `publisher`: the WebSite node already names it, and this file ships in the entry chunk.
+    isPartOf: { '@id': WEBSITE_ID },
+    about: { '@id': SOFTWARE_ID },
+    // The release the answers shipped in (CITATION.cff's date-released), never the build clock.
+    // True for v1.7.0, which rewrote every answer. A release that leaves faq.json untouched
+    // still moves it — pin a literal here if that ever becomes the common case.
+    dateModified: __RELEASE_DATE__,
     mainEntity: faqItems.map(item => ({
       '@type': 'Question',
       name: item.question,
