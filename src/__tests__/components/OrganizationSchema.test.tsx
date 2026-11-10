@@ -154,6 +154,7 @@ describe('OrganizationSchema', () => {
           'https://lasipan.cc/',
           'https://www.linkedin.com/in/ignat-romanov',
           'https://x.com/romignov',
+          'https://orcid.org/0009-0000-0414-1263',
         ],
       });
     });

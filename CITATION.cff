@@ -6,6 +6,7 @@ type: software
 authors:
   - family-names: Romanov
     given-names: Ignat
+    orcid: 'https://orcid.org/0009-0000-0414-1263'
 identifiers:
   # The concept DOI, and deliberately only that one: it resolves to whichever
   # version is newest, so it cannot go stale. Zenodo also mints a DOI per version

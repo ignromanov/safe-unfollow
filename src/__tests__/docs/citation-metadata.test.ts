@@ -326,7 +326,7 @@ describe('.zenodo.json agrees with CITATION.cff', () => {
     description: string;
     license: string;
     keywords: string[];
-    creators: Array<{ name: string }>;
+    creators: Array<{ name: string; orcid?: string }>;
     related_identifiers: Array<{ identifier: string; relation: string }>;
   };
 
@@ -348,6 +348,18 @@ describe('.zenodo.json agrees with CITATION.cff', () => {
     expect(ZENODO.creators.map(c => c.name)).toEqual(
       authors.map(a => `${a['family-names']}, ${a['given-names']}`),
     );
+  });
+
+  it('carries the same ORCID, and the site names it on the founder', async () => {
+    const authors = (await loadCitation()).authors as Array<Record<string, string>>;
+    // CFF wants the full URL, Zenodo the bare iD.
+    expect(ZENODO.creators.map(c => c.orcid)).toEqual(
+      authors.map(a => a.orcid?.replace('https://orcid.org/', '')),
+    );
+    for (const a of authors) {
+      expect(read('src/components/OrganizationSchema.tsx')).toContain(`'${a.orcid}'`);
+      expect(read('docs/_config.yml')).toContain(`"${a.orcid}"`);
+    }
   });
 
   it('links only profiles the site itself claims in sameAs', () => {
