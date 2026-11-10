@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Search engines and AI assistants get one description of SafeUnfollow on every
   indexable page: the app, its founder, and the profiles that name it (GitHub,
-  Crunchbase, Product Hunt, the Zenodo DOI, Instagram). It states that
+  Crunchbase, Product Hunt, the Zenodo DOI, Instagram, YouTube, TikTok). It states that
   SafeUnfollow.app is not affiliated with safeunfollow.com or with any browser
   extension named SafeUnfollow.
 - The FAQ answers how SafeUnfollow.app relates to those two names, in all ten

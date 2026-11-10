@@ -103,7 +103,7 @@ describe('OrganizationSchema', () => {
       expect(org().alternateName).toEqual(['SafeUnfollow.app', 'Instagram Unfollow Tracker']);
     });
 
-    it('lists the five sameAs URLs and no zenodo /records/ URL', () => {
+    it('lists the seven sameAs URLs and no zenodo /records/ URL', () => {
       // Written out rather than imported: this pins the claim the page publishes.
       expect(org().sameAs).toEqual([
         'https://github.com/ignromanov/safe-unfollow',
@@ -111,6 +111,8 @@ describe('OrganizationSchema', () => {
         'https://www.producthunt.com/products/instagram-unfollow-tracker',
         'https://doi.org/10.5281/zenodo.22663615',
         'https://www.instagram.com/safeunfollow',
+        'https://www.youtube.com/@SafeUnfollowapp',
+        'https://www.tiktok.com/@safeunfollow.app',
       ]);
       // The concept DOI lands on the version record; pasting what the browser shows pins one
       // release and is falsified by the next. Checked across the whole graph, every route.

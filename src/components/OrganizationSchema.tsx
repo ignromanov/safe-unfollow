@@ -56,6 +56,8 @@ const SAME_AS = [
   'https://www.producthunt.com/products/instagram-unfollow-tracker',
   `https://doi.org/${ZENODO_CONCEPT_DOI}`,
   'https://www.instagram.com/safeunfollow',
+  'https://www.youtube.com/@SafeUnfollowapp',
+  'https://www.tiktok.com/@safeunfollow.app',
 ];
 
 /**
