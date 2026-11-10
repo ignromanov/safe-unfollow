@@ -1,0 +1,62 @@
+{
+  "upload_type": "software",
+  "access_right": "open",
+  "license": "MIT",
+  "title": "SafeUnfollow",
+  "description": "SafeUnfollow is a web app that reads the official Instagram data export in your browser and shows who unfollowed you, who does not follow back, and who is mutual. The analysis is free and needs no Instagram login. SafeUnfollow never sends the export to a server.",
+  "notes": "Also published as SafeUnfollow.app and Instagram Unfollow Tracker. To cite every version at once, use the concept DOI 10.5281/zenodo.22663615.",
+  "creators": [
+    {
+      "name": "Romanov, Ignat"
+    }
+  ],
+  "keywords": [
+    "instagram",
+    "unfollow",
+    "tracker",
+    "privacy",
+    "instagram-data-export",
+    "react",
+    "typescript",
+    "open-source",
+    "data-analysis",
+    "social-media"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://safeunfollow.app/",
+      "relation": "isDescribedBy",
+      "resource_type": "other"
+    },
+    {
+      "identifier": "https://safeunfollow.app/docs",
+      "relation": "isDocumentedBy",
+      "resource_type": "publication-softwaredocumentation"
+    },
+    {
+      "identifier": "https://www.instagram.com/safeunfollow",
+      "relation": "isDescribedBy",
+      "resource_type": "other"
+    },
+    {
+      "identifier": "https://www.youtube.com/@SafeUnfollowapp",
+      "relation": "isDescribedBy",
+      "resource_type": "video"
+    },
+    {
+      "identifier": "https://www.tiktok.com/@safeunfollow.app",
+      "relation": "isDescribedBy",
+      "resource_type": "video"
+    },
+    {
+      "identifier": "https://www.producthunt.com/products/instagram-unfollow-tracker",
+      "relation": "isDescribedBy",
+      "resource_type": "other"
+    },
+    {
+      "identifier": "https://www.crunchbase.com/organization/safeunfollow",
+      "relation": "isDescribedBy",
+      "resource_type": "other"
+    }
+  ]
+}
