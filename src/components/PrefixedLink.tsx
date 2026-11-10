@@ -2,6 +2,7 @@ import { Link, useLocation, type LinkProps } from 'react-router-dom';
 
 import { useLanguagePrefix } from '@/hooks/useLanguagePrefix';
 import type { IntentSlug } from '@/config/intent-pages';
+import { isLegalPath } from '@/config/legal-pages';
 import type { HeroCta } from '@/lib/stats/cta-capture';
 
 export interface PrefixedLinkProps extends Omit<LinkProps, 'to'> {
@@ -56,7 +57,9 @@ export interface PrefixedLinkProps extends Omit<LinkProps, 'to'> {
 export function PrefixedLink({ to, cta, samePathState, state, ...props }: PrefixedLinkProps) {
   const prefix = useLanguagePrefix();
   const { pathname } = useLocation();
-  const href = to === '/' ? prefix || '/' : `${prefix}${to}`;
+  // The legal pages exist in English only (src/config/legal-pages.ts); a prefixed link to one
+  // would land on a 308.
+  const href = to === '/' ? prefix || '/' : isLegalPath(to) ? to : `${prefix}${to}`;
   // No new subscription: useLanguagePrefix() reads useLocation() already, and it
   // derives the prefix from this same pathname — so href and pathname cannot
   // disagree about which locale they are in.

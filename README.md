@@ -105,7 +105,7 @@ Available in **10 languages** with full RTL support:
 | 日本語           | ja   | —   |
 | العربية          | ar   | ✅  |
 
-- **73 pre-rendered pages** — SSG for instant load and SEO
+- **55 pre-rendered pages** — SSG for instant load and SEO
 - **Dynamic meta tags** — localized titles/descriptions per language
 - **Browser language detection** — auto-redirects to preferred language
 
@@ -193,7 +193,7 @@ ceiling. The storage and memory columns are targets on the same footing.
 - **TanStack Virtual** — renders only visible items (60 FPS scrolling)
 - **Web Workers + Comlink** — type-safe off-thread filtering
 - **Trigram/Prefix Indexes** — O(1) search instead of O(n) linear scan
-- **vite-react-ssg** — 73 pre-rendered pages for SEO and instant loads
+- **vite-react-ssg** — 55 pre-rendered pages for SEO and instant loads
 - **PWA (Workbox)** — runtime caching; only icons and the manifest are precached (`vite/pwa-config.ts`)
 
 📖 **Deep dive:** [IndexedDB Architecture](INDEXEDDB_ARCHITECTURE.md)

@@ -26,7 +26,7 @@
     "cta": "Abrir Centro de cuentas",
     "trust": {
       "noLogin": "Sin inicio de sesión. Sin contraseña. Nada que conectar.",
-      "local": "Tu exportación se lee en este navegador y nunca se sube."
+      "local": "SafeUnfollow lee tu exportación en este navegador y nunca envía el archivo a un servidor."
     },
     "recipe": {
       "title": "Qué elegir en el diálogo de Instagram",

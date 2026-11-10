@@ -184,7 +184,7 @@
   "loadingTips": {
     "localProcessing": {
       "title": "Dosyanız bu cihazdan asla ayrılmaz",
-      "desc": "İşleme tamamen tarayıcınızda gerçekleşir — hiçbir şey yüklenmez."
+      "desc": "SafeUnfollow dışa aktarımını tamamen tarayıcında ayrıştırır ve dosyayı asla bir sunucuya göndermez."
     },
     "revokeAccess": {
       "title": "Hızlı gizlilik ipucu",

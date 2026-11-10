@@ -184,7 +184,7 @@
   "loadingTips": {
     "localProcessing": {
       "title": "Your file never leaves this device",
-      "desc": "Parsing happens entirely in your browser — nothing is uploaded."
+      "desc": "SafeUnfollow parses your export entirely in your browser and never sends the file to a server."
     },
     "revokeAccess": {
       "title": "Quick privacy tip",

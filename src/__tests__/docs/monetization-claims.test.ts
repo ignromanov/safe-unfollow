@@ -435,14 +435,10 @@ const DOCS_PRIVACY_MAX_BYTES = 3800;
  * no true way to say "tested and verified" or "<5ms" as an achieved result on this project,
  * so no `qualifiedBy` exemption exists for it the way `free forever` has one.
  *
- * One page is exempted rather than fixed: `docs/instagram-export.md` is frozen until
- * ~2026-09-15 pending a GSC-driven rewrite (`.claude/plans/2026-09-02-position-content/`
- * task 05) and carries `~5ms` in a table at line 192 — a design target already phrased
- * with `~`, not `<`, so it would not match `<5ms` today, but it is listed here explicitly
- * so the exemption is visible rather than an accident of the regex, and so whoever runs
- * task 05 knows to remove this line in the same change that rewrites the page.
+ * No page is exempt. `docs/instagram-export.md` was, while it stayed frozen pending its
+ * rewrite; the freeze ended and the page was rewritten in v1.7.0 (plan 2026-11-09-seo-aeo-geo,
+ * task 06), so the exemption left in the same change, as this comment asked.
  */
-const PERFORMANCE_BANNED_DOCS_EXEMPT = new Set(['instagram-export.md']);
 
 const PERFORMANCE_BANNED: BannedEntry[] = [
   { pattern: /tested and verified/i, why: 'no benchmark harness exists; the 1M-scale test mocks IndexedDB' },
@@ -468,9 +464,6 @@ const PERFORMANCE_BANNED: BannedEntry[] = [
  * a millisecond figure. `faq.md` names them without a number ("stays interactive") and is
  * correctly out. `tech-spec.md` prints `sub-2ms` without naming them and carries its own,
  * differently-worded disclaimer at its section 5 — recorded, not unified here.
- *
- * ⛔ `PERFORMANCE_BANNED_DOCS_EXEMPT` does not apply. That exemption covers the literal phrases
- * `<5ms` / `sub-5ms`; this page is this rule's subject.
  */
 const PERFORMANCE_CLAUSE_END = 'ceiling.';
 
@@ -1075,7 +1068,7 @@ describe('docs monetization claims', () => {
   for (const entry of PERFORMANCE_BANNED) {
     it(`never claims ${String(entry.pattern)} in docs/*.md — ${entry.why}`, () => {
       const offenders = DOCS.filter(
-        doc => !PERFORMANCE_BANNED_DOCS_EXEMPT.has(doc.name) && entry.pattern.test(doc.text),
+        doc => entry.pattern.test(doc.text),
       ).map(doc => doc.name);
 
       expect(offenders, `${offenders.join(', ')} — ${entry.why}`).toEqual([]);

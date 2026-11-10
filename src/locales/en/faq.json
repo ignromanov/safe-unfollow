@@ -3,7 +3,7 @@
   "items": {
     "howToFind": {
       "question": "How to check who unfollowed you on Instagram without app?",
-      "answer": "Open Meta Accounts Center › Create export › Select your profile › Choose \"Export to device\" › Select only \"Followers and following\" › Set date range to \"All time\" › Set format to JSON. Download the ZIP when ready (usually 5-30 minutes), then upload it here. The tool compares your lists in the browser, so the export is never uploaded anywhere. No login needed.",
+      "answer": "SafeUnfollow reads the export Meta gives you, so you need neither an app nor your password. Open Meta Accounts Center › Create export › Select your profile › Choose \"Export to device\" › Select only \"Followers and following\" › Set date range to \"All time\" › Set format to JSON. Then select the ZIP here.",
       "relatedLink": {
         "text": "Start the export guide",
         "href": "/upload?guide=1"
@@ -11,7 +11,7 @@
     },
     "whoDoesntFollowBack": {
       "question": "Who doesn't follow me back on Instagram?",
-      "answer": "Your Instagram data export holds both lists — who you follow and who follows you — and the accounts in the first list but not the second are the ones that don't follow you back. Upload the export here and the \"Not following back\" filter shows them: free, with no login, and the file never leaves your browser.",
+      "answer": "SafeUnfollow shows who doesn't follow you back by comparing the two lists in your Instagram export. Accounts you follow that don't follow you appear under the \"Not following back\" filter. The analysis is free and needs no Instagram login.",
       "relatedLink": {
         "text": "Who doesn't follow you back, step by step",
         "href": "/who-doesnt-follow-me-back"
@@ -19,7 +19,7 @@
     },
     "pendingSent": {
       "question": "How do I see the follow requests I sent on Instagram?",
-      "answer": "The app has no screen for them, but your data export does: pending_follow_requests.json lists every request you sent that was never accepted. Upload the export here and the \"Pending request\" filter shows the whole list at once, with no login.",
+      "answer": "SafeUnfollow lists every follow request you sent that was never accepted, read from pending_follow_requests.json (or .html) in your export. Instagram's app has no screen for them. Select your export here and the \"Pending request\" filter shows the whole list at once.",
       "relatedLink": {
         "text": "Your pending follow requests, explained",
         "href": "/instagram-pending-follow-requests"
@@ -27,7 +27,7 @@
     },
     "mutuals": {
       "question": "How do I find my mutual followers on Instagram?",
-      "answer": "The accounts that appear in both lists of your export — following and followers — are your mutuals, computed over every row of the export rather than a sample. This works for your own account only; it cannot compare two other people's profiles.",
+      "answer": "SafeUnfollow counts an account as mutual when it appears in both lists of your export, following and followers. It checks every row of the export rather than a sample. It works for your own account only and cannot compare two other people's profiles.",
       "relatedLink": {
         "text": "Your mutual followers, from your own export",
         "href": "/instagram-mutual-followers"
@@ -35,7 +35,7 @@
     },
     "withoutDownload": {
       "question": "Can I check Instagram unfollowers without data download or apps?",
-      "answer": "No. Instagram doesn't provide a native unfollower list. The only safe methods are: (1) Manually checking followed accounts vs followers, or (2) Using your official data download with this tool. This tracker does method 2 for you, free: no password, no login, no account risk.",
+      "answer": "No. Instagram has no unfollower list, so you either compare your lists by hand or use the official data download. SafeUnfollow does the second for you. The analysis is free, and SafeUnfollow never asks for your Instagram password or login.",
       "relatedLink": {
         "text": "Learn how to get your data",
         "href": "/upload?guide=1"
@@ -43,7 +43,7 @@
     },
     "privacy": {
       "question": "How does Instagram unfollower tracker work without login?",
-      "answer": "This tracker uses your official Instagram data export (ZIP file) to analyze followers locally in your browser. No login required. Parsing, filtering and search all happen on your device, and your Instagram export stays in this browser. We receive only anonymous page analytics, which you can switch off in the footer. This method is safe because it uses Instagram's official export tool, not password scraping.",
+      "answer": "SafeUnfollow works without a login because it reads your official Instagram data export in your browser, where the export stays. Our analytics record page views and the export's account count and size, never a username. You can switch them off in the footer.",
       "relatedLink": {
         "text": "Read our privacy policy",
         "href": "/privacy"
@@ -51,7 +51,7 @@
     },
     "safety": {
       "question": "Is it safe to use Instagram unfollower tracker apps?",
-      "answer": "Yes, if they use your official Instagram data export. Apps requiring your Instagram password violate Terms of Service and pose security risks. Safe trackers use only the ZIP file from Instagram's Data Download tool: no login, no password required. This tool uses that method exclusively.",
+      "answer": "Yes, when the app reads your official Instagram export and never asks for your password. Apps that want your password break Instagram's Terms of Service. SafeUnfollow reads only the ZIP from Instagram's data download tool and has no password field.",
       "relatedLink": {
         "text": "Read our privacy policy",
         "href": "/privacy"
@@ -59,11 +59,11 @@
     },
     "dataIncluded": {
       "question": "What data does Instagram include in my data download file?",
-      "answer": "The ZIP file contains your profile info, followers list, following list, comments, posts, messages, saved items, and more. For unfollower tracking, the key files are followers_1.json (your followers) and following.json (who you follow). The tracker uses these two files to identify unfollowers and non-mutuals."
+      "answer": "Instagram's data download ZIP holds your profile, followers, following, comments, posts, messages, saved items and more. SafeUnfollow needs two files from it: followers_1.json (your followers) and following.json (who you follow), or their .html versions. It compares them to find unfollowers and accounts that don't follow back."
     },
     "zipFile": {
       "question": "What is Instagram data download and why use it?",
-      "answer": "Instagram Data Download (via Meta Accounts Center) is the official tool for exporting your account information including followers and following lists. It's the only safe, authorized way to access this data without risking your account. Apps that ask for your password violate Instagram's Terms of Service.",
+      "answer": "Instagram's data download, in Meta Accounts Center, is Meta's official tool for exporting your account information, including your followers and following lists. It gets you that data without giving your password to anyone. SafeUnfollow reads this export and nothing else.",
       "relatedLink": {
         "text": "Follow our step-by-step guide",
         "href": "/upload?guide=1"
@@ -71,7 +71,7 @@
     },
     "htmlExport": {
       "question": "I exported HTML instead of JSON. Do I need to export again?",
-      "answer": "No. SafeUnfollow already reads both formats. HTML exports also work, but JSON is the format we read most reliably, so it's still what the guide recommends. Upload the ZIP you already have.",
+      "answer": "No. SafeUnfollow reads HTML exports as well as JSON. The guide still recommends JSON because it is the format we read most reliably. Select the ZIP you already have.",
       "relatedLink": {
         "text": "How to get your export",
         "href": "/upload?guide=1"
@@ -79,15 +79,19 @@
     },
     "accountSafety": {
       "question": "Will my Instagram account be safe using this tracker?",
-      "answer": "Yes, 100% safe. Unlike apps that ask for your password and 'scrape' data (which violates Terms of Service), this tool uses your official data export. No login required: you download the ZIP directly from Instagram, then upload it locally to your browser. We never access your account.",
+      "answer": "Yes. SafeUnfollow never signs in to your Instagram account and cannot act inside it. You download the ZIP from Instagram yourself and select it here, where your browser reads it. Apps that ask for your password and scrape your data break Instagram's Terms of Service.",
       "relatedLink": {
         "text": "View our terms",
         "href": "/terms"
       }
     },
+    "notAffiliated": {
+      "question": "Is SafeUnfollow.app related to safeunfollow.com or to a browser extension called SafeUnfollow?",
+      "answer": "SafeUnfollow is the web app at safeunfollow.app. SafeUnfollow.app is not affiliated with safeunfollow.com or with any browser extension named SafeUnfollow. We do not publish a browser extension. Nothing we publish acts inside your Instagram account or asks for your Instagram login."
+    },
     "downloadTime": {
       "question": "How long does it take to receive my Instagram data download?",
-      "answer": "Meta typically sends your data within 5-30 minutes via email. Larger accounts or high server load may take up to a few hours. Once you have the ZIP, the analysis runs in your own browser rather than on a server, so there is no queue and no upload wait. Bigger exports naturally take longer to read than small ones.",
+      "answer": "Meta usually emails your data within 5-30 minutes, and larger accounts or busy periods can take a few hours. Once you have the ZIP, SafeUnfollow reads it in your own browser rather than on a server, so there is no queue.",
       "relatedLink": {
         "text": "Set a calendar reminder",
         "href": "/upload?step=8"
@@ -95,7 +99,7 @@
     },
     "scale": {
       "question": "What size Instagram account export can you analyze?",
-      "answer": "This tracker handles exports of up to 1,000,000+ accounts. We use columnar storage and bitset indexing so filtering stays fast as the list grows. Whether you have 100 followers or 1,000,000, the tool stays responsive.",
+      "answer": "SafeUnfollow was tested on a synthetic export of 1,000,000 accounts: about 21 seconds from choosing the file to results, in desktop Chrome (November 2026). That was one desktop run, and no phone has been tested at that size. Columnar storage and bitsets keep filtering responsive as the list grows.",
       "relatedLink": {
         "text": "Try with sample data",
         "href": "/sample"
@@ -103,11 +107,11 @@
     },
     "free": {
       "question": "Are there free Instagram unfollower trackers?",
-      "answer": "Yes. The analysis is 100% free: every badge, filter and account, with no signup and no limit. Most alternatives charge a monthly subscription. Here, the only thing that costs anything is exporting your filtered list as a file — a one-time unlock, never a subscription, with the price shown on the button. Viewing the list here is always free. Open-source (MIT), and your Instagram export is processed locally in your browser."
+      "answer": "Yes. SafeUnfollow's analysis is free: every badge, filter and account, with no signup and no limit. The only paid item is exporting your filtered list as a file, a one-time unlock with the price shown on the button. Viewing the list is always free. The code is open source (MIT)."
     },
     "analyzeData": {
       "question": "How do I analyze my Instagram data download to find unfollowers?",
-      "answer": "Upload your Instagram ZIP file to this tracker. The tool unpacks your follower and following lists locally in your browser, compares them, and highlights who unfollowed you. Results show unfollowers, non-mutuals, mutual followers, and more, and the comparison runs on your device rather than on a server.",
+      "answer": "SafeUnfollow unpacks your Instagram ZIP in your browser and compares your follower and following lists. Select the file here to see unfollowers, accounts that don't follow back, mutuals and pending requests. The comparison runs on your device rather than on a server.",
       "relatedLink": {
         "text": "Upload your file now",
         "href": "/upload"
@@ -115,7 +119,7 @@
     },
     "shareDataSafely": {
       "question": "Is it safe to upload Instagram data download to third-party tools?",
-      "answer": "Yes, if the app processes your file locally in your browser and keeps it there. This tracker reads your ZIP entirely on your device: the file itself stays in this browser. Anonymous page analytics and ad requests do leave it, but neither carries your file. Be wary of cloud-based unfollower trackers that ask you to hand over your ZIP or your Instagram password: those send your file to someone else's machine. Always check that the app works from the official export and asks for no login.",
+      "answer": "Yes, if the tool keeps your file in your browser. SafeUnfollow reads your ZIP on your device, and the file stays in this browser. Anonymous page analytics and ad requests do leave it, but neither carries your file. Avoid trackers that ask for your Instagram password.",
       "relatedLink": {
         "text": "Read our privacy commitment",
         "href": "/privacy"
@@ -123,7 +127,7 @@
     },
     "withoutPassword": {
       "question": "How does SafeUnfollow work without my Instagram password?",
-      "answer": "SafeUnfollow uses Instagram's official data export feature (available in Meta Accounts Center) instead of your password. You download your follower data as a ZIP file directly from Instagram, then upload that file here. The app reads the JSON files inside the ZIP to compare followers vs following lists. All processing happens in your browser. No API access, no scraping, no login credentials needed.",
+      "answer": "SafeUnfollow works without your password because it reads Instagram's official data export instead of your account. You download your follower data as a ZIP from Meta Accounts Center, then select it here. Your browser reads the files inside and compares followers with following. It never calls Instagram's API.",
       "relatedLink": {
         "text": "See the export guide",
         "href": "/upload?guide=1"
@@ -131,11 +135,11 @@
     },
     "betterThanPaid": {
       "question": "Is SafeUnfollow better than paid Instagram unfollow apps?",
-      "answer": "For most users, yes. The analysis is free: no signup, no subscription, every account in your export. It needs no login (so no account ban risk), processes your export locally in your browser (maximum privacy), handles 1,000,000+ accounts (most paid apps cap at 100,000), and is open source. Exporting your filtered list as a file is a one-time unlock — paid once, not every month; everything you can see on screen stays free. Paid apps offer real-time monitoring, which requires API access, but that violates Instagram's Terms of Service and risks your account. SafeUnfollow uses the official, safe data export method."
+      "answer": "For checking who doesn't follow you back, yes. SafeUnfollow's analysis is free and needs no Instagram login. It cannot alert you in real time. Real-time paid apps need access to your account, which breaks Instagram's Terms of Service. Exporting your filtered list as a file is a one-time unlock."
     },
     "mobileUse": {
       "question": "Can I use SafeUnfollow on iPhone or Android?",
-      "answer": "Yes. SafeUnfollow works in any modern mobile browser (Safari, Chrome, Firefox). Visit safeunfollow.app, upload your ZIP file, and read your results on the phone. You can also install it as a PWA for quick access from your home screen. Most people who use it are on a phone, and the layout is built for that first. Request your data export from the Instagram app, download the ZIP from your email, then upload it here."
+      "answer": "Yes. SafeUnfollow works in any mobile browser, including Safari, Chrome and Firefox on iPhone and Android. Request your export in the Instagram app, download the ZIP from Meta's email and select it at safeunfollow.app. Most of its visitors are on a phone, so the layout is built for phones first."
     }
   }
 }

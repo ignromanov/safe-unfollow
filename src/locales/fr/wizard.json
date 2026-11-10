@@ -26,7 +26,7 @@
     "cta": "Ouvrir l'Espace Comptes",
     "trust": {
       "noLogin": "Aucune connexion. Aucun mot de passe. Rien à relier.",
-      "local": "Votre export est lu dans ce navigateur et jamais téléversé."
+      "local": "SafeUnfollow lit votre export dans ce navigateur et n'envoie jamais le fichier à un serveur."
     },
     "recipe": {
       "title": "Que choisir dans la boîte de dialogue Instagram",

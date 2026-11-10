@@ -5,6 +5,7 @@ import {
   createLanguagePrefixRegex,
   detectLanguageFromPathname,
 } from '@/config/languages';
+import { INTENT_PAGES } from '@/config/intent-pages';
 
 const BREADCRUMB_NAMES: Record<string, string> = {
   '/': 'Home',
@@ -14,6 +15,15 @@ const BREADCRUMB_NAMES: Record<string, string> = {
   '/privacy': 'Privacy Policy',
   '/terms': 'Terms of Service',
 };
+
+/**
+ * The intent landing pages, named by their h1. English only, like the routes themselves
+ * (`src/routes.tsx` → `createIntentPageChildren`): a locale-prefixed slug renders NotFoundPage,
+ * so it gets no trail.
+ */
+const INTENT_NAMES: Record<string, string> = Object.fromEntries(
+  INTENT_PAGES.map(page => [`/${page.slug}`, page.h1])
+);
 
 const BASE_URL = 'https://safeunfollow.app';
 
@@ -47,7 +57,7 @@ export function BreadcrumbSchema() {
   const items = [{ name: 'Home', url: `${BASE_URL}${localePrefix || '/'}` }];
 
   if (path !== '/') {
-    const pageName = BREADCRUMB_NAMES[path];
+    const pageName = BREADCRUMB_NAMES[path] ?? (localePrefix ? undefined : INTENT_NAMES[path]);
     if (pageName) {
       items.push({
         name: pageName,

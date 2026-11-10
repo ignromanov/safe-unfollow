@@ -26,7 +26,7 @@
     "cta": "Abrir Central de Contas",
     "trust": {
       "noLogin": "Sem login. Sem senha. Nada para conectar.",
-      "local": "Sua exportação é lida neste navegador e nunca enviada."
+      "local": "O SafeUnfollow lê sua exportação neste navegador e nunca envia o arquivo a um servidor."
     },
     "recipe": {
       "title": "O que escolher na caixa de diálogo do Instagram",

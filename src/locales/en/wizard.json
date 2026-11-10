@@ -26,7 +26,7 @@
     "cta": "Open Accounts Center",
     "trust": {
       "noLogin": "No login. No password. Nothing to connect.",
-      "local": "Your export is read in this browser and never uploaded."
+      "local": "SafeUnfollow reads your export in this browser and never sends the file to a server."
     },
     "recipe": {
       "title": "What to pick in Instagram's dialog",

@@ -62,8 +62,8 @@
     <link rel="canonical" href="{{ site.url }}{{ canonical_path }}"/>
 
     {%- comment -%} structured-data:start
-      Four nodes, three of them from .claude/plans/2026-09-04-geo-quick-wins/00-design.md §4 A1
-      and one that overturns it:
+      Five nodes, three of them from .claude/plans/2026-09-04-geo-quick-wins/00-design.md §4 A1,
+      one that overturns it, and the founder that node names:
 
       WebPage        — keyed on the same `canonical_path` the <link rel="canonical"> above is
                        built from, so the @id and the canonical cannot disagree.
@@ -82,7 +82,9 @@
                        resolving "SafeUnfollow" to an unrelated Chrome extension, and these are
                        the pages llms.txt sends those engines to. Values live in _config.yml's
                        `entity:` block; a gate compares them against the React component that
-                       publishes the same entity on the home page.
+                       publishes the same entity on every indexable app route.
+      Person         — the founder (v1.7.0), written out in full like the Organization, which
+                       points at it by @id inside this same graph.
 
       Still not here, each checked against Google's documentation rather than assumed: speakable
       (beta since 2018, US-English news only), HowTo (rich result removed Sep 2023), FAQPage
@@ -116,7 +118,7 @@
     {%- endfor -%}
     {%- unless page.no_structured_data -%}
 <script type="application/ld+json">
-{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":{{ page_canonical_url | jsonify }},"url":{{ page_canonical_url | jsonify }},"name":{{ head_title | jsonify }},"description":{{ head_description | jsonify }},"dateModified":{{ page.last_updated | date: '%Y-%m-%d' | jsonify }},"isPartOf":{"@id":{{ site.entity.website_id | jsonify }}}},{"@type":"WebSite","@id":{{ site.entity.website_id | jsonify }},"url":{{ site.entity.url | jsonify }},"name":{{ site.entity.alternate_name | jsonify }},"publisher":{"@id":{{ site.entity.id | jsonify }}}},{"@type":"Organization","@id":{{ site.entity.id | jsonify }},"name":{{ site.entity.name | jsonify }},"alternateName":{{ site.entity.alternate_name | jsonify }},"url":{{ site.entity.url | jsonify }},"logo":{{ site.entity.logo | jsonify }},"sameAs":{{ site.entity.same_as | jsonify }},"description":{{ site.entity.description | jsonify }},"disambiguatingDescription":{{ site.entity.disambiguating_description | jsonify }}}{%- if crumb_count >= 2 -%},{"@type":"BreadcrumbList","itemListElement":[{{ crumb_items }}]}{%- endif -%}]}
+{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":{{ page_canonical_url | jsonify }},"url":{{ page_canonical_url | jsonify }},"name":{{ head_title | jsonify }},"description":{{ head_description | jsonify }},"dateModified":{{ page.last_updated | date: '%Y-%m-%d' | jsonify }},"isPartOf":{"@id":{{ site.entity.website_id | jsonify }}}},{"@type":"WebSite","@id":{{ site.entity.website_id | jsonify }},"url":{{ site.entity.url | append: "/" | jsonify }},"name":{{ site.entity.name | jsonify }},"alternateName":{{ site.entity.website_alternate_name | jsonify }},"publisher":{"@id":{{ site.entity.id | jsonify }}}},{"@type":"Organization","@id":{{ site.entity.id | jsonify }},"name":{{ site.entity.name | jsonify }},"alternateName":{{ site.entity.alternate_name | jsonify }},"url":{{ site.entity.url | jsonify }},"logo":{{ site.entity.logo | jsonify }},"sameAs":{{ site.entity.same_as | jsonify }},"description":{{ site.entity.description | jsonify }},"disambiguatingDescription":{{ site.entity.disambiguating_description | jsonify }},"founder":{"@id":{{ site.entity.founder_id | jsonify }}}},{"@type":"Person","@id":{{ site.entity.founder_id | jsonify }},"name":{{ site.entity.founder.name | jsonify }},"url":{{ site.entity.founder.url | jsonify }},"jobTitle":{{ site.entity.founder.job_title | jsonify }},"description":{{ site.entity.founder.description | jsonify }},"sameAs":{{ site.entity.founder.same_as | jsonify }}}{%- if crumb_count >= 2 -%},{"@type":"BreadcrumbList","itemListElement":[{{ crumb_items }}]}{%- endif -%}]}
 </script>
     {%- endunless -%}
     {%- comment -%} structured-data:end {%- endcomment -%}

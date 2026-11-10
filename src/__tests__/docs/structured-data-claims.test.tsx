@@ -7,6 +7,8 @@ import { BreadcrumbSchema } from '@/components/BreadcrumbSchema';
 import { FAQSection } from '@/components/FAQSection';
 import { HowToSection } from '@/components/HowToSection';
 import { OrganizationSchema } from '@/components/OrganizationSchema';
+import { INTENT_PAGES } from '@/config/intent-pages';
+import { Component as IntentPage } from '@/pages/IntentPage';
 
 import { renderWithRouter } from '../test-utils';
 
@@ -113,6 +115,7 @@ const EMITTERS: Array<[string, () => React.ReactElement, string]> = [
   ['BreadcrumbSchema', () => <BreadcrumbSchema />, '/upload'],
   ['HowToSection', () => <HowToSection />, '/'],
   ['FAQSection', () => <FAQSection />, '/'],
+  ['IntentPage', () => <IntentPage page={INTENT_PAGES[0]} />, `/${INTENT_PAGES[0].slug}`],
 ];
 
 /**

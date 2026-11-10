@@ -184,7 +184,7 @@
   "loadingTips": {
     "localProcessing": {
       "title": "File Anda tidak pernah meninggalkan perangkat ini",
-      "desc": "Pemrosesan sepenuhnya terjadi di browser Anda — tidak ada yang diunggah."
+      "desc": "SafeUnfollow memproses ekspor Anda sepenuhnya di browser dan tidak pernah mengirim filenya ke server."
     },
     "revokeAccess": {
       "title": "Tips privasi singkat",

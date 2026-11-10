@@ -2,12 +2,12 @@
   "title": "Quem deixou de te seguir no Instagram: grátis, sem login",
   "description": "Veja quem deixou de te seguir no Instagram sem login. Envie sua exportação oficial de dados: a análise roda dentro do seu navegador. Grátis, sem senha.",
   "ogTitle": "Quem deixou de te seguir no Instagram: grátis, sem login",
-  "twitterDescription": "Veja quem deixou de te seguir no Instagram sem login. Envie o ZIP: a análise roda dentro do seu navegador e a exportação nunca sai dele. Grátis, sem senha.",
+  "twitterDescription": "Veja quem deixou de te seguir no Instagram sem login. Selecione seu ZIP e o SafeUnfollow o lê no seu navegador e nunca envia a exportação a um servidor.",
   "keywords": "quem deixou de te seguir instagram, rastreador de unfollowers, quem parou de me seguir, verificar unfollowers sem login, arquivo zip do instagram",
   "routes": {
     "/upload": {
       "title": "Já tem o ZIP do Instagram? Veja quem deixou de te seguir",
-      "description": "Envie sua exportação do Instagram e veja grátis quem deixou de te seguir. Serve JSON ou HTML. Sem login e sem senha: o arquivo é lido dentro do seu navegador.",
+      "description": "Já exportou seus dados do Instagram? Selecione o ZIP e veja grátis quem deixou de te seguir. JSON e HTML servem; o SafeUnfollow nunca envia o ZIP a um servidor.",
       "ogTitle": "Já tem o ZIP do Instagram? Veja quem deixou de te seguir"
     },
     "/sample": {
@@ -15,20 +15,10 @@
       "description": "Veja com dados de exemplo como funcionam os badges, os filtros e a busca. Não precisa enviar nada seu. A demo é gratuita e não pede login nem senha nenhuma.",
       "ogTitle": "Teste a demo gratuita do rastreador de unfollowers"
     },
-    "/privacy": {
-      "title": "Privacidade: sua exportação nunca sai do dispositivo",
-      "description": "Política de privacidade do SafeUnfollow: o que chega até nós e o que não chega. Sua exportação do Instagram é lida no navegador e fica no seu dispositivo.",
-      "ogTitle": "Privacidade: sua exportação nunca sai do dispositivo"
-    },
     "/results": {
       "title": "Seus resultados: quem deixou de te seguir no Instagram",
       "description": "Veja o resultado da sua análise: quem deixou de te seguir, quem não te segue de volta e quem é mútuo. Filtre por badges e pesquise contas dentro da lista.",
       "ogTitle": "Seus resultados: quem deixou de te seguir no Instagram"
-    },
-    "/terms": {
-      "title": "Termos de Serviço",
-      "description": "Termos de serviço do SafeUnfollow: um rastreador gratuito e open-source que lê a sua exportação do Instagram dentro do seu próprio navegador, sem login.",
-      "ogTitle": "Termos de Serviço"
     }
   }
 }

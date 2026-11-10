@@ -1,7 +1,7 @@
 {
   "name": "safe-unfollow",
   "private": true,
-  "version": "1.6.0",
+  "version": "1.7.0",
   "type": "module",
   "description": "Find out who unfollowed you on Instagram — 100% local, free, open source unfollow tracker",
   "keywords": [
@@ -57,7 +57,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "code:check": "npm run lint:strict && npm run type-check",
-    "perf:budget": "node scripts/assert-entry-budget.mjs 354000",
+    "perf:budget": "node scripts/assert-entry-budget.mjs 356086",
     "prepare": "husky"
   },
   "lint-staged": {

@@ -34,7 +34,7 @@ describeDist('the sitemap does not advertise a noindexed route', built, () => {
   const locations = [...xml.matchAll(/<loc>([^<]*)<\/loc>/g)].map(match => match[1]);
 
   it('reads a sitemap with entries in it', () => {
-    expect(locations.length).toBeGreaterThan(50);
+    expect(locations.length).toBeGreaterThan(30); // 39 since v1.7.0 dropped the 18 localized legal URLs
   });
 
   it('derived at least the two routes this gate was written for', () => {

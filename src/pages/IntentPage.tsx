@@ -5,6 +5,7 @@ import { INTENT_PAGES } from '@/config/intent-pages';
 import type { IntentPageConfig, IntentSlug } from '@/config/intent-pages';
 import { INTENT_CONTENT, ctaHref } from './intent-content';
 import { INTENT_DEMO } from '@/config/intent-demo-rows';
+import { ORGANIZATION_ID, SOFTWARE_ID, WEBSITE_ID } from '@/config/entity';
 
 interface IntentPageProps {
   page: IntentPageConfig & { slug: IntentSlug };
@@ -64,10 +65,30 @@ export function Component({ page }: IntentPageProps) {
   const badgeChip = BADGE_STYLES[page.badge] || 'bg-muted text-muted-foreground';
   const rows = demo.usernames.slice(0, PREVIEW_ROWS);
 
+  // The page as a node of the entity graph: named by its h1, joined to OrganizationSchema's
+  // nodes by id. No FAQPage — the answer is ReactNode, and a schema copy of it would be a
+  // second text nothing keeps equal to the visible one. The description stays in the meta tag.
+  const webPageSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    '@id': `https://safeunfollow.app/${page.slug}#webpage`,
+    url: `https://safeunfollow.app/${page.slug}`,
+    name: page.h1,
+    inLanguage: 'en',
+    isPartOf: { '@id': WEBSITE_ID },
+    about: { '@id': SOFTWARE_ID },
+    publisher: { '@id': ORGANIZATION_ID },
+  };
+
   return (
     // No px-4: Layout's <main> is already `container mx-auto px-4`, and a second one took the
     // measure on a 390px phone from 358px down to 326px.
     <div className="mx-auto w-full max-w-3xl py-10 md:py-12">
+      {/* Safe: every value is a hard-coded config string, never user input. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageSchema) }}
+      />
       <h1
         className={`text-3xl md:text-4xl font-display font-extrabold tracking-tight mb-5 ${PROSE}`}
       >

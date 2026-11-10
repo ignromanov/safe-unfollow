@@ -177,14 +177,12 @@ describe('every published page fits the search result it appears in', () => {
   });
 
   /**
-   * ⛔ This is a dated exemption, not a permanent one. `/docs/instagram-export`
-   * keeps its over-long title while its ranking recovers from the W34 collapse;
-   * task 05 of the position-content plan rewrites it after the W37 chart, and
-   * deletes the `_config.yml` entry with it. Asserting the count keeps a second
-   * page from quietly joining it.
+   * The one dated exemption — `/docs/instagram-export`'s over-long title, held while its ranking
+   * recovered from the W34 collapse — ended 2026-11-09 (v1.7.0, plan task 06): position 48.6 in
+   * W34, 5.0 in W45. Asserting the empty set keeps a page from quietly re-acquiring it.
    */
-  it('exempts exactly one page, and names which', () => {
-    expect(FROZEN).toEqual(['instagram-export.md']);
+  it('exempts no page', () => {
+    expect(FROZEN).toEqual([]);
   });
 
   /**

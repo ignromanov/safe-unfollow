@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 
 import { SUPPORTED_LANGUAGES } from '@/config/languages';
 import { INTENT_PAGES } from '@/config/intent-pages';
+import { LEGAL_PATHS } from '@/config/legal-pages';
 
 const ROOT = process.cwd();
 
@@ -123,7 +124,7 @@ const STATIC_ROUTES = prerenderableRoutesPerLanguage();
  * maps INTENT_PAGES — the count lives in the manifest, and a regex over the factory body would be
  * a second source for it. That second source is the defect this whole file exists to prevent.
  */
-const ROOT_ONLY = INTENT_PAGES.length;
+const ROOT_ONLY = INTENT_PAGES.length + LEGAL_PATHS.length;
 
 const PRERENDERED_ROUTES = LANGUAGES * STATIC_ROUTES + ROOT_ONLY;
 
@@ -138,7 +139,9 @@ describe('architecture facts — derived, not copied', () => {
     expect(LANGUAGES).toBeGreaterThan(0);
     expect(STATIC_ROUTES).toBeGreaterThan(0);
 
-    // 10 languages x 7 static routes. Change a locale or a route and this fails on
+    // 10 languages x 5 static routes, plus five English-only pages: the three intent pages and,
+    // since v1.7.0, /privacy and /terms (src/config/legal-pages.ts; their locale copies are
+    // 308s). Change a locale or a route and this fails on
     // purpose — update .claude/architecture/*, CLAUDE.md and product.md too.
     //
     // There used to be a second term here: vite.config.ts `includedRoutes` added eight
@@ -151,9 +154,9 @@ describe('architecture facts — derived, not copied', () => {
     // they can never contribute a page here.
     expect({ LANGUAGES, STATIC_ROUTES, ROOT_ONLY, PRERENDERED_ROUTES }).toEqual({
       LANGUAGES: 10,
-      STATIC_ROUTES: 7,
-      ROOT_ONLY: 3,
-      PRERENDERED_ROUTES: 73,
+      STATIC_ROUTES: 5,
+      ROOT_ONLY: 5,
+      PRERENDERED_ROUTES: 55,
     });
   });
 

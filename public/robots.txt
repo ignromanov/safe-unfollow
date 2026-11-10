@@ -1,4 +1,8 @@
 User-agent: *
 Allow: /
+Disallow: /results
+Disallow: /sample
+Disallow: /*/results
+Disallow: /*/sample
 
 Sitemap: https://safeunfollow.app/sitemap.xml

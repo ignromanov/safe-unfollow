@@ -19,6 +19,45 @@
 /ru/wizard /ru/upload 308
 /tr/wizard /tr/upload 308
 
+# The localized legal pages (v1.7.0): the policy and terms are English-only, so each locale copy
+# is a 308 to the one English page. Both slash shapes are spelled out.
+/ar/privacy /privacy 308
+/ar/privacy/ /privacy 308
+/ar/terms /terms 308
+/ar/terms/ /terms 308
+/de/privacy /privacy 308
+/de/privacy/ /privacy 308
+/de/terms /terms 308
+/de/terms/ /terms 308
+/es/privacy /privacy 308
+/es/privacy/ /privacy 308
+/es/terms /terms 308
+/es/terms/ /terms 308
+/fr/privacy /privacy 308
+/fr/privacy/ /privacy 308
+/fr/terms /terms 308
+/fr/terms/ /terms 308
+/id/privacy /privacy 308
+/id/privacy/ /privacy 308
+/id/terms /terms 308
+/id/terms/ /terms 308
+/ja/privacy /privacy 308
+/ja/privacy/ /privacy 308
+/ja/terms /terms 308
+/ja/terms/ /terms 308
+/pt/privacy /privacy 308
+/pt/privacy/ /privacy 308
+/pt/terms /terms 308
+/pt/terms/ /terms 308
+/ru/privacy /privacy 308
+/ru/privacy/ /privacy 308
+/ru/terms /terms 308
+/ru/terms/ /terms 308
+/tr/privacy /privacy 308
+/tr/privacy/ /privacy 308
+/tr/terms /terms 308
+/tr/terms/ /terms 308
+
 /hi/* /:splat 308
 /wizard/step/:step /upload 308
 /ar/wizard/step/:step /ar/upload 308

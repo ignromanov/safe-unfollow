@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { renderWithRouter } from '../test-utils';
 import { BreadcrumbSchema } from '@/components/BreadcrumbSchema';
 import { NON_ENGLISH_LANGUAGES } from '@/config/languages';
+import { INTENT_PAGES } from '@/config/intent-pages';
 
 describe('BreadcrumbSchema', () => {
   describe('rendering', () => {
@@ -162,6 +163,31 @@ describe('BreadcrumbSchema', () => {
    * tag. A breadcrumb that disagreed made one rendered document assert two
    * different addresses for itself.
    */
+  describe('intent pages', () => {
+    // One case per page, derived from INTENT_PAGES, so a fourth page is covered by existing.
+    for (const page of INTENT_PAGES) {
+      it(`names /${page.slug} by its h1`, () => {
+        const { container } = renderWithRouter(<BreadcrumbSchema />, {
+          initialEntries: [`/${page.slug}`],
+        });
+        const script = container.querySelector('script[type="application/ld+json"]');
+        expect(script, `/${page.slug} emits no BreadcrumbList`).not.toBeNull();
+        const schema = JSON.parse(script!.textContent!) as {
+          itemListElement: Array<{ position: number; name: string; item: string }>;
+        };
+        expect(schema.itemListElement).toEqual([
+          { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://safeunfollow.app/' },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: page.h1,
+            item: `https://safeunfollow.app/${page.slug}`,
+          },
+        ]);
+      });
+    }
+  });
+
   describe('locale prefixes survive into the emitted URLs', () => {
     it.each(NON_ENGLISH_LANGUAGES)('%s: the page item keeps its locale', lang => {
       const { container } = renderWithRouter(<BreadcrumbSchema />, {

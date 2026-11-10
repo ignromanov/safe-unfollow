@@ -2,12 +2,12 @@
   "title": "Instagramでフォローを外された人を確認｜無料・ログイン不要",
   "description": "Instagram（インスタ）でフォローを外された人を、ログインなしで確認できます。公式のデータエクスポート（ZIP）をアップロードすると、解析はブラウザの中だけで動き、ファイルは端末から出ません。無料で使えます。",
   "ogTitle": "Instagramでフォローを外された人を確認｜無料・ログイン不要",
-  "twitterDescription": "インスタでフォローを外された人を、ログインなしで確認。ZIPをアップロードすると解析はブラウザの中だけで動き、エクスポートは端末から出ません。無料で使えます。",
+  "twitterDescription": "インスタで誰にフォローを外されたかを、ログインなしで確認。ZIPを選ぶとSafeUnfollowがブラウザ内で読み込み、エクスポートをサーバーに送信することはありません。",
   "keywords": "instagram フォローを外された, インスタ フォロー解除された, 誰がフォロー外した instagram, アンフォローチェッカー, instagram zip 分析, ログイン不要 フォロー確認",
   "routes": {
     "/upload": {
       "title": "Instagram ZIPをアップロード｜フォローを外した人を無料で確認",
-      "description": "Instagramのデータエクスポート（ZIP）をアップロードすると、フォローを外した人を無料で確認できます。JSONでもHTMLでも読み込めます。ログインもパスワードも不要。ファイルはブラウザの中だけで読み込まれ、端末から出ません。",
+      "description": "Instagramのデータエクスポートをお持ちなら、ZIPを選択すると、誰にフォローを外されたかを無料で確認できます。JSONもHTMLも読み込めます。SafeUnfollowがファイルをサーバーに送信することはありません。",
       "ogTitle": "Instagram ZIPをアップロード｜フォローを外した人を無料で確認"
     },
     "/sample": {
@@ -15,20 +15,10 @@
       "description": "サンプルデータでInstagram Unfollow Trackerを試せます。バッジ、フィルター、検索の動きを、ファイルをアップロードせずに、アカウントも作らずに確認できます。",
       "ogTitle": "Instagram Unfollow Trackerを試す｜無料デモ"
     },
-    "/privacy": {
-      "title": "プライバシーポリシー｜エクスポートは端末から出ません",
-      "description": "SafeUnfollowのプライバシーポリシー。何が当方に届き、何が届かないかを説明します。Instagramのエクスポートはブラウザの中で読み込まれ、端末に残ります。",
-      "ogTitle": "プライバシーポリシー｜エクスポートは端末から出ません"
-    },
     "/results": {
       "title": "Instagramでフォローを外された人の分析結果",
       "description": "Instagramでフォローを外された人の分析結果を表示します。バッジで絞り込み、アカウントを検索して、誰にフォローを外されたかを確認できます。",
       "ogTitle": "Instagramでフォローを外された人の分析結果"
-    },
-    "/terms": {
-      "title": "利用規約",
-      "description": "SafeUnfollowの利用規約。100%ローカル処理の無料オープンソースInstagramアンフォロートラッカー。",
-      "ogTitle": "利用規約"
     }
   }
 }

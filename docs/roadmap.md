@@ -1,16 +1,16 @@
 ---
 layout: default
 title: "Instagram Unfollow Tracker Roadmap: Planned Features"
-description: 'See what''s coming next for Instagram Unfollow Tracker. Historical comparison, a Chrome extension, and more planned features.'
+description: 'What SafeUnfollow does today and what is planned next: comparing two exports over time, more parsed lists, and export options.'
 permalink: /roadmap/
-last_updated: 2026-09-08
+last_updated: 2026-11-09
 ---
 
 # Roadmap
 
-## Current Status (v1.5.0) ✅
+## What ships today ✅
 
-**Released:** January 14, 2026
+Release notes for each version are in the [CHANGELOG](https://github.com/ignromanov/safe-unfollow/blob/main/CHANGELOG.md).
 
 ### Core Functionality
 - ✅ **Unfollow tracking** — Find who unfollowed you and who you don't follow back
@@ -30,7 +30,7 @@ last_updated: 2026-09-08
 ### Internationalization (i18n)
 - ✅ **10 languages** — English, Spanish, Russian, German, Portuguese, Turkish, Indonesian, Japanese, Arabic, French
 - ✅ **Arabic RTL support** — Full right-to-left layout for Arabic
-- ✅ **Pre-rendered pages** — every route, in every language, built ahead of time with vite-react-ssg for instant load
+- ✅ **Pre-rendered pages** — every route, in every language, built ahead of time with vite-react-ssg
 - ✅ **Localized meta tags** — Dynamic title/description per language for SEO
 - ✅ **Browser language detection** — Auto-redirects to preferred language
 
@@ -48,23 +48,24 @@ last_updated: 2026-09-08
 - ✅ **TypeScript strict mode** — Full type safety with zero `any` types
 
 ### Privacy & Security
-- ✅ **100% local processing** — Your Instagram export never leaves your device during analysis
+- ✅ **Local processing** — SafeUnfollow reads your Instagram export in your browser and never sends the file to a server
 - ✅ **No Instagram login** — Uses official Instagram data export only
 - ✅ **Open source** — MIT license, full transparency
 
 ### Analytics (Privacy-Respecting)
 - ✅ **Umami Analytics** — Anonymous usage statistics (no personal data, GDPR-compliant)
 
+### Data Export
+- ✅ **CSV, JSON and HTML report export** — free sample report (every count, the first 10 accounts), then a one-time unlock ($7 or less — the button shows your price) for the full list
+
 ---
 
-## v1.6 (Next Priority) 🔄
+## Next 🔄
 
 ### Data Export
-- ✅ **CSV, JSON and HTML report export** — ships today: free sample report (every count, the first 10 accounts), then a one-time unlock ($7 or less — the button shows your price) for the full list
 - 🔄 **Export customization** — Choose which columns to include
 
 ### Upload UX Improvements
-- 🔄 **JSON vs HTML Quiz** — Interactive guide to prevent wrong format uploads
 - 🔄 **Mobile file picker hints** — iOS/Android-specific file location guidance
 - 🔄 **Better error diagnostics** — More specific error messages for common mistakes
 
@@ -74,7 +75,7 @@ last_updated: 2026-09-08
 
 ---
 
-## v1.7 (Medium Priority) 🔄
+## Later 🔄
 
 ### Historical Tracking
 - 🔄 **Multiple data imports** — Compare data from different time periods
@@ -89,7 +90,7 @@ last_updated: 2026-09-08
 
 ---
 
-## v1.8+ (Long-term) 🔄
+## Long-term 🔄
 
 ### Advanced Analytics
 - 📊 **Connection patterns** — Analyze follow/unfollow patterns
@@ -98,7 +99,6 @@ last_updated: 2026-09-08
 
 ### Integration Features
 - 🔗 **Calendar integration** — Schedule regular analysis sessions
-- 🔗 **Browser extension** — Easier Instagram data download flow
 
 ---
 
@@ -157,8 +157,8 @@ each third party does and does not receive.
 - **BuyMeACoffee Widget** — Donation support
 
 ### v1.0.0 (October 9, 2025)
-- **IndexedDB v2** — Columnar storage, 40x space reduction
-- **FastBitSet.js** — 75x faster filtering
+- **IndexedDB v2** — Columnar storage, designed for ~40x space reduction
+- **FastBitSet.js** — Bitwise filtering, 1 bit per account per badge
 - **Modern UI** — shadcn/ui + Tailwind CSS migration
 - **Search Indexes** — Trigram/prefix for instant search
 
@@ -187,7 +187,7 @@ Want to help with development? See our [CONTRIBUTING.md](https://github.com/ignr
 
 ### Priority Areas for Contributors
 1. **Export customization** — choose which columns to include
-2. **Upload UX** — JSON vs HTML quiz, mobile file picker hints
+2. **Upload UX** — mobile file picker hints
 3. **Historical tracking** — Compare multiple data exports
 4. **More languages** — Add translations for new languages
 5. **Documentation** — Improve guides and examples

@@ -1,14 +1,14 @@
 ---
 layout: default
-title: "Instagram Data Export: ZIP/JSON Guide (No Login Needed)"
-description: "Free step-by-step guide to export your Instagram ZIP/JSON file safely — no login or password shared. Avoid the #1 upload mistake."
+title: "Instagram Data Export: ZIP Guide and followers_1.json"
+description: "How to request your Instagram data export as a ZIP, choose JSON or HTML, and read what followers_1.json and pending_follow_requests.html hold."
 permalink: /instagram-export/
-last_updated: 2026-08-31
+last_updated: 2026-11-09
 ---
 
-# How to Download Your Instagram Data as a ZIP (JSON Format)
+# How to Download Your Instagram Data as a ZIP (JSON or HTML)
 
-This complete guide shows you how to get your Instagram data in the correct format for [Instagram Unfollow Tracker](https://safeunfollow.app). The most important step: **select only "Followers and following"** — an export without it has nothing to analyze. For the format, **choose JSON**: HTML exports also work, but JSON is the format the tracker reads most reliably.
+[SafeUnfollow](https://safeunfollow.app) reads the Instagram data export in both formats, JSON and HTML. This guide shows how to request the export from Meta and what each file inside the ZIP holds. The most important step is to **select only "Followers and following"**, because an export without it has nothing to analyze. For the format, **choose JSON**. HTML exports also work, but JSON is the format SafeUnfollow reads most reliably.
 
 ## Quick Steps
 
@@ -36,7 +36,7 @@ Choosing HTML instead of JSON has historically been the **#1 cause of upload err
 | **File contents** | `.json` files with structured data | `.html` files for browser viewing |
 | **Data structure** | Machine-readable arrays and objects | Human-readable web pages |
 | **File size** | Smaller (1-5 MB typical) | Larger (includes styling/markup) |
-| **Processing** | Instant parsing | Converted first; may fail on unusual exports |
+| **Processing** | Read directly | Converted first; may fail on unusual exports |
 
 ### How to Tell Which Format You Have
 
@@ -98,7 +98,7 @@ connections/followers_and_following/followers_1.html
 
 ### Step 9: Upload Your File
 - Go to [safeunfollow.app/upload](https://safeunfollow.app/upload) and upload the ZIP file
-- Analysis happens instantly, 100% in your browser
+- The analysis runs in your browser
 
 ---
 
@@ -143,10 +143,23 @@ your-instagram-export.zip
 
 **`followers_1.json`** — Your followers list (same structure, key is `"relationships_followers"`).
 
-The tracker reads these JSON arrays, extracts usernames and timestamps, and cross-references them to identify:
-- **Unfollowers** — accounts in your following but not in followers
-- **Non-mutuals** — accounts you follow that don't follow back
-- **Mutuals** — accounts that follow each other
+An HTML export holds the same files with `.html` in place of `.json` (`followers_1.html`, `pending_follow_requests.html`), and SafeUnfollow reads those too.
+
+### File reference
+
+| File (`.json` or `.html`) | What it holds |
+|---|---|
+| `followers_1`, `followers_2`, … | The accounts that follow you. A large account is split across several numbered files, and SafeUnfollow reads them together |
+| `following` | The accounts you follow |
+| `pending_follow_requests` | Follow requests you sent that have not been accepted. Instagram's app has no screen for them |
+| `recently_unfollowed_profiles` | Accounts you unfollowed recently, as Instagram recorded them |
+| `close_friends` | Your Close Friends list |
+| `restricted_profiles` | Accounts you restricted |
+
+SafeUnfollow extracts the usernames and the dates the export recorded, then compares the lists:
+- **Not following back**: accounts you follow that are missing from your followers
+- **Mutuals**: accounts that appear in both lists
+- **Recently unfollowed**: read from `recently_unfollowed_profiles`, never inferred
 
 ### If Your Structure Differs
 
@@ -190,6 +203,10 @@ If your archive has a different folder structure, the tracker will try to locate
 exists in this repo, and the only 1M-scale test mocks IndexedDB entirely and asserts a 500ms
 ceiling.
 
+One end-to-end figure is measured: SafeUnfollow was tested on a synthetic export of 1,000,000
+accounts, about 21 seconds from choosing the file to results, in desktop Chrome (November 2026).
+That was one desktop run, and no phone has been tested at that size.
+
 ---
 
 ## Privacy and Security
@@ -197,9 +214,9 @@ ceiling.
 Your Instagram data export contains personal information. Here's how we handle it:
 
 - **100% local processing** — Your ZIP file is analyzed entirely in your browser
-- **No server uploads** — your export never leaves your device
+- **Never sent to a server** — your export is read in your browser and stays there
 - **No login required** — We never ask for your Instagram password
-- **Your export stays out of ads and analytics** — the site shows Google ads and records anonymous page analytics, which you can switch off in the footer; your ZIP reaches neither
+- **Your export stays out of ads and analytics** — the site shows Google ads and runs analytics that record page views and your export's account count and size, never a username; you can switch analytics off in the footer, and your ZIP reaches neither
 - **Open source** — [View the code on GitHub](https://github.com/ignromanov/safe-unfollow)
 
 > Keep your ZIP file secure and don't share it with others. Delete it after analysis if you prefer.

@@ -149,6 +149,20 @@ describe('HowToSection', () => {
       expect(schema.step[0].name).toBe(howtoEN.steps['1'].title);
     });
 
+    it('gives every step image an absolute URL on the production host', () => {
+      // A relative `image` in JSON-LD is resolved by nobody: schema.org expects a URL, and a
+      // consumer reading the block out of context has no base to resolve it against.
+      const { container } = renderWithRouter(<HowToSection />);
+      const schema = JSON.parse(
+        container.querySelector('script[type="application/ld+json"]')!.innerHTML
+      ) as { step: Array<{ image?: string }> };
+      const images = schema.step.map(s => s.image).filter((i): i is string => Boolean(i));
+      expect(images.length).toBeGreaterThan(0);
+      for (const image of images) {
+        expect(image).toMatch(/^https:\/\/safeunfollow\.app\/[^/].*-600w-poster\.jpg$/);
+      }
+    });
+
     it('should include supplies and tools in schema', () => {
       const { container } = renderWithRouter(<HowToSection />);
 

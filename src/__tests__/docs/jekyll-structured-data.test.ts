@@ -1,7 +1,11 @@
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
+import { createElement } from 'react';
 import { describe, expect, it } from 'vitest';
+
+import { OrganizationSchema } from '@/components/OrganizationSchema';
+import { renderWithRouter } from '../test-utils';
 
 /**
  * The docs layout's JSON-LD, checked as far as a machine without Ruby can check it.
@@ -178,6 +182,7 @@ describe('the docs layout emits structured data', () => {
       'WebPage',
       'WebSite',
       'Organization',
+      'Person',
       'BreadcrumbList',
     ]);
   });
@@ -188,6 +193,7 @@ describe('the docs layout emits structured data', () => {
       'WebPage',
       'WebSite',
       'Organization',
+      'Person',
     ]);
   });
 
@@ -256,7 +262,7 @@ describe('the docs layout emits structured data', () => {
    * than guessing a window; same fix here, on the same file this test already reads structurally
    * via `matchAll` before this round. Not "widen the window again" — remove it.
    */
-  it('grants the two freeze exemptions to the same page', async () => {
+  it('grants the two freeze exemptions to the same pages, and now to none', async () => {
     const { parse: parseYAML } = await import('yaml');
     const parsed = parseYAML(CONFIG) as {
       defaults?: Array<{ scope?: { path?: string }; values?: Record<string, unknown> }>;
@@ -266,7 +272,9 @@ describe('the docs layout emits structured data', () => {
         .filter(entry => entry.values?.[key] === true)
         .map(entry => entry.scope?.path ?? '');
     expect(granted('no_structured_data')).toEqual(granted('title_suffix'));
-    expect(granted('no_structured_data')).toEqual(['instagram-export.md']);
+    // The freeze ended 2026-11-09 (v1.7.0, plan task 06): the page recovered from position 48.6
+    // (W34) to 5.0 (W45), so both halves left `_config.yml` together and no page holds either.
+    expect(granted('no_structured_data')).toEqual([]);
   });
 
   it('leaves no page able to break out of the script element', () => {
@@ -326,19 +334,6 @@ describe('the docs layout emits structured data', () => {
  * This is the only thing keeping them equal. There is no shared module to import.
  */
 describe('the docs entity and the app entity are the same entity', () => {
-  /** Reads a `const NAME = 'a' + 'b';` chain out of the component's source and joins it. */
-  function componentString(name: string): string {
-    const COMPONENT = readFileSync(
-      join(process.cwd(), 'src', 'components', 'OrganizationSchema.tsx'),
-      'utf-8'
-    );
-    const declaration = new RegExp(`const ${name} =([\\s\\S]*?);\\n`).exec(COMPONENT)?.[1];
-    expect(declaration, `${name} not found in OrganizationSchema.tsx`).toBeTruthy();
-    const parts = [...declaration!.matchAll(/'((?:[^'\\\\]|\\\\.)*)'/g)].map(m => m[1]);
-    expect(parts.length, `${name} yielded no string literals`).toBeGreaterThan(0);
-    return parts.join('');
-  }
-
   async function entity(): Promise<Record<string, unknown>> {
     const { parse: parseYAML } = await import('yaml');
     const parsed = parseYAML(CONFIG) as { entity?: Record<string, unknown> };
@@ -348,36 +343,86 @@ describe('the docs entity and the app entity are the same entity', () => {
 
   it('describes the organisation identically on both surfaces', async () => {
     const e = await entity();
-    expect(e.description).toBe(componentString('ORGANIZATION_DESCRIPTION'));
-    expect(e.disambiguating_description).toBe(componentString('DISAMBIGUATING_DESCRIPTION'));
+    const org = appNode('Organization');
+    expect(e.description).toBe(org.description);
+    expect(e.disambiguating_description).toBe(org.disambiguatingDescription);
   });
 
-  it('claims the same profiles on both surfaces', async () => {
+  /**
+   * The Vite node as the app actually renders it, rather than read out of its source: the
+   * comparison below is between two published graphs, so it reads both as published.
+   */
+  function appGraph(): Array<Record<string, unknown>> {
+    const { container } = renderWithRouter(createElement(OrganizationSchema), {
+      initialEntries: ['/'],
+    });
+    const script = container.querySelector('script[type="application/ld+json"]');
+    expect(script, 'OrganizationSchema rendered no JSON-LD at /').toBeTruthy();
+    return (JSON.parse(script!.textContent!) as { '@graph': Array<Record<string, unknown>> })[
+      '@graph'
+    ];
+  }
+  const appNode = (type: string) => appGraph().find(n => n['@type'] === type)!;
+
+  it("the docs node's alternateName, sameAs and founder equal the Vite node's", async () => {
     const e = await entity();
-    // SAME_AS holds identifiers, so the extractor reads the consts it is built from - and the
-    // order matters, because the two surfaces are separate builds and a reordered list is a
+    const org = appNode('Organization');
+    // Order matters: the two surfaces are separate builds, and a reordered list is a
     // disagreement a reader would otherwise have to resolve by hand.
-    const github = componentString('GITHUB_URL');
-    const crunchbase = componentString('CRUNCHBASE_URL');
-    expect(e.same_as).toEqual([github, crunchbase]);
+    expect(e.alternate_name).toEqual(org.alternateName);
+    expect(e.same_as).toEqual(org.sameAs);
+    expect(e.founder_id).toBe((org.founder as { '@id': string })['@id']);
+  });
+
+  it('describes the founder identically on both surfaces', async () => {
+    const e = await entity();
+    const person = appNode('Person');
+    const f = e.founder as Record<string, unknown>;
+    expect({
+      '@id': e.founder_id,
+      name: f.name,
+      url: f.url,
+      jobTitle: f.job_title,
+      description: f.description,
+      sameAs: f.same_as,
+    }).toEqual({
+      '@id': person['@id'],
+      name: person.name,
+      url: person.url,
+      jobTitle: person.jobTitle,
+      description: person.description,
+      sameAs: person.sameAs,
+    });
+    // The layout emits the founder by these keys, and links the Organization to it by @id.
+    expect(SCRIPT).toMatch(/"@type":"Person","@id":\{\{ site\.entity\.founder_id \| jsonify \}\}/);
+    expect(SCRIPT).toMatch(/"founder":\{"@id":\{\{ site\.entity\.founder_id \| jsonify \}\}\}/);
+  });
+
+  it('names the website identically on both surfaces', async () => {
+    const e = await entity();
+    const site = appNode('WebSite');
+    expect(e.name).toBe(site.name);
+    expect(e.website_alternate_name).toEqual(site.alternateName);
+    expect(SCRIPT).toMatch(
+      /"@type":"WebSite","@id":[^,]*,"url":[^,]*,"name":\{\{ site\.entity\.name \| jsonify \}\},"alternateName":\{\{ site\.entity\.website_alternate_name \| jsonify \}\}/
+    );
   });
 
   it('builds the shared @id from the site URL rather than typing it twice', async () => {
     const e = await entity();
     expect(e.id).toBe(`${e.url as string}/#organization`);
     expect(e.website_id).toBe(`${e.url as string}/#website`);
-    const COMPONENT = readFileSync(
-      join(process.cwd(), 'src', 'components', 'OrganizationSchema.tsx'),
-      'utf-8'
-    );
-    expect(COMPONENT).toContain('`${BASE_URL}/#organization`');
+    expect(e.founder_id).toBe(`${e.url as string}/#founder`);
+    // The ids moved to src/config/entity.ts so FAQPage, HowTo and the intent pages share them.
+    const ENTITY = readFileSync(join(process.cwd(), 'src', 'config', 'entity.ts'), 'utf-8');
+    expect(ENTITY).toContain('`${SITE_URL}/#organization`');
   });
 
   /** The control: the extractor must be able to see a difference, or it proves nothing. */
   it('the comparison can go red', () => {
-    expect(componentString('ORGANIZATION_DESCRIPTION')).not.toBe(
-      componentString('DISAMBIGUATING_DESCRIPTION')
-    );
+    const org = appNode('Organization');
+    expect(org.description).toBeTruthy();
+    expect(org.description).not.toBe(org.disambiguatingDescription);
   });
 });
 

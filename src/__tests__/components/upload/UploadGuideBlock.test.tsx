@@ -56,7 +56,7 @@ describe('UploadGuideBlock', () => {
     const cta = screen.getByRole('link', { name: /accounts center/i });
     const subtext = cta.parentElement!;
     expect(within(subtext).getByText(/no login/i)).toBeInTheDocument();
-    expect(within(subtext).getByText(/never uploaded/i)).toBeInTheDocument();
+    expect(within(subtext).getByText(/never sends the file to a server/i)).toBeInTheDocument();
   });
 
   it('states our cost and disclaims theirs, as two separate keys', () => {

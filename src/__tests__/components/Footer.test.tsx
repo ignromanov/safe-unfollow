@@ -5,8 +5,9 @@ import commonEN from '@/locales/en/common.json';
 import { createI18nMock } from '@/__tests__/utils/mockI18n';
 
 // Mock useLanguagePrefix
+const prefix = vi.hoisted(() => ({ value: '' }));
 vi.mock('@/hooks/useLanguagePrefix', () => ({
-  useLanguagePrefix: () => '',
+  useLanguagePrefix: () => prefix.value,
 }));
 
 vi.mock('react-i18next', () => createI18nMock(commonEN));
@@ -27,6 +28,16 @@ vi.mock('@/lib/analytics', () => ({
 describe('Footer', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    prefix.value = '';
+  });
+
+  it('legal links are never locale-prefixed', () => {
+    // Plan 2026-11-09 task 08a: the localized legal pages are 308s to English. velum-cdpo's
+    // condition (velum-verdicts.md Q3): every locale's footer keeps the /privacy link, unprefixed.
+    prefix.value = '/es';
+    renderWithRouter(<Footer />, { initialEntries: ['/es/upload'] });
+    expect(screen.getByText(commonEN.footer.privacyPolicy)).toHaveAttribute('href', '/privacy');
+    expect(screen.getByText(commonEN.footer.termsOfService)).toHaveAttribute('href', '/terms');
   });
 
   it('should render footer with copyright text', () => {

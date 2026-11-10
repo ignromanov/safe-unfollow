@@ -35,7 +35,7 @@ describeDist('sitemap after the wizard routes were removed', built, () => {
   it('reads a sitemap with entries in it', () => {
     // Guards the guard: an empty sitemap would satisfy every assertion below for the
     // wrong reason.
-    expect(locations.length).toBeGreaterThan(50);
+    expect(locations.length).toBeGreaterThan(30); // 39 since v1.7.0 dropped the 18 localized legal URLs
   });
 
   it('emits no sitemap entry containing "wizard"', () => {
