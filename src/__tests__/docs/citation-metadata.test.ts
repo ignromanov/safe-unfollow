@@ -312,3 +312,67 @@ describe('citation metadata', () => {
     ).toEqual([]);
   });
 });
+
+/**
+ * `.zenodo.json` is the metadata Zenodo mints each release from, and when it exists Zenodo ignores
+ * CITATION.cff entirely. v1.6.0's extra metadata was typed into Zenodo's form by hand and v1.7.0
+ * did not inherit it, because every version is built from the repository, not from the last one.
+ * So the extras live in `.zenodo.json` now, and the facts both files state must agree, or the
+ * archive (which cannot be rewritten) and the citation GitHub shows tell two stories.
+ */
+describe('.zenodo.json agrees with CITATION.cff', () => {
+  const ZENODO = JSON.parse(read('.zenodo.json')) as {
+    title: string;
+    description: string;
+    license: string;
+    keywords: string[];
+    creators: Array<{ name: string; orcid?: string }>;
+    related_identifiers: Array<{ identifier: string; relation: string }>;
+  };
+
+  const loadCitation = async (): Promise<Record<string, unknown>> => {
+    const { parse } = await import('yaml');
+    return parse(read('CITATION.cff')) as Record<string, unknown>;
+  };
+
+  it('states the same title, abstract, licence and keywords', async () => {
+    const cff = await loadCitation();
+    expect(ZENODO.title).toBe(cff.title);
+    expect(ZENODO.description).toBe(cff.abstract);
+    expect(ZENODO.license).toBe(cff.license);
+    expect(ZENODO.keywords).toEqual(cff.keywords);
+  });
+
+  it('names the same authors', async () => {
+    const authors = (await loadCitation()).authors as Array<Record<string, string>>;
+    expect(ZENODO.creators.map(c => c.name)).toEqual(
+      authors.map(a => `${a['family-names']}, ${a['given-names']}`),
+    );
+  });
+
+  it('carries the same ORCID, and the site names it on the founder', async () => {
+    const authors = (await loadCitation()).authors as Array<Record<string, string>>;
+    // CFF wants the full URL, Zenodo the bare iD.
+    expect(ZENODO.creators.map(c => c.orcid)).toEqual(
+      authors.map(a => a.orcid?.replace('https://orcid.org/', '')),
+    );
+    for (const a of authors) {
+      expect(read('src/components/OrganizationSchema.tsx')).toContain(`'${a.orcid}'`);
+      expect(read('docs/_config.yml')).toContain(`"${a.orcid}"`);
+    }
+  });
+
+  it('links only profiles the site itself claims in sameAs', () => {
+    const schema = read('src/components/OrganizationSchema.tsx');
+    const profiles = ZENODO.related_identifiers
+      .map(r => r.identifier)
+      .filter(url => !url.startsWith('https://safeunfollow.app'));
+    // Control: the filter leaves something to check.
+    expect(profiles.length).toBeGreaterThan(0);
+    for (const url of profiles) expect(schema, url).toContain(`'${url}'`);
+  });
+
+  it('carries no version, so the release tag stays the only source of one', () => {
+    expect(ZENODO).not.toHaveProperty('version');
+  });
+});
