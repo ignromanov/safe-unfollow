@@ -144,7 +144,7 @@ export const FilterChips = memo(function FilterChips({
       newFilters.add(filter);
     }
 
-    recordToggle(filter, action, newFilters.size, 'chip');
+    recordToggle(filter, action, newFilters, 'chip');
     onFiltersChange(newFilters);
   };
 

@@ -2,6 +2,7 @@ import type { BadgeKey } from '@/core/types';
 import { analytics } from '@/lib/analytics';
 import { IndexedDBFilterEngine } from '@/lib/filtering/IndexedDBFilterEngine';
 import { indexedDBService } from '@/lib/indexeddb/indexeddb-service';
+import { combinationOf, resultKeyOf } from '@/lib/stats/filter-session';
 import { useAppStore } from '@/lib/store';
 import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDebounce } from 'use-debounce';
@@ -26,6 +27,12 @@ export function useAccountFiltering(options: UseAccountFilteringOptions) {
   const [filteredIndices, setFilteredIndices] = useState<number[] | null>(null);
   const [isFiltering, setIsFiltering] = useState(false);
   const [processingTime, setProcessingTime] = useState<number>(0);
+  // Which selection and query `filteredIndices` was computed for, and whether
+  // it came from a failure (the catch below renders the whole list). Written in
+  // the same update as the indices, so the two can never describe different
+  // selections in one render. `isFiltering` cannot carry this: it lags
+  // `setFilters` by a render and clears before the transition lands.
+  const [result, setResult] = useState<{ key: string; failed: boolean } | null>(null);
 
   // Get filters from store (shared across all data sources)
   const filters = useAppStore(s => s.filters);
@@ -143,6 +150,7 @@ export function useAccountFiltering(options: UseAccountFilteringOptions) {
 
       // null means "show all" — no 8MB array allocation
       setFilteredIndices(null);
+      setResult({ key: resultKeyOf([], debouncedQuery), failed: false });
       setIsFiltering(false);
       isFilteringRef.current = false;
       return;
@@ -163,6 +171,7 @@ export function useAccountFiltering(options: UseAccountFilteringOptions) {
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
     isFilteringRef.current = true;
+    const requestKey = resultKeyOf(activeFilters, debouncedQuery);
 
     // Choose filter method: worker (preferred) or fallback engine
     const performFilter = async (): Promise<number[]> => {
@@ -188,6 +197,7 @@ export function useAccountFiltering(options: UseAccountFilteringOptions) {
           // Wrap in startTransition to keep UI responsive during large updates
           startTransition(() => {
             setFilteredIndices(indices);
+            setResult({ key: requestKey, failed: false });
           });
           setProcessingTime(0);
           setIsFiltering(false);
@@ -218,6 +228,7 @@ export function useAccountFiltering(options: UseAccountFilteringOptions) {
         // Only update state if component is still mounted and request not cancelled
         if (isMountedRef.current && !abortController.signal.aborted) {
           setFilteredIndices(null);
+          setResult({ key: requestKey, failed: true });
           setProcessingTime(0);
           setIsFiltering(false);
           isFilteringRef.current = false;
@@ -263,6 +274,10 @@ export function useAccountFiltering(options: UseAccountFilteringOptions) {
   // reads downstream as "every badge yields zero", which is a legitimate value
   // and would disable everything.
   const [candidateCounts, setCandidateCounts] = useState<Record<BadgeKey, number> | null>(null);
+  // The selection those counts were computed for. They arrive asynchronously,
+  // so between a toggle and the recompute they describe the PREVIOUS
+  // selection; a prediction read off them then would be against the wrong set.
+  const [candidateCountsFor, setCandidateCountsFor] = useState<string | null>(null);
 
   useEffect(() => {
     if (!fileHash || totalCount === 0) return;
@@ -280,10 +295,14 @@ export function useAccountFiltering(options: UseAccountFilteringOptions) {
 
     compute()
       .then(counts => {
-        if (!cancelled) setCandidateCounts(counts);
+        if (cancelled) return;
+        setCandidateCounts(counts);
+        setCandidateCountsFor(counts === null ? null : combinationOf(filtersArray));
       })
       .catch(() => {
-        if (!cancelled) setCandidateCounts(null);
+        if (cancelled) return;
+        setCandidateCounts(null);
+        setCandidateCountsFor(null);
       });
 
     return () => {
@@ -339,6 +358,9 @@ export function useAccountFiltering(options: UseAccountFilteringOptions) {
     setFilters: setStoreFilters,
     filterCounts,
     candidateCounts,
+    candidateCountsFor,
+    resultKey: result?.key ?? null,
+    resultFailed: result?.failed ?? false,
     isFiltering,
     processingTime,
     clearFilters,

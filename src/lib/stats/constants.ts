@@ -27,6 +27,8 @@ export const AnalyticsEvents = {
   // Filters
   FILTER_CLEAR_ALL: 'filter_clear_all',
   FILTER_SESSION_SUMMARY: 'filter_session_summary',
+  FILTER_STEP: 'filter_step',
+  FILTER_ANOMALY: 'filter_anomaly',
 
   // Search
   SEARCH_PERFORM: 'search_perform',
@@ -250,6 +252,18 @@ export type FilterAction = 'enable' | 'disable';
  * default value here is how that blind spot returns.
  */
 export type FilterSource = 'chip' | 'stat_card';
+
+/** A `filter_step` action: a toggle, the clear-all control, or step 0. */
+export type FilterStepAction = FilterAction | 'clear_all' | 'arrival';
+
+/**
+ * Where a `filter_step` came from. `url` and `persisted` occur only on step 0;
+ * `none` is an arrival with nothing applied, or clear-all.
+ */
+export type FilterStepSource = FilterSource | 'url' | 'persisted' | 'none';
+
+/** The `filter_anomaly` kinds. Each fires at most once per filtering session. */
+export type FilterAnomalyKind = 'predicted_mismatch' | 'card_vs_list' | 'filter_failed';
 
 /** How the processing state ended. Fast errors must not look like fast parses. */
 export type ParseOutcome = 'success' | 'cached' | 'error' | 'cancelled';

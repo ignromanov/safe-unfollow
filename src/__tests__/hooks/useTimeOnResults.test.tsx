@@ -11,6 +11,7 @@ vi.mock('@/lib/analytics', () => ({
 import { analytics, AnalyticsEvents, trackBeacon } from '@/lib/analytics';
 import { useTimeOnResults } from '@/hooks/useTimeOnResults';
 import { recordToggle, resetFilterSession } from '@/lib/stats/filter-session';
+import type { BadgeKey } from '@/core/types';
 
 type TimeOnResultsApi = ReturnType<typeof useTimeOnResults>;
 
@@ -127,7 +128,7 @@ describe('useTimeOnResults', () => {
     }
 
     it('sends the filter summary on leave when the reader filtered', () => {
-      recordToggle('unfollowed', 'enable', 1, 'chip');
+      recordToggle('unfollowed', 'enable', new Set<BadgeKey>(['unfollowed']), 'chip');
 
       render(<Harness accountCount={100} isActive />);
       leave();
@@ -155,7 +156,7 @@ describe('useTimeOnResults', () => {
       // prove nothing about the floor; see the sibling test for the sampler.
       vi.spyOn(Math, 'random').mockReturnValue(0.01);
       vi.spyOn(Date, 'now').mockReturnValue(0);
-      recordToggle('unfollowed', 'enable', 1, 'chip');
+      recordToggle('unfollowed', 'enable', new Set<BadgeKey>(['unfollowed']), 'chip');
 
       render(<Harness accountCount={100} isActive />);
       vi.spyOn(Date, 'now').mockReturnValue(4_000); // under fireEvent's 5s floor
@@ -176,7 +177,7 @@ describe('useTimeOnResults', () => {
       // waited for.
       vi.spyOn(Math, 'random').mockReturnValue(0.99); // loses the 0.25 roll
       vi.spyOn(Date, 'now').mockReturnValue(0);
-      recordToggle('unfollowed', 'enable', 1, 'chip');
+      recordToggle('unfollowed', 'enable', new Set<BadgeKey>(['unfollowed']), 'chip');
 
       render(<Harness accountCount={100} isActive />);
       vi.spyOn(Date, 'now').mockReturnValue(10_000); // well past the floor
@@ -191,14 +192,14 @@ describe('useTimeOnResults', () => {
     });
 
     it('supersedes rather than repeats when the session continues', () => {
-      recordToggle('unfollowed', 'enable', 1, 'chip');
+      recordToggle('unfollowed', 'enable', new Set<BadgeKey>(['unfollowed']), 'chip');
 
       render(<Harness accountCount={100} isActive />);
       leave();
       leave(); // nothing changed -> no second row
       expect(analytics.filterSessionSummary).toHaveBeenCalledTimes(1);
 
-      recordToggle('pending', 'enable', 2, 'chip'); // the session continued
+      recordToggle('pending', 'enable', new Set<BadgeKey>(['pending', 'unfollowed']), 'chip'); // the session continued
       leave();
 
       expect(analytics.filterSessionSummary).toHaveBeenCalledTimes(2);
@@ -209,7 +210,7 @@ describe('useTimeOnResults', () => {
     });
 
     it('keeps the accumulator when the account count changes mid-visit', () => {
-      recordToggle('unfollowed', 'enable', 1, 'chip');
+      recordToggle('unfollowed', 'enable', new Set<BadgeKey>(['unfollowed']), 'chip');
 
       const { rerender } = render(<Harness accountCount={100} isActive />);
       rerender(<Harness accountCount={250} isActive />); // a filter resolved
@@ -229,10 +230,10 @@ describe('useTimeOnResults', () => {
       // /results -> elsewhere -> /results, inside one Umami session. Each cycle
       // is a complete, independent filtering session: the reset effect's cleanup
       // ends the accumulator and the seq sequence together, so both emit seq 0.
-      recordToggle('unfollowed', 'enable', 1, 'chip');
+      recordToggle('unfollowed', 'enable', new Set<BadgeKey>(['unfollowed']), 'chip');
       render(<Harness accountCount={100} isActive />).unmount();
 
-      recordToggle('pending', 'enable', 1, 'chip');
+      recordToggle('pending', 'enable', new Set<BadgeKey>(['pending']), 'chip');
       render(<Harness accountCount={100} isActive />).unmount();
 
       const calls = vi.mocked(analytics.filterSessionSummary).mock.calls;
@@ -261,14 +262,14 @@ describe('useTimeOnResults', () => {
       // Visit 1: the reader taps a stat card during the IndexedDB load and
       // leaves before it finishes. Nothing may be emitted for it — there is no
       // active visit — but it must not be inherited either.
-      recordToggle('unfollowed', 'enable', 1, 'chip');
+      recordToggle('unfollowed', 'enable', new Set<BadgeKey>(['unfollowed']), 'chip');
       const first = render(<Harness accountCount={100} isActive={false} />);
       first.unmount();
 
       expect(analytics.filterSessionSummary).not.toHaveBeenCalled();
 
       // Visit 2, same page life, this time with data.
-      recordToggle('pending', 'enable', 1, 'chip');
+      recordToggle('pending', 'enable', new Set<BadgeKey>(['pending']), 'chip');
       render(<Harness accountCount={100} isActive />);
       leave();
 
@@ -294,7 +295,7 @@ describe('useTimeOnResults', () => {
       // still loading, the data lands, and they leave. The row must carry the
       // tap.
       const { rerender } = render(<Harness accountCount={100} isActive={false} />);
-      recordToggle('unfollowed', 'enable', 1, 'chip');
+      recordToggle('unfollowed', 'enable', new Set<BadgeKey>(['unfollowed']), 'chip');
 
       rerender(<Harness accountCount={100} isActive />);
       leave();
@@ -309,11 +310,11 @@ describe('useTimeOnResults', () => {
       // The other half, and the trap in the obvious fix: a per-emit counter
       // would make these two rows look like two sessions, and the supersede rule
       // exists precisely to collapse them.
-      recordToggle('unfollowed', 'enable', 1, 'chip');
+      recordToggle('unfollowed', 'enable', new Set<BadgeKey>(['unfollowed']), 'chip');
 
       render(<Harness accountCount={100} isActive />);
       leave();
-      recordToggle('pending', 'enable', 2, 'chip');
+      recordToggle('pending', 'enable', new Set<BadgeKey>(['pending', 'unfollowed']), 'chip');
       leave();
 
       const calls = vi.mocked(analytics.filterSessionSummary).mock.calls;
