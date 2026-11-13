@@ -13,10 +13,26 @@ import type { BadgeKey } from '@/core/types';
 import { useAccountFiltering } from '@/hooks/useAccountFiltering';
 import { useUploadCaveats } from '@/hooks/useUploadCaveats';
 import { analytics } from '@/lib/analytics';
-import { buildFilterSummary, resetFilterSession } from '@/lib/stats/filter-session';
+import { flushEvents } from '@/lib/stats/queue';
+import { filterTelemetry } from '@/lib/stats/filter-step-events';
+import {
+  buildFilterSummary,
+  combinationOf,
+  drainFilterSteps,
+  resetFilterSession,
+  resultKeyOf,
+} from '@/lib/stats/filter-session';
 
 // Mock the useAccountFiltering hook
 vi.mock('@/hooks/useAccountFiltering');
+
+// The real queue, with `flushEvents` observable: the step hook must flush AFTER
+// queueing its step on the way out, because `Layout`'s own flush listener was
+// registered first and has already run.
+vi.mock('@/lib/stats/queue', async importOriginal => {
+  const actual = await importOriginal<typeof import('@/lib/stats/queue')>();
+  return { ...actual, flushEvents: vi.fn(actual.flushEvents) };
+});
 
 // Reads IndexedDB, which jsdom does not provide. Mocked so every other test in
 // this file renders the clean page, and the caveat tests below opt in.
@@ -171,31 +187,51 @@ describe('AccountListSection', () => {
   // indistinguishable from one handing it the right one.
   const defaultCandidateCounts = { ...defaultFilterCounts, followers: 42 };
 
-  // Helper function to create mock return value
-  const createMockReturnValue = (overrides = {}) => ({
-    query: '',
-    setQuery: mockSetQuery,
-    filteredIndices: null as number[] | null, // null = "show all"
-    filters: new Set<BadgeKey>(),
-    setFilters: mockSetFilters,
-    filterCounts: defaultFilterCounts,
-    // Task 3 added this to the hook's return and this task consumes it. A mock
-    // missing it renders `undefined`, which the contract says cannot occur —
-    // `null` is the absence state — and nothing would catch it, because
-    // `tsconfig.json:23-32` excludes the tests (GH#70).
-    candidateCounts: defaultCandidateCounts,
-    isFiltering: false,
-    totalCount: 21,
-    hasLoadedData: true,
-    processingTime: 0,
-    ...overrides,
-  });
+  // Helper function to create mock return value.
+  //
+  // The three identity fields default to "the result on screen IS the result
+  // for the current selection": every older test renders a settled page, and
+  // the step tests below override them to render the unsettled one.
+  const createMockReturnValue = (overrides: Record<string, unknown> = {}) => {
+    const base = createBaseReturnValue(overrides);
+    return {
+      resultKey: resultKeyOf(base.filters, base.query),
+      resultFailed: false,
+      candidateCountsFor: combinationOf(base.filters),
+      ...base,
+    };
+  };
+
+  const createBaseReturnValue = (overrides: Record<string, unknown> = {}) =>
+    ({
+      query: '',
+      setQuery: mockSetQuery,
+      filteredIndices: null as number[] | null, // null = "show all"
+      filters: new Set<BadgeKey>(),
+      setFilters: mockSetFilters,
+      filterCounts: defaultFilterCounts,
+      // Task 3 added this to the hook's return and this task consumes it. A mock
+      // missing it renders `undefined`, which the contract says cannot occur —
+      // `null` is the absence state — and nothing would catch it, because
+      // `tsconfig.json:23-32` excludes the tests (GH#70).
+      candidateCounts: defaultCandidateCounts,
+      isFiltering: false,
+      totalCount: 21,
+      hasLoadedData: true,
+      processingTime: 0,
+      ...(overrides as object),
+    }) as ReturnType<typeof createBaseShape> & Record<string, unknown>;
+
+  // The shape only, for the cast above; tests are not type-checked (GH#70),
+  // so this is documentation as much as typing.
+  const createBaseShape = () => ({ filters: new Set<BadgeKey>(), query: '' });
 
   beforeEach(() => {
     vi.clearAllMocks();
     // Module state shared by every test in this file, and by every other file
-    // in the run that touches it.
+    // in the run that touches it. Steps survive a reset by design, so drain too.
     resetFilterSession();
+    drainFilterSteps();
     mockUseAccountFiltering.mockReturnValue(createMockReturnValue());
     mockUseUploadCaveats.mockReturnValue(caveats());
   });
@@ -1259,6 +1295,241 @@ describe('AccountListSection', () => {
       // A list that has not finished filtering is not a dead end. Absence is not
       // zero.
       expect(buildFilterSummary()?.reachedEmpty).toBe(false);
+    });
+  });
+  /**
+   * `filter_step` and `filter_anomaly`, through the real component and the
+   * real step module, with the filtering hook driven render by render. Every
+   * `settle` is one render the hook could really produce, including the stale
+   * one right after a click, where `isFiltering` is still false and the list is
+   * still the old one.
+   */
+  describe('filter steps and anomalies', () => {
+    const stepRows = (spy: { mock: { calls: unknown[][] } }) =>
+      spy.mock.calls.map(([step]) => {
+        const s = step as { step: number; combination: string; result?: { count: number } };
+        return [s.step, s.combination, s.result?.count];
+      });
+
+    const anomalyKinds = (spy: { mock: { calls: unknown[][] } }) =>
+      spy.mock.calls.map(([a]) => (a as { kind: string }).kind);
+
+    const mount = (overrides: Record<string, unknown> = {}) => {
+      mockUseAccountFiltering.mockReturnValue(createMockReturnValue(overrides));
+      const view = renderWithRouter(<AccountListSection {...defaultProps} />);
+      const settle = (next: Record<string, unknown>) => {
+        mockUseAccountFiltering.mockReturnValue(createMockReturnValue(next));
+        view.rerender(<AccountListSection {...defaultProps} />);
+      };
+      return { ...view, settle };
+    };
+
+    const clickCard = (label: string) =>
+      fireEvent.click(within(screen.getByTestId(`stat-card-${label}`)).getByRole('button'));
+
+    it('emits one step per action with the sorted combination and the exact count', () => {
+      const stepSpy = vi.spyOn(filterTelemetry, 'step');
+      const unfollowed = new Set<BadgeKey>(['unfollowed']);
+      const both = new Set<BadgeKey>(['unfollowed', 'notFollowingBack']);
+      const { settle } = mount();
+
+      clickCard('unfollowed');
+      // The stale render: new selection, old result, isFiltering not yet set.
+      settle({ filters: unfollowed, resultKey: resultKeyOf([], '') });
+      settle({ filters: unfollowed, isFiltering: true, resultKey: resultKeyOf([], '') });
+      settle({ filters: unfollowed, filteredIndices: [0, 1, 2, 3] });
+
+      clickCard('not following');
+      settle({ filters: both, resultKey: resultKeyOf(unfollowed, '') });
+      settle({ filters: both, filteredIndices: [] });
+
+      // Step 0 was held (nothing applied on arrival) and left with the first click.
+      expect(stepRows(stepSpy)).toEqual([
+        [0, '', 21],
+        [1, 'unfollowed', 4],
+        [2, 'notFollowingBack+unfollowed', 0],
+      ]);
+    });
+
+    it('emits nothing for a visit that never filtered', () => {
+      const stepSpy = vi.spyOn(filterTelemetry, 'step');
+      const { unmount } = mount();
+      unmount();
+
+      expect(stepSpy).not.toHaveBeenCalled();
+    });
+
+    it('sends the pending step unresolved when the page hides, and flushes it', () => {
+      const stepSpy = vi.spyOn(filterTelemetry, 'step');
+      const { settle } = mount();
+
+      clickCard('unfollowed');
+      settle({ filters: new Set<BadgeKey>(['unfollowed']), isFiltering: true, resultKey: null });
+      window.dispatchEvent(new Event('pagehide'));
+
+      const last = stepSpy.mock.calls.at(-1)?.[0] as { step: number; result?: unknown };
+      expect(last.step).toBe(1);
+      expect(last.result).toBeUndefined();
+      // Queued, THEN flushed — otherwise it waits in the queue for the next
+      // route change, which after a pagehide never comes.
+      const flushed = vi.mocked(flushEvents).mock.invocationCallOrder.at(-1) ?? 0;
+      const queued = stepSpy.mock.invocationCallOrder.at(-1) ?? Infinity;
+      expect(flushed).toBeGreaterThan(queued);
+    });
+
+    it('records clear-all as its own step', () => {
+      const stepSpy = vi.spyOn(filterTelemetry, 'step');
+      const { settle } = mount({ filters: new Set<BadgeKey>(['pending']), filteredIndices: [0] });
+
+      fireEvent.click(screen.getByRole('button', { name: resultsEN.filters.reset }));
+      settle({ filters: new Set<BadgeKey>() });
+
+      const last = stepSpy.mock.calls.at(-1)?.[0] as { action: string; combination: string };
+      expect(last).toMatchObject({ action: 'clear_all', combination: '' });
+    });
+
+    describe('card_vs_list', () => {
+      it('fires when the card count and the resolved list disagree', () => {
+        const anomalySpy = vi.spyOn(filterTelemetry, 'anomaly');
+        // filterCounts.pending is 1; the list resolved to 2.
+        mount({ filters: new Set<BadgeKey>(['pending']), filteredIndices: [0, 1] });
+
+        expect(anomalySpy).toHaveBeenCalledTimes(1);
+        expect(anomalySpy.mock.calls[0]?.[0]).toMatchObject({
+          kind: 'card_vs_list',
+          expected: 1,
+          actual: 2,
+        });
+      });
+
+      it('does not fire while the list is still filtering', () => {
+        const anomalySpy = vi.spyOn(filterTelemetry, 'anomaly');
+        mount({
+          filters: new Set<BadgeKey>(['pending']),
+          filteredIndices: [0, 1],
+          isFiltering: true,
+        });
+
+        expect(anomalySpy).not.toHaveBeenCalled();
+      });
+
+      it('does not fire on the stale render, where the list belongs to another selection', () => {
+        // The false positive this guard exists for: isFiltering is false and
+        // the list on screen is the previous selection's.
+        const anomalySpy = vi.spyOn(filterTelemetry, 'anomaly');
+        mount({
+          filters: new Set<BadgeKey>(['pending']),
+          filteredIndices: [0, 1],
+          resultKey: resultKeyOf([], ''),
+        });
+
+        expect(anomalySpy).not.toHaveBeenCalled();
+      });
+
+      it('does not fire before the card counts have loaded', () => {
+        const anomalySpy = vi.spyOn(filterTelemetry, 'anomaly');
+        mount({
+          filters: new Set<BadgeKey>(['pending']),
+          filteredIndices: [0, 1],
+          filterCounts: {},
+        });
+
+        expect(anomalySpy).not.toHaveBeenCalled();
+      });
+
+      it('does not fire while a search narrows the list', () => {
+        const anomalySpy = vi.spyOn(filterTelemetry, 'anomaly');
+        mount({ filters: new Set<BadgeKey>(['pending']), filteredIndices: [0, 1], query: 'ann' });
+
+        expect(anomalySpy).not.toHaveBeenCalled();
+      });
+
+      it('fires once per filtering session, however often the state recurs', () => {
+        const anomalySpy = vi.spyOn(filterTelemetry, 'anomaly');
+        const pending = new Set<BadgeKey>(['pending']);
+        const { settle } = mount({ filters: pending, filteredIndices: [0, 1] });
+
+        fireEvent.click(
+          screen.getByRole('button', {
+            name: resultsEN.filters.removeOne.replace('{{label}}', resultsEN.badges.pending),
+          })
+        );
+        settle({ filters: new Set<BadgeKey>() });
+        // A second resolved step that disagrees again: the followers card says
+        // 15, the list and the prediction both say 42. Only the prediction
+        // agrees, so the one kind it could add is the one already on record.
+        clickCard('followers');
+        const followers = new Set<BadgeKey>(['followers']);
+        settle({ filters: followers, filteredIndices: Array.from({ length: 42 }, (_, i) => i) });
+
+        expect(anomalyKinds(anomalySpy)).toEqual(['card_vs_list']);
+      });
+    });
+
+    describe('predicted_mismatch', () => {
+      it('fires when an enable resolves to a different size than predicted', () => {
+        const anomalySpy = vi.spyOn(filterTelemetry, 'anomaly');
+        // candidateCounts.unfollowed (4) is the prediction; filterCounts agrees
+        // with the list so card_vs_list stays quiet.
+        const { settle } = mount();
+
+        clickCard('unfollowed');
+        settle({
+          filters: new Set<BadgeKey>(['unfollowed']),
+          filteredIndices: [0, 1, 2],
+          filterCounts: { ...defaultFilterCounts, unfollowed: 3 },
+        });
+
+        expect(anomalySpy.mock.calls[0]?.[0]).toMatchObject({
+          kind: 'predicted_mismatch',
+          expected: 4,
+          actual: 3,
+        });
+      });
+
+      it('never fires on a disable', () => {
+        const anomalySpy = vi.spyOn(filterTelemetry, 'anomaly');
+        const { settle } = mount({
+          filters: new Set<BadgeKey>(['unfollowed', 'pending']),
+          filteredIndices: [0],
+          candidateCounts: { ...defaultCandidateCounts, pending: 99 },
+        });
+
+        fireEvent.click(
+          screen.getByRole('button', {
+            name: resultsEN.filters.removeOne.replace('{{label}}', resultsEN.badges.pending),
+          })
+        );
+        settle({ filters: new Set<BadgeKey>(['unfollowed']), filteredIndices: [0, 1, 2, 3] });
+
+        expect(anomalyKinds(anomalySpy)).not.toContain('predicted_mismatch');
+      });
+
+      it('never fires with a search query', () => {
+        const anomalySpy = vi.spyOn(filterTelemetry, 'anomaly');
+        const { settle } = mount({ query: 'ann' });
+
+        clickCard('unfollowed');
+        settle({ filters: new Set<BadgeKey>(['unfollowed']), filteredIndices: [0], query: 'ann' });
+
+        expect(anomalySpy).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('filter_failed', () => {
+      it('fires when the filter threw, and suppresses card_vs_list for that step', () => {
+        const anomalySpy = vi.spyOn(filterTelemetry, 'anomaly');
+        // The catch renders the whole list (null -> 21) under the filter's
+        // label; filterCounts.pending is 1, which would otherwise disagree.
+        mount({
+          filters: new Set<BadgeKey>(['pending']),
+          filteredIndices: null,
+          resultFailed: true,
+        });
+
+        expect(anomalyKinds(anomalySpy)).toEqual(['filter_failed']);
+        expect(anomalySpy.mock.calls[0]?.[0]).toMatchObject({ actual: 21 });
+      });
     });
   });
 });

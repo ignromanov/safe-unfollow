@@ -30,10 +30,10 @@ import { RESCUE_PLAN_BANNER_ENABLED } from '@/config/feature-flags';
 import { useAccountFiltering } from '@/hooks/useAccountFiltering';
 import { useUploadCaveats } from '@/hooks/useUploadCaveats';
 import { useTimeOnResults } from '@/hooks/useTimeOnResults';
-import { readArrivalSource } from '@/hooks/useFilterFromUrl';
+import { useFilterSteps } from '@/hooks/useFilterSteps';
 import { analytics } from '@/lib/analytics';
-import { recordArrival, recordEmptyResult, recordToggle } from '@/lib/stats/filter-session';
-import { useEffect, useRef, useState } from 'react';
+import { recordClearAll, recordEmptyResult, recordToggle } from '@/lib/stats/filter-session';
+import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
@@ -151,6 +151,9 @@ export function AccountListSection({
     setFilters,
     filterCounts,
     candidateCounts,
+    candidateCountsFor,
+    resultKey,
+    resultFailed,
     isFiltering,
     totalCount,
     hasLoadedData,
@@ -202,6 +205,7 @@ export function AccountListSection({
   // only the filters.
   const handleClearFilters = () => {
     analytics.filterClearAll(filters.size);
+    recordClearAll();
     setFilters(new Set());
     setQuery('');
     trackAction();
@@ -210,7 +214,7 @@ export function AccountListSection({
   const handleRemoveFilter = (badgeType: BadgeKey) => {
     const newFilters = new Set(filters);
     newFilters.delete(badgeType);
-    recordToggle(badgeType, 'disable', newFilters.size, 'chip');
+    recordToggle(badgeType, 'disable', newFilters, 'chip');
     setFilters(newFilters);
     trackAction();
   };
@@ -225,39 +229,29 @@ export function AccountListSection({
       newFilters.add(badgeType);
     }
 
-    recordToggle(badgeType, action, newFilters.size, 'stat_card');
+    recordToggle(badgeType, action, newFilters, 'stat_card');
     setFilters(newFilters);
     trackAction();
   };
 
-  // What the reader arrived with, before they did anything. Recorded once:
-  // 52.3% of sessions arrive with a filter already on, and from Task 6 some of
-  // them arrive with one we chose for them.
-  //
-  // The count comes from the APPLIER, not from the store and not from the URL.
-  //
-  // Not the store, because `useFilterFromUrl` runs in the page and this effect
-  // runs in a child: React flushes child effects before parent effects in the
-  // same commit, so `filters.size` here would see yesterday's persisted
-  // selection on exactly the arrivals this measurement exists for.
-  //
-  // Not the URL either, though it was until this fix. A URL states what was
-  // ASKED FOR; only the code that applies it knows whether anyone acted. This
-  // component is rendered by `/results` AND `/sample`, and `/sample` calls no
-  // applier — so `/sample?filter=pending` reported one applied filter and, worse,
-  // marked the session `touched`, buying a summary row for a visit in which
-  // nothing happened. `appliedUrlFilter` is computed during the page's render,
-  // so it is here before this effect runs: the ordering dependency stays removed.
-  //
-  // `applied ? 1 : filters.size` is not an approximation: a valid `?filter=`
-  // REPLACES the persisted set, so it means exactly one filter is applied.
-  const arrivalRecorded = useRef(false);
-  useEffect(() => {
-    if (arrivalRecorded.current || !hasLoadedData) return;
-    arrivalRecorded.current = true;
-
-    recordArrival(appliedUrlFilter ? 1 : filters.size, readArrivalSource(search));
-  }, [hasLoadedData, filters.size, search, appliedUrlFilter]);
+  // Step 0 at arrival, then one `filter_step` per action as its list
+  // resolves, plus the `filter_anomaly` tripwire. The arrival record that used
+  // to sit here lives in the hook now, ahead of the resolution it feeds.
+  useFilterSteps({
+    filters,
+    query,
+    hasLoadedData,
+    isFiltering,
+    resultKey,
+    resultFailed,
+    displayCount,
+    totalCount,
+    filterCounts,
+    candidateCounts,
+    candidateCountsFor,
+    appliedUrlFilter,
+    search,
+  });
 
   // The empty result is the finding, and the exit that follows it is the one
   // most likely to lose its beacon. Emit at the moment it happens, not only on

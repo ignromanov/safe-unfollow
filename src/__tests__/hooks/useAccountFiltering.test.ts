@@ -15,6 +15,7 @@ import { useFilterWorker } from '@/hooks/useFilterWorker';
 import { IndexedDBFilterEngine } from '@/lib/filtering/IndexedDBFilterEngine';
 import { indexedDBService } from '@/lib/indexeddb/indexeddb-service';
 import { useAppStore } from '@/lib/store';
+import { combinationOf, resultKeyOf } from '@/lib/stats/filter-session';
 import { useDebounce } from 'use-debounce';
 
 describe('useAccountFiltering', () => {
@@ -1391,6 +1392,103 @@ describe('useAccountFiltering', () => {
       // Not {}: an empty map reads as "every badge yields zero" downstream, and
       // zero is the value that disables an option.
       expect(result.current.candidateCounts).not.toEqual({});
+
+      unmount();
+    });
+  });
+  /**
+   * Which selection a result or a set of candidate counts belongs to.
+   * `isFiltering` cannot say it: it is set in an effect one render after
+   * `setFilters`, and the indices land in a transition after it clears. The
+   * filter-step telemetry reads these keys, so a result is never attributed to
+   * a selection it was not computed for.
+   */
+  describe('result identity', () => {
+    const withWorker = (filterToIndices = vi.fn().mockResolvedValue([3, 4])) => {
+      vi.mocked(useFilterWorker).mockReturnValue({
+        filterToIndices,
+        getStats: vi.fn().mockResolvedValue(mockFilterCounts),
+        candidateCounts: vi.fn().mockResolvedValue(mockFilterCounts),
+        isReady: true,
+        hasError: false,
+        error: null,
+      });
+    };
+    const withFilters = (filters: Set<BadgeKey>) => {
+      vi.mocked(useAppStore).mockImplementation((selector: any) =>
+        selector({ fileMetadata: mockFileMetadata, filters, setFilters: mockSetFilters })
+      );
+    };
+    const render = () =>
+      renderHook(() =>
+        useAccountFiltering({
+          fileHash: mockFileMetadata.fileHash,
+          accountCount: mockFileMetadata.accountCount,
+        })
+      );
+
+    it('keys a resolved result to the selection and query it was computed for', async () => {
+      withWorker();
+      withFilters(new Set<BadgeKey>(['following']));
+      const { result, unmount } = render();
+
+      await waitFor(() => expect(result.current.filteredIndices).toEqual([3, 4]));
+      expect(result.current.resultKey).toBe(resultKeyOf(['following'], ''));
+      expect(result.current.resultFailed).toBe(false);
+
+      unmount();
+    });
+
+    it('keys the show-all path too', async () => {
+      withWorker();
+      const { result, unmount } = render();
+
+      await waitFor(() => expect(result.current.resultKey).toBe(resultKeyOf([], '')));
+
+      unmount();
+    });
+
+    it('marks a result that came from a failed filter', async () => {
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      withWorker(vi.fn().mockRejectedValue(new Error('boom')));
+      withFilters(new Set<BadgeKey>(['following']));
+      const { result, unmount } = render();
+
+      // The catch sets `filteredIndices = null`, which renders the WHOLE list
+      // under the filter's label. That is the state `filter_failed` reports.
+      await waitFor(() => expect(result.current.resultFailed).toBe(true));
+      expect(result.current.resultKey).toBe(resultKeyOf(['following'], ''));
+      expect(result.current.filteredIndices).toBeNull();
+
+      consoleErrorSpy.mockRestore();
+      unmount();
+    });
+
+    it('states which selection the candidate counts belong to', async () => {
+      withWorker();
+      withFilters(new Set<BadgeKey>(['following', 'close']));
+      const { result, unmount } = render();
+
+      await waitFor(() =>
+        expect(result.current.candidateCountsFor).toBe(combinationOf(['following', 'close']))
+      );
+
+      unmount();
+    });
+
+    it('claims no selection for counts it could not compute', async () => {
+      vi.mocked(useFilterWorker).mockReturnValue({
+        filterToIndices: vi.fn().mockResolvedValue([]),
+        getStats: vi.fn().mockResolvedValue(mockFilterCounts),
+        candidateCounts: vi.fn().mockRejectedValue(new Error('boom')),
+        isReady: true,
+        hasError: false,
+        error: null,
+      });
+      const { result, unmount } = render();
+
+      await waitFor(() => expect(result.current.candidateCounts).toBeNull());
+      expect(result.current.candidateCountsFor).toBeNull();
 
       unmount();
     });
