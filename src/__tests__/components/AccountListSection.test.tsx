@@ -14,6 +14,7 @@ import { useAccountFiltering } from '@/hooks/useAccountFiltering';
 import { useUploadCaveats } from '@/hooks/useUploadCaveats';
 import { analytics } from '@/lib/analytics';
 import { flushEvents } from '@/lib/stats/queue';
+import { filterTelemetry } from '@/lib/stats/filter-step-events';
 import {
   buildFilterSummary,
   combinationOf,
@@ -1327,7 +1328,7 @@ describe('AccountListSection', () => {
       fireEvent.click(within(screen.getByTestId(`stat-card-${label}`)).getByRole('button'));
 
     it('emits one step per action with the sorted combination and the exact count', () => {
-      const stepSpy = vi.spyOn(analytics, 'filterStep');
+      const stepSpy = vi.spyOn(filterTelemetry, 'step');
       const unfollowed = new Set<BadgeKey>(['unfollowed']);
       const both = new Set<BadgeKey>(['unfollowed', 'notFollowingBack']);
       const { settle } = mount();
@@ -1351,7 +1352,7 @@ describe('AccountListSection', () => {
     });
 
     it('emits nothing for a visit that never filtered', () => {
-      const stepSpy = vi.spyOn(analytics, 'filterStep');
+      const stepSpy = vi.spyOn(filterTelemetry, 'step');
       const { unmount } = mount();
       unmount();
 
@@ -1359,7 +1360,7 @@ describe('AccountListSection', () => {
     });
 
     it('sends the pending step unresolved when the page hides, and flushes it', () => {
-      const stepSpy = vi.spyOn(analytics, 'filterStep');
+      const stepSpy = vi.spyOn(filterTelemetry, 'step');
       const { settle } = mount();
 
       clickCard('unfollowed');
@@ -1377,7 +1378,7 @@ describe('AccountListSection', () => {
     });
 
     it('records clear-all as its own step', () => {
-      const stepSpy = vi.spyOn(analytics, 'filterStep');
+      const stepSpy = vi.spyOn(filterTelemetry, 'step');
       const { settle } = mount({ filters: new Set<BadgeKey>(['pending']), filteredIndices: [0] });
 
       fireEvent.click(screen.getByRole('button', { name: resultsEN.filters.reset }));
@@ -1389,7 +1390,7 @@ describe('AccountListSection', () => {
 
     describe('card_vs_list', () => {
       it('fires when the card count and the resolved list disagree', () => {
-        const anomalySpy = vi.spyOn(analytics, 'filterAnomaly');
+        const anomalySpy = vi.spyOn(filterTelemetry, 'anomaly');
         // filterCounts.pending is 1; the list resolved to 2.
         mount({ filters: new Set<BadgeKey>(['pending']), filteredIndices: [0, 1] });
 
@@ -1402,7 +1403,7 @@ describe('AccountListSection', () => {
       });
 
       it('does not fire while the list is still filtering', () => {
-        const anomalySpy = vi.spyOn(analytics, 'filterAnomaly');
+        const anomalySpy = vi.spyOn(filterTelemetry, 'anomaly');
         mount({
           filters: new Set<BadgeKey>(['pending']),
           filteredIndices: [0, 1],
@@ -1415,7 +1416,7 @@ describe('AccountListSection', () => {
       it('does not fire on the stale render, where the list belongs to another selection', () => {
         // The false positive this guard exists for: isFiltering is false and
         // the list on screen is the previous selection's.
-        const anomalySpy = vi.spyOn(analytics, 'filterAnomaly');
+        const anomalySpy = vi.spyOn(filterTelemetry, 'anomaly');
         mount({
           filters: new Set<BadgeKey>(['pending']),
           filteredIndices: [0, 1],
@@ -1426,7 +1427,7 @@ describe('AccountListSection', () => {
       });
 
       it('does not fire before the card counts have loaded', () => {
-        const anomalySpy = vi.spyOn(analytics, 'filterAnomaly');
+        const anomalySpy = vi.spyOn(filterTelemetry, 'anomaly');
         mount({
           filters: new Set<BadgeKey>(['pending']),
           filteredIndices: [0, 1],
@@ -1437,14 +1438,14 @@ describe('AccountListSection', () => {
       });
 
       it('does not fire while a search narrows the list', () => {
-        const anomalySpy = vi.spyOn(analytics, 'filterAnomaly');
+        const anomalySpy = vi.spyOn(filterTelemetry, 'anomaly');
         mount({ filters: new Set<BadgeKey>(['pending']), filteredIndices: [0, 1], query: 'ann' });
 
         expect(anomalySpy).not.toHaveBeenCalled();
       });
 
       it('fires once per filtering session, however often the state recurs', () => {
-        const anomalySpy = vi.spyOn(analytics, 'filterAnomaly');
+        const anomalySpy = vi.spyOn(filterTelemetry, 'anomaly');
         const pending = new Set<BadgeKey>(['pending']);
         const { settle } = mount({ filters: pending, filteredIndices: [0, 1] });
 
@@ -1467,7 +1468,7 @@ describe('AccountListSection', () => {
 
     describe('predicted_mismatch', () => {
       it('fires when an enable resolves to a different size than predicted', () => {
-        const anomalySpy = vi.spyOn(analytics, 'filterAnomaly');
+        const anomalySpy = vi.spyOn(filterTelemetry, 'anomaly');
         // candidateCounts.unfollowed (4) is the prediction; filterCounts agrees
         // with the list so card_vs_list stays quiet.
         const { settle } = mount();
@@ -1487,7 +1488,7 @@ describe('AccountListSection', () => {
       });
 
       it('never fires on a disable', () => {
-        const anomalySpy = vi.spyOn(analytics, 'filterAnomaly');
+        const anomalySpy = vi.spyOn(filterTelemetry, 'anomaly');
         const { settle } = mount({
           filters: new Set<BadgeKey>(['unfollowed', 'pending']),
           filteredIndices: [0],
@@ -1505,7 +1506,7 @@ describe('AccountListSection', () => {
       });
 
       it('never fires with a search query', () => {
-        const anomalySpy = vi.spyOn(analytics, 'filterAnomaly');
+        const anomalySpy = vi.spyOn(filterTelemetry, 'anomaly');
         const { settle } = mount({ query: 'ann' });
 
         clickCard('unfollowed');
@@ -1517,7 +1518,7 @@ describe('AccountListSection', () => {
 
     describe('filter_failed', () => {
       it('fires when the filter threw, and suppresses card_vs_list for that step', () => {
-        const anomalySpy = vi.spyOn(analytics, 'filterAnomaly');
+        const anomalySpy = vi.spyOn(filterTelemetry, 'anomaly');
         // The catch renders the whole list (null -> 21) under the filter's
         // label; filterCounts.pending is 1, which would otherwise disagree.
         mount({

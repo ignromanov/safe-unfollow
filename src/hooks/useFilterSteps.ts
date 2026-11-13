@@ -1,5 +1,4 @@
 import type { BadgeKey } from '@/core/types';
-import { analytics } from '@/lib/analytics';
 import type { FilterAnomalyKind } from '@/lib/stats/constants';
 import {
   abandonPendingStep,
@@ -11,6 +10,7 @@ import {
   resolvePendingStep,
   resultKeyOf,
 } from '@/lib/stats/filter-session';
+import { filterTelemetry } from '@/lib/stats/filter-step-events';
 import { flushEvents } from '@/lib/stats/queue';
 import { readArrivalSource } from './useFilterFromUrl';
 import { useEffect, useRef } from 'react';
@@ -78,7 +78,7 @@ function anomaliesOf(
 
 function sendSteps(totalCount: number): number {
   const steps = drainFilterSteps();
-  for (const step of steps) analytics.filterStep(step, totalCount);
+  for (const step of steps) filterTelemetry.step(step, totalCount);
   return steps.length;
 }
 
@@ -150,7 +150,7 @@ export function useFilterSteps({
 
     if (step?.result) {
       for (const anomaly of anomaliesOf(step, step.result, resultFailed, filters, filterCounts)) {
-        if (claimAnomaly(anomaly.kind)) analytics.filterAnomaly({ ...anomaly, step }, totalCount);
+        if (claimAnomaly(anomaly.kind)) filterTelemetry.anomaly({ ...anomaly, step }, totalCount);
       }
     }
     sendSteps(totalCount);
