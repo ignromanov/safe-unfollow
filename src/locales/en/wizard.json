@@ -65,7 +65,7 @@
     },
     "5": {
       "title": "Set Date Range to \"All time\"",
-      "description": "Click \"Date range\" › Select \"All time\" › Save. This ensures you get your complete follower history.",
+      "description": "Click \"Date range\" › Select \"All time\" › Save. Instagram selects \"Last year\" by default, which leaves older followers out of the file. Change it even if you didn't touch anything.",
       "alt": "The \"Date range\" panel with \"All time\" selected."
     },
     "6": {

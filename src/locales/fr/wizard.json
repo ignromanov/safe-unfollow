@@ -65,7 +65,7 @@
     },
     "5": {
       "title": "Définissez la plage de dates sur « Tout »",
-      "description": "Cliquez sur « Plage de dates » › Sélectionnez « Tout » › Enregistrer. Cela permet d'obtenir l'historique complet de vos abonnés.",
+      "description": "Cliquez sur « Plage de dates » › Sélectionnez « Tout » › Enregistrer. Instagram sélectionne la dernière année par défaut, ce qui exclut vos abonnés plus anciens du fichier. Modifiez-la même si vous n'avez rien touché.",
       "alt": "Le panneau « Plage de dates » avec « Tout » sélectionné."
     },
     "6": {

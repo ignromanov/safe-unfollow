@@ -65,7 +65,7 @@
     },
     "5": {
       "title": "Atur Rentang Tanggal ke \"Sepanjang waktu\"",
-      "description": "Klik \"Rentang tanggal\" › Pilih \"Sepanjang waktu\" › Simpan. Ini memastikan riwayat pengikut lengkap.",
+      "description": "Klik \"Rentang tanggal\" › Pilih \"Sepanjang waktu\" › Simpan. Instagram memilih satu tahun terakhir secara default, sehingga pengikut lama tidak masuk ke file. Ubah meskipun Anda tidak menyentuh apa pun.",
       "alt": "Panel \"Rentang tanggal\" dengan \"Sepanjang waktu\" terpilih."
     },
     "6": {

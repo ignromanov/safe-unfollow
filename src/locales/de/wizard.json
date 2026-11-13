@@ -65,7 +65,7 @@
     },
     "5": {
       "title": "Setze den Zeitraum auf \"Gesamter Zeitraum\"",
-      "description": "Klicke auf \"Zeitraum\" › Wähle \"Gesamter Zeitraum\" › Speichern. Das stellt sicher, dass du deine komplette Follower-Historie bekommst.",
+      "description": "Klicke auf \"Zeitraum\" › Wähle \"Gesamter Zeitraum\" › Speichern. Instagram wählt standardmäßig das letzte Jahr, dann fehlen ältere Follower in der Datei. Ändere das, auch wenn du nichts angefasst hast.",
       "alt": "Das Fenster \"Zeitraum\" mit ausgewähltem \"Gesamter Zeitraum\"."
     },
     "6": {
