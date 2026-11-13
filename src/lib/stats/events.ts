@@ -115,9 +115,9 @@ export const analytics = {
   /**
    * One event per filtering session, replacing 9.48 per-toggle rows.
    *
-   * Unsampled, and deliberately not on `useTimeOnResults`'s `fireEvent` path:
-   * that handler is a 25% sample of visits over five seconds, and this replaces
-   * a series GH#123 made unsampled on purpose so it reads as a count.
+   * Unsampled, and not on `useTimeOnResults`'s `fireEvent` path: that handler
+   * sends at most one row per side of its five-second floor, while this one is
+   * cumulative and re-sent whenever it changed.
    *
    * `trackBeacon` rather than `trackEvent`: this is all-or-nothing per session
    * and mostly fires on the way out, where an ordinary request is freely
@@ -169,28 +169,22 @@ export const analytics = {
   /**
    * Aggregated click summary sent on page leave.
    *
-   * Unsampled here on purpose. `useTimeOnResults` is the only caller and it
-   * already rolls once per visit, before any of its three triggers fire. A
-   * second roll compounded to 6.25%, far too thin to segment `badge_clicks` by
-   * badge — which is the only reason that field is in the payload at all.
+   * Unsampled, like its only caller `useTimeOnResults`, which sends it once per
+   * visit with the row past the five-second floor. Segmenting `badge_clicks` by
+   * badge is the only reason that field is in the payload at all.
    */
   resultsClicksSummary: (stats: {
     totalClicks: number;
     badgeClicks: Record<string, number>;
     timeSpentSeconds: number;
   }) => {
-    // Keep only top 3 badges by click count to reduce payload
-    const top3 = Object.entries(stats.badgeClicks)
-      .sort(([, a], [, b]) => b - a)
-      .slice(0, 3)
-      .reduce<Record<string, number>>((acc, [k, v]) => {
-        acc[k] = v;
-        return acc;
-      }, {});
+    // Every badge clicked, most-clicked first. There are eleven badge keys, so
+    // the payload is bounded; the top-3 cut hid every badge below third place.
+    const all = Object.fromEntries(Object.entries(stats.badgeClicks).sort(([, a], [, b]) => b - a));
 
     trackEvent(AnalyticsEvents.RESULTS_CLICKS_SUMMARY, {
       total_clicks: stats.totalClicks,
-      badge_clicks: JSON.stringify(top3),
+      badge_clicks: JSON.stringify(all),
       time_spent: Math.round(stats.timeSpentSeconds),
     });
   },

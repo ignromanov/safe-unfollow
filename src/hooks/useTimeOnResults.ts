@@ -1,5 +1,9 @@
 import { analytics, AnalyticsEvents, trackBeacon } from '@/lib/analytics';
-import { buildFilterSummary, resetFilterSession } from '@/lib/stats/filter-session';
+import {
+  buildFilterSummary,
+  currentFilterSessionId,
+  resetFilterSession,
+} from '@/lib/stats/filter-session';
 import { useCallback, useEffect, useRef } from 'react';
 
 interface UseTimeOnResultsReturn {
@@ -25,12 +29,17 @@ interface UseTimeOnResultsReturn {
  * @param accountCount - Total number of accounts being viewed
  * @param isActive - Whether the results are currently being displayed
  */
+/** Under this many seconds a visit is sent with `below_floor: true`. */
+const FLOOR_SECONDS = 5;
+
 export function useTimeOnResults(accountCount: number, isActive: boolean): UseTimeOnResultsReturn {
   const startTimeRef = useRef<number | null>(null);
   const actionsCountRef = useRef(0);
   const clicksCountRef = useRef(0);
   const badgeClicksRef = useRef<Record<string, number>>({});
-  const hasDecidedRef = useRef(false);
+  // At most one row per side of the floor per visit; see `fireEvent`.
+  const sentRef = useRef({ below: false, above: false });
+  const visitIdRef = useRef('');
 
   // Track user actions (filter, search, etc.)
   const trackAction = useCallback(() => {
@@ -46,38 +55,37 @@ export function useTimeOnResults(accountCount: number, isActive: boolean): UseTi
     });
   }, []);
 
-  // Fire the analytics events via sendBeacon for reliability
+  // Every visit, unsampled. The old 25% roll existed only for storage.
+  //
+  // A trigger under the floor sends a `below_floor` row, but it does not end the
+  // visit: a tab switch at 3s followed by ten minutes of reading must not be
+  // recorded as a 3s visit. So each side of the floor sends at most once, both
+  // rows carry the visit's `filter_session_id`, and the reader keeps the larger
+  // `time_seconds` per id. Rows past the floor mean what they meant before:
+  // the time at the first trigger after five seconds.
   const fireEvent = useCallback(() => {
-    if (hasDecidedRef.current || startTimeRef.current === null) {
+    if (startTimeRef.current === null) {
       return;
     }
 
     const timeSpent = (Date.now() - startTimeRef.current) / 1000;
-
-    // Below the engagement floor this visit has nothing to say yet, and a later
-    // trigger may still clear the bar — so do not spend the guard on it.
-    if (timeSpent < 5) {
+    const belowFloor = timeSpent < FLOOR_SECONDS;
+    const side = belowFloor ? 'below' : 'above';
+    if (sentRef.current[side]) {
       return;
     }
-
-    // The guard goes up once the sampling decision is made — whether or not
-    // the roll passes — before the dice are rolled. Setting it inside the
-    // sampling branch let a failed roll re-roll on each of three triggers,
-    // making a documented 25% behave like 1 - 0.75^n.
-    hasDecidedRef.current = true;
-
-    if (Math.random() > 0.25) {
-      return;
-    }
+    sentRef.current[side] = true;
 
     trackBeacon(AnalyticsEvents.TIME_ON_RESULTS, {
       time_seconds: Math.round(timeSpent),
       account_count: accountCount,
       actions_count: actionsCountRef.current,
+      below_floor: belowFloor,
+      filter_session_id: visitIdRef.current,
     });
 
-    // Send aggregated click summary (only if there were clicks)
-    if (clicksCountRef.current > 0) {
+    // Clicks ride with the row past the floor only, so they are sent once.
+    if (!belowFloor && clicksCountRef.current > 0) {
       analytics.resultsClicksSummary({
         totalClicks: clicksCountRef.current,
         badgeClicks: badgeClicksRef.current,
@@ -87,10 +95,8 @@ export function useTimeOnResults(accountCount: number, isActive: boolean): UseTi
   }, [accountCount]);
 
   // The filter summary rides the same three triggers as the time beacon and
-  // none of its gates. `fireEvent` above is a 25% sample of visits longer than
-  // five seconds; this replaces a series `events.ts` (GH#123) made unsampled on
-  // purpose, and the sessions the floor drops — two filters, an empty list,
-  // gone in four seconds — are the ones the measurement exists for.
+  // none of its per-side limits: it is cumulative and superseding, so it is
+  // re-sent whenever it changed.
   const filterSeqRef = useRef(0);
   const lastFilterSigRef = useRef<string | null>(null);
 
@@ -145,7 +151,10 @@ export function useTimeOnResults(accountCount: number, isActive: boolean): UseTi
     actionsCountRef.current = 0;
     clicksCountRef.current = 0;
     badgeClicksRef.current = {};
-    hasDecidedRef.current = false;
+    sentRef.current = { below: false, above: false };
+    // Captured at the start: the reset effect's cleanup rotates the id before
+    // this effect's cleanup sends the last row.
+    visitIdRef.current = currentFilterSessionId();
 
     // Layer 1: visibilitychange (most reliable on mobile)
     const handleVisibilityChange = () => {

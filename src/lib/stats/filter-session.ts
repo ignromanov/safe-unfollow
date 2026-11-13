@@ -60,11 +60,7 @@ interface FilterSessionState extends FilterSessionSummary {
 /**
  * One page life, six base-36 characters, computed once on import.
  *
- * `Math.random` is read here and nowhere else in this module, deliberately: the
- * hook that emits the summary samples `time_on_results` with `Math.random` too,
- * and a suite that asserts the dice were consulted exactly once
- * (`useTimeOnResults.test.tsx`) would count a per-session roll as a second
- * throw. Reading it at import time puts it before any spy.
+ * Read at import time, so it sits before any `Math.random` spy a suite installs.
  */
 const PAGE_ID = Math.random().toString(36).slice(2, 8);
 
@@ -164,6 +160,15 @@ function beginStep(step: Omit<FilterStep, 'sessionId' | 'step'>): void {
   if (pending) finalize(pending);
   const number = step.action === 'arrival' ? 0 : state.nextStep++;
   pending = { sessionId: state.id, step: number, ...step };
+}
+
+/**
+ * The current filtering session's id. `useTimeOnResults` sends it on
+ * `time_on_results`, which makes time on the page joinable to the visit's
+ * `filter_step` rows and its summary. A random id, never an identity.
+ */
+export function currentFilterSessionId(): string {
+  return state.id;
 }
 
 export function resetFilterSession(): void {

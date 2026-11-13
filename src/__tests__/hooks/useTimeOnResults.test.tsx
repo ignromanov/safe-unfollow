@@ -38,73 +38,121 @@ describe('useTimeOnResults', () => {
     vi.restoreAllMocks();
   });
 
-  it('rolls the sampling dice once per session, not once per trigger', () => {
-    // The bug: hasFiredRef was set inside the sampling branch, so a failed roll
-    // left the guard down and the next of three triggers rolled again. That
-    // turns a documented 25% into 1 - 0.75^3 ~= 58%.
-    const random = vi.spyOn(Math, 'random').mockReturnValue(0.99); // always fails the roll
-    vi.spyOn(Date, 'now').mockReturnValue(0);
-
-    const { unmount } = render(<Harness accountCount={100} isActive />);
-
-    vi.spyOn(Date, 'now').mockReturnValue(10_000); // 10s spent, past the 5s floor
-
-    vi.spyOn(document, 'hidden', 'get').mockReturnValue(true);
-    document.dispatchEvent(new Event('visibilitychange'));
-    window.dispatchEvent(new Event('pagehide'));
-    unmount();
-
-    // Three triggers, and the dice must have been consulted exactly once.
-    expect(random).toHaveBeenCalledTimes(1);
-    expect(trackBeacon).not.toHaveBeenCalled();
-  });
-
-  it('still sends nothing for a visit under the five second floor', () => {
-    vi.spyOn(Math, 'random').mockReturnValue(0.01); // would pass the roll
-    vi.spyOn(Date, 'now').mockReturnValue(0);
-
-    const { unmount } = render(<Harness accountCount={100} isActive />);
-
-    vi.spyOn(Date, 'now').mockReturnValue(2_000);
-    unmount();
-
-    expect(trackBeacon).not.toHaveBeenCalled();
-  });
-
-  it('sends the event with the right payload when the visit clears the floor and wins the roll', () => {
-    vi.spyOn(Math, 'random').mockReturnValue(0.1); // passes the 0.25 roll
-    vi.spyOn(Date, 'now').mockReturnValue(0);
-
-    const apiRef: MutableRefObject<TimeOnResultsApi | null> = { current: null };
-    const { unmount } = render(<Harness accountCount={100} isActive apiRef={apiRef} />);
-
-    apiRef.current?.trackClick(['mutual']);
-
-    // 7.4s elapsed: picked so Math.round is actually exercised, not just a
-    // whole number that would pass even if the rounding were dropped.
-    vi.spyOn(Date, 'now').mockReturnValue(7_400);
-    unmount();
-
-    expect(trackBeacon).toHaveBeenCalledTimes(1);
-    expect(trackBeacon).toHaveBeenCalledWith(AnalyticsEvents.TIME_ON_RESULTS, {
-      time_seconds: 7,
-      account_count: 100,
-      actions_count: 1,
+  describe('time_on_results: every visit, at most one row per side of the floor', () => {
+    // The mocks are cleared per attempt, not in afterEach: see the note in the
+    // filter-summary block below on `retry: 2`.
+    beforeEach(() => {
+      resetFilterSession();
+      vi.clearAllMocks();
     });
-    expect(analytics.resultsClicksSummary).toHaveBeenCalledTimes(1);
-  });
 
-  it('skips the click summary when the visit had no clicks', () => {
-    vi.spyOn(Math, 'random').mockReturnValue(0.1); // passes the 0.25 roll
-    vi.spyOn(Date, 'now').mockReturnValue(0);
+    function hide() {
+      vi.spyOn(document, 'hidden', 'get').mockReturnValue(true);
+      document.dispatchEvent(new Event('visibilitychange'));
+    }
 
-    const { unmount } = render(<Harness accountCount={100} isActive />);
+    function timeRows() {
+      return vi
+        .mocked(trackBeacon)
+        .mock.calls.filter(([name]) => name === AnalyticsEvents.TIME_ON_RESULTS)
+        .map(([, payload]) => payload as Record<string, unknown>);
+    }
 
-    vi.spyOn(Date, 'now').mockReturnValue(7_400);
-    unmount();
+    it('sends a visit past the floor without consulting any dice', () => {
+      // A roll that would have lost the old 25% sample. If anything still
+      // samples, this visit disappears.
+      vi.spyOn(Math, 'random').mockReturnValue(0.99);
+      vi.spyOn(Date, 'now').mockReturnValue(0);
 
-    expect(trackBeacon).toHaveBeenCalledTimes(1);
-    expect(analytics.resultsClicksSummary).not.toHaveBeenCalled();
+      const apiRef: MutableRefObject<TimeOnResultsApi | null> = { current: null };
+      const { unmount } = render(<Harness accountCount={100} isActive apiRef={apiRef} />);
+      apiRef.current?.trackClick(['mutuals']);
+
+      // 7.4s: Math.round is exercised, not just a whole number.
+      vi.spyOn(Date, 'now').mockReturnValue(7_400);
+      unmount();
+
+      expect(timeRows()).toEqual([
+        {
+          time_seconds: 7,
+          account_count: 100,
+          actions_count: 1,
+          below_floor: false,
+          filter_session_id: expect.stringMatching(/.+/),
+        },
+      ]);
+      expect(analytics.resultsClicksSummary).toHaveBeenCalledTimes(1);
+    });
+
+    it('sends a visit under the five second floor, marked as such', () => {
+      vi.spyOn(Date, 'now').mockReturnValue(0);
+      const apiRef: MutableRefObject<TimeOnResultsApi | null> = { current: null };
+      const { unmount } = render(<Harness accountCount={100} isActive apiRef={apiRef} />);
+      apiRef.current?.trackClick(['mutuals']);
+
+      vi.spyOn(Date, 'now').mockReturnValue(2_000);
+      unmount();
+
+      expect(timeRows()).toEqual([
+        expect.objectContaining({ time_seconds: 2, below_floor: true, actions_count: 1 }),
+      ]);
+      // Clicks ride only with the row past the floor, as before.
+      expect(analytics.resultsClicksSummary).not.toHaveBeenCalled();
+    });
+
+    it('sends one row per side of the floor, however many triggers fire', () => {
+      // Hidden at 3s (a tab switch), back, then gone at 9s through all three
+      // triggers. The short row must not stand for the whole visit, and the
+      // later triggers must not repeat either row.
+      vi.spyOn(Date, 'now').mockReturnValue(0);
+      const { unmount } = render(<Harness accountCount={100} isActive />);
+
+      vi.spyOn(Date, 'now').mockReturnValue(3_000);
+      hide();
+      window.dispatchEvent(new Event('pagehide'));
+
+      vi.spyOn(Date, 'now').mockReturnValue(9_000);
+      hide();
+      window.dispatchEvent(new Event('pagehide'));
+      unmount();
+
+      const rows = timeRows();
+      expect(rows.map(r => [r.time_seconds, r.below_floor])).toEqual([
+        [3, true],
+        [9, false],
+      ]);
+      // One visit, one key: the reader keeps the larger time per key.
+      expect(rows[0]?.filter_session_id).toBe(rows[1]?.filter_session_id);
+    });
+
+    it('gives two visits two different keys', () => {
+      vi.spyOn(Date, 'now').mockReturnValue(0);
+      const first = render(<Harness accountCount={100} isActive />);
+      vi.spyOn(Date, 'now').mockReturnValue(6_000);
+      first.unmount();
+
+      vi.spyOn(Date, 'now').mockReturnValue(10_000);
+      const second = render(<Harness accountCount={100} isActive />);
+      vi.spyOn(Date, 'now').mockReturnValue(16_000);
+      second.unmount();
+
+      const [a, b] = timeRows();
+      expect(a?.filter_session_id).toEqual(expect.any(String));
+      expect(a?.filter_session_id).not.toBe(b?.filter_session_id);
+    });
+
+    it("carries the id the visit's filter steps carry", () => {
+      // The join that makes time-on-page readable against filtering.
+      vi.spyOn(Date, 'now').mockReturnValue(0);
+      recordToggle('unfollowed', 'enable', new Set<BadgeKey>(['unfollowed']), 'chip');
+      const { unmount } = render(<Harness accountCount={100} isActive />);
+      vi.spyOn(Date, 'now').mockReturnValue(6_000);
+      unmount();
+
+      const summary = vi.mocked(analytics.filterSessionSummary).mock.calls[0]?.[0];
+      expect(summary?.id).toEqual(expect.any(String));
+      expect(timeRows()[0]?.filter_session_id).toBe(summary?.id);
+    });
   });
 
   describe('the filter session summary', () => {
@@ -150,45 +198,14 @@ describe('useTimeOnResults', () => {
     });
 
     it('sends a summary from a session shorter than the time beacon floor', () => {
-      // The sampler is forced OPEN so that the only thing which can still hold
-      // time_on_results back at 4s is the floor. Left to a real Math.random the
-      // control below would pass ~75% of the time for the sampler's reason and
-      // prove nothing about the floor; see the sibling test for the sampler.
-      vi.spyOn(Math, 'random').mockReturnValue(0.01);
       vi.spyOn(Date, 'now').mockReturnValue(0);
       recordToggle('unfollowed', 'enable', new Set<BadgeKey>(['unfollowed']), 'chip');
 
       render(<Harness accountCount={100} isActive />);
-      vi.spyOn(Date, 'now').mockReturnValue(4_000); // under fireEvent's 5s floor
+      vi.spyOn(Date, 'now').mockReturnValue(4_000); // under the 5s floor
       leave();
 
       expect(analytics.filterSessionSummary).toHaveBeenCalled(); // not gated
-      // The control: the floor still holds for time_on_results.
-      expect(trackBeacon).not.toHaveBeenCalledWith(
-        AnalyticsEvents.TIME_ON_RESULTS,
-        expect.anything()
-      );
-    });
-
-    it('sends a summary from a session that lost the time beacon sampling roll', () => {
-      // The other half of the ruling, and the reason it is a second test: at 10s
-      // the floor is cleared, so the only thing that can hold time_on_results
-      // back is the losing roll. Deterministic — a failing roll is forced, not
-      // waited for.
-      vi.spyOn(Math, 'random').mockReturnValue(0.99); // loses the 0.25 roll
-      vi.spyOn(Date, 'now').mockReturnValue(0);
-      recordToggle('unfollowed', 'enable', new Set<BadgeKey>(['unfollowed']), 'chip');
-
-      render(<Harness accountCount={100} isActive />);
-      vi.spyOn(Date, 'now').mockReturnValue(10_000); // well past the floor
-      leave();
-
-      expect(analytics.filterSessionSummary).toHaveBeenCalled(); // not sampled
-      // The control: the sampler still holds for time_on_results.
-      expect(trackBeacon).not.toHaveBeenCalledWith(
-        AnalyticsEvents.TIME_ON_RESULTS,
-        expect.anything()
-      );
     });
 
     it('supersedes rather than repeats when the session continues', () => {
