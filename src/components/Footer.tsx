@@ -154,7 +154,7 @@ export function Footer() {
                 </span>
               </button>
               <a
-                href="https://github.com/ignromanov/safe-unfollow"
+                href={__SOURCE_URL__}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-primary-strong transition-colors py-2 px-1 flex items-center gap-1.5 cursor-pointer"

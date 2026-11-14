@@ -129,7 +129,7 @@ export const INTENT_CONTENT: Record<IntentSlug, IntentContent> = {
               Sort the list, search it, open any profile in a tap, and decide for yourself. The
               analysis is free at any size, and the list is yours to keep: it runs entirely inside
               this browser tab, and your archive never leaves your device. The code is open source
-              (MIT), so that is a claim you can check rather than take on trust.
+              (AGPL-3.0), so that is a claim you can check rather than take on trust.
             </p>
             <p>
               One boundary: this tool never connects to Instagram, so it does not follow or unfollow
@@ -216,7 +216,7 @@ export const INTENT_CONTENT: Record<IntentSlug, IntentContent> = {
             <p>
               If you do have them and want them gone, cancelling is done in the Instagram app. This
               tool never connects to Instagram, so it can show you the list and nothing more — for
-              free, at any size, with the code open source (MIT) so you can read what it does.
+              free, at any size, with the code open source (AGPL-3.0) so you can read what it does.
             </p>
           </>
         ),
@@ -260,8 +260,8 @@ export const INTENT_CONTENT: Record<IntentSlug, IntentContent> = {
               If you are trying to find the mutual followers between two <em>other</em> accounts —
               yours and a friend's, or two public profiles — this is the wrong tool. That needs read
               access to accounts that are not yours, which means either scraping Instagram or
-              holding your login. This tool does neither, ever; the code is open source (MIT), so
-              you can confirm that rather than take our word for it.
+              holding your login. This tool does neither, ever; the code is open source (AGPL-3.0),
+              so you can confirm that rather than take our word for it.
             </p>
             <p>
               What it does instead is answer the version of the question you have the data for: your

@@ -33,7 +33,7 @@ Five claims. Each one links to the thing that proves it.
 
 1. **There is no password field.** Not on the upload page, not anywhere else — the product has no login at all. [Open the upload page](/upload?guide=1) and look.
 2. **Your export is never sent to a server.** The ZIP is opened and searched on your device, and the results are stored there too. What the rest of the site loads is a separate question, answered on [the privacy page](/docs/privacy).
-3. **You can read the code.** All of it, MIT licensed, [on GitHub](https://github.com/ignromanov/safe-unfollow) — including the part that opens your archive.
+3. **You can read the code.** All of it, AGPL-3.0 licensed, [on GitHub](https://github.com/ignromanov/safe-unfollow) — including the part that opens your archive.
 4. **These claims are checked automatically.** A test in that repository reads this very page and refuses to release a version where we have promised something sweeping about ads, servers or tracking.
 5. **It is archived.** Every release is deposited on [Zenodo under one DOI](https://doi.org/10.5281/zenodo.22663615), so the code that read your file stays open to inspection even if this site goes away.
 

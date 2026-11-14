@@ -24,7 +24,7 @@ export function TermsOfService({ onBack }: TermsOfServiceProps) {
           </div>
           <h1 className="text-4xl md:text-5xl font-display font-bold">Terms of Service</h1>
         </div>
-        <p className="text-muted-foreground text-lg">Last updated: October 26, 2026</p>
+        <p className="text-muted-foreground text-lg">Last updated: November 14, 2026</p>
       </header>
 
       {/* Content */}
@@ -42,8 +42,8 @@ export function TermsOfService({ onBack }: TermsOfServiceProps) {
                 {/* Naming the paid export here is what keeps the summary from
                     contradicting §2.1 one screen below it. */}
                 <strong className="text-foreground">Free to Use</strong> — SafeUnfollow is free and
-                open-source under the MIT license. Exporting your results as a file is an optional
-                $7 one-time purchase.
+                open-source under the AGPL-3.0 license. Exporting your results as a file is an
+                optional $7 one-time purchase.
               </span>
             </li>
             <li className="flex items-start gap-3">
@@ -166,9 +166,12 @@ export function TermsOfService({ onBack }: TermsOfServiceProps) {
 
           <h3 className="text-lg font-semibold mt-6 mb-3">5.1 Open Source License</h3>
           <p className="text-muted-foreground">
-            SafeUnfollow is open-source software released under the MIT License. You are free to
-            use, copy, modify, and distribute the software in accordance with the license terms. The
-            source code is available at{' '}
+            SafeUnfollow is open-source software released under the GNU Affero General Public
+            License, version 3 only (AGPL-3.0-only). You may use, copy, modify, and distribute the
+            software under that license&apos;s terms. If you let other people use a modified version
+            over a network, the license requires you to offer them its source code. Versions up to
+            and including v1.7.0 were released under the MIT License, and those copies remain
+            available under it. The source code is available at{' '}
             <a
               href="https://github.com/ignromanov/safe-unfollow"
               target="_blank"
@@ -182,8 +185,8 @@ export function TermsOfService({ onBack }: TermsOfServiceProps) {
 
           <h3 className="text-lg font-semibold mt-6 mb-3">5.2 Trademarks</h3>
           <p className="text-muted-foreground">
-            The SafeUnfollow name, logo, and branding are proprietary. The MIT license applies to
-            the code, not to our trademarks.
+            The SafeUnfollow name, logo, and branding are proprietary. The AGPL-3.0 license applies
+            to the code, not to our trademarks.
           </p>
         </section>
 

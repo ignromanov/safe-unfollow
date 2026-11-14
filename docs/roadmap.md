@@ -50,7 +50,7 @@ Release notes for each version are in the [CHANGELOG](https://github.com/ignroma
 ### Privacy & Security
 - ✅ **Local processing** — SafeUnfollow reads your Instagram export in your browser and never sends the file to a server
 - ✅ **No Instagram login** — Uses official Instagram data export only
-- ✅ **Open source** — MIT license, full transparency
+- ✅ **Open source** — AGPL-3.0 license, full transparency
 
 ### Analytics (Privacy-Respecting)
 - ✅ **Umami Analytics** — Anonymous usage statistics (no personal data, GDPR-compliant)

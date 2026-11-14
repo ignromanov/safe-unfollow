@@ -8,7 +8,7 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22663615.svg)](https://doi.org/10.5281/zenodo.22663615)
 ![Version](https://img.shields.io/github/package-json/v/ignromanov/safe-unfollow?label=Version&color=blue)
 ![Privacy: 100% local](https://img.shields.io/badge/Privacy-100%25%20local-success)
-![License: MIT](https://img.shields.io/badge/License-MIT-blue)
+![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue)
 ![Open Source](https://img.shields.io/badge/Open%20Source-Yes-informational)
 ![Analysis: free](https://img.shields.io/badge/Analysis-Free-green)
 ![CI](https://github.com/ignromanov/safe-unfollow/actions/workflows/code-quality.yml/badge.svg)
@@ -118,7 +118,7 @@ Available in **10 languages** with full RTL support:
 | **Instagram Login** | ✅ Not required                                          | ❌ Required (risky!)           |
 | **Account Limit**   | ✅ 1M+ by design                                         | ⚠️ 10k-100k max                |
 | **Data Processing** | ⚡ In your browser, no round-trip                        | 🐌 Cloud round-trip            |
-| **Open Source**     | ✅ MIT license                                           | ❌ Closed source               |
+| **Open Source**     | ✅ AGPL-3.0 license                                      | ❌ Closed source               |
 | **Ads/Tracking**    | ⚠️ Ads + analytics — never usernames or your export file | ⚠️ Usually present             |
 | **Platform**        | 🌐 Web (all devices)                                     | 📱 Mobile apps usually         |
 
@@ -264,7 +264,15 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.
 
 ## 📄 License
 
-MIT License — see [LICENSE](LICENSE) for details.
+Copyright (C) 2025-2026 Ignat Romanov.
+
+SafeUnfollow is free software: you can redistribute it and/or modify it under the terms of the
+GNU Affero General Public License as published by the Free Software Foundation, version 3 only
+(`AGPL-3.0-only`). See [LICENSE](LICENSE). If you run a modified version for other people over a
+network, the licence requires you to offer them its source code.
+
+Versions up to and including v1.7.0 were released under the MIT License, and those copies remain
+available under it.
 
 **Disclaimer**: This project is not affiliated with Instagram/Meta. Use your data export in accordance with platform rules.
 

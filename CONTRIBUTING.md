@@ -2,7 +2,11 @@
 
 Thank you for your interest in contributing! This project is privacy-first and fully client-side, built with **IndexedDB v2** for handling massive datasets (1M+ accounts) efficiently.
 
-We welcome bug reports, feature requests, documentation improvements, and pull requests.
+**Outside code changes are not being accepted right now.** Bug reports, feature requests and
+questions are welcome in [GitHub Issues](https://github.com/ignromanov/safe-unfollow/issues).
+
+The project is licensed under `AGPL-3.0-only` (see [LICENSE](LICENSE)). Versions up to and
+including v1.7.0 were released under the MIT License.
 
 ### Development Setup
 

@@ -13,7 +13,7 @@
 - Shows unfollowers, non-mutuals, mutuals, pending requests, restricted and close-friends accounts, with the follow date the export recorded (since 2026-10-25).
 - Tested on a synthetic export of 1,000,000 accounts: about 21 seconds from choosing the file to results, in desktop Chrome (November 2026). One desktop run; no phone has been tested at that size.
 - Available in 10 languages.
-- Open source under the MIT licence, archived on Zenodo: https://doi.org/10.5281/zenodo.22663615
+- Open source under the AGPL-3.0 licence, archived on Zenodo: https://doi.org/10.5281/zenodo.22663615
 
 ## What it costs
 

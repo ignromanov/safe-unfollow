@@ -35,7 +35,7 @@ describe('TermsOfService', () => {
     it('should render last updated date', () => {
       render(<TermsOfService {...defaultProps} />);
 
-      expect(screen.getByText('Last updated: October 26, 2026')).toBeInTheDocument();
+      expect(screen.getByText('Last updated: November 14, 2026')).toBeInTheDocument();
     });
   });
 
@@ -55,10 +55,10 @@ describe('TermsOfService', () => {
       expect(screen.getByText('Not Affiliated')).toBeInTheDocument();
     });
 
-    it('should mention MIT license', () => {
+    it('should mention the AGPL-3.0 license', () => {
       render(<TermsOfService {...defaultProps} />);
 
-      expect(screen.getByText(/open-source under the MIT license/)).toBeInTheDocument();
+      expect(screen.getByText(/open-source under the AGPL-3.0 license/)).toBeInTheDocument();
     });
   });
 

@@ -39,7 +39,7 @@ how the free analysis is paid for. None of them receives the export itself — i
 
 ## Verify rather than believe
 
-- **Source code**: [github.com/ignromanov/safe-unfollow](https://github.com/ignromanov/safe-unfollow) — MIT, auditable
+- **Source code**: [github.com/ignromanov/safe-unfollow](https://github.com/ignromanov/safe-unfollow) — AGPL-3.0, auditable
 - **Network tab**: upload a file with DevTools open; no request carries its contents
 - **Offline**: run an analysis, then cut the network — everything you have already opened keeps working; a first visit still needs a connection
 

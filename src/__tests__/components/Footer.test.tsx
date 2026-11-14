@@ -122,7 +122,7 @@ describe('Footer', () => {
     expect(screen.getByText(commonEN.footer.trackingOff)).toBeInTheDocument();
   });
 
-  it('should render MIT License text', () => {
+  it('should render the license text', () => {
     renderWithRouter(<Footer />);
 
     expect(screen.getByText(commonEN.footer.license)).toBeInTheDocument();

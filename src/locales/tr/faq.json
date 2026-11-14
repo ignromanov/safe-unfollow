@@ -107,7 +107,7 @@
     },
     "free": {
       "question": "Ücretsiz Instagram takipten çıkan izleyicileri var mı?",
-      "answer": "Evet. SafeUnfollow'un analizi ücretsizdir: tüm rozetler, filtreler ve hesaplar, kayıt ve sınır olmadan. Ücretli olan tek şey filtrelenmiş listeni dosya olarak dışa aktarmaktır; bu, fiyatı düğmede yazan tek seferlik bir ödemeyle açılır. Listeyi görüntülemek her zaman ücretsizdir. Kod açık kaynaktır (MIT)."
+      "answer": "Evet. SafeUnfollow'un analizi ücretsizdir: tüm rozetler, filtreler ve hesaplar, kayıt ve sınır olmadan. Ücretli olan tek şey filtrelenmiş listeni dosya olarak dışa aktarmaktır; bu, fiyatı düğmede yazan tek seferlik bir ödemeyle açılır. Listeyi görüntülemek her zaman ücretsizdir. Kod açık kaynaktır (AGPL-3.0)."
     },
     "analyzeData": {
       "question": "Takipten çıkanları bulmak için Instagram veri indirmemi nasıl analiz ederim?",

@@ -107,7 +107,7 @@
     },
     "free": {
       "question": "Are there free Instagram unfollower trackers?",
-      "answer": "Yes. SafeUnfollow's analysis is free: every badge, filter and account, with no signup and no limit. The only paid item is exporting your filtered list as a file, a one-time unlock with the price shown on the button. Viewing the list is always free. The code is open source (MIT)."
+      "answer": "Yes. SafeUnfollow's analysis is free: every badge, filter and account, with no signup and no limit. The only paid item is exporting your filtered list as a file, a one-time unlock with the price shown on the button. Viewing the list is always free. The code is open source (AGPL-3.0)."
     },
     "analyzeData": {
       "question": "How do I analyze my Instagram data download to find unfollowers?",

@@ -24,7 +24,7 @@ last_updated: 2026-09-03
 | **Account size limit** | 1M+ by design — unit-tested at 1,000,000 accounts | 2,500 followers on Essential |
 | **Networks** | Instagram | Instagram, Threads, TikTok, Twitter/X |
 | **Ongoing monitoring** | No — one export, one snapshot | Yes, on the paid tier |
-| **Source code published** | Yes (MIT) | No |
+| **Source code published** | Yes (AGPL-3.0) | No |
 
 ## Where The Two Actually Differ
 
@@ -42,7 +42,7 @@ SafeUnfollow has no account-size limit. It stores usernames in packed columns an
 
 ### Whether you can check the claim, or only read it
 
-followsback says processing happens on your own device. So do we, in almost the same words. Neither claim can be verified from the outside by a visitor — and only one of the two can be verified at all: **SafeUnfollow's client is published under the MIT license**, so the code that touches your export is code you or anyone else can read. followsback does not publish its source.
+followsback says processing happens on your own device. So do we, in almost the same words. Neither claim can be verified from the outside by a visitor — and only one of the two can be verified at all: **SafeUnfollow's client is published under the AGPL-3.0 license**, so the code that touches your export is code you or anyone else can read. followsback does not publish its source.
 
 This is the difference we would ask you to weigh, because it is the only one on this page that does not depend on trusting either of us. If you want to run the check yourself rather than take it on faith, [here is how to check any tracker in two minutes](/docs/is-it-safe).
 
@@ -59,7 +59,7 @@ Honest answer: in three situations.
 - **Your account is bigger than their cap.** Above 2,500 followers, Essential cannot serve you.
 - **You want the answer, not a subscription.** One export, one complete list, nothing renewing.
 - **You want to keep the list.** The one-time unlock downloads it as a file, and it hands you a free sample of the first rows before you pay, so you see the exact format first.
-- **You want to read the code.** [The client is on GitHub](https://github.com/ignromanov/safe-unfollow) under the MIT license.
+- **You want to read the code.** [The client is on GitHub](https://github.com/ignromanov/safe-unfollow) under the AGPL-3.0 license.
 
 ## Switching Takes No Migration
 

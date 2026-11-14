@@ -107,7 +107,7 @@
     },
     "free": {
       "question": "Existe-t-il des suivis de désabonnements Instagram gratuits ?",
-      "answer": "Oui. L'analyse de SafeUnfollow est gratuite : tous les badges, filtres et comptes, sans inscription ni limite. Seul l'export de votre liste filtrée sous forme de fichier est payant, un paiement unique dont le prix est affiché sur le bouton. Consulter la liste reste toujours gratuit. Le code est open source (licence MIT)."
+      "answer": "Oui. L'analyse de SafeUnfollow est gratuite : tous les badges, filtres et comptes, sans inscription ni limite. Seul l'export de votre liste filtrée sous forme de fichier est payant, un paiement unique dont le prix est affiché sur le bouton. Consulter la liste reste toujours gratuit. Le code est open source (licence AGPL-3.0)."
     },
     "analyzeData": {
       "question": "Comment analyser mon téléchargement de données Instagram pour trouver les désabonnements ?",

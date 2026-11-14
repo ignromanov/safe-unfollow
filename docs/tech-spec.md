@@ -26,7 +26,7 @@ A privacy-focused, local web application that analyzes Instagram Data Download (
 ### Privacy Principles
 - **100% local processing**: All data processing happens in the browser
 - **No Instagram login**: Uses official Instagram data export only
-- **Open source**: MIT license, full transparency and auditability
+- **Open source**: AGPL-3.0 license, full transparency and auditability
 - **Optional analytics**: Self-hosted Umami and pageview-only Google Analytics 4 (disabled via "Don't Track Me")
 
 ---
@@ -202,7 +202,7 @@ Each row is a claim we make elsewhere, with how it was established and what it d
 | Tested on a synthetic export of 1,000,000 accounts: about 21 seconds from choosing the file to results, in desktop Chrome | Chrome DevTools Performance trace of the production site, from the file being chosen (71.3 s) to `/results` rendering (about 92.5 s) | One recorded run on a MacBook Pro 16" (Intel Core i9, 32 GB), Chrome 156; synthetic export of 500,000 following and 450,000 followers | November 2026 | One run, one desktop, one browser. Synthetic data, generated to the parser's schema. No phone has run it. Peak page heap was 598 MB, and worker memory may not be included |
 | Reads both JSON and HTML exports | The parser reads `.html` files through a built-in converter | [PR #152](https://github.com/ignromanov/safe-unfollow/pull/152) | 2026-08-29 | JSON is read most reliably; an unusual HTML export can fail |
 | Shows the follow date the export recorded | Dates are read from the export's own `timestamp` fields | [PR #288](https://github.com/ignromanov/safe-unfollow/pull/288) | 2026-10-25 | Only what the file recorded; no date is inferred |
-| Open source (MIT), archived with a DOI | Each release is deposited on Zenodo | [doi.org/10.5281/zenodo.22663615](https://doi.org/10.5281/zenodo.22663615) | since 2026-09-08 | The DOI always resolves to the newest version |
+| Open source (AGPL-3.0), archived with a DOI | Each release is deposited on Zenodo | [doi.org/10.5281/zenodo.22663615](https://doi.org/10.5281/zenodo.22663615) | since 2026-09-08 | The DOI always resolves to the newest version |
 | Available in 10 languages | The locale list the build prerenders | `src/config/languages.ts` | current | Legal pages are in English only |
 | Every badge and filter is free at any export size | Only saving the full list as a file is paid | `src/lib/export/` | current | Exporting the full list is a one-time purchase, priced by country |
 

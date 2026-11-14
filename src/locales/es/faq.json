@@ -107,7 +107,7 @@
     },
     "free": {
       "question": "¿Existen rastreadores de unfollowers de Instagram gratis?",
-      "answer": "Sí. El análisis de SafeUnfollow es gratis: todas las insignias, filtros y cuentas, sin registro ni límite. Lo único de pago es exportar tu lista filtrada como archivo, un desbloqueo de pago único con el precio en el propio botón. Ver la lista siempre es gratis. El código es abierto (licencia MIT)."
+      "answer": "Sí. El análisis de SafeUnfollow es gratis: todas las insignias, filtros y cuentas, sin registro ni límite. Lo único de pago es exportar tu lista filtrada como archivo, un desbloqueo de pago único con el precio en el propio botón. Ver la lista siempre es gratis. El código es abierto (licencia AGPL-3.0)."
     },
     "analyzeData": {
       "question": "¿Cómo analizo mi descarga de datos de Instagram para encontrar unfollowers?",

@@ -9,8 +9,6 @@ import IntentPage from './pages/IntentPage';
 // one waits for no second module (8af34d1 made every route static for that reason).
 import HomePage from './pages/HomePage';
 import UploadPage from './pages/UploadPage';
-import PrivacyPage from './pages/PrivacyPage';
-import TermsPage from './pages/TermsPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 /**
@@ -33,6 +31,15 @@ import NotFoundPage from './pages/NotFoundPage';
  */
 const loadResultsPage = () => import('./pages/ResultsPage');
 const loadSamplePage = () => import('./pages/SamplePage');
+
+/**
+ * The legal pages are route chunks too (2026-11-14). Their text is several KB of English prose
+ * that only these two pages render, and every byte of it sat in the entry: the AGPL-3.0 licence
+ * section alone overran `perf:budget`. The same `modulepreload` keeps a direct load free of a
+ * waterfall; `results-out-of-entry.test.ts` asserts it for both pages.
+ */
+const loadPrivacyPage = () => import('./pages/PrivacyPage');
+const loadTermsPage = () => import('./pages/TermsPage');
 
 /**
  * Factory for page children — each parent route needs its own object references
@@ -59,8 +66,8 @@ function createPageChildren(): RouteRecord[] {
  */
 function createLegalPageChildren(): RouteRecord[] {
   return [
-    { path: 'privacy', element: <PrivacyPage /> },
-    { path: 'terms', element: <TermsPage /> },
+    { path: 'privacy', lazy: loadPrivacyPage },
+    { path: 'terms', lazy: loadTermsPage },
   ];
 }
 

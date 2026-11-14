@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildVersion, citationReleaseDate, scrubPreviewEnv } from '../../../vite/build-env';
+import {
+  buildVersion,
+  citationReleaseDate,
+  scrubPreviewEnv,
+  sourceUrl,
+} from '../../../vite/build-env';
 
 describe('buildVersion', () => {
   it('is the short commit sha on Workers Builds', () => {
@@ -9,6 +14,20 @@ describe('buildVersion', () => {
 
   it("is package.json's version anywhere else", () => {
     expect(buildVersion({}, '1.6.0')).toBe('1.6.0');
+  });
+});
+
+// AGPL-3.0 §13: a network user is offered the source of the version they are using,
+// so the footer links the exact commit that was built, not the moving default branch.
+describe('sourceUrl', () => {
+  it('points at the built commit on Workers Builds', () => {
+    expect(sourceUrl({ WORKERS_CI_COMMIT_SHA: 'abcdef0123456789' })).toBe(
+      'https://github.com/ignromanov/safe-unfollow/tree/abcdef0'
+    );
+  });
+
+  it('falls back to the repository when no commit is known', () => {
+    expect(sourceUrl({})).toBe('https://github.com/ignromanov/safe-unfollow');
   });
 });
 

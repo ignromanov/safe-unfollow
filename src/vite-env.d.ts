@@ -57,6 +57,9 @@ declare const __APP_VERSION__: string;
  */
 declare const __PKG_VERSION__: string;
 
+/** The footer's source link: the built commit in CI, the repository elsewhere (`vite/build-env.ts`). */
+declare const __SOURCE_URL__: string;
+
 /**
  * `CITATION.cff`'s `date-released`, inlined by `define` in vite.config.ts and vitest.config.ts.
  * Published as `SoftwareApplication.dateModified`: a release date, never a build date.
