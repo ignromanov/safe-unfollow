@@ -4,6 +4,7 @@ import {
   currentFilterSessionId,
   resetFilterSession,
 } from '@/lib/stats/filter-session';
+import { resultsTelemetry } from '@/lib/stats/results-click-events';
 import { useCallback, useEffect, useRef } from 'react';
 
 interface UseTimeOnResultsReturn {
@@ -21,7 +22,8 @@ interface UseTimeOnResultsReturn {
  * Fires analytics events on unmount or when page becomes hidden.
  *
  * V7: Extended to track profile clicks with badge aggregation.
- * Sends both timeOnResults and resultsClicksSummary events.
+ * Sends both timeOnResults and results_clicks_summary events; the clicks row
+ * is cumulative and re-sent on every trigger after the count moved.
  *
  * V9: Uses sendBeacon for reliable delivery on mobile page unload.
  * Also uses pagehide as additional listener for Safari.
@@ -40,6 +42,9 @@ export function useTimeOnResults(accountCount: number, isActive: boolean): UseTi
   // At most one row per side of the floor per visit; see `fireEvent`.
   const sentRef = useRef({ below: false, above: false });
   const visitIdRef = useRef('');
+  // Click count at the last clicks row, and that row's seq. See `fireClicks`.
+  const clicksSentRef = useRef(0);
+  const clicksSeqRef = useRef(0);
 
   // Track user actions (filter, search, etc.)
   const trackAction = useCallback(() => {
@@ -83,16 +88,30 @@ export function useTimeOnResults(accountCount: number, isActive: boolean): UseTi
       below_floor: belowFloor,
       filter_session_id: visitIdRef.current,
     });
-
-    // Clicks ride with the row past the floor only, so they are sent once.
-    if (!belowFloor && clicksCountRef.current > 0) {
-      analytics.resultsClicksSummary({
-        totalClicks: clicksCountRef.current,
-        badgeClicks: badgeClicksRef.current,
-        timeSpentSeconds: timeSpent,
-      });
-    }
   }, [accountCount]);
+
+  // The clicks row is cumulative and superseding, so unlike `fireEvent` it has
+  // no per-side limit: it is re-sent on every trigger after the count moved.
+  // It used to ride once with the first row past the floor, and a profile
+  // opens in Instagram — the very click hides the tab — so the row nearly
+  // always held exactly one click (97% of clicking visits). No floor gate
+  // either: a later row supersedes, so a short first row costs nothing.
+  const fireClicks = useCallback(() => {
+    const clicks = clicksCountRef.current;
+    if (startTimeRef.current === null || clicks === clicksSentRef.current) {
+      return;
+    }
+    clicksSentRef.current = clicks;
+    resultsTelemetry.clicksSummary(
+      {
+        totalClicks: clicks,
+        badgeClicks: badgeClicksRef.current,
+        timeSpentSeconds: (Date.now() - startTimeRef.current) / 1000,
+      },
+      visitIdRef.current,
+      clicksSeqRef.current++
+    );
+  }, []);
 
   // The filter summary rides the same three triggers as the time beacon and
   // none of its per-side limits: it is cumulative and superseding, so it is
@@ -152,6 +171,8 @@ export function useTimeOnResults(accountCount: number, isActive: boolean): UseTi
     clicksCountRef.current = 0;
     badgeClicksRef.current = {};
     sentRef.current = { below: false, above: false };
+    clicksSentRef.current = 0;
+    clicksSeqRef.current = 0;
     // Captured at the start: the reset effect's cleanup rotates the id before
     // this effect's cleanup sends the last row.
     visitIdRef.current = currentFilterSessionId();
@@ -160,6 +181,7 @@ export function useTimeOnResults(accountCount: number, isActive: boolean): UseTi
     const handleVisibilityChange = () => {
       if (document.hidden) {
         fireEvent();
+        fireClicks();
         fireFilterSummary();
       }
     };
@@ -167,6 +189,7 @@ export function useTimeOnResults(accountCount: number, isActive: boolean): UseTi
     // Layer 2: pagehide (Safari-specific)
     const handlePageHide = () => {
       fireEvent();
+      fireClicks();
       fireFilterSummary();
     };
 
@@ -178,12 +201,13 @@ export function useTimeOnResults(accountCount: number, isActive: boolean): UseTi
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('pagehide', handlePageHide);
       fireEvent();
+      fireClicks();
       // Firing twice on the way out is free: the signature check above returns
       // without emitting when the reset effect's cleanup has already sent this
       // exact summary.
       fireFilterSummary();
     };
-  }, [isActive, fireEvent, fireFilterSummary]);
+  }, [isActive, fireEvent, fireClicks, fireFilterSummary]);
 
   // The accumulator's last owner, and the only cleanup here registered whether
   // or not the visit ever became active.

@@ -3,12 +3,17 @@ import type { MutableRefObject } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/lib/analytics', () => ({
-  analytics: { resultsClicksSummary: vi.fn(), filterSessionSummary: vi.fn() },
+  analytics: { filterSessionSummary: vi.fn() },
   AnalyticsEvents: { TIME_ON_RESULTS: 'time_on_results' },
   trackBeacon: vi.fn(),
 }));
 
+vi.mock('@/lib/stats/results-click-events', () => ({
+  resultsTelemetry: { clicksSummary: vi.fn() },
+}));
+
 import { analytics, AnalyticsEvents, trackBeacon } from '@/lib/analytics';
+import { resultsTelemetry } from '@/lib/stats/results-click-events';
 import { useTimeOnResults } from '@/hooks/useTimeOnResults';
 import { recordToggle, resetFilterSession } from '@/lib/stats/filter-session';
 import type { BadgeKey } from '@/core/types';
@@ -81,7 +86,7 @@ describe('useTimeOnResults', () => {
           filter_session_id: expect.stringMatching(/.+/),
         },
       ]);
-      expect(analytics.resultsClicksSummary).toHaveBeenCalledTimes(1);
+      expect(resultsTelemetry.clicksSummary).toHaveBeenCalledTimes(1);
     });
 
     it('sends a visit under the five second floor, marked as such', () => {
@@ -96,8 +101,9 @@ describe('useTimeOnResults', () => {
       expect(timeRows()).toEqual([
         expect.objectContaining({ time_seconds: 2, below_floor: true, actions_count: 1 }),
       ]);
-      // Clicks ride only with the row past the floor, as before.
-      expect(analytics.resultsClicksSummary).not.toHaveBeenCalled();
+      // The clicks row is cumulative and superseding, so it is not floor-gated:
+      // a click in a short visit is still a click.
+      expect(resultsTelemetry.clicksSummary).toHaveBeenCalledTimes(1);
     });
 
     it('sends one row per side of the floor, however many triggers fire', () => {
@@ -338,6 +344,91 @@ describe('useTimeOnResults', () => {
       expect(calls).toHaveLength(2);
       expect(calls[0]?.[0].id).toBe(calls[1]?.[0].id);
       expect(calls[1]?.[1]).toBeGreaterThan(Number(calls[0]?.[1]));
+    });
+  });
+
+  describe('results_clicks_summary: cumulative, re-sent whenever the count moved', () => {
+    beforeEach(() => {
+      resetFilterSession();
+      vi.clearAllMocks();
+    });
+
+    function setHidden(hidden: boolean) {
+      vi.spyOn(document, 'hidden', 'get').mockReturnValue(hidden);
+      document.dispatchEvent(new Event('visibilitychange'));
+    }
+
+    function clickRows() {
+      return vi.mocked(resultsTelemetry.clicksSummary).mock.calls;
+    }
+
+    it('three profile visits with a return each give a last row of three, not one', () => {
+      // The defect this replaces: the summary went out once, on the first
+      // trigger past the floor, so every later click in the visit was lost and
+      // 97% of clicking visits were recorded with exactly one click.
+      vi.spyOn(Date, 'now').mockReturnValue(0);
+      const apiRef: MutableRefObject<TimeOnResultsApi | null> = { current: null };
+      const { unmount } = render(<Harness accountCount={100} isActive apiRef={apiRef} />);
+
+      for (let i = 1; i <= 3; i++) {
+        vi.spyOn(Date, 'now').mockReturnValue(i * 10_000);
+        apiRef.current?.trackClick(['notFollowingBack']);
+        setHidden(true); // the profile opens in Instagram
+        setHidden(false); // the reader comes back
+      }
+      unmount();
+
+      const rows = clickRows();
+      expect(rows).toHaveLength(3);
+      const last = rows[rows.length - 1];
+      expect(last?.[0]).toEqual(
+        expect.objectContaining({ totalClicks: 3, badgeClicks: { notFollowingBack: 3 } })
+      );
+      // One visit, superseding rows: same id, strictly rising seq.
+      expect(new Set(rows.map(r => r[1])).size).toBe(1);
+      expect(rows.map(r => r[2])).toEqual([0, 1, 2]);
+    });
+
+    it('does not re-send when nothing was clicked since the last row', () => {
+      vi.spyOn(Date, 'now').mockReturnValue(0);
+      const apiRef: MutableRefObject<TimeOnResultsApi | null> = { current: null };
+      const { unmount } = render(<Harness accountCount={100} isActive apiRef={apiRef} />);
+      apiRef.current?.trackClick(['mutuals']);
+
+      vi.spyOn(Date, 'now').mockReturnValue(8_000);
+      setHidden(true);
+      setHidden(false);
+      setHidden(true);
+      window.dispatchEvent(new Event('pagehide'));
+      unmount();
+
+      expect(clickRows()).toHaveLength(1);
+    });
+
+    it('sends nothing for a visit without clicks', () => {
+      vi.spyOn(Date, 'now').mockReturnValue(0);
+      const { unmount } = render(<Harness accountCount={100} isActive />);
+      vi.spyOn(Date, 'now').mockReturnValue(8_000);
+      setHidden(true);
+      unmount();
+
+      expect(clickRows()).toHaveLength(0);
+    });
+
+    it('starts seq again at 0 for the next visit, under a new id', () => {
+      vi.spyOn(Date, 'now').mockReturnValue(0);
+      const apiRef: MutableRefObject<TimeOnResultsApi | null> = { current: null };
+      const { rerender, unmount } = render(<Harness accountCount={100} isActive apiRef={apiRef} />);
+      apiRef.current?.trackClick(['mutuals']);
+      rerender(<Harness accountCount={100} isActive={false} apiRef={apiRef} />);
+      rerender(<Harness accountCount={100} isActive apiRef={apiRef} />);
+      apiRef.current?.trackClick(['mutuals']);
+      unmount();
+
+      const rows = clickRows();
+      expect(rows.map(r => r[2])).toEqual([0, 0]);
+      expect(rows[0]?.[1]).not.toBe(rows[1]?.[1]);
+      expect(rows[1]?.[0]).toEqual(expect.objectContaining({ totalClicks: 1 }));
     });
   });
 });
