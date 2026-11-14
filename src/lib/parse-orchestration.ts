@@ -34,6 +34,12 @@ export interface ParseResult {
   labelResolutionMode?: LabelResolutionMode;
   truncatedRelationshipFile?: RelationshipSkew;
   datesFitted?: boolean;
+  /**
+   * `count_<badge>` for `file_upload_success`. Worker path only: the main-thread
+   * fallback, taken when no Worker can start, sends none, so its uploads read
+   * as "not measured" rather than costing the entry bundle the file map.
+   */
+  badgeCounts?: Record<string, number>;
 }
 
 export interface ProgressCallback {
@@ -81,6 +87,7 @@ export async function parseWithWorker(
           labelResolutionMode,
           truncatedRelationshipFile,
           datesFitted,
+          badgeCounts,
         } = e.data;
         worker.removeEventListener('message', handleMessage);
         resolve({
@@ -91,6 +98,7 @@ export async function parseWithWorker(
           labelResolutionMode,
           truncatedRelationshipFile,
           datesFitted,
+          badgeCounts,
         });
       } else if (e.data?.type === 'error') {
         clearTimeout(timeoutId);

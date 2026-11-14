@@ -5,6 +5,7 @@
 import { AnalyticsEvents, parseDurationBucket } from './constants';
 import type { LinkType, ParseOutcome } from './constants';
 import { trackBeacon, trackEvent } from './core';
+import { uploadIdField } from './upload-context';
 import { enqueueEvent, flushEvents, trackNavigating } from './queue';
 import { getStoredUTM, getEntryCTA } from './utm';
 import type { GuideSource } from '@/hooks/useGuideDialog';
@@ -51,6 +52,7 @@ export const analytics = {
   fileUploadStart: (fileSizeMb: number) => {
     enqueueEvent(AnalyticsEvents.FILE_UPLOAD_START, {
       file_size_mb: roundMb(fileSizeMb),
+      ...uploadIdField(),
     });
   },
 
@@ -76,7 +78,10 @@ export const analytics = {
     fromCache: boolean,
     format?: ExportFormat,
     mixedRelationshipFormats?: boolean,
-    duplicateRelationshipShards?: boolean
+    duplicateRelationshipShards?: boolean,
+    // `count_<badge>` keys from `measuredBadgeCounts`: fresh parses only, and
+    // only the badges that parse measured.
+    badgeCounts?: Record<string, number>
   ) => {
     const utm = getStoredUTM();
     const entryCta = getEntryCTA();
@@ -94,6 +99,8 @@ export const analytics = {
       ...(utm.utm_medium && { utm_medium: utm.utm_medium }),
       ...(utm.utm_campaign && { utm_campaign: utm.utm_campaign }),
       ...(entryCta && { entry_cta: entryCta }),
+      ...badgeCounts,
+      ...uploadIdField(),
     });
   },
 
@@ -108,6 +115,7 @@ export const analytics = {
     enqueueEvent(AnalyticsEvents.UPLOAD_PARSE_DURATION, {
       duration_bucket: parseDurationBucket(durationMs),
       outcome,
+      ...uploadIdField(),
     });
   },
 
@@ -156,13 +164,17 @@ export const analytics = {
     queryLength: number,
     resultCount: number,
     totalCount: number,
-    hasFiltersActive: boolean
+    hasFiltersActive: boolean,
+    // Matches for the same query with no filters. Measured only when a filtered
+    // search found nothing, so absent means "not measured", never 0.
+    unfilteredCount?: number
   ) => {
     enqueueEvent(AnalyticsEvents.SEARCH_PERFORM, {
       query_length: queryLength,
       result_count: resultCount,
       total_count: totalCount,
       has_filters_active: hasFiltersActive,
+      ...(unfilteredCount === undefined ? {} : { unfiltered_count: unfilteredCount }),
     });
   },
 
@@ -472,6 +484,7 @@ export const analytics = {
       UNKNOWN: AnalyticsEvents.UPLOAD_ERROR_UNKNOWN,
     };
     enqueueEvent(eventMap[code], {
+      ...uploadIdField(),
       error_message: errorMessage?.slice(0, 50) ?? '',
       // The size used to reach the database only inside error_message, i18n'd
       // into ten languages and truncated at 50 characters — German writes
@@ -540,6 +553,7 @@ export const analytics = {
     trackEvent(AnalyticsEvents.OPTIONAL_FILE_FORMAT_DRIFT, {
       file_code: fileCode,
       ...(format === undefined ? {} : { format }),
+      ...uploadIdField(),
     });
   },
 
@@ -551,7 +565,7 @@ export const analytics = {
   // `optionalFileFormatDrift`: a rare diagnostic about an upstream format
   // change, not a high-volume impression.
   usernameLabelResolution: (mode: LabelResolutionMode) => {
-    trackEvent(AnalyticsEvents.USERNAME_LABEL_RESOLUTION, { mode });
+    trackEvent(AnalyticsEvents.USERNAME_LABEL_RESOLUTION, { mode, ...uploadIdField() });
   },
 
   // Fires only when one of the two required relationship files looks cut short,
@@ -564,7 +578,7 @@ export const analytics = {
   // shape, never about its contents. Same line the label event draws: no
   // username, no count, nothing derived from the file's bytes.
   relationshipFileTruncated: (file: 'followers' | 'following') => {
-    trackEvent(AnalyticsEvents.RELATIONSHIP_FILE_TRUNCATED, { file });
+    trackEvent(AnalyticsEvents.RELATIONSHIP_FILE_TRUNCATED, { file, ...uploadIdField() });
   },
 
   // The same parse's verdict, including the two quiet ones and the abstention.
@@ -590,6 +604,7 @@ export const analytics = {
       verdict,
       ...(format === undefined ? {} : { format }),
       ...(datesFitted === undefined ? {} : { dates_fitted: datesFitted }),
+      ...uploadIdField(),
     });
   },
 

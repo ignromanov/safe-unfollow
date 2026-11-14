@@ -174,18 +174,18 @@ export function useAccountFiltering(options: UseAccountFilteringOptions) {
     const requestKey = resultKeyOf(activeFilters, debouncedQuery);
 
     // Choose filter method: worker (preferred) or fallback engine
-    const performFilter = async (): Promise<number[]> => {
+    const performFilter = async (filters: BadgeKey[]): Promise<number[]> => {
       if (isWorkerReady) {
         // Use Web Worker (off main thread)
-        return workerFilterToIndices(debouncedQuery, new Set(activeFilters));
+        return workerFilterToIndices(debouncedQuery, new Set(filters));
       } else if (filterEngineRef.current) {
         // Fallback to sync engine (main thread)
-        return filterEngineRef.current.filterToIndices(debouncedQuery, activeFilters);
+        return filterEngineRef.current.filterToIndices(debouncedQuery, filters);
       }
       return [];
     };
 
-    performFilter()
+    performFilter(activeFilters)
       .then(indices => {
         // Check if this request was cancelled
         if (abortController.signal.aborted) {
@@ -207,13 +207,26 @@ export function useAccountFiltering(options: UseAccountFilteringOptions) {
           // Track search only if query changed and is non-empty
           const trimmedQuery = debouncedQuery.trim();
           if (trimmedQuery && trimmedQuery !== lastTrackedQueryRef.current) {
-            analytics.searchPerform(
-              trimmedQuery.length,
-              indices.length,
-              totalCount,
-              activeFilters.length > 0
-            );
             lastTrackedQueryRef.current = trimmedQuery;
+            const report = (...unfiltered: [number] | []) =>
+              analytics.searchPerform(
+                trimmedQuery.length,
+                indices.length,
+                totalCount,
+                activeFilters.length > 0,
+                ...unfiltered
+              );
+            // A filtered search that found nothing is either "filtered out" or
+            // "not in your list", and they need opposite fixes. The same query
+            // with no filters tells them apart. Asked only then, after the list
+            // has already updated, so it costs the reader nothing.
+            if (indices.length === 0 && activeFilters.length > 0) {
+              performFilter([])
+                .then(all => report(all.length))
+                .catch(() => report());
+            } else {
+              report();
+            }
           }
         }
       })

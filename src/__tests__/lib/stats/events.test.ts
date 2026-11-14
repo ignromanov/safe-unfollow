@@ -350,3 +350,28 @@ describe('freeExportDownload export_format (GH#286)', () => {
     });
   });
 });
+
+describe('searchPerform', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('carries unfiltered_count when it was measured', () => {
+    analytics.searchPerform(5, 0, 100, true, 2);
+
+    expect(enqueueEvent).toHaveBeenCalledWith('search_perform', {
+      query_length: 5,
+      result_count: 0,
+      total_count: 100,
+      has_filters_active: true,
+      unfiltered_count: 2,
+    });
+  });
+
+  it('omits unfiltered_count when it was not measured, rather than sending 0', () => {
+    analytics.searchPerform(5, 3, 100, true);
+
+    const [, payload] = enqueueEvent.mock.calls[0];
+    expect(payload).not.toHaveProperty('unfiltered_count');
+  });
+});

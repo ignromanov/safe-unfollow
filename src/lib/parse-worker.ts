@@ -8,6 +8,7 @@ import { generateFileHash } from './indexeddb/indexeddb-cache';
 import { indexedDBService } from './indexeddb/indexeddb-service';
 import { buildAllSearchIndexes } from './search-index';
 import { logger } from './logger';
+import { readBadgeCounts } from './stats/upload-badge-counts';
 
 // Search index build delay (ms) - allows UI to be responsive before background task
 const SEARCH_INDEX_BUILD_DELAY_MS = 100;
@@ -121,6 +122,10 @@ self.onmessage = async (
       }
     }, SEARCH_INDEX_BUILD_DELAY_MS);
 
+    // Read here, in the worker's own chunk, rather than on the main thread:
+    // `useFileUpload` is in the entry bundle, and the file map is not small.
+    const badgeCounts = await readBadgeCounts(fileHash, parseResult.discovery.files);
+
     // Send success result with warnings and discovery info
     self.postMessage({
       type: 'result',
@@ -132,6 +137,7 @@ self.onmessage = async (
       labelResolutionMode: parseResult.labelResolutionMode,
       truncatedRelationshipFile: parseResult.truncatedRelationshipFile,
       datesFitted: parseResult.datesFitted,
+      badgeCounts,
     });
   } catch (error) {
     // Send error result with classified code

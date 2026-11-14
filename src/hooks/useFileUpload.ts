@@ -9,6 +9,7 @@ import { dbCache, generateFileHash } from '@/lib/indexeddb/indexeddb-cache';
 import { indexedDBService } from '@/lib/indexeddb/indexeddb-service';
 import { parseOnMainThread, parseWithWorker } from '@/lib/parse-orchestration';
 import type { ParseErrorData } from '@/lib/parse-orchestration';
+import { newUploadId, withUpload } from '@/lib/stats/upload-context';
 import { useAppStore } from '@/lib/store';
 import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -57,7 +58,11 @@ const LAST_UPLOAD_KEY = 'analytics_last_upload';
  * here instead of a fourth positional argument at three call sites and a fourth
  * hand-written `error as { field?: T }` cast on the failure path.
  */
-function reportParseDiagnostics({
+function reportParseDiagnostics(data: ParseErrorData, uploadId: string): void {
+  withUpload(uploadId, () => emitParseDiagnostics(data));
+}
+
+function emitParseDiagnostics({
   warnings,
   discovery,
   labelResolutionMode,
@@ -230,6 +235,11 @@ export function useFileUpload() {
 
       let fileHash: string;
 
+      // Every event of this attempt carries this `upload_id`. Each emit is
+      // wrapped, not the attempt: a second file can be dropped while this one
+      // parses, and the two must not share or swap ids.
+      const uploadId = newUploadId();
+
       try {
         // Validate ZIP file before processing
         const isZip = await isValidZipFile(file);
@@ -248,7 +258,7 @@ export function useFileUpload() {
         fileHash = await generateFileHash(file);
 
         // Track upload start with file hash
-        analytics.fileUploadStart(fileSizeMb);
+        withUpload(uploadId, () => analytics.fileUploadStart(fileSizeMb));
 
         // Check IndexedDB cache first
         const cachedData = await dbCache.get(fileHash);
@@ -271,7 +281,9 @@ export function useFileUpload() {
           // parsed this call — the cache holds no discovery to report, and a
           // fabricated 'unknown' would read as a measurement rather than the
           // omission it is.
-          analytics.fileUploadSuccess(cachedData.metadata.accountCount, true);
+          withUpload(uploadId, () =>
+            analytics.fileUploadSuccess(cachedData.metadata.accountCount, true)
+          );
 
           outcome = 'cached';
           return;
@@ -283,6 +295,8 @@ export function useFileUpload() {
         // GH#156: hoisted the same way accountCount/resultFileHash are, so
         // fileUploadSuccess can report the export's shape below.
         let discovery: FileDiscovery | undefined;
+        // Worker path only; see `ParseResult.badgeCounts`.
+        let badgeCounts: Record<string, number> | undefined;
 
         const handleProgress = (progress: number, processed: number, total: number) => {
           setUploadProgress(progress);
@@ -304,6 +318,7 @@ export function useFileUpload() {
             accountCount = result.accountCount;
             resultFileHash = result.fileHash;
             discovery = result.discovery;
+            badgeCounts = result.badgeCounts;
 
             // Store warnings and discovery from worker
             if (result.warnings || result.discovery) {
@@ -312,7 +327,7 @@ export function useFileUpload() {
                 fileDiscovery: result.discovery,
               });
             }
-            reportParseDiagnostics(result);
+            reportParseDiagnostics(result, uploadId);
           } catch (error) {
             // Extract warnings/discovery from error if available
             if (error instanceof Error && 'warnings' in error) {
@@ -321,7 +336,7 @@ export function useFileUpload() {
                 parseWarnings: failure.warnings ?? [],
                 fileDiscovery: failure.discovery,
               });
-              reportParseDiagnostics(failure);
+              reportParseDiagnostics(failure, uploadId);
             }
             throw error;
           }
@@ -342,7 +357,7 @@ export function useFileUpload() {
             parseWarnings: result.warnings ?? [],
             fileDiscovery: result.discovery,
           });
-          reportParseDiagnostics(result);
+          reportParseDiagnostics(result, uploadId);
         }
 
         // Data already cached in IndexedDB by worker during chunked processing
@@ -362,13 +377,15 @@ export function useFileUpload() {
           accountCount: accountCount,
         });
 
-        // Track successful processing
-        analytics.fileUploadSuccess(
-          accountCount,
-          false,
-          discovery?.format,
-          discovery?.mixedRelationshipFormats,
-          discovery?.duplicateRelationshipShards
+        withUpload(uploadId, () =>
+          analytics.fileUploadSuccess(
+            accountCount,
+            false,
+            discovery?.format,
+            discovery?.mixedRelationshipFormats,
+            discovery?.duplicateRelationshipShards,
+            badgeCounts
+          )
         );
 
         // Track return upload (user uploading new data)
@@ -378,7 +395,9 @@ export function useFileUpload() {
       } catch (err) {
         // Track cancelled uploads but don't show error
         if (abortControllerRef.current?.signal.aborted) {
-          analytics.uploadErrorByCode('UPLOAD_CANCELLED', undefined, fileSizeMb);
+          withUpload(uploadId, () =>
+            analytics.uploadErrorByCode('UPLOAD_CANCELLED', undefined, fileSizeMb)
+          );
           outcome = 'cancelled';
           return;
         }
@@ -392,7 +411,9 @@ export function useFileUpload() {
         const warnings = (err as { warnings?: ParseWarning[] }).warnings;
         const discovery = (err as { discovery?: FileDiscovery }).discovery;
 
-        analytics.uploadErrorByCode(errorCode, errorMessage, fileSizeMb, discovery?.format);
+        withUpload(uploadId, () =>
+          analytics.uploadErrorByCode(errorCode, errorMessage, fileSizeMb, discovery?.format)
+        );
 
         setUploadInfo({
           currentFileName: file.name,
@@ -405,7 +426,9 @@ export function useFileUpload() {
       } finally {
         // Every terminal path lands here, including the early cache return, so
         // the bucket distribution covers all uploads and not just slow ones.
-        analytics.uploadParseDuration(performance.now() - startTime, outcome);
+        withUpload(uploadId, () =>
+          analytics.uploadParseDuration(performance.now() - startTime, outcome)
+        );
       }
     },
     [setUploadInfo, t]
