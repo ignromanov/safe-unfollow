@@ -172,6 +172,26 @@ describe('fileUploadSuccess duplicate_relationship_shards field (GH#160 step 2)'
   });
 });
 
+describe('fileUploadSuccess archive_scope field (v1.8 task 02)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it.each(['followers_only', 'extended'] as const)('reports %s', scope => {
+    analytics.fileUploadSuccess(100, false, 'json', false, false, undefined, scope);
+
+    const [, payload] = enqueueEvent.mock.calls[0];
+    expect(payload).toMatchObject({ archive_scope: scope });
+  });
+
+  it('omits it on the cache-hit path, where no archive was analysed', () => {
+    analytics.fileUploadSuccess(100, true);
+
+    const [, payload] = enqueueEvent.mock.calls[0];
+    expect(payload).not.toHaveProperty('archive_scope');
+  });
+});
+
 describe('optionalFileFormatDrift format field (GH#156)', () => {
   beforeEach(() => {
     vi.clearAllMocks();

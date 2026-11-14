@@ -9,7 +9,12 @@ import { uploadIdField } from './upload-context';
 import { enqueueEvent, flushEvents, trackNavigating } from './queue';
 import { getStoredUTM, getEntryCTA } from './utm';
 import type { GuideSource } from '@/hooks/useGuideDialog';
-import type { LabelResolutionMode, RelationshipFormat, RelationshipSkew } from '@/core/types';
+import type {
+  ArchiveScope,
+  LabelResolutionMode,
+  RelationshipFormat,
+  RelationshipSkew,
+} from '@/core/types';
 import type { LicenseFailureReason } from '@/lib/export/license';
 import type { ExportFormat as ExportFileFormat } from '@/lib/export/types';
 import type { FilterSessionSummary } from './filter-session';
@@ -81,7 +86,9 @@ export const analytics = {
     duplicateRelationshipShards?: boolean,
     // `count_<badge>` keys from `measuredBadgeCounts`: fresh parses only, and
     // only the badges that parse measured.
-    badgeCounts?: Record<string, number>
+    badgeCounts?: Record<string, number>,
+    // Omitted on the cache-hit path, like `format`.
+    archiveScope?: ArchiveScope
   ) => {
     const utm = getStoredUTM();
     const entryCta = getEntryCTA();
@@ -100,6 +107,7 @@ export const analytics = {
       ...(utm.utm_campaign && { utm_campaign: utm.utm_campaign }),
       ...(entryCta && { entry_cta: entryCta }),
       ...badgeCounts,
+      ...(archiveScope && { archive_scope: archiveScope }),
       ...uploadIdField(),
     });
   },
@@ -129,8 +137,8 @@ export const analytics = {
    *
    * `trackBeacon` rather than `trackEvent`: this is all-or-nothing per session
    * and mostly fires on the way out, where an ordinary request is freely
-   * cancelled. (`resultsClicksSummary` below is on `trackEvent` and has the same
-   * exposure — a pre-existing inconsistency, not this event's to fix.)
+   * cancelled. (`results_clicks_summary` moved to `trackBeacon` too, in
+   * `results-click-events.ts`.)
    *
    * `seq` supersedes: the accumulator is cumulative, so a row with a higher seq
    * contains everything the lower ones did. Analysis reads the highest seq
@@ -175,29 +183,6 @@ export const analytics = {
       total_count: totalCount,
       has_filters_active: hasFiltersActive,
       ...(unfilteredCount === undefined ? {} : { unfiltered_count: unfilteredCount }),
-    });
-  },
-
-  /**
-   * Aggregated click summary sent on page leave.
-   *
-   * Unsampled, like its only caller `useTimeOnResults`, which sends it once per
-   * visit with the row past the five-second floor. Segmenting `badge_clicks` by
-   * badge is the only reason that field is in the payload at all.
-   */
-  resultsClicksSummary: (stats: {
-    totalClicks: number;
-    badgeClicks: Record<string, number>;
-    timeSpentSeconds: number;
-  }) => {
-    // Every badge clicked, most-clicked first. There are eleven badge keys, so
-    // the payload is bounded; the top-3 cut hid every badge below third place.
-    const all = Object.fromEntries(Object.entries(stats.badgeClicks).sort(([, a], [, b]) => b - a));
-
-    trackEvent(AnalyticsEvents.RESULTS_CLICKS_SUMMARY, {
-      total_clicks: stats.totalClicks,
-      badge_clicks: JSON.stringify(all),
-      time_spent: Math.round(stats.timeSpentSeconds),
     });
   },
 

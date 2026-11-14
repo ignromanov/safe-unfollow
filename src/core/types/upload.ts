@@ -167,6 +167,8 @@ export const RELATIONSHIP_FORMATS = ['json', 'html'] as const;
 export type RelationshipFormat = (typeof RELATIONSHIP_FORMATS)[number];
 
 /** Discovery status of expected files */
+export type ArchiveScope = 'followers_only' | 'extended';
+
 export interface FileDiscovery {
   /** Format of the export, or `unknown` when no relationship file was found. */
   format: RelationshipFormat | 'unknown';
@@ -190,6 +192,12 @@ export interface FileDiscovery {
    * a fabricated measurement in the denominator of a rate.
    */
   duplicateRelationshipShards?: boolean;
+  /**
+   * Whether the export carries anything beyond the relationship folders, read
+   * off top-level folder NAMES only — no file is opened for it (v1.8 task 02).
+   * Optional for the same reason as the two fields above.
+   */
+  archiveScope?: ArchiveScope;
   /** All expected files and their status */
   files: FileExpectation[];
 }

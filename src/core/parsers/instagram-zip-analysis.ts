@@ -3,7 +3,7 @@
  * Detects format and provides diagnostic information
  */
 
-import type { FileDiscovery, ParseWarning, RelationshipFormat } from '@/core/types';
+import type { ArchiveScope, FileDiscovery, ParseWarning, RelationshipFormat } from '@/core/types';
 import {
   RELATIONSHIP_EXTENSIONS,
   relationshipFileBase,
@@ -67,7 +67,25 @@ export interface ZipAnalysis {
    * archives that parse correctly.
    */
   duplicateRelationshipShards: boolean;
+  /**
+   * `extended` when a top-level folder outside the relationship data is
+   * present. Decided on folder names only, over every top-level folder rather
+   * than the five `topLevelFolders` keeps for error messages.
+   */
+  archiveScope: ArchiveScope;
 }
+
+/**
+ * Top-level folders that only an export with more than "Followers and
+ * following" selected contains. A named list rather than "anything else",
+ * because a root file or an unknown folder must not read as a wider export.
+ */
+const EXTENDED_SCOPE_FOLDERS = new Set([
+  'media',
+  'messages',
+  'your_instagram_activity',
+  'personal_information',
+]);
 
 /**
  * `following.json` / `followers_3.html` and the like, anywhere in the archive.
@@ -146,6 +164,10 @@ export function analyzeZipStructure(allFiles: string[]): ZipAnalysis {
     basePath = 'followers_and_following';
   }
 
+  // Folders only: a root entry without a slash is a file, whatever its name.
+  const allTopLevelFolders = new Set(
+    allFiles.filter(f => f.includes('/')).map(f => f.slice(0, f.indexOf('/')))
+  );
   const topLevelFolders = [
     ...new Set(allFiles.map(f => f.split('/')[0]).filter((f): f is string => Boolean(f))),
   ].slice(0, 5);
@@ -159,6 +181,9 @@ export function analyzeZipStructure(allFiles: string[]): ZipAnalysis {
     isInstagramExport: hasConnections || hasFollowersFolder,
     mixedRelationshipFormats: relationshipFormats.size > 1,
     duplicateRelationshipShards: [...directoriesByShard.values()].some(dirs => dirs.size > 1),
+    archiveScope: [...allTopLevelFolders].some(f => EXTENDED_SCOPE_FOLDERS.has(f))
+      ? 'extended'
+      : 'followers_only',
   };
 }
 

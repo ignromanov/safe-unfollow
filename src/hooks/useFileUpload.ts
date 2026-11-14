@@ -384,7 +384,8 @@ export function useFileUpload() {
             discovery?.format,
             discovery?.mixedRelationshipFormats,
             discovery?.duplicateRelationshipShards,
-            badgeCounts
+            badgeCounts,
+            discovery?.archiveScope
           )
         );
 

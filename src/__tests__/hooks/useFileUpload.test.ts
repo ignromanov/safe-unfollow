@@ -585,6 +585,7 @@ describe('useFileUpload', () => {
         'json',
         undefined,
         undefined,
+        undefined,
         undefined
       );
     });
@@ -685,8 +686,26 @@ describe('useFileUpload', () => {
         'json',
         true,
         undefined,
+        undefined,
         undefined
       );
+    });
+
+    it('carries the archive scope on fileUploadSuccess (v1.8 task 02)', async () => {
+      const { parseInstagramZipFile } = await import('@/core/parsers/instagram');
+      const parsed = await vi.mocked(parseInstagramZipFile)(mockFile);
+      vi.mocked(parseInstagramZipFile).mockResolvedValue({
+        ...parsed,
+        discovery: { ...parsed.discovery, archiveScope: 'extended' },
+      });
+
+      const { result } = renderHook(() => useFileUpload());
+
+      await act(async () => {
+        await result.current.handleZipUpload(mockFile);
+      });
+
+      expect(vi.mocked(analytics.fileUploadSuccess).mock.calls[0]?.[6]).toBe('extended');
     });
 
     it('carries the duplicate-shard verdict on fileUploadSuccess (GH#160 step 2)', async () => {
@@ -709,6 +728,7 @@ describe('useFileUpload', () => {
         'json',
         undefined,
         true,
+        undefined,
         undefined
       );
     });
