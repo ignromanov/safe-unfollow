@@ -10,5 +10,5 @@ contact_links:
     url: https://safeunfollow.app/docs/privacy
     about: Understand how we handle your data
   - name: Contributing Guide
-    url: https://github.com/ignromanov/safe-unfollow/blob/master/CONTRIBUTING.md
-    about: Learn how to contribute to this project
+    url: https://github.com/ignromanov/safe-unfollow/blob/main/CONTRIBUTING.md
+    about: How issues are handled (outside code changes are not accepted for now)
