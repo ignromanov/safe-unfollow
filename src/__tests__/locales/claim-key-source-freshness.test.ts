@@ -114,8 +114,8 @@ const CLAIM_KEYS: readonly ClaimKey[] = [
     ns: 'faq',
     path: ['items', 'free', 'answer'],
     why: 'states what is free and what is paid — the claim that went false on 2026-07-27',
-    reviewed: '2026-11-09',
-    en: "Yes. SafeUnfollow's analysis is free: every badge, filter and account, with no signup and no limit. The only paid item is exporting your filtered list as a file, a one-time unlock with the price shown on the button. Viewing the list is always free. The code is open source (MIT).",
+    reviewed: '2026-11-14',
+    en: "Yes. SafeUnfollow's analysis is free: every badge, filter and account, with no signup and no limit. The only paid item is exporting your filtered list as a file, a one-time unlock with the price shown on the button. Viewing the list is always free. The code is open source (AGPL-3.0).",
   },
   {
     ns: 'faq',

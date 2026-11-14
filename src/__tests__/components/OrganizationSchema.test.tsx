@@ -239,7 +239,7 @@ describe('OrganizationSchema', () => {
     it('keeps the free offer, the licence and the first-publication date', () => {
       expect(app().offers).toEqual({ '@type': 'Offer', price: '0', priceCurrency: 'USD' });
       expect(app().isAccessibleForFree).toBe(true);
-      expect(app().license).toBe('https://opensource.org/licenses/MIT');
+      expect(app().license).toBe('https://spdx.org/licenses/AGPL-3.0-only.html');
       expect(app().datePublished).toBe('2025-11-22');
     });
   });

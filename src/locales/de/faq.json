@@ -107,7 +107,7 @@
     },
     "free": {
       "question": "Gibt es kostenlose Instagram-Entfolger-Tracker?",
-      "answer": "Ja. Die Analyse von SafeUnfollow ist kostenlos: alle Abzeichen, Filter und Konten, ohne Anmeldung und ohne Limit. Kostenpflichtig ist nur der Datei-Export deiner gefilterten Liste, eine einmalige Freischaltung, deren Preis auf dem Button steht. Die Liste anzusehen ist immer kostenlos. Der Code ist Open Source (MIT)."
+      "answer": "Ja. Die Analyse von SafeUnfollow ist kostenlos: alle Abzeichen, Filter und Konten, ohne Anmeldung und ohne Limit. Kostenpflichtig ist nur der Datei-Export deiner gefilterten Liste, eine einmalige Freischaltung, deren Preis auf dem Button steht. Die Liste anzusehen ist immer kostenlos. Der Code ist Open Source (AGPL-3.0)."
     },
     "analyzeData": {
       "question": "Wie analysiere ich meinen Instagram-Daten-Download, um Entfolger zu finden?",

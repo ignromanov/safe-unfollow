@@ -25,7 +25,7 @@ Every figure in the rival columns is taken from that product's own homepage or p
 | **Account limit** | 1M+ by design — unit-tested at 1,000,000 accounts | 2,500 followers on Essential | Not stated | Not stated | Not stated |
 | **Login required** | No | No | Yes | No | No |
 | **How it gets your data** | You upload Instagram's official export | You upload the official export | Connect your Instagram account | You upload the official export (JSON or HTML) | You upload the official export |
-| **Source code published** | Yes (MIT) | No | No | No | No |
+| **Source code published** | Yes (AGPL-3.0) | No | No | No | No |
 
 The row that matters most is **Priced by**. Three of the four price by account size, by time, or by both; SafeUnfollow prices by neither, and the analysis itself is free at any size — every badge, every filter, the complete list. The one paid extra is a one-time unlock for downloading that list as a file, and the download hands you a free sample first.
 
@@ -41,7 +41,7 @@ Your Instagram export is parsed, stored and filtered in your own browser, using 
 SafeUnfollow uses columnar storage and bitset filtering, and is built and unit-tested for over 1,000,000 accounts, with no network round-trip — filtering runs locally in your browser.
 
 ### You Can Read The Code
-The entire client is [open source on GitHub](https://github.com/ignromanov/safe-unfollow) under the MIT license. None of the four above publishes its source, so their processing claims — including the ones that read like ours — can be believed but not checked.
+The entire client is [open source on GitHub](https://github.com/ignromanov/safe-unfollow) under the AGPL-3.0 license. None of the four above publishes its source, so their processing claims — including the ones that read like ours — can be believed but not checked.
 
 ## Detailed Comparisons
 

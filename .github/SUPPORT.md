@@ -91,9 +91,9 @@ For security-related issues, please:
 
 Want to help improve the project?
 
-- See [CONTRIBUTING.md](../CONTRIBUTING.md) for guidelines
+- Outside code changes are not accepted for now — see [CONTRIBUTING.md](../CONTRIBUTING.md)
+- Bug reports and feature requests are welcome in GitHub Issues
 - Check the [roadmap](https://safeunfollow.app/docs/roadmap) for priority areas
-- Look for issues labeled `good first issue`
 
 ### 🧪 Testing
 

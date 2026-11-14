@@ -1292,7 +1292,7 @@ const BANNED_KNOWN_INNOCENTS = [
   'The site carries advertising and uses privacy-focused analytics for page-level metrics.',
   'Filter speed and search speed are design targets, not measurements.',
   'Designed for exports up to 1,000,000+ accounts.',
-  'Open source under the MIT licence.',
+  'Open source under the AGPL-3.0 licence.',
 ];
 
 describe('llms.txt states nothing the docs corpus may not state', () => {

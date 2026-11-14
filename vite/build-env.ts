@@ -14,6 +14,18 @@ export function buildVersion(env: Env, pkgVersion: string): string {
   return env.WORKERS_CI_COMMIT_SHA?.slice(0, 7) || pkgVersion;
 }
 
+const REPOSITORY_URL = 'https://github.com/ignromanov/safe-unfollow';
+
+/**
+ * Where the footer's "view source" link points. AGPL-3.0 §13 asks that a network user be
+ * offered the source of the version they are running, so a CI build links its own commit.
+ * A local build has no commit to name and links the repository.
+ */
+export function sourceUrl(env: Env): string {
+  const sha = env.WORKERS_CI_COMMIT_SHA?.slice(0, 7);
+  return sha ? `${REPOSITORY_URL}/tree/${sha}` : REPOSITORY_URL;
+}
+
 /**
  * Drops the variables a preview build must not inherit.
  *

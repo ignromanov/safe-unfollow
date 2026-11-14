@@ -39,7 +39,7 @@ describe('PrivacyPolicy Component', () => {
     it('should render the last updated date', () => {
       render(<PrivacyPolicy onBack={mockOnBack} />);
 
-      expect(screen.getByText(/last updated: november 7, 2026/i)).toBeInTheDocument();
+      expect(screen.getByText(/last updated: november 14, 2026/i)).toBeInTheDocument();
     });
   });
 

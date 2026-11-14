@@ -19,6 +19,7 @@ export default defineConfig({
     // Not a fixed string, unlike the line above: this one is asserted against package.json in
     // src/__tests__/components/OrganizationSchema.test.tsx, which is the point of deriving it.
     __PKG_VERSION__: JSON.stringify(pkg.version),
+    __SOURCE_URL__: JSON.stringify("https://github.com/ignromanov/safe-unfollow"),
     // Same derivation as vite.config.ts, asserted against CITATION.cff in OrganizationSchema.test.tsx.
     __RELEASE_DATE__: JSON.stringify(
       citationReleaseDate(readFileSync(path.join(__dirname, "CITATION.cff"), "utf-8"))

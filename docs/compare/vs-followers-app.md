@@ -32,7 +32,7 @@ SafeUnfollow is the second kind. If real-time alerts are what you actually want,
 | **Account size limit** | 1M+ by design — unit-tested at 1,000,000 accounts |
 | **Real-time alerts** | No |
 | **Platform** | Any browser, desktop or mobile; installable as a PWA |
-| **Source code** | Published under the MIT license |
+| **Source code** | Published under the AGPL-3.0 license |
 
 The site itself is not silent on the network — it loads anonymous page analytics, and the upload and results pages carry ads. [What the rest of the site loads is set out on the privacy page](/docs/privacy). The export is the part that stays on your device.
 
@@ -44,7 +44,7 @@ The site itself is not silent on the network — it loads anonymous page analyti
 | To check without handing over a login | SafeUnfollow |
 | An account larger than a mobile app comfortably handles | SafeUnfollow — built and unit-tested for 1,000,000 accounts |
 | To download the result as a file | SafeUnfollow — one-time unlock, free sample first |
-| To read the code that touches your data | SafeUnfollow — [MIT-licensed on GitHub](https://github.com/ignromanov/safe-unfollow) |
+| To read the code that touches your data | SafeUnfollow — [AGPL-3.0-licensed on GitHub](https://github.com/ignromanov/safe-unfollow) |
 
 ## Check Any Of Them Yourself
 

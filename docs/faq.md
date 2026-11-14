@@ -106,11 +106,14 @@ This is normal and expected:
 - **Security**: For security matters, see [SECURITY.md](https://github.com/ignromanov/safe-unfollow/blob/main/SECURITY.md)
 
 ### Can I modify the code for my needs?
-**Absolutely!** The project is open source (MIT license). You can:
+**Yes.** The project is open source under the AGPL-3.0 license. You can:
 - Fork the repository
 - Modify the code
 - Deploy your own version
-- Contribute improvements back
+
+If you let other people use a modified version over a network, the license requires you to offer
+them its source code. Outside code changes are not being accepted right now, but issues are
+welcome.
 
 ### Is there a roadmap for new features?
 Yes! See [Project Roadmap](/docs/roadmap) for upcoming features. Already live:

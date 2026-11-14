@@ -24,7 +24,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
           </div>
           <h1 className="text-4xl md:text-5xl font-display font-bold">Privacy Policy</h1>
         </div>
-        <p className="text-muted-foreground text-lg">Last updated: November 7, 2026</p>
+        <p className="text-muted-foreground text-lg">Last updated: November 14, 2026</p>
       </header>
 
       {/* Content */}
@@ -193,7 +193,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
 
           <h3 className="text-lg font-semibold mt-6 mb-3">4.3 Open Source</h3>
           <p className="text-muted-foreground">
-            Our code is open source under the MIT license. You can audit exactly what the
+            Our code is open source under the AGPL-3.0 license. You can audit exactly what the
             application does at{' '}
             <a
               href="https://github.com/ignromanov/safe-unfollow"

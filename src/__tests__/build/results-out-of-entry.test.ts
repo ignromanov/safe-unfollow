@@ -33,6 +33,10 @@ const MARKERS: Record<string, string> = {
   'AccountList.tsx (virtualizer)': 'measureElement',
   'StaleDatesHint.tsx': 'dates.staleHint',
   'SamplePage.tsx': 'Preparing 1,180 demo accounts',
+  // The legal pages joined them on 2026-11-14: their text is English prose of several KB that
+  // only /privacy and /terms render, and the AGPL-3.0 licence section alone overran the budget.
+  'PrivacyPolicy.tsx': 'You can audit exactly what the',
+  'TermsOfService.tsx': '5.2 Trademarks',
 };
 
 type ManifestChunk = { file: string; isEntry?: boolean; isDynamicEntry?: boolean };
@@ -57,11 +61,14 @@ describeDist(
       return record;
     };
 
-    it.each(['ResultsPage', 'SamplePage'])('%s is a dynamic entry of its own', page => {
-      const record = pageChunk(page);
-      expect(record.isDynamicEntry).toBe(true);
-      expect(record.file).not.toBe(`assets/${entryFile()}`);
-    });
+    it.each(['ResultsPage', 'SamplePage', 'PrivacyPage', 'TermsPage'])(
+      '%s is a dynamic entry of its own',
+      page => {
+        const record = pageChunk(page);
+        expect(record.isDynamicEntry).toBe(true);
+        expect(record.file).not.toBe(`assets/${entryFile()}`);
+      }
+    );
 
     it.each(Object.entries(MARKERS))('%s left the entry chunk', (_module, marker) => {
       const holders = jsFiles().filter(f => read(f).includes(marker));
@@ -77,6 +84,8 @@ describeDist(
       ['results.html', 'ResultsPage'],
       ['id/results.html', 'ResultsPage'],
       ['sample.html', 'SamplePage'],
+      ['privacy.html', 'PrivacyPage'],
+      ['terms.html', 'TermsPage'],
     ])('%s preloads its route chunk, so a direct load pays no waterfall', (html, page) => {
       const href = `/${pageChunk(page).file}`;
       const doc = readFileSync(join(dist, html), 'utf8');

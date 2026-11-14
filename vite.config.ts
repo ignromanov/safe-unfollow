@@ -5,7 +5,7 @@ import { fileURLToPath } from "url";
 import { VitePWA } from "vite-plugin-pwa";
 import { defineConfig } from "vite";
 import { buildConfig } from "./vite/build-config";
-import { buildVersion, citationReleaseDate, scrubPreviewEnv } from "./vite/build-env";
+import { buildVersion, citationReleaseDate, scrubPreviewEnv, sourceUrl } from "./vite/build-env";
 import { pwaConfig } from "./vite/pwa-config";
 import { injectLocalizedMeta } from "./vite/ssg-meta-injector";
 import pkg from "./package.json";
@@ -28,6 +28,8 @@ export default defineConfig({
     // (src/components/OrganizationSchema.tsx). That field held a hand-typed '1.5.0' against a
     // package.json reading '1.6.0' until 2026-09-07.
     __PKG_VERSION__: JSON.stringify(pkg.version),
+    // The footer's source link: the built commit, so it is the source of what is running.
+    __SOURCE_URL__: JSON.stringify(sourceUrl(process.env)),
     // CITATION.cff's date-released, published as SoftwareApplication.dateModified. Read here
     // so the release date is written once; see vite/build-env.ts.
     __RELEASE_DATE__: JSON.stringify(

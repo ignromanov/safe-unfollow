@@ -183,7 +183,7 @@ export function OrganizationSchema() {
       url: BASE_URL,
       screenshot: `${BASE_URL}/og-image.png`,
       datePublished: '2025-11-22',
-      license: 'https://opensource.org/licenses/MIT',
+      license: 'https://spdx.org/licenses/AGPL-3.0-only.html',
       identifier: {
         '@type': 'PropertyValue',
         propertyID: 'DOI',
@@ -204,7 +204,7 @@ export function OrganizationSchema() {
         'Reads the export in your browser and never sends the file to a server',
         'No login or password required',
         'Uses official Instagram data export (ZIP file)',
-        'Free analysis, open source (MIT license)',
+        'Free analysis, open source (AGPL-3.0 license)',
       ],
       keywords:
         'instagram unfollow tracker, who unfollowed me on instagram, instagram unfollowers, instagram data export analyzer',

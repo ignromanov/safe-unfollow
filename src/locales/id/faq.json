@@ -107,7 +107,7 @@
     },
     "free": {
       "question": "Apakah ada pelacak unfollower Instagram gratis?",
-      "answer": "Ya. Analisis SafeUnfollow gratis: semua lencana, filter, dan akun, tanpa pendaftaran dan tanpa batas. Satu-satunya yang berbayar adalah mengekspor daftar terfilter sebagai file, sekali bayar untuk membukanya, dengan harga tertera di tombolnya. Melihat daftarnya selalu gratis. Kodenya open source (MIT)."
+      "answer": "Ya. Analisis SafeUnfollow gratis: semua lencana, filter, dan akun, tanpa pendaftaran dan tanpa batas. Satu-satunya yang berbayar adalah mengekspor daftar terfilter sebagai file, sekali bayar untuk membukanya, dengan harga tertera di tombolnya. Melihat daftarnya selalu gratis. Kodenya open source (AGPL-3.0)."
     },
     "analyzeData": {
       "question": "Bagaimana cara menganalisis unduhan data Instagram saya untuk menemukan unfollower?",

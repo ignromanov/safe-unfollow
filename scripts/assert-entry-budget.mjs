@@ -71,8 +71,9 @@
  *   base   a production-shaped build of `main`, measured on the machine deriving it
  *   rule   base x 1.01, rounded up to a whole hundred
  *
- * Last derived 2026-10-25 (GH#292) from a base of 350486: `/results` and `/sample` became route
- * chunks, which changed the bundle's shape. Before that it was derived 2026-09-09 from 427601,
+ * Last derived 2026-11-14 from a base of 322204: `/privacy` and `/terms` became route chunks
+ * (v1.8 task 01), which changed the bundle's shape again. Derived 2026-10-25 (GH#292) from
+ * 350486, when `/results` and `/sample` became route chunks. Before that it was derived 2026-09-09 from 427601,
  * which CI reproduced exactly. Either way the ceiling sits ~1% above the number the gate itself
  * prints. That still catches what the gate
  * guards against, because an accidental static import of a library is ten kilobytes and upward,
