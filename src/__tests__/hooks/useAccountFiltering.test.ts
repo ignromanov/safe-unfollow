@@ -14,6 +14,7 @@ import { useAccountFiltering } from '@/hooks/useAccountFiltering';
 import { useFilterWorker } from '@/hooks/useFilterWorker';
 import { IndexedDBFilterEngine } from '@/lib/filtering/IndexedDBFilterEngine';
 import { indexedDBService } from '@/lib/indexeddb/indexeddb-service';
+import { analytics } from '@/lib/analytics';
 import { useAppStore } from '@/lib/store';
 import { combinationOf, resultKeyOf } from '@/lib/stats/filter-session';
 import { useDebounce } from 'use-debounce';
@@ -561,6 +562,84 @@ describe('useAccountFiltering', () => {
 
       // No errors should occur
       expect(true).toBe(true);
+    });
+  });
+
+  describe('search diagnosis (T4): filtered out vs not in the list', () => {
+    function withFilters(filters: Set<BadgeKey>) {
+      vi.mocked(useAppStore).mockImplementation((selector: any) =>
+        selector({ fileMetadata: mockFileMetadata, filters, setFilters: mockSetFilters })
+      );
+    }
+
+    async function runSearch(query: string) {
+      const search = vi.spyOn(analytics, 'searchPerform');
+      const { result, unmount } = renderHook(() =>
+        useAccountFiltering({
+          fileHash: mockFileMetadata.fileHash,
+          accountCount: mockFileMetadata.accountCount,
+        })
+      );
+      act(() => {
+        result.current.setQuery(query);
+      });
+      await waitFor(() => expect(search).toHaveBeenCalled());
+      unmount();
+      return search;
+    }
+
+    it('counts the matches without the filter when a filtered search finds nothing', async () => {
+      withFilters(new Set<BadgeKey>(['mutuals']));
+      mockEngine.filterToIndices.mockImplementation(async (_q: string, filters: BadgeKey[]) =>
+        filters.length > 0 ? [] : [4, 7]
+      );
+
+      const search = await runSearch('alice');
+
+      // Asked of the same engine, with the same query and no filters.
+      expect(mockEngine.filterToIndices).toHaveBeenCalledWith('alice', []);
+      expect(search).toHaveBeenCalledTimes(1);
+      expect(search).toHaveBeenCalledWith(5, 0, 10, true, 2);
+    });
+
+    it('reports zero for both when the account is not in the export at all', async () => {
+      withFilters(new Set<BadgeKey>(['mutuals']));
+      mockEngine.filterToIndices.mockResolvedValue([]);
+
+      const search = await runSearch('zzz');
+
+      expect(search).toHaveBeenCalledWith(3, 0, 10, true, 0);
+    });
+
+    it('does not run the second query when the filtered search found something', async () => {
+      withFilters(new Set<BadgeKey>(['mutuals']));
+      mockEngine.filterToIndices.mockResolvedValue([1]);
+
+      const search = await runSearch('bob');
+
+      expect(mockEngine.filterToIndices).not.toHaveBeenCalledWith('bob', []);
+      expect(search).toHaveBeenCalledWith(3, 1, 10, true);
+    });
+
+    it('does not run the second query when no filter is active', async () => {
+      mockEngine.filterToIndices.mockResolvedValue([]);
+
+      const search = await runSearch('bob');
+
+      expect(mockEngine.filterToIndices).toHaveBeenCalledTimes(1);
+      expect(search).toHaveBeenCalledWith(3, 0, 10, false);
+    });
+
+    it('still reports the search when the second query fails, without the count', async () => {
+      withFilters(new Set<BadgeKey>(['mutuals']));
+      mockEngine.filterToIndices.mockImplementation(async (_q: string, filters: BadgeKey[]) => {
+        if (filters.length > 0) return [];
+        throw new Error('index gone');
+      });
+
+      const search = await runSearch('carol');
+
+      expect(search).toHaveBeenCalledWith(5, 0, 10, true);
     });
   });
 

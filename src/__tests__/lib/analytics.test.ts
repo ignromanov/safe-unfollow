@@ -229,7 +229,7 @@ describe('Analytics', () => {
       // stats/impression-batching.test.ts, which mocks both paths and can tell
       // them apart; asserting them here would only prove umami.track is idle.
 
-      it('should track results clicks summary with top 3 badges', () => {
+      it('should track results clicks summary with every badge clicked', () => {
         const originalRandom = Math.random;
         Math.random = () => 0.1;
         analytics.resultsClicksSummary({
@@ -240,7 +240,7 @@ describe('Analytics', () => {
 
         expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.RESULTS_CLICKS_SUMMARY, {
           total_clicks: 20,
-          badge_clicks: '{"unfollowed":10,"notFollowingBack":5,"following":3}',
+          badge_clicks: '{"unfollowed":10,"notFollowingBack":5,"following":3,"mutuals":2}',
           time_spent: 46,
         });
         Math.random = originalRandom;

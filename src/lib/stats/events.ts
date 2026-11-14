@@ -5,6 +5,7 @@
 import { AnalyticsEvents, parseDurationBucket } from './constants';
 import type { LinkType, ParseOutcome } from './constants';
 import { trackBeacon, trackEvent } from './core';
+import { uploadIdField } from './upload-context';
 import { enqueueEvent, flushEvents, trackNavigating } from './queue';
 import { getStoredUTM, getEntryCTA } from './utm';
 import type { GuideSource } from '@/hooks/useGuideDialog';
@@ -51,6 +52,7 @@ export const analytics = {
   fileUploadStart: (fileSizeMb: number) => {
     enqueueEvent(AnalyticsEvents.FILE_UPLOAD_START, {
       file_size_mb: roundMb(fileSizeMb),
+      ...uploadIdField(),
     });
   },
 
@@ -76,7 +78,10 @@ export const analytics = {
     fromCache: boolean,
     format?: ExportFormat,
     mixedRelationshipFormats?: boolean,
-    duplicateRelationshipShards?: boolean
+    duplicateRelationshipShards?: boolean,
+    // `count_<badge>` keys from `measuredBadgeCounts`: fresh parses only, and
+    // only the badges that parse measured.
+    badgeCounts?: Record<string, number>
   ) => {
     const utm = getStoredUTM();
     const entryCta = getEntryCTA();
@@ -94,6 +99,8 @@ export const analytics = {
       ...(utm.utm_medium && { utm_medium: utm.utm_medium }),
       ...(utm.utm_campaign && { utm_campaign: utm.utm_campaign }),
       ...(entryCta && { entry_cta: entryCta }),
+      ...badgeCounts,
+      ...uploadIdField(),
     });
   },
 
@@ -108,6 +115,7 @@ export const analytics = {
     enqueueEvent(AnalyticsEvents.UPLOAD_PARSE_DURATION, {
       duration_bucket: parseDurationBucket(durationMs),
       outcome,
+      ...uploadIdField(),
     });
   },
 
@@ -115,9 +123,9 @@ export const analytics = {
   /**
    * One event per filtering session, replacing 9.48 per-toggle rows.
    *
-   * Unsampled, and deliberately not on `useTimeOnResults`'s `fireEvent` path:
-   * that handler is a 25% sample of visits over five seconds, and this replaces
-   * a series GH#123 made unsampled on purpose so it reads as a count.
+   * Unsampled, and not on `useTimeOnResults`'s `fireEvent` path: that handler
+   * sends at most one row per side of its five-second floor, while this one is
+   * cumulative and re-sent whenever it changed.
    *
    * `trackBeacon` rather than `trackEvent`: this is all-or-nothing per session
    * and mostly fires on the way out, where an ordinary request is freely
@@ -156,41 +164,39 @@ export const analytics = {
     queryLength: number,
     resultCount: number,
     totalCount: number,
-    hasFiltersActive: boolean
+    hasFiltersActive: boolean,
+    // Matches for the same query with no filters. Measured only when a filtered
+    // search found nothing, so absent means "not measured", never 0.
+    unfilteredCount?: number
   ) => {
     enqueueEvent(AnalyticsEvents.SEARCH_PERFORM, {
       query_length: queryLength,
       result_count: resultCount,
       total_count: totalCount,
       has_filters_active: hasFiltersActive,
+      ...(unfilteredCount === undefined ? {} : { unfiltered_count: unfilteredCount }),
     });
   },
 
   /**
    * Aggregated click summary sent on page leave.
    *
-   * Unsampled here on purpose. `useTimeOnResults` is the only caller and it
-   * already rolls once per visit, before any of its three triggers fire. A
-   * second roll compounded to 6.25%, far too thin to segment `badge_clicks` by
-   * badge — which is the only reason that field is in the payload at all.
+   * Unsampled, like its only caller `useTimeOnResults`, which sends it once per
+   * visit with the row past the five-second floor. Segmenting `badge_clicks` by
+   * badge is the only reason that field is in the payload at all.
    */
   resultsClicksSummary: (stats: {
     totalClicks: number;
     badgeClicks: Record<string, number>;
     timeSpentSeconds: number;
   }) => {
-    // Keep only top 3 badges by click count to reduce payload
-    const top3 = Object.entries(stats.badgeClicks)
-      .sort(([, a], [, b]) => b - a)
-      .slice(0, 3)
-      .reduce<Record<string, number>>((acc, [k, v]) => {
-        acc[k] = v;
-        return acc;
-      }, {});
+    // Every badge clicked, most-clicked first. There are eleven badge keys, so
+    // the payload is bounded; the top-3 cut hid every badge below third place.
+    const all = Object.fromEntries(Object.entries(stats.badgeClicks).sort(([, a], [, b]) => b - a));
 
     trackEvent(AnalyticsEvents.RESULTS_CLICKS_SUMMARY, {
       total_clicks: stats.totalClicks,
-      badge_clicks: JSON.stringify(top3),
+      badge_clicks: JSON.stringify(all),
       time_spent: Math.round(stats.timeSpentSeconds),
     });
   },
@@ -478,6 +484,7 @@ export const analytics = {
       UNKNOWN: AnalyticsEvents.UPLOAD_ERROR_UNKNOWN,
     };
     enqueueEvent(eventMap[code], {
+      ...uploadIdField(),
       error_message: errorMessage?.slice(0, 50) ?? '',
       // The size used to reach the database only inside error_message, i18n'd
       // into ten languages and truncated at 50 characters — German writes
@@ -546,6 +553,7 @@ export const analytics = {
     trackEvent(AnalyticsEvents.OPTIONAL_FILE_FORMAT_DRIFT, {
       file_code: fileCode,
       ...(format === undefined ? {} : { format }),
+      ...uploadIdField(),
     });
   },
 
@@ -557,7 +565,7 @@ export const analytics = {
   // `optionalFileFormatDrift`: a rare diagnostic about an upstream format
   // change, not a high-volume impression.
   usernameLabelResolution: (mode: LabelResolutionMode) => {
-    trackEvent(AnalyticsEvents.USERNAME_LABEL_RESOLUTION, { mode });
+    trackEvent(AnalyticsEvents.USERNAME_LABEL_RESOLUTION, { mode, ...uploadIdField() });
   },
 
   // Fires only when one of the two required relationship files looks cut short,
@@ -570,7 +578,7 @@ export const analytics = {
   // shape, never about its contents. Same line the label event draws: no
   // username, no count, nothing derived from the file's bytes.
   relationshipFileTruncated: (file: 'followers' | 'following') => {
-    trackEvent(AnalyticsEvents.RELATIONSHIP_FILE_TRUNCATED, { file });
+    trackEvent(AnalyticsEvents.RELATIONSHIP_FILE_TRUNCATED, { file, ...uploadIdField() });
   },
 
   // The same parse's verdict, including the two quiet ones and the abstention.
@@ -596,6 +604,7 @@ export const analytics = {
       verdict,
       ...(format === undefined ? {} : { format }),
       ...(datesFitted === undefined ? {} : { dates_fitted: datesFitted }),
+      ...uploadIdField(),
     });
   },
 

@@ -12,6 +12,20 @@ vi.mock('@/lib/indexeddb/indexeddb-cache');
 vi.mock('@/lib/indexeddb/indexeddb-service');
 vi.mock('@/core/parsers/instagram');
 vi.mock('@/core/badges');
+// Records which upload id is active at each emit, the way the real module
+// scopes it: around the synchronous call and no longer.
+const uploadScope = vi.hoisted(() => ({ active: undefined as string | undefined, next: 0 }));
+vi.mock('@/lib/stats/upload-context', () => ({
+  newUploadId: () => `u${++uploadScope.next}`,
+  withUpload: <T>(id: string, emit: () => T): T => {
+    uploadScope.active = id;
+    try {
+      return emit();
+    } finally {
+      uploadScope.active = undefined;
+    }
+  },
+}));
 // Mock analytics (V9: fileUploadError removed)
 vi.mock('@/lib/analytics', () => ({
   analytics: {
@@ -570,8 +584,83 @@ describe('useFileUpload', () => {
         false,
         'json',
         undefined,
+        undefined,
         undefined
       );
+    });
+
+    it('sends no badge counts from the main-thread fallback, even when the store has them', async () => {
+      // The fallback (no Worker, as in this suite) is not measured on purpose:
+      // see `ParseResult.badgeCounts`. Absent, never a number read by another path.
+      mockIndexedDBService.getBadgeStats.mockResolvedValue({ following: 1 } as Record<
+        BadgeKey,
+        number
+      >);
+
+      const { result } = renderHook(() => useFileUpload());
+      await act(async () => {
+        await result.current.handleZipUpload(mockFile);
+      });
+
+      expect(vi.mocked(analytics.fileUploadSuccess).mock.calls[0]?.[5]).toBeUndefined();
+    });
+
+    /** Every analytics call of the run, with the upload id active when it was made. */
+    function recordUploadIds(): [string, string | undefined][] {
+      const seen: [string, string | undefined][] = [];
+      for (const [name, fn] of Object.entries(analytics)) {
+        vi.mocked(fn as () => void).mockImplementation(() => {
+          seen.push([name, uploadScope.active]);
+        });
+      }
+      return seen;
+    }
+
+    it('emits every event of a fresh parse under one upload id', async () => {
+      const seen = recordUploadIds();
+      const { result } = renderHook(() => useFileUpload());
+      await act(async () => {
+        await result.current.handleZipUpload(mockFile);
+      });
+
+      const names = seen.map(([name]) => name);
+      expect(names).toEqual(
+        expect.arrayContaining([
+          'fileUploadStart',
+          'usernameLabelResolution',
+          'fileUploadSuccess',
+          'uploadParseDuration',
+        ])
+      );
+      const ids = new Set(seen.filter(([name]) => name !== 'returnUpload').map(([, id]) => id));
+      expect([...ids]).toEqual([expect.stringMatching(/^u\d+$/)]);
+      expect(uploadScope.active).toBeUndefined(); // nothing left open
+    });
+
+    it('emits every event of a failed attempt under its id, and a new attempt gets a new one', async () => {
+      const seen = recordUploadIds();
+      const { parseInstagramZipFile } = await import('@/core/parsers/instagram');
+      vi.mocked(parseInstagramZipFile).mockRejectedValueOnce(new Error('boom'));
+      const now = vi.spyOn(Date, 'now').mockReturnValue(1_000_000);
+
+      const { result } = renderHook(() => useFileUpload());
+      await act(async () => {
+        await result.current.handleZipUpload(mockFile).catch(() => {});
+      });
+      now.mockReturnValue(1_010_000); // past the debounce
+      await act(async () => {
+        await result.current.handleZipUpload(mockFile);
+      });
+
+      const first = seen.slice(0, seen.findIndex(([n]) => n === 'uploadParseDuration') + 1);
+      const second = seen.slice(first.length);
+      expect(first.map(([n]) => n)).toContain('uploadErrorByCode');
+      expect(new Set(first.map(([, id]) => id)).size).toBe(1);
+      expect(new Set(second.filter(([n]) => n !== 'returnUpload').map(([, id]) => id)).size).toBe(
+        1
+      );
+      expect(first[0]?.[1]).toEqual(expect.any(String));
+      expect(first[0]?.[1]).not.toBe(second[0]?.[1]);
     });
 
     it('carries the mixed-format verdict on fileUploadSuccess (GH#160)', async () => {
@@ -590,7 +679,14 @@ describe('useFileUpload', () => {
         await result.current.handleZipUpload(mockFile);
       });
 
-      expect(analytics.fileUploadSuccess).toHaveBeenCalledWith(2, false, 'json', true, undefined);
+      expect(analytics.fileUploadSuccess).toHaveBeenCalledWith(
+        2,
+        false,
+        'json',
+        true,
+        undefined,
+        undefined
+      );
     });
 
     it('carries the duplicate-shard verdict on fileUploadSuccess (GH#160 step 2)', async () => {
@@ -607,7 +703,14 @@ describe('useFileUpload', () => {
         await result.current.handleZipUpload(mockFile);
       });
 
-      expect(analytics.fileUploadSuccess).toHaveBeenCalledWith(2, false, 'json', undefined, true);
+      expect(analytics.fileUploadSuccess).toHaveBeenCalledWith(
+        2,
+        false,
+        'json',
+        undefined,
+        true,
+        undefined
+      );
     });
 
     it('omits the format on the cache-hit path — nothing was parsed this call', async () => {
