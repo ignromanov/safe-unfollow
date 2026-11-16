@@ -43,7 +43,7 @@
       "NOT_ZIP": {
         "title": "Keine ZIP-Datei",
         "message": "Bitte lade das ZIP-Archiv von Instagram hoch, keinen Ordner oder einen anderen Dateityp.",
-        "fix": "Suche in deinem Download-Ordner nach einer Datei mit der Endung .zip. Sie sollte etwa so heißen: \"instagram-benutzername-datum.zip\". Entpacke den Ordner nicht und wähle keine einzelne .html- oder .json-Datei daraus aus."
+        "fix": "Wähle die .zip-Datei selbst aus. Sie liegt meist im Download-Ordner und heißt etwa \"instagram-benutzername-datum.zip\". Wurde sie in einen Ordner entpackt, nimm wieder die .zip-Datei: Eine einzelne .html- oder .json-Datei aus diesem Ordner funktioniert nicht. Ist die .zip-Datei weg, lade sie über den Link in der E-Mail von Meta erneut herunter. Der Link ist 4 Tage gültig."
       },
       "HTML_FORMAT": {
         "title": "Wir konnten diesen Export nicht lesen",

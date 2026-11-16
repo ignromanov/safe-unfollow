@@ -43,7 +43,7 @@
       "NOT_ZIP": {
         "title": "No es un archivo ZIP",
         "message": "Por favor sube el archivo ZIP de Instagram, no una carpeta ni otro tipo de archivo.",
-        "fix": "Busca un archivo que termine en .zip en tu carpeta de Descargas. Debería llamarse algo como \"instagram-usuario-fecha.zip\". No descomprimas la carpeta ni elijas un archivo .html o .json suelto dentro de ella."
+        "fix": "Elige el archivo .zip en sí. Suele estar en Descargas y llamarse algo como \"instagram-usuario-fecha.zip\". Si se descomprimió en una carpeta, vuelve al .zip: un archivo .html o .json suelto de esa carpeta no sirve. Si ya no tienes el .zip, descárgalo de nuevo desde el enlace del correo de Meta. El enlace dura 4 días."
       },
       "HTML_FORMAT": {
         "title": "No pudimos leer esta exportación",

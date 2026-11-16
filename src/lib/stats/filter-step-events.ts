@@ -37,6 +37,7 @@ export const filterTelemetry = {
         search_active: step.result.searchActive,
       }),
       ...(step.predictedCount !== undefined && { predicted_count: step.predictedCount }),
+      ...(step.replaced !== undefined && { replaced: step.replaced }),
     });
   },
 

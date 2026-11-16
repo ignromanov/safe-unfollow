@@ -36,6 +36,13 @@ export interface FilterStep {
   combination: string;
   /** On `enable` only, and only when the pre-click counts were for the pre-click selection. */
   predictedCount?: number;
+  /**
+   * Badges the same click switched OFF, as a combination. A StatCard click on an
+   * inactive card replaces the whole selection, so the badges it drops are
+   * disabled by an action that is not a toggle of theirs. Without this field
+   * that disable is invisible. Absent when the click removed nothing.
+   */
+  replaced?: string;
   result?: { count: number; searchActive: boolean };
 }
 
@@ -200,12 +207,18 @@ export function recordArrival(
  * `next` is the selection AFTER the toggle; the predicted count is looked up
  * against the selection before it, which is the only one the reader saw counts
  * for when they clicked.
+ *
+ * `replaced` names the badges the same click dropped (a StatCard switch). They
+ * travel on the step as `replaced`, and the step carries no prediction: the
+ * pre-click candidate count is for the old selection plus `badge`, not for the
+ * list the switch produces, so comparing them would fire a false mismatch.
  */
 export function recordToggle(
   badge: BadgeKey,
   action: FilterAction,
   next: ReadonlySet<BadgeKey>,
-  source: FilterSource
+  source: FilterSource,
+  replaced: ReadonlySet<BadgeKey> = new Set()
 ): void {
   touch();
   state.toggleCount += 1;
@@ -217,7 +230,7 @@ export function recordToggle(
 
   const before = combinationOf([...next].filter(b => b !== badge));
   const predictedCount =
-    action === 'enable' && predictions?.selection === before
+    action === 'enable' && replaced.size === 0 && predictions?.selection === before
       ? predictions.counts[badge]
       : undefined;
 
@@ -227,6 +240,7 @@ export function recordToggle(
     source,
     combination: combinationOf(next),
     ...(predictedCount === undefined ? {} : { predictedCount }),
+    ...(replaced.size === 0 ? {} : { replaced: combinationOf(replaced) }),
   });
 }
 

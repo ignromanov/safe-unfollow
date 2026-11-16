@@ -1352,6 +1352,12 @@ describe('AccountListSection', () => {
         [1, 'unfollowed', 4],
         [2, 'notFollowingBack', 3],
       ]);
+      // The switch dropped `unfollowed` without a toggle of its own: that disable
+      // is on the switching step, never lost.
+      const replacedOf = (call: unknown[] | undefined) =>
+        (call?.[0] as { replaced?: string } | undefined)?.replaced;
+      expect(replacedOf(stepSpy.mock.calls[1])).toBeUndefined();
+      expect(replacedOf(stepSpy.mock.calls[2])).toBe('unfollowed');
     });
 
     it('emits nothing for a visit that never filtered', () => {
