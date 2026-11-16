@@ -220,14 +220,11 @@ export function AccountListSection({
   };
 
   const handleStatCardClick = (badgeType: BadgeKey) => {
-    const newFilters = new Set(filters);
-    const action = newFilters.has(badgeType) ? 'disable' : 'enable';
-
-    if (newFilters.has(badgeType)) {
-      newFilters.delete(badgeType);
-    } else {
-      newFilters.add(badgeType);
-    }
+    const isActive = filters.has(badgeType);
+    const action = isActive ? 'disable' : 'enable';
+    const newFilters = isActive
+      ? new Set([...filters].filter(b => b !== badgeType))
+      : new Set<BadgeKey>([badgeType]);
 
     recordToggle(badgeType, action, newFilters, 'stat_card');
     setFilters(newFilters);
