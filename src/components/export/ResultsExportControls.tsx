@@ -3,6 +3,7 @@ import { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { BadgeKey } from '@/core/types';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Button } from '@/components/ui/button';
 import { useAdViewability } from '@/hooks/useAdViewability';
 import { useExportWorker } from '@/hooks/useExportWorker';
@@ -11,11 +12,18 @@ import { downloadBlob } from '@/lib/export/download';
 import { exportFilename } from '@/lib/export/filename';
 import { registerExportOpener } from '@/lib/export/export-opener';
 import {
+  forgetExportModal,
+  rememberExportModal,
+  takeExportResume,
+  type SavedSample,
+} from '@/lib/export/export-resume';
+import {
   FREE_EXPORT_ROWS,
   freeReportSampleLimit,
   isFreeExportCapped,
 } from '@/lib/export/free-tier';
 import { buildReportContext } from '@/lib/export/report-context';
+import { isStaleChunkReloadPending } from '@/lib/stale-chunk-recovery';
 import { analytics } from '@/lib/stats';
 
 // Lazy: the paywall, the export dialog and everything they pull in (export
@@ -76,9 +84,7 @@ export function ResultsExportControls({
   // What the last free export actually put on disk. Snapshotted rather than
   // recomputed at render: the reader can change the filters right after the
   // download, and a receipt is only worth anything if it describes the file.
-  const [saved, setSaved] = useState<{ filename: string; total: number; capped: boolean } | null>(
-    null
-  );
+  const [saved, setSaved] = useState<SavedSample | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   // A ref, not `isBusy`: two clicks in the same tick both read the state from
   // before the re-render and both start a build. Same reason LicenseDialog
@@ -104,6 +110,21 @@ export function ResultsExportControls({
     if (!isEnabled) return;
     return registerExportOpener(() => setIsExportDialogOpen(true));
   }, [isEnabled]);
+
+  // The page a chunk-failure reload produced: put back the modal the reader asked for and
+  // never saw (lib/export/export-resume.ts). The paywall comes back against the sample
+  // already saved — no second build, no second file, and no second `paywall_view`, which
+  // was counted on the click that failed to draw it.
+  useEffect(() => {
+    if (!isEnabled) return;
+    const resume = takeExportResume(fileHash);
+    if (resume?.modal === 'paywall') {
+      setSaved(resume.saved);
+      setIsPaywallOpen(true);
+    } else if (resume?.modal === 'export') {
+      setIsExportDialogOpen(true);
+    }
+  }, [isEnabled, fileHash]);
 
   if (!isEnabled) return null;
 
@@ -153,6 +174,7 @@ export function ResultsExportControls({
     //   CSVs), so the narrower scope is intentional, just unwritten until now.
     if (saved !== null && saved.capped && saved.total === rowCount) {
       analytics.paywallView(i18n.language, rowCount);
+      rememberExportModal({ modal: 'paywall', fileHash, saved });
       setIsPaywallOpen(true);
       return;
     }
@@ -193,11 +215,13 @@ export function ResultsExportControls({
       downloadBlob(blob, savedFilename);
       // One name, used for the file and for whatever names it back. A receipt
       // pointing at a different file than the one on disk is worse than none.
-      setSaved({ filename: savedFilename, total: rowCount, capped });
+      const receipt = { filename: savedFilename, total: rowCount, capped };
+      setSaved(receipt);
       analytics.freeExportDownload(capped, 'html');
 
       if (capped) {
         analytics.paywallView(i18n.language, rowCount);
+        rememberExportModal({ modal: 'paywall', fileHash, saved: receipt });
         setIsPaywallOpen(true);
       }
     } catch {
@@ -245,6 +269,7 @@ export function ResultsExportControls({
     if (isRunningRef.current) return;
     analytics.exportClick(isUnlocked);
     if (isUnlocked) {
+      rememberExportModal({ modal: 'export', fileHash });
       setIsExportDialogOpen(true);
       return;
     }
@@ -337,43 +362,79 @@ export function ResultsExportControls({
         )}
       </div>
 
-      <Suspense fallback={null}>
-        {isPaywallOpen && saved ? (
-          <PaywallModal
-            open={isPaywallOpen}
-            onOpenChange={handlePaywallOpenChange}
-            onCheckout={() => startCheckout(i18n.language, saved.total)}
-            onManualEntry={openLicenseDialog}
-            savedFilename={saved.filename}
-            totalRows={saved.total}
-            checkoutState={checkoutState}
-          />
-        ) : null}
-        {isExportDialogOpen ? (
-          <ExportDialog
-            open={isExportDialogOpen}
-            onOpenChange={setIsExportDialogOpen}
-            fileHash={fileHash}
-            indices={indices}
-            rowCount={rowCount}
-            totalCount={totalCount}
-            filters={filters}
-            searchApplied={searchApplied}
-          />
-        ) : null}
-        {isLicenseDialogOpen ? (
-          <LicenseDialog
-            open={isLicenseDialogOpen}
-            onOpenChange={setIsLicenseDialogOpen}
-            initialKey={null}
-            source="manual"
-            onContinue={() => {
-              setIsLicenseDialogOpen(false);
-              setIsExportDialogOpen(true);
-            }}
-          />
-        ) : null}
-      </Suspense>
+      {/* A failed modal chunk stays here instead of reaching the app-wide boundary, whose
+          "Something went wrong" screen is what iOS readers met at the step that pays. The
+          event is still reported — ErrorBoundary reports before it renders a fallback. */}
+      <ErrorBoundary fallback={<ModalChunkFailed onShown={() => setHasError(true)} />}>
+        <Suspense fallback={null}>
+          {isPaywallOpen && saved ? (
+            <>
+              <PaywallModal
+                open={isPaywallOpen}
+                onOpenChange={handlePaywallOpenChange}
+                onCheckout={() => startCheckout(i18n.language, saved.total)}
+                onManualEntry={openLicenseDialog}
+                savedFilename={saved.filename}
+                totalRows={saved.total}
+                checkoutState={checkoutState}
+              />
+              <ForgetExportResume />
+            </>
+          ) : null}
+          {isExportDialogOpen ? (
+            <>
+              <ExportDialog
+                open={isExportDialogOpen}
+                onOpenChange={setIsExportDialogOpen}
+                fileHash={fileHash}
+                indices={indices}
+                rowCount={rowCount}
+                totalCount={totalCount}
+                filters={filters}
+                searchApplied={searchApplied}
+              />
+              <ForgetExportResume />
+            </>
+          ) : null}
+          {isLicenseDialogOpen ? (
+            <LicenseDialog
+              open={isLicenseDialogOpen}
+              onOpenChange={setIsLicenseDialogOpen}
+              initialKey={null}
+              source="manual"
+              onContinue={() => {
+                setIsLicenseDialogOpen(false);
+                setIsExportDialogOpen(true);
+              }}
+            />
+          ) : null}
+        </Suspense>
+      </ErrorBoundary>
     </>
   );
+}
+
+/**
+ * Erases the remembered modal once it has mounted. It sits inside the Suspense boundary
+ * beside the lazy modal, so its effect runs only when that chunk resolved and the modal
+ * committed — a normal open leaves nothing behind for an ordinary reload to reopen.
+ */
+function ForgetExportResume(): null {
+  useEffect(() => {
+    forgetExportModal();
+  }, []);
+  return null;
+}
+
+/**
+ * Says nothing while the reload stale-chunk-recovery asked for is on its way — the page is
+ * about to go, and the remembered modal will reopen on the next one. Otherwise it hands the
+ * failure to the controls' own error line under the button, because an import the browser
+ * has refused once is not retried by clicking again.
+ */
+function ModalChunkFailed({ onShown }: { onShown: () => void }): null {
+  useEffect(() => {
+    if (!isStaleChunkReloadPending()) onShown();
+  }, [onShown]);
+  return null;
 }

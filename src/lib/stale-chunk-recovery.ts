@@ -54,6 +54,16 @@ function rememberAttempt(): void {
 }
 
 /**
+ * True only when this page has asked for the reload, so a boundary that catches the failed
+ * chunk can stay quiet for the second or so before the page goes. Deliberately not the
+ * `sessionStorage` marker: on the page a reload produced, the marker says a reload already
+ * happened, and nothing more is coming — that page's failure has to be shown.
+ */
+export function isStaleChunkReloadPending(): boolean {
+  return reloadAttempted;
+}
+
+/**
  * Install before anything that can dynamically import — including `initI18n`, whose locale
  * bundles are dynamic imports too.
  *
