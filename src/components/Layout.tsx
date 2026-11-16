@@ -5,6 +5,7 @@ import { Outlet } from 'react-router-dom';
 import { BreadcrumbSchema } from '@/components/BreadcrumbSchema';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { LicenseDialogMount } from '@/components/export/LicenseDialogMount';
+import { LocaleHint } from '@/components/LocaleHint';
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { OrganizationSchema } from '@/components/OrganizationSchema';
@@ -161,6 +162,8 @@ export function Layout({ lang }: LayoutProps) {
           </main>
 
           <Footer />
+
+          <LocaleHint lang={lang ?? 'en'} />
 
           {/* Structured data for SEO */}
           <BreadcrumbSchema />
