@@ -29,10 +29,20 @@ function firePreloadError(): Event {
 describe('stale chunk recovery', () => {
   const realLocation = window.location;
   let reload: ReturnType<typeof vi.fn>;
+  // Every test installs a fresh module's listener on the one shared window. Left attached, an
+  // earlier test's listener runs first on the next dispatch, spends the sessionStorage marker,
+  // and the module under test sees an attempt it never made. Counting `reload` calls cannot
+  // tell whose listener reloaded; asking a module about its own state can.
+  const listeners: EventListenerOrEventListenerObject[] = [];
+  const realAdd = window.addEventListener.bind(window);
 
   beforeEach(() => {
     vi.resetModules();
     sessionStorage.clear();
+    vi.spyOn(window, 'addEventListener').mockImplementation((type, listener, options) => {
+      if (type === 'vite:preloadError' && listener) listeners.push(listener);
+      realAdd(type, listener, options);
+    });
     reload = vi.fn();
     // jsdom's own location.reload is a non-configurable no-op that logs "not implemented",
     // so it is replaced wholesale — the shape used by LanguageSwitcher.test.tsx.
@@ -41,6 +51,10 @@ describe('stale chunk recovery', () => {
   });
 
   afterEach(() => {
+    for (const listener of listeners.splice(0)) {
+      window.removeEventListener('vite:preloadError', listener);
+    }
+    vi.mocked(window.addEventListener).mockRestore();
     delete (window as { location?: Location }).location;
     (window as unknown as { location: unknown }).location = realLocation;
     sessionStorage.clear();
@@ -134,6 +148,36 @@ describe('stale chunk recovery', () => {
       // Declining to reload is not the same as having reloaded. Spending the guard while offline
       // would leave the tab with no recovery left at the moment recovery becomes possible.
       expect(reload).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('isStaleChunkReloadPending', () => {
+    // A boundary that catches the failed chunk decides between "say nothing, the page is
+    // about to reload" and "say the export failed". It may only stay silent when THIS page
+    // asked for the reload.
+    it('is false until this page asks for a reload, and true after', async () => {
+      const { installStaleChunkRecovery, isStaleChunkReloadPending } =
+        await import('@/lib/stale-chunk-recovery');
+      installStaleChunkRecovery();
+      expect(isStaleChunkReloadPending()).toBe(false);
+
+      firePreloadError();
+
+      expect(isStaleChunkReloadPending()).toBe(true);
+    });
+
+    it('is false on the page the reload produced, so its next failure is shown', async () => {
+      const first = await import('@/lib/stale-chunk-recovery');
+      first.installStaleChunkRecovery();
+      firePreloadError();
+
+      vi.resetModules();
+      const second = await import('@/lib/stale-chunk-recovery');
+      second.installStaleChunkRecovery();
+      firePreloadError();
+
+      // The marker says a reload already happened in this tab; it does not say one is coming.
+      expect(second.isStaleChunkReloadPending()).toBe(false);
     });
   });
 
