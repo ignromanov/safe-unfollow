@@ -146,14 +146,27 @@ interface FormSpec {
   option: Intl.DateTimeFormatOptions['month'];
   keep: number | null;
   exact: boolean;
+  /**
+   * Whether to query `Intl` in a date-formatting context (`{ day: 'numeric', month }`)
+   * via `formatToParts` instead of standalone `{ month }`. Inflected languages
+   * (`ru`, `uk`, `el`, `cs`, `pl`) and German (`de`) produce different month
+   * tokens when a month accompanies a day (`мая` / `мар.` / `июн.` in `ru`,
+   * `März` / `Juni` / `Juli` / `Sept.` in `de`) than in standalone nominative
+   * headers (`май` / `март` / `июнь` in `ru`, `Mär` / `Jun` / `Jul` / `Sep` in
+   * `de` — GH#156, Dashboard I1).
+   */
+  inDate: boolean;
 }
 
 const FORM_SPECS = {
-  'cldr-short': { option: 'short', keep: null, exact: true },
-  'cldr-long': { option: 'long', keep: null, exact: true },
-  numeric: { option: 'numeric', keep: null, exact: true },
-  prefix3: { option: 'long', keep: 3, exact: false },
-  prefix4: { option: 'long', keep: 4, exact: false },
+  'cldr-short': { option: 'short', keep: null, exact: true, inDate: false },
+  'cldr-long': { option: 'long', keep: null, exact: true, inDate: false },
+  'cldr-format-short': { option: 'short', keep: null, exact: true, inDate: true },
+  'cldr-format-long': { option: 'long', keep: null, exact: true, inDate: true },
+  numeric: { option: 'numeric', keep: null, exact: true, inDate: false },
+  prefix3: { option: 'long', keep: 3, exact: false, inDate: false },
+  prefix4: { option: 'long', keep: 4, exact: false, inDate: false },
+  'format-prefix3': { option: 'long', keep: 3, exact: false, inDate: true },
 } as const satisfies Record<string, FormSpec>;
 
 type Form = keyof typeof FORM_SPECS;
@@ -225,11 +238,15 @@ function normalizeToken(token: string): string {
 
 /** One candidate's twelve tokens, or `null` when they are not all distinct. */
 function buildCandidate(locale: string, form: Form): Map<string, number> | null {
-  const { option, keep }: FormSpec = FORM_SPECS[form];
+  const { option, keep, inDate }: FormSpec = FORM_SPECS[form];
 
   let formatter: Intl.DateTimeFormat;
   try {
-    formatter = new Intl.DateTimeFormat(locale, { month: option, timeZone: 'UTC' });
+    formatter = new Intl.DateTimeFormat(locale, {
+      ...(inDate ? { day: 'numeric' } : {}),
+      month: option,
+      timeZone: 'UTC',
+    });
   } catch {
     // An environment without this locale's data is not an error; it is one
     // fewer candidate. Every browser answers for at least `en`.
@@ -238,7 +255,10 @@ function buildCandidate(locale: string, form: Form): Map<string, number> | null 
 
   const table = new Map<string, number>();
   for (let month = 0; month < 12; month++) {
-    const full = formatter.format(new Date(Date.UTC(PROBE_YEAR, month, PROBE_DAY)));
+    const probeDate = new Date(Date.UTC(PROBE_YEAR, month, PROBE_DAY));
+    const full = inDate
+      ? (formatter.formatToParts(probeDate).find(p => p.type === 'month')?.value ?? '')
+      : formatter.format(probeDate);
     const key = normalizeToken(keep === null ? full : full.slice(0, keep));
     // Not injective: two months would answer to one token, so this candidate
     // cannot read a date unambiguously and is discarded rather than ranked.

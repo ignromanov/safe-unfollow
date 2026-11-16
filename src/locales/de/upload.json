@@ -43,7 +43,7 @@
       "NOT_ZIP": {
         "title": "Keine ZIP-Datei",
         "message": "Bitte lade das ZIP-Archiv von Instagram hoch, keinen Ordner oder einen anderen Dateityp.",
-        "fix": "Suche in deinem Download-Ordner nach einer Datei mit der Endung .zip. Sie sollte etwa so heißen: \"instagram-benutzername-datum.zip\"."
+        "fix": "Suche in deinem Download-Ordner nach einer Datei mit der Endung .zip. Sie sollte etwa so heißen: \"instagram-benutzername-datum.zip\". Entpacke den Ordner nicht und wähle keine einzelne .html- oder .json-Datei daraus aus."
       },
       "HTML_FORMAT": {
         "title": "Wir konnten diesen Export nicht lesen",

@@ -1,9 +1,9 @@
 ---
 layout: default
-title: "Instagram Data Export: ZIP Guide and followers_1.json"
-description: "How to request your Instagram data export as a ZIP, choose JSON or HTML, and read what followers_1.json and pending_follow_requests.html hold."
+title: "Instagram Data Export: ZIP/JSON Guide (No Login)"
+description: "Step-by-step guide to download your Instagram data export ZIP (JSON or HTML) safely without logging in, including followers_1.json and pending requests."
 permalink: /instagram-export/
-last_updated: 2026-11-09
+last_updated: 2026-11-16
 ---
 
 # How to Download Your Instagram Data as a ZIP (JSON or HTML)

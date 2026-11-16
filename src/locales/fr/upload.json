@@ -43,7 +43,7 @@
       "NOT_ZIP": {
         "title": "Ce n'est pas un fichier ZIP",
         "message": "Veuillez téléverser l'archive ZIP d'Instagram, pas un dossier ou un autre type de fichier.",
-        "fix": "Cherchez un fichier se terminant par .zip dans votre dossier Téléchargements. Il devrait s'appeler quelque chose comme « instagram-nomutilisateur-date.zip »."
+        "fix": "Cherchez un fichier se terminant par .zip dans votre dossier Téléchargements. Il devrait s'appeler quelque chose comme « instagram-nomutilisateur-date.zip ». Ne décompressez pas le dossier et ne sélectionnez pas un fichier .html ou .json isolé à l'intérieur."
       },
       "HTML_FORMAT": {
         "title": "Nous n'avons pas pu lire cette exportation",

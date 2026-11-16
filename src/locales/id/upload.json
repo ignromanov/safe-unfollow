@@ -43,7 +43,7 @@
       "NOT_ZIP": {
         "title": "Bukan File ZIP",
         "message": "Unggah arsip ZIP dari Instagram, bukan folder atau jenis file lain.",
-        "fix": "Cari file berakhiran .zip di folder Unduhan Anda. Biasanya bernama seperti \"instagram-username-tanggal.zip\"."
+        "fix": "Cari file berakhiran .zip di folder Unduhan Anda. Biasanya bernama seperti \"instagram-username-tanggal.zip\". Jangan ekstrak foldernya atau memilih satu file .html atau .json di dalamnya."
       },
       "HTML_FORMAT": {
         "title": "Kami Tidak Dapat Membaca Ekspor Ini",

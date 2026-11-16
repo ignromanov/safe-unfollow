@@ -43,7 +43,7 @@
       "NOT_ZIP": {
         "title": "ZIP Dosyası Değil",
         "message": "Lütfen klasör veya başka bir dosya türü değil, Instagram'dan gelen ZIP arşivini yükle.",
-        "fix": "İndirilenler klasöründe .zip uzantılı bir dosya ara. Genellikle \"instagram-kullaniciadi-tarih.zip\" gibi bir ismi olur."
+        "fix": "İndirilenler klasöründe .zip uzantılı bir dosya ara. Genellikle \"instagram-kullaniciadi-tarih.zip\" gibi bir ismi olur. Klasörü dışa çıkarma veya içinden tek bir .html ya da .json dosyası seçme."
       },
       "HTML_FORMAT": {
         "title": "Bu dışa aktarımı okuyamadık",

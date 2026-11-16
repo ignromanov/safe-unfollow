@@ -43,7 +43,7 @@
       "NOT_ZIP": {
         "title": "Not a ZIP File",
         "message": "Please upload the ZIP archive from Instagram, not a folder or other file type.",
-        "fix": "Look for a file ending in .zip in your Downloads folder. It should be named something like \"instagram-username-date.zip\"."
+        "fix": "Look for a file ending in .zip in your Downloads folder. It should be named something like \"instagram-username-date.zip\". Do not unzip the folder or select a single .html or .json file from inside it."
       },
       "HTML_FORMAT": {
         "title": "We couldn't read this export",
