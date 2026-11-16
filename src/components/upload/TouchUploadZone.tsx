@@ -27,10 +27,14 @@ export function TouchUploadZone({ fileInputRef, isProcessing, onFileInput }: Tou
             : 'cursor-pointer active:scale-[0.98] active:shadow-md'
         }`}
       >
+        {/* Every string sits in its own <span>. A bare text node here is what
+            Chrome's page translator replaces with <font>, and the next state
+            switch then hands React a node that is no longer in the label:
+            insertBefore throws and the ErrorBoundary takes /upload. */}
         {isProcessing ? (
           <>
             <Loader2 className="h-6 w-6 shrink-0 animate-spin" aria-hidden="true" />
-            {t('zone.processing')}
+            <span>{t('zone.processing')}</span>
             {/* Indeterminate on purpose: parsing emits no progress events, so a
                 filling bar would be inventing a number. This only says "still
                 working", which is the one thing we actually know. */}
@@ -44,7 +48,7 @@ export function TouchUploadZone({ fileInputRef, isProcessing, onFileInput }: Tou
         ) : (
           <>
             <Smartphone size={24} className="shrink-0" aria-hidden="true" />
-            {t('zone.tapToSelect', { defaultValue: 'Tap to select your ZIP file' })}
+            <span>{t('zone.tapToSelect', { defaultValue: 'Tap to select your ZIP file' })}</span>
           </>
         )}
       </label>

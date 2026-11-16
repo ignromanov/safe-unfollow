@@ -42,6 +42,43 @@ describe('TouchUploadZone', () => {
     expect(container.textContent?.trim()).toBe(uploadEN.zone.processing);
   });
 
+  describe('under a page translator', () => {
+    // Chrome's built-in translator replaces every text node it translates with
+    // <font><font>…</font></font>. React still holds the original node, so any
+    // insertBefore/removeChild that uses it as a reference throws NotFoundError
+    // and the ErrorBoundary takes the page. Measured 2026-10-30 → 11-16: 122
+    // error_boundary events in 83 sessions, every one Chrome/Android on /upload,
+    // every stack ending in this label — at the moment the reader picks a file.
+    function translateTextNodes(root: Element): void {
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      const nodes: Text[] = [];
+      while (walker.nextNode()) nodes.push(walker.currentNode as Text);
+      for (const node of nodes) {
+        if (!node.nodeValue?.trim()) continue;
+        const outer = document.createElement('font');
+        const inner = document.createElement('font');
+        inner.textContent = `[translated] ${node.nodeValue}`;
+        outer.appendChild(inner);
+        node.replaceWith(outer);
+      }
+    }
+
+    function renderWithTranslator(from: boolean, to: boolean) {
+      const props = { fileInputRef: createRef<HTMLInputElement>(), onFileInput: vi.fn() };
+      const view = render(<TouchUploadZone {...props} isProcessing={from} />);
+      translateTextNodes(view.container);
+      return () => view.rerender(<TouchUploadZone {...props} isProcessing={to} />);
+    }
+
+    it('survives the switch to the busy state when the file is picked', () => {
+      expect(renderWithTranslator(false, true)).not.toThrow();
+    });
+
+    it('survives the switch back to idle when the parse ends', () => {
+      expect(renderWithTranslator(true, false)).not.toThrow();
+    });
+  });
+
   it('holds its height across the state change so nothing below it moves', () => {
     // The busy label is one line where the idle label is two in the long
     // locales; without a floor the button would shrink at parse start and drag
