@@ -1330,7 +1330,7 @@ describe('AccountListSection', () => {
     it('emits one step per action with the sorted combination and the exact count', () => {
       const stepSpy = vi.spyOn(filterTelemetry, 'step');
       const unfollowed = new Set<BadgeKey>(['unfollowed']);
-      const both = new Set<BadgeKey>(['unfollowed', 'notFollowingBack']);
+      const notFollowing = new Set<BadgeKey>(['notFollowingBack']);
       const { settle } = mount();
 
       clickCard('unfollowed');
@@ -1339,16 +1339,25 @@ describe('AccountListSection', () => {
       settle({ filters: unfollowed, isFiltering: true, resultKey: resultKeyOf([], '') });
       settle({ filters: unfollowed, filteredIndices: [0, 1, 2, 3] });
 
+      // StatCard clicks switch exclusively to the clicked badge (Dashboard F2 fix:
+      // prevents 100%-empty `notFollowingBack+unfollowed` intersections); multi-select
+      // lives in the FilterChips sheet.
       clickCard('not following');
-      settle({ filters: both, resultKey: resultKeyOf(unfollowed, '') });
-      settle({ filters: both, filteredIndices: [] });
+      settle({ filters: notFollowing, resultKey: resultKeyOf(unfollowed, '') });
+      settle({ filters: notFollowing, filteredIndices: [0, 1, 2] });
 
       // Step 0 was held (nothing applied on arrival) and left with the first click.
       expect(stepRows(stepSpy)).toEqual([
         [0, '', 21],
         [1, 'unfollowed', 4],
-        [2, 'notFollowingBack+unfollowed', 0],
+        [2, 'notFollowingBack', 3],
       ]);
+      // The switch dropped `unfollowed` without a toggle of its own: that disable
+      // is on the switching step, never lost.
+      const replacedOf = (call: unknown[] | undefined) =>
+        (call?.[0] as { replaced?: string } | undefined)?.replaced;
+      expect(replacedOf(stepSpy.mock.calls[1])).toBeUndefined();
+      expect(replacedOf(stepSpy.mock.calls[2])).toBe('unfollowed');
     });
 
     it('emits nothing for a visit that never filtered', () => {

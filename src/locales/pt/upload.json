@@ -43,7 +43,7 @@
       "NOT_ZIP": {
         "title": "Não é um arquivo ZIP",
         "message": "Envie o arquivo ZIP do Instagram, não uma pasta ou outro tipo de arquivo.",
-        "fix": "Procure um arquivo terminado em .zip na sua pasta de Downloads. O nome deve ser algo como \"instagram-usuario-data.zip\"."
+        "fix": "Escolha o próprio arquivo .zip. Ele costuma ficar em Downloads, com um nome como \"instagram-usuario-data.zip\". Se ele foi descompactado em uma pasta, volte ao .zip: um arquivo .html ou .json solto dessa pasta não funciona. Se o .zip sumiu, baixe de novo pelo link do e-mail da Meta. O link vale por 4 dias."
       },
       "HTML_FORMAT": {
         "title": "Não conseguimos ler esta exportação",

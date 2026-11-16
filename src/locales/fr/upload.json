@@ -43,7 +43,7 @@
       "NOT_ZIP": {
         "title": "Ce n'est pas un fichier ZIP",
         "message": "Veuillez téléverser l'archive ZIP d'Instagram, pas un dossier ou un autre type de fichier.",
-        "fix": "Cherchez un fichier se terminant par .zip dans votre dossier Téléchargements. Il devrait s'appeler quelque chose comme « instagram-nomutilisateur-date.zip »."
+        "fix": "Choisissez le fichier .zip lui-même. Il se trouve généralement dans Téléchargements et s'appelle quelque chose comme « instagram-nomutilisateur-date.zip ». S'il a été décompressé dans un dossier, revenez au .zip : un fichier .html ou .json isolé de ce dossier ne fonctionnera pas. Si le .zip a disparu, téléchargez-le à nouveau via le lien de l'e-mail de Meta. Le lien est valable 4 jours."
       },
       "HTML_FORMAT": {
         "title": "Nous n'avons pas pu lire cette exportation",

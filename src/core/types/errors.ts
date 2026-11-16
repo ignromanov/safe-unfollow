@@ -116,7 +116,7 @@ export function createDiagnosticError(
     NOT_ZIP: {
       title: 'Not a ZIP File',
       message: 'Please upload the ZIP archive from Instagram, not a folder or other file type.',
-      fix: 'Look for a file ending in .zip in your Downloads folder. It should be named something like "instagram-username-date.zip".',
+      fix: 'Choose the .zip file itself. It is usually in Downloads, named like "instagram-username-date.zip". If it was unzipped into a folder, go back to the .zip; a single .html or .json file from that folder will not work. If the .zip is gone, download it again from the link in Meta\'s email. The link works for 4 days.',
       icon: 'zip',
       severity: 'error',
     },

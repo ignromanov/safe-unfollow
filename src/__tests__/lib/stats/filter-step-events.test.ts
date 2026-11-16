@@ -64,6 +64,34 @@ describe('filter step and anomaly payloads', () => {
     });
   });
 
+  it('names the badges a switch dropped, and sends no prediction with them', () => {
+    const { predictedCount: _none, ...rest } = resolved;
+    filterTelemetry.step(
+      {
+        ...rest,
+        combination: 'notFollowingBack',
+        replaced: 'unfollowed',
+        result: { count: 3, searchActive: false },
+      },
+      840
+    );
+
+    const [, payload] = enqueueEvent.mock.calls[0];
+    expect(payload).toEqual({
+      filter_session_id: 'abc1230',
+      step: 2,
+      badge: 'notFollowingBack',
+      action: 'enable',
+      source: 'stat_card',
+      combination: 'notFollowingBack',
+      total_count: 840,
+      resolved: true,
+      result_count: 3,
+      search_active: false,
+      replaced: 'unfollowed',
+    });
+  });
+
   it('sends an anomaly with both numbers', () => {
     filterTelemetry.anomaly({ kind: 'card_vs_list', step: resolved, expected: 4, actual: 5 }, 840);
 

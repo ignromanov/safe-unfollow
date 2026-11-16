@@ -220,16 +220,16 @@ export function AccountListSection({
   };
 
   const handleStatCardClick = (badgeType: BadgeKey) => {
-    const newFilters = new Set(filters);
-    const action = newFilters.has(badgeType) ? 'disable' : 'enable';
+    // Exclusive: an inactive card replaces the selection, so the badges it drops
+    // are recorded as `replaced` on this one step. Multi-select is the sheet's.
+    const isActive = filters.has(badgeType);
+    const action = isActive ? 'disable' : 'enable';
+    const newFilters = isActive
+      ? new Set([...filters].filter(b => b !== badgeType))
+      : new Set<BadgeKey>([badgeType]);
+    const replaced = isActive ? new Set<BadgeKey>() : new Set(filters);
 
-    if (newFilters.has(badgeType)) {
-      newFilters.delete(badgeType);
-    } else {
-      newFilters.add(badgeType);
-    }
-
-    recordToggle(badgeType, action, newFilters, 'stat_card');
+    recordToggle(badgeType, action, newFilters, 'stat_card', replaced);
     setFilters(newFilters);
     trackAction();
   };

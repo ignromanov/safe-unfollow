@@ -140,7 +140,7 @@ describe('DiagnosticErrorScreen', () => {
       expect(screen.getByText(uploadEN.diagnostic.howToFix)).toBeInTheDocument();
       // Fix instructions for NOT_ZIP
       expect(
-        screen.getByText(/Look for a file ending in .zip in your Downloads folder/)
+        screen.getByText(/If the .zip is gone, download it again from the link in Meta.s email/)
       ).toBeInTheDocument();
     });
   });

@@ -306,6 +306,36 @@ describe('filter steps', () => {
       expect(drainFilterSteps()[0]?.predictedCount).toBeUndefined();
     });
 
+    it('is absent on a switch, and the dropped badges travel as `replaced`', () => {
+      // A StatCard switch from {unfollowed} to {notFollowingBack}. The counts on
+      // hand are for {unfollowed}; the list the switch produces is not that
+      // selection plus the badge, so a prediction here would be a false mismatch.
+      notePredictions(combinationOf(['unfollowed']), { notFollowingBack: 0 } as Record<
+        BadgeKey,
+        number
+      >);
+      recordToggle(
+        'notFollowingBack',
+        'enable',
+        new Set<BadgeKey>(['notFollowingBack']),
+        'stat_card',
+        new Set<BadgeKey>(['unfollowed'])
+      );
+      abandonPendingStep();
+
+      const [step] = drainFilterSteps();
+      expect(step?.predictedCount).toBeUndefined();
+      expect(step?.replaced).toBe('unfollowed');
+      expect(step?.combination).toBe('notFollowingBack');
+    });
+
+    it('carries no `replaced` when the click dropped nothing', () => {
+      enable('notFollowingBack', ['notFollowingBack']);
+      abandonPendingStep();
+
+      expect(drainFilterSteps()[0]).not.toHaveProperty('replaced');
+    });
+
     it('is absent when the counts belong to another selection', () => {
       // Candidate counts arrive asynchronously. Two quick enables would
       // otherwise predict the second one against the selection before the first.

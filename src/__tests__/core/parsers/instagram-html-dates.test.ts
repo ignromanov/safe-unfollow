@@ -91,6 +91,32 @@ describe('fitting a month table to the tokens a file actually contains', () => {
     expect(table?.get('12月')).toBe(11);
   });
 
+  it('fits Russian genitive format-context months (мая, мар., июн.) where standalone nominative fails', () => {
+    // Dashboard I1 measured 98.6% (68/69) of Russian HTML exports failing
+    // `dates_fitted` because standalone `{ month: 'short' }` returns nominative
+    // `март` / `май` / `июнь` while a date with a day uses genitive `мар.` / `мая` / `июн.`.
+    const shortTable = fitMonthTable(['янв.', 'февр.', 'мар.', 'мая', 'июн.']);
+    expect(shortTable?.get('янв.')).toBe(0);
+    expect(shortTable?.get('мар.')).toBe(2);
+    expect(shortTable?.get('мая')).toBe(4);
+    expect(shortTable?.get('июн.')).toBe(5);
+
+    const prefix3Table = fitMonthTable(['янв', 'фев', 'мар', 'мая', 'июн']);
+    expect(prefix3Table?.get('мая')).toBe(4);
+  });
+
+  it('fits German format-context short months (März, Juni, Juli, Sept.)', () => {
+    // Dashboard I1 measured 100% (11/11) of German HTML exports failing
+    // `dates_fitted` when format-context short tokens (`März`, `Juni`, `Sept.`)
+    // appear alongside 3-letter months (`Jan.`, `Mai`).
+    const table = fitMonthTable(['Jan.', 'März', 'Mai', 'Juni', 'Sept.']);
+    expect(table?.get('Jan.')).toBe(0);
+    expect(table?.get('März')).toBe(2);
+    expect(table?.get('Mai')).toBe(4);
+    expect(table?.get('Juni')).toBe(5);
+    expect(table?.get('Sept.')).toBe(8);
+  });
+
   it('is not fooled by the machine timezone', () => {
     // The trap: `Intl.DateTimeFormat(locale, {month:'short'})` over
     // `Date.UTC(y, i, 1)` builds a table shifted by one whenever the machine's

@@ -233,8 +233,9 @@ export const INTENT_CONTENT: Record<IntentSlug, IntentContent> = {
     ),
     intro: (
       <>
-        This works on <em>your</em> account, from <em>your</em> archive. It cannot tell you the
-        mutuals between two other people.
+        Upload your Instagram archive once to see your mutual followers, everyone who doesn't follow
+        you back and everyone you haven't followed back, without logging in. It works from your own
+        archive only: mutuals between two other people need access this tool never asks for.
       </>
     ),
     sections: [
