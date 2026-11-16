@@ -132,12 +132,15 @@ export function ResultsExportControls({
 
   // Warm the chunks on intent. The report builder is not warmed here: it runs
   // in the export worker, which `useExportWorker` creates on the first build.
+  // A failed warm-up is swallowed: Vite has already dispatched `vite:preloadError`
+  // for it, and the lazy render's own import reports the failure through the
+  // boundary below. Left uncaught it was a second, unhandled rejection.
   const preloadModal = (): void => {
     if (isUnlocked) {
-      void import('./ExportDialog');
+      import('./ExportDialog').catch(() => {});
       return;
     }
-    void import('./PaywallModal');
+    import('./PaywallModal').catch(() => {});
   };
 
   /**
