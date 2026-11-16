@@ -90,3 +90,22 @@ describe('AccountItem date line', () => {
     expect(onAccountClick).toHaveBeenCalledWith(['following', 'followers']);
   });
 });
+
+// A page translator rewrites every text node it is allowed to read, and a hosted one may send that
+// text off the device to do it. A username is a proper noun in nobody's language, so translating it
+// can only corrupt it, and it is the one piece of the reader's export this page shows.
+describe('AccountItem under a page translator', () => {
+  it('marks the username as not for translation', () => {
+    render(
+      <AccountItem
+        account={{ username: 'some.friend', badges: {} }}
+        index={0}
+        totalCount={1}
+        dateZones={null}
+        formatDate={fmt}
+        reserveDateLine={false}
+      />
+    );
+    expect(screen.getByText('@some.friend')).toHaveAttribute('translate', 'no');
+  });
+});
