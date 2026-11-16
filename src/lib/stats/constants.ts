@@ -42,6 +42,7 @@ export const AnalyticsEvents = {
   // Locale hint (shown while a page translator renders one of our languages)
   LOCALE_HINT_VIEW: 'locale_hint_view',
   LOCALE_HINT_CLICK: 'locale_hint_click',
+  LOCALE_HINT_DISMISS: 'locale_hint_dismiss',
   // The one control at the end of the guide. Instrumented before GH#102 moves
   // it: its reach was measured (83.4% of step-2 sessions), its usefulness never
   // was, so a move with no "before" would be unarguable either way.

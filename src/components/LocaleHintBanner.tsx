@@ -54,6 +54,7 @@ export default function LocaleHintBanner({ target, href, path, onDismiss }: Loca
           aria-label={copy.close}
           onClick={() => {
             dismissLocaleHint();
+            localeHintTelemetry.dismiss(target, path);
             onDismiss();
           }}
           className="shrink-0 rounded p-1 text-muted-foreground hover:text-foreground"

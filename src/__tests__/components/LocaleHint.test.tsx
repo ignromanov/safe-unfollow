@@ -81,20 +81,34 @@ describe('LocaleHint', () => {
     expect(trackBeacon).toHaveBeenCalledWith('locale_hint_click', { target_lang: 'id', path: '/' });
   });
 
-  it('closes for good on dismissal, and sends nothing for it', async () => {
+  it('closes for good on an explicit Close, and reports that choice and nothing else', async () => {
     const { unmount } = renderAt('/upload');
     act(() => translateTo('ru'));
     fireEvent.click(await screen.findByRole('button', { name: 'Закрыть' }));
 
     expect(screen.queryByRole('region')).not.toBeInTheDocument();
     expect(trackBeacon).not.toHaveBeenCalled();
-    expect(trackEvent).toHaveBeenCalledTimes(1); // the view, nothing more
+    expect(trackEvent).toHaveBeenCalledTimes(2);
+    expect(trackEvent).toHaveBeenLastCalledWith('locale_hint_dismiss', {
+      target_lang: 'ru',
+      path: '/upload',
+    });
     unmount();
 
     renderAt('/');
     act(() => translateTo('ru'));
     await settle();
     expect(screen.queryByRole('region')).not.toBeInTheDocument();
+  });
+
+  // A tab closed without a choice is not a dismissal.
+  it('reports no dismissal when the hint just goes away', async () => {
+    const { unmount } = renderAt('/upload');
+    act(() => translateTo('pt'));
+    await screen.findByRole('region');
+    unmount();
+    expect(trackEvent).toHaveBeenCalledTimes(1);
+    expect(trackEvent).not.toHaveBeenCalledWith('locale_hint_dismiss', expect.anything());
   });
 
   it.each([

@@ -52,7 +52,7 @@ export function localeHintHref(pathname: string, target: SupportedLanguage): str
 
 const DISMISS_KEY = 'locale-hint-dismissed';
 
-/** Dismissal stays on this device and is never sent anywhere (velum-cdpo). */
+/** The remembered dismissal stays on this device and is never sent (velum-cdpo). */
 export function dismissLocaleHint(): void {
   try {
     localStorage.setItem(DISMISS_KEY, '1');
