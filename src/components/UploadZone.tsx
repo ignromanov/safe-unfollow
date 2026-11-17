@@ -168,7 +168,7 @@ export function UploadZone({
           t('zone.processingAria', { defaultValue: 'Processing your file, please wait...' })}
       </div>
 
-      <div className="grid gap-12 lg:grid-cols-5">
+      <div className="grid grid-cols-1 gap-12 lg:grid-cols-5">
         {/* Main upload area - 3 columns */}
         <div className="flex flex-col gap-5 lg:col-span-3 lg:gap-8">
           {/* Title */}
