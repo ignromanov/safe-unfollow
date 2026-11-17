@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Heart, Coffee, EyeOff, Eye, BookOpen } from 'lucide-react';
+import { Heart, EyeOff, Eye, BookOpen } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { analytics, isTrackingOptedOut, optOutOfTracking, optIntoTracking } from '@/lib/analytics';
-import { useStoreSSR } from '@/hooks/useStoreSSR';
 import { Logo } from './Logo';
 import { PrefixedLink } from './PrefixedLink';
 
@@ -42,11 +41,6 @@ function GithubMark({ size = 14 }: { size?: number }) {
 
 export function Footer() {
   const { t } = useTranslation('common');
-  // The prerendered footer says the Instagram export never leaves the browser; the count
-  // replaces it only once the store is readable. Previously gated behind this component's
-  // own `mounted` flag. Both branches render into the same node, so they must agree on
-  // register in locales that have one — see `analyzedCount` in ru/tr common.json.
-  const accountCount = useStoreSSR(s => s.fileMetadata?.accountCount, undefined);
 
   // Not a hydration gate: `isOptedOut` is false until the effect reads localStorage, so
   // the prerendered branch is the initial value itself.
@@ -82,112 +76,86 @@ export function Footer() {
             </p>
           </div>
 
-          {/* Links & Support */}
-          <div className="flex flex-col items-center lg:items-end gap-8">
-            {/* Navigation Links */}
-            <div className="flex flex-wrap items-center justify-center lg:justify-end gap-x-12 gap-y-6 text-xs lg:text-sm font-black uppercase tracking-widest text-zinc-400">
-              <PrefixedLink
-                to="/privacy"
-                className="hover:text-primary-strong transition-colors py-2 px-1 cursor-pointer"
-                onClick={() => analytics.linkClick('privacy-policy')}
-              >
-                {t('footer.privacyPolicy')}
-              </PrefixedLink>
-              <PrefixedLink
-                to="/terms"
-                className="hover:text-primary-strong transition-colors py-2 px-1 cursor-pointer"
-                onClick={() => analytics.linkClick('terms-of-service')}
-              >
-                {t('footer.termsOfService')}
-              </PrefixedLink>
-              <a
-                href="https://safeunfollow.app/docs"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-primary-strong transition-colors py-2 px-1 flex items-center gap-1.5 cursor-pointer"
-                onClick={() => analytics.linkClick('docs')}
-              >
-                <BookOpen size={14} aria-hidden="true" />
-                {t('footer.docs')}
-                <span className="sr-only"> (opens in new tab)</span>
-              </a>
-              <a
-                href="https://safeunfollow.app/docs/troubleshooting"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-primary-strong transition-colors py-2 px-1 cursor-pointer"
-                onClick={() => analytics.linkClick('docs-troubleshooting')}
-              >
-                {t('footer.troubleshooting')}
-                <span className="sr-only"> (opens in new tab)</span>
-              </a>
-              <a
-                href="https://safeunfollow.app/docs/accessibility"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-primary-strong transition-colors py-2 px-1 cursor-pointer"
-                onClick={() => analytics.linkClick('docs-accessibility')}
-              >
-                {t('footer.accessibility')}
-                <span className="sr-only"> (opens in new tab)</span>
-              </a>
-              <a
-                href="mailto:hello@safeunfollow.app"
-                className="hover:text-primary-strong transition-colors py-2 px-1 cursor-pointer"
-              >
-                {t('footer.contact')}
-              </a>
-              <button
-                onClick={handleTrackingToggle}
-                className={`cursor-pointer hover:text-primary-strong transition-colors py-2 px-1 flex items-center gap-1.5 ${
-                  isOptedOut ? 'text-emerald-500' : ''
-                }`}
-                title={isOptedOut ? t('footer.trackingDisabled') : t('footer.trackingEnabled')}
-                suppressHydrationWarning
-              >
-                {/* Wrap children in spans with suppressHydrationWarning (shallow!) */}
-                <span suppressHydrationWarning>
-                  {isOptedOut ? <Eye size={14} /> : <EyeOff size={14} />}
-                </span>
-                <span suppressHydrationWarning>
-                  {isOptedOut ? t('footer.trackingOff') : t('footer.dontTrackMe')}
-                </span>
-              </button>
-              <a
-                href={__SOURCE_URL__}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-primary-strong transition-colors py-2 px-1 flex items-center gap-1.5 cursor-pointer"
-                onClick={() => analytics.linkClick('github')}
-              >
-                <GithubMark size={14} />
-                {t('footer.viewSource')}
-                <span className="sr-only"> (opens in new tab)</span>
-              </a>
-            </div>
-
-            {/* BuyMeaCoffee Section */}
-            <div className="bg-[oklch(0.5_0_0_/_0.03)] p-6 lg:p-8 rounded-3xl border border-border flex flex-col items-center gap-5 shadow-sm w-full lg:w-auto">
-              <p
-                className="text-xs lg:text-sm font-black text-zinc-500 uppercase tracking-widest leading-none"
-                suppressHydrationWarning
-              >
-                {accountCount
-                  ? t('footer.analyzedCount', { count: accountCount })
-                  : t('footer.exportNeverLeavesBrowser')}
-              </p>
-              <a
-                href="https://www.buymeacoffee.com/ignromanov"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex items-center gap-4 px-10 py-5 bg-primary text-primary-foreground rounded-2xl font-black text-sm lg:text-lg shadow-xl hover:scale-105 active:scale-95 transition-all w-full lg:w-auto justify-center cursor-pointer"
-                onClick={() => analytics.linkClick('buy-me-coffee')}
-              >
-                <Coffee size={22} aria-hidden="true" />
-                <span>{t('footer.buyACoffee')}</span>
-                <span className="sr-only"> (opens in new tab)</span>
-              </a>
-            </div>
+          {/* Navigation Links */}
+          <div className="flex flex-wrap items-center justify-center lg:justify-end gap-x-12 gap-y-6 text-xs lg:text-sm font-black uppercase tracking-widest text-zinc-400">
+            <PrefixedLink
+              to="/privacy"
+              className="hover:text-primary-strong transition-colors py-2 px-1 cursor-pointer"
+              onClick={() => analytics.linkClick('privacy-policy')}
+            >
+              {t('footer.privacyPolicy')}
+            </PrefixedLink>
+            <PrefixedLink
+              to="/terms"
+              className="hover:text-primary-strong transition-colors py-2 px-1 cursor-pointer"
+              onClick={() => analytics.linkClick('terms-of-service')}
+            >
+              {t('footer.termsOfService')}
+            </PrefixedLink>
+            <a
+              href="https://safeunfollow.app/docs"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-primary-strong transition-colors py-2 px-1 flex items-center gap-1.5 cursor-pointer"
+              onClick={() => analytics.linkClick('docs')}
+            >
+              <BookOpen size={14} aria-hidden="true" />
+              {t('footer.docs')}
+              <span className="sr-only"> (opens in new tab)</span>
+            </a>
+            <a
+              href="https://safeunfollow.app/docs/troubleshooting"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-primary-strong transition-colors py-2 px-1 cursor-pointer"
+              onClick={() => analytics.linkClick('docs-troubleshooting')}
+            >
+              {t('footer.troubleshooting')}
+              <span className="sr-only"> (opens in new tab)</span>
+            </a>
+            <a
+              href="https://safeunfollow.app/docs/accessibility"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-primary-strong transition-colors py-2 px-1 cursor-pointer"
+              onClick={() => analytics.linkClick('docs-accessibility')}
+            >
+              {t('footer.accessibility')}
+              <span className="sr-only"> (opens in new tab)</span>
+            </a>
+            <a
+              href="mailto:hello@safeunfollow.app"
+              className="hover:text-primary-strong transition-colors py-2 px-1 cursor-pointer"
+            >
+              {t('footer.contact')}
+            </a>
+            <button
+              onClick={handleTrackingToggle}
+              className={`cursor-pointer hover:text-primary-strong transition-colors py-2 px-1 flex items-center gap-1.5 ${
+                isOptedOut ? 'text-emerald-500' : ''
+              }`}
+              title={isOptedOut ? t('footer.trackingDisabled') : t('footer.trackingEnabled')}
+              suppressHydrationWarning
+            >
+              {/* Wrap children in spans with suppressHydrationWarning (shallow!) */}
+              <span suppressHydrationWarning>
+                {isOptedOut ? <Eye size={14} /> : <EyeOff size={14} />}
+              </span>
+              <span suppressHydrationWarning>
+                {isOptedOut ? t('footer.trackingOff') : t('footer.dontTrackMe')}
+              </span>
+            </button>
+            <a
+              href={__SOURCE_URL__}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-primary-strong transition-colors py-2 px-1 flex items-center gap-1.5 cursor-pointer"
+              onClick={() => analytics.linkClick('github')}
+            >
+              <GithubMark size={14} />
+              {t('footer.viewSource')}
+              <span className="sr-only"> (opens in new tab)</span>
+            </a>
           </div>
         </div>
 

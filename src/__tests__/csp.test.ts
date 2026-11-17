@@ -196,9 +196,8 @@ describe('public/_headers Content-Security-Policy', () => {
   /**
    * Removed 2026-08-19 with `BuyMeCoffeeWidget`. The floating widget was the
    * only thing on the site that loaded `cdnjs.buymeacoffee.com` or framed
-   * buymeacoffee.com; the two donation surfaces that remain — the footer block
-   * and `InlineDonationCard` — are plain `<a href target="_blank">` top-level
-   * navigations, which neither `script-src` nor `frame-src` governs.
+   * buymeacoffee.com (`Footer` and `InlineDonationCard` only ever used plain
+   * `<a href target="_blank">` links before both were removed on 2026-11-17).
    *
    * Pinned rather than merely deleted because the trust argument is arithmetic:
    * the widget's clicks were unattributable by construction (an iframe), so it

@@ -160,7 +160,7 @@ describe('FeedbackPrompt', () => {
   // from the behaviour above. Each was a real defect in the first version of
   // this component, found in review on 2026-08-23, so each gets a named test
   // rather than a comment: an intention that nothing checks is not a property.
-  describe('the weight it claims against the donation card above it', () => {
+  describe('the weight it claims in the results tail', () => {
     it('carries no fill, so the mandatory notice keeps its contrast', () => {
       render(<FeedbackPrompt />);
 
@@ -173,7 +173,7 @@ describe('FeedbackPrompt', () => {
     it('never stretches its trigger to the full width', () => {
       render(<FeedbackPrompt />);
 
-      // The donation card's CTA is auto-width. This ask is forecast at ~7
+      // This ask is forecast at ~7
       // responses a month against $5.50 a sale on the export above it, so its
       // control must not be the widest thing in the tail.
       expect(screen.getByRole('button').className).not.toMatch(/(^|\s)w-full(\s|$)/);

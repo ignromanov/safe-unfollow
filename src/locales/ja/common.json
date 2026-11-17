@@ -48,16 +48,11 @@
     "dontTrackMe": "トラッキングしない",
     "trackingDisabled": "アナリティクス無効",
     "trackingEnabled": "匿名アナリティクスを無効にする",
-    "keepItFree": "無料でプライベートに",
-    "supportPrivacy": "プライバシーを支援",
     "madeWithLove": "愛を込めて",
     "forTheCommunity": "コミュニティのために",
     "copyright": "© 2026 SafeUnfollow.app",
     "license": "AGPL-3.0ライセンス",
-    "viewSource": "ソースコード",
-    "analyzedCount": "{{count}}アカウントを分析しました。無料でした。",
-    "exportNeverLeavesBrowser": "Instagramのエクスポートはこのブラウザから出ません。",
-    "buyACoffee": "コーヒーを贈る"
+    "viewSource": "ソースコード"
   },
   "nav": {
     "privacy": "プライバシーポリシー",

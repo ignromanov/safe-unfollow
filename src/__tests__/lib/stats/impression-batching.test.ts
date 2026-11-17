@@ -38,10 +38,10 @@ describe('promo impression batching', () => {
     expect(trackEvent).not.toHaveBeenCalled();
   });
 
-  it('queues the donation card impression', () => {
-    analytics.donationCardImpression(42);
+  it('queues the feedback prompt viewable impression', () => {
+    analytics.feedbackPromptViewable();
 
-    expect(enqueueEvent).toHaveBeenCalledWith('donation_card_impression', { account_count: 42 });
+    expect(enqueueEvent).toHaveBeenCalledWith('feedback_prompt_viewable', undefined);
   });
 
   it('queues the rescue plan impression', () => {
@@ -67,9 +67,9 @@ describe('promo impression batching', () => {
   });
 
   it('leaves new-tab clicks on trackEvent — a _blank click never unloads this page', () => {
-    analytics.donationCardClick(1200);
+    analytics.linkClick('docs');
 
-    expect(trackEvent).toHaveBeenCalledWith('donation_card_click', { account_count: 1200 });
+    expect(trackEvent).toHaveBeenCalledWith('link_click', { link_type: 'docs' });
     expect(trackNavigating).not.toHaveBeenCalled();
   });
 
@@ -272,7 +272,7 @@ describe('promo impression batching', () => {
     const random = vi.spyOn(Math, 'random').mockReturnValue(0.99);
 
     analytics.adSlotViewable('results');
-    analytics.donationCardImpression(1);
+    analytics.feedbackPromptViewable();
 
     expect(enqueueEvent).toHaveBeenCalledTimes(2);
     random.mockRestore();

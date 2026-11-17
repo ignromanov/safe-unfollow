@@ -48,16 +48,11 @@
     "dontTrackMe": "Jangan Lacak Saya",
     "trackingDisabled": "Analitik dinonaktifkan",
     "trackingEnabled": "Nonaktifkan analitik anonim",
-    "keepItFree": "Tetap gratis & privat",
-    "supportPrivacy": "Dukung privasi",
     "madeWithLove": "Dibuat dengan",
     "forTheCommunity": "untuk Komunitas",
     "copyright": "© 2026 SafeUnfollow.app",
     "license": "Lisensi AGPL-3.0",
-    "viewSource": "Kode Sumber",
-    "analyzedCount": "Anda menganalisis {{count}} akun. Itu gratis.",
-    "exportNeverLeavesBrowser": "Ekspor Instagram Anda tidak pernah keluar dari browser ini.",
-    "buyACoffee": "Traktir Kopi"
+    "viewSource": "Kode Sumber"
   },
   "nav": {
     "privacy": "Kebijakan Privasi",

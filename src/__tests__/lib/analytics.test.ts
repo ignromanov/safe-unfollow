@@ -639,6 +639,10 @@ describe('Analytics', () => {
       // when the free analytics database filled up. Its series ends at that
       // deploy; reintroducing the name would splice a new population onto it.
       expect(events['GUIDE_SECTION_VIEW']).toBeUndefined();
+      // Retired 2026-11-17 with InlineDonationCard removal.
+      expect(events['DONATION_CARD_IMPRESSION']).toBeUndefined();
+      expect(events['DONATION_CARD_CLICK']).toBeUndefined();
+      expect(events['DONATION_CARD_DISMISS']).toBeUndefined();
     });
   });
 
