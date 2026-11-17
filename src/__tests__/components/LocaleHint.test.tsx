@@ -130,6 +130,77 @@ describe('LocaleHint', () => {
     expect(screen.queryByRole('region')).not.toBeInTheDocument();
   });
 
+  it('sits above the sticky header, which is z-[80]', async () => {
+    renderAt('/upload');
+    act(() => translateTo('pt'));
+
+    const region = await screen.findByRole('region');
+    expect(region.className).toContain('z-[85]');
+    expect(region.className).not.toMatch(/(^|\s)z-50(\s|$)/);
+  });
+
+  it('sits at the bottom, within thumb reach, clear of the home indicator', async () => {
+    renderAt('/upload');
+    act(() => translateTo('pt'));
+
+    const region = await screen.findByRole('region');
+    expect(region.className).toMatch(/(^|\s)bottom-0(\s|$)/);
+    expect(region.className).not.toMatch(/(^|\s)top-0(\s|$)/);
+    expect(region.className).toContain('env(safe-area-inset-bottom)');
+    expect(region.style.bottom).toBe('0px');
+  });
+
+  it('gives both controls a 44px touch target', async () => {
+    renderAt('/upload');
+    act(() => translateTo('pt'));
+
+    expect((await screen.findByRole('link', { name: 'Abrir' })).className).toContain('min-h-11');
+    const close = screen.getByRole('button', { name: 'Fechar' });
+    expect(close.className).toContain('size-11');
+  });
+
+  function anchorAd(top: number, bottom: number): HTMLElement {
+    const ad = document.createElement('ins');
+    ad.className = 'adsbygoogle adsbygoogle-noablate';
+    ad.style.position = 'fixed';
+    ad.setAttribute('data-anchor-status', 'displayed');
+    ad.getBoundingClientRect = () => ({ top, bottom, height: bottom - top }) as DOMRect;
+    document.body.appendChild(ad);
+    return ad;
+  }
+
+  it('rises above a bottom AdSense anchor instead of under it, and back once it is dismissed', async () => {
+    const ad = anchorAd(window.innerHeight - 64, window.innerHeight);
+    try {
+      renderAt('/upload');
+      act(() => translateTo('pt'));
+
+      const region = await screen.findByRole('region');
+      expect(region.style.bottom).toBe('64px');
+      // The anchor already sits above the home indicator, so no second safe-area gap.
+      expect(region.className).not.toContain('env(safe-area-inset-bottom)');
+
+      await act(async () => {
+        ad.setAttribute('data-anchor-status', 'dismissed');
+        await new Promise(resolve => setTimeout(resolve, 0));
+      });
+      expect(region.style.bottom).toBe('0px');
+    } finally {
+      ad.remove();
+    }
+  });
+
+  it('ignores a top anchor', async () => {
+    const ad = anchorAd(0, 64);
+    try {
+      renderAt('/upload');
+      act(() => translateTo('pt'));
+      expect((await screen.findByRole('region')).style.bottom).toBe('0px');
+    } finally {
+      ad.remove();
+    }
+  });
+
   it('says nothing for a language we do not publish', async () => {
     renderAt('/upload');
     act(() => translateTo('it'));
