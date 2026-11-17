@@ -1,0 +1,75 @@
+<!-- @dsCard group="Navigation" height=150 subtitle="Static rendition: segmented tabs" -->
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        margin: 0;
+        padding: 24px;
+        background: var(--background);
+        color: var(--foreground);
+        font-family: var(--font-sans);
+      }
+      svg.i {
+        width: 18px;
+        height: 18px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .l {
+        display: inline-flex;
+        height: 36px;
+        align-items: center;
+        justify-content: center;
+        padding: 3px;
+        border-radius: var(--radius-lg);
+        background: var(--muted);
+        color: var(--muted-foreground);
+      }
+      .tr {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        height: calc(100% - 1px);
+        padding: 4px 8px;
+        border: 1px solid transparent;
+        border-radius: var(--radius-md);
+        font: 500 14px/20px var(--font-sans);
+        white-space: nowrap;
+        color: var(--foreground);
+        background: transparent;
+        cursor: pointer;
+      }
+      [data-theme='dark'] .tr {
+        color: var(--muted-foreground);
+      }
+      .tr[aria-selected='true'] {
+        background: var(--background);
+        box-shadow: 0 1px 2px rgb(0 0 0/0.05);
+      }
+      [data-theme='dark'] .tr[aria-selected='true'] {
+        color: var(--foreground);
+        border-color: var(--input);
+        background: color-mix(in oklab, var(--input) 30%, transparent);
+      }
+      p {
+        font-size: 14px;
+        color: var(--muted-foreground);
+        margin: 12px 0 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="l" role="tablist">
+      <button class="tr" role="tab" aria-selected="true">Account</button
+      ><button class="tr" role="tab" aria-selected="false">Export</button
+      ><button class="tr" role="tab" aria-selected="false">Settings</button>
+    </div>
+    <p>Panel content for the selected tab.</p>
+  </body>
+</html>

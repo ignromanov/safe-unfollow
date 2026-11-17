@@ -1,0 +1,92 @@
+<!-- @dsCard group="Overlays" height=250 subtitle="Static rendition: menu with a focused item" -->
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        margin: 0;
+        background: var(--background);
+        color: var(--foreground);
+        font-family: var(--font-sans);
+      }
+      svg.i {
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      body {
+        padding: 24px;
+      }
+      .m {
+        width: 220px;
+        box-sizing: border-box;
+        padding: 4px;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background: #fff;
+        color: #09090b;
+        box-shadow:
+          0 10px 15px -3px rgb(0 0 0/0.1),
+          0 4px 6px -4px rgb(0 0 0/0.1);
+      }
+      [data-theme='dark'] .m {
+        background: #18181b;
+        color: #fafafa;
+      }
+      .it {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: var(--radius-xl);
+        font: 400 14px/20px var(--font-sans);
+        cursor: pointer;
+      }
+      .it.fo {
+        background: #f4f4f5;
+        color: #18181b;
+      }
+      [data-theme='dark'] .it.fo {
+        background: #27272a;
+        color: #fafafa;
+      }
+      .it.di {
+        opacity: 0.5;
+      }
+      .ck {
+        position: relative;
+        padding-inline-start: 32px;
+      }
+      .ck svg {
+        position: absolute;
+        inset-inline-start: 8px;
+      }
+      .sp {
+        height: 1px;
+        margin: 4px -4px;
+        background: var(--border);
+      }
+      .lb {
+        padding: 6px 12px;
+        font: 600 12px/16px var(--font-sans);
+        color: #71717a;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="m" role="menu">
+      <div class="lb">Language</div>
+      <div class="it ck fo" role="menuitemradio" aria-checked="true">
+        <svg class="i" width="16" height="16" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" /></svg
+        >English
+      </div>
+      <div class="it ck" role="menuitemradio">Español</div>
+      <div class="it ck" role="menuitemradio">Русский</div>
+      <div class="sp"></div>
+      <div class="it di" role="menuitem">Unavailable option</div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,171 @@
+<!-- @dsCard group="Layout" height=620 subtitle="Static rendition: landing hero with CTAs and trust row" -->
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        margin: 0;
+        background: var(--background);
+        color: var(--foreground);
+        font-family: var(--font-sans);
+      }
+      svg.i {
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .s {
+        max-width: 720px;
+        margin: auto;
+        padding: 48px 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 16px;
+        border-radius: 999px;
+        background: color-mix(in oklab, var(--primary) 10%, transparent);
+        color: var(--primary-strong);
+        border: 1px solid color-mix(in oklab, var(--primary) 20%, transparent);
+        font: 700 12px/16px var(--font-sans);
+        margin-bottom: 32px;
+      }
+      .pill i {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--primary);
+      }
+      h1 {
+        margin: 0 0 24px;
+        font: 800 56px/1 var(--font-display);
+        letter-spacing: -0.04em;
+        text-wrap: balance;
+        color: var(--foreground);
+      }
+      .gr {
+        background: linear-gradient(
+          to right,
+          var(--brand-start),
+          oklch(0.65 0.22 285),
+          var(--brand-end)
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      .sub {
+        margin: 0 0 40px;
+        max-width: 576px;
+        font: 500 20px/1.625 var(--font-sans);
+        color: #71717a;
+      }
+      [data-theme='dark'] .sub {
+        color: #a1a1aa;
+      }
+      .cta {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-bottom: 16px;
+      }
+      .p {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 20px 48px;
+        border-radius: 24px;
+        background: var(--primary);
+        color: var(--primary-foreground);
+        font: 700 18px/28px var(--font-sans);
+        border: 0;
+        box-shadow: 0 25px 50px -12px color-mix(in oklab, var(--primary) 30%, transparent);
+      }
+      .o {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 20px 40px;
+        border-radius: 24px;
+        background: var(--card);
+        color: var(--foreground);
+        border: 1px solid var(--border);
+        font: 700 18px/28px var(--font-sans);
+      }
+      .g {
+        padding: 12px 32px;
+        border-radius: 24px;
+        border: 0;
+        background: none;
+        color: #71717a;
+        font: 700 14px/20px var(--font-sans);
+        margin-bottom: 24px;
+      }
+      .tr {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px 24px;
+        font: 600 14px/20px var(--font-sans);
+        color: #71717a;
+      }
+      .tr span {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .tr svg {
+        color: #10b981;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="s">
+      <div class="pill"><i></i>V1.7</div>
+      <h1>Check <span class="gr">Instagram Unfollowers</span> Without Logging In</h1>
+      <p class="sub">
+        Find out who unfollowed you on Instagram. Free, no login required. Upload your ZIP file,
+        analyze locally. 100% Private.
+      </p>
+      <div class="cta">
+        <button class="p">
+          Check Unfollowers Free<svg class="i" width="20" height="20" viewBox="0 0 24 24">
+            <path d="M5 12h14M12 5l7 7-7 7" />
+          </svg></button
+        ><button class="o">
+          <svg class="i" width="20" height="20" viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" /></svg
+          >I already have my ZIP file
+        </button>
+      </div>
+      <button class="g">Try with Sample</button>
+      <div class="tr">
+        <span
+          ><svg class="i" width="16" height="16" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" />
+            <path d="m9 12 2 2 4-4" /></svg
+          >Free Analysis • No Signup</span
+        ><span
+          ><svg class="i" width="16" height="16" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" />
+            <path d="m9 12 2 2 4-4" /></svg
+          >No Password • No Account Risk</span
+        ><span
+          ><svg class="i" width="16" height="16" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" />
+            <path d="m9 12 2 2 4-4" /></svg
+          >100% Private • Local Analysis</span
+        >
+      </div>
+    </section>
+  </body>
+</html>

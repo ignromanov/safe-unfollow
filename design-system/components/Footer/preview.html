@@ -1,0 +1,123 @@
+<!-- @dsCard group="Layout" height=330 subtitle="Static rendition: footer with description and links" -->
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        margin: 0;
+        background: var(--background);
+        color: var(--foreground);
+        font-family: var(--font-sans);
+      }
+      svg.i {
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      body {
+        padding: 0;
+      }
+      .f {
+        border-top: 1px solid var(--border);
+        background: var(--card);
+        padding: 40px 16px;
+      }
+      .in {
+        max-width: 720px;
+        margin: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 32px;
+        text-align: center;
+      }
+      .b {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .wm {
+        font: 800 30px/1 var(--font-display);
+        letter-spacing: -0.025em;
+      }
+      .wm b {
+        color: var(--primary-strong);
+        font-weight: 800;
+      }
+      .d {
+        margin: 0;
+        max-width: 384px;
+        font: 500 16px/1.625 var(--font-sans);
+        color: #71717a;
+      }
+      [data-theme='dark'] .d {
+        color: #a1a1aa;
+      }
+      .n {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px 48px;
+        font: 900 12px/16px var(--font-sans);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #a1a1aa;
+      }
+      .n a {
+        padding: 8px 4px;
+        color: inherit;
+        text-decoration: none;
+      }
+      .n a:hover {
+        color: var(--primary-strong);
+      }
+      .c {
+        font-size: 12px;
+        color: var(--muted-foreground);
+      }
+    </style>
+  </head>
+  <body>
+    <footer class="f">
+      <div class="in">
+        <div>
+          <div class="b">
+            <svg
+              width="56"
+              height="56"
+              viewBox="0 0 512 512"
+              role="img"
+              aria-label="SafeUnfollow logo"
+            >
+              <defs>
+                <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#5B6BE0" />
+                  <stop offset="50%" stop-color="#9B5DE5" />
+                  <stop offset="100%" stop-color="#E05B9B" />
+                </linearGradient>
+              </defs>
+              <rect width="512" height="512" rx="112" fill="url(#g)" />
+              <path
+                fill="#fff"
+                fill-rule="evenodd"
+                d="M 256 98 C 262 98 268 100 273 104 C 302 126 336 136 368 138 C 380 139 388 147 388 160 L 388 242 C 388 324 334 382 266 413 C 260 416 252 416 246 413 C 178 382 124 324 124 242 L 124 160 C 124 147 132 139 144 138 C 176 136 210 126 239 104 C 244 100 250 98 256 98 Z M 207.2 230.8 A 21.5 21.5 0 0 0 176.8 261.2 L 220.8 305.2 A 21.5 21.5 0 0 0 251.2 305.2 L 339.2 217.2 A 21.5 21.5 0 0 0 308.8 186.8 L 236.0 259.59 Z"
+              /></svg
+            ><span class="wm">SafeUnfollow<b>.app</b></span>
+          </div>
+        </div>
+        <p class="d">
+          The only relationship analyzer that runs 100% in your browser. Your Instagram export is
+          read on your device and stays there.
+        </p>
+        <nav class="n">
+          <a href="#">Privacy Policy</a><a href="#">Terms of Service</a><a href="#">Docs</a
+          ><a href="#">Source Code</a>
+        </nav>
+        <div class="c">© 2026 SafeUnfollow.app · AGPL-3.0 Licensed</div>
+      </div>
+    </footer>
+  </body>
+</html>

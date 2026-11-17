@@ -1,0 +1,122 @@
+<!-- @dsCard group="Overlays" height=360 subtitle="Static rendition: destructive confirmation" -->
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        margin: 0;
+        background: var(--background);
+        color: var(--foreground);
+        font-family: var(--font-sans);
+      }
+      svg.i {
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .sc {
+        position: relative;
+        height: 360px;
+        background: rgb(0 0 0/0.5);
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+      }
+      .bg {
+        position: absolute;
+        inset: 0;
+        background: var(--background);
+        z-index: -1;
+      }
+      .dl {
+        box-sizing: border-box;
+        width: min(100% - 32px, 448px);
+        display: grid;
+        gap: 24px;
+        padding: 32px;
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        background: var(--background);
+        box-shadow: 0 25px 50px -12px rgb(0 0 0/0.25);
+      }
+      .hd {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+        align-items: center;
+      }
+      .ic {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: #ffe4e6;
+        color: #f43f5e;
+        display: grid;
+        place-items: center;
+        margin-bottom: 4px;
+      }
+      [data-theme='dark'] .ic {
+        background: color-mix(in oklab, #881337 30%, transparent);
+      }
+      h2 {
+        margin: 0;
+        font: 700 20px/1.4 var(--font-sans);
+      }
+      .ds {
+        margin: 0;
+        font: 400 16px/1.625 var(--font-sans);
+        color: var(--muted-foreground);
+      }
+      .ft {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        padding-top: 8px;
+      }
+      .b {
+        padding: 12px 24px;
+        border-radius: 16px;
+        border: 1px solid transparent;
+        font: 700 14px/20px var(--font-sans);
+        cursor: pointer;
+      }
+      .c {
+        background: var(--background);
+        border-color: var(--border);
+        color: var(--foreground);
+      }
+      .a {
+        background: #f43f5e;
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bg"></div>
+    <div class="sc">
+      <div class="dl" role="alertdialog" aria-labelledby="t">
+        <div class="hd">
+          <div class="ic">
+            <svg class="i" width="28" height="28" viewBox="0 0 24 24">
+              <path
+                d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2M10 11v6M14 11v6"
+              />
+            </svg>
+          </div>
+          <h2 id="t">Clear all data?</h2>
+          <p class="ds">
+            This will remove all loaded Instagram data and return you to the home screen. This
+            action cannot be undone.
+          </p>
+        </div>
+        <div class="ft">
+          <button class="b c">Cancel</button><button class="b a">Clear Data</button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

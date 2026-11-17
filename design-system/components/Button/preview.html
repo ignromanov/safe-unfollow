@@ -1,0 +1,121 @@
+<!-- @dsCard group="Actions" height=190 subtitle="Static rendition: 6 variants, 4 sizes" -->
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        margin: 0;
+        padding: 24px;
+        background: var(--background);
+        color: var(--foreground);
+        font-family: var(--font-sans);
+        display: grid;
+        gap: 16px;
+      }
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+      }
+      .b {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        height: 36px;
+        padding: 8px 16px;
+        border-radius: var(--radius-md);
+        border: 1px solid transparent;
+        font: 500 14px/20px var(--font-sans);
+        white-space: nowrap;
+        cursor: pointer;
+        box-shadow: 0 1px 2px rgb(0 0 0/0.05);
+      }
+      .b svg {
+        width: 16px;
+        height: 16px;
+      }
+      .default {
+        background: var(--primary);
+        color: var(--primary-foreground);
+      }
+      .destructive {
+        background: var(--destructive);
+        color: #fff;
+      }
+      [data-theme='dark'] .destructive {
+        background: color-mix(in oklab, var(--destructive) 60%, transparent);
+      }
+      .outline {
+        background: var(--background);
+        color: var(--foreground);
+        border-color: var(--border);
+      }
+      [data-theme='dark'] .outline {
+        background: color-mix(in oklab, var(--input) 30%, transparent);
+        border-color: var(--input);
+      }
+      .secondary {
+        background: var(--secondary);
+        color: var(--secondary-foreground);
+      }
+      .ghost {
+        background: transparent;
+        color: var(--foreground);
+        box-shadow: none;
+      }
+      .link {
+        background: transparent;
+        color: var(--primary-strong);
+        box-shadow: none;
+        text-decoration: underline;
+        text-underline-offset: 4px;
+      }
+      .sm {
+        height: 32px;
+        padding: 8px 12px;
+        gap: 6px;
+      }
+      .lg {
+        height: 40px;
+        padding: 8px 24px;
+      }
+      .icon {
+        width: 36px;
+        padding: 0;
+      }
+      .focus {
+        outline: 3px solid color-mix(in oklab, var(--ring) 80%, transparent);
+        outline-offset: 0;
+      }
+      .dis {
+        opacity: 0.5;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="row">
+      <button class="b default">Default</button><button class="b destructive">Destructive</button
+      ><button class="b outline">Outline</button><button class="b secondary">Secondary</button
+      ><button class="b ghost">Ghost</button><button class="b link">Link</button>
+    </div>
+    <div class="row">
+      <button class="b default sm">Small</button><button class="b default">Default</button
+      ><button class="b default lg">Large</button
+      ><button class="b default icon" aria-label="Close">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+        >
+          <path d="M18 6 6 18M6 6l12 12" />
+        </svg></button
+      ><button class="b default focus">Focus</button><button class="b default dis">Disabled</button>
+    </div>
+  </body>
+</html>

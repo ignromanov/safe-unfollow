@@ -1,0 +1,102 @@
+<!-- @dsCard group="Upload" height=420 subtitle="Static rendition: resting and drag-over" -->
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        margin: 0;
+        padding: 24px;
+        background: var(--background);
+        color: var(--foreground);
+        font-family: var(--font-sans);
+      }
+      svg.i {
+        width: 18px;
+        height: 18px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .w {
+        display: grid;
+        gap: 24px;
+        max-width: 640px;
+      }
+      .z {
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        aspect-ratio: 16/9;
+        padding: 32px;
+        border: 4px dashed var(--border);
+        border-radius: 32px;
+        background: var(--card);
+        box-shadow: 0 1px 2px rgb(0 0 0/0.05);
+        text-align: center;
+      }
+      .z.dr {
+        transform: scale(1.02);
+        border-color: var(--primary);
+        background: color-mix(in oklab, var(--primary) 10%, transparent);
+        box-shadow: 0 25px 50px -12px rgb(0 0 0/0.25);
+      }
+      .ic {
+        width: 72px;
+        height: 72px;
+        margin-bottom: 20px;
+        border-radius: 24px;
+        background: #f4f4f5;
+        color: #a1a1aa;
+        display: grid;
+        place-items: center;
+      }
+      [data-theme='dark'] .ic {
+        background: #27272a;
+      }
+      .dr .ic {
+        background: var(--primary);
+        color: var(--primary-foreground);
+        transform: rotate(12deg);
+      }
+      h3 {
+        margin: 0 0 8px;
+        font: 700 24px/1.25 var(--font-display);
+        letter-spacing: -0.04em;
+        color: var(--foreground);
+      }
+      p {
+        margin: 0 auto;
+        max-width: 320px;
+        font: 500 14px/1.5 var(--font-sans);
+        color: #71717a;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="w">
+      <div class="z">
+        <div class="ic">
+          <svg class="i" viewBox="0 0 24 24" style="width: 32px; height: 32px">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
+          </svg>
+        </div>
+        <h3>Drop your Instagram ZIP file here</h3>
+        <p>Or tap to browse your local storage.</p>
+      </div>
+      <div class="z dr">
+        <div class="ic">
+          <svg class="i" viewBox="0 0 24 24" style="width: 32px; height: 32px">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
+          </svg>
+        </div>
+        <h3>Drop your Instagram ZIP file here</h3>
+        <p>Either export format works, JSON or HTML.</p>
+      </div>
+    </div>
+  </body>
+</html>

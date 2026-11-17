@@ -1,0 +1,54 @@
+<!-- @dsCard group="Forms" height=170 subtitle="Static rendition: rest, focus, invalid, disabled" -->
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        margin: 0;
+        padding: 24px;
+        background: var(--background);
+        color: var(--foreground);
+        font-family: var(--font-sans);
+        display: grid;
+        gap: 12px;
+        max-width: 420px;
+      }
+      .i {
+        box-sizing: border-box;
+        height: 48px;
+        width: 100%;
+        border-radius: 16px;
+        border: 1px solid var(--input);
+        background: transparent;
+        color: var(--foreground);
+        padding: 4px 12px;
+        font: 400 16px/24px var(--font-sans);
+        box-shadow: 0 1px 2px rgb(0 0 0/0.05);
+      }
+      [data-theme='dark'] .i {
+        background: color-mix(in oklab, var(--input) 30%, transparent);
+      }
+      .i::placeholder {
+        color: var(--muted-foreground);
+      }
+      .f {
+        border-color: var(--ring);
+        outline: 3px solid color-mix(in oklab, var(--ring) 80%, transparent);
+      }
+      .v {
+        border-color: var(--destructive);
+        outline: 3px solid color-mix(in oklab, var(--destructive) 20%, transparent);
+      }
+      .d {
+        opacity: 0.5;
+      }
+    </style>
+  </head>
+  <body>
+    <input class="i" placeholder="Search username" />
+    <input class="i f" value="mattcoffee" />
+    <input class="i v" value="@@" aria-invalid="true" />
+    <input class="i d" placeholder="Disabled" disabled />
+  </body>
+</html>

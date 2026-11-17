@@ -1,0 +1,693 @@
+<!-- @dsCard group="Export & payment" height=800 subtitle="Static rendition: format chooser, building, saved, failed" -->
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 16px;
+        background: var(--background);
+        color: var(--foreground);
+        font-family: var(--font-sans);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 32px 24px;
+        align-items: flex-start;
+      }
+      figure {
+        margin: 0;
+        display: grid;
+        gap: 8px;
+      }
+      figcaption {
+        font: 500 12px/16px var(--font-sans);
+        color: var(--muted-foreground);
+      }
+      /* scrim + sheet: ExportSheet below 640px */
+      .sc {
+        width: 390px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding-top: 32px;
+        background: linear-gradient(rgb(0 0 0 / 0.5), rgb(0 0 0 / 0.5)), var(--background);
+        outline: 1px solid var(--border);
+        overflow: hidden;
+      }
+      .sc.wide {
+        width: 440px;
+        justify-content: center;
+        padding: 32px 24px;
+      }
+      .sh {
+        position: relative;
+        display: grid;
+        gap: 16px;
+        padding: 24px 20px 28px;
+        border: 1px solid var(--border);
+        border-bottom: 0;
+        border-radius: 24px 24px 0 0;
+        background: var(--background);
+        box-shadow: 0 -8px 30px rgb(0 0 0 / 0.12);
+      }
+      .sh.dk {
+        padding: 24px;
+        border-bottom: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        box-shadow:
+          0 10px 15px -3px rgb(0 0 0 / 0.1),
+          0 4px 6px -4px rgb(0 0 0 / 0.1);
+      }
+      .gr {
+        position: absolute;
+        top: 8px;
+        inset-inline-start: 50%;
+        width: 36px;
+        height: 4px;
+        margin-inline-start: -18px;
+        border-radius: 999px;
+        background: var(--border);
+      }
+      .x {
+        position: absolute;
+        top: 4px;
+        inset-inline-end: 4px;
+        width: 44px;
+        height: 44px;
+        display: grid;
+        place-items: center;
+        border: 0;
+        border-radius: 999px;
+        background: transparent;
+        color: var(--foreground);
+        opacity: 0.7;
+      }
+      .hd {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        text-align: start;
+      }
+      .hd.pe {
+        padding-inline-end: 32px;
+      }
+      h2 {
+        margin: 0;
+        font: 600 18px/1.375 var(--font-sans);
+      }
+      h2.ti {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .ds {
+        margin: 0;
+        font: 400 14px/20px var(--font-sans);
+        color: var(--muted-foreground);
+      }
+      .ds.fg {
+        color: var(--foreground);
+        line-height: 1.625;
+      }
+      .ft {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+      }
+      .ft.tight {
+        gap: 4px;
+      }
+      .em {
+        color: #10b981;
+        flex: none;
+      }
+      .xs {
+        margin: 0;
+        font: 400 12px/1.5 var(--font-sans);
+        color: var(--muted-foreground);
+      }
+      .al {
+        margin: 0;
+        display: flex;
+        gap: 8px;
+        align-items: flex-start;
+        font: 400 14px/1.5 var(--font-sans);
+        color: var(--destructive);
+      }
+      .al svg {
+        margin-top: 2px;
+        flex: none;
+      }
+      /* buttons */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 48px;
+        padding: 0 24px;
+        border: 1px solid transparent;
+        border-radius: 16px;
+        font: 700 14px/20px var(--font-sans);
+        text-decoration: none;
+        white-space: nowrap;
+        cursor: pointer;
+      }
+      .pri {
+        background: var(--primary);
+        color: var(--primary-foreground);
+        box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+      }
+      .gh {
+        background: transparent;
+        color: var(--muted-foreground);
+      }
+      .dis {
+        opacity: 0.5;
+        pointer-events: none;
+      }
+      .spin {
+        animation: spin 1s linear infinite;
+        display: inline-flex;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .spin {
+          animation: none;
+        }
+      }
+      /* format buttons */
+      .fmt {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+        min-height: 48px;
+        padding: 8px 24px;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background: var(--background);
+        color: var(--foreground);
+        text-align: start;
+        font: 700 14px/20px var(--font-sans);
+        box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+      }
+      [data-theme='dark'] .fmt:not(.pri) {
+        background: color-mix(in oklab, var(--input) 30%, transparent);
+        border-color: var(--input);
+      }
+      .fmt.pri {
+        border-color: transparent;
+        background: var(--primary);
+        color: var(--primary-foreground);
+      }
+      .fmt .l {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .fmt .h {
+        font-weight: 400;
+        font-size: 12px;
+        line-height: 16px;
+        color: var(--muted-foreground);
+        white-space: normal;
+      }
+      .fmt.pri .h {
+        color: color-mix(in oklab, var(--primary-foreground) 80%, transparent);
+      }
+      /* input */
+      .in {
+        height: 48px;
+        width: 100%;
+        padding: 4px 12px;
+        border: 1px solid var(--input);
+        border-radius: 16px;
+        background: transparent;
+        color: var(--foreground);
+        font: 400 16px/24px var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+        box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+      }
+      [data-theme='dark'] .in {
+        background: color-mix(in oklab, var(--input) 30%, transparent);
+      }
+      .in::placeholder {
+        color: var(--muted-foreground);
+      }
+      .in.inv {
+        border-color: var(--destructive);
+        outline: 3px solid color-mix(in oklab, var(--destructive) 20%, transparent);
+      }
+    </style>
+  </head>
+  <body>
+    <figure>
+      <figcaption>Choose a format</figcaption>
+      <div class="sc">
+        <div class="sh" role="dialog">
+          <div class="gr"></div>
+          <button class="x" aria-label="Close">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
+          </button>
+          <div class="hd pe">
+            <h2>Export accounts</h2>
+            <p class="ds">1,284 accounts will be exported</p>
+          </div>
+          <div class="ft">
+            <button class="fmt pri">
+              <span class="l"
+                ><svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+                  <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+                  <path d="M10 9H8M16 13H8M16 17H8" /></svg
+                >Download report</span
+              ><span class="h"
+                >Opens in a browser on your phone or computer. Print it to save a PDF.</span
+              ></button
+            ><button class="fmt">
+              <span class="l"
+                ><svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+                  <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+                  <path d="M8 13h2M14 13h2M8 17h2M14 17h2" /></svg
+                >Download CSV</span
+              ><span class="h">Opens in Excel, Google Sheets and Numbers</span></button
+            ><button class="fmt">
+              <span class="l"
+                ><svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+                  <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+                  <path
+                    d="M10 12a1 1 0 0 0-1 1v1a1 1 0 0 1-1 1 1 1 0 0 1 1 1v1a1 1 0 0 0 1 1M14 18a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1 1 1 0 0 1-1-1v-1a1 1 0 0 0-1-1"
+                  /></svg
+                >Download JSON</span
+              ><span class="h">For scripts and your own tools</span>
+            </button>
+            <p class="xs">A blank date means we found no date for that account in your file.</p>
+          </div>
+        </div>
+      </div>
+    </figure>
+    <figure>
+      <figcaption>Report ceiling above 50,000 accounts</figcaption>
+      <div class="sc">
+        <div class="sh" role="dialog">
+          <div class="gr"></div>
+          <button class="x" aria-label="Close">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
+          </button>
+          <div class="hd pe">
+            <h2>Export accounts</h2>
+            <p class="ds">62,410 accounts will be exported</p>
+          </div>
+          <div class="ft">
+            <button class="fmt pri">
+              <span class="l"
+                ><svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+                  <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+                  <path d="M10 9H8M16 13H8M16 17H8" /></svg
+                >Download report</span
+              ><span class="h"
+                >Opens in a browser on your phone or computer. Print it to save a PDF.</span
+              >
+            </button>
+            <p class="xs">The report lists up to 50,000 accounts. The CSV has all 62,410.</p>
+            <button class="fmt">
+              <span class="l"
+                ><svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+                  <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+                  <path d="M8 13h2M14 13h2M8 17h2M14 17h2" /></svg
+                >Download CSV</span
+              ><span class="h">Opens in Excel, Google Sheets and Numbers</span></button
+            ><button class="fmt">
+              <span class="l"
+                ><svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+                  <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+                  <path
+                    d="M10 12a1 1 0 0 0-1 1v1a1 1 0 0 1-1 1 1 1 0 0 1 1 1v1a1 1 0 0 0 1 1M14 18a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1 1 1 0 0 1-1-1v-1a1 1 0 0 0-1-1"
+                  /></svg
+                >Download JSON</span
+              ><span class="h">For scripts and your own tools</span>
+            </button>
+            <p class="xs">A blank date means we found no date for that account in your file.</p>
+          </div>
+        </div>
+      </div>
+    </figure>
+    <figure>
+      <figcaption>Building: progress, buttons locked</figcaption>
+      <div class="sc">
+        <div class="sh" role="dialog">
+          <div class="gr"></div>
+          <button class="x" aria-label="Close">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
+          </button>
+          <div style="display: flex; flex-direction: column; gap: 12px">
+            <div class="hd pe">
+              <h2>Building your file</h2>
+              <p class="ds">Your export is built here, in this browser.</p>
+            </div>
+            <div
+              aria-hidden="true"
+              style="
+                display: flex;
+                height: 8px;
+                overflow: hidden;
+                border-radius: 999px;
+                background: var(--muted);
+              "
+            >
+              <div style="width: 41%; background: var(--primary)"></div>
+            </div>
+            <p class="xs" style="font-variant-numeric: tabular-nums">531 of 1,284 accounts</p>
+          </div>
+          <div class="ft">
+            <button class="fmt pri dis">
+              <span class="l"
+                ><svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+                  <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+                  <path d="M10 9H8M16 13H8M16 17H8" /></svg
+                >Download report</span
+              ><span class="h"
+                >Opens in a browser on your phone or computer. Print it to save a PDF.</span
+              ></button
+            ><button class="fmt dis" aria-busy="true">
+              <span class="l"
+                ><svg
+                  class="spin"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg
+                >Download CSV</span
+              ><span class="h">Opens in Excel, Google Sheets and Numbers</span></button
+            ><button class="fmt dis">
+              <span class="l"
+                ><svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+                  <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+                  <path
+                    d="M10 12a1 1 0 0 0-1 1v1a1 1 0 0 1-1 1 1 1 0 0 1 1 1v1a1 1 0 0 0 1 1M14 18a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1 1 1 0 0 1-1-1v-1a1 1 0 0 0-1-1"
+                  /></svg
+                >Download JSON</span
+              ><span class="h">For scripts and your own tools</span>
+            </button>
+            <p class="xs">A blank date means we found no date for that account in your file.</p>
+          </div>
+        </div>
+      </div>
+    </figure>
+    <figure>
+      <figcaption>Saved</figcaption>
+      <div class="sc">
+        <div class="sh" role="dialog">
+          <div class="gr"></div>
+          <button class="x" aria-label="Close">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
+          </button>
+          <div style="display: flex; flex-direction: column; gap: 12px" role="status">
+            <div class="hd pe">
+              <h2 class="ti">
+                <svg
+                  class="em"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M20 6 9 17l-5-5" /></svg
+                >Saved to your device
+              </h2>
+              <p class="ds">safeunfollow-2026-11-17.csv — all 1,284 accounts.</p>
+            </div>
+            <p class="xs">Check your Downloads folder. On iPhone, look in Files › Downloads.</p>
+          </div>
+          <div class="ft">
+            <button class="btn pri">Export again</button
+            ><button class="btn fmt" style="justify-content: center; flex-direction: row">
+              Done
+            </button>
+          </div>
+        </div>
+      </div>
+    </figure>
+    <figure>
+      <figcaption>Failed</figcaption>
+      <div class="sc">
+        <div class="sh" role="dialog">
+          <div class="gr"></div>
+          <button class="x" aria-label="Close">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
+          </button>
+          <div class="hd pe">
+            <h2>Export accounts</h2>
+            <p class="ds">1,284 accounts will be exported</p>
+          </div>
+          <p class="al" role="alert">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 8v4M12 16h.01" /></svg
+            ><span>Export failed. Please try again.</span>
+          </p>
+          <div class="ft">
+            <button class="fmt pri">
+              <span class="l"
+                ><svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+                  <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+                  <path d="M10 9H8M16 13H8M16 17H8" /></svg
+                >Download report</span
+              ><span class="h"
+                >Opens in a browser on your phone or computer. Print it to save a PDF.</span
+              ></button
+            ><button class="fmt">
+              <span class="l"
+                ><svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+                  <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+                  <path d="M8 13h2M14 13h2M8 17h2M14 17h2" /></svg
+                >Download CSV</span
+              ><span class="h">Opens in Excel, Google Sheets and Numbers</span></button
+            ><button class="fmt">
+              <span class="l"
+                ><svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+                  <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+                  <path
+                    d="M10 12a1 1 0 0 0-1 1v1a1 1 0 0 1-1 1 1 1 0 0 1 1 1v1a1 1 0 0 0 1 1M14 18a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1 1 1 0 0 1-1-1v-1a1 1 0 0 0-1-1"
+                  /></svg
+                >Download JSON</span
+              ><span class="h">For scripts and your own tools</span>
+            </button>
+            <p class="xs">A blank date means we found no date for that account in your file.</p>
+          </div>
+        </div>
+      </div>
+    </figure>
+  </body>
+</html>
