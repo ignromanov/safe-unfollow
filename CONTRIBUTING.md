@@ -46,7 +46,10 @@ npm run code:check        # Full quality check (lint + type + unused code)
 
 ### Branching and PRs
 
-- Create a feature branch from `main`.
+- Create a feature branch from `develop` and open the PR against `develop` (squash merge).
+- `main` is the release branch: it moves only by a release PR from `develop` (merge commit),
+  or by a `hotfix/*` branch that is merged back into `develop` afterwards. Production deploys
+  from `main`.
 - Keep PRs focused and small when possible.
 - Include tests for new logic, and update docs when behavior changes.
 - Link related issues in the PR description.
