@@ -1,0 +1,7 @@
+Landing hero, from `src/components/Hero.tsx`: version pill, headline with one gradient phrase, subheadline, two primary paths, a ghost sample link, a trust row, and a grid of four feature cards.
+
+The consumer provides `hasData`: with data the primary becomes "View Analysis Results" and the upload and sample links disappear. Headline is `display-hero` scaled up (36px, 72px from 768px, 96px from 1024px at line-height 1.0), tracking -0.04em, with exactly one phrase in the brand gradient (`brand-start`, `brand-mid`, `brand-end`, left to right) clipped to the text. Primary CTA: `primary` fill, 24px corners, 48px by 20px padding, bold 18px, a `primary` glow shadow. Secondary "I already have my ZIP file": `card` surface with a 1px `border`, same height. "Try with Sample" is a ghost link. Trust row: 14px semibold, emerald-500 check icons, three short claims.
+
+The two paths are deliberate: people who already hold the ZIP need a first-viewport route to upload (source GH#86). Keep trust copy to the allowed wording: "Free Analysis", "No Signup", "No Password", "100% Private • Local Analysis". The subheadline and trust row are zinc-500 (about 4.8:1 light).
+
+Static rendition: headline set at 56px for the preview width; the pulsing dot, the feature-card grid and the entrance animation are omitted. The version pill shows only "V1.7"; the source pill also carries a scale claim that is a design target, not a measurement.
