@@ -1,0 +1,4 @@
+# Wrangler skips these when uploading dist/ as Worker assets.
+# .vite/ holds build manifests that vite/ssg-meta-injector.ts reads at build time.
+.vite
+.assetsignore
