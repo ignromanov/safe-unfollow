@@ -130,6 +130,55 @@ describe('LocaleHint', () => {
     expect(screen.queryByRole('region')).not.toBeInTheDocument();
   });
 
+  it('sits above the sticky header, which is z-[80]', async () => {
+    renderAt('/upload');
+    act(() => translateTo('pt'));
+
+    const region = await screen.findByRole('region');
+    expect(region.className).toContain('z-[85]');
+    expect(region.className).not.toMatch(/(^|\s)z-50(\s|$)/);
+  });
+
+  it('moves below a top AdSense anchor instead of under it, and back once it is dismissed', async () => {
+    const ad = document.createElement('ins');
+    ad.className = 'adsbygoogle adsbygoogle-noablate';
+    ad.style.position = 'fixed';
+    ad.setAttribute('data-anchor-status', 'displayed');
+    ad.getBoundingClientRect = () => ({ top: 0, bottom: 64, height: 64 }) as DOMRect;
+    document.body.appendChild(ad);
+    try {
+      renderAt('/upload');
+      act(() => translateTo('pt'));
+
+      const region = await screen.findByRole('region');
+      expect(region.style.top).toBe('64px');
+
+      await act(async () => {
+        ad.setAttribute('data-anchor-status', 'dismissed');
+        await new Promise(resolve => setTimeout(resolve, 0));
+      });
+      expect(region.style.top).toBe('0px');
+    } finally {
+      ad.remove();
+    }
+  });
+
+  it('ignores a bottom anchor', async () => {
+    const ad = document.createElement('ins');
+    ad.className = 'adsbygoogle adsbygoogle-noablate';
+    ad.style.position = 'fixed';
+    ad.setAttribute('data-anchor-status', 'displayed');
+    ad.getBoundingClientRect = () => ({ top: 700, bottom: 768, height: 68 }) as DOMRect;
+    document.body.appendChild(ad);
+    try {
+      renderAt('/upload');
+      act(() => translateTo('pt'));
+      expect((await screen.findByRole('region')).style.top).toBe('0px');
+    } finally {
+      ad.remove();
+    }
+  });
+
   it('says nothing for a language we do not publish', async () => {
     renderAt('/upload');
     act(() => translateTo('it'));

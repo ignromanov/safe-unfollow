@@ -6,6 +6,7 @@ import { LOCALE_HINT_COPY } from '@/config/locale-hint-copy';
 import { dismissLocaleHint } from '@/lib/locale-hint';
 import { localeHintTelemetry } from '@/lib/stats/locale-hint-events';
 import { persistLanguageSync } from '@/lib/store';
+import { useTopAnchorInset } from '@/lib/top-anchor-inset';
 
 interface LocaleHintBannerProps {
   target: SupportedLanguage;
@@ -15,12 +16,14 @@ interface LocaleHintBannerProps {
 }
 
 /**
- * Fixed at the top, so it moves no layout (no CLS) and stays clear of the AdSense anchor and
- * vignette, which take the bottom of the screen. `translate="no"` and `lang` keep the
+ * Fixed at the top, so it moves no layout (no CLS). z-[85] puts it above the sticky header
+ * (Header.tsx, z-[80]) and below dialogs (z-[90]). When AdSense puts its anchor at the top
+ * instead of the bottom, the banner moves down below it (lib/top-anchor-inset.ts). `translate="no"` and `lang` keep the
  * translator that summoned it from rewriting words already in its target language.
  */
 export default function LocaleHintBanner({ target, href, path, onDismiss }: LocaleHintBannerProps) {
   const copy = LOCALE_HINT_COPY[target];
+  const top = useTopAnchorInset();
 
   useEffect(() => {
     localeHintTelemetry.view(target, path);
@@ -33,7 +36,8 @@ export default function LocaleHintBanner({ target, href, path, onDismiss }: Loca
       dir={RTL_LANGUAGES.includes(target) ? 'rtl' : 'ltr'}
       role="region"
       aria-label={copy.text}
-      className="fixed inset-x-0 top-0 z-50 flex justify-center px-4 pt-3 pointer-events-none"
+      style={{ top }}
+      className="fixed inset-x-0 z-[85] flex justify-center px-4 pt-3 pointer-events-none"
     >
       <div className="pointer-events-auto flex max-w-xl items-center gap-3 rounded-xl border border-border bg-background px-4 py-3 text-sm shadow-lg">
         <span>{copy.text}</span>
