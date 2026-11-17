@@ -1,0 +1,145 @@
+<!-- @dsCard group="Data display" height=300 subtitle="Static rendition: grouped filter tiles, one active" -->
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        margin: 0;
+        padding: 24px;
+        background: var(--background);
+        color: var(--foreground);
+        font-family: var(--font-sans);
+      }
+      svg.i {
+        width: 18px;
+        height: 18px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .w {
+        max-width: 420px;
+      }
+      h5 {
+        margin: 0 0 12px;
+        font: 900 12px/16px var(--font-sans);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #71717a;
+      }
+      [data-theme='dark'] h5 {
+        color: #71717a;
+      }
+      .g {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 24px;
+      }
+      .t {
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: space-between;
+        min-height: 85px;
+        padding: 16px;
+        border-radius: 16px;
+        border: 1px solid var(--border);
+        background: color-mix(in oklab, #fafafa 50%, transparent);
+        color: #52525b;
+        font: 700 12px/1.375 var(--font-sans);
+        text-align: start;
+        cursor: pointer;
+      }
+      [data-theme='dark'] .t {
+        background: color-mix(in oklab, #18181b 20%, transparent);
+        color: #a1a1aa;
+      }
+      .t.on {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: var(--primary-foreground);
+        box-shadow: 0 4px 6px -1px rgb(0 0 0/0.1);
+      }
+      .t.off {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .h {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+      }
+      .n {
+        padding: 2px 8px;
+        border-radius: var(--radius-lg);
+        background: #e4e4e7;
+        color: #71717a;
+        font: 900 12px/16px var(--font-sans);
+      }
+      [data-theme='dark'] .n {
+        background: #27272a;
+      }
+      .on .n {
+        background: rgb(255 255 255/0.2);
+        color: var(--primary-foreground);
+      }
+      .on .h span:first-child {
+        color: var(--primary-foreground) !important;
+      }
+      .lb {
+        margin-top: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="w">
+      <h5>Who left</h5>
+      <div class="g">
+        <button class="t on" aria-pressed="true">
+          <span class="h"
+            ><span style="color: #f43f5e"
+              ><svg class="i" viewBox="0 0 24 24">
+                <path d="M22 17l-8.5-8.5-5 5L2 7M16 17h6v-6" /></svg></span
+            ><span class="n">150</span></span
+          ><span class="lb">Not following back</span></button
+        ><button class="t off" aria-pressed="false">
+          <span class="h"
+            ><span style="color: #e11d48"
+              ><svg class="i" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" />
+                <path d="m15 9-6 6M9 9l6 6" /></svg></span
+            ><span class="n">80</span></span
+          ><span class="lb">Unfollowed</span>
+        </button>
+      </div>
+      <h5>Connections</h5>
+      <div class="g">
+        <button class="t" aria-pressed="false">
+          <span class="h"
+            ><span style="color: #3b82f6"
+              ><svg class="i" viewBox="0 0 24 24">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></svg></span
+            ><span class="n">412</span></span
+          ><span class="lb">Following</span></button
+        ><button class="t" aria-pressed="false">
+          <span class="h"
+            ><span style="color: #6366f1"
+              ><svg class="i" viewBox="0 0 24 24">
+                <path
+                  d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"
+                /></svg></span
+            ><span class="n">262</span></span
+          ><span class="lb">Mutuals</span>
+        </button>
+      </div>
+    </div>
+  </body>
+</html>
