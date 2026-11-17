@@ -154,11 +154,6 @@ export const AnalyticsEvents = {
   // FAQ
   FAQ_EXPAND: 'faq_expand',
 
-  // Donation Card
-  DONATION_CARD_IMPRESSION: 'donation_card_impression',
-  DONATION_CARD_CLICK: 'donation_card_click',
-  DONATION_CARD_DISMISS: 'donation_card_dismiss',
-
   // Rescue Plan
   RESCUE_PLAN_IMPRESSION: 'rescue_plan_impression',
   RESCUE_PLAN_TOOL_CLICK: 'rescue_plan_tool_click',
@@ -246,8 +241,7 @@ export type LinkType =
   | 'license'
   | 'meta_accounts'
   | 'privacy-policy'
-  | 'terms-of-service'
-  | 'buy-me-coffee';
+  | 'terms-of-service';
 
 export type FilterAction = 'enable' | 'disable';
 

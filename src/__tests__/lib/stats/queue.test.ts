@@ -57,7 +57,7 @@ describe('event queue', () => {
   it('sends N events in a single request', () => {
     enqueueEvent(AnalyticsEvents.AD_SLOT_VIEWABLE, { slot: 'results' });
     enqueueEvent(AnalyticsEvents.AD_SLOT_VIEWABLE, { slot: 'results_end' });
-    enqueueEvent(AnalyticsEvents.DONATION_CARD_IMPRESSION, { account_count: 42 });
+    enqueueEvent(AnalyticsEvents.FEEDBACK_PROMPT_VIEWABLE);
 
     flushEvents();
 
@@ -312,7 +312,7 @@ describe('event queue', () => {
     });
 
     it('carries anything already queued along with it', () => {
-      enqueueEvent(AnalyticsEvents.DONATION_CARD_IMPRESSION, { account_count: 7 });
+      enqueueEvent(AnalyticsEvents.FEEDBACK_PROMPT_VIEWABLE);
 
       trackNavigating(AnalyticsEvents.CHECKOUT_START);
 

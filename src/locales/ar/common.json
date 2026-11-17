@@ -48,16 +48,11 @@
     "dontTrackMe": "لا تتبعني",
     "trackingDisabled": "التحليلات معطلة",
     "trackingEnabled": "تعطيل التحليلات المجهولة",
-    "keepItFree": "اجعله مجانياً وخاصاً",
-    "supportPrivacy": "ادعم الخصوصية",
     "madeWithLove": "صنع بـ",
     "forTheCommunity": "للمجتمع",
     "copyright": "© 2026 SafeUnfollow.app",
     "license": "رخصة AGPL-3.0",
-    "viewSource": "الكود المصدري",
-    "analyzedCount": "لقد حللت {{count}} حساب. كان مجانياً.",
-    "exportNeverLeavesBrowser": "تصدير انستغرام الخاص بك لا يغادر هذا المتصفح أبداً.",
-    "buyACoffee": "اشترِ قهوة"
+    "viewSource": "الكود المصدري"
   },
   "nav": {
     "privacy": "سياسة الخصوصية",

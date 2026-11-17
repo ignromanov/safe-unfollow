@@ -48,16 +48,11 @@
     "dontTrackMe": "Ne pas me suivre",
     "trackingDisabled": "Analyses désactivées",
     "trackingEnabled": "Désactiver les analyses anonymes",
-    "keepItFree": "Gardez-le gratuit et privé",
-    "supportPrivacy": "Soutenez la confidentialité",
     "madeWithLove": "Fait avec",
     "forTheCommunity": "pour la communauté",
     "copyright": "© 2026 SafeUnfollow.app",
     "license": "Licence AGPL-3.0",
-    "viewSource": "Code source",
-    "analyzedCount": "Vous avez analysé {{count}} comptes. C'était gratuit.",
-    "exportNeverLeavesBrowser": "Votre export Instagram ne quitte jamais ce navigateur.",
-    "buyACoffee": "Offrir un Café"
+    "viewSource": "Code source"
   },
   "nav": {
     "privacy": "Politique de confidentialité",

@@ -93,15 +93,6 @@
     "header": "Akun ({{count, number}})",
     "viewProfile": "Lihat Profil"
   },
-  "donation": {
-    "headline": "Anda baru saja menganalisis {{count}} akun — gratis.",
-    "body": "Tanpa login. Ekspor Instagram Anda tidak pernah keluar dari browser ini. Jika ini menghemat waktu Anda, secangkir kopi menjaga proyek tetap berjalan.",
-    "headlineMobile": "Analisis gratis. Privat. Tanpa login.",
-    "bodyMobile": "Ekspor Anda tidak pernah keluar dari browser. Jika bermanfaat, pertimbangkan untuk mentraktir kopi.",
-    "cta": "Traktir Kopi",
-    "ctaMobile": "Dukung",
-    "dismiss": "Nanti saja"
-  },
   "feedback": {
     "headline": "Apa yang harus kami bangun selanjutnya?",
     "body": "Dua pertanyaan, sekitar satu menit. Tanpa akun, tanpa email.",

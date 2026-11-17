@@ -331,25 +331,6 @@ export const analytics = {
     });
   },
 
-  // Donation Card (100% sampling — high-value conversion events)
-  donationCardImpression: (accountCount: number) => {
-    enqueueEvent(AnalyticsEvents.DONATION_CARD_IMPRESSION, {
-      account_count: accountCount,
-    });
-  },
-
-  donationCardClick: (accountCount: number) => {
-    trackEvent(AnalyticsEvents.DONATION_CARD_CLICK, {
-      account_count: accountCount,
-    });
-  },
-
-  donationCardDismiss: (accountCount: number) => {
-    trackEvent(AnalyticsEvents.DONATION_CARD_DISMISS, {
-      account_count: accountCount,
-    });
-  },
-
   // Feedback prompt (/results, 100% sampling — deliberately, not house style).
   // The 3-5% precedents elsewhere in this file exist for high-volume events;
   // at ~7 clicks/month forecast, 5% sampling yields 0.35 events/month and the

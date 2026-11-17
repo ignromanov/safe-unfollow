@@ -48,16 +48,11 @@
     "dontTrackMe": "Beni Takip Etme",
     "trackingDisabled": "Analitik devre dışı",
     "trackingEnabled": "Anonim analitiği devre dışı bırak",
-    "keepItFree": "Ücretsiz ve gizli tut",
-    "supportPrivacy": "Gizliliği destekle",
     "madeWithLove": "Sevgiyle yapıldı",
     "forTheCommunity": "Topluluk için",
     "copyright": "© 2026 SafeUnfollow.app",
     "license": "AGPL-3.0 Lisanslı",
-    "viewSource": "Kaynak Kodu",
-    "analyzedCount": "{{count}} hesabı analiz ettin. Ücretsizdi.",
-    "exportNeverLeavesBrowser": "Instagram dışa aktarman bu tarayıcıdan asla çıkmaz.",
-    "buyACoffee": "Kahve Ismarla"
+    "viewSource": "Kaynak Kodu"
   },
   "nav": {
     "privacy": "Gizlilik Politikası",
