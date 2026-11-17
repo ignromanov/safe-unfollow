@@ -39,8 +39,12 @@ The paid flow is one sheet family (`Export & payment`): ExportTrigger → a free
 - **Every failure has a next step.** Wrong key: re-enter. Network: retry. Three browsers used or key revoked: email support. After paying, a person is never left on a silent screen.
 - **Phone first.** All of it is a bottom sheet below 640px, 48px touch targets, `rounded-2xl` buttons.
 
+## Pro v1.8 (concept)
+
+Screens for the planned Pro release, drawn from the v1.8 plan and **not in the product yet**: ProPaywallSheet and PassPicker (one sheet, two passes, local prices), ProEntryPoints (where Pro is met), ProSuggestions (who to unfollow first, ready lists), CleanupQueue and DailyQuota (marks and the daily pace), ProStatus (connecting, expiry, limits). Every card in that group is labelled as a concept. Prices, quota numbers and the ad-free wording are the plan's and are still open for the operator, velum-cdpo (privacy and terms) and lumen-cro (copy).
+
 ## Not synced
 
-Built from `ignromanov/safe-unfollow` at `refactor/retire-donation-surfaces@a0076316`. Skipped: `calc()` radii (written out as px), Tailwind palette overrides, gradient scrollbar utilities, Cyrillic, Greek and Vietnamese font subsets (latin only), and the React library: every component here is a static recreation from source (no bundle, no behaviour). Not included: Hero's feature-card grid, ads, FAQ and how-to sections, the downloaded HTML report itself, page-level screens, and the v1.8 paywall plans (not in source yet).
+Built from `ignromanov/safe-unfollow` at `refactor/retire-donation-surfaces@a0076316`. Skipped: `calc()` radii (written out as px), Tailwind palette overrides, gradient scrollbar utilities, Cyrillic, Greek and Vietnamese font subsets (latin only), and the React library: every component here is a static recreation from source (no bundle, no behaviour). Not included: Hero's feature-card grid, ads, FAQ and how-to sections, the downloaded HTML report itself, page-level screens, and the shipped counterpart of the v1.8 plans (they are drawn as concepts instead).
 
 **Deprecated, removed from this system:** the Rescue Plan affiliate card (`RescueToolCard`). It is an old mechanism that is not shown anywhere in the product; do not design with it. Its source file still exists under `src/components/rescue-plan/` and is imported by the old banner; this design system no longer documents it.
