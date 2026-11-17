@@ -29,6 +29,18 @@ Lucide, stroke icons, via shadcn/ui (new-york style, Radix primitives). Icons in
 
 `logo-v3.svg` (squircle, headers, decks), `logo-v3-avatar.svg` (full bleed, for circular crops), `logo-text.svg` (horizontal lockup, light backgrounds), `logo-text-dark.svg` (dark backgrounds). On video end-cards use the lockup, not the icon alone.
 
+## Export and payment
+
+The paid flow is one sheet family (`Export & payment`): ExportTrigger → a free sample is saved at once → PaywallModal → CheckoutHandoff → the payment page → LicenseDialog (key from the redirect or typed by hand) → ExportDialog (report, CSV, JSON) → "Saved to your device". RevokedLicenseNotice and the "All 3 browsers are in use" state are the two dead ends, and both end in an email, not a purchase.
+
+- **Give before asking.** The first click saves a free report with the first 10 accounts; the paywall opens after that, showing the real count.
+- **One price, written plainly.** "One payment, not a subscription", "once". Amounts come from the country price table, never typed into a layout. No timers, scarcity, struck-through prices or hidden close.
+- **The only privacy claim.** The Instagram export stays in the browser and the payment page never sees it. Say nothing broader: ads, analytics and payments exist and are disclosed.
+- **Every failure has a next step.** Wrong key: re-enter. Network: retry. Three browsers used or key revoked: email support. After paying, a person is never left on a silent screen.
+- **Phone first.** All of it is a bottom sheet below 640px, 48px touch targets, `rounded-2xl` buttons.
+
 ## Not synced
 
-Built from `ignromanov/safe-unfollow` at `refactor/retire-donation-surfaces@a0076316`. Skipped: `calc()` radii (written out as px), Tailwind palette overrides, gradient scrollbar utilities, Cyrillic, Greek and Vietnamese font subsets (latin only), and the React library: Button, Badge, Input, Alert, StatCard, Logo, SearchBar, AccountItem, FilterChips, Tabs, Accordion, Dialog, UploadZone, Header, Footer, Hero, RescueToolCard, DropdownMenu, Sheet and AlertDialog are static recreations from source (no bundle, no behaviour). Not included: Hero's feature-card grid, ads and export surfaces, FAQ and how-to sections, page-level screens.
+Built from `ignromanov/safe-unfollow` at `refactor/retire-donation-surfaces@a0076316`. Skipped: `calc()` radii (written out as px), Tailwind palette overrides, gradient scrollbar utilities, Cyrillic, Greek and Vietnamese font subsets (latin only), and the React library: every component here is a static recreation from source (no bundle, no behaviour). Not included: Hero's feature-card grid, ads, FAQ and how-to sections, the downloaded HTML report itself, page-level screens, and the v1.8 paywall plans (not in source yet).
+
+**Deprecated, removed from this system:** the Rescue Plan affiliate card (`RescueToolCard`). It is an old mechanism that is not shown anywhere in the product; do not design with it. Its source file still exists under `src/components/rescue-plan/` and is imported by the old banner; this design system no longer documents it.

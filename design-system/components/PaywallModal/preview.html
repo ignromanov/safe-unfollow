@@ -1,0 +1,586 @@
+<!-- @dsCard group="Export & payment" height=800 subtitle="Static rendition: the offer after a free sample, and its failed state" -->
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 16px;
+        background: var(--background);
+        color: var(--foreground);
+        font-family: var(--font-sans);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 32px 24px;
+        align-items: flex-start;
+      }
+      figure {
+        margin: 0;
+        display: grid;
+        gap: 8px;
+      }
+      figcaption {
+        font: 500 12px/16px var(--font-sans);
+        color: var(--muted-foreground);
+      }
+      /* scrim + sheet: ExportSheet below 640px */
+      .sc {
+        width: 390px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding-top: 32px;
+        background: linear-gradient(rgb(0 0 0 / 0.5), rgb(0 0 0 / 0.5)), var(--background);
+        outline: 1px solid var(--border);
+        overflow: hidden;
+      }
+      .sc.wide {
+        width: 440px;
+        justify-content: center;
+        padding: 32px 24px;
+      }
+      .sh {
+        position: relative;
+        display: grid;
+        gap: 16px;
+        padding: 24px 20px 28px;
+        border: 1px solid var(--border);
+        border-bottom: 0;
+        border-radius: 24px 24px 0 0;
+        background: var(--background);
+        box-shadow: 0 -8px 30px rgb(0 0 0 / 0.12);
+      }
+      .sh.dk {
+        padding: 24px;
+        border-bottom: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        box-shadow:
+          0 10px 15px -3px rgb(0 0 0 / 0.1),
+          0 4px 6px -4px rgb(0 0 0 / 0.1);
+      }
+      .gr {
+        position: absolute;
+        top: 8px;
+        inset-inline-start: 50%;
+        width: 36px;
+        height: 4px;
+        margin-inline-start: -18px;
+        border-radius: 999px;
+        background: var(--border);
+      }
+      .x {
+        position: absolute;
+        top: 4px;
+        inset-inline-end: 4px;
+        width: 44px;
+        height: 44px;
+        display: grid;
+        place-items: center;
+        border: 0;
+        border-radius: 999px;
+        background: transparent;
+        color: var(--foreground);
+        opacity: 0.7;
+      }
+      .hd {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        text-align: start;
+      }
+      .hd.pe {
+        padding-inline-end: 32px;
+      }
+      h2 {
+        margin: 0;
+        font: 600 18px/1.375 var(--font-sans);
+      }
+      h2.ti {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .ds {
+        margin: 0;
+        font: 400 14px/20px var(--font-sans);
+        color: var(--muted-foreground);
+      }
+      .ds.fg {
+        color: var(--foreground);
+        line-height: 1.625;
+      }
+      .ft {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+      }
+      .ft.tight {
+        gap: 4px;
+      }
+      .em {
+        color: #10b981;
+        flex: none;
+      }
+      .xs {
+        margin: 0;
+        font: 400 12px/1.5 var(--font-sans);
+        color: var(--muted-foreground);
+      }
+      .al {
+        margin: 0;
+        display: flex;
+        gap: 8px;
+        align-items: flex-start;
+        font: 400 14px/1.5 var(--font-sans);
+        color: var(--destructive);
+      }
+      .al svg {
+        margin-top: 2px;
+        flex: none;
+      }
+      /* buttons */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 48px;
+        padding: 0 24px;
+        border: 1px solid transparent;
+        border-radius: 16px;
+        font: 700 14px/20px var(--font-sans);
+        text-decoration: none;
+        white-space: nowrap;
+        cursor: pointer;
+      }
+      .pri {
+        background: var(--primary);
+        color: var(--primary-foreground);
+        box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+      }
+      .gh {
+        background: transparent;
+        color: var(--muted-foreground);
+      }
+      .dis {
+        opacity: 0.5;
+        pointer-events: none;
+      }
+      .spin {
+        animation: spin 1s linear infinite;
+        display: inline-flex;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .spin {
+          animation: none;
+        }
+      }
+      /* format buttons */
+      .fmt {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+        min-height: 48px;
+        padding: 8px 24px;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background: var(--background);
+        color: var(--foreground);
+        text-align: start;
+        font: 700 14px/20px var(--font-sans);
+        box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+      }
+      [data-theme='dark'] .fmt:not(.pri) {
+        background: color-mix(in oklab, var(--input) 30%, transparent);
+        border-color: var(--input);
+      }
+      .fmt.pri {
+        border-color: transparent;
+        background: var(--primary);
+        color: var(--primary-foreground);
+      }
+      .fmt .l {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .fmt .h {
+        font-weight: 400;
+        font-size: 12px;
+        line-height: 16px;
+        color: var(--muted-foreground);
+        white-space: normal;
+      }
+      .fmt.pri .h {
+        color: color-mix(in oklab, var(--primary-foreground) 80%, transparent);
+      }
+      /* input */
+      .in {
+        height: 48px;
+        width: 100%;
+        padding: 4px 12px;
+        border: 1px solid var(--input);
+        border-radius: 16px;
+        background: transparent;
+        color: var(--foreground);
+        font: 400 16px/24px var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+        box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+      }
+      [data-theme='dark'] .in {
+        background: color-mix(in oklab, var(--input) 30%, transparent);
+      }
+      .in::placeholder {
+        color: var(--muted-foreground);
+      }
+      .in.inv {
+        border-color: var(--destructive);
+        outline: 3px solid color-mix(in oklab, var(--destructive) 20%, transparent);
+      }
+
+      .rc {
+        margin: 0;
+        display: flex;
+        gap: 8px;
+        align-items: flex-start;
+        font: 400 12px/1.625 var(--font-sans);
+        color: var(--muted-foreground);
+      }
+      .rc svg {
+        margin-top: 2px;
+      }
+      .big {
+        display: block;
+        font: 800 44px/1 var(--font-display);
+        color: var(--primary-strong);
+      }
+      .sub {
+        display: block;
+        margin-top: 2px;
+        font: 600 14px/20px var(--font-sans);
+        color: var(--muted-foreground);
+      }
+      .dk .big {
+        font-size: 48px;
+      }
+      .bar {
+        display: flex;
+        height: 16px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: var(--muted);
+      }
+      .bar .a {
+        flex: none;
+        width: max(12px, 0.5%);
+        background: #10b981;
+      }
+      .bar .d {
+        flex: none;
+        width: 2px;
+        background: var(--primary-foreground);
+      }
+      .bar .r {
+        flex: 1 1 auto;
+        background: var(--primary);
+      }
+      .lg {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        font: 400 12px/16px var(--font-sans);
+      }
+      .lg span {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .lg b {
+        font-weight: 700;
+      }
+      .sw {
+        width: 10px;
+        height: 10px;
+        flex: none;
+        border: 1px solid var(--muted-foreground);
+        border-radius: 3px;
+      }
+      .cta {
+        font-size: 16px;
+        padding: 0 20px;
+        box-shadow: 0 25px 50px -12px color-mix(in oklab, var(--primary) 30%, transparent);
+      }
+      .why {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding-top: 14px;
+        border-top: 1px solid var(--border);
+      }
+      .why p {
+        margin: 0;
+        text-align: center;
+        font: 400 12px/1.625 var(--font-sans);
+        color: var(--muted-foreground);
+      }
+      .why a {
+        color: var(--foreground);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+      .why .tl {
+        align-self: center;
+        padding: 8px 4px;
+        border: 0;
+        background: none;
+        font: 400 12px/16px var(--font-sans);
+        color: var(--muted-foreground);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+      .fail {
+        margin: 0;
+        text-align: center;
+        font: 400 12px/1.625 var(--font-sans);
+        color: var(--destructive);
+      }
+    </style>
+  </head>
+  <body>
+    <figure>
+      <figcaption>Offer: phone</figcaption>
+      <div class="sc">
+        <div class="sh" role="dialog">
+          <div class="gr"></div>
+          <p class="rc">
+            <svg
+              class="em"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M20 6 9 17l-5-5" /></svg
+            ><span>Saved safeunfollow-2026-11-17-sample.html — the first 10 of 1,284 accounts</span>
+          </p>
+          <div class="hd">
+            <h2>
+              <span class="big">1,284</span><span class="sub">accounts matched by this filter</span>
+            </h2>
+          </div>
+          <div aria-hidden="true" style="display: flex; flex-direction: column; gap: 8px">
+            <div class="bar">
+              <div class="a" style="width: max(12px, 0.78%)"></div>
+              <div class="d"></div>
+              <div class="r"></div>
+            </div>
+            <div class="lg">
+              <span><i class="sw" style="background: #10b981"></i>Yours — first 10</span
+              ><span
+                ><b
+                  ><i
+                    class="sw"
+                    style="
+                      background: var(--primary);
+                      display: inline-block;
+                      margin-inline-end: 6px;
+                    "
+                  ></i
+                  >The rest of your list</b
+                ></span
+              >
+            </div>
+          </div>
+          <p class="ds fg">
+            Your free report has all the counts but lists only the first 10 accounts. The export
+            lists all 1,284, as a report, CSV or JSON — one payment, not a subscription.
+          </p>
+          <div class="ft tight">
+            <button class="btn pri cta">Unlock export — $7</button
+            ><button class="btn gh">Not now</button>
+          </div>
+          <div class="why">
+            <p>
+              Similar trackers charge $5–10 a month to keep watching your followers. This is $7,
+              once, for the file itself.
+            </p>
+            <p>One-time $7. Unlocks on up to 3 browsers.</p>
+            <p>
+              Not what you expected? Email
+              <a dir="ltr" href="mailto:refunds@safeunfollow.app">refunds@safeunfollow.app</a>
+              within 30 days and we’ll refund it.
+            </p>
+            <button class="tl">Already purchased? Enter your key</button>
+          </div>
+        </div>
+      </div>
+    </figure>
+    <figure>
+      <figcaption>Checkout failed: phone</figcaption>
+      <div class="sc">
+        <div class="sh" role="dialog">
+          <div class="gr"></div>
+          <p class="rc">
+            <svg
+              class="em"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M20 6 9 17l-5-5" /></svg
+            ><span>Saved safeunfollow-2026-11-17-sample.html — the first 10 of 1,284 accounts</span>
+          </p>
+          <div class="hd">
+            <h2>
+              <span class="big">1,284</span><span class="sub">accounts matched by this filter</span>
+            </h2>
+          </div>
+          <div aria-hidden="true" style="display: flex; flex-direction: column; gap: 8px">
+            <div class="bar">
+              <div class="a" style="width: max(12px, 0.78%)"></div>
+              <div class="d"></div>
+              <div class="r"></div>
+            </div>
+            <div class="lg">
+              <span><i class="sw" style="background: #10b981"></i>Yours — first 10</span
+              ><span
+                ><b
+                  ><i
+                    class="sw"
+                    style="
+                      background: var(--primary);
+                      display: inline-block;
+                      margin-inline-end: 6px;
+                    "
+                  ></i
+                  >The rest of your list</b
+                ></span
+              >
+            </div>
+          </div>
+          <p class="ds fg">
+            Your free report has all the counts but lists only the first 10 accounts. The export
+            lists all 1,284, as a report, CSV or JSON — one payment, not a subscription.
+          </p>
+          <div class="ft tight">
+            <button class="btn pri cta">Checkout didn’t open — try again</button>
+            <p class="fail" role="alert">
+              The payment page did not load. Check your connection and try again.
+            </p>
+            <button class="btn gh">Not now</button>
+          </div>
+          <div class="why">
+            <p>
+              Similar trackers charge $5–10 a month to keep watching your followers. This is $7,
+              once, for the file itself.
+            </p>
+            <p>One-time $7. Unlocks on up to 3 browsers.</p>
+            <p>
+              Not what you expected? Email
+              <a dir="ltr" href="mailto:refunds@safeunfollow.app">refunds@safeunfollow.app</a>
+              within 30 days and we’ll refund it.
+            </p>
+            <button class="tl">Already purchased? Enter your key</button>
+          </div>
+        </div>
+      </div>
+    </figure>
+    <figure>
+      <figcaption>Offer: desktop, a very large list</figcaption>
+      <div class="sc wide">
+        <div class="sh dk" role="dialog">
+          <p class="rc">
+            <svg
+              class="em"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M20 6 9 17l-5-5" /></svg
+            ><span
+              >Saved safeunfollow-2026-11-17-sample.html — the first 10 of 62,410 accounts</span
+            >
+          </p>
+          <div class="hd">
+            <h2>
+              <span class="big">62,410</span
+              ><span class="sub">accounts matched by this filter</span>
+            </h2>
+          </div>
+          <div aria-hidden="true" style="display: flex; flex-direction: column; gap: 8px">
+            <div class="bar">
+              <div class="a" style="width: max(12px, 0.02%)"></div>
+              <div class="d"></div>
+              <div class="r"></div>
+            </div>
+            <div class="lg">
+              <span><i class="sw" style="background: #10b981"></i>Yours — first 10</span
+              ><span
+                ><b
+                  ><i
+                    class="sw"
+                    style="
+                      background: var(--primary);
+                      display: inline-block;
+                      margin-inline-end: 6px;
+                    "
+                  ></i
+                  >The rest of your list</b
+                ></span
+              >
+            </div>
+          </div>
+          <p class="ds fg">
+            Your free report has all the counts but lists only the first 10 accounts. The export
+            lists all 62,410, as a report, CSV or JSON — one payment, not a subscription.
+          </p>
+          <div class="ft tight">
+            <button class="btn pri cta">Unlock export — $7</button
+            ><button class="btn gh">Not now</button>
+          </div>
+          <div class="why">
+            <p>
+              Similar trackers charge $5–10 a month to keep watching your followers. This is $7,
+              once, for the file itself.
+            </p>
+            <p>One-time $7. Unlocks on up to 3 browsers.</p>
+            <p>
+              Not what you expected? Email
+              <a dir="ltr" href="mailto:refunds@safeunfollow.app">refunds@safeunfollow.app</a>
+              within 30 days and we’ll refund it.
+            </p>
+            <button class="tl">Already purchased? Enter your key</button>
+          </div>
+        </div>
+      </div>
+    </figure>
+  </body>
+</html>
