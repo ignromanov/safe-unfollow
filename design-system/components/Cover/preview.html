@@ -1,0 +1,90 @@
+<!-- @dsCard height=288 -->
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        background: var(--background);
+      }
+      svg {
+        display: block;
+        width: 960px;
+        height: 288px;
+      }
+      .a {
+        fill: var(--brand-start);
+      }
+      .b {
+        fill: var(--brand-mid);
+      }
+      .c {
+        fill: var(--brand-end);
+      }
+      .d {
+        fill: var(--foreground);
+      }
+      .t {
+        fill: var(--background);
+        rx: var(--radius-md);
+      }
+      .n {
+        fill: var(--foreground);
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: 64px;
+        letter-spacing: -0.04em;
+      }
+      .g {
+        fill: var(--muted-foreground);
+        font-family: var(--font-sans);
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <!--
+blocks: brand-start 288x112, brand-mid 192x112, brand-end 240x112, foreground 240x112 (top band, flush, bleeding off top/left/right)
+arrangement: one horizontal strip of unequal bands, the gradient's three stops in order, then ink
+pattern: modular tiles cut by radius-md (32px, pitch 48 = space-6 x2); the app is dense UI built from rounded cards, and the strip reads as a row of list rows being unfollowed
+steps/radii: 24, 32, 48 px; radius-md
+-->
+    <svg viewBox="0 0 960 288" role="img" aria-label="SafeUnfollow.app">
+      <rect class="a" x="0" y="0" width="288" height="112" />
+      <rect class="b" x="288" y="0" width="192" height="112" />
+      <rect class="c" x="480" y="0" width="240" height="112" />
+      <rect class="d" x="720" y="0" width="240" height="112" />
+      <g id="p"></g>
+      <text class="n" x="48" y="196">SafeUnfollow.app</text>
+      <text class="g" x="48" y="238">
+        Find who unfollowed you. Your export never leaves your browser.
+      </text>
+    </svg>
+    <script>
+      var g = document.getElementById('p'),
+        ns = 'http://www.w3.org/2000/svg';
+      [
+        [48, 16],
+        [96, 64],
+        [336, 16],
+        [384, 64],
+        [528, 16],
+        [576, 64],
+        [768, 16],
+        [816, 64],
+        [864, 16],
+        [240, 64],
+      ].forEach(function (p) {
+        var r = document.createElementNS(ns, 'rect');
+        r.setAttribute('class', 't');
+        r.setAttribute('x', p[0]);
+        r.setAttribute('y', p[1]);
+        r.setAttribute('width', 32);
+        r.setAttribute('height', 32);
+        g.appendChild(r);
+      });
+    </script>
+  </body>
+</html>
