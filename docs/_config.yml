@@ -29,7 +29,9 @@ url: "https://safeunfollow.app"
 # number restated here could only drift away from them.
 # `.claude/analytics/2026-09-07-entity-resolution/00-the-entity-defects.md` §2 and §3.
 # Since v1.7.0 the node also names its founder (a Person, `founder_id`), and the WebSite is named
-# "SafeUnfollow" like the app's (plan 2026-11-09-seo-aeo-geo, task 01).
+# "SafeUnfollow" like the app's (plan 2026-11-09-seo-aeo-geo, task 01). Since 2026-11-18 the founder
+# is the Person node shared by all of Ignat Romanov's sites, `https://lasipan.cc/#person`, with the
+# values of the vault entity-pack §1; it is not an id on safeunfollow.app.
 #
 # ⛔ Every value below is duplicated from `src/components/OrganizationSchema.tsx`, because
 # Jekyll and Vite are separate builds with no shared source. `jekyll-structured-data.test.ts`
@@ -38,7 +40,7 @@ url: "https://safeunfollow.app"
 entity:
   id: "https://safeunfollow.app/#organization"
   website_id: "https://safeunfollow.app/#website"
-  founder_id: "https://safeunfollow.app/#founder"
+  founder_id: "https://lasipan.cc/#person"
   name: "SafeUnfollow"
   alternate_name:
     - "SafeUnfollow.app"
@@ -61,8 +63,8 @@ entity:
   founder:
     name: "Ignat Romanov"
     url: "https://lasipan.cc/"
-    job_title: "Builder & Web3 Frontend Engineer"
-    description: "Builder & Web3 Frontend Engineer — crafting privacy-first tools for the decentralized economy."
+    job_title: "Senior Frontend Engineer — Web3 and AI-agent tooling"
+    description: "Ignat Romanov is a senior frontend engineer in Paraguay who works on Web3 interfaces and AI-agent tooling. He merged 19 pull requests into Curve's DeFi frontend in 2024 and builds VoidPay, Conclave and the @void-layer/codec library."
     same_as:
       - "https://github.com/ignromanov"
       - "https://lasipan.cc/"

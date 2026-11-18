@@ -165,7 +165,7 @@ export function Footer() {
             {t('footer.madeWithLove')}{' '}
             <Heart size={16} className="text-rose-500 fill-current animate-pulse" />{' '}
             {t('footer.forTheCommunity')}
-            {/* The visible half of the JSON-LD `#founder` Person (OrganizationSchema.tsx): a
+            {/* The visible half of the JSON-LD founder Person (`lasipan.cc/#person`) (OrganizationSchema.tsx): a
                 name marked up but shown nowhere is markup the page does not carry. A proper
                 name, so it is not translated, and no "by" that would need ten translations. */}
             <span aria-hidden="true">·</span>
