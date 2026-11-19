@@ -44,9 +44,10 @@ describe('HeaderV2', () => {
     expect(header).toBeInTheDocument();
   });
 
-  it('should render logo with ShieldCheck icon', () => {
+  it('should render brand logo and wordmark', () => {
     renderWithRouter(<Header />);
 
+    expect(screen.getByRole('img', { name: 'SafeUnfollow logo' })).toBeInTheDocument();
     // Logo text should be visible
     expect(screen.getByText('SafeUnfollow')).toBeInTheDocument();
     expect(screen.getByText('.app')).toBeInTheDocument();
