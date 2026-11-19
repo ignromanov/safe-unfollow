@@ -499,16 +499,6 @@ export const analytics = {
     });
   },
 
-  // Web Vitals (V10: 3% sampling, was 10%)
-  webVital: (name: string, value: number, rating: string) => {
-    if (Math.random() > 0.03) return;
-    trackEvent(AnalyticsEvents.WEB_VITAL, {
-      metric_name: name,
-      metric_value: Math.round(value),
-      rating,
-    });
-  },
-
   // PWA Install
   //
   // Batched together: the prompt is the denominator the install is divided by,

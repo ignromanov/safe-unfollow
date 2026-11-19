@@ -88,11 +88,6 @@ describe('initWebVitals', () => {
   beforeEach(async () => {
     vi.stubEnv('DEV', false);
     clsFinalizedOnHide = null;
-    // The legacy sampled per-metric event shares this gate; pinning it high keeps
-    // the parallel emitter silent so these assertions see the census payload
-    // alone. The rate itself is not restated here — `analytics.webVital` in
-    // `lib/stats/events.ts` is where it is decided.
-    vi.spyOn(Math, 'random').mockReturnValue(1);
     localStorage.clear();
     clearEventQueue();
     for (const key of Object.keys(reporters)) delete reporters[key];
