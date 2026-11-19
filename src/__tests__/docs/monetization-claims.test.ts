@@ -568,11 +568,10 @@ function accountLimitCell(text: string): string | undefined {
  * archive that cannot be rewritten.
  *
  * So the channel is pinned rather than the sentence. This repository's convention is that a
- * free-text analytics field is truncated at the call site with `.slice(0, N)`; the four
- * below are every such field, and `file_hash_prefix` is included because a digest of the
- * user's own archive belongs in the same review even though it is neither a username nor
- * the file. Adding a fifth goes red on purpose: the question it forces is "does the README
- * still tell the truth", and that question has to be asked while the field is being added.
+ * free-text analytics field is truncated at the call site with `.slice(0, N)`; the three
+ * below are every such field (`file_hash_prefix` was removed in T5 / v1.8 task 09). Adding
+ * a fourth goes red on purpose: the question it forces is "does the README still tell the
+ * truth", and that question has to be asked while the field is being added.
  */
 describe('the analytics payload carries shape, not content', () => {
   const EVENTS = readFileSync(join(process.cwd(), 'src/lib/stats/events.ts'), 'utf-8');
@@ -588,13 +587,13 @@ describe('the analytics payload carries shape, not content', () => {
     expect(truncatedFields().length).toBeGreaterThan(0);
   });
 
-  it('no analytics field carries free text beyond the four on record', () => {
+  it('no analytics field carries free text beyond the three on record', () => {
     expect(
       truncatedFields(),
       'a new truncated analytics field appeared. Free text can carry a username. Check it ' +
         'against the README claim "never receive usernames or your export file" before ' +
         'adding it here — that sentence is going into a Zenodo archive that cannot be edited.',
-    ).toEqual(['component_stack', 'error_message', 'file_hash_prefix', 'message']);
+    ).toEqual(['component_stack', 'error_message', 'message']);
   });
 });
 

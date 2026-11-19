@@ -100,12 +100,19 @@ describe('useDataManagement', () => {
     });
   });
 
-  it('should work with different store implementations', () => {
-    // Test that the hook works regardless of store implementation
+  it('removes legacy analytics_last_upload key while preserving umami-opt-out', async () => {
+    localStorage.setItem('analytics_last_upload', JSON.stringify({ hash: 'old', timestamp: 1 }));
+    localStorage.setItem('umami-opt-out', 'true');
+
     const { result } = renderHook(() => useDataManagement());
 
-    expect(result.current).toEqual({
-      handleClearData: expect.any(Function),
+    await act(async () => {
+      await result.current.handleClearData();
     });
+
+    expect(localStorage.getItem('analytics_last_upload')).toBeNull();
+    expect(localStorage.getItem('umami-opt-out')).toBe('true');
+
+    localStorage.removeItem('umami-opt-out');
   });
 });
