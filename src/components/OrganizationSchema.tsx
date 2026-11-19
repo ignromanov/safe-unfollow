@@ -178,8 +178,9 @@ export function OrganizationSchema() {
       softwareVersion: __PKG_VERSION__,
       // CITATION.cff's date-released (vite/build-env.ts): a release date, never a build date.
       dateModified: __RELEASE_DATE__,
-      // On our own domain, not GitHub's CHANGELOG: the release history is a page we want read.
-      releaseNotes: `${BASE_URL}/docs/roadmap/#release-history`,
+      // On our own domain, not GitHub's CHANGELOG, and at the canonical address: the slashed
+      // form answers 307, so a link to it spends a redirect before the page is read.
+      releaseNotes: `${BASE_URL}/docs/roadmap#release-history`,
       browserRequirements: 'Requires JavaScript and a browser with IndexedDB support.',
       inLanguage: [...SUPPORTED_LANGUAGES],
       // No `downloadUrl`: schema.org defines it as the URL of a binary to download, and a web
