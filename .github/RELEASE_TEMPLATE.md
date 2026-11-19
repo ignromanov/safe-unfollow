@@ -188,19 +188,33 @@ Quick patch release fixing critical bugs reported in v1.0.0.
 
 ## Release Checklist
 
-Before publishing a release, ensure:
+`develop` is the integration branch and `main` the release branch (#345). A release is
+two PRs and a tag, in this order:
 
-- [ ] All tests pass (`npm test`)
-- [ ] Build succeeds (`npm run build`)
-- [ ] Version bumped in `package.json`
-- [ ] `CHANGELOG.md` updated with release date
-- [ ] `RELEASE_NOTES.md` created (for major/minor versions)
-- [ ] Documentation updated to reflect new features
-- [ ] Migration guide written (if breaking changes)
-- [ ] GitHub Release draft created using this template
-- [ ] Release notes reviewed for clarity and accuracy
-- [ ] Tag created with format `vX.Y.Z`
-- [ ] Assets attached to release (if applicable)
+1. **Bump PR into `develop`** (squash), from a `chore/release-X.Y.Z` branch:
+   - [ ] `package.json` and the two root entries of `package-lock.json` (not a
+         dependency that happens to share the old number)
+   - [ ] `CITATION.cff` — `version` and `date-released`
+   - [ ] `docs/tech-spec.md` — both version mentions
+   - [ ] `CHANGELOG.md` — move `[Unreleased]` under `## [X.Y.Z] - YYYY-MM-DD`
+   - [ ] **Hero chip** — `version` in `src/locales/*/hero.json`, all ten locales.
+         Format `V{major}.{minor} · {feature} · {feature}`: the version without the patch,
+         then the two biggest reader-facing features of the 1.x line that the rest of the
+         hero does not already say (no login, free, local and 1M+ are said elsewhere),
+         worded the way people search. Keep it under ~45 characters in English; it is one
+         line on a 360px phone. A patch release leaves it alone unless it ships such a
+         feature. The text is copy on `/`: lumen-cro signs it off, and the deploy date goes
+         into `analytics/measurement-boundaries.md`.
+         `citation-metadata.test.ts` checks only that major.minor matches `package.json`,
+         so an unchanged chip passes on every patch release; the gate does not do this step for you.
+   - [ ] `code-quality` and `build-test` green
+2. **Release PR `develop → main`** — **merge commit, never squash**: a squashed release
+   makes the two branches diverge and every next release conflicts. `release-source`
+   refuses any other head branch.
+3. **Tag and release** on the merge commit in `main`:
+   `gh release create vX.Y.Z --target <merge sha> --title "SafeUnfollow vX.Y.Z"` with the
+   CHANGELOG entry as notes. The release event is what Zenodo mints the version DOI from;
+   cite only the concept DOI.
 
 ---
 

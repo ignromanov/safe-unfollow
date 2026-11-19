@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SafeUnfollow is now licensed under the GNU AGPL-3.0-only (#332). Versions up to
   and including 1.7.0 remain available under MIT.
 - A new logo, app icons and social preview image (#351).
+- The badge above the homepage headline names follow dates and HTML & JSON exports,
+  in all ten languages.
 - The donation links are gone from the app (#342).
 - When the browser is machine-translating the page into a language SafeUnfollow
   ships, it offers its own translation instead (#338).
