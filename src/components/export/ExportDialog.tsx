@@ -22,6 +22,7 @@ import {
   clearLicense,
   getStoredLicense,
   markValidatedThisSession,
+  recordValidationSuccess,
   shouldValidateThisSession,
 } from '@/lib/export/unlock';
 import { analytics } from '@/lib/stats';
@@ -126,7 +127,14 @@ export function ExportDialog({
     void validateLicense(license.key, license.instanceId).then(result => {
       // Fail open: only an explicit negative revokes. A network problem must not
       // take the export away from someone who paid for it.
-      const revoked = !result.ok && (result.reason === 'disabled' || result.reason === 'not_found');
+      if (result.ok) {
+        recordValidationSuccess();
+      }
+      const revoked =
+        !result.ok &&
+        (result.reason === 'invalid' ||
+          result.reason === 'disabled' ||
+          result.reason === 'not_found');
       if (revoked) {
         clearLicense();
         analytics.licenseRevoked();

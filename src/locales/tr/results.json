@@ -220,7 +220,11 @@
       "blockedAction": "Anahtarınla birlikte {{email}} adresine yaz. Bir tarayıcıyı boşaltamazsak ödediğin tutarın tamamını iade ederiz.",
       "revokedTitle": "Bu anahtar artık etkin değil",
       "revokedBody": "Devre dışı bırakıldı ya da iade edildi. Beklemiyorsan anahtarla birlikte {{email}} adresine yaz — bize bu yeterli.",
-      "emailSupport": "Desteğe yaz"
+      "emailSupport": "Desteğe yaz",
+      "paste": "Yapıştır",
+      "cantFindKey": "Anahtarınızı bulamıyor musunuz?",
+      "saveKey": "Anahtarı kaydet",
+      "keyCopied": "Kopyalandı"
     },
     "dialog": {
       "title": "Hesapları dışa aktar",

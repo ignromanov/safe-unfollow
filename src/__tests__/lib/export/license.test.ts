@@ -269,5 +269,23 @@ describe('export/license', () => {
 
       expect(timeoutSpy).toHaveBeenCalledWith(4000);
     });
+
+    it('drops buyer PII returned by Dodo activate and never exposes email, name, or phone', async () => {
+      mockResponse(201, {
+        id: INSTANCE,
+        license_key_id: 'lk_123',
+        customer: {
+          email: 'buyer@example.com',
+          name: 'Jane Doe',
+          phone: '+15551234567',
+        },
+      });
+
+      const result = await activateLicense(KEY);
+      expect(result).toEqual({ ok: true, instanceId: INSTANCE });
+      expect(JSON.stringify(result)).not.toContain('buyer@example.com');
+      expect(JSON.stringify(result)).not.toContain('Jane Doe');
+      expect(JSON.stringify(result)).not.toContain('+15551234567');
+    });
   });
 });

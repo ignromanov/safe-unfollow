@@ -220,7 +220,11 @@
       "blockedAction": "Email {{email}} with your key. If we cannot free a browser, we refund your purchase in full.",
       "revokedTitle": "This key is no longer active",
       "revokedBody": "It was disabled or refunded. If that is unexpected, email {{email}} with the key — that is all we need.",
-      "emailSupport": "Email support"
+      "emailSupport": "Email support",
+      "paste": "Paste",
+      "cantFindKey": "Can’t find your key?",
+      "saveKey": "Save key",
+      "keyCopied": "Copied"
     },
     "dialog": {
       "title": "Export accounts",

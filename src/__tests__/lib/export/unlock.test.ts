@@ -4,16 +4,22 @@ import {
   clearLicense,
   consumeLicenseParam,
   getCheckoutUrl,
+  getCustomerPortalUrl,
   getStoredLicense,
   isExportFeatureEnabled,
   isExportUnlocked,
+  isOfflineGraceExpired,
   markValidatedThisSession,
+  needsDailyValidation,
+  OFFLINE_GRACE_MS,
+  recordValidationSuccess,
   resetUnlockCache,
   resetValidationFlag,
   shouldValidateThisSession,
   storeLicense,
   stripCheckoutReturnParams,
   subscribeUnlock,
+  VALIDATION_INTERVAL_MS,
 } from '@/lib/export/unlock';
 
 describe('export/unlock', () => {
@@ -267,7 +273,12 @@ describe('export/unlock', () => {
       storeLicense(KEY, INSTANCE);
 
       expect(isExportUnlocked()).toBe(true);
-      expect(getStoredLicense()).toEqual({ v: 1, key: KEY, instanceId: INSTANCE });
+      expect(getStoredLicense()).toEqual({
+        v: 1,
+        key: KEY,
+        instanceId: INSTANCE,
+        validatedAt: expect.any(Number),
+      });
     });
 
     it('should lock again after clearLicense', () => {
@@ -503,6 +514,74 @@ describe('export/unlock', () => {
       storeLicense(KEY, INSTANCE);
 
       expect(seen).toBe(true);
+    });
+  });
+
+  describe('daily validation & 7-day offline grace (v1.8 task 03)', () => {
+    const T0 = 1_700_000_000_000;
+
+    it('persists validatedAt on storeLicense and stays unlocked within 7 days', () => {
+      storeLicense(KEY, INSTANCE, T0);
+
+      expect(getStoredLicense()).toEqual({
+        v: 1,
+        key: KEY,
+        instanceId: INSTANCE,
+        validatedAt: T0,
+      });
+      expect(isOfflineGraceExpired(T0 + OFFLINE_GRACE_MS)).toBe(false);
+      expect(isExportUnlocked(T0 + OFFLINE_GRACE_MS)).toBe(true);
+    });
+
+    it('locks Pro after the 7-day offline grace expires without clearing the stored key', () => {
+      storeLicense(KEY, INSTANCE, T0);
+
+      const pastGrace = T0 + OFFLINE_GRACE_MS + 1;
+      expect(isOfflineGraceExpired(pastGrace)).toBe(true);
+      expect(isExportUnlocked(pastGrace)).toBe(false);
+      // Key remains stored so a later validate refreshes it without spending a new activation.
+      expect(getStoredLicense()?.key).toBe(KEY);
+    });
+
+    it('requires daily re-validation once 24h have elapsed, and refreshes on success', () => {
+      storeLicense(KEY, INSTANCE, T0);
+
+      expect(needsDailyValidation(T0 + VALIDATION_INTERVAL_MS - 1)).toBe(false);
+      expect(needsDailyValidation(T0 + VALIDATION_INTERVAL_MS)).toBe(true);
+
+      recordValidationSuccess(T0 + VALIDATION_INTERVAL_MS);
+      expect(needsDailyValidation(T0 + VALIDATION_INTERVAL_MS + 1000)).toBe(false);
+    });
+
+    it('treats legacy records without validatedAt as needing validation, not expired', () => {
+      localStorage.setItem(
+        'su-pro-export',
+        JSON.stringify({ v: 1, key: KEY, instanceId: INSTANCE })
+      );
+      resetUnlockCache();
+
+      expect(isOfflineGraceExpired(T0)).toBe(false);
+      expect(isExportUnlocked(T0)).toBe(true);
+      expect(needsDailyValidation(T0)).toBe(true);
+    });
+  });
+
+  describe('getCustomerPortalUrl (v1.8 task 03)', () => {
+    it('returns null when VITE_DODO_BUSINESS_ID is unset', () => {
+      vi.stubEnv('VITE_DODO_BUSINESS_ID', '');
+      expect(getCustomerPortalUrl()).toBeNull();
+    });
+
+    it('returns live portal URL for live checkout mode', () => {
+      vi.stubEnv('VITE_DODO_CHECKOUT_URL', 'https://checkout.dodopayments.com/buy/pdt_123');
+      vi.stubEnv('VITE_DODO_BUSINESS_ID', 'bus_abc');
+      expect(getCustomerPortalUrl()).toBe('https://customer.dodopayments.com/login/bus_abc');
+    });
+
+    it('returns test portal URL for test checkout mode', () => {
+      vi.stubEnv('VITE_DODO_CHECKOUT_URL', 'https://test.checkout.dodopayments.com/buy/pdt_123');
+      vi.stubEnv('VITE_DODO_BUSINESS_ID', 'bus_abc');
+      expect(getCustomerPortalUrl()).toBe('https://test.customer.dodopayments.com/login/bus_abc');
     });
   });
 });

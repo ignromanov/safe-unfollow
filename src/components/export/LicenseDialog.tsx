@@ -1,4 +1,4 @@
-import { Check, CircleAlert, Loader2 } from 'lucide-react';
+import { Check, CircleAlert, ClipboardPaste, ExternalLink, Loader2, Share2 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import type { LicenseFailureReason } from '@/lib/export/license';
 import { activateLicense, isLicenseKeyFormat } from '@/lib/export/license';
 import { SUPPORT_EMAIL } from '@/lib/export/support-email';
-import { getStoredLicense, storeLicense } from '@/lib/export/unlock';
+import { getCustomerPortalUrl, getStoredLicense, storeLicense } from '@/lib/export/unlock';
 import { analytics } from '@/lib/stats';
 
 export interface LicenseDialogProps {
@@ -89,6 +89,22 @@ function maskKey(key: string): string {
 // what used to sit inline.
 function ActivatedBody({ activatedKey }: { activatedKey: string }) {
   const { t } = useTranslation('results');
+  const [copied, setCopied] = useState(false);
+
+  const handleSaveKey = async (): Promise<void> => {
+    try {
+      if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+        await navigator.share({ text: activatedKey });
+        return;
+      }
+      if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(activatedKey);
+        setCopied(true);
+      }
+    } catch {
+      // User dismissed share sheet or clipboard permission denied
+    }
+  };
 
   return (
     <div role="status" className="flex flex-col gap-3">
@@ -105,9 +121,25 @@ function ActivatedBody({ activatedKey }: { activatedKey: string }) {
       </DialogHeader>
       <p className="text-xs text-muted-foreground">{t('export.license.successMeta')}</p>
       <div className="flex flex-col gap-1.5">
-        <span className="text-xs font-semibold text-muted-foreground">
-          {t('export.license.keyLabel')}
-        </span>
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-xs font-semibold text-muted-foreground">
+            {t('export.license.keyLabel')}
+          </span>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-7 gap-1.5 px-2 text-xs"
+            onClick={() => void handleSaveKey()}
+          >
+            {copied ? (
+              <Check className="h-3.5 w-3.5 text-emerald-500" />
+            ) : (
+              <Share2 className="h-3.5 w-3.5" />
+            )}
+            {copied ? t('export.license.keyCopied') : t('export.license.saveKey')}
+          </Button>
+        </div>
         <span className="rounded-2xl border bg-muted px-3 py-2 font-mono text-sm break-all">
           {maskKey(activatedKey)}
         </span>
@@ -126,6 +158,7 @@ function ActivatedBody({ activatedKey }: { activatedKey: string }) {
 // screen — both describe the identical situation.
 function TerminalErrorBody({ reason }: { reason: LicenseFailureReason | 'format' }) {
   const { t } = useTranslation('results');
+  const portalUrl = getCustomerPortalUrl();
 
   if (reason !== 'limit_reached') return <RevokedLicenseNotice />;
 
@@ -145,6 +178,72 @@ function TerminalErrorBody({ reason }: { reason: LicenseFailureReason | 'format'
       <p className="text-sm leading-normal text-muted-foreground">
         {t('export.license.blockedAction', { email: SUPPORT_EMAIL })}
       </p>
+      {portalUrl ? (
+        <a
+          href={portalUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-primary underline underline-offset-4"
+        >
+          {t('export.license.cantFindKey')}
+          <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+        </a>
+      ) : null}
+    </div>
+  );
+}
+
+function ManualKeyInput({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+  const { t } = useTranslation('results');
+  const portalUrl = getCustomerPortalUrl();
+  const canPaste =
+    typeof navigator !== 'undefined' && typeof navigator.clipboard?.readText === 'function';
+
+  const handlePaste = async (): Promise<void> => {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (text) onChange(text.trim());
+    } catch {
+      // Clipboard read permission denied — user can paste into the input directly
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center gap-2">
+        <Input
+          value={value}
+          onChange={event => onChange(event.target.value)}
+          placeholder={t('export.license.placeholder')}
+          aria-label={t('export.license.title')}
+          autoComplete="off"
+          spellCheck={false}
+          className="font-mono"
+        />
+        {canPaste ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-10 shrink-0 gap-1.5"
+            onClick={() => void handlePaste()}
+          >
+            <ClipboardPaste className="h-4 w-4" aria-hidden="true" />
+            {t('export.license.paste')}
+          </Button>
+        ) : null}
+      </div>
+      {portalUrl ? (
+        <a
+          href={portalUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex w-fit items-center gap-1 text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"
+        >
+          {t('export.license.cantFindKey')}
+          <ExternalLink className="h-3 w-3" aria-hidden="true" />
+        </a>
+      ) : null}
     </div>
   );
 }
@@ -408,15 +507,7 @@ export function LicenseDialog({
       state.kind !== 'activating' &&
       state.kind !== 'activated' &&
       !(state.kind === 'error' && isTerminalReason(state.reason)) ? (
-        <Input
-          value={inputValue}
-          onChange={event => setInputValue(event.target.value)}
-          placeholder={t('export.license.placeholder')}
-          aria-label={t('export.license.title')}
-          autoComplete="off"
-          spellCheck={false}
-          className="font-mono"
-        />
+        <ManualKeyInput value={inputValue} onChange={setInputValue} />
       ) : null}
 
       <DialogFooter className="flex-col gap-2 sm:flex-col sm:items-stretch">

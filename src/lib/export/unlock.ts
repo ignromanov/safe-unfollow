@@ -26,7 +26,15 @@ export interface StoredLicense {
   v: 1;
   key: string;
   instanceId: string;
+  /** Epoch ms of the last successful activate or validate call (v1.8 task 03). */
+  validatedAt?: number;
 }
+
+/** Re-validate a stored license at most once every 24 hours. */
+export const VALIDATION_INTERVAL_MS = 24 * 60 * 60 * 1000;
+
+/** Offline grace window before an unvalidated stored license pauses Pro access. */
+export const OFFLINE_GRACE_MS = 7 * 24 * 60 * 60 * 1000;
 
 const listeners = new Set<() => void>();
 let licenseCache: StoredLicense | null | undefined;
@@ -167,6 +175,21 @@ export function getCheckoutUrl(): string | null {
   return url ? url : null;
 }
 
+/**
+ * Dodo Customer Portal login URL for self-service key recovery, or null when
+ * `VITE_DODO_BUSINESS_ID` is not configured. Host matches the active checkout mode.
+ */
+export function getCustomerPortalUrl(): string | null {
+  const businessId = import.meta.env.VITE_DODO_BUSINESS_ID?.trim();
+  if (!businessId) return null;
+  const apiBase = getApiBase();
+  const host =
+    apiBase === 'https://test.dodopayments.com'
+      ? 'https://test.customer.dodopayments.com'
+      : 'https://customer.dodopayments.com';
+  return `${host}/login/${encodeURIComponent(businessId)}`;
+}
+
 function readStoredLicense(): StoredLicense | null {
   if (typeof window === 'undefined') return null;
 
@@ -186,8 +209,10 @@ function readStoredLicense(): StoredLicense | null {
       typeof (parsed as StoredLicense).key === 'string' &&
       typeof (parsed as StoredLicense).instanceId === 'string'
     ) {
-      const { key, instanceId } = parsed as StoredLicense;
-      return { v: 1, key, instanceId };
+      const { key, instanceId, validatedAt } = parsed as StoredLicense;
+      return typeof validatedAt === 'number' && Number.isFinite(validatedAt)
+        ? { v: 1, key, instanceId, validatedAt }
+        : { v: 1, key, instanceId };
     }
   } catch {
     // Anything that isn't even valid JSON is not a license.
@@ -204,18 +229,36 @@ export function getStoredLicense(): StoredLicense | null {
   return licenseCache;
 }
 
-export function isExportUnlocked(): boolean {
-  return getStoredLicense() !== null;
+/**
+ * True when a stored license has gone past the 7-day offline grace window
+ * without a successful validation. Legacy records without `validatedAt` are
+ * not treated as expired until their first validation attempt.
+ */
+export function isOfflineGraceExpired(now: number = Date.now()): boolean {
+  const license = getStoredLicense();
+  if (!license || license.validatedAt === undefined) return false;
+  return now - license.validatedAt > OFFLINE_GRACE_MS;
 }
 
-/** Persists an activated license and notifies subscribers. */
-export function storeLicense(key: string, instanceId: string): void {
+export function isExportUnlocked(now: number = Date.now()): boolean {
+  return getStoredLicense() !== null && !isOfflineGraceExpired(now);
+}
+
+/** Persists an activated license (key + instanceId + validatedAt only, never PII) and notifies subscribers. */
+export function storeLicense(key: string, instanceId: string, now: number = Date.now()): void {
   if (typeof window === 'undefined') return;
 
-  const license: StoredLicense = { v: 1, key, instanceId };
+  const license: StoredLicense = { v: 1, key, instanceId, validatedAt: now };
   localStorage.setItem(UNLOCK_STORAGE_KEY, JSON.stringify(license));
   licenseCache = license;
   notifyUnlockChanged();
+}
+
+/** Refreshes `validatedAt` after a successful `POST /licenses/validate` check. */
+export function recordValidationSuccess(now: number = Date.now()): void {
+  const existing = getStoredLicense();
+  if (!existing) return;
+  storeLicense(existing.key, existing.instanceId, now);
 }
 
 /** Removes the license — used when validation returns an explicit negative. */
@@ -290,6 +333,18 @@ export function consumeLicenseParam(): string | null {
 /** True until the first validation of this browser session. */
 export function shouldValidateThisSession(): boolean {
   return !hasValidatedThisSession;
+}
+
+/**
+ * True when a stored license should be re-validated now: once per 24h (or
+ * immediately for a legacy record lacking `validatedAt`), at most once per session.
+ */
+export function needsDailyValidation(now: number = Date.now()): boolean {
+  if (hasValidatedThisSession) return false;
+  const license = getStoredLicense();
+  if (!license) return false;
+  if (license.validatedAt === undefined) return true;
+  return now - license.validatedAt >= VALIDATION_INTERVAL_MS;
 }
 
 export function markValidatedThisSession(): void {
