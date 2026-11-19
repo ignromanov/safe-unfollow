@@ -220,7 +220,11 @@
       "blockedAction": "Kirim email ke {{email}} beserta kunci Anda. Kalau kami tidak bisa membebaskan satu browser, kami kembalikan dana Anda sepenuhnya.",
       "revokedTitle": "Kunci ini sudah tidak aktif",
       "revokedBody": "Kunci ini dinonaktifkan atau dananya sudah dikembalikan. Kalau ini di luar dugaan, kirim email ke {{email}} beserta kuncinya — hanya itu yang kami perlukan.",
-      "emailSupport": "Email ke dukungan"
+      "emailSupport": "Email ke dukungan",
+      "paste": "Tempel",
+      "cantFindKey": "Tidak menemukan kunci?",
+      "saveKey": "Simpan kunci",
+      "keyCopied": "Disalin"
     },
     "dialog": {
       "title": "Ekspor akun",

@@ -8,10 +8,16 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 
+import { validateLicense } from '@/lib/export/license';
 import {
   buildCheckoutUrl,
+  clearLicense,
+  getStoredLicense,
   isExportFeatureEnabled,
   isExportUnlocked,
+  markValidatedThisSession,
+  needsDailyValidation,
+  recordValidationSuccess,
   subscribeUnlock,
 } from '@/lib/export/unlock';
 import { analytics } from '@/lib/stats';
@@ -85,6 +91,29 @@ export function useProExport(): UseProExportResult {
 
   // The timer outlives the component when the reader dismisses mid-redirect.
   useEffect(() => clearPendingTimeout, []);
+
+  // Daily background re-validation of a stored license (v1.8 task 03).
+  // Runs at most once per session when `validatedAt` is ≥24h old (or missing on
+  // legacy records). Fails open on network errors so the 7-day offline grace holds.
+  useEffect(() => {
+    if (!isEnabled || !needsDailyValidation()) return;
+    const license = getStoredLicense();
+    if (!license) return;
+
+    void validateLicense(license.key, license.instanceId).then(result => {
+      if (result.ok) {
+        recordValidationSuccess();
+      } else if (
+        result.reason === 'invalid' ||
+        result.reason === 'disabled' ||
+        result.reason === 'not_found'
+      ) {
+        clearLicense();
+        analytics.licenseRevoked();
+      }
+      markValidatedThisSession();
+    });
+  }, [isEnabled]);
 
   // A page restored from the back/forward cache is, by definition, one the
   // reader navigated back to — so nothing this hook believes about an in-flight

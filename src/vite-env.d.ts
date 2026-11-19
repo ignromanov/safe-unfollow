@@ -17,6 +17,12 @@ interface ImportMetaEnv {
    */
   readonly VITE_DODO_CHECKOUT_URL?: string;
   /**
+   * Dodo Payments business ID for the self-service Customer Portal login link
+   * (`https://customer.dodopayments.com/login/{business_id}`). Optional: when
+   * unset, the "Can't find your key?" link is omitted rather than broken.
+   */
+  readonly VITE_DODO_BUSINESS_ID?: string;
+  /**
    * Where the Umami tracker is loaded from. Defaults to the analytics instance
    * directly; the same-origin proxy `/v/script.js` was removed 2026-09-14 because each
    * hop through a (then Vercel) external rewrite billed its own Edge Request. Set this

@@ -220,7 +220,11 @@
       "blockedAction": "Écrivez-nous à {{email}} en indiquant votre clé. Si nous ne pouvons libérer aucun navigateur, nous remboursons votre achat intégralement.",
       "revokedTitle": "Cette clé n’est plus active",
       "revokedBody": "Elle a été désactivée ou remboursée. Si c’est inattendu, écrivez à {{email}} en indiquant la clé — c’est tout ce dont nous avons besoin.",
-      "emailSupport": "Contacter le support"
+      "emailSupport": "Contacter le support",
+      "paste": "Coller",
+      "cantFindKey": "Clé introuvable ?",
+      "saveKey": "Enregistrer la clé",
+      "keyCopied": "Copiée"
     },
     "dialog": {
       "title": "Exporter les comptes",

@@ -52,7 +52,12 @@ describe('LicenseDialog', () => {
       expect(activateLicense).toHaveBeenCalledWith(KEY);
     });
     await waitFor(() => {
-      expect(getStoredLicense()).toEqual({ v: 1, key: KEY, instanceId: INSTANCE });
+      expect(getStoredLicense()).toEqual({
+        v: 1,
+        key: KEY,
+        instanceId: INSTANCE,
+        validatedAt: expect.any(Number),
+      });
     });
     expect(analytics.purchaseSuccess).toHaveBeenCalled();
   });
@@ -240,7 +245,12 @@ describe('LicenseDialog', () => {
       expect(activateLicense).toHaveBeenCalledWith(OTHER_KEY);
     });
     await waitFor(() => {
-      expect(getStoredLicense()).toEqual({ v: 1, key: OTHER_KEY, instanceId: OTHER_INSTANCE });
+      expect(getStoredLicense()).toEqual({
+        v: 1,
+        key: OTHER_KEY,
+        instanceId: OTHER_INSTANCE,
+        validatedAt: expect.any(Number),
+      });
     });
   });
 

@@ -220,7 +220,11 @@
       "blockedAction": "Escríbenos a {{email}} con tu clave. Si no podemos liberar un navegador, te devolvemos el importe íntegro de tu compra.",
       "revokedTitle": "Esta clave ya no está activa",
       "revokedBody": "Se desactivó o se reembolsó. Si no lo esperabas, escríbenos a {{email}} con la clave: es todo lo que necesitamos.",
-      "emailSupport": "Escribir a soporte"
+      "emailSupport": "Escribir a soporte",
+      "paste": "Pegar",
+      "cantFindKey": "¿No encuentras tu clave?",
+      "saveKey": "Guardar clave",
+      "keyCopied": "Copiada"
     },
     "dialog": {
       "title": "Exportar cuentas",
