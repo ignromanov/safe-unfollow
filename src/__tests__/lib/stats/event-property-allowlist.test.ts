@@ -220,9 +220,6 @@ const ALLOWED_EVENT_PROPERTIES: Record<AnalyticsEventName, readonly string[]> = 
   [AnalyticsEvents.ERROR_BOUNDARY]: ['error_message', 'component_stack'],
   [AnalyticsEvents.ROUTE_ERROR]: ['status', 'message'],
 
-  // Web Vitals (legacy — removed in GH#120; kept here while still in AnalyticsEvents)
-  [AnalyticsEvents.WEB_VITAL]: ['metric_name', 'metric_value', 'rating'],
-
   // PWA
   [AnalyticsEvents.PWA_INSTALL_PROMPT]: [],
   [AnalyticsEvents.PWA_INSTALLED]: [],
