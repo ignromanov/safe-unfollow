@@ -20,8 +20,8 @@ identifiers:
 repository-code: 'https://github.com/ignromanov/safe-unfollow'
 url: 'https://safeunfollow.app'
 license: AGPL-3.0-only
-version: 1.7.0
-date-released: '2026-11-09'
+version: 1.7.1
+date-released: '2026-11-19'
 keywords:
   - instagram
   - unfollow

@@ -8,7 +8,7 @@ last_updated: 2026-11-09
 
 # Technical Specification
 
-**Version:** 1.7.0
+**Version:** 1.7.1
 
 ## 1. Project Overview
 
@@ -380,4 +380,4 @@ npm run code:check   # lint:strict + type-check
 
 ---
 
-*This specification reflects v1.7.0 architecture. See CHANGELOG.md for version history.*
+*This specification reflects v1.7.1 architecture. See CHANGELOG.md for version history.*
