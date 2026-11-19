@@ -128,18 +128,6 @@ describe('Footer', () => {
     expect(screen.getByText(commonEN.footer.license)).toBeInTheDocument();
   });
 
-  it('should render buy a coffee button', () => {
-    renderWithRouter(<Footer />);
-
-    const supportButton = screen.getByText(commonEN.footer.buyACoffee);
-    expect(supportButton).toBeInTheDocument();
-
-    const link = supportButton.closest('a');
-    expect(link).toHaveAttribute('href', 'https://www.buymeacoffee.com/ignromanov');
-    expect(link).toHaveAttribute('target', '_blank');
-    expect(link).toHaveAttribute('rel', 'noopener noreferrer');
-  });
-
   it('should render description text', () => {
     renderWithRouter(<Footer />);
 
@@ -178,15 +166,6 @@ describe('Footer', () => {
     fireEvent.click(termsLink);
 
     expect(analytics.analytics.linkClick).toHaveBeenCalledWith('terms-of-service');
-  });
-
-  it('should call analytics on support button click', () => {
-    renderWithRouter(<Footer />);
-
-    const supportButton = screen.getByText('Buy a Coffee');
-    fireEvent.click(supportButton);
-
-    expect(analytics.analytics.linkClick).toHaveBeenCalledWith('buy-me-coffee');
   });
 
   it('should render Logo component', () => {

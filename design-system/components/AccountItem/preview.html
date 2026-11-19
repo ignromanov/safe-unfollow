@@ -1,0 +1,179 @@
+<!-- @dsCard group="Data display" height=300 subtitle="Static rendition: three rows with relationship chips" -->
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        margin: 0;
+        padding: 24px;
+        background: var(--background);
+        color: var(--foreground);
+        font-family: var(--font-sans);
+      }
+      svg.i {
+        width: 18px;
+        height: 18px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      body {
+        padding: 0;
+      }
+      .l {
+        background: var(--card);
+        border-top: 1px solid var(--border);
+        max-width: 520px;
+      }
+      .r {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--border);
+        color: inherit;
+        text-decoration: none;
+      }
+      .r:hover {
+        background: color-mix(in oklab, var(--accent) 50%, transparent);
+      }
+      .av {
+        width: 44px;
+        height: 44px;
+        flex: none;
+        border-radius: 16px;
+        border: 1px solid var(--border);
+        background: #f4f4f5;
+        color: #a1a1aa;
+        display: grid;
+        place-items: center;
+      }
+      [data-theme='dark'] .av {
+        background: #27272a;
+      }
+      .u {
+        display: block;
+        font: 700 16px/1.25 var(--font-display);
+        letter-spacing: -0.04em;
+        margin-bottom: 6px;
+      }
+      .cs {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .c {
+        border: 1px solid;
+        border-radius: var(--radius-lg);
+        padding: 4px 10px;
+        font: 900 12px/1 var(--font-sans);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        white-space: nowrap;
+      }
+      .d {
+        margin: 4px 0 0;
+        font-size: 12px;
+        line-height: 16px;
+        color: var(--muted-foreground);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="l">
+      <a class="r" href="#"
+        ><span class="av"
+          ><svg class="i" viewBox="0 0 24 24" style="width: 24px; height: 24px">
+            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" /></svg></span
+        ><span
+          ><span class="u" translate="no">@mattcoffee_co</span
+          ><span class="cs"
+            ><span
+              class="c"
+              style="
+                background: var(--rel-notFollowingBack-bg);
+                border-color: var(--rel-notFollowingBack-border);
+                color: var(--rel-notFollowingBack-fg);
+              "
+              >Not following back</span
+            ></span
+          >
+          <p class="d">You followed on 12 Mar 2025</p></span
+        ></a
+      >
+      <a class="r" href="#"
+        ><span class="av"
+          ><svg class="i" viewBox="0 0 24 24" style="width: 24px; height: 24px">
+            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" /></svg></span
+        ><span
+          ><span class="u" translate="no">@emilyski.ig</span
+          ><span class="cs"
+            ><span
+              class="c"
+              style="
+                background: var(--rel-following-bg);
+                border-color: var(--rel-following-border);
+                color: var(--rel-following-fg);
+              "
+              >Following</span
+            >
+            <span
+              class="c"
+              style="
+                background: var(--rel-followers-bg);
+                border-color: var(--rel-followers-border);
+                color: var(--rel-followers-fg);
+              "
+              >Follower</span
+            >
+            <span
+              class="c"
+              style="
+                background: var(--rel-mutuals-bg);
+                border-color: var(--rel-mutuals-border);
+                color: var(--rel-mutuals-fg);
+              "
+              >Mutual</span
+            ></span
+          >
+          <p class="d">You followed on 3 Aug 2024</p></span
+        ></a
+      >
+      <a class="r" href="#"
+        ><span class="av"
+          ><svg class="i" viewBox="0 0 24 24" style="width: 24px; height: 24px">
+            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" /></svg></span
+        ><span
+          ><span class="u" translate="no">@julia_fitness</span
+          ><span class="cs"
+            ><span
+              class="c"
+              style="
+                background: var(--rel-unfollowed-bg);
+                border-color: var(--rel-unfollowed-border);
+                color: var(--rel-unfollowed-fg);
+              "
+              >Unfollowed</span
+            >
+            <span
+              class="c"
+              style="
+                background: var(--rel-close-bg);
+                border-color: var(--rel-close-border);
+                color: var(--rel-close-fg);
+              "
+              >Close friend</span
+            ></span
+          >
+          <p class="d">&nbsp;</p></span
+        ></a
+      >
+    </div>
+  </body>
+</html>

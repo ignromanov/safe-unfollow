@@ -21,6 +21,8 @@ export const NON_AFFILIATION =
  */
 const SITE_URL = 'https://safeunfollow.app';
 export const ORGANIZATION_ID = `${SITE_URL}/#organization`;
-export const FOUNDER_ID = `${SITE_URL}/#founder`;
+// The founder is the one Person node shared by every site of Ignat Romanov's; its home is lasipan.cc
+// (vault `Careers/Positioning/entity-pack.md` §1, approved 2026-11-18). Not a safeunfollow.app id.
+export const FOUNDER_ID = 'https://lasipan.cc/#person';
 export const SOFTWARE_ID = `${SITE_URL}/#software`;
 export const WEBSITE_ID = `${SITE_URL}/#website`;

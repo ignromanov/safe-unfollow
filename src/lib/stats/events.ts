@@ -331,25 +331,6 @@ export const analytics = {
     });
   },
 
-  // Donation Card (100% sampling — high-value conversion events)
-  donationCardImpression: (accountCount: number) => {
-    enqueueEvent(AnalyticsEvents.DONATION_CARD_IMPRESSION, {
-      account_count: accountCount,
-    });
-  },
-
-  donationCardClick: (accountCount: number) => {
-    trackEvent(AnalyticsEvents.DONATION_CARD_CLICK, {
-      account_count: accountCount,
-    });
-  },
-
-  donationCardDismiss: (accountCount: number) => {
-    trackEvent(AnalyticsEvents.DONATION_CARD_DISMISS, {
-      account_count: accountCount,
-    });
-  },
-
   // Feedback prompt (/results, 100% sampling — deliberately, not house style).
   // The 3-5% precedents elsewhere in this file exist for high-volume events;
   // at ~7 clicks/month forecast, 5% sampling yields 0.35 events/month and the
@@ -492,20 +473,11 @@ export const analytics = {
   },
 
   // Session & Engagement
-  returnUpload: (fileHashPrefix: string, daysSinceLastUpload: number) => {
+  // No file hash prefix: a digest of the user's archive is a cross-session
+  // identifier (v1.8 task 09 / T5). Only the elapsed day count is sent.
+  returnUpload: (daysSinceLastUpload: number) => {
     trackEvent(AnalyticsEvents.RETURN_UPLOAD, {
-      file_hash_prefix: fileHashPrefix.slice(0, 8),
       days_since_last: daysSinceLastUpload,
-    });
-  },
-
-  // Web Vitals (V10: 3% sampling, was 10%)
-  webVital: (name: string, value: number, rating: string) => {
-    if (Math.random() > 0.03) return;
-    trackEvent(AnalyticsEvents.WEB_VITAL, {
-      metric_name: name,
-      metric_value: Math.round(value),
-      rating,
     });
   },
 

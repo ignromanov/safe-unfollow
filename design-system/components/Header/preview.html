@@ -1,0 +1,192 @@
+<!-- @dsCard group="Layout" height=210 subtitle="Static rendition: no data and with data" -->
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        margin: 0;
+        background: var(--background);
+        color: var(--foreground);
+        font-family: var(--font-sans);
+      }
+      svg.i {
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .h {
+        box-sizing: border-box;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 16px;
+        border-bottom: 1px solid var(--border);
+        background: var(--card);
+      }
+      .lg {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-decoration: none;
+        color: inherit;
+      }
+      .lg svg {
+        filter: drop-shadow(0 10px 8px rgb(0 0 0/0.12));
+      }
+      .wm {
+        font: 800 20px/1.25 var(--font-display);
+        letter-spacing: -0.025em;
+      }
+      .wm b {
+        color: var(--primary-strong);
+        font-weight: 800;
+      }
+      .ac {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .l {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px;
+        border-radius: var(--radius-xl);
+        border: 0;
+        background: none;
+        font: 700 12px/16px var(--font-sans);
+        color: #71717a;
+        cursor: pointer;
+      }
+      .l.on {
+        background: var(--primary);
+        color: var(--primary-foreground);
+        box-shadow: 0 4px 6px -1px rgb(0 0 0/0.1);
+      }
+      .l.del {
+        color: #f43f5e;
+      }
+      .dv {
+        width: 1px;
+        height: 24px;
+        background: var(--border);
+      }
+      .ib {
+        padding: 12px;
+        border-radius: 16px;
+        border: 0;
+        background: none;
+        color: #71717a;
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+      }
+      .w {
+        margin-bottom: 24px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="h w">
+      <a class="lg" href="#"
+        ><svg
+          width="36"
+          height="36"
+          viewBox="0 0 512 512"
+          role="img"
+          aria-label="SafeUnfollow logo"
+        >
+          <defs>
+            <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#5B6BE0" />
+              <stop offset="50%" stop-color="#9B5DE5" />
+              <stop offset="100%" stop-color="#E05B9B" />
+            </linearGradient>
+          </defs>
+          <rect width="512" height="512" rx="112" fill="url(#g)" />
+          <path
+            fill="#fff"
+            fill-rule="evenodd"
+            d="M 256 98 C 262 98 268 100 273 104 C 302 126 336 136 368 138 C 380 139 388 147 388 160 L 388 242 C 388 324 334 382 266 413 C 260 416 252 416 246 413 C 178 382 124 324 124 242 L 124 160 C 124 147 132 139 144 138 C 176 136 210 126 239 104 C 244 100 250 98 256 98 Z M 207.2 230.8 A 21.5 21.5 0 0 0 176.8 261.2 L 220.8 305.2 A 21.5 21.5 0 0 0 251.2 305.2 L 339.2 217.2 A 21.5 21.5 0 0 0 308.8 186.8 L 236.0 259.59 Z"
+          /></svg
+        ><span class="wm">SafeUnfollow<b>.app</b></span></a
+      >
+      <div class="ac">
+        <button class="l" aria-label="Upload File">
+          <svg class="i" width="18" height="18" viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
+          </svg></button
+        ><span class="dv"></span
+        ><button class="ib" aria-label="Language">
+          <svg class="i" width="18" height="18" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" />
+            <path
+              d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+            />
+          </svg></button
+        ><button class="ib" aria-label="Theme">
+          <svg class="i" width="18" height="18" viewBox="0 0 24 24">
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="h">
+      <a class="lg" href="#"
+        ><svg
+          width="36"
+          height="36"
+          viewBox="0 0 512 512"
+          role="img"
+          aria-label="SafeUnfollow logo"
+        >
+          <defs>
+            <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#5B6BE0" />
+              <stop offset="50%" stop-color="#9B5DE5" />
+              <stop offset="100%" stop-color="#E05B9B" />
+            </linearGradient>
+          </defs>
+          <rect width="512" height="512" rx="112" fill="url(#g)" />
+          <path
+            fill="#fff"
+            fill-rule="evenodd"
+            d="M 256 98 C 262 98 268 100 273 104 C 302 126 336 136 368 138 C 380 139 388 147 388 160 L 388 242 C 388 324 334 382 266 413 C 260 416 252 416 246 413 C 178 382 124 324 124 242 L 124 160 C 124 147 132 139 144 138 C 176 136 210 126 239 104 C 244 100 250 98 256 98 Z M 207.2 230.8 A 21.5 21.5 0 0 0 176.8 261.2 L 220.8 305.2 A 21.5 21.5 0 0 0 251.2 305.2 L 339.2 217.2 A 21.5 21.5 0 0 0 308.8 186.8 L 236.0 259.59 Z"
+          /></svg
+        ><span class="wm">SafeUnfollow<b>.app</b></span></a
+      >
+      <div class="ac">
+        <button class="l on" aria-label="Results">
+          <svg class="i" width="18" height="18" viewBox="0 0 24 24">
+            <rect x="3" y="3" width="7" height="9" />
+            <rect x="14" y="3" width="7" height="5" />
+            <rect x="14" y="12" width="7" height="9" />
+            <rect x="3" y="16" width="7" height="5" />
+          </svg></button
+        ><button class="l del" aria-label="Delete Data">
+          <svg class="i" width="18" height="18" viewBox="0 0 24 24">
+            <path
+              d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2M10 11v6M14 11v6"
+            />
+          </svg></button
+        ><span class="dv"></span
+        ><button class="ib" aria-label="Language">
+          <svg class="i" width="18" height="18" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" />
+            <path
+              d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+            />
+          </svg></button
+        ><button class="ib" aria-label="Theme">
+          <svg class="i" width="18" height="18" viewBox="0 0 24 24">
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </body>
+</html>

@@ -93,15 +93,6 @@
     "header": "Hesaplar ({{count, number}})",
     "viewProfile": "Profili Görüntüle"
   },
-  "donation": {
-    "headline": "Az önce {{count}} hesabı analiz ettiniz — ücretsiz.",
-    "body": "Giriş yok. Instagram dışa aktarımınız bu tarayıcıdan hiç çıkmadı. Zaman kazandırdıysa, bir kahve projeyi ayakta tutar.",
-    "headlineMobile": "Analiz ücretsiz. Özel. Giriş yok.",
-    "bodyMobile": "Dışa aktarımınız tarayıcıdan hiç çıkmadı. Faydalı olduysa, bir kahve ısmarlayın.",
-    "cta": "Kahve Ismarla",
-    "ctaMobile": "Destekle",
-    "dismiss": "Şimdi değil"
-  },
   "feedback": {
     "headline": "Sırada ne inşa etmeliyiz?",
     "body": "İki soru, yaklaşık bir dakika. Hesap yok, e-posta yok.",

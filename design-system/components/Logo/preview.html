@@ -1,0 +1,74 @@
+<!-- @dsCard group="Brand" height=170 subtitle="Static rendition: icon at 3 sizes and the wordmark" -->
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        margin: 0;
+        padding: 24px;
+        background: var(--background);
+        color: var(--foreground);
+        font-family: var(--font-sans);
+      }
+      svg.i {
+        width: 18px;
+        height: 18px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .r {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        flex-wrap: wrap;
+      }
+      .w {
+        font: 800 28px/1.25 var(--font-display);
+        letter-spacing: -0.04em;
+        color: var(--foreground);
+      }
+      .w b {
+        color: var(--primary-strong);
+        font-weight: 800;
+      }
+    </style>
+  </head>
+  <body>
+    <svg width="0" height="0" style="position: absolute">
+      <defs>
+        <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#5B6BE0" />
+          <stop offset="50%" stop-color="#9B5DE5" />
+          <stop offset="100%" stop-color="#E05B9B" />
+        </linearGradient>
+        <radialGradient id="s" cx="28%" cy="20%" r="72%">
+          <stop offset="0%" stop-color="#fff" stop-opacity=".16" />
+          <stop offset="100%" stop-color="#fff" stop-opacity="0" />
+        </radialGradient>
+        <symbol id="l" viewBox="0 0 512 512">
+          <rect width="512" height="512" rx="112" fill="url(#g)" />
+          <rect width="512" height="512" rx="112" fill="url(#s)" />
+          <path
+            fill="#fff"
+            fill-rule="evenodd"
+            d="M 256 98 C 262 98 268 100 273 104 C 302 126 336 136 368 138 C 380 139 388 147 388 160 L 388 242 C 388 324 334 382 266 413 C 260 416 252 416 246 413 C 178 382 124 324 124 242 L 124 160 C 124 147 132 139 144 138 C 176 136 210 126 239 104 C 244 100 250 98 256 98 Z M 207.2 230.8 A 21.5 21.5 0 0 0 176.8 261.2 L 220.8 305.2 A 21.5 21.5 0 0 0 251.2 305.2 L 339.2 217.2 A 21.5 21.5 0 0 0 308.8 186.8 L 236.0 259.59 Z"
+          />
+        </symbol>
+      </defs>
+    </svg>
+    <div class="r">
+      <svg width="24" height="24" role="img" aria-label="SafeUnfollow logo"><use href="#l" /></svg
+      ><svg width="40" height="40" role="img" aria-label="SafeUnfollow logo"><use href="#l" /></svg
+      ><svg width="72" height="72" role="img" aria-label="SafeUnfollow logo"><use href="#l" /></svg>
+      <span class="r" style="gap: 10px"
+        ><svg width="40" height="40" role="img" aria-label="SafeUnfollow logo">
+          <use href="#l" /></svg
+        ><span class="w">SafeUnfollow<b>.app</b></span></span
+      >
+    </div>
+  </body>
+</html>

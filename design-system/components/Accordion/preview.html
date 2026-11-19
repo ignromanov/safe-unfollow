@@ -1,0 +1,85 @@
+<!-- @dsCard group="Navigation" height=230 subtitle="Static rendition: one open, two closed" -->
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        margin: 0;
+        padding: 24px;
+        background: var(--background);
+        color: var(--foreground);
+        font-family: var(--font-sans);
+      }
+      svg.i {
+        width: 18px;
+        height: 18px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .w {
+        max-width: 460px;
+      }
+      .it {
+        border-bottom: 1px solid var(--border);
+      }
+      .tg {
+        display: flex;
+        width: 100%;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 0;
+        background: none;
+        border: 0;
+        color: var(--foreground);
+        font: 500 14px/20px var(--font-sans);
+        text-align: start;
+        cursor: pointer;
+      }
+      .tg svg {
+        width: 16px;
+        height: 16px;
+        color: var(--muted-foreground);
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .o svg {
+        transform: rotate(180deg);
+      }
+      .ct {
+        padding: 0 0 16px;
+        font-size: 14px;
+        line-height: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="w">
+      <div class="it o">
+        <button class="tg" aria-expanded="true">
+          Does my file leave my device?<svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></svg>
+        </button>
+        <div class="ct">
+          The export is analysed in your browser and stored only in its private database. Analytics
+          and ads load separately and never receive the file.
+        </div>
+      </div>
+      <div class="it">
+        <button class="tg" aria-expanded="false">
+          Which export format works?<svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></svg>
+        </button>
+      </div>
+      <div class="it">
+        <button class="tg" aria-expanded="false">
+          Do I need to log in?<svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></svg>
+        </button>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,111 @@
+<!-- @dsCard group="Forms" height=210 subtitle="Static rendition: empty and with a query" -->
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        margin: 0;
+        padding: 24px;
+        background: var(--background);
+        color: var(--foreground);
+        font-family: var(--font-sans);
+      }
+      svg.i {
+        width: 18px;
+        height: 18px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .w {
+        max-width: 420px;
+        display: grid;
+        gap: 24px;
+      }
+      .f {
+        position: relative;
+      }
+      .f .s {
+        position: absolute;
+        inset-inline-start: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 20px;
+        height: 20px;
+        color: var(--muted-foreground);
+      }
+      .in {
+        box-sizing: border-box;
+        height: 48px;
+        width: 100%;
+        border-radius: 16px;
+        border: 1px solid var(--input);
+        background: transparent;
+        color: var(--foreground);
+        padding: 4px 48px 4px 40px;
+        font: 400 16px/24px var(--font-sans);
+        box-shadow: 0 1px 2px rgb(0 0 0/0.05);
+      }
+      [data-theme='dark'] .in {
+        background: color-mix(in oklab, var(--input) 30%, transparent);
+      }
+      .in::placeholder {
+        color: var(--muted-foreground);
+      }
+      .x {
+        position: absolute;
+        inset-inline-end: 4px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 44px;
+        height: 44px;
+        border: 0;
+        border-radius: var(--radius-md);
+        background: transparent;
+        color: var(--foreground);
+        display: grid;
+        place-items: center;
+      }
+      .m {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 8px;
+        font-size: 12px;
+        line-height: 16px;
+        color: var(--muted-foreground);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="w">
+      <div>
+        <div class="f">
+          <svg class="i s" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" /></svg
+          ><input class="in" placeholder="Search username" aria-label="Search accounts" />
+        </div>
+        <div class="m"><span>1,204 of 1,204 accounts</span></div>
+      </div>
+      <div>
+        <div class="f">
+          <svg class="i s" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" /></svg
+          ><input class="in" value="julia" aria-label="Search accounts" /><button
+            class="x"
+            aria-label="Clear search"
+          >
+            <svg class="i" viewBox="0 0 24 24" style="width: 16px; height: 16px">
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div class="m"><span>2 of 1,204 accounts</span><span>&lt;1 ms</span></div>
+      </div>
+    </div>
+  </body>
+</html>

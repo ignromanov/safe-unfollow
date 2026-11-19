@@ -8,6 +8,8 @@ version: 2
 updates:
   - package-ecosystem: npm
     directory: /
+    # Integration happens on develop; main moves only by release PR.
+    target-branch: develop
     schedule:
       interval: weekly
       day: monday
@@ -37,6 +39,7 @@ updates:
   # separate from npm because a bad action update breaks the gate itself.
   - package-ecosystem: github-actions
     directory: /
+    target-branch: develop
     schedule:
       interval: weekly
       day: monday

@@ -17,7 +17,6 @@ import { TruncatedFileCaveat } from './TruncatedFileCaveat';
 import { StaleDatesHint } from './StaleDatesHint';
 import { AccountList } from './AccountList';
 import { StatCard } from './StatCard';
-import { InlineDonationCard } from './InlineDonationCard';
 import { FeedbackPrompt } from './FeedbackPrompt';
 import { PrefixedLink } from './PrefixedLink';
 import { AdSlot } from './ads/AdSlot';
@@ -542,27 +541,10 @@ export function AccountListSection({
         />
       )}
 
-      {/* Below the list: an ask placed before the value is delivered inverts the
-          reciprocity that makes it work, which is why this card is not above it.
-          It used to share the after-the-fact ask with a floating BuyMeACoffee
-          widget; that widget was removed 2026-08-19 because its clicks were
-          unattributable by construction, so this card and the footer link are
-          now the whole ask. Last of the two below-the-list blocks, behind the paid one:
-          both are past the reciprocity threshold, and of the pair only the ad
-          stops earning when it goes unseen. */}
-      <InlineDonationCard accountCount={accountCount} isSample={isSample} />
-
-      {/* Same reciprocity ordering as the donation card above it: after the
-          value, not before. Unlike the ask above, this one has no dismiss —
-          asking what to build next isn't a repeatable annoyance the way a
-          donation nudge can become, and it carries its own disclosure notice
-          instead of a close control.
-
-          It is also deliberately a tier below that card rather than a match
-          for it: unfilled against its bg-muted, no icon tile, lighter
-          headline. The two blocks are adjacent, so anything they share
-          verbatim reads as one block printed twice — and of the pair only the
-          one above earns money. */}
+      {/* Reciprocity ordering: after the value and behind the paid tail ad,
+          not before the list. Has no dismiss — asking what to build next isn't
+          a repeatable annoyance — and carries its own disclosure notice instead
+          of a close control. Delivers quietly without competing with primary CTAs. */}
       <FeedbackPrompt isSample={isSample} />
     </div>
   );

@@ -804,25 +804,24 @@ describe('AccountListSection', () => {
       }
     };
 
-    it('puts the ad above the list and the donation ask below it', () => {
+    it('puts the ad above the list and the feedback prompt below it', () => {
       withAdEnv(() => {
         const { container } = renderThemedRouted(
           <AccountListSection fileHash="abc" accountCount={100} filename="d.zip" />
         );
 
         const ad = container.querySelector('[data-ad-name="results"]') as HTMLElement;
-        const donation = container.querySelector(
-          '[data-testid="inline-donation-card"]'
-        ) as HTMLElement;
+        const feedback = container.querySelector('[data-testid="feedback-prompt"]') as HTMLElement;
         const list = container.querySelector('[data-testid="account-list"]') as HTMLElement;
         expect(ad).not.toBeNull();
-        expect(donation).not.toBeNull();
+        expect(feedback).not.toBeNull();
+        expect(container.querySelector('[data-testid="inline-donation-card"]')).toBeNull();
 
         // Ad before the list...
         expect(ad.compareDocumentPosition(list) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
         // ...and the ask only after the visitor has their data.
         expect(
-          list.compareDocumentPosition(donation) & Node.DOCUMENT_POSITION_FOLLOWING
+          list.compareDocumentPosition(feedback) & Node.DOCUMENT_POSITION_FOLLOWING
         ).toBeTruthy();
       });
     });
@@ -854,10 +853,9 @@ describe('AccountListSection', () => {
     });
 
     // Both sit below the list, so both keep the reciprocity the move down bought.
-    // Between them the order is the paid one first: the donation card is the last
-    // thing on the page, where an unmet ask costs nothing, while the unit still
-    // needs to be reached.
-    it('places the low-profile unit below the list but ahead of the donation card', () => {
+    // Between them the order is the paid one first: the feedback prompt sits last
+    // behind the tail ad, which needs to be reached while it still earns.
+    it('places the low-profile unit below the list but ahead of the feedback prompt', () => {
       vi.stubEnv('VITE_ADSENSE_CLIENT', 'ca-pub-test');
       vi.stubEnv('VITE_ADSENSE_SLOT_RESULTS_END', '333');
       try {
@@ -867,13 +865,12 @@ describe('AccountListSection', () => {
 
         const list = container.querySelector('[data-testid="account-list"]') as HTMLElement;
         const tail = container.querySelector('[data-ad-name="results_end"]') as HTMLElement;
-        const donation = container.querySelector(
-          '[data-testid="inline-donation-card"]'
-        ) as HTMLElement;
+        const feedback = container.querySelector('[data-testid="feedback-prompt"]') as HTMLElement;
         expect(tail).not.toBeNull();
+        expect(feedback).not.toBeNull();
         expect(list.compareDocumentPosition(tail) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
         expect(
-          tail.compareDocumentPosition(donation) & Node.DOCUMENT_POSITION_FOLLOWING
+          tail.compareDocumentPosition(feedback) & Node.DOCUMENT_POSITION_FOLLOWING
         ).toBeTruthy();
       } finally {
         vi.unstubAllEnvs();

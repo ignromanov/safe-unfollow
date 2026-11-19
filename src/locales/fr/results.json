@@ -93,15 +93,6 @@
     "header": "Comptes ({{count, number}})",
     "viewProfile": "Voir le profil"
   },
-  "donation": {
-    "headline": "Vous venez d'analyser {{count}} comptes — gratuitement.",
-    "body": "Pas de connexion. Votre export Instagram n'a jamais quitté ce navigateur. Si ça vous a fait gagner du temps, un café maintient le projet.",
-    "headlineMobile": "Analyse gratuite. Privé. Sans connexion.",
-    "bodyMobile": "Votre export n'a jamais quitté le navigateur. Si c'était utile, offrez un café.",
-    "cta": "Offrir un Café",
-    "ctaMobile": "Soutenir",
-    "dismiss": "Pas maintenant"
-  },
   "feedback": {
     "headline": "Que devrions-nous créer ensuite ?",
     "body": "Deux questions, environ une minute. Sans compte, sans email.",

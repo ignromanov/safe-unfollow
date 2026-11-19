@@ -7,10 +7,62 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.1] - 2026-11-19
+
+### Changed
+
+- SafeUnfollow is now licensed under the GNU AGPL-3.0-only (#332). Versions up to
+  and including 1.7.0 remain available under MIT.
+- A new logo, app icons and social preview image (#351).
+- The badge above the homepage headline names follow dates and HTML & JSON exports,
+  in all ten languages.
+- The release history on `/docs/roadmap/` covers 1.6.0 to 1.7.1, and the app's
+  structured data links to it (`releaseNotes`) and lists follow dates and HTML &
+  JSON exports among its features.
+- The donation links are gone from the app (#342).
+- When the browser is machine-translating the page into a language SafeUnfollow
+  ships, it offers its own translation instead (#338).
+- Clicking a stat card on `/results` now switches to that filter rather than
+  adding it to the ones already on (#334).
+- The export guide says that Meta preselects "Last year" on the date-range step,
+  so the reader knows to change it (#328).
+
+### Analytics
+
+- New events record which filters are applied and how many accounts each step
+  leaves, how long a `/results` visit lasts, and how many profiles are opened
+  from it (#329, #330, #331).
+- Events are checked against an allowlist before they are sent. The upload event
+  no longer carries a prefix of the file's hash, and the browser no longer keeps
+  the time of the last upload (#349).
+- The old sampled web-vitals event is retired; page performance is reported
+  once per page load (#348).
+
+### Fixed
+
+- Picking a single `.html` or `.json` file instead of the ZIP now explains how to
+  get back to the archive, in all ten languages (#334).
+- HTML exports in German, Russian, Ukrainian, Polish, Czech and Greek date their
+  entries with the month name as it is written next to a day; those dates are
+  now read (#334).
+- The touch upload button keeps working while Chrome translates the page (#335),
+  and page translators no longer rewrite usernames on `/results` (#337).
+- If the paywall fails to load, the page reloads quietly and reopens it (#336).
+- An ad can no longer widen the upload screen (#339), and the language hint sits
+  clear of the anchor ad on phones (#341).
+- Lighter images, smaller pre-rendered pages and no duplicate offline-cache
+  entries (#326); build manifests are no longer uploaded as public assets (#340).
+
 ## [1.7.0] - 2026-11-09
 
 ### Added
 
+- Follow dates: each row on `/results` says when you followed the account or
+  when it followed you, and the CSV and JSON export carry them (#287, #288, #295).
+  _Omitted from this entry when 1.7.0 was released; added 2026-11-19._
+- The export is a readable HTML report, and the free sample is that report with
+  every count and the first 10 accounts (#299, #301, #304, #308).
+  _Omitted from this entry when 1.7.0 was released; added 2026-11-19._
 - Search engines and AI assistants get one description of SafeUnfollow on every
   indexable page: the app, its founder, and the profiles that name it (GitHub,
   Crunchbase, Product Hunt, the Zenodo DOI, Instagram, YouTube, TikTok). It states that

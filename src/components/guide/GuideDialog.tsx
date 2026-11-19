@@ -322,12 +322,10 @@ export function GuideDialog({ open, step, source, onGoToStep, onClose }: GuideDi
             >
               {t('entry.cta')} <ExternalLink size={18} className="shrink-0" aria-hidden="true" />
             </a>
-            {/* Secondary weight, still plainly a control — same bordered
-                treatment as InlineDonationCard's "Buy me a coffee": a
-                bordered surface above the card, a brand-tinted hover, no
-                fill. Not `variant="outline"` from ui/button.tsx — that
-                variant's hover pairs near-black text on a near-black fill in
-                dark mode; see InlineDonationCard's own note. */}
+            {/* Secondary weight, still plainly a control: a bordered surface
+                above the card, a brand-tinted hover, no fill. Not
+                `variant="outline"` from ui/button.tsx — that variant's hover
+                pairs near-black text on a near-black fill in dark mode. */}
             <button
               type="button"
               onClick={handleReminder}

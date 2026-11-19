@@ -1,0 +1,125 @@
+<!-- @dsCard group="Overlays" height=330 subtitle="Static rendition: dialog over its scrim" -->
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        margin: 0;
+        padding: 24px;
+        background: var(--background);
+        color: var(--foreground);
+        font-family: var(--font-sans);
+      }
+      svg.i {
+        width: 18px;
+        height: 18px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      body {
+        padding: 0;
+      }
+      .sc {
+        position: relative;
+        height: 330px;
+        background: rgb(0 0 0/0.5);
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+      }
+      .bg {
+        position: absolute;
+        inset: 0;
+        background: var(--background);
+        z-index: -1;
+      }
+      .dl {
+        box-sizing: border-box;
+        width: min(100% - 32px, 512px);
+        display: grid;
+        gap: 16px;
+        padding: 24px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        background: var(--background);
+        box-shadow:
+          0 10px 15px -3px rgb(0 0 0/0.1),
+          0 4px 6px -4px rgb(0 0 0/0.1);
+        position: relative;
+      }
+      .hd {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      h2 {
+        margin: 0;
+        font: 600 18px/1.375 var(--font-sans);
+      }
+      .ds {
+        margin: 0;
+        font-size: 14px;
+        line-height: 20px;
+        color: var(--muted-foreground);
+      }
+      .ft {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+      .b {
+        height: 36px;
+        padding: 0 16px;
+        border-radius: var(--radius-md);
+        border: 1px solid transparent;
+        font: 500 14px/20px var(--font-sans);
+        cursor: pointer;
+      }
+      .p {
+        background: var(--primary);
+        color: var(--primary-foreground);
+      }
+      .o {
+        background: var(--background);
+        border-color: var(--border);
+        color: var(--foreground);
+      }
+      .x {
+        position: absolute;
+        top: 4px;
+        inset-inline-end: 4px;
+        width: 44px;
+        height: 44px;
+        border: 0;
+        background: transparent;
+        color: var(--foreground);
+        border-radius: var(--radius-md);
+        display: grid;
+        place-items: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bg"></div>
+    <div class="sc">
+      <div class="dl" role="dialog" aria-labelledby="t">
+        <button class="x" aria-label="Close">
+          <svg class="i" viewBox="0 0 24 24" style="width: 16px; height: 16px">
+            <path d="M18 6 6 18M6 6l12 12" />
+          </svg>
+        </button>
+        <div class="hd">
+          <h2 id="t">Remove this export?</h2>
+          <p class="ds">
+            The analysis is deleted from this browser. You can upload the ZIP again at any time.
+          </p>
+        </div>
+        <div class="ft"><button class="b o">Cancel</button><button class="b p">Remove</button></div>
+      </div>
+    </div>
+  </body>
+</html>

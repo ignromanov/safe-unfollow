@@ -394,21 +394,6 @@ describe('Analytics', () => {
         });
       });
 
-      it('should track web vital with 3% sampling', () => {
-        const originalRandom = Math.random;
-        Math.random = () => 0.02; // 2% < 3% threshold
-
-        analytics.webVital('LCP', 1234.5, 'good');
-
-        expect(windowSpy.umami.track).toHaveBeenCalledWith(AnalyticsEvents.WEB_VITAL, {
-          metric_name: 'LCP',
-          metric_value: 1235,
-          rating: 'good',
-        });
-
-        Math.random = originalRandom;
-      });
-
       // pwa_install_prompt and pwa_installed are batched together, so the
       // install rate divides one population — see
       // stats/impression-batching.test.ts.
@@ -579,7 +564,6 @@ describe('Analytics', () => {
       expect(AnalyticsEvents.GUIDE_OPEN).toBe('guide_open');
       expect(AnalyticsEvents.ERROR_BOUNDARY).toBe('error_boundary');
       expect(AnalyticsEvents.ROUTE_ERROR).toBe('route_error');
-      expect(AnalyticsEvents.WEB_VITAL).toBe('web_vital');
       expect(AnalyticsEvents.PWA_INSTALL_PROMPT).toBe('pwa_install_prompt');
       expect(AnalyticsEvents.PWA_INSTALLED).toBe('pwa_installed');
     });
@@ -639,6 +623,10 @@ describe('Analytics', () => {
       // when the free analytics database filled up. Its series ends at that
       // deploy; reintroducing the name would splice a new population onto it.
       expect(events['GUIDE_SECTION_VIEW']).toBeUndefined();
+      // Retired 2026-11-17 with InlineDonationCard removal.
+      expect(events['DONATION_CARD_IMPRESSION']).toBeUndefined();
+      expect(events['DONATION_CARD_CLICK']).toBeUndefined();
+      expect(events['DONATION_CARD_DISMISS']).toBeUndefined();
     });
   });
 

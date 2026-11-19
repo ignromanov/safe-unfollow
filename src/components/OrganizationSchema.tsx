@@ -137,13 +137,15 @@ export function OrganizationSchema() {
     '@id': FOUNDER_ID,
     name: 'Ignat Romanov',
     url: 'https://lasipan.cc/',
-    jobTitle: 'Builder & Web3 Frontend Engineer',
+    jobTitle: 'Senior Frontend Engineer — Web3 and AI-agent tooling',
     description:
-      'Builder & Web3 Frontend Engineer — crafting privacy-first tools for the decentralized economy.',
+      'Ignat Romanov is a senior frontend engineer in Paraguay who works on Web3 interfaces and AI-agent tooling. ' +
+      "He merged 19 pull requests into Curve's DeFi frontend in 2024 and builds VoidPay, Conclave and the @void-layer/codec library.",
     sameAs: [
       'https://github.com/ignromanov',
       'https://lasipan.cc/',
       'https://www.linkedin.com/in/ignat-romanov',
+      'https://x.com/ignromanov',
       'https://x.com/romignov',
       'https://orcid.org/0009-0000-0414-1263',
     ],
@@ -176,6 +178,8 @@ export function OrganizationSchema() {
       softwareVersion: __PKG_VERSION__,
       // CITATION.cff's date-released (vite/build-env.ts): a release date, never a build date.
       dateModified: __RELEASE_DATE__,
+      // On our own domain, not GitHub's CHANGELOG: the release history is a page we want read.
+      releaseNotes: `${BASE_URL}/docs/roadmap/#release-history`,
       browserRequirements: 'Requires JavaScript and a browser with IndexedDB support.',
       inLanguage: [...SUPPORTED_LANGUAGES],
       // No `downloadUrl`: schema.org defines it as the URL of a binary to download, and a web
@@ -200,6 +204,8 @@ export function OrganizationSchema() {
       publisher: { '@id': ORGANIZATION_ID },
       featureList: [
         'Find who unfollowed you on Instagram',
+        'Shows when you followed each account and when each follower followed you',
+        'Reads both HTML and JSON Instagram exports',
         'Tested on a synthetic export of 1,000,000 accounts',
         'Reads the export in your browser and never sends the file to a server',
         'No login or password required',

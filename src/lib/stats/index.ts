@@ -20,9 +20,9 @@
  * - Tightened sampling: wizardStepView 5%, filterToggle 3%, searchPerform 5%, webVital 3%
  *   (wizardStepView — later guideSectionView, itself retired 2026-10-21 —
  *   filterToggle, searchPerform and guideEntryView (deleted; GuideEntry dissolved in PR-1 of the wizard-popup
- *   series) were unsampled again on 2026-08-21 — GH#123; webVital keeps its
- *   3%. Every one of those four series steps by 20x or 33x on that deploy
- *   date)
+ *   series) were unsampled again on 2026-08-21 — GH#123. Every one of those four
+ *   series steps by 20x or 33x on that deploy date. `webVital` was retired in GH#120
+ *   once Umami's native `type: 'performance'` census (#268) proved itself in production.)
  * - Added 25% sampling to resultsClicksSummary
  * - Simplified payloads: removed file_hash from upload events, removed processing_time_ms
  */

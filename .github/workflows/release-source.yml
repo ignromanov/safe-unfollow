@@ -1,0 +1,29 @@
+name: Release Source
+
+# main is the release branch: it moves only by a release PR from develop, or by
+# a hotfix/* branch that is merged back into develop afterwards. A ruleset cannot
+# restrict a PR's source branch, so this job does, as a required check on main.
+on:
+  pull_request:
+    branches: [main]
+
+permissions: {}
+
+jobs:
+  release-source:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Head branch is develop or hotfix/*
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          BASE_REPO: ${{ github.repository }}
+        run: |
+          if [ "$HEAD_REPO" != "$BASE_REPO" ]; then
+            echo "::error::PRs into main come from this repository's develop or hotfix/* — target develop instead."
+            exit 1
+          fi
+          case "$HEAD_REF" in
+            develop|hotfix/*) echo "ok: $HEAD_REF" ;;
+            *) echo "::error::main accepts PRs only from develop or hotfix/* (got '$HEAD_REF'). Target develop."; exit 1 ;;
+          esac
