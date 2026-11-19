@@ -59,7 +59,7 @@ export const createRoot = ViteReactSSG(
       // Heatmap recorder — landing page only, after the first interaction (GH#95)
       loadHeatmapRecorder();
 
-      // Report Web Vitals (LCP, INP, CLS, FCP, TTFB). Sample rate: `analytics.webVital`.
+      // Report Web Vitals (LCP, INP, CLS, FCP, TTFB) via Umami performance census.
       import('./lib/web-vitals').then(({ initWebVitals }) => initWebVitals());
     }
   }

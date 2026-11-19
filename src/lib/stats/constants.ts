@@ -169,9 +169,6 @@ export const AnalyticsEvents = {
   ERROR_BOUNDARY: 'error_boundary',
   ROUTE_ERROR: 'route_error',
 
-  // Web Vitals (V10: 3% sampling)
-  WEB_VITAL: 'web_vital',
-
   // PWA
   PWA_INSTALL_PROMPT: 'pwa_install_prompt',
   PWA_INSTALLED: 'pwa_installed',
