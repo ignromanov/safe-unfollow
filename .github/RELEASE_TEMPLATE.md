@@ -207,6 +207,17 @@ two PRs and a tag, in this order:
          into `analytics/measurement-boundaries.md`.
          `citation-metadata.test.ts` checks only that major.minor matches `package.json`,
          so an unchanged chip passes on every patch release; the gate does not do this step for you.
+   - [ ] **Release History** in `docs/roadmap.md`: a dated entry with the 2–4 changes a
+         reader would notice, and `last_updated` set to the release date (it drives the
+         page's sitemap `<lastmod>`). This is the on-domain changelog that
+         `SoftwareApplication.releaseNotes` points at, so a release missing here leaves
+         the JSON-LD linking to a history that stops one version early. `softwareVersion`
+         and `dateModified` need no edit: they derive from `package.json` and
+         `CITATION.cff`.
+   - [ ] **One feature set**: the hero chip, `featureList` in
+         `src/components/OrganizationSchema.tsx` and "What ships today" in
+         `docs/roadmap.md` name the same headline features. `featureList` is ingested as
+         fact, so it takes no target and no caveat (`structured-data-claims.test.tsx`)
    - [ ] `code-quality` and `build-test` green
 2. **Release PR `develop → main`** — **merge commit, never squash**: a squashed release
    makes the two branches diverge and every next release conflicts. `release-source`
@@ -215,6 +226,11 @@ two PRs and a tag, in this order:
    `gh release create vX.Y.Z --target <merge sha> --title "SafeUnfollow vX.Y.Z"` with the
    CHANGELOG entry as notes. The release event is what Zenodo mints the version DOI from;
    cite only the concept DOI.
+4. **After production deploys**: submit the URLs whose content changed (the homepages if the
+   chip moved, `/docs/roadmap/`) to IndexNow once, with the key in `public/`. Only changed
+   URLs: the protocol asks callers not to resubmit unchanged ones, and a ping on every
+   deploy is ruled out. If `/` copy changed, add the deploy date to
+   `analytics/measurement-boundaries.md`.
 
 ---
 

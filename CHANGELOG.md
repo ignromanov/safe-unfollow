@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A new logo, app icons and social preview image (#351).
 - The badge above the homepage headline names follow dates and HTML & JSON exports,
   in all ten languages.
+- The release history on `/docs/roadmap/` covers 1.6.0 to 1.7.1, and the app's
+  structured data links to it (`releaseNotes`) and lists follow dates and HTML &
+  JSON exports among its features.
 - The donation links are gone from the app (#342).
 - When the browser is machine-translating the page into a language SafeUnfollow
   ships, it offers its own translation instead (#338).
@@ -54,6 +57,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Follow dates: each row on `/results` says when you followed the account or
+  when it followed you, and the CSV and JSON export carry them (#287, #288, #295).
+  _Omitted from this entry when 1.7.0 was released; added 2026-11-19._
+- The export is a readable HTML report, and the free sample is that report with
+  every count and the first 10 accounts (#299, #301, #304, #308).
+  _Omitted from this entry when 1.7.0 was released; added 2026-11-19._
 - Search engines and AI assistants get one description of SafeUnfollow on every
   indexable page: the app, its founder, and the profiles that name it (GitHub,
   Crunchbase, Product Hunt, the Zenodo DOI, Instagram, YouTube, TikTok). It states that

@@ -3,7 +3,7 @@ layout: default
 title: "Instagram Unfollow Tracker Roadmap: Planned Features"
 description: 'What SafeUnfollow does today and what is planned next: comparing two exports over time, more parsed lists, and export options.'
 permalink: /roadmap/
-last_updated: 2026-11-09
+last_updated: 2026-11-19
 ---
 
 # Roadmap
@@ -14,6 +14,8 @@ Release notes for each version are in the [CHANGELOG](https://github.com/ignroma
 
 ### Core Functionality
 - ✅ **Unfollow tracking** — Find who unfollowed you and who you don't follow back
+- ✅ **Follow dates** — When you followed each account and when each follower followed you, on every row and in the export
+- ✅ **HTML and JSON exports** — Reads either format Instagram offers in its download dialog
 - ✅ **Smart badges** — Following, Followers, Mutuals, Not following back, Not followed back, Pending, Restricted, Close friends, Unfollowed, Dismissed
 - ✅ **Lightning search** — Trigram/prefix indexes, designed for sub-2ms search even at 1M+ accounts
 - ✅ **Advanced filtering** — BitSet-based filtering designed to stay interactive for any badge combination
@@ -128,6 +130,24 @@ each third party does and does not receive.
 ---
 
 ## Release History
+
+Every version since v1.6.0 is also archived on Zenodo, under the concept DOI
+[10.5281/zenodo.22663615](https://doi.org/10.5281/zenodo.22663615).
+
+### v1.7.1 (November 19, 2026)
+- **Licence** — SafeUnfollow is now AGPL-3.0-only; versions up to v1.7.0 remain MIT
+- **Translated pages** — When your browser machine-translates the page into one of our ten languages, SafeUnfollow offers its own translation, and the upload button and usernames survive the translator
+- **HTML export dates** — German, Russian, Ukrainian, Polish, Czech and Greek exports, which write the month as it reads next to a day, are now dated correctly
+- **New look** — New logo, app icons and social preview image
+
+### v1.7.0 (November 9, 2026)
+- **Follow dates** — When you followed each account and when each follower followed you, on every row of the results and in the CSV and JSON export
+- **HTML report** — The export is a readable HTML report; the free sample shows every count and the first 10 accounts
+- **One description everywhere** — Search engines and AI assistants get the same account of SafeUnfollow on every page, including that it is not affiliated with safeunfollow.com or any browser extension named SafeUnfollow
+
+### v1.6.0 (September 8, 2026)
+- **HTML exports** — An export downloaded in HTML instead of JSON is read instead of refused
+- **Citable** — The first tagged release, archived on Zenodo with a DOI
 
 ### v1.5.0 (January 14, 2026)
 - **i18n Meta Tags** — Dynamic localized meta tags for all languages
