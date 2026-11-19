@@ -12,11 +12,12 @@ import {
 import { AppState } from '@/core/types';
 import { analytics } from '@/lib/analytics';
 import { useIsClient } from '@/hooks/useIsClient';
-import { LayoutDashboard, Moon, ShieldCheck, Sun, SunMoon, Trash2, Upload } from 'lucide-react';
+import { LayoutDashboard, Moon, Sun, SunMoon, Trash2, Upload } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useTranslation } from 'react-i18next';
 
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { Logo } from './Logo';
 import { PrefixedLink } from './PrefixedLink';
 
 interface HeaderProps {
@@ -53,9 +54,10 @@ export function Header({ hasData = false, onClear, activeScreen = AppState.HERO 
           className="flex items-center gap-3 cursor-pointer group"
           aria-label={t('header.logoAria')}
         >
-          <div className="w-9 h-9 md:w-10 md:h-10 rounded-2xl bg-gradient-brand flex items-center justify-center text-white shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all">
-            <ShieldCheck size={22} strokeWidth={2.5} />
-          </div>
+          <Logo
+            size={40}
+            className="w-9 h-9 md:w-10 md:h-10 shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all"
+          />
           <span className="font-display font-extrabold text-xl md:text-2xl tracking-tight hidden sm:block">
             SafeUnfollow<span className="text-primary-strong">.app</span>
           </span>

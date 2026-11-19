@@ -1,17 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  SafeUnfollow.app favicon — tuned for small sizes, not for the header.
-
-  Differs from logo.svg on purpose:
-  - solid shield instead of a stroked outline (a 1px outline dies below 24px)
-  - shield spans 56% of the canvas (was 42%) so it survives Google's circle crop
-  - checkmark is knocked out of the shield, so it reads as shape, not as a hairline
-  - background fills the full canvas: any padding leaves a dark rim inside the circle
-
-  Brand gradient (135deg), unchanged from logo.svg:
-  - oklch(0.6 0.18 264) -> #5B6BE0 (purple-blue)
-  - oklch(0.65 0.22 285) -> #9B5DE5 (purple)
-  - oklch(0.65 0.2 340) -> #E05B9B (pink)
+  SafeUnfollow.app V3 Master Logo (Reference SVG)
+  - Pure single-path fill-rule="evenodd" shield + cutout checkmark (zero <mask> issues)
+  - Bounding box: 264x318 (51.6% width), max radius 164px from center -> passes BOTH
+    Android maskable 80% safe-zone (r=204.8px) AND Google/IG/TikTok/YouTube circle crops
+  - Brand gradient (135deg): #5B6BE0 -> #9B5DE5 -> #E05B9B + subtle top radial sheen
 -->
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
   <defs>
@@ -20,21 +13,14 @@
       <stop offset="50%" stop-color="#9B5DE5" />
       <stop offset="100%" stop-color="#E05B9B" />
     </linearGradient>
-
-    <!-- Checkmark as a cutout: masks the shield so the gradient shows through -->
-    <mask id="checkCutout" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512">
-      <rect width="512" height="512" fill="white" />
-      <path d="m9 12 2 2 4-4" transform="translate(40, 37.9) scale(18)" fill="none" stroke="black"
-        stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" />
-    </mask>
+    <radialGradient id="topSheen" cx="28%" cy="20%" r="72%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.16" />
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0" />
+    </radialGradient>
   </defs>
 
-  <!-- Background: edge to edge, so Google's circle crop yields a full gradient disc -->
-  <rect width="512" height="512" rx="96" ry="96" fill="url(#brandGradient)" />
+  <rect x="0" y="0" width="512" height="512" rx="64" ry="64" fill="url(#brandGradient)" />
+  <rect x="0" y="0" width="512" height="512" rx="64" ry="64" fill="url(#topSheen)" />
 
-  <!-- Shield (Lucide shield-check), filled and centred: 288x355px of the 512px canvas -->
-  <g mask="url(#checkCutout)">
-    <path transform="translate(40, 37.9) scale(18)" fill="white"
-      d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
-  </g>
+  <path fill="#FFFFFF" fill-rule="evenodd" d="M 256 98 C 262 98 268 100 273 104 C 302 126 336 136 368 138 C 380 139 388 147 388 160 L 388 242 C 388 324 334 382 266 413 C 260 416 252 416 246 413 C 178 382 124 324 124 242 L 124 160 C 124 147 132 139 144 138 C 176 136 210 126 239 104 C 244 100 250 98 256 98 Z M 207.2 230.8 A 21.5 21.5 0 0 0 176.8 261.2 L 220.8 305.2 A 21.5 21.5 0 0 0 251.2 305.2 L 339.2 217.2 A 21.5 21.5 0 0 0 308.8 186.8 L 236.0 259.59 Z" />
 </svg>

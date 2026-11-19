@@ -44,17 +44,17 @@ All processing happens **100% locally** in your browser: your Instagram export i
 ## 📸 Screenshots
 
 <div align="center">
-  <img src="assets/hero.png" alt="Instagram Unfollow Tracker - Landing Page" width="100%" />
+  <img src="assets/screenshots/desktop/hero.png" alt="Instagram Unfollow Tracker - Landing Page" width="100%" />
   <p><em>Clean landing page with clear call-to-action</em></p>
 </div>
 
 <div align="center">
-  <img src="assets/upload-zip.png" alt="Upload your Instagram ZIP file" width="100%" />
+  <img src="assets/screenshots/desktop/upload-zip.png" alt="Upload your Instagram ZIP file" width="100%" />
   <p><em>Drag and drop upload with pre-upload checklist</em></p>
 </div>
 
 <div align="center">
-  <img src="assets/analysis-result.png" alt="Analysis Results - Filter and search accounts" width="100%" />
+  <img src="assets/screenshots/desktop/analysis-result.png" alt="Analysis Results - Filter and search accounts" width="100%" />
   <p><em>Analysis results with smart filters and account badges</em></p>
 </div>
 
@@ -62,12 +62,17 @@ All processing happens **100% locally** in your browser: your Instagram export i
 <summary>📱 <strong>View Mobile Screenshots</strong></summary>
 
 <div align="center">
-  <img src="assets/upload-zip-mobile.png" alt="Mobile view - Upload screen" width="375" />
-  <p><em>Mobile-optimized file upload</em></p>
+  <img src="assets/screenshots/mobile/upload-mobile.png" alt="Mobile view - Upload screen" width="375" />
+  <p><em>Mobile-optimized file upload (JSON & HTML ZIP)</em></p>
 </div>
 
 <div align="center">
-  <img src="assets/close-friend-mobile.png" alt="Mobile view - Close Friends filter" width="375" />
+  <img src="assets/screenshots/mobile/results-notfollowingback-mobile.png" alt="Mobile view - Not following back filter" width="375" />
+  <p><em>Inspect non-mutual accounts on mobile</em></p>
+</div>
+
+<div align="center">
+  <img src="assets/screenshots/mobile/results-closefriends-mobile.png" alt="Mobile view - Close Friends filter" width="375" />
   <p><em>Filter by Close Friends and other badges on mobile</em></p>
 </div>
 

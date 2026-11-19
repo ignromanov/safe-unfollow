@@ -39,7 +39,7 @@ Instagram Unfollow Tracker is a privacy-focused tool that analyzes your Instagra
 3. Wait for processing to complete (usually 1-3 seconds)
 4. Your data is now ready for analysis!
 
-![Upload your Instagram data](/docs/assets/upload-zip.png){: width="2950" height="1890" loading="lazy" decoding="async"}
+![Upload your Instagram data](/docs/assets/upload-zip.png){: width="1024" height="640" loading="lazy" decoding="async"}
 *Drag and drop your Instagram ZIP file to get started*
 
 ### Step 3: Explore Your Results
@@ -48,7 +48,7 @@ Instagram Unfollow Tracker is a privacy-focused tool that analyzes your Instagra
 - **Search**: Type usernames to find specific accounts
 - **Click profiles**: Open Instagram profiles in new tabs
 
-![Explore your results](/docs/assets/analysis-result.png){: width="2950" height="1966" loading="lazy" decoding="async"}
+![Explore your results](/docs/assets/analysis-result.png){: width="1024" height="640" loading="lazy" decoding="async"}
 *Full interface with filtering, search, and detailed account information*
 
 ## Understanding the Results
