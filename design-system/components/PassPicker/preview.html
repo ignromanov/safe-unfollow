@@ -1,0 +1,610 @@
+<!-- @dsCard group="Pro v1.8 (concept)" height=340 subtitle="Concept: two passes, local prices" -->
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 16px;
+        background: var(--background);
+        color: var(--foreground);
+        font-family: var(--font-sans);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 32px 24px;
+        align-items: flex-start;
+      }
+      figure {
+        margin: 0;
+        display: grid;
+        gap: 8px;
+      }
+      figcaption {
+        font: 500 12px/16px var(--font-sans);
+        color: var(--muted-foreground);
+      }
+      /* scrim + sheet: ExportSheet below 640px */
+      .sc {
+        width: 390px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding-top: 32px;
+        background: linear-gradient(rgb(0 0 0 / 0.5), rgb(0 0 0 / 0.5)), var(--background);
+        outline: 1px solid var(--border);
+        overflow: hidden;
+      }
+      .sc.wide {
+        width: 440px;
+        justify-content: center;
+        padding: 32px 24px;
+      }
+      .sh {
+        position: relative;
+        display: grid;
+        gap: 16px;
+        padding: 24px 20px 28px;
+        border: 1px solid var(--border);
+        border-bottom: 0;
+        border-radius: 24px 24px 0 0;
+        background: var(--background);
+        box-shadow: 0 -8px 30px rgb(0 0 0 / 0.12);
+      }
+      .sh.dk {
+        padding: 24px;
+        border-bottom: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        box-shadow:
+          0 10px 15px -3px rgb(0 0 0 / 0.1),
+          0 4px 6px -4px rgb(0 0 0 / 0.1);
+      }
+      .gr {
+        position: absolute;
+        top: 8px;
+        inset-inline-start: 50%;
+        width: 36px;
+        height: 4px;
+        margin-inline-start: -18px;
+        border-radius: 999px;
+        background: var(--border);
+      }
+      .x {
+        position: absolute;
+        top: 4px;
+        inset-inline-end: 4px;
+        width: 44px;
+        height: 44px;
+        display: grid;
+        place-items: center;
+        border: 0;
+        border-radius: 999px;
+        background: transparent;
+        color: var(--foreground);
+        opacity: 0.7;
+      }
+      .hd {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        text-align: start;
+      }
+      .hd.pe {
+        padding-inline-end: 32px;
+      }
+      h2 {
+        margin: 0;
+        font: 600 18px/1.375 var(--font-sans);
+      }
+      h2.ti {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .ds {
+        margin: 0;
+        font: 400 14px/20px var(--font-sans);
+        color: var(--muted-foreground);
+      }
+      .ds.fg {
+        color: var(--foreground);
+        line-height: 1.625;
+      }
+      .ft {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+      }
+      .ft.tight {
+        gap: 4px;
+      }
+      .em {
+        color: #10b981;
+        flex: none;
+      }
+      .xs {
+        margin: 0;
+        font: 400 12px/1.5 var(--font-sans);
+        color: var(--muted-foreground);
+      }
+      .al {
+        margin: 0;
+        display: flex;
+        gap: 8px;
+        align-items: flex-start;
+        font: 400 14px/1.5 var(--font-sans);
+        color: var(--destructive);
+      }
+      .al svg {
+        margin-top: 2px;
+        flex: none;
+      }
+      /* buttons */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 48px;
+        padding: 0 24px;
+        border: 1px solid transparent;
+        border-radius: 16px;
+        font: 700 14px/20px var(--font-sans);
+        text-decoration: none;
+        white-space: nowrap;
+        cursor: pointer;
+      }
+      .pri {
+        background: var(--primary);
+        color: var(--primary-foreground);
+        box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+      }
+      .gh {
+        background: transparent;
+        color: var(--muted-foreground);
+      }
+      .dis {
+        opacity: 0.5;
+        pointer-events: none;
+      }
+      .spin {
+        animation: spin 1s linear infinite;
+        display: inline-flex;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .spin {
+          animation: none;
+        }
+      }
+      /* format buttons */
+      .fmt {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+        min-height: 48px;
+        padding: 8px 24px;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background: var(--background);
+        color: var(--foreground);
+        text-align: start;
+        font: 700 14px/20px var(--font-sans);
+        box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+      }
+      [data-theme='dark'] .fmt:not(.pri) {
+        background: color-mix(in oklab, var(--input) 30%, transparent);
+        border-color: var(--input);
+      }
+      .fmt.pri {
+        border-color: transparent;
+        background: var(--primary);
+        color: var(--primary-foreground);
+      }
+      .fmt .l {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .fmt .h {
+        font-weight: 400;
+        font-size: 12px;
+        line-height: 16px;
+        color: var(--muted-foreground);
+        white-space: normal;
+      }
+      .fmt.pri .h {
+        color: color-mix(in oklab, var(--primary-foreground) 80%, transparent);
+      }
+      /* input */
+      .in {
+        height: 48px;
+        width: 100%;
+        padding: 4px 12px;
+        border: 1px solid var(--input);
+        border-radius: 16px;
+        background: transparent;
+        color: var(--foreground);
+        font: 400 16px/24px var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+        box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+      }
+      [data-theme='dark'] .in {
+        background: color-mix(in oklab, var(--input) 30%, transparent);
+      }
+      .in::placeholder {
+        color: var(--muted-foreground);
+      }
+      .in.inv {
+        border-color: var(--destructive);
+        outline: 3px solid color-mix(in oklab, var(--destructive) 20%, transparent);
+      }
+
+      .dsc {
+        font: 500 11px/16px var(--font-sans);
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--muted-foreground);
+      }
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 8px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        font: 700 11px/16px var(--font-sans);
+        color: var(--primary-strong);
+        background: var(--background);
+      }
+      .pg {
+        width: 390px;
+        padding: 16px;
+        display: grid;
+        gap: 16px;
+        background: var(--background);
+        outline: 1px solid var(--border);
+        align-content: start;
+      }
+      .card {
+        padding: 16px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        background: var(--card);
+        display: grid;
+        gap: 12px;
+      }
+      .tt {
+        margin: 0;
+        font: 700 16px/24px var(--font-sans);
+      }
+      .tt2 {
+        margin: 0;
+        font: 700 20px/28px var(--font-sans);
+      }
+      .mut {
+        margin: 0;
+        font: 400 14px/20px var(--font-sans);
+        color: var(--muted-foreground);
+      }
+      .fgt {
+        margin: 0;
+        font: 400 14px/1.5 var(--font-sans);
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .sp {
+        justify-content: space-between;
+      }
+      .num {
+        font-variant-numeric: tabular-nums;
+        font-weight: 700;
+      }
+      .sm2 {
+        min-height: 40px;
+        padding: 0 16px;
+        border-radius: 12px;
+        font-size: 14px;
+      }
+      .outl {
+        background: var(--background);
+        color: var(--foreground);
+        border-color: var(--border);
+      }
+      [data-theme='dark'] .outl {
+        background: color-mix(in oklab, var(--input) 30%, transparent);
+        border-color: var(--input);
+      }
+      .tl {
+        align-self: center;
+        padding: 8px 4px;
+        border: 0;
+        background: none;
+        font: 400 12px/16px var(--font-sans);
+        color: var(--muted-foreground);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+        cursor: pointer;
+      }
+      .ctr {
+        text-align: center;
+      }
+      .tlk {
+        color: var(--muted-foreground);
+        flex: none;
+      }
+      /* benefits */
+      .bn {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 8px;
+      }
+      .bn li {
+        display: flex;
+        gap: 8px;
+        align-items: flex-start;
+        font: 400 14px/20px var(--font-sans);
+      }
+      .bn svg {
+        flex: none;
+        margin-top: 2px;
+      }
+      /* pass picker */
+      .pk {
+        display: grid;
+        gap: 8px;
+      }
+      .pr {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 56px;
+        padding: 0 16px;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background: var(--background);
+      }
+      .pr.on {
+        border: 2px solid var(--primary);
+        padding: 0 15px;
+        background: color-mix(in oklab, var(--primary) 8%, var(--background));
+      }
+      .rd {
+        width: 20px;
+        height: 20px;
+        flex: none;
+        border: 2px solid var(--muted-foreground);
+        border-radius: 50%;
+      }
+      .on .rd {
+        border-color: var(--primary);
+        background: radial-gradient(circle, var(--primary) 5px, transparent 6px);
+      }
+      .pl {
+        flex: 1;
+        font: 600 14px/20px var(--font-sans);
+      }
+      .pp {
+        font: 700 16px/24px var(--font-sans);
+        font-variant-numeric: tabular-nums;
+      }
+      .cta {
+        font-size: 16px;
+        padding: 0 20px;
+        box-shadow: 0 25px 50px -12px color-mix(in oklab, var(--primary) 30%, transparent);
+      }
+      /* locked strips and skeletons */
+      .sk {
+        display: block;
+        height: 14px;
+        border-radius: 6px;
+        background: var(--muted);
+      }
+      .lkw {
+        position: relative;
+        display: grid;
+        gap: 10px;
+        padding: 12px 0;
+      }
+      .lkp {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+      }
+      .lkb {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 40px;
+        padding: 0 16px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: var(--background);
+        color: var(--foreground);
+        font: 600 13px/16px var(--font-sans);
+        box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
+      }
+      .rl {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        min-height: 48px;
+        padding: 8px 16px;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background: var(--background);
+        font: 400 14px/20px var(--font-sans);
+      }
+      .rl .num {
+        margin-inline-start: auto;
+      }
+      .acc {
+        display: grid;
+        gap: 2px;
+        padding: 8px 0;
+        border-top: 1px solid var(--border);
+      }
+      .acc:first-of-type {
+        border-top: 0;
+      }
+      .acc b {
+        font: 600 14px/20px var(--font-sans);
+      }
+      .acc span {
+        font: 400 12px/16px var(--font-sans);
+        color: var(--muted-foreground);
+      }
+      /* progress */
+      .pb {
+        display: flex;
+        height: 8px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: var(--muted);
+      }
+      .pb i {
+        display: block;
+        height: 100%;
+      }
+      .pb .f {
+        background: var(--primary);
+      }
+      .pb .l {
+        background: repeating-linear-gradient(
+          135deg,
+          var(--muted-foreground) 0 2px,
+          transparent 2px 6px
+        );
+        opacity: 0.35;
+      }
+      .nt {
+        display: flex;
+        gap: 8px;
+        align-items: flex-start;
+        padding: 12px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--muted);
+        font: 400 12px/1.5 var(--font-sans);
+        color: var(--foreground);
+      }
+      .nt svg {
+        flex: none;
+        margin-top: 1px;
+        color: var(--muted-foreground);
+      }
+      .ad {
+        display: grid;
+        place-items: center;
+        height: 72px;
+        border: 1px dashed var(--border);
+        border-radius: 12px;
+        font: 500 11px/16px var(--font-sans);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--muted-foreground);
+      }
+      a.btn {
+        text-decoration: none;
+      }
+      .btn.fmt {
+        align-items: center;
+      }
+    </style>
+  </head>
+  <body>
+    <figure>
+      <figcaption>United States and the rest: default</figcaption>
+      <div class="pg">
+        <div class="pk" role="radiogroup" aria-label="Choose a pass">
+          <div class="pr" role="radio" aria-checked="false">
+            <i class="rd"></i><span class="pl">30 days</span><span class="pp">$7.99</span>
+          </div>
+          <div class="pr on" role="radio" aria-checked="true">
+            <i class="rd"></i><span class="pl">1 year</span><span class="pp">$19.99</span>
+          </div>
+        </div>
+      </div>
+    </figure>
+    <figure>
+      <figcaption>United States: 30 days selected</figcaption>
+      <div class="pg">
+        <div class="pk" role="radiogroup" aria-label="Choose a pass">
+          <div class="pr on" role="radio" aria-checked="true">
+            <i class="rd"></i><span class="pl">30 days</span><span class="pp">$7.99</span>
+          </div>
+          <div class="pr" role="radio" aria-checked="false">
+            <i class="rd"></i><span class="pl">1 year</span><span class="pp">$19.99</span>
+          </div>
+        </div>
+      </div>
+    </figure>
+    <figure>
+      <figcaption>Brazil</figcaption>
+      <div class="pg">
+        <div class="pk" role="radiogroup" aria-label="Choose a pass">
+          <div class="pr" role="radio" aria-checked="false">
+            <i class="rd"></i><span class="pl">30 days</span><span class="pp">R$19.90</span>
+          </div>
+          <div class="pr on" role="radio" aria-checked="true">
+            <i class="rd"></i><span class="pl">1 year</span><span class="pp">R$49.90</span>
+          </div>
+        </div>
+      </div>
+    </figure>
+    <figure>
+      <figcaption>India</figcaption>
+      <div class="pg">
+        <div class="pk" role="radiogroup" aria-label="Choose a pass">
+          <div class="pr" role="radio" aria-checked="false">
+            <i class="rd"></i><span class="pl">30 days</span><span class="pp">₹199</span>
+          </div>
+          <div class="pr on" role="radio" aria-checked="true">
+            <i class="rd"></i><span class="pl">1 year</span><span class="pp">₹499</span>
+          </div>
+        </div>
+      </div>
+    </figure>
+    <figure>
+      <figcaption>Indonesia</figcaption>
+      <div class="pg">
+        <div class="pk" role="radiogroup" aria-label="Choose a pass">
+          <div class="pr" role="radio" aria-checked="false">
+            <i class="rd"></i><span class="pl">30 days</span><span class="pp">Rp 29,000</span>
+          </div>
+          <div class="pr on" role="radio" aria-checked="true">
+            <i class="rd"></i><span class="pl">1 year</span><span class="pp">Rp 79,000</span>
+          </div>
+        </div>
+      </div>
+    </figure>
+    <figure>
+      <figcaption>Philippines</figcaption>
+      <div class="pg">
+        <div class="pk" role="radiogroup" aria-label="Choose a pass">
+          <div class="pr" role="radio" aria-checked="false">
+            <i class="rd"></i><span class="pl">30 days</span><span class="pp">₱149</span>
+          </div>
+          <div class="pr on" role="radio" aria-checked="true">
+            <i class="rd"></i><span class="pl">1 year</span><span class="pp">₱399</span>
+          </div>
+        </div>
+      </div>
+    </figure>
+  </body>
+</html>
