@@ -137,13 +137,15 @@ export function OrganizationSchema() {
     '@id': FOUNDER_ID,
     name: 'Ignat Romanov',
     url: 'https://lasipan.cc/',
-    jobTitle: 'Builder & Web3 Frontend Engineer',
+    jobTitle: 'Senior Frontend Engineer — Web3 and AI-agent tooling',
     description:
-      'Builder & Web3 Frontend Engineer — crafting privacy-first tools for the decentralized economy.',
+      'Ignat Romanov is a senior frontend engineer in Paraguay who works on Web3 interfaces and AI-agent tooling. ' +
+      "He merged 19 pull requests into Curve's DeFi frontend in 2024 and builds VoidPay, Conclave and the @void-layer/codec library.",
     sameAs: [
       'https://github.com/ignromanov',
       'https://lasipan.cc/',
       'https://www.linkedin.com/in/ignat-romanov',
+      'https://x.com/ignromanov',
       'https://x.com/romignov',
       'https://orcid.org/0009-0000-0414-1263',
     ],

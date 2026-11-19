@@ -412,7 +412,8 @@ describe('the docs entity and the app entity are the same entity', () => {
     const e = await entity();
     expect(e.id).toBe(`${e.url as string}/#organization`);
     expect(e.website_id).toBe(`${e.url as string}/#website`);
-    expect(e.founder_id).toBe(`${e.url as string}/#founder`);
+    // The founder is the shared Person whose home is lasipan.cc, not an id on this site.
+    expect(e.founder_id).toBe('https://lasipan.cc/#person');
     // The ids moved to src/config/entity.ts so FAQPage, HowTo and the intent pages share them.
     const ENTITY = readFileSync(join(process.cwd(), 'src', 'config', 'entity.ts'), 'utf-8');
     expect(ENTITY).toContain('`${SITE_URL}/#organization`');
