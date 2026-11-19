@@ -93,6 +93,7 @@ describe('useFileUpload', () => {
     mockIndexedDBService.clearFile.mockResolvedValue();
     mockIndexedDBService.saveFileMetadata.mockResolvedValue();
     mockIndexedDBService.storeAllAccounts.mockResolvedValue();
+    mockIndexedDBService.getAllFiles.mockResolvedValue([]);
 
     // Mock parsers for fallback path
     const { parseInstagramZipFile } = await import('@/core/parsers/instagram');
@@ -1554,6 +1555,75 @@ describe('useFileUpload', () => {
       );
 
       vi.useRealTimers();
+    });
+  });
+
+  describe('return upload tracking via IndexedDB (T5)', () => {
+    beforeEach(() => {
+      localStorage.clear();
+    });
+
+    it('computes days_since_last from prior IndexedDB files without writing analytics_last_upload', async () => {
+      const fiveDaysAgo = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000);
+      const tenDaysAgo = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000);
+      mockIndexedDBService.getAllFiles.mockResolvedValue([
+        {
+          fileHash: 'older-hash',
+          name: 'older.zip',
+          size: 100,
+          uploadDate: tenDaysAgo,
+          accountCount: 10,
+          version: 2,
+        },
+        {
+          fileHash: 'previous-hash',
+          name: 'prev.zip',
+          size: 100,
+          uploadDate: fiveDaysAgo,
+          accountCount: 10,
+          version: 2,
+        },
+        {
+          fileHash: mockFileHash,
+          name: 'test.zip',
+          size: 100,
+          uploadDate: new Date(),
+          accountCount: 2,
+          version: 2,
+        },
+      ]);
+
+      const { result } = renderHook(() => useFileUpload());
+
+      await act(async () => {
+        await result.current.handleZipUpload(mockFile);
+      });
+
+      expect(analytics.returnUpload).toHaveBeenCalledTimes(1);
+      expect(analytics.returnUpload).toHaveBeenCalledWith(5);
+      expect(localStorage.getItem('analytics_last_upload')).toBeNull();
+    });
+
+    it('does not emit returnUpload when only the current file hash exists in IndexedDB', async () => {
+      mockIndexedDBService.getAllFiles.mockResolvedValue([
+        {
+          fileHash: mockFileHash,
+          name: 'test.zip',
+          size: 100,
+          uploadDate: new Date(),
+          accountCount: 2,
+          version: 2,
+        },
+      ]);
+
+      const { result } = renderHook(() => useFileUpload());
+
+      await act(async () => {
+        await result.current.handleZipUpload(mockFile);
+      });
+
+      expect(analytics.returnUpload).not.toHaveBeenCalled();
+      expect(localStorage.getItem('analytics_last_upload')).toBeNull();
     });
   });
 });

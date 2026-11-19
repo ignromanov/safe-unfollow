@@ -22,6 +22,13 @@ export function useDataManagement() {
     } catch (error) {
       console.error('[IndexedDB] Failed to clear cache:', error);
     }
+
+    // Remove legacy cross-session upload marker if present, preserving umami-opt-out
+    try {
+      localStorage.removeItem('analytics_last_upload');
+    } catch {
+      // localStorage may be unavailable (private browsing / restricted storage)
+    }
   }, [clearData, setUploadInfo]);
 
   return {

@@ -473,9 +473,10 @@ export const analytics = {
   },
 
   // Session & Engagement
-  returnUpload: (fileHashPrefix: string, daysSinceLastUpload: number) => {
+  // No file hash prefix: a digest of the user's archive is a cross-session
+  // identifier (v1.8 task 09 / T5). Only the elapsed day count is sent.
+  returnUpload: (daysSinceLastUpload: number) => {
     trackEvent(AnalyticsEvents.RETURN_UPLOAD, {
-      file_hash_prefix: fileHashPrefix.slice(0, 8),
       days_since_last: daysSinceLastUpload,
     });
   },

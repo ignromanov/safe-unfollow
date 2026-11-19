@@ -395,3 +395,20 @@ describe('searchPerform', () => {
     expect(payload).not.toHaveProperty('unfiltered_count');
   });
 });
+
+describe('returnUpload (T5 / v1.8 task 09)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('sends only days_since_last and never a file hash prefix', () => {
+    analytics.returnUpload(7);
+
+    expect(trackEvent).toHaveBeenCalledWith('return_upload', {
+      days_since_last: 7,
+    });
+    const [, payload] = trackEvent.mock.calls[0];
+    expect(payload).not.toHaveProperty('file_hash_prefix');
+    expect(payload).not.toHaveProperty('file_hash');
+  });
+});

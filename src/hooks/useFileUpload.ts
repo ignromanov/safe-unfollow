@@ -18,9 +18,6 @@ import { useParseWorker } from './useParseWorker';
 // Upload rate limiting (ms)
 const UPLOAD_DEBOUNCE_MS = 1000;
 
-// localStorage key for tracking return uploads
-const LAST_UPLOAD_KEY = 'analytics_last_upload';
-
 /**
  * Report everything this parse observed about the export's shape, from whichever
  * of the three parse exit points reached it (worker success, worker failure,
@@ -153,30 +150,35 @@ function guardFailure(warning: ParseWarning): Error & ParseErrorData {
 }
 
 /**
- * Check if this is a return upload and track it
+ * Check if this is a return upload and track it.
+ *
+ * Derived from IndexedDB's `files` store rather than a separate localStorage
+ * key so no cross-session tracking identifier survives outside the user's own
+ * stored exports (v1.8 task 09 / T5).
  */
-function trackReturnUploadIfApplicable(fileHash: string): void {
-  const lastUpload = localStorage.getItem(LAST_UPLOAD_KEY);
+async function trackReturnUploadIfApplicable(fileHash: string): Promise<void> {
+  try {
+    const files = await indexedDBService.getAllFiles();
+    let latestPreviousMs: number | null = null;
 
-  if (lastUpload) {
-    try {
-      const { hash: lastHash, timestamp } = JSON.parse(lastUpload) as {
-        hash: string;
-        timestamp: number;
-      };
-
-      // Only track if different file (hash changed)
-      if (lastHash !== fileHash) {
-        const daysSince = Math.floor((Date.now() - timestamp) / (1000 * 60 * 60 * 24));
-        analytics.returnUpload(fileHash, daysSince);
+    for (const file of files) {
+      if (file.fileHash === fileHash) continue;
+      const timestamp = file.uploadDate instanceof Date ? file.uploadDate.getTime() : NaN;
+      if (!Number.isNaN(timestamp) && (latestPreviousMs === null || timestamp > latestPreviousMs)) {
+        latestPreviousMs = timestamp;
       }
-    } catch {
-      // Invalid stored data, ignore
     }
-  }
 
-  // Store current upload info
-  localStorage.setItem(LAST_UPLOAD_KEY, JSON.stringify({ hash: fileHash, timestamp: Date.now() }));
+    if (latestPreviousMs !== null) {
+      const daysSince = Math.max(
+        0,
+        Math.floor((Date.now() - latestPreviousMs) / (1000 * 60 * 60 * 24))
+      );
+      analytics.returnUpload(daysSince);
+    }
+  } catch {
+    // Non-critical telemetry; never fail the upload flow
+  }
 }
 
 export function useFileUpload() {
@@ -390,7 +392,7 @@ export function useFileUpload() {
         );
 
         // Track return upload (user uploading new data)
-        trackReturnUploadIfApplicable(resultFileHash);
+        await trackReturnUploadIfApplicable(resultFileHash);
 
         outcome = 'success';
       } catch (err) {
