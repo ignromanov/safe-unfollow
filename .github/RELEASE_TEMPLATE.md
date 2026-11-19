@@ -227,7 +227,7 @@ two PRs and a tag, in this order:
    CHANGELOG entry as notes. The release event is what Zenodo mints the version DOI from;
    cite only the concept DOI.
 4. **After production deploys**: submit the URLs whose content changed (the homepages if the
-   chip moved, `/docs/roadmap/`) to IndexNow once, with the key in `public/`. Only changed
+   chip moved, `/docs/roadmap`) to IndexNow once, with the key in `public/`. Only changed
    URLs: the protocol asks callers not to resubmit unchanged ones, and a ping on every
    deploy is ruled out. If `/` copy changed, add the deploy date to
    `analytics/measurement-boundaries.md`.
