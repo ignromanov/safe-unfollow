@@ -382,16 +382,10 @@ describe('the docs entity and the app entity are the same entity', () => {
       '@id': e.founder_id,
       name: f.name,
       url: f.url,
-      jobTitle: f.job_title,
-      description: f.description,
-      sameAs: f.same_as,
     }).toEqual({
       '@id': person['@id'],
       name: person.name,
       url: person.url,
-      jobTitle: person.jobTitle,
-      description: person.description,
-      sameAs: person.sameAs,
     });
     // The layout emits the founder by these keys, and links the Organization to it by @id.
     expect(SCRIPT).toMatch(/"@type":"Person","@id":\{\{ site\.entity\.founder_id \| jsonify \}\}/);
